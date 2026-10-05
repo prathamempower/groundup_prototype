@@ -17,6 +17,7 @@ import {
   Layers
 } from 'lucide-react';
 import { UserRole, USER_ROLES, Project } from '../../shared/types';
+import { hasPermission, ROLE_ACCESS_PROFILES } from '../../shared/rbac/matrix';
 
 interface TopHeaderProps {
   currentRole: UserRole;
@@ -28,6 +29,7 @@ interface TopHeaderProps {
   onOpenChangeOrder: () => void;
   onOpenAIChat: () => void;
   onSignOut: () => void;
+  onNavigateScreen?: (screen: any) => void;
 }
 
 export function TopHeader({
@@ -40,21 +42,27 @@ export function TopHeader({
   onOpenChangeOrder,
   onOpenAIChat,
   onSignOut,
+  onNavigateScreen,
 }: TopHeaderProps) {
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showProjectMenu, setShowProjectMenu] = useState(false);
 
   const activeRoleContext = USER_ROLES[currentRole] || USER_ROLES.DEVELOPER_OWNER;
+  const roleProfile = ROLE_ACCESS_PROFILES[currentRole] || ROLE_ACCESS_PROFILES.DEVELOPER_OWNER;
   const activeProject = projects.find(p => p.id === selectedProjectId) || projects[0];
 
   const roleList: UserRole[] = [
     'DEVELOPER_OWNER',
     'CFO',
     'PM',
+    'LENDER',
     'GC_FIXED',
     'GC_DAILY',
     'INVESTOR',
   ];
+
+  const canCreateDrawPacket = hasPermission(currentRole, 'draw:create_packet');
+  const canCreateChangeOrder = hasPermission(currentRole, 'change_order:create');
 
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
@@ -66,11 +74,14 @@ export function TopHeader({
             Active Persona: <strong className="text-white">{activeRoleContext.roleTitle}</strong> ({activeRoleContext.name})
           </span>
           <span className="text-slate-500 hidden md:inline">·</span>
+          <span className="text-emerald-400 font-semibold hidden md:inline">{roleProfile.accessLevel}</span>
+          <span className="text-slate-500 hidden md:inline">·</span>
           <span className="text-slate-400 hidden md:inline">{activeRoleContext.roleDescription}</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px] font-mono">
-            GroundUp Core v2.0
+          <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px] font-mono flex items-center gap-1">
+            <Lock className="w-2.5 h-2.5 text-emerald-400" />
+            <span>RBAC Enforced</span>
           </span>
         </div>
       </div>
@@ -172,25 +183,25 @@ export function TopHeader({
             )}
           </div>
 
-          {/* Quick Actions (only show relevant actions per role) */}
-          {(currentRole === 'DEVELOPER_OWNER' || currentRole === 'CFO') && (
-            <>
-              <button
-                onClick={onOpenChangeOrder}
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Change Order</span>
-              </button>
+          {/* Quick Actions (strictly gated by RBAC capabilities) */}
+          {canCreateChangeOrder && (
+            <button
+              onClick={onOpenChangeOrder}
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Change Order</span>
+            </button>
+          )}
 
-              <button
-                onClick={onOpenDrawPacket}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs"
-              >
-                <FileCheck className="w-3.5 h-3.5" />
-                <span>+ Draw Packet</span>
-              </button>
-            </>
+          {canCreateDrawPacket && (
+            <button
+              onClick={onOpenDrawPacket}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs"
+            >
+              <FileCheck className="w-3.5 h-3.5" />
+              <span>+ Draw Packet</span>
+            </button>
           )}
 
           {/* AI Chat Drawer Button */}

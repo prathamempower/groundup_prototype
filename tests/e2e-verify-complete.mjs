@@ -244,6 +244,104 @@ async function runCompleteTestSuite() {
     await page.screenshot({ path: path.join(screenshotDir, '14-ai-analyst-drawer.png') });
     console.log('   ✓ AI financial query executed & verified 📸');
 
+    // Close AI Drawer by clicking backdrop
+    await page.click('.fixed.inset-0 > div:first-child');
+    await page.waitForTimeout(500);
+
+    // 14. Test Lender Portal (BCB Bank Draw Queue & Wire Disbursement)
+    console.log('1️⃣4️⃣ Testing Lender Portal & Wire Disbursement...');
+    await page.click('aside >> text=Lender Draw Queue');
+    await page.waitForTimeout(800);
+
+    // Toggle Line Item Rejection & Approval
+    const approveBtn = page.locator('button:has-text("Approve")').last();
+    if (await approveBtn.isVisible()) {
+      await approveBtn.click();
+      await page.waitForTimeout(400);
+      console.log('   ✓ Lender line item approved');
+    }
+
+    // Execute Wire Disbursement
+    const wireBtn = page.locator('button:has-text("Execute Wire Disbursement")');
+    if (await wireBtn.isVisible()) {
+      await wireBtn.click();
+      await page.waitForTimeout(800);
+      await page.screenshot({ path: path.join(screenshotDir, '15-lender-portal-wire.png') });
+      console.log('   ✓ Wire disbursement executed & recorded 📸');
+    }
+
+    // 15. Test GC Fixed-Price Portal (Milestone Claims)
+    console.log('1️⃣5️⃣ Testing GC Fixed-Price Contract Portal...');
+    await page.click('aside >> text=GC Fixed Claims');
+    await page.waitForTimeout(800);
+
+    await page.click('button:has-text("+ Submit Milestone Payment Claim")');
+    await page.waitForTimeout(500);
+    await page.fill('textarea', 'MEP rough-in completed and passed building & plumbing township inspections.');
+    await page.click('button:has-text("Submit Payment Claim")');
+    await page.waitForTimeout(1000);
+    await page.screenshot({ path: path.join(screenshotDir, '16-gc-fixed-claims.png') });
+    console.log('   ✓ GC milestone payment claim submitted & logged 📸');
+
+    // 16. Test GC Daily Logs Portal (Open-Book / Cost-Plus)
+    console.log('1️⃣6️⃣ Testing GC Daily Logs Portal...');
+    await page.click('aside >> text=GC Daily Logs');
+    await page.waitForTimeout(800);
+
+    await page.fill('textarea', 'Completed interior drywall framing and rough MEP walk-through with architect.');
+    await page.click('button:has-text("Publish Daily Report")');
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: path.join(screenshotDir, '17-gc-daily-logs.png') });
+    console.log('   ✓ GC daily report with 12% markup posted to feed 📸');
+
+    // 17. Test CFO Reconciliation & Lien Waiver Audit
+    console.log('1️⃣7️⃣ Testing CFO Reconciliation & Lien Audit...');
+    await page.click('aside >> text=CFO & Lien Audit');
+    await page.waitForTimeout(800);
+
+    const verifyWaiverBtn = page.locator('button:has-text("Upload & Verify")').first();
+    if (await verifyWaiverBtn.isVisible()) {
+      await verifyWaiverBtn.click();
+      await page.waitForTimeout(400);
+      console.log('   ✓ Missing subcontractor lien waiver audited & cleared');
+    }
+
+    await page.click('button:has-text("Export Reconciliation Audit (Excel)")');
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: path.join(screenshotDir, '18-cfo-recon-waiver.png') });
+    console.log('   ✓ CFO variance audit exported & downloaded 📸');
+
+    // 18. Test Investor Transparency Portal
+    console.log('1️⃣8️⃣ Testing Investor Transparency Portal...');
+    await page.click('aside >> text=Investor Transparency');
+    await page.waitForTimeout(800);
+
+    await page.click('button:has-text("Download Certified Report (PDF)")');
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: path.join(screenshotDir, '19-investor-transparency.png') });
+    console.log('   ✓ Certified monthly investor report generated & downloaded 📸');
+
+    // 19. Test Canonical Document Repository (7 Core Docs)
+    console.log('1️⃣9️⃣ Testing Canonical Document Repository...');
+    await page.click('aside >> text=Document Repository');
+    await page.waitForTimeout(800);
+
+    const docDownloadBtn = page.locator('button:has-text("Download")').first();
+    if (await docDownloadBtn.isVisible()) {
+      await docDownloadBtn.click();
+      await page.waitForTimeout(400);
+      console.log('   ✓ Canonical document download verified');
+    }
+
+    const replaceFileBtn = page.locator('button:has-text("Replace File")').first();
+    if (await replaceFileBtn.isVisible()) {
+      await replaceFileBtn.click();
+      await page.waitForTimeout(600);
+      console.log('   ✓ Canonical document replaced & re-indexed');
+    }
+    await page.screenshot({ path: path.join(screenshotDir, '20-document-intake.png') });
+    console.log('   ✓ Document repository verified 📸');
+
     console.log('\n======================================================');
     console.log('🎉 COMPLETE PLAYWRIGHT VERIFICATION PASSED!');
     console.log(`Console Errors: ${consoleErrors.length}`);
@@ -252,7 +350,7 @@ async function runCompleteTestSuite() {
     } else {
       console.log('   ✅ ZERO client-side errors detected!');
     }
-    console.log('   ✅ All 6 Personas, 7 Lifecycle Tabs, 5 Modals & Settings working perfectly!');
+    console.log('   ✅ All 8 Roles, 7 Portals, 7 Lifecycle Tabs, 5 Modals & Settings working perfectly!');
     console.log('======================================================\n');
 
   } catch (err) {

@@ -10,20 +10,25 @@ import {
   DollarSign,
   Clock,
   Home,
-  Settings
+  Settings,
+  Landmark,
+  Hammer,
+  ClipboardList,
+  Scale,
+  TrendingUp,
+  FolderArchive,
+  Lock,
+  Shield
 } from 'lucide-react';
+import { UserRole, USER_ROLES } from '../../shared/types';
+import { 
+  ActiveNavScreen, 
+  isScreenPermitted, 
+  hasPermission, 
+  ROLE_ACCESS_PROFILES 
+} from '../../shared/rbac/matrix';
 
-export type ActiveNavScreen = 
-  | 'portfolio' 
-  | 'project-detail' 
-  | 'budget'
-  | 'draws' 
-  | 'timeline'
-  | 'documents' 
-  | 'disposition'
-  | 'deal-lab' 
-  | 'alerts'
-  | 'settings';
+export type { ActiveNavScreen };
 
 export interface SidebarProps {
   currentScreen: ActiveNavScreen;
@@ -35,6 +40,7 @@ export interface SidebarProps {
   builderProfile: { name: string; company: string; };
   pendingDrawsCount?: number;
   alertsCount?: number;
+  currentRole?: UserRole;
 }
 
 export function Sidebar({
@@ -46,7 +52,8 @@ export function Sidebar({
   onSignOut,
   builderProfile,
   pendingDrawsCount = 0,
-  alertsCount = 0
+  alertsCount = 0,
+  currentRole = 'DEVELOPER_OWNER'
 }: SidebarProps) {
   
   const getStatusColor = (status: 'ACTIVE' | 'ON_HOLD' | 'COMPLETED') => {
@@ -72,63 +79,139 @@ export function Sidebar({
     { id: 'disposition' as const, label: 'Unit Sales & ROI', icon: Home },
     { id: 'deal-lab' as const, label: 'Deal Lab', icon: Sparkles },
     { id: 'alerts' as const, label: 'Risk Alerts', icon: BellRing, badge: alertsCount },
-    { id: 'settings' as const, label: 'Settings', icon: Settings },
   ];
+
+  const roleNav = [
+    { id: 'lender-portal' as const, label: 'Lender Draw Queue', icon: Landmark },
+    { id: 'gc-fixed-portal' as const, label: 'GC Fixed Claims', icon: Hammer },
+    { id: 'gc-daily-portal' as const, label: 'GC Daily Logs', icon: ClipboardList },
+    { id: 'cfo-recon' as const, label: 'CFO & Lien Audit', icon: Scale },
+    { id: 'investor-portal' as const, label: 'Investor Transparency', icon: TrendingUp },
+    { id: 'document-intake' as const, label: 'Document Repository', icon: FolderArchive },
+  ];
+
+  const roleProfile = ROLE_ACCESS_PROFILES[currentRole] || ROLE_ACCESS_PROFILES.DEVELOPER_OWNER;
+  const visibleMainNav = mainNav.filter(item => isScreenPermitted(currentRole, item.id));
+  const visibleRoleNav = roleNav.filter(item => isScreenPermitted(currentRole, item.id));
+  const isSettingsAllowed = isScreenPermitted(currentRole, 'settings');
+  const canAddProject = hasPermission(currentRole, 'project:create');
 
   return (
     <aside className="flex flex-col w-64 h-screen shrink-0 bg-white border-r border-slate-200">
       {/* Header / Logo */}
-      <div className="p-6 flex items-center gap-3">
-        <div className="w-8 h-8 bg-slate-900 rounded flex items-center justify-center">
-          <span className="text-white font-bold text-xl leading-none tracking-tighter">G</span>
+      <div className="p-5 flex items-center gap-3">
+        <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center shadow-xs">
+          <span className="text-white font-bold text-lg leading-none tracking-tight">G</span>
         </div>
-        <span className="font-bold text-slate-900 text-xl tracking-tight">GroundUp AI</span>
+        <div>
+          <span className="font-bold text-slate-900 text-lg tracking-tight block leading-tight">GroundUp AI</span>
+          <span className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Construction Finance</span>
+        </div>
       </div>
 
       {/* Main Nav */}
-      <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
-        <div className="space-y-1 mb-8">
-          {mainNav.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentScreen === item.id;
-            
-            return (
-              <button
-                key={item.id}
-                onClick={() => onNavigate(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
-                  isActive 
-                    ? 'bg-slate-900 text-white' 
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Icon className="w-5 h-5" />
-                  <span>{item.label}</span>
-                </div>
-                {item.badge && item.badge > 0 ? (
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-                  }`}>
-                    {item.badge}
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
+      <nav className="flex-1 px-3 space-y-4 overflow-y-auto pb-4">
+        {/* Core Lifecycle Nav (Only rendered if user has permitted screens) */}
+        {visibleMainNav.length > 0 && (
+          <div>
+            <div className="px-3 mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Lifecycle & Economics
+            </div>
+            <div className="space-y-0.5">
+              {visibleMainNav.map((item) => {
+                const Icon = item.icon;
+                const isActive = currentScreen === item.id;
+                
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onNavigate(item.id)}
+                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg transition-colors text-xs font-semibold cursor-pointer ${
+                      isActive 
+                        ? 'bg-slate-900 text-white shadow-xs' 
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span>{item.label}</span>
+                    </div>
+                    {item.badge && item.badge > 0 ? (
+                      <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        isActive ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-700'
+                      }`}>
+                        {item.badge}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Dedicated Role Portals (Only rendered if user has permitted screens) */}
+        {visibleRoleNav.length > 0 && (
+          <div>
+            <div className="px-3 mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Role Workspaces
+            </div>
+            <div className="space-y-0.5">
+              {visibleRoleNav.map((item) => {
+                const Icon = item.icon;
+                const isActive = currentScreen === item.id;
+                
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onNavigate(item.id)}
+                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg transition-colors text-xs font-semibold cursor-pointer ${
+                      isActive 
+                        ? 'bg-slate-900 text-white shadow-xs' 
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span className="truncate">{item.label}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Settings Button (Only for authorized roles) */}
+        {isSettingsAllowed && (
+          <div>
+            <button
+              onClick={() => onNavigate('settings')}
+              className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg transition-colors text-xs font-semibold cursor-pointer ${
+                currentScreen === 'settings'
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <Settings className="w-4 h-4 shrink-0" />
+              <span>Settings & Team</span>
+            </button>
+          </div>
+        )}
 
         {/* Projects List */}
         <div>
           <div className="flex items-center justify-between px-3 mb-2">
             <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">My Projects</h3>
-            <button 
-              onClick={onAddProject}
-              className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-900 transition-colors"
-              title="Add Project"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
+            {canAddProject && (
+              <button 
+                onClick={onAddProject}
+                className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-900 transition-colors cursor-pointer"
+                title="Add Project"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            )}
           </div>
           
           <div className="space-y-1">
@@ -154,7 +237,7 @@ export function Sidebar({
         </div>
       </nav>
 
-      {/* Footer / User Profile */}
+      {/* Footer / User Profile & Role Security Badge */}
       <div className="p-4 border-t border-slate-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
@@ -167,15 +250,18 @@ export function Sidebar({
               <span className="text-sm font-semibold text-slate-900 truncate">
                 {builderProfile.name}
               </span>
-              <span className="text-xs text-slate-500 truncate">
-                {builderProfile.company}
-              </span>
+              <div className="flex items-center gap-1 mt-0.5">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 truncate">
+                  <Shield className="w-2.5 h-2.5 text-slate-500 shrink-0" />
+                  <span className="truncate">{roleProfile.badge}</span>
+                </span>
+              </div>
             </div>
           </div>
           {onSignOut && (
             <button 
               onClick={onSignOut}
-              className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors flex-shrink-0"
+              className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors flex-shrink-0 cursor-pointer"
               title="Sign Out"
             >
               <LogOut className="w-4 h-4" />

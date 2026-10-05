@@ -35,7 +35,8 @@ import {
   Sparkles,
   Download,
   Share2,
-  UserCheck
+  UserCheck,
+  Lock
 } from 'lucide-react';
 import { 
   Project, 
@@ -48,6 +49,7 @@ import {
   DailyLogEntry,
   ProjectProForma 
 } from '../../shared/types';
+import { hasPermission } from '../../shared/rbac/matrix';
 import { ChangeOrderModal } from '../components/ChangeOrderModal';
 import { ContingencyModal } from '../components/ContingencyModal';
 import { DrawPacketModal } from '../components/DrawPacketModal';
@@ -509,9 +511,9 @@ export function ProjectDetailScreen({
               </p>
             </div>
 
-            {/* Role-Specific Action Triggers */}
+            {/* Role-Specific Action Triggers (Strictly Gated by RBAC) */}
             <div className="flex items-center gap-2">
-              {currentRole === 'GC_FIXED' ? (
+              {hasPermission(currentRole, 'milestone_claim:submit') && (
                 <button
                   onClick={() => setIsDrawPacketModalOpenLocal(true)}
                   className="px-3.5 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
@@ -519,7 +521,9 @@ export function ProjectDetailScreen({
                   <FileCheck className="w-3.5 h-3.5" />
                   <span>Submit Milestone Claim</span>
                 </button>
-              ) : currentRole === 'GC_DAILY' ? (
+              )}
+
+              {hasPermission(currentRole, 'field_log:create') && (
                 <button
                   onClick={() => setActiveTab('timeline')}
                   className="px-3.5 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
@@ -527,29 +531,24 @@ export function ProjectDetailScreen({
                   <Camera className="w-3.5 h-3.5" />
                   <span>Post Daily Work Log</span>
                 </button>
-              ) : currentRole === 'INVESTOR' ? (
+              )}
+
+              {hasPermission(currentRole, 'change_order:create') && (
                 <button
-                  onClick={() => alert('Exporting Certified Investor Health Report PDF...')}
-                  className="px-3.5 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  onClick={() => setIsChangeOrderModalOpenLocal(true)}
+                  className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1"
                 >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download Investor Report</span>
+                  <Plus className="w-3.5 h-3.5" /> Change Order
                 </button>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setIsChangeOrderModalOpenLocal(true)}
-                    className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Change Order
-                  </button>
-                  <button
-                    onClick={() => setIsDrawPacketModalOpenLocal(true)}
-                    className="px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1"
-                  >
-                    <Plus className="w-3.5 h-3.5 text-emerald-400" /> Build Draw Packet
-                  </button>
-                </>
+              )}
+
+              {hasPermission(currentRole, 'draw:create_packet') && (
+                <button
+                  onClick={() => setIsDrawPacketModalOpenLocal(true)}
+                  className="px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5 text-emerald-400" /> Build Draw Packet
+                </button>
               )}
             </div>
           </div>
@@ -681,59 +680,71 @@ export function ProjectDetailScreen({
               </div>
             </div>
 
-            {/* PROJECT ECONOMICS: Pro Forma vs. Current Forecast */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-slate-900 text-base">Project Economics — Pro Forma vs. Current Forecast</h3>
-                  <p className="text-xs text-slate-500">Continuous profit tracking: what you originally planned vs what you will actually take home</p>
-                </div>
-                <span className="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                  Profit Drift: -$195,000 (ROI: 27.7% → 17.9%)
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <div className="text-slate-500 text-[10px]">Acquisition Cost</div>
-                  <div className="font-bold text-slate-900 text-sm mt-0.5">$1,000,000</div>
-                  <div className="text-[10px] text-slate-400">Cash / Land HUD-1</div>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <div className="text-slate-500 text-[10px]">Construction Budget</div>
-                  <div className="font-bold text-slate-900 text-sm mt-0.5">{fmt(totalBudget)}</div>
-                  <div className="text-[10px] text-red-600">+$120K over baseline</div>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <div className="text-slate-500 text-[10px]">Interest & Carrying</div>
-                  <div className="font-bold text-slate-900 text-sm mt-0.5">$225,000</div>
-                  <div className="text-[10px] text-amber-600">+$75K delay carry</div>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <div className="text-slate-500 text-[10px]">Target Sales Price (ARV)</div>
-                  <div className="font-bold text-emerald-700 text-sm mt-0.5">$3,250,000</div>
-                  <div className="text-[10px] text-emerald-600">Comps confirmed</div>
-                </div>
-              </div>
-
-              {/* Profit Drift Explanation Box */}
-              <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2 text-xs">
-                <div className="font-bold text-amber-900 flex items-center gap-1.5">
-                  <AlertTriangle className="w-4 h-4 text-amber-600" />
-                  <span>Why Did Projected Profit Drop by $195,000?</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700">
-                  <div className="flex items-start gap-2 bg-white/80 p-2 rounded-lg border border-amber-100">
-                    <span className="text-red-600 font-bold font-mono">-$120,000</span>
-                    <span>Construction hard cost overruns (Site work & extra foundation piles)</span>
+            {/* PROJECT ECONOMICS: Pro Forma vs. Current Forecast (Shielded from Field / Contractor Roles) */}
+            {hasPermission(currentRole, 'project:view_financials') ? (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-base">Project Economics — Pro Forma vs. Current Forecast</h3>
+                    <p className="text-xs text-slate-500">Continuous profit tracking: what you originally planned vs what you will actually take home</p>
                   </div>
-                  <div className="flex items-start gap-2 bg-white/80 p-2 rounded-lg border border-amber-100">
-                    <span className="text-red-600 font-bold font-mono">-$75,000</span>
-                    <span>Additional carrying interest from 82 days of schedule delay</span>
+                  <span className="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                    Profit Drift: -$195,000 (ROI: 27.7% → 17.9%)
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="text-slate-500 text-[10px]">Acquisition Cost</div>
+                    <div className="font-bold text-slate-900 text-sm mt-0.5">$1,000,000</div>
+                    <div className="text-[10px] text-slate-400">Cash / Land HUD-1</div>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="text-slate-500 text-[10px]">Construction Budget</div>
+                    <div className="font-bold text-slate-900 text-sm mt-0.5">{fmt(totalBudget)}</div>
+                    <div className="text-[10px] text-red-600">+$120K over baseline</div>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="text-slate-500 text-[10px]">Interest & Carrying</div>
+                    <div className="font-bold text-slate-900 text-sm mt-0.5">$225,000</div>
+                    <div className="text-[10px] text-amber-600">+$75K delay carry</div>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="text-slate-500 text-[10px]">Target Sales Price (ARV)</div>
+                    <div className="font-bold text-emerald-700 text-sm mt-0.5">$3,250,000</div>
+                    <div className="text-[10px] text-emerald-600">Comps confirmed</div>
                   </div>
                 </div>
+
+                {/* Profit Drift Explanation Box */}
+                <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2 text-xs">
+                  <div className="font-bold text-amber-900 flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-600" />
+                    <span>Why Did Projected Profit Drop by $195,000?</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700">
+                    <div className="flex items-start gap-2 bg-white/80 p-2 rounded-lg border border-amber-100">
+                      <span className="text-red-600 font-bold font-mono">-$120,000</span>
+                      <span>Construction hard cost overruns (Site work & extra foundation piles)</span>
+                    </div>
+                    <div className="flex items-start gap-2 bg-white/80 p-2 rounded-lg border border-amber-100">
+                      <span className="text-red-600 font-bold font-mono">-$75,000</span>
+                      <span>Additional carrying interest from 82 days of schedule delay</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-6 text-center space-y-2">
+                <div className="mx-auto w-10 h-10 rounded-xl bg-slate-200 flex items-center justify-center text-slate-500">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <h4 className="font-bold text-slate-800 text-sm">Developer Pro Forma Economics Shielded</h4>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  Proprietary land acquisition basis, developer equity margins, and pro forma target ROI are confidential to Developer/Owner and CFO roles.
+                </p>
+              </div>
+            )}
 
             {/* LOAN FACILITY & INTEREST RESERVE METER */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4 text-xs">
@@ -787,20 +798,24 @@ export function ProjectDetailScreen({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setIsContingencyModalOpen(true)}
-                  className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1.5"
-                >
-                  <Shield className="w-3.5 h-3.5" />
-                  <span>Absorb Overrun from Contingency</span>
-                </button>
-                <button
-                  onClick={() => setIsChangeOrderModalOpenLocal(true)}
-                  className="px-3.5 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1.5"
-                >
-                  <Plus className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>New Change Order</span>
-                </button>
+                {hasPermission(currentRole, 'contingency:manage') && (
+                  <button
+                    onClick={() => setIsContingencyModalOpen(true)}
+                    className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Shield className="w-3.5 h-3.5" />
+                    <span>Absorb Overrun from Contingency</span>
+                  </button>
+                )}
+                {hasPermission(currentRole, 'change_order:create') && (
+                  <button
+                    onClick={() => setIsChangeOrderModalOpenLocal(true)}
+                    className="px-3.5 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>New Change Order</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -922,13 +937,15 @@ export function ProjectDetailScreen({
                 <h3 className="font-bold text-slate-900 text-base">Construction Draws & Lender Disbursements</h3>
                 <p className="text-xs text-slate-500">Track requested vs approved vs wire disbursed funding</p>
               </div>
-              <button
-                onClick={() => setIsDrawPacketModalOpenLocal(true)}
-                className="px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1.5"
-              >
-                <Plus className="w-3.5 h-3.5 text-emerald-400" />
-                <span>+ Build Draw #{draws.length + 1} Packet</span>
-              </button>
+              {hasPermission(currentRole, 'draw:create_packet') && (
+                <button
+                  onClick={() => setIsDrawPacketModalOpenLocal(true)}
+                  className="px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>+ Build Draw #{draws.length + 1} Packet</span>
+                </button>
+              )}
             </div>
 
             {/* Draws List */}
@@ -1047,12 +1064,16 @@ export function ProjectDetailScreen({
                       </td>
                       <td className="px-4 py-3 text-slate-600">{m.source}</td>
                       <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => setSelectedMilestoneForEdit(m)}
-                          className="px-2.5 py-1 bg-slate-900 hover:bg-black text-white rounded-lg text-[10px] font-bold cursor-pointer transition"
-                        >
-                          Log Progress
-                        </button>
+                        {hasPermission(currentRole, 'milestone:log_progress') ? (
+                          <button
+                            onClick={() => setSelectedMilestoneForEdit(m)}
+                            className="px-2.5 py-1 bg-slate-900 hover:bg-black text-white rounded-lg text-[10px] font-bold cursor-pointer transition"
+                          >
+                            Log Progress
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 text-[10px] font-medium">Read Only</span>
+                        )}
                       </td>
                     </tr>
                   ))}

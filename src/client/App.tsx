@@ -9,6 +9,14 @@ import { PortfolioScreen } from './screens/PortfolioScreen';
 import { ProjectDetailScreen, ProjectTab } from './screens/ProjectDetailScreen';
 import { DealLabScreen } from './screens/DealLabScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { LenderPortalScreen } from './screens/LenderPortalScreen';
+import { GCFixedPortalScreen } from './screens/GCFixedPortalScreen';
+import { GCDailyPortalScreen } from './screens/GCDailyPortalScreen';
+import { CFOReconciliationScreen } from './screens/CFOReconciliationScreen';
+import { InvestorPortalScreen } from './screens/InvestorPortalScreen';
+import { DocumentIntakeScreen } from './screens/DocumentIntakeScreen';
+import { AccessDeniedScreen } from './components/AccessDeniedScreen';
+import { isScreenPermitted, getRoleDefaultScreen } from '../shared/rbac/matrix';
 import { AIChatDrawer } from './components/AIChatDrawer';
 import { ProvenanceDrawer } from './components/ProvenanceDrawer';
 import { Project, ProjectFourTruthsSummary, UserRole } from '../shared/types';
@@ -251,7 +259,7 @@ export function App() {
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans antialiased text-slate-900">
-      {/* ── Left Sidebar ── */}
+      {/* ── Left Sidebar (RBAC filtered) ── */}
       <Sidebar
         currentScreen={currentScreen}
         onNavigate={handleNavigate}
@@ -262,6 +270,7 @@ export function App() {
         builderProfile={builderProfile}
         pendingDrawsCount={pendingDrawsCount}
         alertsCount={alertsCount}
+        currentRole={currentRole}
       />
 
       {/* ── Main Layout Column ── */}
@@ -269,7 +278,10 @@ export function App() {
         {/* Top Global Header with Role Persona Switcher & Quick Actions */}
         <TopHeader
           currentRole={currentRole}
-          onChangeRole={(role) => setCurrentRole(role)}
+          onChangeRole={(role) => {
+            setCurrentRole(role);
+            setCurrentScreen(getRoleDefaultScreen(role));
+          }}
           projects={projects}
           selectedProjectId={selectedProjectId}
           onSelectProject={(id) => {
@@ -286,59 +298,129 @@ export function App() {
           }}
           onOpenAIChat={() => setShowAIChat(true)}
           onSignOut={handleSignOut}
+          onNavigateScreen={(s) => setCurrentScreen(s)}
         />
 
-        {/* Scrollable Viewport */}
+        {/* Scrollable Viewport with RBAC Route Authorization Gate */}
         <main className="flex-1 overflow-y-auto">
-          {/* Portfolio Dashboard */}
-          {currentScreen === 'portfolio' && (
-            <PortfolioScreen
-              projects={projects}
-              onSelectProject={handleSelectProject}
-              onAddProject={() => handleNavigate('deal-lab')}
-              onOpenDealLab={() => handleNavigate('deal-lab')}
-              onNavigateDraws={() => handleNavigate('draws')}
-            />
-          )}
-
-          {/* Project Detail (6 Lifecycle Tabs: Overview, Budget, Draws, Timeline, Documents, Disposition, Alerts) */}
-          {isProjectDetailScreen && (
-            <ProjectDetailScreen
-              projectId={selectedProjectId}
-              projects={projects}
-              onSelectProject={(id) => {
-                setSelectedProjectId(id);
-                fetchProjectSummary(id);
-              }}
-              summary={summary}
-              onBack={() => handleNavigate('portfolio')}
-              onSubmitDraw={() => setIsDrawPacketModalOpen(true)}
-              onOpenLenderPackage={() => {}}
-              onOpenInvoices={() => {}}
-              onOpenAIChat={() => setShowAIChat(true)}
-              onInspectProvenance={(type, category) =>
-                setProvenanceTarget({ type, category })
-              }
-              initialTab={getProjectTab()}
+          {!isScreenPermitted(currentRole, currentScreen) ? (
+            <AccessDeniedScreen
+              requestedScreen={currentScreen}
               currentRole={currentRole}
-              isDrawPacketModalOpen={isDrawPacketModalOpen}
-              onCloseDrawPacketModal={() => setIsDrawPacketModalOpen(false)}
-              isChangeOrderModalOpen={isChangeOrderModalOpen}
-              onCloseChangeOrderModal={() => setIsChangeOrderModalOpen(false)}
+              onNavigate={(s) => setCurrentScreen(s)}
+              onSwitchRole={(r) => {
+                setCurrentRole(r);
+                setCurrentScreen(getRoleDefaultScreen(r));
+              }}
             />
-          )}
+          ) : (
+            <>
+              {/* Portfolio Dashboard */}
+              {currentScreen === 'portfolio' && (
+                <PortfolioScreen
+                  projects={projects}
+                  onSelectProject={handleSelectProject}
+                  onAddProject={() => handleNavigate('deal-lab')}
+                  onOpenDealLab={() => handleNavigate('deal-lab')}
+                  onNavigateDraws={() => handleNavigate('draws')}
+                />
+              )}
 
-          {/* Deal Lab Underwriting Calculator */}
-          {currentScreen === 'deal-lab' && (
-            <DealLabScreen
-              onBack={() => handleNavigate('portfolio')}
-              onSaveAsProject={handleSaveDealAsProject}
-            />
-          )}
+              {/* Project Detail (Lifecycle Tabs: Overview, Budget, Draws, Timeline, Documents, Disposition, Alerts) */}
+              {isProjectDetailScreen && (
+                <ProjectDetailScreen
+                  projectId={selectedProjectId}
+                  projects={projects}
+                  onSelectProject={(id) => {
+                    setSelectedProjectId(id);
+                    fetchProjectSummary(id);
+                  }}
+                  summary={summary}
+                  onBack={() => handleNavigate('portfolio')}
+                  onSubmitDraw={() => setIsDrawPacketModalOpen(true)}
+                  onOpenLenderPackage={() => {}}
+                  onOpenInvoices={() => {}}
+                  onOpenAIChat={() => setShowAIChat(true)}
+                  onInspectProvenance={(type, category) =>
+                    setProvenanceTarget({ type, category })
+                  }
+                  initialTab={getProjectTab()}
+                  currentRole={currentRole}
+                  isDrawPacketModalOpen={isDrawPacketModalOpen}
+                  onCloseDrawPacketModal={() => setIsDrawPacketModalOpen(false)}
+                  isChangeOrderModalOpen={isChangeOrderModalOpen}
+                  onCloseChangeOrderModal={() => setIsChangeOrderModalOpen(false)}
+                />
+              )}
 
-          {/* Settings & Stakeholder Management */}
-          {currentScreen === 'settings' && (
-            <SettingsScreen onBack={() => handleNavigate('portfolio')} />
+              {/* Construction Lender Portal (BCB Community Bank) */}
+              {currentScreen === 'lender-portal' && (
+                <LenderPortalScreen
+                  projects={projects}
+                  selectedProjectId={selectedProjectId}
+                  onSelectProject={(id) => {
+                    setSelectedProjectId(id);
+                    fetchProjectSummary(id);
+                  }}
+                  onDisburseFunds={(drawId, amount) => {
+                    console.log(`Disbursed ${amount} for ${drawId}`);
+                  }}
+                />
+              )}
+
+              {/* GC Fixed-Price Contract Portal */}
+              {currentScreen === 'gc-fixed-portal' && (
+                <GCFixedPortalScreen
+                  projects={projects}
+                  selectedProjectId={selectedProjectId}
+                />
+              )}
+
+              {/* GC Daily Logs & Cost-Plus Portal */}
+              {currentScreen === 'gc-daily-portal' && (
+                <GCDailyPortalScreen
+                  projects={projects}
+                  selectedProjectId={selectedProjectId}
+                />
+              )}
+
+              {/* CFO Reconciliation & Lien Waiver Audit Center */}
+              {currentScreen === 'cfo-recon' && (
+                <CFOReconciliationScreen
+                  projects={projects}
+                  selectedProjectId={selectedProjectId}
+                />
+              )}
+
+              {/* Investor / Partner Transparency Portal */}
+              {currentScreen === 'investor-portal' && (
+                <InvestorPortalScreen
+                  projects={projects}
+                  selectedProjectId={selectedProjectId}
+                />
+              )}
+
+              {/* Canonical Document Intake Repository */}
+              {currentScreen === 'document-intake' && (
+                <DocumentIntakeScreen
+                  projects={projects}
+                  selectedProjectId={selectedProjectId}
+                />
+              )}
+
+              {/* Deal Lab Underwriting Calculator */}
+              {currentScreen === 'deal-lab' && (
+                <DealLabScreen
+                  onBack={() => handleNavigate('portfolio')}
+                  onSaveAsProject={handleSaveDealAsProject}
+                />
+              )}
+
+              {/* Settings & Stakeholder Management */}
+              {currentScreen === 'settings' && (
+                <SettingsScreen onBack={() => handleNavigate('portfolio')} />
+              )}
+            </>
           )}
         </main>
       </div>
