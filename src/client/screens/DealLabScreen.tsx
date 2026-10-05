@@ -97,8 +97,8 @@ export function DealLabScreen({ onBack, onSaveAsProject }: DealLabScreenProps) {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+      {/* Top Action Bar */}
+      <div className="bg-white border-b border-slate-200/80 px-8 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
@@ -135,7 +135,7 @@ export function DealLabScreen({ onBack, onSaveAsProject }: DealLabScreenProps) {
             Save as New Project <TrendingUp className="w-4 h-4" />
           </button>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <main className="flex-1 p-6 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
