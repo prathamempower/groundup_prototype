@@ -21,6 +21,7 @@ import { AIChatDrawer } from './components/AIChatDrawer';
 import { ProvenanceDrawer } from './components/ProvenanceDrawer';
 import { Project, ProjectFourTruthsSummary, UserRole } from '../shared/types';
 import { Sparkles } from 'lucide-react';
+import { NewUserIntakePage } from './screens/NewUserIntakePage';
 
 const DEFAULT_PROJECTS: Project[] = [
   {
@@ -222,6 +223,47 @@ export function App() {
     setCurrentScreen('project-detail');
   };
 
+  const handleOnboardingComplete = (projectId: string, reportData: any) => {
+    const newProject: Project = {
+      id: projectId,
+      name: reportData.address.split(',')[0],
+      address: reportData.address,
+      gc_name: 'Metro Builds LLC',
+      gc_contract_model: 'FIXED_PRICE',
+      lender_name: 'BCB Community Bank',
+      units: reportData.units || 4,
+      square_feet: reportData.sqFt || 4200,
+      target_budget: reportData.hardCosts || 1350000,
+      start_date: 'Nov 1, 2026',
+      expected_completion: 'May 30, 2028',
+      status: 'ACTIVE',
+      created_by_user_id: currentUser?.id || 'user-dev-1',
+      created_at: new Date().toISOString(),
+      acquisition_cost: reportData.acquisitionCost || 1100000,
+      expected_sale_price: reportData.arv || 3300000,
+      contingency_initial: 80000,
+      contingency_remaining: 80000,
+    };
+
+    setProjects(prev => {
+      const updated = [newProject, ...prev];
+      try { localStorage.setItem('groundup_projects', JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+
+    // Update currentUser to set isNewUser to false
+    const updatedUser = {
+      ...currentUser!,
+      isNewUser: false,
+    };
+    setCurrentUser(updatedUser);
+    try { localStorage.setItem('groundup_user', JSON.stringify(updatedUser)); } catch {}
+
+    // Optionally set selectedProjectId and navigate to project-detail
+    setSelectedProjectId(projectId);
+    setCurrentScreen('project-detail');
+  };
+
   const activeProjectName =
     projects.find(p => p.id === selectedProjectId)?.name ||
     summary?.project_name ||
@@ -230,6 +272,15 @@ export function App() {
   // ── Auth gate ─────────────────────────────────────────────────────────────
   if (!currentUser) {
     return <AuthScreen onAuthenticate={handleAuthenticate} />;
+  }
+
+  // ── New user onboarding gate ───────────────────────────────────────────────
+  if (currentUser?.isNewUser) {
+    return <NewUserIntakePage 
+      user={currentUser} 
+      onCompleteIntake={handleOnboardingComplete} 
+      onCancelOrSignOut={handleSignOut} 
+    />;
   }
 
   // ── Compute counts for badges ─────────────────────────────────────────────
