@@ -86,6 +86,75 @@ const DEFAULT_PROJECTS: Project[] = [
   },
 ];
 
+const VALID_SCREENS: ActiveNavScreen[] = [
+  'portfolio',
+  'project-detail',
+  'budget',
+  'draws',
+  'timeline',
+  'documents',
+  'disposition',
+  'deal-lab',
+  'alerts',
+  'settings',
+  'lender-portal',
+  'gc-fixed-portal',
+  'gc-daily-portal',
+  'cfo-recon',
+  'investor-portal',
+  'document-intake',
+];
+
+const VALID_ROLES: UserRole[] = [
+  'DEVELOPER_OWNER',
+  'CFO',
+  'PM',
+  'LENDER',
+  'GC_FIXED',
+  'GC_DAILY',
+  'INVESTOR',
+  'ACCOUNTANT',
+];
+
+function getInitialScreen(): ActiveNavScreen {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const screenFromUrl = params.get('screen') as ActiveNavScreen | null;
+    if (screenFromUrl && VALID_SCREENS.includes(screenFromUrl)) {
+      return screenFromUrl;
+    }
+    const screenFromStorage = localStorage.getItem('groundup_current_screen') as ActiveNavScreen | null;
+    if (screenFromStorage && VALID_SCREENS.includes(screenFromStorage)) {
+      return screenFromStorage;
+    }
+  } catch {}
+  return 'portfolio';
+}
+
+function getInitialProject(): string {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const projectFromUrl = params.get('project');
+    if (projectFromUrl) return projectFromUrl;
+
+    const projectFromStorage = localStorage.getItem('groundup_selected_project_id');
+    if (projectFromStorage) return projectFromStorage;
+  } catch {}
+  return 'proj-73-broadway';
+}
+
+function getInitialRole(): UserRole {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const roleFromUrl = params.get('role') as UserRole | null;
+    if (roleFromUrl && VALID_ROLES.includes(roleFromUrl)) return roleFromUrl;
+
+    const roleFromStorage = localStorage.getItem('groundup_role') as UserRole | null;
+    if (roleFromStorage && VALID_ROLES.includes(roleFromStorage)) return roleFromStorage;
+  } catch {}
+  return 'DEVELOPER_OWNER';
+}
+
 export function App() {
   // ── Auth ─────────────────────────────────────────────────────────────────
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(() => {
@@ -98,11 +167,11 @@ export function App() {
   });
 
   // ── Role Persona (Default: DEVELOPER_OWNER) ──────────────────────────────
-  const [currentRole, setCurrentRole] = useState<UserRole>('DEVELOPER_OWNER');
+  const [currentRole, setCurrentRole] = useState<UserRole>(getInitialRole);
 
-  // ── Navigation ────────────────────────────────────────────────────────────
-  const [currentScreen, setCurrentScreen] = useState<ActiveNavScreen>('portfolio');
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('proj-73-broadway');
+  // ── Navigation (Persisted across page reloads & synced with URL) ──────────
+  const [currentScreen, setCurrentScreen] = useState<ActiveNavScreen>(getInitialScreen);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(getInitialProject);
 
   // ── Data ──────────────────────────────────────────────────────────────────
   const [projects, setProjects] = useState<Project[]>(() => {
@@ -168,6 +237,57 @@ export function App() {
     if (selectedProjectId && currentUser) fetchProjectSummary(selectedProjectId);
   }, [selectedProjectId, currentUser]);
 
+  // ── State persistence & URL synchronization ──────────────────────────────
+  useEffect(() => {
+    try {
+      localStorage.setItem('groundup_current_screen', currentScreen);
+      localStorage.setItem('groundup_selected_project_id', selectedProjectId);
+      localStorage.setItem('groundup_role', currentRole);
+    } catch {}
+
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('screen', currentScreen);
+      if (selectedProjectId) {
+        url.searchParams.set('project', selectedProjectId);
+      }
+      if (currentRole && currentRole !== 'DEVELOPER_OWNER') {
+        url.searchParams.set('role', currentRole);
+      } else {
+        url.searchParams.delete('role');
+      }
+
+      if (url.search !== window.location.search) {
+        window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+      }
+    } catch {}
+  }, [currentScreen, selectedProjectId, currentRole]);
+
+  // ── Listen for browser back / forward navigation ─────────────────────────
+  useEffect(() => {
+    const handlePopState = () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const screenFromUrl = params.get('screen') as ActiveNavScreen | null;
+        const projectFromUrl = params.get('project');
+        const roleFromUrl = params.get('role') as UserRole | null;
+
+        if (screenFromUrl && VALID_SCREENS.includes(screenFromUrl)) {
+          setCurrentScreen(screenFromUrl);
+        }
+        if (projectFromUrl) {
+          setSelectedProjectId(projectFromUrl);
+        }
+        if (roleFromUrl && VALID_ROLES.includes(roleFromUrl)) {
+          setCurrentRole(roleFromUrl);
+        }
+      } catch {}
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleAuthenticate = (user: AuthenticatedUser) => {
     setCurrentUser(user);
@@ -175,20 +295,44 @@ export function App() {
   };
 
   const handleSignOut = () => {
-    try { localStorage.removeItem('groundup_user'); } catch {}
+    try {
+      localStorage.removeItem('groundup_user');
+      localStorage.removeItem('groundup_current_screen');
+      localStorage.removeItem('groundup_selected_project_id');
+      localStorage.removeItem('groundup_role');
+      const url = new URL(window.location.href);
+      url.search = '';
+      window.history.replaceState(null, '', url.pathname);
+    } catch {}
     setCurrentUser(null);
+    setCurrentScreen('portfolio');
   };
 
   const handleNavigate = (screen: ActiveNavScreen, projectId?: string) => {
+    const targetProject = projectId || selectedProjectId;
     if (projectId) setSelectedProjectId(projectId);
     setCurrentScreen(screen);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('screen', screen);
+      if (targetProject) {
+        url.searchParams.set('project', targetProject);
+      }
+      if (currentRole && currentRole !== 'DEVELOPER_OWNER') {
+        url.searchParams.set('role', currentRole);
+      } else {
+        url.searchParams.delete('role');
+      }
+      window.history.pushState(null, '', url.pathname + url.search + url.hash);
+    } catch {}
   };
 
   const handleSelectProject = (projectId: string) => {
     setSelectedProjectId(projectId);
     fetchProjectSummary(projectId);
-    setCurrentScreen('project-detail');
+    handleNavigate('project-detail', projectId);
   };
 
   const handleSaveDealAsProject = (dealData: any) => {
@@ -219,8 +363,7 @@ export function App() {
       return updated;
     });
 
-    setSelectedProjectId(newProject.id);
-    setCurrentScreen('project-detail');
+    handleNavigate('project-detail', newProject.id);
   };
 
   const handleOnboardingComplete = (projectId: string, reportData: any) => {
@@ -260,8 +403,7 @@ export function App() {
     try { localStorage.setItem('groundup_user', JSON.stringify(updatedUser)); } catch {}
 
     // Optionally set selectedProjectId and navigate to project-detail
-    setSelectedProjectId(projectId);
-    setCurrentScreen('project-detail');
+    handleNavigate('project-detail', projectId);
   };
 
   const activeProjectName =
@@ -331,25 +473,30 @@ export function App() {
           currentRole={currentRole}
           onChangeRole={(role) => {
             setCurrentRole(role);
-            setCurrentScreen(getRoleDefaultScreen(role));
+            handleNavigate(getRoleDefaultScreen(role));
           }}
           projects={projects}
           selectedProjectId={selectedProjectId}
           onSelectProject={(id) => {
             setSelectedProjectId(id);
             fetchProjectSummary(id);
+            try {
+              const url = new URL(window.location.href);
+              url.searchParams.set('project', id);
+              window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+            } catch {}
           }}
           onOpenDrawPacket={() => {
-            if (!isProjectDetailScreen) setCurrentScreen('draws');
+            if (!isProjectDetailScreen) handleNavigate('draws');
             setIsDrawPacketModalOpen(true);
           }}
           onOpenChangeOrder={() => {
-            if (!isProjectDetailScreen) setCurrentScreen('budget');
+            if (!isProjectDetailScreen) handleNavigate('budget');
             setIsChangeOrderModalOpen(true);
           }}
           onOpenAIChat={() => setShowAIChat(true)}
           onSignOut={handleSignOut}
-          onNavigateScreen={(s) => setCurrentScreen(s)}
+          onNavigateScreen={(s) => handleNavigate(s)}
         />
 
         {/* Scrollable Viewport with RBAC Route Authorization Gate */}
@@ -358,10 +505,10 @@ export function App() {
             <AccessDeniedScreen
               requestedScreen={currentScreen}
               currentRole={currentRole}
-              onNavigate={(s) => setCurrentScreen(s)}
+              onNavigate={(s) => handleNavigate(s)}
               onSwitchRole={(r) => {
                 setCurrentRole(r);
-                setCurrentScreen(getRoleDefaultScreen(r));
+                handleNavigate(getRoleDefaultScreen(r));
               }}
             />
           ) : (
@@ -396,6 +543,18 @@ export function App() {
                     setProvenanceTarget({ type, category })
                   }
                   initialTab={getProjectTab()}
+                  onTabChange={(tab) => {
+                    const tabToScreen: Record<ProjectTab, ActiveNavScreen> = {
+                      overview: 'project-detail',
+                      budget: 'budget',
+                      draws: 'draws',
+                      timeline: 'timeline',
+                      documents: 'documents',
+                      disposition: 'disposition',
+                      alerts: 'alerts',
+                    };
+                    handleNavigate(tabToScreen[tab] || 'project-detail');
+                  }}
                   currentRole={currentRole}
                   isDrawPacketModalOpen={isDrawPacketModalOpen}
                   onCloseDrawPacketModal={() => setIsDrawPacketModalOpen(false)}

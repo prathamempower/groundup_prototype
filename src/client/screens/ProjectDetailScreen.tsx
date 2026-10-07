@@ -70,6 +70,7 @@ interface ProjectDetailScreenProps {
   onOpenAIChat: () => void;
   onInspectProvenance: (type: 'spend' | 'budget' | 'funded' | 'exposure' | 'delay', category?: string) => void;
   initialTab?: ProjectTab;
+  onTabChange?: (tab: ProjectTab) => void;
   currentRole?: UserRole;
   isDrawPacketModalOpen?: boolean;
   onCloseDrawPacketModal?: () => void;
@@ -91,6 +92,7 @@ export function ProjectDetailScreen({
   onOpenAIChat,
   onInspectProvenance,
   initialTab = 'overview',
+  onTabChange,
   currentRole = 'DEVELOPER_OWNER',
   isDrawPacketModalOpen = false,
   onCloseDrawPacketModal,
@@ -137,17 +139,59 @@ export function ProjectDetailScreen({
     },
   ]);
 
-  const [changeOrders, setChangeOrders] = useState([
-    {
-      id: 'co-1',
-      number: 'CO-001',
-      category: 'Foundation',
-      amount: 40000,
-      reason: 'Unforeseen soft soil condition',
-      status: 'APPROVED',
-      date: 'Mar 18, 2026',
-    },
-  ]);
+  const [changeOrders, setChangeOrders] = useState<any[]>(() => {
+    try {
+      const stored = localStorage.getItem(`groundup_change_orders_${projectId}`);
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return [
+      {
+        id: 'co-1',
+        number: 'CO-001',
+        category: 'Foundation',
+        sub_section: 'Substructure & Pile Reinforcement',
+        cost_code: '03-100',
+        amount: 40000,
+        reason: 'Unforeseen soft soil condition',
+        description: 'Engineered grade beams and extra helical piles required by structural engineer.',
+        status: 'APPROVED',
+        visible_to_gc: true,
+        gc_notes: 'Owner approved. GC authorized to proceed with foundation underpinning.',
+        date: 'Mar 18, 2026',
+        is_other: false,
+      },
+      {
+        id: 'co-other-1',
+        number: 'CO-002',
+        category: 'Municipal Utility Easement Relocation',
+        sub_section: 'Off-Site Civil & Utility Trenching',
+        cost_code: '02-310',
+        amount: 18500,
+        reason: 'Township Utility Conflict',
+        description: 'PSE&G mandated emergency lateral line relocation across west boundary easement.',
+        status: 'APPROVED',
+        visible_to_gc: true,
+        gc_notes: 'Approved lateral rework. GC coordinated with municipal inspectors.',
+        date: 'Apr 02, 2026',
+        is_other: true,
+      },
+    ];
+  });
+
+  // Inline "Add New Order" Sub-Section State
+  const [showInlineAddOrder, setShowInlineAddOrder] = useState(false);
+  const [inlineScopeType, setInlineScopeType] = useState<'standard' | 'other'>('other');
+  const [inlineCategory, setInlineCategory] = useState('Framing');
+  const [inlineCustomCategory, setInlineCustomCategory] = useState('');
+  const [inlineSubSection, setInlineSubSection] = useState('');
+  const [inlineCostCode, setInlineCostCode] = useState('');
+  const [inlineAmount, setInlineAmount] = useState('18500');
+  const [inlineReason, setInlineReason] = useState('UNFORESEEN_SITE_CONDITION');
+  const [inlineCustomReason, setInlineCustomReason] = useState('');
+  const [inlineDesc, setInlineDesc] = useState('');
+  const [inlineVisibleToGC, setInlineVisibleToGC] = useState(true);
+  const [inlineGcNotes, setInlineGcNotes] = useState('Approved by Owner. GC authorized to proceed with trade work.');
+  const [coFeedbackToast, setCoFeedbackToast] = useState<string | null>(null);
 
   const [draws, setDraws] = useState([
     {
@@ -346,27 +390,105 @@ export function ProjectDetailScreen({
 
   // Handlers
   const handleAddChangeOrder = (co: any) => {
-    setChangeOrders(prev => [
-      {
-        id: `co-${Date.now()}`,
-        number: co.change_order_number,
-        category: co.category,
-        amount: co.amount,
-        reason: co.reason,
-        status: 'APPROVED',
-        date: 'Today',
-      },
-      ...prev,
-    ]);
+    const isOther = co.category === '__OTHER__' || !budgetLines.some(b => b.category === co.category) || !!co.is_other;
+    const finalCategory = (co.category === '__OTHER__' ? (co.customCategory || 'Other Scope / Custom Order') : co.category) || 'General Scope';
+    const amountVal = Number(co.amount) || 0;
 
-    // Update budget line
-    setBudgetLines(prev =>
-      prev.map(line =>
-        line.category === co.category
-          ? { ...line, budget: line.budget + co.amount }
-          : line
-      )
+    const newOrder = {
+      id: `co-${Date.now()}`,
+      number: co.change_order_number || `CO-00${changeOrders.length + 1}`,
+      category: finalCategory,
+      sub_section: co.sub_section || '',
+      cost_code: co.cost_code || '',
+      amount: amountVal,
+      reason: co.reason || 'Contract Scope Adjustment',
+      custom_reason: co.custom_reason || '',
+      description: co.description || '',
+      status: 'APPROVED',
+      visible_to_gc: co.visible_to_gc !== false,
+      gc_notes: co.gc_notes || 'Approved by Owner. GC authorized to proceed.',
+      date: 'Today',
+      is_other: isOther,
+      projectId: projectId,
+    };
+
+    setChangeOrders(prev => {
+      const next = [newOrder, ...prev];
+      try {
+        localStorage.setItem(`groundup_change_orders_${projectId}`, JSON.stringify(next));
+        const allCOs = JSON.parse(localStorage.getItem('groundup_all_change_orders') || '[]');
+        localStorage.setItem('groundup_all_change_orders', JSON.stringify([newOrder, ...allCOs.filter((x: any) => x.id !== newOrder.id)]));
+        window.dispatchEvent(new Event('groundup_co_updated'));
+      } catch (e) {
+        console.error(e);
+      }
+      return next;
+    });
+
+    // Update or append budget line
+    setBudgetLines(prev => {
+      const exists = prev.some(line => line.category === finalCategory);
+      if (exists) {
+        return prev.map(line =>
+          line.category === finalCategory
+            ? { ...line, budget: line.budget + amountVal }
+            : line
+        );
+      } else {
+        return [
+          ...prev,
+          {
+            category: finalCategory,
+            budget: amountVal,
+            spent: 0,
+            progress: 0,
+            status: 'upcoming',
+          }
+        ];
+      }
+    });
+
+    const gcTargetName = selectedProject?.gc_name || 'General Contractor';
+    setCoFeedbackToast(
+      newOrder.visible_to_gc
+        ? `Order #${newOrder.number} submitted! Budget updated & showed to ${gcTargetName}.`
+        : `Order #${newOrder.number} submitted & budget updated.`
     );
+    setTimeout(() => setCoFeedbackToast(null), 5000);
+  };
+
+  const handleInlineSubmitOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsedAmount = parseFloat(inlineAmount) || 0;
+    if (parsedAmount <= 0) return;
+
+    const isOtherScope = inlineScopeType === 'other';
+    const categoryName = isOtherScope
+      ? (inlineCustomCategory.trim() || 'Other Scope / Custom Trade')
+      : inlineCategory;
+
+    handleAddChangeOrder({
+      change_order_number: `CO-00${changeOrders.length + 1}`,
+      category: categoryName,
+      sub_section: inlineSubSection.trim() || undefined,
+      cost_code: inlineCostCode.trim() || undefined,
+      amount: parsedAmount,
+      description: inlineDesc.trim() || (isOtherScope ? 'Supplemental trade order approved by Owner.' : 'Standard scope revision approved by Owner.'),
+      budget_impact: true,
+      reason: inlineReason === 'OTHER' ? (inlineCustomReason.trim() || 'Other Scope') : inlineReason,
+      custom_reason: inlineCustomReason,
+      visible_to_gc: inlineVisibleToGC,
+      gc_notes: inlineGcNotes,
+      is_other: isOtherScope,
+    });
+
+    // Reset inline form
+    setInlineCustomCategory('');
+    setInlineSubSection('');
+    setInlineCostCode('');
+    setInlineAmount('18500');
+    setInlineDesc('');
+    setShowInlineAddOrder(false);
   };
 
   const handleAbsorbContingency = (movement: any) => {
@@ -525,7 +647,10 @@ export function ProjectDetailScreen({
 
               {hasPermission(currentRole, 'field_log:create') && (
                 <button
-                  onClick={() => setActiveTab('timeline')}
+                  onClick={() => {
+                    setActiveTab('timeline');
+                    onTabChange?.('timeline');
+                  }}
                   className="px-3.5 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   <Camera className="w-3.5 h-3.5" />
@@ -561,7 +686,10 @@ export function ProjectDetailScreen({
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    onTabChange?.(tab.id);
+                  }}
                   className={`flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold border-b-2 transition cursor-pointer -mb-px shrink-0 ${
                     isActive
                       ? 'border-slate-900 text-slate-900'
@@ -892,6 +1020,416 @@ export function ProjectDetailScreen({
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Feedback alert toast */}
+            {coFeedbackToast && (
+              <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-900 flex items-center justify-between animate-in fade-in">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{coFeedbackToast}</span>
+                </div>
+                <button onClick={() => setCoFeedbackToast(null)} className="text-emerald-700 hover:text-emerald-900 font-bold text-xs">✕</button>
+              </div>
+            )}
+
+            {/* ══════════════════════════════════════════════════════════════════
+                CHANGE ORDERS SECTION: STANDARD & OTHER ORDERS
+            ══════════════════════════════════════════════════════════════════ */}
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs space-y-0">
+              {/* Change Orders Section Header */}
+              <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    <h3 className="font-bold text-slate-900 text-sm">Contract Change Orders & Extra Scope Orders</h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700">
+                      {changeOrders.length} Orders Total
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Formal change requests and scope amendments submitted, approved, and showed to General Contractor ({selectedProject?.gc_name || 'K&P Construction'}).
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs flex items-center gap-2 shadow-xs">
+                    <span className="text-slate-500">Total Approved:</span>
+                    <span className="font-mono font-bold text-slate-900">
+                      {fmt(changeOrders.reduce((sum, co) => sum + (Number(co.amount) || 0), 0))}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setShowInlineAddOrder(!showInlineAddOrder)}
+                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{showInlineAddOrder ? 'Close Quick Add' : '+ Add New Order (Sub-Section)'}</span>
+                  </button>
+                  {hasPermission(currentRole, 'change_order:create') && (
+                    <button
+                      onClick={() => setIsChangeOrderModalOpenLocal(true)}
+                      className="px-3.5 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Layers className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Full Order Builder</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Sub-Section: Interactive Quick Add New Order */}
+              {showInlineAddOrder && (
+                <div className="p-6 bg-slate-50/70 border-b border-slate-200 animate-in fade-in duration-150">
+                  <div className="max-w-4xl mx-auto bg-white rounded-2xl border border-emerald-200 p-5 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
+                          +
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                            Sub-Section: Add New Contract Order
+                          </h4>
+                          <p className="text-[11px] text-slate-500">
+                            Configure category, trade phase sub-section, cost code, and broadcast directly to GC.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs">
+                        <button
+                          type="button"
+                          onClick={() => setInlineScopeType('other')}
+                          className={`px-3 py-1 rounded-lg font-bold transition ${
+                            inlineScopeType === 'other'
+                              ? 'bg-white text-emerald-700 shadow-xs'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                        >
+                          Other / New Order Scope
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setInlineScopeType('standard')}
+                          className={`px-3 py-1 rounded-lg font-bold transition ${
+                            inlineScopeType === 'standard'
+                              ? 'bg-white text-slate-900 shadow-xs'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                        >
+                          Standard Category Order
+                        </button>
+                      </div>
+                    </div>
+
+                    <form onSubmit={handleInlineSubmitOrder} className="space-y-4 text-xs">
+                      {/* Category & Scope Type Row */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {inlineScopeType === 'other' ? (
+                          <div className="md:col-span-1">
+                            <label className="block font-semibold text-slate-700 mb-1">
+                              Other Scope / Order Name <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={inlineCustomCategory}
+                              onChange={(e) => setInlineCustomCategory(e.target.value)}
+                              placeholder="e.g. Utility Lateral Relocation"
+                              className="w-full px-3 py-2 bg-slate-50 border border-emerald-300 rounded-lg text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                              required
+                            />
+                          </div>
+                        ) : (
+                          <div className="md:col-span-1">
+                            <label className="block font-semibold text-slate-700 mb-1">Budget Category</label>
+                            <select
+                              value={inlineCategory}
+                              onChange={(e) => setInlineCategory(e.target.value)}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium"
+                            >
+                              {budgetLines.map(b => (
+                                <option key={b.category} value={b.category}>{b.category}</option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">
+                            Sub-Section / Trade Phase
+                          </label>
+                          <input
+                            type="text"
+                            value={inlineSubSection}
+                            onChange={(e) => setInlineSubSection(e.target.value)}
+                            placeholder="e.g. Phase 2 Pier Drillings & Grade Beams"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">
+                            Cost Code (CSI / Division)
+                          </label>
+                          <input
+                            type="text"
+                            value={inlineCostCode}
+                            onChange={(e) => setInlineCostCode(e.target.value)}
+                            placeholder="e.g. 02-310 or 03-100"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-mono text-slate-900"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Amount & Reason */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">Order Amount ($) <span className="text-red-500">*</span></label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-2.5 text-slate-400 font-mono font-bold">$</span>
+                            <input
+                              type="number"
+                              value={inlineAmount}
+                              onChange={(e) => setInlineAmount(e.target.value)}
+                              className="w-full pl-7 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 text-sm"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block font-semibold text-slate-700 mb-1">Root Cause / Reason</label>
+                          <select
+                            value={inlineReason}
+                            onChange={(e) => setInlineReason(e.target.value)}
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900"
+                          >
+                            <option value="UNFORESEEN_SITE_CONDITION">Unforeseen Site Condition (Soil/Rock)</option>
+                            <option value="MUNICIPAL_CODE_REVISION">Municipal Code / Inspection Mandate</option>
+                            <option value="ARCHITECTURAL_BULLETIN">Architectural Bulletin / Plan Change</option>
+                            <option value="OWNER_ELECTED_UPGRADE">Owner Elected Scope Upgrade</option>
+                            <option value="VALUE_ENGINEERING">Value Engineering Scope Modification</option>
+                            <option value="OTHER">Other Custom Reason...</option>
+                          </select>
+                        </div>
+
+                        {inlineReason === 'OTHER' ? (
+                          <div>
+                            <label className="block font-semibold text-slate-700 mb-1">Specify Other Reason</label>
+                            <input
+                              type="text"
+                              value={inlineCustomReason}
+                              onChange={(e) => setInlineCustomReason(e.target.value)}
+                              placeholder="e.g. Utility Company Easement Re-route"
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900"
+                              required
+                            />
+                          </div>
+                        ) : (
+                          <div>
+                            <label className="block font-semibold text-slate-700 mb-1">Scope Description / Notes</label>
+                            <input
+                              type="text"
+                              value={inlineDesc}
+                              onChange={(e) => setInlineDesc(e.target.value)}
+                              placeholder="Details and engineer justification..."
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* General Contractor Sync Sub-Section */}
+                      <div className="p-3.5 bg-indigo-50/70 border border-indigo-200 rounded-xl space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label className="flex items-center gap-2 text-indigo-950 font-bold cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={inlineVisibleToGC}
+                              onChange={(e) => setInlineVisibleToGC(e.target.checked)}
+                              className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                            />
+                            <span>Show & Submit Order to General Contractor ({selectedProject?.gc_name || 'K&P Construction'})</span>
+                          </label>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 border border-indigo-200">
+                            GC Live Portal Broadcast
+                          </span>
+                        </div>
+                        {inlineVisibleToGC && (
+                          <div>
+                            <label className="block text-[11px] font-semibold text-indigo-900 mb-1">
+                              Authorization Memo to GC:
+                            </label>
+                            <input
+                              type="text"
+                              value={inlineGcNotes}
+                              onChange={(e) => setInlineGcNotes(e.target.value)}
+                              className="w-full px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs text-slate-800"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-end gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowInlineAddOrder(false)}
+                          className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-5 py-2 bg-slate-900 hover:bg-black text-white font-bold rounded-lg transition shadow-xs cursor-pointer flex items-center gap-2"
+                        >
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                          <span>Submit & Show Order to GC</span>
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION: OTHER ORDERS & SUPPLEMENTAL TRADE SCOPE */}
+              <div className="p-5 border-b border-slate-200 bg-emerald-50/20">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                      Other Orders & Supplemental Trade Scope
+                    </h4>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                      {changeOrders.filter(co => co.is_other).length} Other Orders
+                    </span>
+                  </div>
+                  <span className="text-xs text-slate-500 font-medium">
+                    Supplemental custom trade scopes & sub-sections added to contract
+                  </span>
+                </div>
+
+                {changeOrders.filter(co => co.is_other).length === 0 ? (
+                  <div className="p-6 bg-white border border-dashed border-slate-300 rounded-xl text-center">
+                    <p className="text-xs text-slate-500 font-medium">No custom "Other" orders added yet.</p>
+                    <button
+                      onClick={() => {
+                        setInlineScopeType('other');
+                        setShowInlineAddOrder(true);
+                      }}
+                      className="mt-2 text-xs font-bold text-emerald-700 hover:underline cursor-pointer"
+                    >
+                      + Add New Other Order & Sub-Section
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {changeOrders.filter(co => co.is_other).map((co) => (
+                      <div key={co.id} className="bg-white border border-emerald-200/80 rounded-xl p-4 shadow-2xs hover:shadow-xs transition space-y-2.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono font-bold text-xs text-slate-900">{co.number}</span>
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                Other Scope
+                              </span>
+                              {co.cost_code && (
+                                <span className="font-mono text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                                  {co.cost_code}
+                                </span>
+                              )}
+                            </div>
+                            <h5 className="font-bold text-slate-900 text-xs mt-1">{co.category}</h5>
+                            {co.sub_section && (
+                              <div className="text-[11px] text-slate-600 font-medium flex items-center gap-1 mt-0.5">
+                                <span className="text-slate-400">Sub-Section:</span> {co.sub_section}
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-sm font-bold font-mono text-emerald-700">+{fmt(co.amount)}</span>
+                            <div className="text-[10px] text-slate-400 font-mono mt-0.5">{co.date}</div>
+                          </div>
+                        </div>
+
+                        <p className="text-xs text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                          {co.description || co.reason}
+                        </p>
+
+                        <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
+                          <span className="text-slate-500">
+                            Reason: <strong className="text-slate-700">{co.reason?.replace(/_/g, ' ')}</strong>
+                          </span>
+                          {co.visible_to_gc ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                              <CheckCircle2 className="w-3 h-3 text-indigo-600" />
+                              <span>Showed to GC</span>
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-slate-400">Internal Owner Only</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* SECTION: STANDARD CONTRACT CHANGE ORDERS LIST */}
+              <div>
+                <div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs font-bold text-slate-700">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-slate-400" />
+                    <span>Standard Schedule of Values Change Orders ({changeOrders.filter(co => !co.is_other).length})</span>
+                  </div>
+                  <span className="text-slate-500 font-normal">Directly updates line item budget truth</span>
+                </div>
+                <table className="w-full text-xs">
+                  <thead className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[11px] bg-slate-50/50">
+                    <tr>
+                      <th className="px-5 py-3 text-left">CO #</th>
+                      <th className="px-5 py-3 text-left">Budget Category & Sub-Section</th>
+                      <th className="px-5 py-3 text-right">Amount</th>
+                      <th className="px-5 py-3 text-left">Root Cause / Justification</th>
+                      <th className="px-5 py-3 text-center">GC Sync Status</th>
+                      <th className="px-5 py-3 text-right">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {changeOrders.filter(co => !co.is_other).map((co) => (
+                      <tr key={co.id} className="hover:bg-slate-50 transition">
+                        <td className="px-5 py-3.5 font-mono font-bold text-slate-900">{co.number}</td>
+                        <td className="px-5 py-3.5">
+                          <div className="font-bold text-slate-900">{co.category}</div>
+                          {co.sub_section && (
+                            <div className="text-[11px] text-slate-500 font-medium">Sub-Section: {co.sub_section}</div>
+                          )}
+                          {co.cost_code && (
+                            <div className="text-[10px] font-mono text-slate-400">Cost Code: {co.cost_code}</div>
+                          )}
+                        </td>
+                        <td className="px-5 py-3.5 text-right font-mono font-bold text-slate-900">
+                          +{fmt(co.amount)}
+                        </td>
+                        <td className="px-5 py-3.5 text-slate-600 max-w-xs">
+                          <div className="font-medium text-slate-800">{co.reason?.replace(/_/g, ' ')}</div>
+                          {co.description && <div className="text-[11px] text-slate-500 truncate">{co.description}</div>}
+                        </td>
+                        <td className="px-5 py-3.5 text-center">
+                          {co.visible_to_gc ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                              <CheckCircle2 className="w-3 h-3 text-indigo-600" />
+                              <span>Showed to GC</span>
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-slate-400">Owner Internal</span>
+                          )}
+                        </td>
+                        <td className="px-5 py-3.5 text-right font-mono text-slate-400">{co.date}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* Contingency Movements Audit Table */}
@@ -1337,6 +1875,7 @@ export function ProjectDetailScreen({
           if (onCloseChangeOrderModal) onCloseChangeOrderModal();
         }}
         categories={budgetLines.map(b => b.category)}
+        gcName={selectedProject?.gc_name || 'K&P Construction'}
         onSubmitChangeOrder={handleAddChangeOrder}
       />
 

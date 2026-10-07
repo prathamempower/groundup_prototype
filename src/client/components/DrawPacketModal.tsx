@@ -135,37 +135,44 @@ export function DrawPacketModal({
         </div>
 
         {/* Stepper Bar */}
-        <div className="px-6 py-3 bg-white border-b border-slate-100 flex items-center justify-between text-xs shrink-0">
+        <div className="px-6 py-2.5 bg-white border-b border-slate-100 flex items-center justify-between text-xs shrink-0">
           {[
-            { s: 1, label: '1. Select Lines' },
-            { s: 2, label: '2. Audit Conditions' },
-            { s: 3, label: '3. Retainage Math' },
-            { s: 4, label: '4. Packet Summary' },
-          ].map((item) => (
-            <div
-              key={item.s}
-              className={`flex items-center gap-1.5 font-semibold ${
-                step === item.s
-                  ? 'text-slate-900 border-b-2 border-slate-900 pb-1'
-                  : step > item.s
-                  ? 'text-emerald-700'
-                  : 'text-slate-400'
-              }`}
-            >
-              <span
-                className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
-                  step === item.s
-                    ? 'bg-slate-900 text-white'
-                    : step > item.s
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-slate-100 text-slate-500'
+            { s: 1 as const, label: 'Select Lines' },
+            { s: 2 as const, label: 'Audit Conditions' },
+            { s: 3 as const, label: 'Retainage Math' },
+            { s: 4 as const, label: 'Packet Summary' },
+          ].map((item) => {
+            const isActive = step === item.s;
+            const isCompleted = step > item.s;
+
+            return (
+              <button
+                key={item.s}
+                type="button"
+                onClick={() => setStep(item.s)}
+                className={`flex items-center gap-1.5 font-semibold transition py-1.5 px-2 rounded-lg cursor-pointer ${
+                  isActive
+                    ? 'text-slate-900 border-b-2 border-slate-900 pb-1'
+                    : isCompleted
+                    ? 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50/70'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
-                {step > item.s ? '✓' : item.s}
-              </span>
-              <span>{item.label}</span>
-            </div>
-          ))}
+                <span
+                  className={`w-4.5 h-4.5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
+                    isActive
+                      ? 'bg-slate-900 text-white'
+                      : isCompleted
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {isCompleted ? '✓' : item.s}
+                </span>
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Step Body */}

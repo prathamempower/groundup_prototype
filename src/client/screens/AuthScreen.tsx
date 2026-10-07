@@ -20,19 +20,27 @@ export function AuthScreen({ onAuthenticate }: AuthScreenProps) {
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState('Developer / Owner');
+  const [fullName, setFullName] = useState('');
+  const [company, setCompany] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleAuth = (e: React.FormEvent, provider: 'email' | 'google' | 'demo' = 'email') => {
+  const handleAuth = (e: React.FormEvent, provider: 'email' | 'google' = 'email') => {
     e.preventDefault();
     setIsLoading(true);
 
     // Mock authentication
     setTimeout(() => {
+      const derivedName = fullName.trim() || (email ? email.split('@')[0] : (activeTab === 'signup' ? 'New User' : 'Sarah Jenkins'));
+      const derivedEmail = email.trim() || (activeTab === 'signup' ? 'user@company.com' : 'sarah@horizon-development.com');
+      const derivedCompany = company.trim() || 'Horizon Development Group';
+
       onAuthenticate({
-        id: 'usr_mock123',
-        name: activeTab === 'signup' ? 'New User' : 'Sarah Jenkins',
-        email: 'sarah@horizon-development.com',
-        company: 'Horizon Development Group',
-        role: provider === 'demo' ? 'Developer / Owner' : role,
+        id: `usr_${Date.now()}`,
+        name: derivedName,
+        email: derivedEmail,
+        company: derivedCompany,
+        role: role,
         isNewUser: activeTab === 'signup',
         authProvider: provider,
       });
@@ -41,7 +49,7 @@ export function AuthScreen({ onAuthenticate }: AuthScreenProps) {
   };
 
   return (
-    <div className="flex min-h-screen bg-white font-sans">
+    <div className="flex min-h-screen bg-white font-sans text-slate-900">
       {/* LEFT HALF */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-slate-900 text-white p-12">
         <div>
@@ -100,10 +108,10 @@ export function AuthScreen({ onAuthenticate }: AuthScreenProps) {
           <div className="flex gap-6 border-b border-slate-200 mb-8">
             <button
               type="button"
-              className={`pb-3 text-sm font-medium transition-colors ${
+              className={`pb-3 text-sm font-semibold transition-colors ${
                 activeTab === 'signin'
                   ? 'border-b-2 border-slate-900 text-slate-900'
-                  : 'text-slate-500 hover:text-slate-700'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
               onClick={() => setActiveTab('signin')}
             >
@@ -111,10 +119,10 @@ export function AuthScreen({ onAuthenticate }: AuthScreenProps) {
             </button>
             <button
               type="button"
-              className={`pb-3 text-sm font-medium transition-colors ${
+              className={`pb-3 text-sm font-semibold transition-colors ${
                 activeTab === 'signup'
                   ? 'border-b-2 border-slate-900 text-slate-900'
-                  : 'text-slate-500 hover:text-slate-700'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
               onClick={() => setActiveTab('signup')}
             >
@@ -126,25 +134,29 @@ export function AuthScreen({ onAuthenticate }: AuthScreenProps) {
             {activeTab === 'signup' && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                  <label className="block text-sm font-semibold text-slate-800 mb-1.5">Full Name</label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 pointer-events-none" />
                     <input
                       type="text"
                       required
-                      className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-white text-slate-900 placeholder:text-slate-400 border border-slate-300 rounded-lg text-sm font-normal focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors shadow-2xs"
                       placeholder="Jane Doe"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Company / Entity Name</label>
+                  <label className="block text-sm font-semibold text-slate-800 mb-1.5">Company / Entity Name</label>
                   <div className="relative">
-                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 pointer-events-none" />
                     <input
                       type="text"
                       required
-                      className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-white text-slate-900 placeholder:text-slate-400 border border-slate-300 rounded-lg text-sm font-normal focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors shadow-2xs"
                       placeholder="Horizon Development"
                     />
                   </div>
@@ -153,35 +165,39 @@ export function AuthScreen({ onAuthenticate }: AuthScreenProps) {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-semibold text-slate-800 mb-1.5">
                 {activeTab === 'signup' ? 'Work Email' : 'Email address'}
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 pointer-events-none" />
                 <input
                   type="email"
                   required
-                  className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-white text-slate-900 placeholder:text-slate-400 border border-slate-300 rounded-lg text-sm font-normal focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors shadow-2xs"
                   placeholder="you@company.com"
                 />
               </div>
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-medium text-slate-700">Password</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-semibold text-slate-800">Password</label>
                 {activeTab === 'signin' && (
-                  <button type="button" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+                  <button type="button" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
                     Forgot password?
                   </button>
                 )}
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 pointer-events-none" />
                 <input
                   type="password"
                   required
-                  className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-white text-slate-900 placeholder:text-slate-400 border border-slate-300 rounded-lg text-sm font-normal focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors shadow-2xs tracking-widest"
                   placeholder="••••••••"
                 />
               </div>
@@ -189,29 +205,31 @@ export function AuthScreen({ onAuthenticate }: AuthScreenProps) {
 
             {activeTab === 'signup' && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
-                <div className="relative">
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="w-full pl-3 pr-10 py-2 appearance-none border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 bg-white"
-                  >
-                    <option>Developer / Owner</option>
-                    <option>CFO / Finance Director</option>
-                    <option>General Contractor / PM</option>
-                    <option>Project Accountant</option>
-                    <option>Construction Lender</option>
-                    <option>Investor</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-sm font-semibold text-slate-800">Account Role</label>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Workspace Owner
+                  </span>
                 </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    readOnly
+                    value="Developer / Owner (Principal Sponsor)"
+                    className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 text-slate-900 border border-slate-300 rounded-lg text-sm font-medium cursor-not-allowed select-none focus:outline-none"
+                  />
+                  <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                  Only the Developer / Owner can register a new workspace. Once onboarded, you can invite other roles (GC, Lender, CFO, Accountant, Investors) and email them secure portal access from Settings.
+                </p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-2 flex items-center justify-center gap-2 bg-slate-900 text-white py-2.5 rounded-lg hover:bg-slate-800 transition-colors font-medium disabled:opacity-70"
+              className="w-full mt-3 flex items-center justify-center gap-2 bg-slate-900 text-white py-2.5 rounded-lg hover:bg-slate-800 transition-colors font-medium text-sm shadow-xs disabled:opacity-70 cursor-pointer"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -263,14 +281,6 @@ export function AuthScreen({ onAuthenticate }: AuthScreenProps) {
             </>
           )}
 
-          <div className="mt-8 text-center">
-            <button
-              onClick={(e) => handleAuth(e, 'demo')}
-              className="text-sm font-medium text-slate-500 hover:text-slate-900 underline underline-offset-4"
-            >
-              Try demo account
-            </button>
-          </div>
         </div>
       </div>
     </div>

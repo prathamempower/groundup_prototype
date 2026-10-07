@@ -1,7 +1,7 @@
 // GroundUp AI — GC (Daily Updates / Open-Book) Portal
 // Dedicated portal for GCs under cost-plus / daily update contracts: daily work logs, receipts, and GC markup calculations
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Camera, 
   Calendar, 
@@ -13,7 +13,9 @@ import {
   Plus, 
   ShieldCheck, 
   AlertCircle,
-  Clock
+  Clock,
+  Layers,
+  FileCheck
 } from 'lucide-react';
 import { Project, DailyLogEntry } from '../../shared/types';
 
@@ -27,6 +29,79 @@ export function GCDailyPortalScreen({
   selectedProjectId,
 }: GCDailyPortalScreenProps) {
   const activeProject = projects.find(p => p.id === selectedProjectId) || projects[0];
+
+  // Change Orders state synchronized from Owner / localStorage
+  const [changeOrders, setChangeOrders] = useState<any[]>(() => {
+    try {
+      const stored = localStorage.getItem(`groundup_change_orders_${selectedProjectId}`);
+      if (stored) return JSON.parse(stored);
+      const all = localStorage.getItem('groundup_all_change_orders');
+      if (all) {
+        const parsed = JSON.parse(all);
+        const filtered = parsed.filter((c: any) => c.projectId === selectedProjectId || !c.projectId);
+        if (filtered.length > 0) return filtered;
+      }
+    } catch {}
+    return [
+      {
+        id: 'co-1',
+        number: 'CO-001',
+        category: 'Foundation',
+        sub_section: 'Substructure & Pile Reinforcement',
+        cost_code: '03-100',
+        amount: 40000,
+        reason: 'Unforeseen soft soil condition',
+        description: 'Engineered grade beams and extra helical piles required by structural engineer.',
+        status: 'APPROVED',
+        visible_to_gc: true,
+        gc_notes: 'Owner approved. GC authorized to proceed with foundation underpinning.',
+        date: 'Mar 18, 2026',
+        is_other: false,
+      },
+      {
+        id: 'co-other-1',
+        number: 'CO-002',
+        category: 'Municipal Utility Easement Relocation',
+        sub_section: 'Off-Site Civil & Utility Trenching',
+        cost_code: '02-310',
+        amount: 18500,
+        reason: 'Township Utility Conflict',
+        description: 'PSE&G mandated emergency lateral line relocation across west boundary easement.',
+        status: 'APPROVED',
+        visible_to_gc: true,
+        gc_notes: 'Approved lateral rework. GC coordinated with municipal inspectors.',
+        date: 'Apr 02, 2026',
+        is_other: true,
+      },
+    ];
+  });
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      try {
+        const stored = localStorage.getItem(`groundup_change_orders_${selectedProjectId}`);
+        if (stored) {
+          setChangeOrders(JSON.parse(stored));
+        } else {
+          const all = localStorage.getItem('groundup_all_change_orders');
+          if (all) {
+            const parsed = JSON.parse(all);
+            const filtered = parsed.filter((c: any) => c.projectId === selectedProjectId || !c.projectId);
+            if (filtered.length > 0) setChangeOrders(filtered);
+          }
+        }
+      } catch {}
+    };
+
+    window.addEventListener('groundup_co_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('groundup_co_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, [selectedProjectId]);
+
+  const visibleCOs = changeOrders.filter(co => co.visible_to_gc !== false);
 
   // Daily logs state
   const [dailyLogs, setDailyLogs] = useState<DailyLogEntry[]>([
@@ -280,6 +355,106 @@ export function GCDailyPortalScreen({
             </div>
           ))}
         </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          APPROVED CONTRACT CHANGE ORDERS & SUPPLEMENTAL ORDERS (SHOWED TO GC)
+      ══════════════════════════════════════════════════════════════════ */}
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+        <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-teal-500" />
+              <h3 className="font-bold text-slate-900 text-sm">
+                Approved Supplemental Scope & Change Orders (Showed to GC)
+              </h3>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-100 text-teal-800 border border-teal-200">
+                {visibleCOs.length} Orders Authorized
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Owner-approved scope modifications and trade orders broadcasted directly to field contractor operations.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-bold text-teal-800 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-xl">
+              +${visibleCOs.reduce((sum, co) => sum + (Number(co.amount) || 0), 0).toLocaleString()} Total Authorized
+            </span>
+          </div>
+        </div>
+
+        {visibleCOs.length === 0 ? (
+          <div className="p-8 text-center text-slate-400 text-xs">
+            No change orders currently assigned or showed to GC for this project.
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            <table className="w-full text-xs">
+              <thead className="bg-slate-50/50 border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[11px]">
+                <tr>
+                  <th className="px-5 py-3 text-left">Order #</th>
+                  <th className="px-5 py-3 text-left">Trade Category & Sub-Section</th>
+                  <th className="px-5 py-3 text-right">Authorized Amount</th>
+                  <th className="px-5 py-3 text-left">Root Cause / Scope Description</th>
+                  <th className="px-5 py-3 text-center">Status</th>
+                  <th className="px-5 py-3 text-left">Owner Authorization Notes</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {visibleCOs.map((co) => (
+                  <tr key={co.id} className="hover:bg-slate-50 transition">
+                    <td className="px-5 py-4 font-mono font-bold text-slate-900">
+                      <div className="flex items-center gap-1.5">
+                        <FileCheck className="w-3.5 h-3.5 text-teal-600" />
+                        <span>{co.number}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="font-bold text-slate-900 flex items-center gap-2">
+                        <span>{co.category}</span>
+                        {co.is_other && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                            Other Scope
+                          </span>
+                        )}
+                      </div>
+                      {co.sub_section && (
+                        <div className="text-[11px] text-slate-600 font-medium mt-0.5">
+                          Sub-Section: {co.sub_section}
+                        </div>
+                      )}
+                      {co.cost_code && (
+                        <div className="text-[10px] font-mono text-slate-400 mt-0.5">
+                          Cost Code: {co.cost_code}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-5 py-4 text-right font-mono font-bold text-teal-800 text-sm">
+                      +${(Number(co.amount) || 0).toLocaleString()}
+                    </td>
+                    <td className="px-5 py-4 text-slate-600 max-w-xs">
+                      <div className="font-semibold text-slate-800">{co.reason?.replace(/_/g, ' ')}</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">{co.description}</div>
+                    </td>
+                    <td className="px-5 py-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
+                        <CheckCircle2 className="w-3 h-3 text-teal-600" />
+                        <span>Showed to GC · Authorized</span>
+                      </span>
+                      <div className="text-[10px] text-slate-400 font-mono mt-0.5">{co.date}</div>
+                    </td>
+                    <td className="px-5 py-4 text-slate-700 max-w-xs">
+                      <div className="p-2 bg-teal-50/50 rounded-lg border border-teal-100 text-[11px] text-teal-950 font-medium">
+                        {co.gc_notes || 'Owner approved. GC authorized to proceed with trade work.'}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

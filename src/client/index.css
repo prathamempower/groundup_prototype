@@ -65,3 +65,24 @@ input::-moz-selection, textarea::-moz-selection, select::-moz-selection {
   background-color: #bfdbfe;
   color: #0f172a;
 }
+
+/* Form input, select, and autofill legibility fixes */
+input, select, textarea {
+  color: #0f172a;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #0f172a !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  color: #0f172a !important;
+}
