@@ -1,0 +1,97 @@
+import { Draw, DrawLine } from '../../types';
+
+export const INITIAL_DRAWS: Draw[] = [
+  // 73 Broadway Draws ($1,094,000 disbursed)
+  {
+    id: 'draw-73-1',
+    project_id: 'proj-73-broadway',
+    draw_number: 1,
+    revision_number: 0,
+    requested_total: 605000,
+    approved_total: 605000,
+    disbursed_total: 605000,
+    status: 'approved_full',
+    submitted_date: '2025-10-15',
+    response_date: '2025-10-22',
+    disbursed_date: '2025-10-25',
+    lender_notes: 'Full disbursement for Demolition & Foundation mobilization',
+    created_at: '2025-10-15T00:00:00Z',
+  },
+  {
+    id: 'draw-73-2',
+    project_id: 'proj-73-broadway',
+    draw_number: 2,
+    revision_number: 0,
+    requested_total: 304000,
+    approved_total: 304000,
+    disbursed_total: 304000,
+    status: 'approved_full',
+    submitted_date: '2026-01-20',
+    response_date: '2026-01-28',
+    disbursed_date: '2026-02-01',
+    lender_notes: 'Disbursed for framing milestone confirmation',
+    created_at: '2026-01-20T00:00:00Z',
+  },
+  {
+    id: 'draw-73-3',
+    project_id: 'proj-73-broadway',
+    draw_number: 3,
+    revision_number: 0,
+    requested_total: 185000,
+    approved_total: 185000,
+    disbursed_total: 185000,
+    status: 'approved_full',
+    submitted_date: '2026-03-20',
+    response_date: '2026-03-28',
+    disbursed_date: '2026-04-01',
+    lender_notes: 'Disbursed for Exterior & MEP rough-in progress',
+    created_at: '2026-03-20T00:00:00Z',
+  },
+
+  // 212 Maple Ave Draws ($213,200 disbursed, $84,500 pending)
+  {
+    id: 'draw-212-1',
+    project_id: 'proj-212-maple',
+    draw_number: 1,
+    revision_number: 0,
+    requested_total: 213200,
+    approved_total: 213200,
+    disbursed_total: 213200,
+    status: 'approved_full',
+    submitted_date: '2026-03-07',
+    response_date: '2026-03-10',
+    disbursed_date: '2026-03-12',
+    lender_notes: 'Disbursed for Site Work and Foundation milestone',
+    created_at: '2026-03-07T00:00:00Z',
+  },
+  {
+    id: 'draw-212-2',
+    project_id: 'proj-212-maple',
+    draw_number: 2,
+    revision_number: 0,
+    requested_total: 84500,
+    approved_total: 84500,
+    disbursed_total: 0,
+    status: 'submitted',
+    submitted_date: '2026-04-25',
+    lender_notes: 'Draw #2 Framing & Roof Trusses verified via photo inspection',
+    created_at: '2026-04-25T00:00:00Z',
+  },
+];
+
+export const INITIAL_DRAW_LINES: DrawLine[] = [
+  // 73 Broadway Draw Lines
+  { id: 'dl-73-1-1', draw_id: 'draw-73-1', project_id: 'proj-73-broadway', category: 'Site Work & Demolition', requested_amount: 78000, approved_amount: 78000, funded_amount: 78000, status: 'disbursed' },
+  { id: 'dl-73-1-2', draw_id: 'draw-73-1', project_id: 'proj-73-broadway', category: 'Foundation & Concrete', requested_amount: 285000, approved_amount: 285000, funded_amount: 285000, status: 'disbursed' },
+  { id: 'dl-73-1-3', draw_id: 'draw-73-1', project_id: 'proj-73-broadway', category: 'Pre-construction & Permits', requested_amount: 95000, approved_amount: 95000, funded_amount: 95000, status: 'disbursed' },
+  { id: 'dl-73-1-4', draw_id: 'draw-73-1', project_id: 'proj-73-broadway', category: 'Contingency', requested_amount: 147000, approved_amount: 147000, funded_amount: 147000, status: 'disbursed' },
+  { id: 'dl-73-2-1', draw_id: 'draw-73-2', project_id: 'proj-73-broadway', category: 'Framing & Trusses', requested_amount: 304000, approved_amount: 304000, funded_amount: 304000, status: 'disbursed' },
+  { id: 'dl-73-3-1', draw_id: 'draw-73-3', project_id: 'proj-73-broadway', category: 'Exterior & Roofing', requested_amount: 185000, approved_amount: 185000, funded_amount: 185000, status: 'disbursed' },
+
+  // 212 Maple Draw Lines
+  { id: 'dl-212-1-1', draw_id: 'draw-212-1', project_id: 'proj-212-maple', category: 'Foundation & Concrete', requested_amount: 135000, approved_amount: 135000, funded_amount: 135000, status: 'disbursed' },
+  { id: 'dl-212-1-2', draw_id: 'draw-212-1', project_id: 'proj-212-maple', category: 'Site Work & Demolition', requested_amount: 40200, approved_amount: 40200, funded_amount: 40200, status: 'disbursed' },
+  { id: 'dl-212-1-3', draw_id: 'draw-212-1', project_id: 'proj-212-maple', category: 'Pre-construction & Permits', requested_amount: 38000, approved_amount: 38000, funded_amount: 38000, status: 'disbursed' },
+  { id: 'dl-212-2-1', draw_id: 'draw-212-2', project_id: 'proj-212-maple', category: 'Framing & Trusses', requested_amount: 54500, approved_amount: 54500, funded_amount: 0, status: 'requested' },
+  { id: 'dl-212-2-2', draw_id: 'draw-212-2', project_id: 'proj-212-maple', category: 'Foundation & Concrete', requested_amount: 30000, approved_amount: 30000, funded_amount: 0, status: 'requested' },
+];

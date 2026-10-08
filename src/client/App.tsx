@@ -1,409 +1,51 @@
-// GroundUp AI — Main Application Shell (Complete Feature Suite)
-// Full Multi-Role Architecture, Full Lifecycle Navigation, and Top Header Integration
+// GroundUp AI — Main Application Shell
+// Multi-Role Architecture, RBAC Security Matrix, React Router Navigation
 
-import React, { useState, useEffect } from 'react';
-import { AuthScreen, AuthenticatedUser } from './screens/AuthScreen';
-import { Sidebar, ActiveNavScreen } from './components/Sidebar';
+import React from 'react';
+import { Sparkles } from 'lucide-react';
+import { AuthScreen } from './screens/AuthScreen';
+import { Sidebar } from './components/Sidebar';
 import { TopHeader } from './components/TopHeader';
-import { PortfolioScreen } from './screens/PortfolioScreen';
-import { ProjectDetailScreen, ProjectTab } from './screens/ProjectDetailScreen';
-import { DealLabScreen } from './screens/DealLabScreen';
-import { SettingsScreen } from './screens/SettingsScreen';
-import { LenderPortalScreen } from './screens/LenderPortalScreen';
-import { GCFixedPortalScreen } from './screens/GCFixedPortalScreen';
-import { GCDailyPortalScreen } from './screens/GCDailyPortalScreen';
-import { CFOReconciliationScreen } from './screens/CFOReconciliationScreen';
-import { InvestorPortalScreen } from './screens/InvestorPortalScreen';
-import { DocumentIntakeScreen } from './screens/DocumentIntakeScreen';
 import { AccessDeniedScreen } from './components/AccessDeniedScreen';
-import { isScreenPermitted, getRoleDefaultScreen } from '../shared/rbac/matrix';
 import { AIChatDrawer } from './components/AIChatDrawer';
 import { ProvenanceDrawer } from './components/ProvenanceDrawer';
-import { Project, ProjectFourTruthsSummary, UserRole } from '../shared/types';
-import { Sparkles } from 'lucide-react';
 import { NewUserIntakePage } from './screens/NewUserIntakePage';
-
-const DEFAULT_PROJECTS: Project[] = [
-  {
-    id: 'proj-73-broadway',
-    name: '73 Broadway',
-    address: '73 Broadway, Hoboken NJ',
-    gc_name: 'K&P Construction',
-    gc_contract_model: 'DAILY_UPDATES',
-    lender_name: 'BCB Community Bank',
-    units: 3,
-    square_feet: 4800,
-    target_budget: 1820000,
-    start_date: 'Sep 1, 2025',
-    expected_completion: 'Jun 15, 2026',
-    status: 'ACTIVE',
-    created_by_user_id: 'user-dev-1',
-    created_at: '2025-09-01T00:00:00Z',
-    acquisition_cost: 1000000,
-    expected_sale_price: 3250000,
-    contingency_initial: 82000,
-    contingency_remaining: 42000,
-  },
-  {
-    id: 'proj-161-woodlawn',
-    name: '161 Woodlawn Ave',
-    address: '161 Woodlawn Ave, Ridgewood NJ',
-    gc_name: 'Metro Builds LLC',
-    gc_contract_model: 'FIXED_PRICE',
-    lender_name: 'First Republic / Chase',
-    units: 1,
-    square_feet: 3400,
-    target_budget: 892000,
-    start_date: 'Jan 15, 2026',
-    expected_completion: 'Nov 30, 2026',
-    status: 'ACTIVE',
-    created_by_user_id: 'user-dev-1',
-    created_at: '2026-01-15T00:00:00Z',
-    acquisition_cost: 650000,
-    expected_sale_price: 1850000,
-    contingency_initial: 65000,
-    contingency_remaining: 65000,
-  },
-  {
-    id: 'proj-392-1st',
-    name: '392 1st Street',
-    address: '392 1st Street, Jersey City NJ',
-    gc_name: 'Kunal Shah Development',
-    gc_contract_model: 'FIXED_PRICE',
-    lender_name: 'BCB Community Bank',
-    units: 3,
-    square_feet: 4200,
-    target_budget: 1450000,
-    start_date: 'Feb 1, 2025',
-    expected_completion: 'Mar 1, 2026',
-    status: 'COMPLETED',
-    created_by_user_id: 'user-dev-1',
-    created_at: '2025-02-01T00:00:00Z',
-    acquisition_cost: 850000,
-    expected_sale_price: 2940000,
-    contingency_initial: 70000,
-    contingency_remaining: 52000,
-  },
-];
-
-const VALID_SCREENS: ActiveNavScreen[] = [
-  'portfolio',
-  'project-detail',
-  'budget',
-  'draws',
-  'timeline',
-  'documents',
-  'disposition',
-  'deal-lab',
-  'alerts',
-  'settings',
-  'lender-portal',
-  'gc-fixed-portal',
-  'gc-daily-portal',
-  'cfo-recon',
-  'investor-portal',
-  'document-intake',
-];
-
-const VALID_ROLES: UserRole[] = [
-  'DEVELOPER_OWNER',
-  'CFO',
-  'PM',
-  'LENDER',
-  'GC_FIXED',
-  'GC_DAILY',
-  'INVESTOR',
-  'ACCOUNTANT',
-];
-
-function getInitialScreen(): ActiveNavScreen {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const screenFromUrl = params.get('screen') as ActiveNavScreen | null;
-    if (screenFromUrl && VALID_SCREENS.includes(screenFromUrl)) {
-      return screenFromUrl;
-    }
-    const screenFromStorage = localStorage.getItem('groundup_current_screen') as ActiveNavScreen | null;
-    if (screenFromStorage && VALID_SCREENS.includes(screenFromStorage)) {
-      return screenFromStorage;
-    }
-  } catch {}
-  return 'portfolio';
-}
-
-function getInitialProject(): string {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const projectFromUrl = params.get('project');
-    if (projectFromUrl) return projectFromUrl;
-
-    const projectFromStorage = localStorage.getItem('groundup_selected_project_id');
-    if (projectFromStorage) return projectFromStorage;
-  } catch {}
-  return 'proj-73-broadway';
-}
-
-function getInitialRole(): UserRole {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const roleFromUrl = params.get('role') as UserRole | null;
-    if (roleFromUrl && VALID_ROLES.includes(roleFromUrl)) return roleFromUrl;
-
-    const roleFromStorage = localStorage.getItem('groundup_role') as UserRole | null;
-    if (roleFromStorage && VALID_ROLES.includes(roleFromStorage)) return roleFromStorage;
-  } catch {}
-  return 'DEVELOPER_OWNER';
-}
+import { isScreenPermitted, getRoleDefaultScreen } from '../shared/rbac/matrix';
+import { useAppState } from './app/use-app-state';
+import { screenToPath } from './app/nav-helpers';
+import { AppRoutes } from './app/AppRoutes';
 
 export function App() {
-  // ── Auth ─────────────────────────────────────────────────────────────────
-  const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(() => {
-    try {
-      const stored = localStorage.getItem('groundup_user');
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  // ── Role Persona (Default: DEVELOPER_OWNER) ──────────────────────────────
-  const [currentRole, setCurrentRole] = useState<UserRole>(getInitialRole);
-
-  // ── Navigation (Persisted across page reloads & synced with URL) ──────────
-  const [currentScreen, setCurrentScreen] = useState<ActiveNavScreen>(getInitialScreen);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>(getInitialProject);
-
-  // ── Data ──────────────────────────────────────────────────────────────────
-  const [projects, setProjects] = useState<Project[]>(() => {
-    try {
-      const stored = localStorage.getItem('groundup_projects');
-      if (stored) return JSON.parse(stored);
-    } catch {}
-    return DEFAULT_PROJECTS;
-  });
-
-  const [summary, setSummary] = useState<ProjectFourTruthsSummary | null>(null);
-
-  // ── Modals / Overlays ─────────────────────────────────────────────────────
-  const [showAIChat, setShowAIChat] = useState(false);
-  const [isDrawPacketModalOpen, setIsDrawPacketModalOpen] = useState(false);
-  const [isChangeOrderModalOpen, setIsChangeOrderModalOpen] = useState(false);
-
-  const [provenanceTarget, setProvenanceTarget] = useState<{
-    type: 'spend' | 'budget' | 'funded' | 'exposure' | 'delay';
-    category?: string;
-  } | null>(null);
+  const {
+    currentUser,
+    setCurrentUser,
+    currentRole,
+    setCurrentRole,
+    selectedProjectId,
+    setSelectedProjectId,
+    projects,
+    summary,
+    showAIChat,
+    setShowAIChat,
+    isDrawPacketModalOpen,
+    setIsDrawPacketModalOpen,
+    isChangeOrderModalOpen,
+    setIsChangeOrderModalOpen,
+    provenanceTarget,
+    setProvenanceTarget,
+    currentScreen,
+    navigate,
+    handleAuthenticate,
+    handleSignOut,
+    handleNavigate,
+    handleSelectProject,
+    handleSaveDealAsProject,
+    handleOnboardingComplete,
+  } = useAppState();
 
   const builderProfile = {
     name: currentUser?.name || 'Hardik Parikh',
     company: currentUser?.company || 'GroundUp Development Partners',
-  };
-
-  // ── Data fetching ─────────────────────────────────────────────────────────
-  const fetchProjects = () => {
-    fetch('/api/projects')
-      .then(res => res.json())
-      .then((data: Project[]) => {
-        if (data && data.length > 0) {
-          setProjects(prev => {
-            // merge backend with default
-            const combined = [...data];
-            DEFAULT_PROJECTS.forEach(dp => {
-              if (!combined.some(p => p.id === dp.id)) combined.push(dp);
-            });
-            return combined;
-          });
-        }
-      })
-      .catch(() => {
-        // Fallback to default
-        setProjects(DEFAULT_PROJECTS);
-      });
-  };
-
-  const fetchProjectSummary = (projId: string) => {
-    if (!projId) { setSummary(null); return; }
-    fetch(`/api/projects/${projId}`)
-      .then(res => res.json())
-      .then((data: ProjectFourTruthsSummary) => setSummary(data))
-      .catch(() => {});
-  };
-
-  useEffect(() => {
-    if (currentUser) fetchProjects();
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (selectedProjectId && currentUser) fetchProjectSummary(selectedProjectId);
-  }, [selectedProjectId, currentUser]);
-
-  // ── State persistence & URL synchronization ──────────────────────────────
-  useEffect(() => {
-    try {
-      localStorage.setItem('groundup_current_screen', currentScreen);
-      localStorage.setItem('groundup_selected_project_id', selectedProjectId);
-      localStorage.setItem('groundup_role', currentRole);
-    } catch {}
-
-    try {
-      const url = new URL(window.location.href);
-      url.searchParams.set('screen', currentScreen);
-      if (selectedProjectId) {
-        url.searchParams.set('project', selectedProjectId);
-      }
-      if (currentRole && currentRole !== 'DEVELOPER_OWNER') {
-        url.searchParams.set('role', currentRole);
-      } else {
-        url.searchParams.delete('role');
-      }
-
-      if (url.search !== window.location.search) {
-        window.history.replaceState(null, '', url.pathname + url.search + url.hash);
-      }
-    } catch {}
-  }, [currentScreen, selectedProjectId, currentRole]);
-
-  // ── Listen for browser back / forward navigation ─────────────────────────
-  useEffect(() => {
-    const handlePopState = () => {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const screenFromUrl = params.get('screen') as ActiveNavScreen | null;
-        const projectFromUrl = params.get('project');
-        const roleFromUrl = params.get('role') as UserRole | null;
-
-        if (screenFromUrl && VALID_SCREENS.includes(screenFromUrl)) {
-          setCurrentScreen(screenFromUrl);
-        }
-        if (projectFromUrl) {
-          setSelectedProjectId(projectFromUrl);
-        }
-        if (roleFromUrl && VALID_ROLES.includes(roleFromUrl)) {
-          setCurrentRole(roleFromUrl);
-        }
-      } catch {}
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  // ── Handlers ──────────────────────────────────────────────────────────────
-  const handleAuthenticate = (user: AuthenticatedUser) => {
-    setCurrentUser(user);
-    try { localStorage.setItem('groundup_user', JSON.stringify(user)); } catch {}
-  };
-
-  const handleSignOut = () => {
-    try {
-      localStorage.removeItem('groundup_user');
-      localStorage.removeItem('groundup_current_screen');
-      localStorage.removeItem('groundup_selected_project_id');
-      localStorage.removeItem('groundup_role');
-      const url = new URL(window.location.href);
-      url.search = '';
-      window.history.replaceState(null, '', url.pathname);
-    } catch {}
-    setCurrentUser(null);
-    setCurrentScreen('portfolio');
-  };
-
-  const handleNavigate = (screen: ActiveNavScreen, projectId?: string) => {
-    const targetProject = projectId || selectedProjectId;
-    if (projectId) setSelectedProjectId(projectId);
-    setCurrentScreen(screen);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    try {
-      const url = new URL(window.location.href);
-      url.searchParams.set('screen', screen);
-      if (targetProject) {
-        url.searchParams.set('project', targetProject);
-      }
-      if (currentRole && currentRole !== 'DEVELOPER_OWNER') {
-        url.searchParams.set('role', currentRole);
-      } else {
-        url.searchParams.delete('role');
-      }
-      window.history.pushState(null, '', url.pathname + url.search + url.hash);
-    } catch {}
-  };
-
-  const handleSelectProject = (projectId: string) => {
-    setSelectedProjectId(projectId);
-    fetchProjectSummary(projectId);
-    handleNavigate('project-detail', projectId);
-  };
-
-  const handleSaveDealAsProject = (dealData: any) => {
-    const newProject: Project = {
-      id: `proj-${Date.now()}`,
-      name: dealData.address.split(',')[0],
-      address: dealData.address,
-      gc_name: 'Metro Builds LLC',
-      gc_contract_model: 'FIXED_PRICE',
-      lender_name: 'BCB Community Bank',
-      units: dealData.units || 4,
-      square_feet: dealData.sqFt || 4200,
-      target_budget: dealData.hardCosts || 1350000,
-      start_date: 'Nov 1, 2026',
-      expected_completion: 'May 30, 2028',
-      status: 'ACTIVE',
-      created_by_user_id: currentUser?.id || 'user-dev-1',
-      created_at: new Date().toISOString(),
-      acquisition_cost: dealData.acquisitionCost || 1100000,
-      expected_sale_price: dealData.arv || 3300000,
-      contingency_initial: 80000,
-      contingency_remaining: 80000,
-    };
-
-    setProjects(prev => {
-      const updated = [newProject, ...prev];
-      try { localStorage.setItem('groundup_projects', JSON.stringify(updated)); } catch {}
-      return updated;
-    });
-
-    handleNavigate('project-detail', newProject.id);
-  };
-
-  const handleOnboardingComplete = (projectId: string, reportData: any) => {
-    const newProject: Project = {
-      id: projectId,
-      name: reportData.address.split(',')[0],
-      address: reportData.address,
-      gc_name: 'Metro Builds LLC',
-      gc_contract_model: 'FIXED_PRICE',
-      lender_name: 'BCB Community Bank',
-      units: reportData.units || 4,
-      square_feet: reportData.sqFt || 4200,
-      target_budget: reportData.hardCosts || 1350000,
-      start_date: 'Nov 1, 2026',
-      expected_completion: 'May 30, 2028',
-      status: 'ACTIVE',
-      created_by_user_id: currentUser?.id || 'user-dev-1',
-      created_at: new Date().toISOString(),
-      acquisition_cost: reportData.acquisitionCost || 1100000,
-      expected_sale_price: reportData.arv || 3300000,
-      contingency_initial: 80000,
-      contingency_remaining: 80000,
-    };
-
-    setProjects(prev => {
-      const updated = [newProject, ...prev];
-      try { localStorage.setItem('groundup_projects', JSON.stringify(updated)); } catch {}
-      return updated;
-    });
-
-    // Update currentUser to set isNewUser to false
-    const updatedUser = {
-      ...currentUser!,
-      isNewUser: false,
-    };
-    setCurrentUser(updatedUser);
-    try { localStorage.setItem('groundup_user', JSON.stringify(updatedUser)); } catch {}
-
-    // Optionally set selectedProjectId and navigate to project-detail
-    handleNavigate('project-detail', projectId);
   };
 
   const activeProjectName =
@@ -411,64 +53,39 @@ export function App() {
     summary?.project_name ||
     '73 Broadway, Hoboken';
 
-  // ── Auth gate ─────────────────────────────────────────────────────────────
+  const defaultRoleScreen = getRoleDefaultScreen(currentRole);
+  const defaultRolePath = screenToPath(defaultRoleScreen, selectedProjectId);
+
   if (!currentUser) {
     return <AuthScreen onAuthenticate={handleAuthenticate} />;
   }
 
-  // ── New user onboarding gate ───────────────────────────────────────────────
-  if (currentUser?.isNewUser) {
-    return <NewUserIntakePage 
-      user={currentUser} 
-      onCompleteIntake={handleOnboardingComplete} 
-      onCancelOrSignOut={handleSignOut} 
-    />;
+  if (currentUser.isNewUser) {
+    return (
+      <NewUserIntakePage 
+        user={currentUser} 
+        onCompleteIntake={handleOnboardingComplete} 
+        onCancelOrSignOut={handleSignOut} 
+      />
+    );
   }
-
-  // ── Compute counts for badges ─────────────────────────────────────────────
-  const alertsCount = 3;
-  const pendingDrawsCount = 1;
-
-  // Helper to map active nav screen to project tab
-  const getProjectTab = (): ProjectTab => {
-    if (currentScreen === 'budget') return 'budget';
-    if (currentScreen === 'draws') return 'draws';
-    if (currentScreen === 'timeline') return 'timeline';
-    if (currentScreen === 'documents') return 'documents';
-    if (currentScreen === 'disposition') return 'disposition';
-    if (currentScreen === 'alerts') return 'alerts';
-    return 'overview';
-  };
-
-  const isProjectDetailScreen = [
-    'project-detail',
-    'budget',
-    'draws',
-    'timeline',
-    'documents',
-    'disposition',
-    'alerts',
-  ].includes(currentScreen);
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans antialiased text-slate-900">
-      {/* ── Left Sidebar (RBAC filtered) ── */}
       <Sidebar
         currentScreen={currentScreen}
         onNavigate={handleNavigate}
         projects={projects.map(p => ({ id: p.id, name: p.name, status: p.status }))}
         selectedProjectId={selectedProjectId}
-        onAddProject={() => handleNavigate('deal-lab')}
+        onAddProject={() => navigate('/new-project')}
         onSignOut={handleSignOut}
         builderProfile={builderProfile}
-        pendingDrawsCount={pendingDrawsCount}
-        alertsCount={alertsCount}
+        pendingDrawsCount={1}
+        alertsCount={3}
         currentRole={currentRole}
       />
 
-      {/* ── Main Layout Column ── */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Top Global Header with Role Persona Switcher & Quick Actions */}
         <TopHeader
           currentRole={currentRole}
           onChangeRole={(role) => {
@@ -477,21 +94,13 @@ export function App() {
           }}
           projects={projects}
           selectedProjectId={selectedProjectId}
-          onSelectProject={(id) => {
-            setSelectedProjectId(id);
-            fetchProjectSummary(id);
-            try {
-              const url = new URL(window.location.href);
-              url.searchParams.set('project', id);
-              window.history.replaceState(null, '', url.pathname + url.search + url.hash);
-            } catch {}
-          }}
+          onSelectProject={handleSelectProject}
           onOpenDrawPacket={() => {
-            if (!isProjectDetailScreen) handleNavigate('draws');
+            handleNavigate('draws');
             setIsDrawPacketModalOpen(true);
           }}
           onOpenChangeOrder={() => {
-            if (!isProjectDetailScreen) handleNavigate('budget');
+            handleNavigate('budget');
             setIsChangeOrderModalOpen(true);
           }}
           onOpenAIChat={() => setShowAIChat(true)}
@@ -499,7 +108,6 @@ export function App() {
           onNavigateScreen={(s) => handleNavigate(s)}
         />
 
-        {/* Scrollable Viewport with RBAC Route Authorization Gate */}
         <main className="flex-1 overflow-y-auto">
           {!isScreenPermitted(currentRole, currentScreen) ? (
             <AccessDeniedScreen
@@ -512,130 +120,28 @@ export function App() {
               }}
             />
           ) : (
-            <>
-              {/* Portfolio Dashboard */}
-              {currentScreen === 'portfolio' && (
-                <PortfolioScreen
-                  projects={projects}
-                  onSelectProject={handleSelectProject}
-                  onAddProject={() => handleNavigate('deal-lab')}
-                  onOpenDealLab={() => handleNavigate('deal-lab')}
-                  onNavigateDraws={() => handleNavigate('draws')}
-                />
-              )}
-
-              {/* Project Detail (Lifecycle Tabs: Overview, Budget, Draws, Timeline, Documents, Disposition, Alerts) */}
-              {isProjectDetailScreen && (
-                <ProjectDetailScreen
-                  projectId={selectedProjectId}
-                  projects={projects}
-                  onSelectProject={(id) => {
-                    setSelectedProjectId(id);
-                    fetchProjectSummary(id);
-                  }}
-                  summary={summary}
-                  onBack={() => handleNavigate('portfolio')}
-                  onSubmitDraw={() => setIsDrawPacketModalOpen(true)}
-                  onOpenLenderPackage={() => {}}
-                  onOpenInvoices={() => {}}
-                  onOpenAIChat={() => setShowAIChat(true)}
-                  onInspectProvenance={(type, category) =>
-                    setProvenanceTarget({ type, category })
-                  }
-                  initialTab={getProjectTab()}
-                  onTabChange={(tab) => {
-                    const tabToScreen: Record<ProjectTab, ActiveNavScreen> = {
-                      overview: 'project-detail',
-                      budget: 'budget',
-                      draws: 'draws',
-                      timeline: 'timeline',
-                      documents: 'documents',
-                      disposition: 'disposition',
-                      alerts: 'alerts',
-                    };
-                    handleNavigate(tabToScreen[tab] || 'project-detail');
-                  }}
-                  currentRole={currentRole}
-                  isDrawPacketModalOpen={isDrawPacketModalOpen}
-                  onCloseDrawPacketModal={() => setIsDrawPacketModalOpen(false)}
-                  isChangeOrderModalOpen={isChangeOrderModalOpen}
-                  onCloseChangeOrderModal={() => setIsChangeOrderModalOpen(false)}
-                />
-              )}
-
-              {/* Construction Lender Portal (BCB Community Bank) */}
-              {currentScreen === 'lender-portal' && (
-                <LenderPortalScreen
-                  projects={projects}
-                  selectedProjectId={selectedProjectId}
-                  onSelectProject={(id) => {
-                    setSelectedProjectId(id);
-                    fetchProjectSummary(id);
-                  }}
-                  onDisburseFunds={(drawId, amount) => {
-                    console.log(`Disbursed ${amount} for ${drawId}`);
-                  }}
-                />
-              )}
-
-              {/* GC Fixed-Price Contract Portal */}
-              {currentScreen === 'gc-fixed-portal' && (
-                <GCFixedPortalScreen
-                  projects={projects}
-                  selectedProjectId={selectedProjectId}
-                />
-              )}
-
-              {/* GC Daily Logs & Cost-Plus Portal */}
-              {currentScreen === 'gc-daily-portal' && (
-                <GCDailyPortalScreen
-                  projects={projects}
-                  selectedProjectId={selectedProjectId}
-                />
-              )}
-
-              {/* CFO Reconciliation & Lien Waiver Audit Center */}
-              {currentScreen === 'cfo-recon' && (
-                <CFOReconciliationScreen
-                  projects={projects}
-                  selectedProjectId={selectedProjectId}
-                />
-              )}
-
-              {/* Investor / Partner Transparency Portal */}
-              {currentScreen === 'investor-portal' && (
-                <InvestorPortalScreen
-                  projects={projects}
-                  selectedProjectId={selectedProjectId}
-                />
-              )}
-
-              {/* Canonical Document Intake Repository */}
-              {currentScreen === 'document-intake' && (
-                <DocumentIntakeScreen
-                  projects={projects}
-                  selectedProjectId={selectedProjectId}
-                />
-              )}
-
-              {/* Deal Lab Underwriting Calculator */}
-              {currentScreen === 'deal-lab' && (
-                <DealLabScreen
-                  onBack={() => handleNavigate('portfolio')}
-                  onSaveAsProject={handleSaveDealAsProject}
-                />
-              )}
-
-              {/* Settings & Stakeholder Management */}
-              {currentScreen === 'settings' && (
-                <SettingsScreen onBack={() => handleNavigate('portfolio')} />
-              )}
-            </>
+            <AppRoutes
+              projects={projects}
+              summary={summary}
+              selectedProjectId={selectedProjectId}
+              setSelectedProjectId={setSelectedProjectId}
+              currentRole={currentRole}
+              defaultRolePath={defaultRolePath}
+              isDrawPacketModalOpen={isDrawPacketModalOpen}
+              setIsDrawPacketModalOpen={setIsDrawPacketModalOpen}
+              isChangeOrderModalOpen={isChangeOrderModalOpen}
+              setIsChangeOrderModalOpen={setIsChangeOrderModalOpen}
+              setShowAIChat={setShowAIChat}
+              setProvenanceTarget={setProvenanceTarget}
+              setCurrentUser={setCurrentUser}
+              onNavigate={handleNavigate}
+              onSelectProject={handleSelectProject}
+              onSaveDealAsProject={handleSaveDealAsProject}
+            />
           )}
         </main>
       </div>
 
-      {/* ── Floating AI Chat Button (for fast querying) ── */}
       <button
         onClick={() => setShowAIChat(true)}
         className="fixed bottom-6 right-6 z-30 bg-slate-900 hover:bg-black text-white px-4 py-3 rounded-full shadow-xl flex items-center gap-2 text-xs font-bold transition cursor-pointer border border-slate-700"
@@ -644,7 +150,6 @@ export function App() {
         <span>Ask AI Analyst</span>
       </button>
 
-      {/* ── AI Chat Assistant Drawer ── */}
       <AIChatDrawer
         isOpen={showAIChat}
         onClose={() => setShowAIChat(false)}
@@ -657,7 +162,6 @@ export function App() {
         }}
       />
 
-      {/* ── Provenance Drill-down Drawer ── */}
       <ProvenanceDrawer
         isOpen={!!provenanceTarget}
         onClose={() => setProvenanceTarget(null)}

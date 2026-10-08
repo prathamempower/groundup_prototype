@@ -1,8 +1,7 @@
-// GroundUp AI — Milestone Progress & Inspection Modal
-// Project Manager and GC field tool to update progress %, log inspections, and attribute delay sources
-
 import React, { useState } from 'react';
-import { X, CheckCircle2, Clock, Camera, AlertTriangle, FileCheck, Building, Calendar } from 'lucide-react';
+import { X, CheckCircle2, Clock, Camera } from 'lucide-react';
+import { InspectionFields } from './milestone-update/InspectionFields';
+import { DelayAttributionSection } from './milestone-update/DelayAttributionSection';
 
 interface MilestoneUpdateModalProps {
   isOpen: boolean;
@@ -39,12 +38,10 @@ export function MilestoneUpdateModal({
   const [delayDays, setDelayDays] = useState(milestone.delayDays || 14);
   const [delayCause, setDelayCause] = useState('MUNICIPAL_PERMIT');
   const [notes, setNotes] = useState('Rough plumbing passed rough township inspection. Green sticker posted on site.');
-  const [photoUploaded, setPhotoUploaded] = useState(true);
 
   if (!isOpen) return null;
 
-  const dailyCarryingCost = 324; // $324/day (9.75% on loan balance)
-  const delayCarryingImpact = delayDays * dailyCarryingCost;
+  const dailyCarryingCost = 324;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,78 +103,20 @@ export function MilestoneUpdateModal({
             </div>
           </div>
 
-          {/* Inspection Status */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Inspection Status</label>
-              <select
-                value={inspectionResult}
-                onChange={(e) => setInspectionResult(e.target.value as any)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none"
-              >
-                <option value="PASSED">Passed (Signed Off)</option>
-                <option value="FAILED">Failed (Correction Notice)</option>
-                <option value="SCHEDULED">Scheduled</option>
-                <option value="PENDING">Pending Inspector</option>
-              </select>
-            </div>
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Inspector / Agency</label>
-              <input
-                type="text"
-                value={inspectorName}
-                onChange={(e) => setInspectorName(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none"
-                required
-              />
-            </div>
-          </div>
+          <InspectionFields
+            inspectionResult={inspectionResult}
+            setInspectionResult={setInspectionResult}
+            inspectorName={inspectorName}
+            setInspectorName={setInspectorName}
+          />
 
-          {/* Delay Attribution */}
-          <div className="p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-amber-900 flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                <span>Delay Attribution & Carry Impact</span>
-              </span>
-              <span className="font-mono font-bold text-amber-900">
-                +${delayCarryingImpact.toLocaleString()}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2.5">
-              <div>
-                <label className="block text-[11px] font-medium text-amber-800 mb-0.5">Delay Slip (Days)</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="180"
-                  value={delayDays}
-                  onChange={(e) => setDelayDays(parseInt(e.target.value) || 0)}
-                  className="w-full px-2.5 py-1.5 bg-white border border-amber-300 rounded font-mono font-bold text-slate-900 focus:ring-1 focus:ring-slate-900 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-medium text-amber-800 mb-0.5">Root Cause Tag</label>
-                <select
-                  value={delayCause}
-                  onChange={(e) => setDelayCause(e.target.value)}
-                  className="w-full px-2 py-1.5 bg-white border border-amber-300 rounded text-slate-900 focus:ring-1 focus:ring-slate-900 outline-none"
-                >
-                  <option value="MUNICIPAL_PERMIT">Municipal / Permit Delay</option>
-                  <option value="UTILITY_INTERCONNECT">PSE&G / Utility Interconnect</option>
-                  <option value="WEATHER">Inclement Weather (Rain/Snow)</option>
-                  <option value="SUB_PERFORMANCE">Subcontractor Shortage</option>
-                  <option value="GC_COORDINATION">GC Material Lead Time</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="text-[11px] text-amber-700">
-              Calculation: {delayDays} days × ${dailyCarryingCost}/day = <strong>${delayCarryingImpact.toLocaleString()}</strong> in loan carrying cost.
-            </div>
-          </div>
+          <DelayAttributionSection
+            delayDays={delayDays}
+            setDelayDays={setDelayDays}
+            delayCause={delayCause}
+            setDelayCause={setDelayCause}
+            dailyCarryingCost={dailyCarryingCost}
+          />
 
           {/* Photo Proof */}
           <div>
