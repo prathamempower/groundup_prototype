@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ProjectDetailScreen, ProjectTab } from '../screens/ProjectDetailScreen';
 import { Project, ProjectFourTruthsSummary, UserRole } from '../../shared/types';
+import { isProjectTabPermitted, getRoleDefaultTab } from '../../shared/rbac';
 
 interface ProjectDetailRouteWrapperProps {
   projects: Project[];
@@ -17,8 +18,6 @@ interface ProjectDetailRouteWrapperProps {
   selectedProjectId: string;
   setSelectedProjectId: (id: string) => void;
 }
-
-const VALID_TABS: ProjectTab[] = ['overview', 'budget', 'draws', 'timeline', 'documents', 'disposition', 'alerts'];
 
 export function ProjectDetailRouteWrapper({
   projects,
@@ -46,7 +45,16 @@ export function ProjectDetailRouteWrapper({
     }
   }, [projectId]);
 
-  const activeTab: ProjectTab = (tab && VALID_TABS.includes(tab as ProjectTab)) ? (tab as ProjectTab) : 'overview';
+  useEffect(() => {
+    if (tab && !isProjectTabPermitted(currentRole, tab as ProjectTab)) {
+      const defaultTab = getRoleDefaultTab(currentRole);
+      navigate(`/projects/${activeProjectId}/${defaultTab}`, { replace: true });
+    }
+  }, [tab, currentRole, activeProjectId, navigate]);
+
+  const activeTab: ProjectTab = (tab && isProjectTabPermitted(currentRole, tab as ProjectTab))
+    ? (tab as ProjectTab)
+    : getRoleDefaultTab(currentRole);
 
   return (
     <ProjectDetailScreen

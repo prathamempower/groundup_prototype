@@ -56,42 +56,6 @@ export function getPrimaryRoleTasks(state: OnboardingState): SetupTask[] {
     }
   }
 
-  // 2. ADMIN TASKS
-  if (state.role === 'ADMIN') {
-    if (state.admin_erp_integration === 'quickbooks' || state.admin_erp_integration === 'xero') {
-      tasks.push({
-        id: 'task-connect-erp-api',
-        title: `Authorize ${state.admin_erp_integration === 'quickbooks' ? 'QuickBooks Online' : 'Xero'} API Sync`,
-        description: 'Grant OAuth token to synchronize chart of accounts, trade vendors, and paid bills in real time.',
-        category: 'INTEGRATION',
-        priority: 'HIGH',
-        targetScreen: 'settings',
-        estimatedMinutes: 4,
-      });
-    }
-
-    if (state.admin_card_spend === 'amex_feed') {
-      tasks.push({
-        id: 'task-link-amex-feed',
-        title: 'Link American Express Corporate Card Feed',
-        description: 'Establish direct bank feed connection for continuous job site expense categorization.',
-        category: 'INTEGRATION',
-        priority: 'HIGH',
-        targetScreen: 'settings',
-        estimatedMinutes: 5,
-      });
-    }
-
-    tasks.push({
-      id: 'task-dispatch-team-invites',
-      title: 'Review and Dispatch Stakeholder Portal Invites',
-      description: 'Confirm email permissions for project managers, external GC, and finance controllers.',
-      category: 'ACCESS',
-      priority: 'MEDIUM',
-      targetScreen: 'settings',
-      estimatedMinutes: 3,
-    });
-  }
 
   // 3. PROJECT MANAGER TASKS
   if (state.role === 'PROJECT_MANAGER') {

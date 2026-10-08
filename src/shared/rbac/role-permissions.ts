@@ -1,9 +1,9 @@
-import { UserRole } from '../types';
-import { Permission } from './permissions';
+import { GroundUpRole, Permission, UserRole } from './types';
 
-export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
-  DEVELOPER_OWNER: [
+const basePermissions: Record<GroundUpRole, Permission[]> = {
+  OWNER: [
     'portfolio:view',
+    'organization:manage',
     'project:create',
     'project:delete',
     'project:view_overview',
@@ -11,6 +11,12 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'project:settings',
     'deal_lab:access',
     'deal_lab:save_project',
+    'acquisition:view',
+    'acquisition:edit',
+    'permits:view',
+    'permits:edit',
+    'financing:view',
+    'financing:edit',
     'budget:view',
     'budget:edit',
     'change_order:create',
@@ -27,6 +33,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'delay:attribute',
     'field_log:create',
     'milestone_claim:submit',
+    'recon:view',
+    'recon:edit',
     'accounting:recon_matrix',
     'waiver:audit_view',
     'waiver:audit_manage',
@@ -39,10 +47,13 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'investor:download_report',
     'ai_analyst:query',
   ],
-  CFO: [
+  FINANCE: [
     'portfolio:view',
     'project:view_overview',
     'project:view_financials',
+    'acquisition:view',
+    'financing:view',
+    'financing:edit',
     'budget:view',
     'budget:edit',
     'change_order:create',
@@ -51,7 +62,11 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'contingency:manage',
     'draw:view',
     'draw:create_packet',
+    'draw:review_queue',
+    'draw:approve_lines',
     'milestone:view',
+    'recon:view',
+    'recon:edit',
     'accounting:recon_matrix',
     'waiver:audit_view',
     'waiver:audit_manage',
@@ -63,23 +78,66 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'investor:download_report',
     'ai_analyst:query',
   ],
-  PM: [
+  PROJECT_MANAGER: [
     'project:view_overview',
+    'acquisition:view',
+    'permits:view',
+    'permits:edit',
     'budget:view',
     'milestone:view',
     'milestone:log_progress',
     'delay:attribute',
+    'field_log:create',
     'document:view',
+    'document:upload',
     'ai_analyst:query',
   ],
-  LENDER: [
-    'draw:review_queue',
-    'draw:approve_lines',
-    'draw:disburse_wire',
-    'document:view',
+  ACCOUNTANT: [
+    'project:view_overview',
+    'budget:view',
+    'draw:view',
+    'recon:view',
+    'recon:edit',
+    'accounting:recon_matrix',
     'waiver:audit_view',
+    'waiver:audit_manage',
+    'document:view',
+    'document:upload',
+    'amex_feed:match',
     'ai_analyst:query',
   ],
+  INVESTOR: [
+    'project:view_overview',
+    'unit_sales:view',
+    'investor:view_waterfall',
+    'investor:download_report',
+    'document:view',
+    'ai_analyst:query',
+  ],
+  VIEWER: [
+    'project:view_overview',
+    'permits:view',
+    'milestone:view',
+    'document:view',
+    'ai_analyst:query',
+  ],
+};
+
+const fullPermissions: Record<string, Permission[]> = {
+  ...basePermissions,
+  GENERAL_CONTRACTOR: [
+    'project:view_overview',
+    'milestone:view',
+    'milestone_claim:submit',
+    'field_log:create',
+    'change_order:create',
+    'document:view',
+    'document:upload',
+    'ai_analyst:query',
+  ],
+  DEVELOPER_OWNER: basePermissions.OWNER,
+  CFO: basePermissions.FINANCE,
+  PM: basePermissions.PROJECT_MANAGER,
   GC_FIXED: [
     'milestone:view',
     'milestone_claim:submit',
@@ -91,20 +149,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'field_log:create',
     'ai_analyst:query',
   ],
-  INVESTOR: [
-    'unit_sales:view',
-    'investor:view_waterfall',
-    'investor:download_report',
-    'ai_analyst:query',
-  ],
-  ACCOUNTANT: [
-    'budget:view',
-    'draw:view',
-    'accounting:recon_matrix',
-    'waiver:audit_view',
-    'waiver:audit_manage',
-    'document:view',
-    'amex_feed:match',
-    'ai_analyst:query',
-  ],
 };
+
+export const ROLE_PERMISSIONS: Record<string, Permission[]> = fullPermissions;

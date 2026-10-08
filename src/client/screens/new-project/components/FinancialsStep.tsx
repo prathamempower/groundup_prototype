@@ -85,9 +85,9 @@ export function FinancialsStep({ formData, onChange }: FinancialsStepProps) {
               className={selectClass}
             >
               <option value="">Select funding...</option>
-              <option value="Cash">All Cash</option>
-              <option value="Loan">Debt / Loan</option>
-              <option value="Combined">Equity & Debt Combined</option>
+              <option value="Cash">All Cash (Equity Only)</option>
+              <option value="Loan">Senior Construction Loan</option>
+              <option value="Combined">Equity & Senior Debt Combined</option>
             </select>
           </div>
           <div>
@@ -101,6 +101,124 @@ export function FinancialsStep({ formData, onChange }: FinancialsStepProps) {
               placeholder="Lead PM Name"
               className={inputClass}
             />
+          </div>
+        </div>
+
+        {/* GC Contract Model */}
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+            General Contractor Contract Model *
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => onChange('contractModel', 'FIXED_PRICE')}
+              className={`p-3 rounded-xl border text-left cursor-pointer transition ${
+                formData.contractModel === 'FIXED_PRICE' || !formData.contractModel
+                  ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+              }`}
+            >
+              <div className="font-bold text-xs mb-1">Fixed-Price (Lump Sum)</div>
+              <div className="text-[11px] opacity-80 leading-relaxed">
+                AIA G702/G703 milestone progress claims with statutory retainage.
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => onChange('contractModel', 'OPEN_BOOK')}
+              className={`p-3 rounded-xl border text-left cursor-pointer transition ${
+                formData.contractModel === 'OPEN_BOOK'
+                  ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+              }`}
+            >
+              <div className="font-bold text-xs mb-1">Open-Book (Cost Plus / T&M)</div>
+              <div className="text-[11px] opacity-80 leading-relaxed">
+                Daily worker headcounts, receipt audits, subcontractor invoices & GC fee markup.
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Debt / Lender Terms */}
+        {(formData.fundingMethod === 'Loan' || formData.fundingMethod === 'Combined') && (
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+            <div className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+              Senior Construction Loan Parameters
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">External Lender / Bank</label>
+                <input
+                  type="text"
+                  value={formData.lenderName || ''}
+                  onChange={(e) => onChange('lenderName', e.target.value)}
+                  placeholder="e.g. BCB Community Bank"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Interest Rate (%)</label>
+                <input
+                  type="text"
+                  value={formData.interestRate || ''}
+                  onChange={(e) => onChange('interestRate', e.target.value)}
+                  placeholder="e.g. 7.5%"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Interest Carry Method</label>
+                <select
+                  value={formData.interestPaymentMethod || 'RESERVE'}
+                  onChange={(e) => onChange('interestPaymentMethod', e.target.value as any)}
+                  className={selectClass}
+                >
+                  <option value="RESERVE">Drawn from Loan Reserve</option>
+                  <option value="MONTHLY_OUT_OF_POCKET">Monthly Out of Pocket</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Pro Forma Baseline */}
+        <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+          <div className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+            Pro Forma Cost Baseline
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Hard Construction Costs ($)</label>
+              <input
+                type="text"
+                value={formData.hardCosts || ''}
+                onChange={(e) => onChange('hardCosts', e.target.value)}
+                placeholder="e.g. 2,100,000"
+                className={`${inputClass} font-mono`}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Soft Costs & Fees ($)</label>
+              <input
+                type="text"
+                value={formData.softCosts || ''}
+                onChange={(e) => onChange('softCosts', e.target.value)}
+                placeholder="e.g. 450,000"
+                className={`${inputClass} font-mono`}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Contingency Reserve (%)</label>
+              <input
+                type="text"
+                value={formData.contingencyPct || '10'}
+                onChange={(e) => onChange('contingencyPct', e.target.value)}
+                placeholder="10"
+                className={`${inputClass} font-mono`}
+              />
+            </div>
           </div>
         </div>
       </div>

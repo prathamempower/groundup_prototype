@@ -93,11 +93,13 @@ export function AuthScreen({ onAuthenticate }: AuthScreenProps) {
           {activeTab === 'signin' && (
             <>
               <GoogleAuthButton onGoogleAuth={(e) => handleAuth(e, 'google')} />
-              <DirectLoginGrid
-                isLoading={isLoading}
-                loadingPersonaId={loadingPersonaId}
-                onDirectLogin={handleDirectLogin}
-              />
+              {import.meta.env.DEV && (
+                <DirectLoginGrid
+                  isLoading={isLoading}
+                  loadingPersonaId={loadingPersonaId}
+                  onDirectLogin={handleDirectLogin}
+                />
+              )}
             </>
           )}
         </div>

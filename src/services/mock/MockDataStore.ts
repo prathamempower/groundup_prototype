@@ -79,7 +79,7 @@ export class MockDataStore {
   }
 
   public recordAuditEvent(
-    actorRole: UserRole,
+    actorRole: UserRole | string,
     actorName: string,
     entity: string,
     entityId: string,

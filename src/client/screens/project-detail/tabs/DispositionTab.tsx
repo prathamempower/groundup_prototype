@@ -76,6 +76,50 @@ export const DispositionTab: React.FC<DispositionTabProps> = ({
           </div>
         ))}
       </div>
+
+      {/* Senior Loan Payoff & Capital Return Waterfall */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h4 className="font-bold text-slate-900 text-sm">Senior Construction Loan Payoff Waterfall</h4>
+            <p className="text-xs text-slate-500">
+              Unit closing proceeds automatically clear senior lender liens in priority order before equity release.
+            </p>
+          </div>
+          <span className="text-xs font-mono font-bold px-2.5 py-1 bg-slate-100 rounded-lg text-slate-700">
+            Priority-Ranked Waterfall
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+          <div className="p-4 bg-purple-50/70 border border-purple-200 rounded-xl space-y-2">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-purple-700">Priority 1 · Senior Debt Payoff</div>
+            <div className="text-xl font-bold text-purple-900">$2,000,000</div>
+            <div className="text-[11px] text-slate-600 font-sans">
+              BCB Community Bank senior construction mortgage retired 100% at escrow closing.
+            </div>
+            <div className="text-[10px] text-purple-700 font-bold font-sans">✓ First Lien Released</div>
+          </div>
+
+          <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-2">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Priority 2 · Equity Capital Return</div>
+            <div className="text-xl font-bold text-emerald-900">$1,000,000</div>
+            <div className="text-[11px] text-slate-600 font-sans">
+              100% of fronted developer & equity partner principal basis returned dollar-for-dollar.
+            </div>
+            <div className="text-[10px] text-emerald-700 font-bold font-sans">✓ Capital Basis Preserved</div>
+          </div>
+
+          <div className="p-4 bg-blue-50/70 border border-blue-200 rounded-xl space-y-2">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-blue-700">Priority 3 · Net Profit Distribution</div>
+            <div className="text-xl font-bold text-blue-900">$250,000</div>
+            <div className="text-[11px] text-slate-600 font-sans">
+              Net proceeds distributed across general & limited partners per operating agreement.
+            </div>
+            <div className="text-[10px] text-blue-700 font-bold font-sans">✓ Final ROI Realized</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

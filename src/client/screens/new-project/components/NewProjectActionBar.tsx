@@ -18,7 +18,7 @@ export function NewProjectActionBar({
   onSubmit,
 }: NewProjectActionBarProps) {
   return (
-    <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 flex items-center justify-between">
+    <div className="shrink-0 bg-white border-t border-slate-200 p-4 px-8 pr-52 flex items-center justify-between">
       <button
         onClick={onBack}
         className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition cursor-pointer ${

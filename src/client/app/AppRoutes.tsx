@@ -9,6 +9,7 @@ import { Project, ProjectFourTruthsSummary, UserRole } from '../../shared/types'
 import { ActiveNavScreen } from '../components/Sidebar';
 import { AuthenticatedUser } from '../screens/AuthScreen';
 import { renderPortalRoutes } from './PortalRoutes';
+import { isScreenPermitted, hasPermission } from '../../shared/rbac';
 
 interface AppRoutesProps {
   projects: Project[];
@@ -56,26 +57,46 @@ export function AppRoutes({
       <Route
         path="/portfolio"
         element={
-          <PortfolioScreen
-            projects={projects}
-            onSelectProject={(id) => {
-              onSelectProject(id);
-              navigate(`/projects/${id}/overview`);
-            }}
-            onAddProject={() => navigate('/new-project')}
-            onOpenDealLab={() => onNavigate('deal-lab')}
-            onNavigateDraws={() => onNavigate('draws')}
-          />
+          isScreenPermitted(currentRole, 'portfolio') ? (
+            <PortfolioScreen
+              projects={projects}
+              onSelectProject={(id) => {
+                onSelectProject(id);
+                navigate(`/projects/${id}/overview`);
+              }}
+              onAddProject={() => navigate('/new-project')}
+              onOpenDealLab={() => onNavigate('deal-lab')}
+              onNavigateDraws={() => onNavigate('draws')}
+            />
+          ) : (
+            <Navigate to={defaultRolePath} replace />
+          )
         }
       />
 
       <Route
         path="/new-project"
         element={
-          <NewProjectScreen
-            onComplete={() => navigate('/portfolio')}
-            onCancel={() => navigate('/portfolio')}
-          />
+          hasPermission(currentRole, 'project:create') ? (
+            <NewProjectScreen
+              onComplete={(data) => {
+                if (data && (data.projectName || data.propertyAddress)) {
+                  onSaveDealAsProject({
+                    address: data.propertyAddress || data.projectName,
+                    hardCosts: Number(data.hardCosts) || Number(data.estimatedTotalCost) || 1500000,
+                    acquisitionCost: Number(data.acquisitionCost) || 950000,
+                    units: 4,
+                    sqFt: 4500,
+                    arv: Number(data.estimatedTotalCost) ? Number(data.estimatedTotalCost) * 1.3 : 3200000,
+                  });
+                }
+                navigate('/portfolio');
+              }}
+              onCancel={() => navigate('/portfolio')}
+            />
+          ) : (
+            <Navigate to={defaultRolePath} replace />
+          )
         }
       />
 
@@ -120,32 +141,45 @@ export function AppRoutes({
       />
 
       <Route path="/overview" element={<Navigate to={`/projects/${selectedProjectId}/overview`} replace />} />
+      <Route path="/acquisition" element={<Navigate to={`/projects/${selectedProjectId}/acquisition`} replace />} />
+      <Route path="/permits" element={<Navigate to={`/projects/${selectedProjectId}/permits`} replace />} />
+      <Route path="/financing" element={<Navigate to={`/projects/${selectedProjectId}/financing`} replace />} />
       <Route path="/budget" element={<Navigate to={`/projects/${selectedProjectId}/budget`} replace />} />
       <Route path="/draws" element={<Navigate to={`/projects/${selectedProjectId}/draws`} replace />} />
       <Route path="/timeline" element={<Navigate to={`/projects/${selectedProjectId}/timeline`} replace />} />
+      <Route path="/recon" element={<Navigate to={`/projects/${selectedProjectId}/recon`} replace />} />
       <Route path="/documents" element={<Navigate to={`/projects/${selectedProjectId}/documents`} replace />} />
       <Route path="/disposition" element={<Navigate to={`/projects/${selectedProjectId}/disposition`} replace />} />
       <Route path="/alerts" element={<Navigate to={`/projects/${selectedProjectId}/alerts`} replace />} />
+      <Route path="/reports" element={<Navigate to={`/projects/${selectedProjectId}/overview`} replace />} />
 
       {renderPortalRoutes({ projects, selectedProjectId, onSelectProject })}
 
       <Route
         path="/deal-lab"
         element={
-          <DealLabScreen
-            onBack={() => navigate('/portfolio')}
-            onSaveAsProject={onSaveDealAsProject}
-          />
+          isScreenPermitted(currentRole, 'deal-lab') ? (
+            <DealLabScreen
+              onBack={() => navigate('/portfolio')}
+              onSaveAsProject={onSaveDealAsProject}
+            />
+          ) : (
+            <Navigate to={defaultRolePath} replace />
+          )
         }
       />
 
       <Route
         path="/settings"
         element={
-          <SettingsScreen 
-            onBack={() => navigate('/portfolio')} 
-            onRestartOnboarding={() => setCurrentUser(prev => prev ? { ...prev, isNewUser: true } : null)}
-          />
+          isScreenPermitted(currentRole, 'settings') ? (
+            <SettingsScreen 
+              onBack={() => navigate('/portfolio')} 
+              onRestartOnboarding={() => setCurrentUser(prev => prev ? { ...prev, isNewUser: true } : null)}
+            />
+          ) : (
+            <Navigate to={defaultRolePath} replace />
+          )
         }
       />
 

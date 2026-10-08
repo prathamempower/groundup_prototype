@@ -25,7 +25,7 @@ export interface AlertRisk {
 
 export interface AuditEvent {
   id: string;
-  actor_role: UserRole;
+  actor_role: UserRole | string;
   actor_name: string;
   entity: string;
   entity_id: string;
@@ -105,7 +105,7 @@ export interface ProvenanceNode {
   amount?: number;
   date?: string;
   vendor?: string;
-  actor_role?: UserRole;
+  actor_role?: UserRole | string;
   actor_name?: string;
   status: string;
   source_document_name: string;

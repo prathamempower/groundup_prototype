@@ -3,7 +3,7 @@ import { Draw, DrawLine, RejectionReasonCode, UserRole, USER_ROLES } from '../..
 import { broadcastEvent } from '../../index';
 
 function recordAuditEvent(
-  actorRole: UserRole,
+  actorRole: UserRole | string,
   actorName: string,
   entity: string,
   entityId: string,
@@ -31,9 +31,9 @@ export function recordLenderReview(
     }[];
     lender_notes?: string;
   },
-  actorRole: UserRole = 'LENDER'
+  actorRole: UserRole | 'LENDER' = 'LENDER'
 ): Draw {
-  const actor = USER_ROLES[actorRole];
+  const actor = USER_ROLES[actorRole] || { name: 'External Lender (Party)' };
   const draw = db.prepare('SELECT * FROM draws WHERE id = ?').get(drawId) as Draw;
   if (!draw) throw new Error(`Draw ${drawId} not found`);
 
@@ -150,8 +150,8 @@ export function createDrawRevision(
   return { revisionDraw, drawLines: createdLines };
 }
 
-export function recordWireDisbursement(drawId: string, disbursedAmount: number, actorRole: UserRole = 'LENDER'): Draw {
-  const actor = USER_ROLES[actorRole];
+export function recordWireDisbursement(drawId: string, disbursedAmount: number, actorRole: UserRole | 'LENDER' = 'LENDER'): Draw {
+  const actor = USER_ROLES[actorRole] || { name: 'External Lender (Party)' };
   const draw = db.prepare('SELECT * FROM draws WHERE id = ?').get(drawId) as Draw;
   if (!draw) throw new Error(`Draw ${drawId} not found`);
 

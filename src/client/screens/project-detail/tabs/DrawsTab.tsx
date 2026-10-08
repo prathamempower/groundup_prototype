@@ -15,12 +15,12 @@ const fmt = (n: number) => '$' + n.toLocaleString();
 
 export const DrawsTab: React.FC<DrawsTabProps> = ({
   draws,
-  currentRole = 'DEVELOPER_OWNER',
+  currentRole = 'OWNER',
   onOpenDrawPacketModal,
 }) => {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h3 className="font-bold text-slate-900 text-base">Construction Draws & Lender Disbursements</h3>
           <p className="text-xs text-slate-500">Track requested vs approved vs wire disbursed funding</p>
@@ -28,12 +28,31 @@ export const DrawsTab: React.FC<DrawsTabProps> = ({
         {hasPermission(currentRole, 'draw:create_packet') && (
           <button
             onClick={onOpenDrawPacketModal}
-            className="px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1.5"
+            className="px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1.5 self-start sm:self-center"
           >
             <Plus className="w-3.5 h-3.5 text-emerald-400" />
             <span>+ Build Draw #{draws.length + 1} Packet</span>
           </button>
         )}
+      </div>
+
+      {/* Retainage Ledger & Statutory Waivers Summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Statutory Retainage Ledger</div>
+          <div className="text-xl font-bold font-mono text-amber-700 mt-1">$90,367.00</div>
+          <div className="text-[11px] text-slate-500 mt-0.5">10% withheld across all approved draws</div>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lien Waivers Compliance</div>
+          <div className="text-xl font-bold text-emerald-700 mt-1">100% Verified</div>
+          <div className="text-[11px] text-slate-500 mt-0.5">AIA G706 / G706A release forms in place</div>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lender Disbursement Mode</div>
+          <div className="text-base font-bold text-slate-900 mt-1.5">Direct Fedwire</div>
+          <div className="text-[11px] text-slate-500 mt-0.5">BCB Bank title escrow settlement</div>
+        </div>
       </div>
 
       <div className="space-y-3">

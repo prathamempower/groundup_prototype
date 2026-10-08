@@ -7,7 +7,18 @@ import {
   AmexCardTransaction,
 } from '../../../shared/types';
 
-export type ProjectTab = 'overview' | 'budget' | 'draws' | 'timeline' | 'documents' | 'disposition' | 'alerts';
+export type ProjectTab = 
+  | 'overview' 
+  | 'acquisition' 
+  | 'permits' 
+  | 'financing' 
+  | 'budget' 
+  | 'timeline' 
+  | 'draws' 
+  | 'disposition' 
+  | 'recon' 
+  | 'documents' 
+  | 'alerts';
 
 export interface ProjectDetailScreenProps {
   projectId: string;

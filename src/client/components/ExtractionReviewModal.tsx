@@ -108,3 +108,5 @@ export function ExtractionReviewModal({
     </div>
   );
 }
+
+export { ExtractionReviewModal as SplitDocReviewer };

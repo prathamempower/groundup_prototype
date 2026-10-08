@@ -8,14 +8,13 @@ import { generateSetupTasks, resolveTargetWorkspace, buildCreatedProject } from 
 import { OnboardingState } from '../src/client/onboarding/types';
 
 describe('Role-Based Dynamic Onboarding Engine', () => {
-  it('Q1 role selection defines the 8 valid app user roles (and excludes Lender)', () => {
+  it('Q1 role selection defines the valid app user roles (and excludes Lender)', () => {
     const rootQ = QUESTION_DEFINITIONS.role;
     expect(rootQ).toBeDefined();
     expect(rootQ.type).toBe('single_select');
 
     const roleValues = rootQ.options?.map(o => o.value) || [];
     expect(roleValues).toContain('OWNER');
-    expect(roleValues).toContain('ADMIN');
     expect(roleValues).toContain('PROJECT_MANAGER');
     expect(roleValues).toContain('GENERAL_CONTRACTOR');
     expect(roleValues).toContain('FINANCE');

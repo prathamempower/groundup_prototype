@@ -74,7 +74,7 @@ export function evaluateDataReadiness(
     id: 'check-draws',
     title: 'Draw Package & Lender Responses',
     description: 'Requested vs approved lines and disbursement events for Funding Truth',
-    required_role: 'LENDER',
+    required_role: 'FINANCE',
     is_complete: hasDraws,
     item_count: (data.draws || []).length,
     severity: 'OPTIONAL',

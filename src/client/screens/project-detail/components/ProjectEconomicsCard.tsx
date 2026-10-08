@@ -75,7 +75,7 @@ export const ProjectEconomicsCard: React.FC<ProjectEconomicsCardProps> = ({
           </div>
           <div className="flex items-start gap-2 bg-white/80 p-2 rounded-lg border border-amber-100">
             <span className="text-red-600 font-bold font-mono">-$75,000</span>
-            <span>Additional carrying interest from 82 days of schedule delay</span>
+            <span>Additional carrying interest from 82 days schedule delay (<strong className="font-mono text-amber-900">$324/day</strong> daily carry penalty)</span>
           </div>
         </div>
       </div>

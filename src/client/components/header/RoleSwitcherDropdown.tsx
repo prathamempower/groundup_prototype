@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { UserCheck, ChevronDown, Lock, Check } from 'lucide-react';
 import { UserRole, USER_ROLES } from '../../../shared/types';
-import { ROLE_ACCESS_PROFILES } from '../../../shared/rbac/matrix';
+import { ROLE_ACCESS_PROFILES } from '../../../shared/rbac';
 
 interface RoleSwitcherDropdownProps {
   currentRole: UserRole;
@@ -9,13 +9,13 @@ interface RoleSwitcherDropdownProps {
 }
 
 const ROLE_LIST: UserRole[] = [
-  'DEVELOPER_OWNER',
-  'CFO',
-  'PM',
-  'LENDER',
-  'GC_FIXED',
-  'GC_DAILY',
+  'OWNER',
+  'PROJECT_MANAGER',
+  'GENERAL_CONTRACTOR',
+  'FINANCE',
+  'ACCOUNTANT',
   'INVESTOR',
+  'VIEWER',
 ];
 
 export function RoleSwitcherDropdown({
@@ -23,7 +23,7 @@ export function RoleSwitcherDropdown({
   onChangeRole,
 }: RoleSwitcherDropdownProps) {
   const [showRoleMenu, setShowRoleMenu] = useState(false);
-  const activeRoleContext = USER_ROLES[currentRole] || USER_ROLES.DEVELOPER_OWNER;
+  const activeRoleContext = USER_ROLES[currentRole] || USER_ROLES.OWNER;
 
   return (
     <div className="relative">
@@ -33,7 +33,7 @@ export function RoleSwitcherDropdown({
       >
         <UserCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
         <span>
-          Switch Persona: <strong className="font-bold text-white">{activeRoleContext.roleTitle.split(' ')[0]}</strong>
+          Persona: <strong className="font-bold text-white">{activeRoleContext.roleTitle.split(' ')[0]}</strong>
         </span>
         <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
       </button>
@@ -46,7 +46,7 @@ export function RoleSwitcherDropdown({
             </span>
             <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
               <Lock className="w-2.5 h-2.5 text-emerald-600" />
-              <span>RBAC Enforced</span>
+              <span>RBAC Active</span>
             </span>
           </div>
           {ROLE_LIST.map((r) => {
@@ -75,12 +75,12 @@ export function RoleSwitcherDropdown({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1">
-                    <span className="font-semibold text-slate-900 truncate">{meta.roleTitle}</span>
+                    <span className="font-semibold text-slate-900 truncate">{meta?.roleTitle || r}</span>
                     <span className="text-[10px] font-mono font-medium text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded shrink-0">
-                      {profile.badge}
+                      {profile?.badge || r}
                     </span>
                   </div>
-                  <div className="text-[11px] text-slate-500 font-normal truncate">{meta.name}</div>
+                  <div className="text-[11px] text-slate-500 font-normal truncate">{meta?.name || ''}</div>
                 </div>
               </button>
             );

@@ -1,4 +1,4 @@
-import { UserRole } from '../types';
+import { GroundUpRole, UserRole } from './types';
 
 export interface RoleAccessProfile {
   accessLevel: string;
@@ -7,20 +7,14 @@ export interface RoleAccessProfile {
   dataShields: string[];
 }
 
-export const ROLE_ACCESS_PROFILES: Record<UserRole, RoleAccessProfile> = {
-  DEVELOPER_OWNER: {
+const baseProfiles: Record<GroundUpRole, RoleAccessProfile> = {
+  OWNER: {
     accessLevel: 'Full Administrative Authority',
-    badge: 'Owner / Root Access',
+    badge: 'Owner / Developer',
     description: 'Full unconstrained access to underwriting, portfolio economics, pro forma ROI, loan covenants, and team settings.',
     dataShields: [],
   },
-  CFO: {
-    accessLevel: 'Financial & Ledger Authority',
-    badge: 'Financial Controller',
-    description: 'Full financial write access, draw preparation, contingency reallocation, and lien waiver audits.',
-    dataShields: ['Deal Lab pre-acquisition underwriting restricted'],
-  },
-  PM: {
+  PROJECT_MANAGER: {
     accessLevel: 'Field & Schedule Operations',
     badge: 'Field Operations',
     description: 'Operational schedule tracking, physical milestone inspections, and delay carrying cost attribution.',
@@ -30,34 +24,19 @@ export const ROLE_ACCESS_PROFILES: Record<UserRole, RoleAccessProfile> = {
       'Equity investor waterfall and unit pricing hidden',
     ],
   },
-  LENDER: {
-    accessLevel: 'Credit & Disbursement Authority',
-    badge: 'Bank Loan Officer',
-    description: 'Audits draw packages, verifies lien waivers, approves/rejects line items, and authorizes wire releases.',
-    dataShields: [
-      'Internal developer equity and profit margins hidden',
-      'Internal contractor disputes and unapproved change orders hidden',
-      'Deal Lab underwriting calculator restricted',
-    ],
+  FINANCE: {
+    accessLevel: 'Financial & Ledger Authority',
+    badge: 'Financial Controller',
+    description: 'Full financial write access, draw preparation, contingency reallocation, and lien waiver audits.',
+    dataShields: ['Direct contractor field log writing restricted'],
   },
-  GC_FIXED: {
-    accessLevel: 'Contractor Milestone Claims',
-    badge: 'General Contractor',
-    description: 'Submits milestone claims with photo proof and municipal inspection stickers under lump-sum contract.',
+  ACCOUNTANT: {
+    accessLevel: 'Accounting Ledger & Audit',
+    badge: 'Project Accountant',
+    description: 'Invoice ledger management, lien waiver audits, expense recording, and accounting reconciliation.',
     dataShields: [
-      'Total project pro forma profit and ROI masked',
-      'Unit sale pricing and buyer deposits hidden',
-      'Lender financing terms and bank covenants hidden',
-      'Other subcontractor invoices and rates shielded',
-    ],
-  },
-  GC_DAILY: {
-    accessLevel: 'Cost-Plus Field Reporting',
-    badge: 'Open-Book Contractor',
-    description: 'Submits daily site logs, worker counts, active trades, and material receipts with contracted 12% markup.',
-    dataShields: [
-      'Developer pro forma margins and investor waterfall shielded',
-      'Land acquisition costs and settlement statements hidden',
+      'Project deletion and deal lab underwriting restricted',
+      'Contingency reserve reallocation and wire releases restricted',
     ],
   },
   INVESTOR: {
@@ -70,12 +49,37 @@ export const ROLE_ACCESS_PROFILES: Record<UserRole, RoleAccessProfile> = {
       'Draw packet preparation and line approvals restricted',
     ],
   },
-  ACCOUNTANT: {
-    accessLevel: 'Accounting Ledger & Audit',
-    badge: 'Project Accountant',
-    description: 'Expense ledger maintenance, credit card reconciliation, and lien waiver verification.',
+  VIEWER: {
+    accessLevel: 'Read-Only Observer',
+    badge: 'Viewer',
+    description: 'Observer access: project overview dashboard, physical progress timeline, and shared public documents.',
     dataShields: [
-      'Project creation, equity waterfall, and lender disbursement restricted',
+      'All financial mutations and approvals blocked',
+      'Private underwriting and contract editing hidden',
     ],
   },
 };
+
+const gcProfile: RoleAccessProfile = {
+  accessLevel: 'Contractor Claims & Field Logs',
+  badge: 'General Contractor',
+  description: 'Submits milestone claims with photo proof, logs daily work reports, and submits change order requests.',
+  dataShields: [
+    'Total project pro forma profit and ROI masked',
+    'Unit sale pricing and buyer deposits hidden',
+    'Lender financing terms and bank covenants hidden',
+    'Other subcontractor invoices and rates shielded',
+  ],
+};
+
+const fullProfiles: Record<string, RoleAccessProfile> = {
+  ...baseProfiles,
+  GENERAL_CONTRACTOR: gcProfile,
+  DEVELOPER_OWNER: baseProfiles.OWNER,
+  CFO: baseProfiles.FINANCE,
+  PM: baseProfiles.PROJECT_MANAGER,
+  GC_FIXED: gcProfile,
+  GC_DAILY: gcProfile,
+};
+
+export const ROLE_ACCESS_PROFILES: Record<string, RoleAccessProfile> = fullProfiles;

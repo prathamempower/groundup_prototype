@@ -5,7 +5,6 @@ import { UserRole, ActiveNavScreen, Project } from '../../shared/types';
 
 export type OnboardingRole = 
   | 'OWNER'
-  | 'ADMIN'
   | 'PROJECT_MANAGER'
   | 'GENERAL_CONTRACTOR'
   | 'FINANCE'

@@ -121,7 +121,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       <ProjectEconomicsCard totalBudget={totalBudget} currentRole={currentRole} />
 
       {/* LOAN FACILITY & INTEREST RESERVE METER */}
-      <LoanFacilityCard />
+      <LoanFacilityCard currentRole={currentRole} />
     </div>
   );
 };

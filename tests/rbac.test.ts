@@ -1,6 +1,3 @@
-// GroundUp AI — RBAC Permission & Authorization Unit Tests
-// Tests role boundaries, screen access gates, and least-privilege enforcement
-
 import { describe, it, expect } from 'vitest';
 import { 
   hasPermission, 
@@ -9,138 +6,123 @@ import {
   isScreenPermitted, 
   getPermittedScreens, 
   getRoleDefaultScreen,
+  isProjectTabPermitted,
+  getPermittedProjectTabs,
+  getRoleDefaultTab,
   ROLE_PERMISSIONS,
-  ROLE_ALLOWED_SCREENS,
-  ROLE_ACCESS_PROFILES
-} from '../src/shared/rbac/matrix';
-import { UserRole } from '../src/shared/types';
+  ROLE_ACCESS_PROFILES,
+  GROUNDUP_ROLES,
+} from '../src/shared/rbac';
+import { UserRole } from '../src/shared/rbac/types';
 
-describe('RBAC: Role Permission Matrix & Boundaries', () => {
-  it('DEVELOPER_OWNER has root access across all critical capabilities', () => {
-    const ownerPermissions = ROLE_PERMISSIONS.DEVELOPER_OWNER;
-    expect(ownerPermissions).toContain('project:create');
-    expect(ownerPermissions).toContain('project:view_financials');
-    expect(ownerPermissions).toContain('deal_lab:access');
-    expect(ownerPermissions).toContain('change_order:approve');
-    expect(ownerPermissions).toContain('contingency:manage');
-    expect(ownerPermissions).toContain('draw:create_packet');
-    expect(ownerPermissions).toContain('project:settings');
-
-    expect(hasPermission('DEVELOPER_OWNER', 'project:view_financials')).toBe(true);
-    expect(hasPermission('DEVELOPER_OWNER', 'deal_lab:access')).toBe(true);
-    expect(getRoleDefaultScreen('DEVELOPER_OWNER')).toBe('portfolio');
+describe('RBAC: GroundUp Roles, Permissions & Navigation Matrix', () => {
+  it('OWNER has full administrative and portfolio capabilities', () => {
+    expect(hasPermission('OWNER', 'project:create')).toBe(true);
+    expect(hasPermission('OWNER', 'project:view_financials')).toBe(true);
+    expect(hasPermission('OWNER', 'deal_lab:access')).toBe(true);
+    expect(hasPermission('OWNER', 'change_order:approve')).toBe(true);
+    expect(hasPermission('OWNER', 'contingency:manage')).toBe(true);
+    expect(hasPermission('OWNER', 'draw:create_packet')).toBe(true);
+    expect(getRoleDefaultScreen('OWNER')).toBe('portfolio');
+    expect(getRoleDefaultTab('OWNER')).toBe('overview');
   });
 
-  it('LENDER is strictly isolated to draw review, waiver audits, and wire releases', () => {
-    expect(hasPermission('LENDER', 'draw:review_queue')).toBe(true);
-    expect(hasPermission('LENDER', 'draw:approve_lines')).toBe(true);
-    expect(hasPermission('LENDER', 'draw:disburse_wire')).toBe(true);
-    expect(hasPermission('LENDER', 'waiver:audit_view')).toBe(true);
-
-    // Forbidden actions
-    expect(hasPermission('LENDER', 'project:create')).toBe(false);
-    expect(hasPermission('LENDER', 'project:view_financials')).toBe(false);
-    expect(hasPermission('LENDER', 'deal_lab:access')).toBe(false);
-    expect(hasPermission('LENDER', 'change_order:approve')).toBe(false);
-    expect(hasPermission('LENDER', 'contingency:manage')).toBe(false);
-    expect(hasPermission('LENDER', 'project:settings')).toBe(false);
-
-    // Screen gates
-    expect(isScreenPermitted('LENDER', 'lender-portal')).toBe(true);
-    expect(isScreenPermitted('LENDER', 'document-intake')).toBe(true);
-    expect(isScreenPermitted('LENDER', 'deal-lab')).toBe(false);
-    expect(isScreenPermitted('LENDER', 'budget')).toBe(false);
-    expect(isScreenPermitted('LENDER', 'investor-portal')).toBe(false);
-    expect(getRoleDefaultScreen('LENDER')).toBe('lender-portal');
-  });
-
-  it('GC_FIXED cannot view proprietary developer pro forma, investor waterfall or bank facilities', () => {
-    expect(hasPermission('GC_FIXED', 'milestone_claim:submit')).toBe(true);
-    expect(hasPermission('GC_FIXED', 'milestone:view')).toBe(true);
-    expect(hasPermission('GC_FIXED', 'change_order:create')).toBe(true);
-
-    // Proprietary data shielding
-    expect(hasPermission('GC_FIXED', 'project:view_financials')).toBe(false);
-    expect(hasPermission('GC_FIXED', 'investor:view_waterfall')).toBe(false);
-    expect(hasPermission('GC_FIXED', 'deal_lab:access')).toBe(false);
-    expect(hasPermission('GC_FIXED', 'draw:disburse_wire')).toBe(false);
-
-    // Screen gates
-    expect(isScreenPermitted('GC_FIXED', 'gc-fixed-portal')).toBe(true);
-    expect(isScreenPermitted('GC_FIXED', 'timeline')).toBe(true);
-    expect(isScreenPermitted('GC_FIXED', 'deal-lab')).toBe(false);
-    expect(isScreenPermitted('GC_FIXED', 'investor-portal')).toBe(false);
-    expect(isScreenPermitted('GC_FIXED', 'lender-portal')).toBe(false);
-    expect(getRoleDefaultScreen('GC_FIXED')).toBe('gc-fixed-portal');
-  });
-
-  it('GC_DAILY can only post field logs and view milestones', () => {
-    expect(hasPermission('GC_DAILY', 'field_log:create')).toBe(true);
-    expect(hasPermission('GC_DAILY', 'milestone:view')).toBe(true);
-
-    // Prohibited
-    expect(hasPermission('GC_DAILY', 'project:view_financials')).toBe(false);
-    expect(hasPermission('GC_DAILY', 'deal_lab:access')).toBe(false);
-    expect(hasPermission('GC_DAILY', 'investor:view_waterfall')).toBe(false);
-
-    // Screen gates
-    expect(isScreenPermitted('GC_DAILY', 'gc-daily-portal')).toBe(true);
-    expect(isScreenPermitted('GC_DAILY', 'timeline')).toBe(true);
-    expect(isScreenPermitted('GC_DAILY', 'budget')).toBe(false);
-    expect(getRoleDefaultScreen('GC_DAILY')).toBe('gc-daily-portal');
-  });
-
-  it('INVESTOR has read-only transparency and cannot mutate budgets, draws, or field operations', () => {
+  it('INVESTOR has read-only transparency and cannot access budget or draw mutation tabs', () => {
     expect(hasPermission('INVESTOR', 'investor:view_waterfall')).toBe(true);
     expect(hasPermission('INVESTOR', 'investor:download_report')).toBe(true);
     expect(hasPermission('INVESTOR', 'unit_sales:view')).toBe(true);
 
-    // Prohibited modifications
+    // Prohibited mutations
     expect(hasPermission('INVESTOR', 'budget:edit')).toBe(false);
     expect(hasPermission('INVESTOR', 'change_order:create')).toBe(false);
-    expect(hasPermission('INVESTOR', 'change_order:approve')).toBe(false);
     expect(hasPermission('INVESTOR', 'draw:create_packet')).toBe(false);
-    expect(hasPermission('INVESTOR', 'milestone_claim:submit')).toBe(false);
-    expect(hasPermission('INVESTOR', 'waiver:audit_manage')).toBe(false);
 
-    // Screen gates
-    expect(isScreenPermitted('INVESTOR', 'investor-portal')).toBe(true);
-    expect(isScreenPermitted('INVESTOR', 'disposition')).toBe(true);
-    expect(isScreenPermitted('INVESTOR', 'budget')).toBe(false);
-    expect(isScreenPermitted('INVESTOR', 'settings')).toBe(false);
-    expect(getRoleDefaultScreen('INVESTOR')).toBe('investor-portal');
+    // Tab gating ensures no 403 screen is ever encountered
+    expect(isProjectTabPermitted('INVESTOR', 'overview')).toBe(true);
+    expect(isProjectTabPermitted('INVESTOR', 'disposition')).toBe(true);
+    expect(isProjectTabPermitted('INVESTOR', 'documents')).toBe(true);
+    expect(isProjectTabPermitted('INVESTOR', 'budget')).toBe(false);
+    expect(isProjectTabPermitted('INVESTOR', 'draws')).toBe(false);
+
+    const investorTabs = getPermittedProjectTabs('INVESTOR');
+    expect(investorTabs).toEqual(['overview', 'disposition', 'documents']);
+    expect(getRoleDefaultTab('INVESTOR')).toBe('overview');
   });
 
-  it('hasAllPermissions and hasAnyPermission evaluate composite permission lists accurately', () => {
-    expect(hasAllPermissions('DEVELOPER_OWNER', ['budget:view', 'budget:edit', 'change_order:approve'])).toBe(true);
-    expect(hasAllPermissions('PM', ['milestone:view', 'budget:edit'])).toBe(false);
+  it('GENERAL_CONTRACTOR can submit milestone claims and field logs but cannot see pro forma financials', () => {
+    expect(hasPermission('GENERAL_CONTRACTOR', 'milestone_claim:submit')).toBe(true);
+    expect(hasPermission('GENERAL_CONTRACTOR', 'field_log:create')).toBe(true);
+    expect(hasPermission('GENERAL_CONTRACTOR', 'change_order:create')).toBe(true);
 
-    expect(hasAnyPermission('PM', ['budget:edit', 'milestone:view'])).toBe(true);
-    expect(hasAnyPermission('LENDER', ['deal_lab:access', 'investor:view_waterfall'])).toBe(false);
+    // Prohibited proprietary figures
+    expect(hasPermission('GENERAL_CONTRACTOR', 'project:view_financials')).toBe(false);
+    expect(hasPermission('GENERAL_CONTRACTOR', 'investor:view_waterfall')).toBe(false);
+    expect(hasPermission('GENERAL_CONTRACTOR', 'deal_lab:access')).toBe(false);
+
+    // Project tabs
+    expect(isProjectTabPermitted('GENERAL_CONTRACTOR', 'timeline')).toBe(true);
+    expect(isProjectTabPermitted('GENERAL_CONTRACTOR', 'budget')).toBe(false);
+    expect(isProjectTabPermitted('GENERAL_CONTRACTOR', 'draws')).toBe(false);
+    expect(getRoleDefaultTab('GENERAL_CONTRACTOR')).toBe('timeline');
   });
 
-  it('Every role has a defined access profile and designated default landing screen', () => {
-    const roles: UserRole[] = [
-      'DEVELOPER_OWNER',
-      'CFO',
-      'PM',
-      'LENDER',
-      'GC_FIXED',
-      'GC_DAILY',
-      'INVESTOR',
+  it('PROJECT_MANAGER manages schedule, inspections, and delays', () => {
+    expect(hasPermission('PROJECT_MANAGER', 'milestone:view')).toBe(true);
+    expect(hasPermission('PROJECT_MANAGER', 'milestone:log_progress')).toBe(true);
+    expect(hasPermission('PROJECT_MANAGER', 'delay:attribute')).toBe(true);
+
+    expect(isProjectTabPermitted('PROJECT_MANAGER', 'timeline')).toBe(true);
+    expect(isProjectTabPermitted('PROJECT_MANAGER', 'draws')).toBe(false);
+  });
+
+  it('FINANCE and ACCOUNTANT have full ledger and reconciliation authority', () => {
+    expect(hasPermission('FINANCE', 'accounting:recon_matrix')).toBe(true);
+    expect(hasPermission('FINANCE', 'contingency:manage')).toBe(true);
+    expect(hasPermission('FINANCE', 'draw:create_packet')).toBe(true);
+    expect(getRoleDefaultTab('FINANCE')).toBe('budget');
+
+    expect(hasPermission('ACCOUNTANT', 'accounting:recon_matrix')).toBe(true);
+    expect(hasPermission('ACCOUNTANT', 'waiver:audit_manage')).toBe(true);
+    expect(hasPermission('ACCOUNTANT', 'contingency:manage')).toBe(false);
+  });
+
+  it('All GroundUp roles have canonical definitions, access profiles, and default landings', () => {
+    const canonicalRoles: UserRole[] = [
+      'OWNER',
+      'PROJECT_MANAGER',
+      'GENERAL_CONTRACTOR',
+      'FINANCE',
       'ACCOUNTANT',
+      'INVESTOR',
+      'VIEWER',
     ];
 
-    roles.forEach(role => {
+    canonicalRoles.forEach((role) => {
       const screens = getPermittedScreens(role);
       const defaultScreen = getRoleDefaultScreen(role);
+      const tabs = getPermittedProjectTabs(role);
+      const defaultTab = getRoleDefaultTab(role);
+      const def = GROUNDUP_ROLES[role];
       const profile = ROLE_ACCESS_PROFILES[role];
 
       expect(screens.length).toBeGreaterThan(0);
       expect(screens).toContain(defaultScreen);
+      expect(tabs.length).toBeGreaterThan(0);
+      expect(tabs).toContain(defaultTab);
+      expect(def).toBeDefined();
+      expect(def.roleTitle).toBeTruthy();
       expect(profile).toBeDefined();
-      expect(profile.accessLevel).toBeTruthy();
       expect(profile.badge).toBeTruthy();
     });
+  });
+
+  it('Supports legacy aliases and treats LENDER strictly as an external Party with no user permissions', () => {
+    expect(hasPermission('DEVELOPER_OWNER', 'project:create')).toBe(true);
+    expect(hasPermission('CFO', 'accounting:recon_matrix')).toBe(true);
+    expect(hasPermission('PM', 'delay:attribute')).toBe(true);
+    expect(hasPermission('GC_FIXED', 'milestone_claim:submit')).toBe(true);
+    expect(hasPermission('GC_DAILY', 'field_log:create')).toBe(true);
+    expect(hasPermission('LENDER', 'draw:review_queue')).toBe(false);
+    expect(hasPermission('LENDER', 'project:create')).toBe(false);
   });
 });

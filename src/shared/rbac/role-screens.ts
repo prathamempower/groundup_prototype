@@ -1,94 +1,111 @@
-import { UserRole } from '../types';
+import { ActiveNavScreen, GroundUpRole, UserRole } from './types';
 
-export type ActiveNavScreen = 
-  | 'portfolio' 
-  | 'project-detail' 
-  | 'budget' 
-  | 'draws' 
-  | 'timeline' 
-  | 'documents' 
-  | 'disposition' 
-  | 'deal-lab' 
-  | 'alerts' 
-  | 'settings' 
-  | 'lender-portal' 
-  | 'gc-fixed-portal' 
-  | 'gc-daily-portal' 
-  | 'cfo-recon' 
-  | 'investor-portal' 
-  | 'document-intake';
-
-export const ROLE_ALLOWED_SCREENS: Record<UserRole, ActiveNavScreen[]> = {
-  DEVELOPER_OWNER: [
+const baseScreens: Record<GroundUpRole, ActiveNavScreen[]> = {
+  OWNER: [
     'portfolio',
     'project-detail',
+    'acquisition',
+    'permits',
+    'financing',
     'budget',
     'draws',
     'timeline',
     'documents',
     'disposition',
+    'recon',
+    'reports',
     'deal-lab',
     'alerts',
     'settings',
-    'lender-portal',
-    'gc-fixed-portal',
-    'gc-daily-portal',
     'cfo-recon',
     'investor-portal',
-    'document-intake',
+    'gc-fixed-portal',
+    'gc-daily-portal',
   ],
-  CFO: [
+  FINANCE: [
     'portfolio',
     'project-detail',
+    'acquisition',
+    'financing',
     'budget',
     'draws',
     'timeline',
     'documents',
     'disposition',
+    'recon',
+    'reports',
     'alerts',
     'settings',
     'cfo-recon',
-    'document-intake',
+    'investor-portal',
   ],
-  PM: [
+  PROJECT_MANAGER: [
+    'portfolio',
     'project-detail',
+    'acquisition',
+    'permits',
+    'budget',
     'timeline',
     'documents',
     'alerts',
     'gc-daily-portal',
   ],
-  LENDER: [
-    'lender-portal',
-    'document-intake',
-  ],
-  GC_FIXED: [
-    'gc-fixed-portal',
-    'timeline',
-  ],
-  GC_DAILY: [
-    'gc-daily-portal',
-    'timeline',
-  ],
-  INVESTOR: [
-    'investor-portal',
-    'disposition',
-  ],
   ACCOUNTANT: [
-    'cfo-recon',
+    'project-detail',
     'budget',
     'draws',
     'documents',
-    'document-intake',
+    'recon',
+    'reports',
+    'cfo-recon',
+  ],
+  INVESTOR: [
+    'project-detail',
+    'investor-portal',
+    'disposition',
+    'documents',
+    'reports',
+  ],
+  VIEWER: [
+    'project-detail',
+    'permits',
+    'timeline',
+    'documents',
+    'reports',
   ],
 };
 
-export const ROLE_DEFAULT_SCREEN: Record<UserRole, ActiveNavScreen> = {
+const fullScreens: Record<string, ActiveNavScreen[]> = {
+  ...baseScreens,
+  GENERAL_CONTRACTOR: [
+    'project-detail',
+    'timeline',
+    'budget',
+    'documents',
+    'alerts',
+    'gc-fixed-portal',
+    'gc-daily-portal',
+  ],
+  DEVELOPER_OWNER: baseScreens.OWNER,
+  CFO: baseScreens.FINANCE,
+  PM: baseScreens.PROJECT_MANAGER,
+  GC_FIXED: ['gc-fixed-portal', 'timeline', 'project-detail'],
+  GC_DAILY: ['gc-daily-portal', 'timeline', 'project-detail'],
+};
+
+export const ROLE_ALLOWED_SCREENS: Record<string, ActiveNavScreen[]> = fullScreens;
+
+export const ROLE_DEFAULT_SCREEN: Record<string, ActiveNavScreen> = {
+  OWNER: 'portfolio',
+  PROJECT_MANAGER: 'timeline',
+  GENERAL_CONTRACTOR: 'timeline',
+  FINANCE: 'portfolio',
+  ACCOUNTANT: 'budget',
+  INVESTOR: 'project-detail',
+  VIEWER: 'project-detail',
   DEVELOPER_OWNER: 'portfolio',
-  CFO: 'cfo-recon',
+  CFO: 'portfolio',
   PM: 'timeline',
-  LENDER: 'lender-portal',
-  GC_FIXED: 'gc-fixed-portal',
-  GC_DAILY: 'gc-daily-portal',
-  INVESTOR: 'investor-portal',
-  ACCOUNTANT: 'cfo-recon',
+  GC_FIXED: 'timeline',
+  GC_DAILY: 'timeline',
 };

@@ -38,7 +38,7 @@ export interface IDrawService {
       lines: LenderReviewLineItemDTO[];
       lender_notes?: string;
     },
-    actorRole?: UserRole
+    actorRole?: UserRole | 'LENDER'
   ): Promise<Draw>;
 
   /**
@@ -56,6 +56,6 @@ export interface IDrawService {
   recordWireDisbursement(
     drawId: string,
     disbursedAmount: number,
-    actorRole?: UserRole
+    actorRole?: UserRole | 'LENDER'
   ): Promise<RecordWireDisbursementResponseDTO>;
 }

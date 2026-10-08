@@ -63,6 +63,29 @@ export function StatusStep({ formData, onChange }: StatusStepProps) {
             ))}
           </div>
         </div>
+
+        {(formData.acquisitionStatus === 'Acquired' || formData.acquisitionStatus === 'Under Contract') && (
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+            <div className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+              HUD-1 Settlement Statement / Due Diligence
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">
+                Settlement Statement / Closing HUD-1 Document Name
+              </label>
+              <input
+                type="text"
+                value={formData.hudDocumentName || ''}
+                onChange={(e) => onChange('hudDocumentName', e.target.value)}
+                placeholder="e.g. HUD1_Settlement_Statement_Executed.pdf"
+                className={inputClass}
+              />
+              <span className="text-[11px] text-slate-500 mt-1 block">
+                Source document for land cost baseline, transfer tax, and title escrow records.
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ import { ReviewStep } from './components/ReviewStep';
 import { NewProjectActionBar } from './components/NewProjectActionBar';
 
 interface NewProjectScreenProps {
-  onComplete: () => void;
+  onComplete: (data?: ProjectFormData) => void;
   onCancel: () => void;
 }
 
@@ -47,7 +47,7 @@ export function NewProjectScreen({ onComplete, onCancel }: NewProjectScreenProps
     setIsSubmitting(true);
     setTimeout(() => {
       localStorage.removeItem('newProjectFormData');
-      onComplete();
+      onComplete(formData);
     }, 800);
   };
 
@@ -60,8 +60,9 @@ export function NewProjectScreen({ onComplete, onCancel }: NewProjectScreenProps
       <div className="flex-1 flex overflow-hidden">
         <NewProjectSidebar currentStepIndex={currentStepIndex} />
 
-        <div className="flex-1 overflow-y-auto p-8 relative bg-slate-50">
-          <div className="max-w-2xl mx-auto pb-24">
+        <div className="flex-1 flex flex-col relative bg-slate-50">
+          <div className="flex-1 overflow-y-auto p-8">
+          <div className="max-w-2xl mx-auto pb-8">
             <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-8">
               {currentStep.id === 'foundation' && (
                 <FoundationStep formData={formData} onChange={handleChange} />
@@ -78,6 +79,7 @@ export function NewProjectScreen({ onComplete, onCancel }: NewProjectScreenProps
             </div>
           </div>
 
+          </div>
           <NewProjectActionBar
             currentStepIndex={currentStepIndex}
             isSubmitting={isSubmitting}

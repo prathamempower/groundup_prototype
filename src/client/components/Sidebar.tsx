@@ -54,36 +54,28 @@ export function Sidebar({
   builderProfile,
   pendingDrawsCount = 0,
   alertsCount = 0,
-  currentRole = 'DEVELOPER_OWNER',
+  currentRole = 'OWNER',
 }: SidebarProps) {
   const coreNav = [
     { id: 'portfolio' as const, label: 'Portfolio', icon: LayoutGrid },
-    { id: 'project-detail' as const, label: 'Control Center', icon: Building2 },
     { id: 'deal-lab' as const, label: 'Deal Lab', icon: Sparkles },
+    { id: 'documents' as const, label: 'Document Inbox', icon: FolderOpen },
+    { id: 'reports' as const, label: 'Reports & Audits', icon: FileCheck },
   ];
 
   const projectModulesNav = [
+    { id: 'project-detail' as const, label: 'Control Center', icon: Building2 },
     { id: 'budget' as const, label: 'Budget & Contingency', icon: DollarSign },
     { id: 'draws' as const, label: 'Draw Lab', icon: FileCheck, badge: pendingDrawsCount },
-    { id: 'timeline' as const, label: 'Milestones & Delay', icon: Clock },
-    { id: 'documents' as const, label: 'Document Inbox', icon: FolderOpen },
+    { id: 'timeline' as const, label: 'Milestones & Delays', icon: Clock },
+    { id: 'recon' as const, label: 'Financial Recon', icon: Scale },
     { id: 'disposition' as const, label: 'Unit Sales & ROI', icon: Home },
     { id: 'alerts' as const, label: 'Risk Alerts', icon: BellRing, badge: alertsCount },
   ];
 
-  const rolePortalsNav = [
-    { id: 'lender-portal' as const, label: 'Lender Draw Queue', icon: Landmark },
-    { id: 'gc-fixed-portal' as const, label: 'GC Fixed Claims', icon: Hammer },
-    { id: 'gc-daily-portal' as const, label: 'GC Daily Logs', icon: ClipboardList },
-    { id: 'cfo-recon' as const, label: 'CFO & Lien Audit', icon: Scale },
-    { id: 'investor-portal' as const, label: 'Investor Transparency', icon: TrendingUp },
-    { id: 'document-intake' as const, label: 'Document Repository', icon: FolderArchive },
-  ];
-
-  const roleProfile = ROLE_ACCESS_PROFILES[currentRole] || ROLE_ACCESS_PROFILES.DEVELOPER_OWNER;
+  const roleProfile = ROLE_ACCESS_PROFILES[currentRole] || ROLE_ACCESS_PROFILES.OWNER;
   const visibleCoreNav = coreNav.filter((item) => isScreenPermitted(currentRole, item.id));
   const visibleProjectModules = projectModulesNav.filter((item) => isScreenPermitted(currentRole, item.id));
-  const visibleRolePortals = rolePortalsNav.filter((item) => isScreenPermitted(currentRole, item.id));
   const isSettingsAllowed = isScreenPermitted(currentRole, 'settings');
   const canAddProject = hasPermission(currentRole, 'project:create');
 
@@ -102,13 +94,6 @@ export function Sidebar({
         <SidebarNavGroup
           title="Project Modules"
           items={visibleProjectModules}
-          currentScreen={currentScreen}
-          onNavigate={onNavigate}
-        />
-
-        <SidebarNavGroup
-          title="External Portals"
-          items={visibleRolePortals}
           currentScreen={currentScreen}
           onNavigate={onNavigate}
         />

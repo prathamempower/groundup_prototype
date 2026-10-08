@@ -16,13 +16,6 @@ export const ROOT_QUESTIONS: Record<string, QuestionDefinition> = {
         iconName: 'Building2',
       },
       {
-        value: 'ADMIN',
-        label: 'Workspace Admin',
-        badge: 'Operations',
-        description: 'Configures company entities, team member invites, accounting integrations, and organizational governance.',
-        iconName: 'Settings',
-      },
-      {
         value: 'PROJECT_MANAGER',
         label: 'Project Manager',
         badge: 'Field Operations',
@@ -72,7 +65,6 @@ export const ROOT_QUESTIONS: Record<string, QuestionDefinition> = {
     getNextQuestionId: (state) => {
       switch (state.role) {
         case 'OWNER': return 'owner_mode';
-        case 'ADMIN': return 'admin_workspace_scope';
         case 'PROJECT_MANAGER': return 'pm_project_assignment';
         case 'GENERAL_CONTRACTOR': return 'gc_business_profile';
         case 'FINANCE': return 'fin_primary_mandate';

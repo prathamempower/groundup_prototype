@@ -44,7 +44,7 @@ export function ProjectDetailScreen(props: ProjectDetailScreenProps) {
     onInspectProvenance,
     initialTab = 'overview',
     onTabChange,
-    currentRole = 'DEVELOPER_OWNER',
+    currentRole = 'OWNER',
     isDrawPacketModalOpen = false,
     onCloseDrawPacketModal,
     isChangeOrderModalOpen = false,
@@ -82,6 +82,7 @@ export function ProjectDetailScreen(props: ProjectDetailScreenProps) {
 
           <ProjectDetailNav
             activeTab={state.activeTab}
+            currentRole={currentRole}
             pendingDrawsCount={state.draws.filter(d => d.status === 'pending').length}
             unresolvedAlertsCount={state.alerts.filter(a => !a.resolved).length}
             onTabSelect={handleTabSelect}

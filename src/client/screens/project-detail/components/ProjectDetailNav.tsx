@@ -7,11 +7,18 @@ import {
   FolderOpen,
   Home,
   BellRing,
+  MapPin,
+  Building,
+  Landmark,
+  Scale,
 } from 'lucide-react';
 import { ProjectTab } from '../types';
+import { UserRole } from '../../../../shared/types';
+import { isProjectTabPermitted } from '../../../../shared/rbac';
 
 export interface ProjectDetailNavProps {
   activeTab: ProjectTab;
+  currentRole?: UserRole | string;
   onTabChange?: (tab: ProjectTab) => void;
   onTabSelect?: (tab: ProjectTab) => void;
   pendingDrawsCount: number;
@@ -20,6 +27,7 @@ export interface ProjectDetailNavProps {
 
 export const ProjectDetailNav: React.FC<ProjectDetailNavProps> = ({
   activeTab,
+  currentRole = 'OWNER',
   onTabChange,
   onTabSelect,
   pendingDrawsCount,
@@ -29,19 +37,26 @@ export const ProjectDetailNav: React.FC<ProjectDetailNavProps> = ({
     onTabChange?.(tab);
     onTabSelect?.(tab);
   };
-  const tabs: Array<{ id: ProjectTab; label: string; icon: any; badge?: number }> = [
+
+  const allTabs: Array<{ id: ProjectTab; label: string; icon: any; badge?: number }> = [
     { id: 'overview', label: 'Control Center', icon: LayoutDashboard },
+    { id: 'acquisition', label: 'Acquisition & Closing', icon: MapPin },
+    { id: 'permits', label: 'Planning & Permits', icon: Building },
+    { id: 'financing', label: 'Financing & Debt', icon: Landmark },
     { id: 'budget', label: 'Budget & Contingency', icon: DollarSign },
-    { id: 'draws', label: 'Draw Lab', icon: FileCheck, badge: pendingDrawsCount },
     { id: 'timeline', label: 'Milestones & Delay', icon: Clock },
-    { id: 'documents', label: 'Document Inbox & Amex', icon: FolderOpen },
+    { id: 'draws', label: 'Draw Lab', icon: FileCheck, badge: pendingDrawsCount },
     { id: 'disposition', label: 'Unit Sales & ROI', icon: Home },
+    { id: 'recon', label: 'Recon & Lien Audit', icon: Scale },
+    { id: 'documents', label: 'Document Inbox & Amex', icon: FolderOpen },
     { id: 'alerts', label: 'Risk Alerts', icon: BellRing, badge: unresolvedAlertsCount },
   ];
 
+  const permittedTabs = allTabs.filter(tab => isProjectTabPermitted(currentRole, tab.id));
+
   return (
     <div className="flex gap-1 overflow-x-auto border-b border-slate-200 -mb-px pt-2">
-      {tabs.map((tab) => {
+      {permittedTabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
         return (

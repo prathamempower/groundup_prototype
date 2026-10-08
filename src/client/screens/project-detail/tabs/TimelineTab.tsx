@@ -12,7 +12,7 @@ interface TimelineTabProps {
 
 export const TimelineTab: React.FC<TimelineTabProps> = ({
   milestones,
-  currentRole = 'DEVELOPER_OWNER',
+  currentRole = 'OWNER',
   onSelectMilestoneForEdit,
   onEditMilestone,
 }) => {
@@ -78,6 +78,77 @@ export const TimelineTab: React.FC<TimelineTabProps> = ({
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Geotagged Photo Proof Hub */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div>
+            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <span>Geotagged Photo Proof Hub</span>
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Deterministic photographic evidence with embedded EXIF GPS timestamps backing milestone completion.
+            </p>
+          </div>
+          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            4 Certified Field Proofs
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            {
+              title: 'Foundation Grade Beams',
+              milestone: 'Foundation & Excavation',
+              gps: '40.7439° N, 74.0323° W',
+              date: 'Oct 04, 2026 09:14 AM',
+              status: 'Town Inspector Passed',
+              color: 'bg-emerald-500',
+            },
+            {
+              title: 'Framing 3rd Floor Trusses',
+              milestone: 'Superstructure Framing',
+              gps: '40.7439° N, 74.0323° W',
+              date: 'Oct 06, 2026 02:40 PM',
+              status: 'AIA Field Verification',
+              color: 'bg-blue-500',
+            },
+            {
+              title: 'Rough DWV Pressure Test',
+              milestone: 'MEP Rough-Ins',
+              gps: '40.7439° N, 74.0323° W',
+              date: 'Oct 07, 2026 11:22 AM',
+              status: 'Pressure Gauge 50 PSI',
+              color: 'bg-emerald-500',
+            },
+            {
+              title: 'Helical Piles Torque Log',
+              milestone: 'Foundation & Excavation',
+              gps: '40.7439° N, 74.0323° W',
+              date: 'Oct 08, 2026 04:15 PM',
+              status: 'Engineer Stamped',
+              color: 'bg-purple-500',
+            },
+          ].map((photo, idx) => (
+            <div key={idx} className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2 hover:border-slate-300 transition">
+              <div className="h-28 bg-slate-200 rounded-lg flex items-center justify-center relative overflow-hidden text-slate-400 font-mono text-[11px]">
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-2">
+                  <span className="text-[10px] text-white font-mono">{photo.gps}</span>
+                </div>
+                <span>[FIELD IMAGE EVIDENCE]</span>
+              </div>
+              <div>
+                <div className="font-bold text-xs text-slate-900 truncate">{photo.title}</div>
+                <div className="text-[11px] text-slate-500 truncate">{photo.milestone}</div>
+              </div>
+              <div className="text-[10px] font-mono text-slate-400 flex justify-between pt-1 border-t border-slate-200/60">
+                <span>{photo.date.split(' ')[0]}</span>
+                <span className="font-semibold text-emerald-700">{photo.status}</span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

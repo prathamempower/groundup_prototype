@@ -15,7 +15,7 @@ export function executeMockLenderReview(
     lines: LenderReviewLineItemDTO[];
     lender_notes?: string;
   },
-  actorRole: UserRole = 'LENDER'
+  actorRole: UserRole | 'LENDER' = 'LENDER'
 ): Draw {
   const draw = mockStore.draws.find((d) => d.id === drawId);
   if (!draw) throw new Error(`Draw ${drawId} not found.`);
@@ -126,7 +126,7 @@ export function executeMockDrawRevision(
 export function executeMockWireDisbursement(
   drawId: string,
   disbursedAmount: number,
-  actorRole: UserRole = 'LENDER'
+  actorRole: UserRole | 'LENDER' = 'LENDER'
 ): RecordWireDisbursementResponseDTO {
   const draw = mockStore.draws.find((d) => d.id === drawId);
   if (!draw) throw new Error(`Draw ${drawId} not found.`);

@@ -53,6 +53,27 @@ export function ReviewStep({ formData }: ReviewStepProps) {
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Target Completion</p>
           <p className="font-bold text-slate-900">{formData.targetCompletionDate || '-'}</p>
         </div>
+        <div>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Contract Model</p>
+          <p className="font-bold text-slate-900">
+            {formData.contractModel === 'OPEN_BOOK' ? 'Open-Book (Cost Plus / T&M)' : 'Fixed-Price (Lump Sum)'}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Funding & Lender</p>
+          <p className="font-bold text-slate-900">
+            {formData.fundingMethod || 'All Cash'}
+            {formData.lenderName ? ` (${formData.lenderName})` : ''}
+          </p>
+        </div>
+        {formData.hudDocumentName && (
+          <div className="col-span-2">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Closing HUD Document</p>
+            <p className="font-mono text-xs text-slate-800 bg-slate-100 p-2 rounded-lg border border-slate-200">
+              {formData.hudDocumentName}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

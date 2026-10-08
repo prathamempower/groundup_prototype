@@ -1,7 +1,15 @@
-import React from 'react';
 import { Landmark } from 'lucide-react';
+import { UserRole } from '../../../../shared/types';
+import { hasPermission } from '../../../../shared/rbac/matrix';
 
-export const LoanFacilityCard: React.FC = () => {
+interface LoanFacilityCardProps {
+  currentRole?: UserRole;
+}
+
+export const LoanFacilityCard: React.FC<LoanFacilityCardProps> = ({ currentRole = 'OWNER' }) => {
+  if (currentRole === 'GENERAL_CONTRACTOR' || !hasPermission(currentRole, 'project:view_financials')) {
+    return null;
+  }
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4 text-xs">
       <div className="flex items-center justify-between">

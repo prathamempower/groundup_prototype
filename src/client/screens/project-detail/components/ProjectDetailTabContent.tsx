@@ -2,9 +2,13 @@ import React from 'react';
 import { UserRole } from '../../../../shared/types';
 import { useProjectDetailState } from '../use-project-detail-state';
 import { OverviewTab } from '../tabs/OverviewTab';
+import { AcquisitionTab } from '../tabs/AcquisitionTab';
+import { PermitsTab } from '../tabs/PermitsTab';
+import { FinancingTab } from '../tabs/FinancingTab';
 import { BudgetTab } from '../tabs/BudgetTab';
 import { DrawsTab } from '../tabs/DrawsTab';
 import { TimelineTab } from '../tabs/TimelineTab';
+import { ReconTab } from '../tabs/ReconTab';
 import { DocumentsTab } from '../tabs/DocumentsTab';
 import { DispositionTab } from '../tabs/DispositionTab';
 import { AlertsTab } from '../tabs/AlertsTab';
@@ -24,6 +28,9 @@ export const ProjectDetailTabContent: React.FC<ProjectDetailTabContentProps> = (
   onOpenLenderPackage,
   onOpenInvoices,
 }) => {
+  const projectName = state.selectedProject?.name;
+  const projectAddress = state.selectedProject?.address;
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
       {state.activeTab === 'overview' && (
@@ -34,6 +41,28 @@ export const ProjectDetailTabContent: React.FC<ProjectDetailTabContentProps> = (
           cashExposure={state.cashExposure}
           currentRole={currentRole}
           onInspectProvenance={onInspectProvenance}
+        />
+      )}
+
+      {state.activeTab === 'acquisition' && (
+        <AcquisitionTab
+          currentRole={currentRole}
+          projectName={projectName}
+          projectAddress={projectAddress}
+        />
+      )}
+
+      {state.activeTab === 'permits' && (
+        <PermitsTab
+          currentRole={currentRole}
+          projectName={projectName}
+        />
+      )}
+
+      {state.activeTab === 'financing' && (
+        <FinancingTab
+          currentRole={currentRole}
+          projectName={projectName}
         />
       )}
 
@@ -97,6 +126,7 @@ export const ProjectDetailTabContent: React.FC<ProjectDetailTabContentProps> = (
 
       {state.activeTab === 'documents' && (
         <DocumentsTab
+          currentRole={currentRole}
           amexTransactions={state.amexTransactions}
           onConfirmAmexMatch={state.handleConfirmAmexMatch}
           onReviewDoc={(doc) => state.setSelectedDocForReview(doc)}
@@ -106,6 +136,13 @@ export const ProjectDetailTabContent: React.FC<ProjectDetailTabContentProps> = (
 
       {state.activeTab === 'disposition' && (
         <DispositionTab unitSales={state.unitSales} />
+      )}
+
+      {state.activeTab === 'recon' && (
+        <ReconTab
+          currentRole={currentRole}
+          projectName={projectName}
+        />
       )}
 
       {state.activeTab === 'alerts' && (

@@ -14,12 +14,6 @@ export function resolveTargetWorkspace(state: OnboardingState): {
         roleDisplayName: 'Developer / Owner',
       };
 
-    case 'ADMIN':
-      return {
-        role: 'DEVELOPER_OWNER',
-        targetScreen: 'settings',
-        roleDisplayName: 'Workspace Admin',
-      };
 
     case 'PROJECT_MANAGER':
       return {

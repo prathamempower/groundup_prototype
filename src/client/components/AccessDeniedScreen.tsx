@@ -1,10 +1,7 @@
-// GroundUp AI — 403 Access Restricted Screen
-// Explains role isolation, data confidentiality boundaries, and provides guided navigation
-
 import React from 'react';
 import { ShieldAlert, ArrowLeft, Lock, CheckCircle2, UserCheck } from 'lucide-react';
 import { UserRole, USER_ROLES } from '../../shared/types';
-import { ActiveNavScreen, ROLE_ACCESS_PROFILES, getRoleDefaultScreen, getPermittedScreens } from '../../shared/rbac/matrix';
+import { ActiveNavScreen, ROLE_ACCESS_PROFILES, getRoleDefaultScreen, getPermittedScreens } from '../../shared/rbac';
 
 interface AccessDeniedScreenProps {
   requestedScreen: ActiveNavScreen;
@@ -19,8 +16,8 @@ export function AccessDeniedScreen({
   onNavigate,
   onSwitchRole,
 }: AccessDeniedScreenProps) {
-  const roleMeta = USER_ROLES[currentRole] || USER_ROLES.DEVELOPER_OWNER;
-  const profile = ROLE_ACCESS_PROFILES[currentRole];
+  const roleMeta = USER_ROLES[currentRole] || USER_ROLES.OWNER;
+  const profile = ROLE_ACCESS_PROFILES[currentRole] || ROLE_ACCESS_PROFILES.OWNER;
   const defaultScreen = getRoleDefaultScreen(currentRole);
   const permittedScreens = getPermittedScreens(currentRole);
 
@@ -34,7 +31,6 @@ export function AccessDeniedScreen({
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-6">
       <div className="max-w-xl w-full bg-white border border-slate-200 rounded-3xl p-8 shadow-sm space-y-6 text-center">
-        {/* Lock Icon Banner */}
         <div className="mx-auto w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
           <ShieldAlert className="w-8 h-8" />
         </div>
@@ -52,7 +48,6 @@ export function AccessDeniedScreen({
           </p>
         </div>
 
-        {/* Security / Confidentiality Explanation */}
         <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left space-y-2.5">
           <div className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between">
             <span>Role Isolation & Confidentiality Shields</span>
@@ -75,7 +70,6 @@ export function AccessDeniedScreen({
           )}
         </div>
 
-        {/* Permitted Workspaces for Active Role */}
         <div className="text-left space-y-2">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
             Authorized Workspaces for {roleMeta.roleTitle}:
@@ -94,7 +88,6 @@ export function AccessDeniedScreen({
           </div>
         </div>
 
-        {/* Actions */}
         <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-center gap-3">
           <button
             onClick={() => onNavigate(defaultScreen)}
@@ -104,13 +97,13 @@ export function AccessDeniedScreen({
             <span>Return to {formatScreenName(defaultScreen)}</span>
           </button>
 
-          {onSwitchRole && currentRole !== 'DEVELOPER_OWNER' && (
+          {onSwitchRole && currentRole !== 'OWNER' && (
             <button
-              onClick={() => onSwitchRole('DEVELOPER_OWNER')}
+              onClick={() => onSwitchRole('OWNER')}
               className="w-full sm:w-auto px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 text-xs font-semibold rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5"
             >
               <UserCheck className="w-3.5 h-3.5 text-slate-600" />
-              <span>Switch to Developer / Owner</span>
+              <span>Switch to Project Owner</span>
             </button>
           )}
         </div>

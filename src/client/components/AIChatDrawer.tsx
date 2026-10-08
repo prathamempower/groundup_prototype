@@ -93,34 +93,31 @@ export function AIChatDrawer({ isOpen, onClose, projectId, projectName, userCont
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-white shadow-2xl flex flex-col h-full border-l border-slate-200">
+    <div className="fixed bottom-24 right-6 z-50 w-[380px] h-[600px] max-h-[calc(100vh-120px)] bg-white shadow-2xl flex flex-col rounded-2xl border border-slate-200 overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-900 text-white">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-slate-900" />
+            <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-sm border border-emerald-200">
+              <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-semibold text-sm">AI Financial Analyst</div>
-              <div className="text-xs text-slate-400">{projectName}</div>
+              <div className="font-semibold text-sm text-slate-900">AI Financial Analyst</div>
+              <div className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">{projectName}</div>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-800 transition cursor-pointer">
+          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500 transition cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Quick questions */}
-        <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
-          <div className="text-xs text-slate-500 font-medium mb-2">Quick questions:</div>
-          <div className="flex flex-wrap gap-1.5">
+        <div className="px-5 py-3 bg-slate-50/50">
+          <div className="flex flex-wrap gap-2">
             {QUICK_QUESTIONS.slice(0, 3).map(q => (
               <button
                 key={q}
                 onClick={() => handleSend(q)}
-                className="text-xs bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-full hover:bg-slate-900 hover:text-white hover:border-slate-900 transition cursor-pointer"
+                className="text-[11px] font-medium bg-white border border-slate-200 text-slate-600 px-3 py-1.5 rounded-full hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer shadow-sm"
               >
                 {q}
               </button>
@@ -129,26 +126,26 @@ export function AIChatDrawer({ isOpen, onClose, projectId, projectName, userCont
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-5 py-6 space-y-5 bg-white">
           {messages.map(msg => (
-            <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-slate-900 text-white' : 'bg-emerald-100 text-emerald-700'}`}>
-                {msg.role === 'user' ? <User className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
+            <div key={msg.id} className={`flex gap-3 items-end ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm ${msg.role === 'user' ? 'bg-slate-900 text-white' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
+                {msg.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
               </div>
-              <div className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm ${msg.role === 'user' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'}`}>
+              <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-[13px] shadow-sm ${msg.role === 'user' ? 'bg-slate-900 text-white rounded-br-sm' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm'}`}>
                 <div className="leading-relaxed whitespace-pre-wrap">{msg.content}</div>
               </div>
             </div>
           ))}
           {isThinking && (
-            <div className="flex gap-3">
-              <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                <Bot className="w-3.5 h-3.5" />
+            <div className="flex gap-3 items-end">
+              <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
+                <Bot className="w-4 h-4" />
               </div>
-              <div className="bg-slate-100 rounded-xl px-3.5 py-2.5 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-sm px-4 py-3 flex items-center gap-1.5 shadow-sm">
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
             </div>
           )}
@@ -156,25 +153,24 @@ export function AIChatDrawer({ isOpen, onClose, projectId, projectName, userCont
         </div>
 
         {/* Input */}
-        <div className="px-4 py-3 border-t border-slate-200">
-          <div className="flex gap-2">
+        <div className="p-4 bg-white border-t border-slate-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)]">
+          <div className="relative flex items-center">
             <input
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-              placeholder="Ask about budget, draws, timeline..."
-              className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+              placeholder="Message AI Analyst..."
+              className="flex-1 bg-slate-50 border border-slate-200 rounded-full pl-4 pr-12 py-3 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-inner"
             />
             <button
               onClick={() => handleSend()}
               disabled={!input.trim() || isThinking}
-              className="bg-slate-900 text-white w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-800 transition disabled:opacity-40 cursor-pointer"
+              className="absolute right-1.5 w-8 h-8 bg-emerald-600 text-white rounded-full flex items-center justify-center hover:bg-emerald-700 transition disabled:opacity-40 cursor-pointer shadow-md"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-3.5 h-3.5 ml-0.5" />
             </button>
           </div>
-          <div className="text-xs text-slate-400 mt-2 text-center">AI answers are traced to confirmed ledger data only</div>
-        </div>
+          <div className="text-[10px] text-slate-400 mt-2 text-center font-medium">Traced to confirmed ledger data only</div>
       </div>
     </div>
   );

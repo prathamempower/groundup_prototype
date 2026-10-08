@@ -91,7 +91,7 @@ export class MockDrawService implements IDrawService {
       lines: LenderReviewLineItemDTO[];
       lender_notes?: string;
     },
-    actorRole: UserRole = 'LENDER'
+    actorRole: UserRole | 'LENDER' = 'LENDER'
   ): Promise<Draw> {
     await delay();
     return executeMockLenderReview(drawId, response, actorRole);
@@ -109,7 +109,7 @@ export class MockDrawService implements IDrawService {
   async recordWireDisbursement(
     drawId: string,
     disbursedAmount: number,
-    actorRole: UserRole = 'LENDER'
+    actorRole: UserRole | 'LENDER' = 'LENDER'
   ): Promise<RecordWireDisbursementResponseDTO> {
     await delay();
     return executeMockWireDisbursement(drawId, disbursedAmount, actorRole);

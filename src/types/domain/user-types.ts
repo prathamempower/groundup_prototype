@@ -1,88 +1,83 @@
-export type UserRole = 
-  | 'DEVELOPER_OWNER' 
-  | 'CFO' 
-  | 'PM' 
-  | 'GC_FIXED' 
-  | 'GC_DAILY' 
-  | 'INVESTOR' 
-  | 'ACCOUNTANT' 
-  | 'LENDER';
+import { UserRole as CanonicalUserRole, UserRoleDefinition, GROUNDUP_ROLES } from '../../shared/rbac';
+
+export type UserRole = CanonicalUserRole;
 
 export interface UserContext {
   id: string;
   name: string;
-  role: UserRole;
+  role: string;
   roleTitle: string;
   roleDescription: string;
   badgeColor: string;
 }
 
-export const USER_ROLES: Record<UserRole, UserContext> = {
-  DEVELOPER_OWNER: {
-    id: 'user-dev-1',
-    name: 'Hardik Parikh',
-    role: 'DEVELOPER_OWNER',
-    roleTitle: 'Developer / Owner',
-    roleDescription: 'Full control: portfolio economics, pro forma ROI, cash gap, change order approvals, draw packets.',
-    badgeColor: 'bg-slate-900 text-white',
+const baseUserRoles: Record<string, UserContext> = {
+  OWNER: {
+    id: GROUNDUP_ROLES.OWNER.id,
+    name: GROUNDUP_ROLES.OWNER.name,
+    role: 'OWNER',
+    roleTitle: GROUNDUP_ROLES.OWNER.roleTitle,
+    roleDescription: GROUNDUP_ROLES.OWNER.roleDescription,
+    badgeColor: GROUNDUP_ROLES.OWNER.badgeColor,
   },
-  CFO: {
-    id: 'user-cfo-1',
-    name: 'Sarah Jenkins',
-    role: 'CFO',
-    roleTitle: 'CFO / Accounting',
-    roleDescription: 'Financial ledger: matches expenses to budget lines, Amex card feeds, contingency absorption, draw reconciliation.',
-    badgeColor: 'bg-emerald-800 text-white',
+  PROJECT_MANAGER: {
+    id: GROUNDUP_ROLES.PROJECT_MANAGER.id,
+    name: GROUNDUP_ROLES.PROJECT_MANAGER.name,
+    role: 'PROJECT_MANAGER',
+    roleTitle: GROUNDUP_ROLES.PROJECT_MANAGER.roleTitle,
+    roleDescription: GROUNDUP_ROLES.PROJECT_MANAGER.roleDescription,
+    badgeColor: GROUNDUP_ROLES.PROJECT_MANAGER.badgeColor,
   },
-  PM: {
-    id: 'user-pm-1',
-    name: 'Marcus Vance',
-    role: 'PM',
-    roleTitle: 'Project Manager',
-    roleDescription: 'Field & Schedule: milestone progress %, municipal inspections, root-cause delay attribution & carrying costs.',
-    badgeColor: 'bg-blue-800 text-white',
+  GENERAL_CONTRACTOR: {
+    id: GROUNDUP_ROLES.GENERAL_CONTRACTOR.id,
+    name: GROUNDUP_ROLES.GENERAL_CONTRACTOR.name,
+    role: 'GENERAL_CONTRACTOR',
+    roleTitle: GROUNDUP_ROLES.GENERAL_CONTRACTOR.roleTitle,
+    roleDescription: GROUNDUP_ROLES.GENERAL_CONTRACTOR.roleDescription,
+    badgeColor: GROUNDUP_ROLES.GENERAL_CONTRACTOR.badgeColor,
   },
-  GC_FIXED: {
-    id: 'user-gc-fixed',
-    name: 'Kunal Shah',
-    role: 'GC_FIXED',
-    roleTitle: 'GC (Fixed / Milestone)',
-    roleDescription: 'Submits milestone claims upon completion with photo proof & inspection reports; submits change orders.',
-    badgeColor: 'bg-indigo-700 text-white',
-  },
-  GC_DAILY: {
-    id: 'user-gc-daily',
-    name: 'Sylvia Concrete & Framing',
-    role: 'GC_DAILY',
-    roleTitle: 'GC (Daily Updates)',
-    roleDescription: 'Open-book / cost-plus: daily work logs, material & subcontractor receipts with GC markup, daily progress photos.',
-    badgeColor: 'bg-teal-700 text-white',
-  },
-  INVESTOR: {
-    id: 'user-investor-1',
-    name: 'Krutarth Shah',
-    role: 'INVESTOR',
-    roleTitle: 'Investor / Partner',
-    roleDescription: 'Read-only transparency: capital deployed, projected ROI vs baseline, next funding events, narrative monthly updates.',
-    badgeColor: 'bg-purple-800 text-white',
+  FINANCE: {
+    id: GROUNDUP_ROLES.FINANCE.id,
+    name: GROUNDUP_ROLES.FINANCE.name,
+    role: 'FINANCE',
+    roleTitle: GROUNDUP_ROLES.FINANCE.roleTitle,
+    roleDescription: GROUNDUP_ROLES.FINANCE.roleDescription,
+    badgeColor: GROUNDUP_ROLES.FINANCE.badgeColor,
   },
   ACCOUNTANT: {
-    id: 'user-acct-1',
-    name: 'Elena Rostova',
+    id: GROUNDUP_ROLES.ACCOUNTANT.id,
+    name: GROUNDUP_ROLES.ACCOUNTANT.name,
     role: 'ACCOUNTANT',
-    roleTitle: 'Project Accountant',
-    roleDescription: 'Expense ledger, invoice tracking, lien waiver audits, and financial reporting.',
-    badgeColor: 'bg-cyan-800 text-white',
+    roleTitle: GROUNDUP_ROLES.ACCOUNTANT.roleTitle,
+    roleDescription: GROUNDUP_ROLES.ACCOUNTANT.roleDescription,
+    badgeColor: GROUNDUP_ROLES.ACCOUNTANT.badgeColor,
   },
-  LENDER: {
-    id: 'user-lender-1',
-    name: 'David Sterling',
-    role: 'LENDER',
-    roleTitle: 'Construction Lender (BCB Bank)',
-    roleDescription: 'Draw packet review, inspection verification, line-item approvals/rejections, wire disbursement.',
-    badgeColor: 'bg-amber-800 text-white',
+  INVESTOR: {
+    id: GROUNDUP_ROLES.INVESTOR.id,
+    name: GROUNDUP_ROLES.INVESTOR.name,
+    role: 'INVESTOR',
+    roleTitle: GROUNDUP_ROLES.INVESTOR.roleTitle,
+    roleDescription: GROUNDUP_ROLES.INVESTOR.roleDescription,
+    badgeColor: GROUNDUP_ROLES.INVESTOR.badgeColor,
+  },
+  VIEWER: {
+    id: GROUNDUP_ROLES.VIEWER.id,
+    name: GROUNDUP_ROLES.VIEWER.name,
+    role: 'VIEWER',
+    roleTitle: GROUNDUP_ROLES.VIEWER.roleTitle,
+    roleDescription: GROUNDUP_ROLES.VIEWER.roleDescription,
+    badgeColor: GROUNDUP_ROLES.VIEWER.badgeColor,
   },
 };
+
+// Aliases for legacy role strings and external counterparty stubs
+baseUserRoles.DEVELOPER_OWNER = { ...baseUserRoles.OWNER, role: 'DEVELOPER_OWNER' };
+baseUserRoles.CFO = { ...baseUserRoles.FINANCE, role: 'CFO' };
+baseUserRoles.PM = { ...baseUserRoles.PROJECT_MANAGER, role: 'PM' };
+baseUserRoles.GC_FIXED = { ...baseUserRoles.GENERAL_CONTRACTOR, role: 'GC_FIXED' };
+baseUserRoles.GC_DAILY = { ...baseUserRoles.GENERAL_CONTRACTOR, role: 'GC_DAILY' };
+
+export const USER_ROLES: Record<string, UserContext> = baseUserRoles;
 
 export interface AuthenticatedUser {
   id: string;
