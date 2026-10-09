@@ -36,7 +36,7 @@ export const PortfolioProjectList: React.FC<PortfolioProjectListProps> = ({
   }
 
   return (
-    <div className="grid gap-3.5">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {projects.map((project) => (
         <ProjectCardItem
           key={project.id}

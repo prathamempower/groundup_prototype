@@ -5,6 +5,11 @@ export interface EnrichedProject {
   name: string;
   address: string;
   status: string;
+  category?: 'MULTIFAMILY' | 'COMMERCIAL' | 'MIXED_USE' | 'CONDO_CONVERSION' | string;
+  units?: number;
+  squareFeet?: number;
+  currentPhase?: string;
+  healthScore?: 'ON_TRACK' | 'AT_RISK' | 'CRITICAL';
   budget: number;
   spent: number;
   funded: number;
