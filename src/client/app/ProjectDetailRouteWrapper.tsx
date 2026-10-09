@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { ProjectDetailScreen, ProjectTab } from '../screens/ProjectDetailScreen';
 import { Project, ProjectFourTruthsSummary, UserRole } from '../../shared/types';
-import { isProjectTabPermitted, getRoleDefaultTab, isScreenPermitted } from '../../shared/rbac';
+import { isProjectTabPermitted, getRoleDefaultTab } from '../../shared/rbac';
 
 interface ProjectDetailRouteWrapperProps {
   projects: Project[];
@@ -14,9 +14,6 @@ interface ProjectDetailRouteWrapperProps {
   setIsChangeOrderModalOpen: (open: boolean) => void;
   setShowAIChat: (open: boolean) => void;
   setProvenanceTarget: (target: { type: 'spend' | 'budget' | 'funded' | 'exposure' | 'delay'; category?: string } | null) => void;
-  onSelectProject: (id: string) => void;
-  selectedProjectId: string;
-  setSelectedProjectId: (id: string) => void;
 }
 
 export function ProjectDetailRouteWrapper({
@@ -29,58 +26,66 @@ export function ProjectDetailRouteWrapper({
   setIsChangeOrderModalOpen,
   setShowAIChat,
   setProvenanceTarget,
-  onSelectProject,
-  selectedProjectId,
-  setSelectedProjectId,
 }: ProjectDetailRouteWrapperProps) {
-  const { projectId, tab } = useParams<{ projectId?: string; tab?: string }>();
+  const { projectId, tab } = useParams<{ projectId: string; tab?: string }>();
   const navigate = useNavigate();
 
-  const activeProjectId = projectId || selectedProjectId || projects[0]?.id || 'proj-73-broadway';
+  if (!projectId) {
+    return <Navigate to="/projects" replace />;
+  }
 
-  useEffect(() => {
-    if (projectId && projectId !== selectedProjectId) {
-      setSelectedProjectId(projectId);
-      onSelectProject(projectId);
-    }
-  }, [projectId]);
+  const activeProject = projects.find((p) => p.id === projectId);
 
-  useEffect(() => {
-    if (tab && !isProjectTabPermitted(currentRole, tab as ProjectTab)) {
-      const defaultTab = getRoleDefaultTab(currentRole);
-      navigate(`/projects/${activeProjectId}/${defaultTab}`, { replace: true });
-    }
-  }, [tab, currentRole, activeProjectId, navigate]);
+  // If projects are loaded and projectId does not exist, show clear project not found
+  if (!activeProject && projects.length > 0) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center p-6">
+        <div className="max-w-md w-full text-center space-y-6 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto text-slate-500 font-mono text-sm font-bold">
+            404
+          </div>
+          <div className="space-y-1.5">
+            <h1 className="text-xl font-bold text-slate-900">Project Not Found</h1>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              No project found with ID <code className="font-mono bg-slate-100 px-1 py-0.5 rounded text-slate-800">{projectId}</code>. It may have been archived or deleted.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/projects')}
+            className="w-full inline-flex items-center justify-center px-4 py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+          >
+            Return to Projects Catalog
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const activeTab: ProjectTab = (tab && isProjectTabPermitted(currentRole, tab as ProjectTab))
     ? (tab as ProjectTab)
     : getRoleDefaultTab(currentRole);
 
+  useEffect(() => {
+    if (tab && !isProjectTabPermitted(currentRole, tab as ProjectTab)) {
+      const defaultTab = getRoleDefaultTab(currentRole);
+      navigate(`/projects/${projectId}/${defaultTab}`, { replace: true });
+    }
+  }, [tab, currentRole, projectId, navigate]);
+
   return (
     <ProjectDetailScreen
-      projectId={activeProjectId}
+      projectId={projectId}
       projects={projects}
-      onSelectProject={(id) => {
-        setSelectedProjectId(id);
-        onSelectProject(id);
-        navigate(`/projects/${id}/${activeTab}`);
-      }}
       summary={summary}
-      onBack={() => {
-        if (isScreenPermitted(currentRole, 'portfolio')) {
-          navigate('/portfolio');
-        } else {
-          navigate(`/projects/${activeProjectId}/${getRoleDefaultTab(currentRole)}`);
-        }
-      }}
+      onBack={() => navigate('/projects')}
       onSubmitDraw={() => setIsDrawPacketModalOpen(true)}
-      onOpenLenderPackage={() => navigate(`/projects/${activeProjectId}/draws/new`)}
-      onOpenInvoices={() => navigate(`/projects/${activeProjectId}/invoices`)}
+      onOpenLenderPackage={() => navigate(`/projects/${projectId}/draws/new`)}
+      onOpenInvoices={() => navigate(`/projects/${projectId}/invoices`)}
       onOpenAIChat={() => setShowAIChat(true)}
       onInspectProvenance={(type, category) => setProvenanceTarget({ type, category })}
       initialTab={activeTab}
       onTabChange={(newTab) => {
-        navigate(`/projects/${activeProjectId}/${newTab}`);
+        navigate(`/projects/${projectId}/${newTab}`);
       }}
       currentRole={currentRole}
       isDrawPacketModalOpen={isDrawPacketModalOpen}
@@ -90,4 +95,3 @@ export function ProjectDetailRouteWrapper({
     />
   );
 }
-

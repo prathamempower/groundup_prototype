@@ -4,7 +4,7 @@ import { AuthenticatedUser } from '../screens/AuthScreen';
 import { services } from '../../services';
 import { DEFAULT_PROJECTS } from './constants';
 
-export function useProjectSync(currentUser: AuthenticatedUser | null, selectedProjectId: string) {
+export function useProjectSync(currentUser: AuthenticatedUser | null, activeProjectId?: string | null) {
   const [projects, setProjects] = useState<Project[]>(() => {
     try {
       const stored = localStorage.getItem('groundup_projects');
@@ -48,8 +48,12 @@ export function useProjectSync(currentUser: AuthenticatedUser | null, selectedPr
   }, [currentUser]);
 
   useEffect(() => {
-    if (selectedProjectId && currentUser) fetchProjectSummary(selectedProjectId);
-  }, [selectedProjectId, currentUser]);
+    if (activeProjectId && currentUser) {
+      fetchProjectSummary(activeProjectId);
+    } else {
+      setSummary(null);
+    }
+  }, [activeProjectId, currentUser]);
 
   return {
     projects,

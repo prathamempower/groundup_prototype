@@ -8,11 +8,8 @@ export function getInitialProject(): string {
     const params = new URLSearchParams(window.location.search);
     const projectFromUrl = params.get('project');
     if (projectFromUrl) return projectFromUrl;
-
-    const projectFromStorage = localStorage.getItem('groundup_selected_project_id');
-    if (projectFromStorage) return projectFromStorage;
   } catch {}
-  return 'proj-73-broadway';
+  return '';
 }
 
 export function getInitialRole(): UserRole {
@@ -34,7 +31,9 @@ export function getInitialRole(): UserRole {
 }
 
 export function getActiveScreenFromPath(pathname: string): ActiveNavScreen {
-  if (pathname === '/' || pathname.startsWith('/portfolio')) return 'portfolio';
+  if (pathname === '/' || pathname === '/projects' || pathname === '/projects/' || pathname.startsWith('/portfolio')) {
+    return 'portfolio';
+  }
   if (pathname.startsWith('/deal-lab')) return 'deal-lab';
   if (pathname.startsWith('/settings')) return 'settings';
   if (pathname.startsWith('/gc-fixed-portal')) return 'gc-fixed-portal';
@@ -66,24 +65,24 @@ export function getActiveScreenFromPath(pathname: string): ActiveNavScreen {
   return 'portfolio';
 }
 
-export function screenToPath(screen: ActiveNavScreen, projectId: string): string {
+export function screenToPath(screen: ActiveNavScreen, projectId?: string): string {
   switch (screen) {
     case 'portfolio':
-      return '/portfolio';
+      return '/projects';
     case 'deal-lab':
       return '/deal-lab';
     case 'settings':
       return '/settings';
     case 'gc-fixed-portal':
-      return '/gc-fixed-portal';
+      return projectId ? `/projects/${projectId}/timeline` : '/projects';
     case 'gc-daily-portal':
-      return '/gc-daily-portal';
+      return projectId ? `/projects/${projectId}/timeline` : '/projects';
     case 'cfo-recon':
-      return '/cfo-recon';
+      return projectId ? `/projects/${projectId}/recon` : '/projects';
     case 'investor-portal':
-      return '/investor-portal';
+      return projectId ? `/projects/${projectId}/overview` : '/projects';
     case 'project-detail':
-      return `/projects/${projectId}/overview`;
+      return projectId ? `/projects/${projectId}/overview` : '/projects';
     case 'acquisition':
     case 'permits':
     case 'financing':
@@ -95,8 +94,8 @@ export function screenToPath(screen: ActiveNavScreen, projectId: string): string
     case 'invoices':
     case 'disposition':
     case 'alerts':
-      return `/projects/${projectId}/${screen}`;
+      return projectId ? `/projects/${projectId}/${screen}` : '/projects';
     default:
-      return '/portfolio';
+      return '/projects';
   }
 }

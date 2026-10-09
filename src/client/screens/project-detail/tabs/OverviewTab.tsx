@@ -3,8 +3,6 @@ import { ArrowUpRight, Shield } from 'lucide-react';
 import { UserRole } from '../../../../shared/types';
 import { ProjectEconomicsCard } from '../components/ProjectEconomicsCard';
 import { LoanFacilityCard } from '../components/LoanFacilityCard';
-import { SubProjectsPhaseGrid } from '../components/SubProjectsPhaseGrid';
-import { ProjectTaskList } from '../components/ProjectTaskList';
 
 interface OverviewTabProps {
   totalBudget: number;
@@ -118,12 +116,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           </button>
         </div>
       </div>
-
-      {/* SUB-PROJECT PHASES & TRADE SCHEDULE */}
-      <SubProjectsPhaseGrid />
-
-      {/* OPERATIONAL TASKS & INSPECTIONS CHECKLIST */}
-      <ProjectTaskList />
 
       {/* PROJECT ECONOMICS: Pro Forma vs. Current Forecast */}
       <ProjectEconomicsCard totalBudget={totalBudget} currentRole={currentRole} />

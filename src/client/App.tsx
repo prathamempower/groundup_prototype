@@ -1,18 +1,17 @@
 // GroundUp AI — Main Application Shell
 // Multi-Role Architecture, RBAC Security Matrix, React Router Navigation
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Sparkles } from 'lucide-react';
 import { AuthScreen } from './screens/AuthScreen';
 import { Sidebar } from './components/Sidebar';
-import { TopHeader } from './components/TopHeader';
+import { TopHeader, BreadcrumbItem } from './components/TopHeader';
 import { AccessDeniedScreen } from './components/AccessDeniedScreen';
 import { AIChatDrawer } from './components/AIChatDrawer';
 import { ProvenanceDrawer } from './components/ProvenanceDrawer';
 import { NewUserIntakePage } from './screens/NewUserIntakePage';
 import { isScreenPermitted, getRoleDefaultScreen } from '../shared/rbac/matrix';
 import { useAppState } from './app/use-app-state';
-import { screenToPath } from './app/nav-helpers';
 import { AppRoutes } from './app/AppRoutes';
 
 export function App() {
@@ -21,8 +20,7 @@ export function App() {
     setCurrentUser,
     currentRole,
     setCurrentRole,
-    selectedProjectId,
-    setSelectedProjectId,
+    activeProjectId,
     projects,
     summary,
     showAIChat,
@@ -48,13 +46,36 @@ export function App() {
     company: currentUser?.company || 'GroundUp Development Partners',
   };
 
-  const activeProjectName =
-    projects.find(p => p.id === selectedProjectId)?.name ||
-    summary?.project_name ||
-    '73 Broadway, Hoboken';
+  const activeProject = activeProjectId ? projects.find((p) => p.id === activeProjectId) : null;
+  const activeProjectName = activeProject?.name || summary?.project_name || '';
 
-  const defaultRoleScreen = getRoleDefaultScreen(currentRole);
-  const defaultRolePath = screenToPath(defaultRoleScreen, selectedProjectId);
+  // Breadcrumbs for top navbar
+  const breadcrumbs = useMemo(() => {
+    if (!activeProjectId || !activeProject) return undefined;
+    const crumbs: BreadcrumbItem[] = [
+      { label: activeProject.name, href: `/projects/${activeProjectId}/overview` },
+    ];
+
+    if (currentScreen && currentScreen !== 'project-detail' && currentScreen !== 'portfolio') {
+      const screenLabels: Record<string, string> = {
+        acquisition: 'Acquisition & Closing',
+        permits: 'Planning & Permits',
+        financing: 'Financing & Debt',
+        budget: 'Budget & Contingency',
+        timeline: 'Milestones & Delays',
+        draws: 'Draw Lab',
+        documents: 'Document Inbox',
+        invoices: 'Vendor Invoices',
+        recon: 'Financial Recon',
+        disposition: 'Unit Sales & ROI',
+        alerts: 'Risk Alerts',
+      };
+      if (screenLabels[currentScreen]) {
+        crumbs.push({ label: screenLabels[currentScreen] });
+      }
+    }
+    return crumbs;
+  }, [activeProjectId, activeProject, currentScreen]);
 
   if (!currentUser) {
     return <AuthScreen onAuthenticate={handleAuthenticate} />;
@@ -75,13 +96,14 @@ export function App() {
       <Sidebar
         currentScreen={currentScreen}
         onNavigate={handleNavigate}
-        projects={projects.map(p => ({ id: p.id, name: p.name, status: p.status }))}
-        selectedProjectId={selectedProjectId}
+        activeProjectId={activeProjectId}
+        activeProjectName={activeProject?.name}
+        activeProjectStatus={activeProject?.status}
         onAddProject={() => navigate('/new-project')}
         onSignOut={handleSignOut}
         builderProfile={builderProfile}
         pendingDrawsCount={1}
-        alertsCount={3}
+        alertsCount={activeProject ? 2 : 3}
         currentRole={currentRole}
       />
 
@@ -92,20 +114,9 @@ export function App() {
             setCurrentRole(role);
             handleNavigate(getRoleDefaultScreen(role));
           }}
-          projects={projects}
-          selectedProjectId={selectedProjectId}
-          onSelectProject={handleSelectProject}
-          onOpenDrawPacket={() => {
-            const targetId = selectedProjectId || projects[0]?.id || 'proj-73-broadway';
-            navigate(`/projects/${targetId}/draws/new`);
-          }}
-          onOpenChangeOrder={() => {
-            handleNavigate('budget');
-            setIsChangeOrderModalOpen(true);
-          }}
           onOpenAIChat={() => setShowAIChat(true)}
           onSignOut={handleSignOut}
-          onNavigateScreen={(s) => handleNavigate(s)}
+          breadcrumbs={breadcrumbs}
         />
 
         <main className="flex-1 overflow-y-auto">
@@ -123,10 +134,9 @@ export function App() {
             <AppRoutes
               projects={projects}
               summary={summary}
-              selectedProjectId={selectedProjectId}
-              setSelectedProjectId={setSelectedProjectId}
+              activeProjectId={activeProjectId}
               currentRole={currentRole}
-              defaultRolePath={defaultRolePath}
+              defaultRolePath="/projects"
               isDrawPacketModalOpen={isDrawPacketModalOpen}
               setIsDrawPacketModalOpen={setIsDrawPacketModalOpen}
               isChangeOrderModalOpen={isChangeOrderModalOpen}
@@ -153,8 +163,8 @@ export function App() {
       <AIChatDrawer
         isOpen={showAIChat}
         onClose={() => setShowAIChat(false)}
-        projectId={selectedProjectId}
-        projectName={activeProjectName}
+        projectId={activeProjectId || ''}
+        projectName={activeProjectName || 'Portfolio Overview'}
         userContext={{
           name: builderProfile.name,
           company: builderProfile.company,
@@ -165,8 +175,8 @@ export function App() {
       <ProvenanceDrawer
         isOpen={!!provenanceTarget}
         onClose={() => setProvenanceTarget(null)}
-        projectId={selectedProjectId}
-        projectName={activeProjectName}
+        projectId={activeProjectId || ''}
+        projectName={activeProjectName || 'Portfolio Overview'}
         targetType={provenanceTarget?.type || 'spend'}
         category={provenanceTarget?.category}
       />

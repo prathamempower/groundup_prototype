@@ -18,8 +18,7 @@ import { isScreenPermitted, hasPermission } from '../../shared/rbac';
 interface AppRoutesProps {
   projects: Project[];
   summary: ProjectFourTruthsSummary | null;
-  selectedProjectId: string;
-  setSelectedProjectId: (id: string) => void;
+  activeProjectId?: string | null;
   currentRole: UserRole;
   defaultRolePath: string;
   isDrawPacketModalOpen: boolean;
@@ -37,8 +36,7 @@ interface AppRoutesProps {
 export function AppRoutes({
   projects,
   summary,
-  selectedProjectId,
-  setSelectedProjectId,
+  activeProjectId,
   currentRole,
   defaultRolePath,
   isDrawPacketModalOpen,
@@ -53,40 +51,39 @@ export function AppRoutes({
   onSaveDealAsProject,
 }: AppRoutesProps) {
   const navigate = useNavigate();
-  const safeProjectId = selectedProjectId || projects[0]?.id || 'proj-73-broadway';
 
   const handleBackToSafeScreen = () => {
-    if (isScreenPermitted(currentRole, 'portfolio')) {
-      navigate('/portfolio');
-    } else {
-      navigate(defaultRolePath, { replace: true });
-    }
+    navigate('/projects');
   };
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to={defaultRolePath} replace />} />
+      {/* Root View: Always lands on the SaaS Project Catalog */}
+      <Route path="/" element={<Navigate to="/projects" replace />} />
 
+      {/* Primary Project Catalog Routes */}
       <Route
-        path="/portfolio"
+        path="/projects"
         element={
-          isScreenPermitted(currentRole, 'portfolio') ? (
-            <PortfolioScreen
-              projects={projects}
-              onSelectProject={(id) => {
-                onSelectProject(id);
-                navigate(`/projects/${id}/overview`);
-              }}
-              onAddProject={() => navigate('/new-project')}
-              onOpenDealLab={() => onNavigate('deal-lab')}
-              onNavigateDraws={() => navigate(`/projects/${safeProjectId}/draws/new`)}
-              selectedProjectId={safeProjectId}
-            />
-          ) : (
-            <Navigate to={defaultRolePath} replace />
-          )
+          <PortfolioScreen
+            projects={projects}
+            onSelectProject={(id) => {
+              onSelectProject(id);
+              navigate(`/projects/${id}/overview`);
+            }}
+            onAddProject={() => navigate('/new-project')}
+            onOpenDealLab={() => onNavigate('deal-lab')}
+            onNavigateDraws={() => {
+              const target = activeProjectId || projects[0]?.id;
+              if (target) navigate(`/projects/${target}/draws/new`);
+            }}
+            selectedProjectId={activeProjectId || undefined}
+          />
         }
       />
+
+      {/* Backward-compatible alias for /portfolio */}
+      <Route path="/portfolio" element={<Navigate to="/projects" replace />} />
 
       <Route
         path="/new-project"
@@ -109,11 +106,12 @@ export function AppRoutes({
               onCancel={handleBackToSafeScreen}
             />
           ) : (
-            <Navigate to={defaultRolePath} replace />
+            <Navigate to="/projects" replace />
           )
         }
       />
 
+      {/* Isolated Project Workspace Routes */}
       <Route
         path="/projects/:projectId/draws/new"
         element={
@@ -160,9 +158,6 @@ export function AppRoutes({
             setIsChangeOrderModalOpen={setIsChangeOrderModalOpen}
             setShowAIChat={setShowAIChat}
             setProvenanceTarget={setProvenanceTarget}
-            onSelectProject={onSelectProject}
-            selectedProjectId={safeProjectId}
-            setSelectedProjectId={setSelectedProjectId}
           />
         }
       />
@@ -180,27 +175,29 @@ export function AppRoutes({
             setIsChangeOrderModalOpen={setIsChangeOrderModalOpen}
             setShowAIChat={setShowAIChat}
             setProvenanceTarget={setProvenanceTarget}
-            onSelectProject={onSelectProject}
-            selectedProjectId={safeProjectId}
-            setSelectedProjectId={setSelectedProjectId}
           />
         }
       />
 
-      <Route path="/overview" element={<Navigate to={`/projects/${safeProjectId}/overview`} replace />} />
-      <Route path="/acquisition" element={<Navigate to={`/projects/${safeProjectId}/acquisition`} replace />} />
-      <Route path="/permits" element={<Navigate to={`/projects/${safeProjectId}/permits`} replace />} />
-      <Route path="/financing" element={<Navigate to={`/projects/${safeProjectId}/financing`} replace />} />
-      <Route path="/budget" element={<Navigate to={`/projects/${safeProjectId}/budget`} replace />} />
-      <Route path="/draws" element={<Navigate to={`/projects/${safeProjectId}/draws`} replace />} />
-      <Route path="/timeline" element={<Navigate to={`/projects/${safeProjectId}/timeline`} replace />} />
-      <Route path="/recon" element={<Navigate to={`/projects/${safeProjectId}/recon`} replace />} />
-      <Route path="/documents" element={<Navigate to={`/projects/${safeProjectId}/documents`} replace />} />
-      <Route path="/disposition" element={<Navigate to={`/projects/${safeProjectId}/disposition`} replace />} />
-      <Route path="/alerts" element={<Navigate to={`/projects/${safeProjectId}/alerts`} replace />} />
-      <Route path="/reports" element={<Navigate to={`/projects/${safeProjectId}/overview`} replace />} />
+      {/* Legacy flat redirects: guide users back to projects catalog */}
+      <Route path="/overview" element={<Navigate to="/projects" replace />} />
+      <Route path="/acquisition" element={<Navigate to="/projects" replace />} />
+      <Route path="/permits" element={<Navigate to="/projects" replace />} />
+      <Route path="/financing" element={<Navigate to="/projects" replace />} />
+      <Route path="/budget" element={<Navigate to="/projects" replace />} />
+      <Route path="/draws" element={<Navigate to="/projects" replace />} />
+      <Route path="/timeline" element={<Navigate to="/projects" replace />} />
+      <Route path="/recon" element={<Navigate to="/projects" replace />} />
+      <Route path="/documents" element={<Navigate to="/projects" replace />} />
+      <Route path="/disposition" element={<Navigate to="/projects" replace />} />
+      <Route path="/alerts" element={<Navigate to="/projects" replace />} />
+      <Route path="/reports" element={<Navigate to="/projects" replace />} />
 
-      {renderPortalRoutes({ projects, selectedProjectId: safeProjectId, onSelectProject })}
+      {renderPortalRoutes({
+        projects,
+        selectedProjectId: activeProjectId || projects[0]?.id || 'proj-73-broadway',
+        onSelectProject,
+      })}
 
       <Route
         path="/deal-lab"
@@ -211,7 +208,7 @@ export function AppRoutes({
               onSaveAsProject={onSaveDealAsProject}
             />
           ) : (
-            <Navigate to={defaultRolePath} replace />
+            <Navigate to="/projects" replace />
           )
         }
       />
@@ -225,7 +222,7 @@ export function AppRoutes({
               onRestartOnboarding={() => setCurrentUser(prev => prev ? { ...prev, isNewUser: true } : null)}
             />
           ) : (
-            <Navigate to={defaultRolePath} replace />
+            <Navigate to="/projects" replace />
           )
         }
       />
@@ -234,12 +231,11 @@ export function AppRoutes({
         path="*"
         element={
           <NotFoundScreen
-            defaultRolePath={defaultRolePath}
-            onNavigateHome={() => navigate(defaultRolePath, { replace: true })}
+            defaultRolePath="/projects"
+            onNavigateHome={() => navigate('/projects', { replace: true })}
           />
         }
       />
     </Routes>
   );
 }
-

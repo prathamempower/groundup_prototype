@@ -5,7 +5,7 @@ import { UserRole } from '../../shared/types';
 import { ActiveNavScreen } from '../components/Sidebar';
 import { OnboardingCompletionPayload } from '../onboarding/types';
 import { VALID_ROLES } from './constants';
-import { getInitialProject, getInitialRole, getActiveScreenFromPath, screenToPath } from './nav-helpers';
+import { getInitialRole, getActiveScreenFromPath, screenToPath } from './nav-helpers';
 import { getRoleDefaultScreen } from '../../shared/rbac/matrix';
 import { createProjectFromDeal, createProjectFromOnboardingData } from './project-factory';
 import { useSyncStorage } from './use-sync-storage';
@@ -26,9 +26,20 @@ export function useAppState() {
   });
 
   const [currentRole, setCurrentRole] = useState<UserRole>(getInitialRole);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>(getInitialProject);
 
-  const { projects, setProjects, summary, fetchProjectSummary } = useProjectSync(currentUser, selectedProjectId);
+  // Single source of truth: Active project ID derived directly from the URL route parameter
+  const activeProjectId = useMemo(() => {
+    const match = location.pathname.match(/^\/projects\/([^/]+)/);
+    if (match && match[1] && match[1] !== 'new') {
+      return match[1];
+    }
+    return null;
+  }, [location.pathname]);
+
+  const { projects, setProjects, summary, fetchProjectSummary } = useProjectSync(
+    currentUser,
+    activeProjectId
+  );
 
   const [showAIChat, setShowAIChat] = useState(false);
   const [isDrawPacketModalOpen, setIsDrawPacketModalOpen] = useState(false);
@@ -38,11 +49,12 @@ export function useAppState() {
     category?: string;
   } | null>(null);
 
-  const currentScreen = useMemo(() => getActiveScreenFromPath(location.pathname), [location.pathname]);
+  const currentScreen = useMemo(
+    () => getActiveScreenFromPath(location.pathname),
+    [location.pathname]
+  );
 
   useSyncStorage({
-    selectedProjectId,
-    setSelectedProjectId,
     currentRole,
     setCurrentRole,
     currentScreen,
@@ -51,13 +63,17 @@ export function useAppState() {
 
   const handleAuthenticate = (user: AuthenticatedUser) => {
     setCurrentUser(user);
-    try { localStorage.setItem('groundup_user', JSON.stringify(user)); } catch {}
+    try {
+      localStorage.setItem('groundup_user', JSON.stringify(user));
+    } catch {}
 
     if (user.role && VALID_ROLES.includes(user.role as UserRole)) {
       const targetRole = user.role as UserRole;
       setCurrentRole(targetRole);
-      try { localStorage.setItem('groundup_role', targetRole); } catch {}
-      navigate(screenToPath(getRoleDefaultScreen(targetRole), selectedProjectId));
+      try {
+        localStorage.setItem('groundup_role', targetRole);
+      } catch {}
+      navigate(screenToPath(getRoleDefaultScreen(targetRole), activeProjectId || undefined));
     }
   };
 
@@ -69,55 +85,55 @@ export function useAppState() {
       localStorage.removeItem('groundup_role');
     } catch {}
     setCurrentUser(null);
-    navigate('/portfolio');
+    navigate('/projects');
   };
 
   const handleNavigate = (screen: ActiveNavScreen, projId?: string) => {
-    const targetProject = projId || selectedProjectId;
-    if (projId) setSelectedProjectId(projId);
+    const targetProject = projId || activeProjectId || undefined;
     navigate(screenToPath(screen, targetProject));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSelectProject = (projId: string) => {
-    setSelectedProjectId(projId);
-    fetchProjectSummary(projId);
-    if (location.pathname.startsWith('/projects/')) {
-      const parts = location.pathname.split('/').filter(Boolean);
-      navigate(`/projects/${projId}/${parts[2] || 'overview'}`);
-    }
+    navigate(`/projects/${projId}/overview`);
   };
 
   const handleSaveDealAsProject = (dealData: any) => {
     const newProject = createProjectFromDeal(dealData, currentUser?.id);
-    setProjects(prev => {
+    setProjects((prev) => {
       const updated = [newProject, ...prev];
-      try { localStorage.setItem('groundup_projects', JSON.stringify(updated)); } catch {}
+      try {
+        localStorage.setItem('groundup_projects', JSON.stringify(updated));
+      } catch {}
       return updated;
     });
-    setSelectedProjectId(newProject.id);
     navigate(`/projects/${newProject.id}/overview`);
   };
 
   const handleOnboardingComplete = (payloadOrProjectId: any, reportData?: any) => {
     if (payloadOrProjectId && typeof payloadOrProjectId === 'object' && payloadOrProjectId.role) {
       const payload = payloadOrProjectId as OnboardingCompletionPayload;
-      let newSelectedProjId = selectedProjectId;
+      let targetProjId = activeProjectId;
 
       if (payload.project) {
-        newSelectedProjId = payload.project.id;
-        setProjects(prev => {
+        targetProjId = payload.project.id;
+        setProjects((prev) => {
           const updated = [payload.project!, ...prev];
-          try { localStorage.setItem('groundup_projects', JSON.stringify(updated)); } catch {}
+          try {
+            localStorage.setItem('groundup_projects', JSON.stringify(updated));
+          } catch {}
           return updated;
         });
-        setSelectedProjectId(payload.project.id);
       }
 
       setCurrentRole(payload.role);
-      try { localStorage.setItem('groundup_role', payload.role); } catch {}
+      try {
+        localStorage.setItem('groundup_role', payload.role);
+      } catch {}
       if (payload.setupTasks) {
-        try { localStorage.setItem('groundup_setup_tasks', JSON.stringify(payload.setupTasks)); } catch {}
+        try {
+          localStorage.setItem('groundup_setup_tasks', JSON.stringify(payload.setupTasks));
+        } catch {}
       }
 
       const updatedUser: AuthenticatedUser = {
@@ -128,23 +144,29 @@ export function useAppState() {
         isNewUser: false,
       };
       setCurrentUser(updatedUser);
-      try { localStorage.setItem('groundup_user', JSON.stringify(updatedUser)); } catch {}
-      handleNavigate(payload.targetScreen, newSelectedProjId);
+      try {
+        localStorage.setItem('groundup_user', JSON.stringify(updatedUser));
+      } catch {}
+      handleNavigate(payload.targetScreen, targetProjId || undefined);
       return;
     }
 
-    const projectId = typeof payloadOrProjectId === 'string' ? payloadOrProjectId : `proj-${Date.now()}`;
+    const projectId =
+      typeof payloadOrProjectId === 'string' ? payloadOrProjectId : `proj-${Date.now()}`;
     const newProject = createProjectFromOnboardingData(projectId, reportData || {}, currentUser?.id);
-    setProjects(prev => {
+    setProjects((prev) => {
       const updated = [newProject, ...prev];
-      try { localStorage.setItem('groundup_projects', JSON.stringify(updated)); } catch {}
+      try {
+        localStorage.setItem('groundup_projects', JSON.stringify(updated));
+      } catch {}
       return updated;
     });
 
     const updatedUser = { ...currentUser!, isNewUser: false };
     setCurrentUser(updatedUser);
-    try { localStorage.setItem('groundup_user', JSON.stringify(updatedUser)); } catch {}
-    setSelectedProjectId(projectId);
+    try {
+      localStorage.setItem('groundup_user', JSON.stringify(updatedUser));
+    } catch {}
     navigate(`/projects/${projectId}/overview`);
   };
 
@@ -153,8 +175,7 @@ export function useAppState() {
     setCurrentUser,
     currentRole,
     setCurrentRole,
-    selectedProjectId,
-    setSelectedProjectId,
+    activeProjectId,
     projects,
     summary,
     showAIChat,

@@ -38,8 +38,8 @@ export const ProjectDetailHeader: React.FC<ProjectDetailHeaderProps> = ({
     <div className="max-w-6xl mx-auto space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-          <button onClick={onBack} className="hover:text-slate-900 flex items-center gap-1 cursor-pointer">
-            <ChevronLeft className="w-3.5 h-3.5" /> Portfolio
+          <button onClick={onBack} className="hover:text-slate-900 flex items-center gap-1 cursor-pointer font-semibold">
+            <ChevronLeft className="w-3.5 h-3.5" /> Projects
           </button>
           <span>/</span>
           <span className="text-slate-900 font-bold">{projectName}</span>

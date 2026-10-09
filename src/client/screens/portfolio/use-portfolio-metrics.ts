@@ -78,20 +78,14 @@ export function usePortfolioMetrics(projects: Project[]) {
         lastUpdated: 'Just now',
       };
 
-      const category = p.units > 4 ? 'MULTIFAMILY' : p.units > 1 ? 'CONDO_CONVERSION' : 'SINGLE_FAMILY_LUX';
-      const healthScore = stats.alerts > 1 ? 'AT_RISK' : stats.alerts === 1 ? 'NEEDS_REVIEW' : 'ON_TRACK';
-      const currentPhase = p.status === 'COMPLETED' ? 'Final Closeout & Disposition' : stats.progress > 60 ? 'Interior MEP & Finishes' : 'Structural Framing & Envelope';
-
       return {
         id: p.id,
         name: p.name,
         address: p.address,
         status: p.status,
-        category,
-        units: p.units || 1,
-        squareFeet: p.square_feet || 3500,
-        currentPhase,
-        healthScore,
+        gc_contract_model: p.gc_contract_model || (p.id === 'proj-212-maple' ? 'DAILY_LOG_T_M' : 'FIXED_PRICE'),
+        units: p.units || 4,
+        squareFeet: p.square_feet || 4200,
         budget: p.target_budget || 1000000,
         spent: stats.spent || 0,
         funded: stats.funded || 0,
