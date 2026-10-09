@@ -105,6 +105,7 @@ export type ActiveNavScreen =
   | 'permits'
   | 'financing'
   | 'recon'
+  | 'invoices'
   | 'reports';
 
 export type ProjectTab = 

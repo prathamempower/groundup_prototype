@@ -121,7 +121,7 @@ export function ExtractionReviewForm({
       <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2.5">
         <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
         <div className="text-[11px] text-emerald-900">
-          <strong>Zero-Hallucination Posting:</strong> Clicking "Confirm & Post" canonicalizes this entry into the project's <strong>Spend Truth</strong> with full source document provenance.
+          <strong>Verified Recording:</strong> Clicking "Confirm & Post" records this item to project expenses and links it directly to the source document.
         </div>
       </div>
 

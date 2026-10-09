@@ -59,7 +59,7 @@ export const ContractSettingsTab: React.FC<ContractSettingsTabProps> = ({
               {gcModel === 'DAILY_UPDATES' && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
             </div>
             <p className="text-slate-600 leading-relaxed text-[11px]">
-              Cost-plus or partnership structure. The GC posts daily work logs, receipts, and invoices with a separate GC markup % line item. High granularity for CFO ledger reconciliation.
+              Cost-plus or partnership structure. The GC posts daily work logs, receipts, and invoices with an itemized GC markup. Provides detailed line items for financial review and accounting.
             </p>
           </div>
         </div>

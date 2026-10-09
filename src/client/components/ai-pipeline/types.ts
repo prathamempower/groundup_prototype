@@ -34,6 +34,6 @@ export const STEP_DEFINITIONS = [
   { number: 6, name: 'Confidence Check', sub: 'Score extracted data quality & field reliability' },
   { number: 7, name: 'Validation', sub: 'Check for missing info or duplicates in database' },
   { number: 8, name: 'Matching', sub: 'Link to budget category & vendor (Auto-Match / Review)' },
-  { number: 9, name: 'Verification', sub: 'Deterministic Four Truths reconciliation & sign-off' },
+  { number: 9, name: 'Verification', sub: 'Final reconciliation and review across budget, expenses, and draw milestones' },
   { number: 10, name: 'Database Update', sub: 'Save data with immutable audit log into SQLite' },
 ];

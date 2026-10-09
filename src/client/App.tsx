@@ -96,8 +96,7 @@ export function App() {
           selectedProjectId={selectedProjectId}
           onSelectProject={handleSelectProject}
           onOpenDrawPacket={() => {
-            handleNavigate('draws');
-            setIsDrawPacketModalOpen(true);
+            navigate(`/projects/${selectedProjectId}/draws/new`);
           }}
           onOpenChangeOrder={() => {
             handleNavigate('budget');

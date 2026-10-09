@@ -180,7 +180,7 @@ export function ProvenanceDrawer({
 
         <div className="px-5 py-3 border-t border-slate-200 bg-slate-50">
           <div className="text-xs text-slate-400 text-center">
-            Every figure on this platform is traceable to its source document. AI proposes, deterministic code calculates.
+            Every figure is directly linked to its source document. AI extracts the information, while verified financial calculations total the amounts.
           </div>
         </div>
       </div>

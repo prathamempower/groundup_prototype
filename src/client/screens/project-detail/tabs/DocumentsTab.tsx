@@ -94,7 +94,7 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({
 
       {/* Document Ingestion Queue */}
       <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <FolderOpen className="w-5 h-5 text-slate-700" />
             <div>
@@ -102,6 +102,15 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({
               <p className="text-xs text-slate-500">Every number links to its underlying source document</p>
             </div>
           </div>
+          {onOpenInvoices && (
+            <button
+              onClick={onOpenInvoices}
+              className="px-3.5 py-1.5 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer transition flex items-center gap-1.5 self-start sm:self-auto"
+            >
+              <FileText className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Manage All Invoices & Ledger</span>
+            </button>
+          )}
         </div>
 
         <div className="space-y-2.5">

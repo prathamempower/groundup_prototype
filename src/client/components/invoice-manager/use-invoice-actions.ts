@@ -122,9 +122,9 @@ export async function importExtractedDocsToLedger(
     await fetchInvoices();
     onInvoiceChanged();
     setActiveTab('manual');
-    alert(`Successfully imported ${uploadedDocs.length} extracted invoices into the live ledger!`);
+    alert(`Imported ${uploadedDocs.length} extracted invoices into the ledger.`);
   } catch (err) {
     console.error('Import error:', err);
-    alert('Failed to import invoices into ledger.');
+    alert('Unable to import invoices. Please try again.');
   }
 }

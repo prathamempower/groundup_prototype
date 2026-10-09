@@ -79,7 +79,7 @@ export const INVESTOR_VIEWER_QUESTIONS: Record<string, QuestionDefinition> = {
     id: 'viewer_affiliation',
     categoryLabel: 'Professional Role',
     title: 'What is your professional role regarding this development?',
-    subtitle: 'GroundUp restricts access shields strictly to read-only canonical documents.',
+    subtitle: 'Access is limited to read-only view of approved project documents.',
     type: 'single_select',
     options: [
       {
@@ -127,7 +127,7 @@ export const INVESTOR_VIEWER_QUESTIONS: Record<string, QuestionDefinition> = {
         value: 'plans_permits',
         label: 'Architectural Plans, Municipal Permits & Inspection Sign-Offs',
         badge: 'Building Plans',
-        description: 'Access to canonical plans, zoning variances, and municipal certificates.',
+        description: 'Access to official architectural plans, zoning approvals, and municipal certificates.',
       },
       {
         value: 'schedule_timeline',

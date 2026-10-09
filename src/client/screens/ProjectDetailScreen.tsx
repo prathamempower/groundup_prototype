@@ -3,6 +3,7 @@
 // Role-Tailored for Owner, CFO, PM, GC (Fixed/Daily), and Investor
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Project, ProjectFourTruthsSummary, UserRole } from '../../shared/types';
 import { ProjectTab } from './project-detail/types';
 import { useProjectDetailState } from './project-detail/use-project-detail-state';
@@ -33,6 +34,7 @@ export interface ProjectDetailScreenProps {
 }
 
 export function ProjectDetailScreen(props: ProjectDetailScreenProps) {
+  const navigate = useNavigate();
   const {
     projectId,
     projects = [],
@@ -77,7 +79,7 @@ export function ProjectDetailScreen(props: ProjectDetailScreenProps) {
             onOpenClaimModal={() => state.setIsDrawPacketModalOpenLocal(true)}
             onOpenDailyLog={() => handleTabSelect('timeline')}
             onOpenChangeOrderModal={() => state.setIsChangeOrderModalOpenLocal(true)}
-            onOpenDrawPacketModal={() => state.setIsDrawPacketModalOpenLocal(true)}
+            onOpenDrawPacketModal={() => navigate(`/projects/${projectId}/draws/new`)}
           />
         </div>
       </div>

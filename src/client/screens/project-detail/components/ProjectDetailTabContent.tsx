@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { UserRole } from '../../../../shared/types';
 import { useProjectDetailState } from '../use-project-detail-state';
 import { OverviewTab } from '../tabs/OverviewTab';
@@ -28,6 +29,7 @@ export const ProjectDetailTabContent: React.FC<ProjectDetailTabContentProps> = (
   onOpenLenderPackage,
   onOpenInvoices,
 }) => {
+  const navigate = useNavigate();
   const projectName = state.selectedProject?.name;
   const projectAddress = state.selectedProject?.address;
 
@@ -115,7 +117,7 @@ export const ProjectDetailTabContent: React.FC<ProjectDetailTabContentProps> = (
       {state.activeTab === 'draws' && (
         <DrawsTab
           draws={state.draws}
-          onOpenDrawPacketModal={() => state.setIsDrawPacketModalOpenLocal(true)}
+          onOpenDrawPacketModal={() => navigate(`/projects/${state.projectId}/draws/new`)}
           onOpenLenderPackage={onOpenLenderPackage}
         />
       )}
@@ -132,8 +134,8 @@ export const ProjectDetailTabContent: React.FC<ProjectDetailTabContentProps> = (
           currentRole={currentRole}
           amexTransactions={state.amexTransactions}
           onConfirmAmexMatch={state.handleConfirmAmexMatch}
-          onReviewDoc={(doc) => state.setSelectedDocForReview(doc)}
-          onOpenInvoices={onOpenInvoices}
+          onReviewDoc={(doc) => navigate(`/projects/${state.projectId}/documents/${doc.id || 'doc-1'}/review`)}
+          onOpenInvoices={() => navigate(`/projects/${state.projectId}/invoices`)}
         />
       )}
 

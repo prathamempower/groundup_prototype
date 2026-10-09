@@ -54,7 +54,7 @@ export const ROOT_QUESTIONS: Record<string, QuestionDefinition> = {
         value: 'VIEWER',
         label: 'Viewer / Advisory',
         badge: 'Read-Only Audit',
-        description: 'Audits canonical project documentation, permits, architectural plans, and inspection reports without edit rights.',
+        description: 'Reviews approved project documentation, permits, architectural plans, and inspection reports without edit rights.',
         iconName: 'Eye',
       },
     ],

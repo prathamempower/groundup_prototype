@@ -5,6 +5,9 @@ import { NewProjectScreen } from '../screens/new-project/NewProjectScreen';
 import { ProjectDetailRouteWrapper } from './ProjectDetailRouteWrapper';
 import { DealLabScreen } from '../screens/DealLabScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
+import { DrawBuilderScreen } from '../screens/draw-builder/DrawBuilderScreen';
+import { DocumentReviewScreen } from '../screens/document-review/DocumentReviewScreen';
+import { InvoicesScreen } from '../screens/invoices/InvoicesScreen';
 import { Project, ProjectFourTruthsSummary, UserRole } from '../../shared/types';
 import { ActiveNavScreen } from '../components/Sidebar';
 import { AuthenticatedUser } from '../screens/AuthScreen';
@@ -66,7 +69,7 @@ export function AppRoutes({
               }}
               onAddProject={() => navigate('/new-project')}
               onOpenDealLab={() => onNavigate('deal-lab')}
-              onNavigateDraws={() => onNavigate('draws')}
+              onNavigateDraws={() => navigate(`/projects/${selectedProjectId}/draws/new`)}
             />
           ) : (
             <Navigate to={defaultRolePath} replace />
@@ -97,6 +100,39 @@ export function AppRoutes({
           ) : (
             <Navigate to={defaultRolePath} replace />
           )
+        }
+      />
+
+      <Route
+        path="/projects/:projectId/draws/new"
+        element={
+          <DrawBuilderScreen
+            projects={projects}
+            summary={summary}
+            currentRole={currentRole}
+          />
+        }
+      />
+
+      <Route
+        path="/projects/:projectId/documents/:docId/review"
+        element={
+          <DocumentReviewScreen
+            projects={projects}
+            summary={summary}
+            currentRole={currentRole}
+          />
+        }
+      />
+
+      <Route
+        path="/projects/:projectId/invoices"
+        element={
+          <InvoicesScreen
+            projects={projects}
+            summary={summary}
+            currentRole={currentRole}
+          />
         }
       />
 

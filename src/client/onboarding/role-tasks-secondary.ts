@@ -31,7 +31,7 @@ export function getSecondaryRoleTasks(state: OnboardingState): SetupTask[] {
     tasks.push({
       id: 'task-acct-cost-codes',
       title: `Confirm Cost Code Taxonomy (${state.acct_cost_code_format === 'csi_16' ? 'CSI 16-Division' : 'MasterFormat'})`,
-      description: 'Ensure budget line mappings match incoming invoices for automated zero-hallucination allocation.',
+      description: 'Ensure budget categories match incoming invoices for accurate automatic allocation.',
       category: 'INTEGRATION',
       priority: 'HIGH',
       targetScreen: 'document-intake',

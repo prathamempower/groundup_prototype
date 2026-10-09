@@ -22,7 +22,7 @@ export const IntegrationsSettingsTab: React.FC<IntegrationsSettingsTabProps> = (
     {
       id: 'amexCard' as const,
       title: 'American Express Corporate Card Feed (Project Cards)',
-      desc: 'Automatically ingests card swipes and associates charges with project numbers (Home Depot, lumber, etc.).',
+      desc: 'Automatically imports card transactions and links charges with project cost codes (Home Depot, lumber, etc.).',
       connected: integrations.amexCard,
       icon: CreditCard,
     },
