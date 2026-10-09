@@ -7,7 +7,6 @@ import { Project, ProjectFourTruthsSummary, UserRole } from '../../shared/types'
 import { ProjectTab } from './project-detail/types';
 import { useProjectDetailState } from './project-detail/use-project-detail-state';
 import { ProjectDetailHeader } from './project-detail/components/ProjectDetailHeader';
-import { ProjectDetailNav } from './project-detail/components/ProjectDetailNav';
 import { ProjectDetailTabContent } from './project-detail/components/ProjectDetailTabContent';
 import { ProjectDetailModals } from './project-detail/components/ProjectDetailModals';
 
@@ -72,20 +71,13 @@ export function ProjectDetailScreen(props: ProjectDetailScreenProps) {
         <div className="max-w-6xl mx-auto space-y-3">
           <ProjectDetailHeader
             projectName={projectName}
+            selectedProject={state.selectedProject}
             currentRole={currentRole}
             onBack={onBack}
             onOpenClaimModal={() => state.setIsDrawPacketModalOpenLocal(true)}
             onOpenDailyLog={() => handleTabSelect('timeline')}
             onOpenChangeOrderModal={() => state.setIsChangeOrderModalOpenLocal(true)}
             onOpenDrawPacketModal={() => state.setIsDrawPacketModalOpenLocal(true)}
-          />
-
-          <ProjectDetailNav
-            activeTab={state.activeTab}
-            currentRole={currentRole}
-            pendingDrawsCount={state.draws.filter(d => d.status === 'pending').length}
-            unresolvedAlertsCount={state.alerts.filter(a => !a.resolved).length}
-            onTabSelect={handleTabSelect}
           />
         </div>
       </div>

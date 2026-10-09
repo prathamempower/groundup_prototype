@@ -30,7 +30,7 @@ export function SidebarFooter({
               {builderProfile.name}
             </span>
             <div className="flex items-center gap-1 mt-0.5">
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[10px] font-medium bg-slate-200/70 text-slate-700 truncate">
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[10px] font-medium text-slate-700 truncate">
                 <Shield className="w-2.5 h-2.5 text-slate-500 shrink-0" />
                 <span className="truncate">{roleBadge}</span>
               </span>

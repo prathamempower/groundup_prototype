@@ -29,11 +29,11 @@ export function RoleSwitcherDropdown({
     <div className="relative">
       <button
         onClick={() => setShowRoleMenu(!showRoleMenu)}
-        className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition cursor-pointer shadow-xs"
+        className="flex items-center gap-2 px-3 py-1.5 text-slate-900 hover:text-slate-800 rounded-xl text-xs font-semibold transition cursor-pointer"
       >
         <UserCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
         <span>
-          Persona: <strong className="font-bold text-white">{activeRoleContext.roleTitle.split(' ')[0]}</strong>
+          Persona: <strong className="font-bold text-slate-900">{activeRoleContext.roleTitle.split(' ')[0]}</strong>
         </span>
         <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
       </button>
@@ -44,7 +44,7 @@ export function RoleSwitcherDropdown({
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Role & Persona Simulator
             </span>
-            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+            <span className="text-[10px] font-semibold text-emerald-700 px-1.5 py-0.5 rounded flex items-center gap-1">
               <Lock className="w-2.5 h-2.5 text-emerald-600" />
               <span>RBAC Active</span>
             </span>
@@ -61,13 +61,13 @@ export function RoleSwitcherDropdown({
                   setShowRoleMenu(false);
                 }}
                 className={`w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 transition cursor-pointer flex items-start gap-2.5 ${
-                  isCurrent ? 'bg-slate-50 font-bold text-slate-900' : 'text-slate-700'
+                  isCurrent ? 'font-bold text-slate-900' : 'text-slate-700'
                 }`}
               >
                 <div className="mt-0.5 shrink-0">
                   {isCurrent ? (
-                    <div className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center">
-                      <Check className="w-2.5 h-2.5" />
+                    <div className="w-4 h-4 rounded-full border border-slate-300 bg-white flex items-center justify-center">
+                      <Check className="w-2.5 h-2.5 text-emerald-600" />
                     </div>
                   ) : (
                     <div className="w-4 h-4 rounded-full border border-slate-300 bg-white" />
@@ -76,7 +76,7 @@ export function RoleSwitcherDropdown({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1">
                     <span className="font-semibold text-slate-900 truncate">{meta?.roleTitle || r}</span>
-                    <span className="text-[10px] font-mono font-medium text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded shrink-0">
+                    <span className="text-[10px] font-mono font-medium text-slate-500 px-1.5 py-0.2 rounded shrink-0">
                       {profile?.badge || r}
                     </span>
                   </div>

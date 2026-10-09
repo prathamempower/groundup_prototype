@@ -41,7 +41,7 @@ export const PortfolioFooterLinks: React.FC<PortfolioFooterLinksProps> = ({
       </button>
 
       <button
-        onClick={() => onSelectProject('1')}
+        onClick={() => onSelectProject('proj-73-broadway')}
         className="flex items-center gap-3 p-4 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl transition text-left cursor-pointer shadow-2xs group"
       >
         <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition">

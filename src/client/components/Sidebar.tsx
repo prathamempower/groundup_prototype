@@ -16,6 +16,8 @@ import {
   Scale,
   TrendingUp,
   FolderArchive,
+  MapPin,
+  Building,
 } from 'lucide-react';
 import { UserRole } from '../../shared/types';
 import {
@@ -59,15 +61,17 @@ export function Sidebar({
   const coreNav = [
     { id: 'portfolio' as const, label: 'Portfolio', icon: LayoutGrid },
     { id: 'deal-lab' as const, label: 'Deal Lab', icon: Sparkles },
-    { id: 'documents' as const, label: 'Document Inbox', icon: FolderOpen },
-    { id: 'reports' as const, label: 'Reports & Audits', icon: FileCheck },
   ];
 
   const projectModulesNav = [
     { id: 'project-detail' as const, label: 'Control Center', icon: Building2 },
+    { id: 'acquisition' as const, label: 'Acquisition & Closing', icon: MapPin },
+    { id: 'permits' as const, label: 'Planning & Permits', icon: Building },
+    { id: 'financing' as const, label: 'Financing & Debt', icon: Landmark },
     { id: 'budget' as const, label: 'Budget & Contingency', icon: DollarSign },
-    { id: 'draws' as const, label: 'Draw Lab', icon: FileCheck, badge: pendingDrawsCount },
     { id: 'timeline' as const, label: 'Milestones & Delays', icon: Clock },
+    { id: 'draws' as const, label: 'Draw Lab', icon: FileCheck, badge: pendingDrawsCount },
+    { id: 'documents' as const, label: 'Document Inbox', icon: FolderOpen },
     { id: 'recon' as const, label: 'Financial Recon', icon: Scale },
     { id: 'disposition' as const, label: 'Unit Sales & ROI', icon: Home },
     { id: 'alerts' as const, label: 'Risk Alerts', icon: BellRing, badge: alertsCount },

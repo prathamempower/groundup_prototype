@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { Project, ContingencyMovement, UnitSale, AmexCardTransaction } from '../../../shared/types';
 import { ProjectTab, BudgetLineItem, DrawItem, MilestoneItem, AlertItem, ChangeOrderItem } from './types';
 import {
-  INITIAL_BUDGET_LINES,
+  getProjectBudgetLines,
+  getProjectDraws,
+  getProjectMilestones,
+  getProjectAlerts,
   getInitialContingencyMovements,
   getInitialChangeOrders,
-  INITIAL_DRAWS,
-  INITIAL_MILESTONES,
   getInitialUnitSales,
   getInitialAmexTransactions,
-  INITIAL_ALERTS,
 } from './initial-state';
 import { createProjectDetailHandlers } from './use-project-detail-handlers';
 
@@ -28,19 +28,33 @@ export function useProjectDetailState(
 
   const selectedProject = projects.find(p => p.id === projectId) || projects[0];
 
-  const [budgetLines, setBudgetLines] = useState<BudgetLineItem[]>(INITIAL_BUDGET_LINES);
-  const [contingencyRemaining, setContingencyRemaining] = useState(42000);
+  const [budgetLines, setBudgetLines] = useState<BudgetLineItem[]>(() => getProjectBudgetLines(projectId));
+  const [contingencyRemaining, setContingencyRemaining] = useState(selectedProject?.contingency_remaining ?? 42000);
   const [contingencyMovements, setContingencyMovements] = useState<ContingencyMovement[]>(() =>
     getInitialContingencyMovements(projectId)
   );
   const [changeOrders, setChangeOrders] = useState<ChangeOrderItem[]>(() => getInitialChangeOrders(projectId));
-  const [draws, setDraws] = useState<DrawItem[]>(INITIAL_DRAWS);
-  const [milestones, setMilestones] = useState<MilestoneItem[]>(INITIAL_MILESTONES);
+  const [draws, setDraws] = useState<DrawItem[]>(() => getProjectDraws(projectId));
+  const [milestones, setMilestones] = useState<MilestoneItem[]>(() => getProjectMilestones(projectId));
   const [unitSales, setUnitSales] = useState<UnitSale[]>(() => getInitialUnitSales(projectId));
   const [amexTransactions, setAmexTransactions] = useState<AmexCardTransaction[]>(() =>
     getInitialAmexTransactions(projectId)
   );
-  const [alerts, setAlerts] = useState<AlertItem[]>(INITIAL_ALERTS);
+  const [alerts, setAlerts] = useState<AlertItem[]>(() => getProjectAlerts(projectId));
+
+  useEffect(() => {
+    setBudgetLines(getProjectBudgetLines(projectId));
+    setDraws(getProjectDraws(projectId));
+    setMilestones(getProjectMilestones(projectId));
+    setAlerts(getProjectAlerts(projectId));
+    setUnitSales(getInitialUnitSales(projectId));
+    setAmexTransactions(getInitialAmexTransactions(projectId));
+    setChangeOrders(getInitialChangeOrders(projectId));
+    setContingencyMovements(getInitialContingencyMovements(projectId));
+    if (selectedProject) {
+      setContingencyRemaining(selectedProject.contingency_remaining ?? 42000);
+    }
+  }, [projectId, selectedProject]);
 
   // Modal & Edit States
   const [isChangeOrderModalOpenLocal, setIsChangeOrderModalOpenLocal] = useState(false);

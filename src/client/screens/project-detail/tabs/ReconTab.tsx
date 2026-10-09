@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CheckCircle2, Mail, Scale } from 'lucide-react';
-import { UserRole } from '../../../../shared/types';
+import { Project, UserRole } from '../../../../shared/types';
 import { LienWaiverItem } from '../../cfo/types';
 import { INITIAL_LIEN_WAIVERS, INITIAL_RECONCILIATION_ROWS } from '../../cfo/mock-data';
 import { CFOHeader } from '../../cfo/components/CFOHeader';
@@ -11,12 +11,15 @@ import { SpendVsDrawMatrix } from '../../cfo/components/SpendVsDrawMatrix';
 interface ReconTabProps {
   currentRole: UserRole;
   projectName?: string;
+  selectedProject?: Project;
 }
 
 export const ReconTab: React.FC<ReconTabProps> = ({
   currentRole: _currentRole,
-  projectName = '73 Broadway, Hoboken',
+  projectName = 'Selected Project',
+  selectedProject,
 }) => {
+  const displayProjectName = selectedProject?.name || projectName;
   const [lienWaivers, setLienWaivers] = useState<LienWaiverItem[]>(INITIAL_LIEN_WAIVERS);
   const [reconciliationRows] = useState(INITIAL_RECONCILIATION_ROWS);
 

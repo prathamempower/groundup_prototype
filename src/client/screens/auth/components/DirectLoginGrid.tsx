@@ -46,9 +46,6 @@ export function DirectLoginGrid({
                 <span className="font-bold text-xs text-slate-900 group-hover:text-black truncate pr-1">
                   {persona.name}
                 </span>
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${persona.badgeClass}`}>
-                  {persona.roleBadge}
-                </span>
               </div>
               <div className="flex items-center justify-between w-full text-[11px] text-slate-500">
                 <span className="truncate pr-1">{persona.roleTitle}</span>

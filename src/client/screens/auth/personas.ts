@@ -9,7 +9,7 @@ export const DIRECT_LOGIN_PERSONAS: DemoPersona[] = [
     role: 'OWNER',
     roleTitle: 'Developer / Owner',
     roleBadge: 'Owner',
-    badgeClass: 'bg-slate-900 text-white',
+    badgeClass: 'text-white',
   },
   {
     id: 'user-pm-1',
@@ -19,7 +19,7 @@ export const DIRECT_LOGIN_PERSONAS: DemoPersona[] = [
     role: 'PROJECT_MANAGER',
     roleTitle: 'Project Manager',
     roleBadge: 'Field & Schedule',
-    badgeClass: 'bg-blue-100 text-blue-800 border border-blue-200',
+    badgeClass: 'text-blue-800',
   },
   {
     id: 'user-gc-1',
@@ -29,7 +29,7 @@ export const DIRECT_LOGIN_PERSONAS: DemoPersona[] = [
     role: 'GENERAL_CONTRACTOR',
     roleTitle: 'General Contractor',
     roleBadge: 'General Contractor',
-    badgeClass: 'bg-teal-100 text-teal-800 border border-teal-200',
+    badgeClass: 'text-teal-800',
   },
   {
     id: 'user-fin-1',
@@ -39,7 +39,7 @@ export const DIRECT_LOGIN_PERSONAS: DemoPersona[] = [
     role: 'FINANCE',
     roleTitle: 'Finance Director / CFO',
     roleBadge: 'Finance',
-    badgeClass: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+    badgeClass: 'text-emerald-800',
   },
   {
     id: 'user-acct-1',
@@ -49,7 +49,7 @@ export const DIRECT_LOGIN_PERSONAS: DemoPersona[] = [
     role: 'ACCOUNTANT',
     roleTitle: 'Project Accountant',
     roleBadge: 'Ledger & Audit',
-    badgeClass: 'bg-cyan-100 text-cyan-800 border border-cyan-200',
+    badgeClass: 'text-cyan-800',
   },
   {
     id: 'user-investor-1',
@@ -59,7 +59,7 @@ export const DIRECT_LOGIN_PERSONAS: DemoPersona[] = [
     role: 'INVESTOR',
     roleTitle: 'Equity Investor / Partner',
     roleBadge: 'Investor',
-    badgeClass: 'bg-purple-100 text-purple-800 border border-purple-200',
+    badgeClass: 'text-purple-800',
   },
   {
     id: 'user-viewer-1',
@@ -69,6 +69,6 @@ export const DIRECT_LOGIN_PERSONAS: DemoPersona[] = [
     role: 'VIEWER',
     roleTitle: 'Read-Only Viewer',
     roleBadge: 'Viewer',
-    badgeClass: 'bg-slate-100 text-slate-700 border border-slate-200',
+    badgeClass: 'text-slate-700',
   },
 ];

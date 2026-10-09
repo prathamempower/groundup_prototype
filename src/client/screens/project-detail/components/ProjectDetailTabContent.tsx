@@ -49,6 +49,7 @@ export const ProjectDetailTabContent: React.FC<ProjectDetailTabContentProps> = (
           currentRole={currentRole}
           projectName={projectName}
           projectAddress={projectAddress}
+          selectedProject={state.selectedProject}
         />
       )}
 
@@ -56,6 +57,7 @@ export const ProjectDetailTabContent: React.FC<ProjectDetailTabContentProps> = (
         <PermitsTab
           currentRole={currentRole}
           projectName={projectName}
+          selectedProject={state.selectedProject}
         />
       )}
 
@@ -63,6 +65,7 @@ export const ProjectDetailTabContent: React.FC<ProjectDetailTabContentProps> = (
         <FinancingTab
           currentRole={currentRole}
           projectName={projectName}
+          selectedProject={state.selectedProject}
         />
       )}
 
@@ -142,6 +145,7 @@ export const ProjectDetailTabContent: React.FC<ProjectDetailTabContentProps> = (
         <ReconTab
           currentRole={currentRole}
           projectName={projectName}
+          selectedProject={state.selectedProject}
         />
       )}
 

@@ -21,10 +21,50 @@ export const INITIAL_BUDGET_VERSIONS: BudgetVersion[] = [
     notes: 'GMP Master Budget Heritage Bank',
     created_at: '2026-02-14T00:00:00Z',
   },
+  {
+    id: 'bv-161-v1',
+    project_id: 'proj-161-woodlawn',
+    version_number: 1,
+    status: 'APPROVED',
+    approved_at: '2026-01-15T00:00:00Z',
+    approved_by_user_id: 'user-cfo-1',
+    notes: 'GMP Master Budget First Republic / Chase',
+    created_at: '2026-01-15T00:00:00Z',
+  },
+  {
+    id: 'bv-oak-v1',
+    project_id: 'proj-oakridge',
+    version_number: 1,
+    status: 'APPROVED',
+    approved_at: '2026-01-05T00:00:00Z',
+    approved_by_user_id: 'user-cfo-1',
+    notes: 'GMP Master Budget Texas Heritage Credit Union',
+    created_at: '2026-01-05T00:00:00Z',
+  },
+  {
+    id: 'bv-elm-v1',
+    project_id: 'proj-elm-st',
+    version_number: 1,
+    status: 'APPROVED',
+    approved_at: '2026-03-01T00:00:00Z',
+    approved_by_user_id: 'user-cfo-1',
+    notes: 'GMP Master Budget Lone Star Commercial Bank',
+    created_at: '2026-03-01T00:00:00Z',
+  },
+  {
+    id: 'bv-392-v1',
+    project_id: 'proj-392-1st',
+    version_number: 1,
+    status: 'APPROVED',
+    approved_at: '2025-02-01T00:00:00Z',
+    approved_by_user_id: 'user-cfo-1',
+    notes: 'GMP Master Budget BCB Bank (Completed Project)',
+    created_at: '2025-02-01T00:00:00Z',
+  },
 ];
 
 export const INITIAL_BUDGET_LINES: BudgetLine[] = [
-  // 73 Broadway
+  // 1. 73 Broadway ($1,820,000)
   { id: 'bl-73-1', project_id: 'proj-73-broadway', version_id: 'bv-73-v1', category: 'Pre-construction & Permits', cost_code: '01-100', original_amount: 95000 },
   { id: 'bl-73-2', project_id: 'proj-73-broadway', version_id: 'bv-73-v1', category: 'Site Work & Demolition', cost_code: '02-100', original_amount: 78000 },
   { id: 'bl-73-3', project_id: 'proj-73-broadway', version_id: 'bv-73-v1', category: 'Foundation & Concrete', cost_code: '03-300', original_amount: 285000 },
@@ -36,7 +76,7 @@ export const INITIAL_BUDGET_LINES: BudgetLine[] = [
   { id: 'bl-73-9', project_id: 'proj-73-broadway', version_id: 'bv-73-v1', category: 'Interior Finishes', cost_code: '09-600', original_amount: 120000 },
   { id: 'bl-73-10', project_id: 'proj-73-broadway', version_id: 'bv-73-v1', category: 'Contingency', cost_code: '00-500', original_amount: 42000 },
 
-  // 212 Maple Ave
+  // 2. 212 Maple Ave ($740,000)
   { id: 'bl-212-1', project_id: 'proj-212-maple', version_id: 'bv-212-v1', category: 'Pre-construction & Permits', cost_code: '01-100', original_amount: 38000 },
   { id: 'bl-212-2', project_id: 'proj-212-maple', version_id: 'bv-212-v1', category: 'Site Work & Demolition', cost_code: '02-100', original_amount: 42000 },
   { id: 'bl-212-3', project_id: 'proj-212-maple', version_id: 'bv-212-v1', category: 'Foundation & Concrete', cost_code: '03-300', original_amount: 135000 },
@@ -46,4 +86,48 @@ export const INITIAL_BUDGET_LINES: BudgetLine[] = [
   { id: 'bl-212-7', project_id: 'proj-212-maple', version_id: 'bv-212-v1', category: 'Exterior & Roofing', cost_code: '07-100', original_amount: 55000 },
   { id: 'bl-212-8', project_id: 'proj-212-maple', version_id: 'bv-212-v1', category: 'Interior Finishes', cost_code: '09-600', original_amount: 75000 },
   { id: 'bl-212-9', project_id: 'proj-212-maple', version_id: 'bv-212-v1', category: 'Contingency', cost_code: '00-500', original_amount: 35000 },
+
+  // 3. 161 Woodlawn Ave ($892,000)
+  { id: 'bl-161-1', project_id: 'proj-161-woodlawn', version_id: 'bv-161-v1', category: 'Pre-construction & Architectural Permits', cost_code: '01-100', original_amount: 45000 },
+  { id: 'bl-161-2', project_id: 'proj-161-woodlawn', version_id: 'bv-161-v1', category: 'Site Work & Excavation', cost_code: '02-100', original_amount: 58000 },
+  { id: 'bl-161-3', project_id: 'proj-161-woodlawn', version_id: 'bv-161-v1', category: 'Foundation & Concrete Slab', cost_code: '03-300', original_amount: 142000 },
+  { id: 'bl-161-4', project_id: 'proj-161-woodlawn', version_id: 'bv-161-v1', category: 'Framing & Structural Steel', cost_code: '06-100', original_amount: 235000 },
+  { id: 'bl-161-5', project_id: 'proj-161-woodlawn', version_id: 'bv-161-v1', category: 'Plumbing & MEP Rough-in', cost_code: '22-000', original_amount: 125000 },
+  { id: 'bl-161-6', project_id: 'proj-161-woodlawn', version_id: 'bv-161-v1', category: 'Electrical Wiring & Panels', cost_code: '26-000', original_amount: 98000 },
+  { id: 'bl-161-7', project_id: 'proj-161-woodlawn', version_id: 'bv-161-v1', category: 'Exterior Masonry & Roofing', cost_code: '07-100', original_amount: 84000 },
+  { id: 'bl-161-8', project_id: 'proj-161-woodlawn', version_id: 'bv-161-v1', category: 'Interior Finishes & Cabinetry', cost_code: '09-600', original_amount: 40000 },
+  { id: 'bl-161-9', project_id: 'proj-161-woodlawn', version_id: 'bv-161-v1', category: 'Contingency', cost_code: '00-500', original_amount: 65000 },
+
+  // 4. Oakridge Duplex ($1,080,000)
+  { id: 'bl-oak-1', project_id: 'proj-oakridge', version_id: 'bv-oak-v1', category: 'Architectural & Permits', cost_code: '01-100', original_amount: 52000 },
+  { id: 'bl-oak-2', project_id: 'proj-oakridge', version_id: 'bv-oak-v1', category: 'Site Utilities & Grading', cost_code: '02-100', original_amount: 68000 },
+  { id: 'bl-oak-3', project_id: 'proj-oakridge', version_id: 'bv-oak-v1', category: 'Post-Tension Foundation', cost_code: '03-300', original_amount: 165000 },
+  { id: 'bl-oak-4', project_id: 'proj-oakridge', version_id: 'bv-oak-v1', category: 'Duplex Framing & Trusses', cost_code: '06-100', original_amount: 280000 },
+  { id: 'bl-oak-5', project_id: 'proj-oakridge', version_id: 'bv-oak-v1', category: 'HVAC & Climate Systems', cost_code: '23-000', original_amount: 125000 },
+  { id: 'bl-oak-6', project_id: 'proj-oakridge', version_id: 'bv-oak-v1', category: 'Plumbing Rough-In', cost_code: '22-000', original_amount: 115000 },
+  { id: 'bl-oak-7', project_id: 'proj-oakridge', version_id: 'bv-oak-v1', category: 'Electrical Service & Panels', cost_code: '26-000', original_amount: 105000 },
+  { id: 'bl-oak-8', project_id: 'proj-oakridge', version_id: 'bv-oak-v1', category: 'Exterior Roofing & Masonry', cost_code: '07-100', original_amount: 120000 },
+  { id: 'bl-oak-9', project_id: 'proj-oakridge', version_id: 'bv-oak-v1', category: 'Contingency', cost_code: '00-500', original_amount: 50000 },
+
+  // 5. Elm St 4-Plex ($1,860,000)
+  { id: 'bl-elm-1', project_id: 'proj-elm-st', version_id: 'bv-elm-v1', category: 'Engineering, Permits & Zoning', cost_code: '01-100', original_amount: 85000 },
+  { id: 'bl-elm-2', project_id: 'proj-elm-st', version_id: 'bv-elm-v1', category: 'Earthwork & Commercial Slab', cost_code: '02-100', original_amount: 240000 },
+  { id: 'bl-elm-3', project_id: 'proj-elm-st', version_id: 'bv-elm-v1', category: '4-Plex Structural Framing', cost_code: '06-100', original_amount: 480000 },
+  { id: 'bl-elm-4', project_id: 'proj-elm-st', version_id: 'bv-elm-v1', category: 'Exterior Facade & Roofing', cost_code: '07-100', original_amount: 210000 },
+  { id: 'bl-elm-5', project_id: 'proj-elm-st', version_id: 'bv-elm-v1', category: 'Plumbing & Fire Suppression', cost_code: '22-000', original_amount: 220000 },
+  { id: 'bl-elm-6', project_id: 'proj-elm-st', version_id: 'bv-elm-v1', category: 'Electrical Distribution & Meters', cost_code: '26-000', original_amount: 190000 },
+  { id: 'bl-elm-7', project_id: 'proj-elm-st', version_id: 'bv-elm-v1', category: 'HVAC Multi-zone Systems', cost_code: '23-000', original_amount: 165000 },
+  { id: 'bl-elm-8', project_id: 'proj-elm-st', version_id: 'bv-elm-v1', category: 'Drywall & Acoustical Insulation', cost_code: '09-200', original_amount: 180000 },
+  { id: 'bl-elm-9', project_id: 'proj-elm-st', version_id: 'bv-elm-v1', category: 'Contingency', cost_code: '00-500', original_amount: 90000 },
+
+  // 6. 392 1st Street ($1,450,000)
+  { id: 'bl-392-1', project_id: 'proj-392-1st', version_id: 'bv-392-v1', category: 'Pre-construction & Zoning Variance', cost_code: '01-100', original_amount: 75000 },
+  { id: 'bl-392-2', project_id: 'proj-392-1st', version_id: 'bv-392-v1', category: 'Demolition & Deep Excavation', cost_code: '02-100', original_amount: 88000 },
+  { id: 'bl-392-3', project_id: 'proj-392-1st', version_id: 'bv-392-v1', category: 'Foundation & Concrete Superstructure', cost_code: '03-300', original_amount: 220000 },
+  { id: 'bl-392-4', project_id: 'proj-392-1st', version_id: 'bv-392-v1', category: 'Structural Framing & Masonry', cost_code: '06-100', original_amount: 360000 },
+  { id: 'bl-392-5', project_id: 'proj-392-1st', version_id: 'bv-392-v1', category: 'Plumbing & Hydronic Radiant Heating', cost_code: '22-000', original_amount: 175000 },
+  { id: 'bl-392-6', project_id: 'proj-392-1st', version_id: 'bv-392-v1', category: 'Electrical & Smart Home Wiring', cost_code: '26-000', original_amount: 145000 },
+  { id: 'bl-392-7', project_id: 'proj-392-1st', version_id: 'bv-392-v1', category: 'Luxury Finishes, Hardwood & Quartz', cost_code: '09-600', original_amount: 240000 },
+  { id: 'bl-392-8', project_id: 'proj-392-1st', version_id: 'bv-392-v1', category: 'Exterior Facade & Windows', cost_code: '07-100', original_amount: 77000 },
+  { id: 'bl-392-9', project_id: 'proj-392-1st', version_id: 'bv-392-v1', category: 'Contingency', cost_code: '00-500', original_amount: 70000 },
 ];

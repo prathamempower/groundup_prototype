@@ -103,25 +103,92 @@ export class MockDataStore {
     this.auditEvents.unshift(event);
   }
 
-  public getProjectFourTruths(projectId: string): ProjectFourTruthsSummary {
-    let project = this.projects.find((p) => p.id === projectId);
-    if (!project) {
-      // Fallback template for dynamically created project ids
-      project = this.projects[0] || {
+  public ensureProjectDataset(projectId: string): void {
+    if (!this.projects.some((p) => p.id === projectId)) {
+      const dynamicProject: Project = {
         id: projectId,
-        name: 'Project ' + projectId,
+        name: `Project ${projectId.replace(/^proj-/, '').replace(/-/g, ' ')}`,
         address: '100 Construction Way',
         gc_name: 'General Contractor LLC',
         lender_name: 'Commercial Bank',
-        units: 1,
-        target_budget: 1000000,
+        units: 2,
+        target_budget: 1200000,
         start_date: '2026-01-01',
         expected_completion: '2026-12-31',
         status: 'ACTIVE',
         created_by_user_id: 'user-dev-1',
         created_at: new Date().toISOString(),
       };
+      this.projects.push(dynamicProject);
     }
+
+    const proj = this.projects.find((p) => p.id === projectId)!;
+    const budget = proj.target_budget || 1000000;
+
+    if (!this.budgetVersions.some((bv) => bv.project_id === projectId)) {
+      const versionId = `bv-${projectId}-v1`;
+      this.budgetVersions.push({
+        id: versionId,
+        project_id: projectId,
+        version_number: 1,
+        status: 'APPROVED',
+        approved_at: proj.created_at,
+        approved_by_user_id: 'user-cfo-1',
+        notes: `GMP Master Budget ${proj.lender_name || 'Bank'}`,
+        created_at: proj.created_at,
+      });
+
+      const categories = [
+        { name: 'Pre-construction & Permits', code: '01-100', pct: 0.05 },
+        { name: 'Site Work & Demolition', code: '02-100', pct: 0.07 },
+        { name: 'Foundation & Concrete', code: '03-300', pct: 0.18 },
+        { name: 'Framing & Trusses', code: '06-100', pct: 0.26 },
+        { name: 'Plumbing & MEP', code: '22-000', pct: 0.12 },
+        { name: 'Electrical Systems', code: '26-000', pct: 0.10 },
+        { name: 'Exterior & Roofing', code: '07-100', pct: 0.10 },
+        { name: 'Interior Finishes', code: '09-600', pct: 0.07 },
+        { name: 'Contingency', code: '00-500', pct: 0.05 },
+      ];
+
+      categories.forEach((cat, idx) => {
+        this.budgetLines.push({
+          id: `bl-${projectId}-${idx + 1}`,
+          project_id: projectId,
+          version_id: versionId,
+          category: cat.name,
+          cost_code: cat.code,
+          original_amount: Math.round(budget * cat.pct),
+        });
+      });
+    }
+
+    if (!this.loans.some((l) => l.project_id === projectId)) {
+      this.loans.push({
+        id: `loan-${projectId}`,
+        project_id: projectId,
+        lender_name: proj.lender_name || 'Commercial Bank',
+        loan_amount: Math.round(budget * 0.75),
+        interest_rate: 0.0875,
+        term_months: 18,
+        holdback_amount: Math.round(budget * 0.05),
+        current_balance: Math.round(budget * 0.40),
+        closing_date: proj.start_date,
+        entered_by_role: 'CFO',
+      });
+    }
+
+    if (!this.activities.some((a) => a.project_id === projectId)) {
+      this.activities.push(
+        { id: `sa-${projectId}-1`, project_id: projectId, milestone: 'Plans & Permits', trade: 'Architecture / Permits', planned_start: '2026-01-01', planned_end: '2026-02-01', verified_progress_pct: 1.0, last_verified_source: 'inspection_result', last_verified_date: '2026-02-01', entered_by_role: 'PM' },
+        { id: `sa-${projectId}-2`, project_id: projectId, milestone: 'Foundation & Earthwork', trade: 'Concrete', planned_start: '2026-02-01', planned_end: '2026-03-15', verified_progress_pct: 1.0, last_verified_source: 'inspection_result', last_verified_date: '2026-03-15', entered_by_role: 'PM' },
+        { id: `sa-${projectId}-3`, project_id: projectId, milestone: 'Structural Framing', trade: 'Carpentry', planned_start: '2026-03-15', planned_end: '2026-05-30', verified_progress_pct: 0.50, last_verified_source: 'PM_confirmation', last_verified_date: '2026-04-15', entered_by_role: 'PM' },
+      );
+    }
+  }
+
+  public getProjectFourTruths(projectId: string): ProjectFourTruthsSummary {
+    this.ensureProjectDataset(projectId);
+    const project = this.projects.find((p) => p.id === projectId)!;
 
     const bvs = this.budgetVersions.filter((bv) => bv.project_id === projectId);
     const bls = this.budgetLines.filter((bl) => bl.project_id === projectId);

@@ -27,7 +27,7 @@ export const TimelineTab: React.FC<TimelineTabProps> = ({
           <h3 className="font-bold text-slate-900 text-base">Construction Schedule & Delay Attribution</h3>
           <p className="text-xs text-slate-500">Every milestone slip is attributed to a root cause with carrying cost math</p>
         </div>
-        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-mono font-bold text-amber-900">
+        <div className="p-3 text-xs font-mono font-bold text-amber-900">
           Cumulative Delay: 82 Days (+${(82 * 324).toLocaleString()} Carry Cost)
         </div>
       </div>

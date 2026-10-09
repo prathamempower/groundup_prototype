@@ -52,7 +52,7 @@ export function InvestorPortalScreen({
 
       <CondoWaterfallSection sales={CONDO_UNIT_SALES} />
 
-      <ExecutiveNarrativeCard />
+      <ExecutiveNarrativeCard activeProject={activeProject} />
     </div>
   );
 }

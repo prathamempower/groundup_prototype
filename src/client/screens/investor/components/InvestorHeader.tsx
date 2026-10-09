@@ -19,7 +19,7 @@ export function InvestorHeader({ activeProject, onDownload }: InvestorHeaderProp
         </div>
         <h1 className="text-2xl font-bold text-slate-900 mt-1">Investment Performance & Distribution Schedule</h1>
         <p className="text-xs text-slate-500">
-          Investor: Krutarth Shah · Project: {activeProject.name} (73 Broadway, Hoboken)
+          Investor: Krutarth Shah · Project: {activeProject.name} ({activeProject.address})
         </p>
       </div>
 

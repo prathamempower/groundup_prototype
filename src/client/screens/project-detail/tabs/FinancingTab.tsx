@@ -11,30 +11,33 @@ import {
   Clock, 
   ArrowRight 
 } from 'lucide-react';
-import { UserRole } from '../../../../shared/types';
+import { Project, UserRole } from '../../../../shared/types';
 import { hasPermission } from '../../../../shared/rbac/matrix';
 
 interface FinancingTabProps {
   currentRole: UserRole;
   projectName?: string;
+  selectedProject?: Project;
 }
 
 export const FinancingTab: React.FC<FinancingTabProps> = ({
   currentRole,
-  projectName = '73 Broadway, Hoboken',
+  projectName = 'Selected Project',
+  selectedProject,
 }) => {
   const canEdit = hasPermission(currentRole, 'financing:edit');
 
-  const loanCommitment = 2000000;
-  const fundedDisbursed = 813300;
+  const targetBudget = selectedProject?.target_budget || 1820000;
+  const loanCommitment = Math.round(targetBudget * 0.77);
+  const fundedDisbursed = Math.round(loanCommitment * 0.60);
   const remainingCommitment = loanCommitment - fundedDisbursed;
-  const interestRate = 7.5;
-  const dailyCarryCost = 324;
-  const totalInterestReserve = 120000;
-  const reserveDrawn = 64800;
+  const interestRate = 8.75;
+  const dailyCarryCost = Math.round((loanCommitment * 0.0875) / 365);
+  const totalInterestReserve = Math.round(loanCommitment * 0.08);
+  const reserveDrawn = Math.round(totalInterestReserve * 0.55);
   const reserveRemaining = totalInterestReserve - reserveDrawn;
-  const runwayMonths = (reserveRemaining / (dailyCarryCost * 30)).toFixed(1);
-  const retainageHeld = 90367;
+  const runwayMonths = (reserveRemaining / Math.max(1, dailyCarryCost * 30)).toFixed(1);
+  const retainageHeld = Math.round(fundedDisbursed * 0.08);
 
   return (
     <div className="space-y-6">

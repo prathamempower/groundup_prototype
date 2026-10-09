@@ -4,7 +4,6 @@ import { DIRECT_LOGIN_PERSONAS } from './auth/personas';
 import { useAuthState } from './auth/use-auth-state';
 import { AuthHero } from './auth/components/AuthHero';
 import { AuthForm } from './auth/components/AuthForm';
-import { GoogleAuthButton } from './auth/components/GoogleAuthButton';
 import { DirectLoginGrid } from './auth/components/DirectLoginGrid';
 
 export type { AuthenticatedUser, DemoPersona };
@@ -91,16 +90,13 @@ export function AuthScreen({ onAuthenticate }: AuthScreenProps) {
           />
 
           {activeTab === 'signin' && (
-            <>
-              <GoogleAuthButton onGoogleAuth={(e) => handleAuth(e, 'google')} />
-              {import.meta.env.DEV && (
-                <DirectLoginGrid
-                  isLoading={isLoading}
-                  loadingPersonaId={loadingPersonaId}
-                  onDirectLogin={handleDirectLogin}
-                />
-              )}
-            </>
+            import.meta.env.DEV && (
+              <DirectLoginGrid
+                isLoading={isLoading}
+                loadingPersonaId={loadingPersonaId}
+                onDirectLogin={handleDirectLogin}
+              />
+            )
           )}
         </div>
       </div>

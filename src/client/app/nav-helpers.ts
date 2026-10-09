@@ -45,15 +45,19 @@ export function getActiveScreenFromPath(pathname: string): ActiveNavScreen {
   if (pathname.startsWith('/projects/')) {
     const parts = pathname.split('/').filter(Boolean);
     const tab = parts[2];
-    if (tab && ['budget', 'draws', 'timeline', 'documents', 'disposition', 'alerts'].includes(tab)) {
+    if (tab && ['acquisition', 'permits', 'financing', 'budget', 'draws', 'timeline', 'documents', 'disposition', 'recon', 'alerts'].includes(tab)) {
       return tab as ActiveNavScreen;
     }
     return 'project-detail';
   }
 
+  if (pathname === '/acquisition') return 'acquisition';
+  if (pathname === '/permits') return 'permits';
+  if (pathname === '/financing') return 'financing';
   if (pathname === '/budget') return 'budget';
   if (pathname === '/draws') return 'draws';
   if (pathname === '/timeline') return 'timeline';
+  if (pathname === '/recon') return 'recon';
   if (pathname === '/documents') return 'documents';
   if (pathname === '/disposition') return 'disposition';
   if (pathname === '/alerts') return 'alerts';
@@ -79,9 +83,13 @@ export function screenToPath(screen: ActiveNavScreen, projectId: string): string
       return '/investor-portal';
     case 'project-detail':
       return `/projects/${projectId}/overview`;
+    case 'acquisition':
+    case 'permits':
+    case 'financing':
     case 'budget':
     case 'draws':
     case 'timeline':
+    case 'recon':
     case 'documents':
     case 'disposition':
     case 'alerts':

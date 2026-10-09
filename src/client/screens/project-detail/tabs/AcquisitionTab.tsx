@@ -12,13 +12,14 @@ import {
   Clock, 
   AlertCircle 
 } from 'lucide-react';
-import { UserRole } from '../../../../shared/types';
+import { Project, UserRole } from '../../../../shared/types';
 import { hasPermission } from '../../../../shared/rbac/matrix';
 
 interface AcquisitionTabProps {
   currentRole: UserRole;
   projectName?: string;
   projectAddress?: string;
+  selectedProject?: Project;
 }
 
 interface DueDiligenceItem {
@@ -39,7 +40,7 @@ const INITIAL_CHECKLIST: DueDiligenceItem[] = [
     status: 'COMPLETED',
     completedDate: 'Jan 10, 2026',
     documentRef: 'ESA_Phase1_Clean_Report.pdf',
-    notes: 'No Recognized Environmental Conditions (RECs) identified. Site clear for residential.',
+    notes: 'No Recognized Environmental Conditions (RECs) identified. Site clear for development.',
   },
   {
     id: 'dd-2',
@@ -48,7 +49,7 @@ const INITIAL_CHECKLIST: DueDiligenceItem[] = [
     status: 'COMPLETED',
     completedDate: 'Jan 12, 2026',
     documentRef: 'ALTA_Boundary_Survey_Final.pdf',
-    notes: 'Setbacks, utility easements, and lot dimensions (50ft x 100ft) fully validated.',
+    notes: 'Setbacks, utility easements, and lot dimensions fully validated.',
   },
   {
     id: 'dd-3',
@@ -56,8 +57,8 @@ const INITIAL_CHECKLIST: DueDiligenceItem[] = [
     category: 'Geotech',
     status: 'COMPLETED',
     completedDate: 'Jan 14, 2026',
-    documentRef: 'Geotech_Boring_Analysis_NJ.pdf',
-    notes: 'Standard bearing capacity confirmed at 3,500 psf; helical piles recommended for rear garage.',
+    documentRef: 'Geotech_Boring_Analysis.pdf',
+    notes: 'Standard soil bearing capacity confirmed at 3,500 psf for foundation design.',
   },
   {
     id: 'dd-4',
@@ -66,7 +67,7 @@ const INITIAL_CHECKLIST: DueDiligenceItem[] = [
     status: 'COMPLETED',
     completedDate: 'Jan 15, 2026',
     documentRef: 'First_American_Title_Policy.pdf',
-    notes: 'Clean fee simple title issued by First American Title Insurance; zero outstanding municipal liens.',
+    notes: 'Clean fee simple title issued by Title Insurance; zero outstanding municipal liens.',
   },
   {
     id: 'dd-5',
@@ -75,34 +76,26 @@ const INITIAL_CHECKLIST: DueDiligenceItem[] = [
     status: 'COMPLETED',
     completedDate: 'Jan 15, 2026',
     documentRef: 'HUD1_Settlement_Statement_Executed.pdf',
-    notes: 'Final executed settlement statement recorded with Hudson County Register of Deeds.',
-  },
-  {
-    id: 'dd-6',
-    name: 'Township Zoning & Land Use Opinion Letter',
-    category: 'Zoning',
-    status: 'COMPLETED',
-    completedDate: 'Jan 18, 2026',
-    documentRef: 'Zoning_Board_Resolution_73Broadway.pdf',
-    notes: 'Planning board approved 4-unit multi-family condominium development as-of-right with approved variance.',
+    notes: 'Final executed settlement statement recorded with county recorder.',
   },
 ];
 
 export const AcquisitionTab: React.FC<AcquisitionTabProps> = ({
   currentRole,
-  projectName = '73 Broadway, Hoboken',
-  projectAddress = '73 Broadway, Hoboken, NJ 07030',
+  projectName = 'Selected Project',
+  projectAddress = 'Site Address',
+  selectedProject,
 }) => {
   const [checklist, setChecklist] = useState<DueDiligenceItem[]>(INITIAL_CHECKLIST);
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
 
   const canEdit = hasPermission(currentRole, 'acquisition:edit');
 
-  const purchasePrice = 1000000;
-  const initialEquityFronted = 1000000;
-  const closingCosts = 34500;
-  const titleInsurance = 6200;
-  const transferTaxes = 12800;
+  const purchasePrice = selectedProject?.acquisition_cost || 1000000;
+  const initialEquityFronted = purchasePrice;
+  const closingCosts = Math.round(purchasePrice * 0.035);
+  const titleInsurance = Math.round(purchasePrice * 0.006);
+  const transferTaxes = Math.round(purchasePrice * 0.0128);
 
   return (
     <div className="space-y-6">

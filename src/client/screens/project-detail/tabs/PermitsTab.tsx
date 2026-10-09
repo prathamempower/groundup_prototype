@@ -10,12 +10,13 @@ import {
   FileCheck2,
   ExternalLink 
 } from 'lucide-react';
-import { UserRole } from '../../../../shared/types';
+import { Project, UserRole } from '../../../../shared/types';
 import { hasPermission } from '../../../../shared/rbac/matrix';
 
 interface PermitsTabProps {
   currentRole: UserRole;
   projectName?: string;
+  selectedProject?: Project;
 }
 
 interface PermitRecord {
@@ -99,8 +100,10 @@ const INITIAL_PERMITS: PermitRecord[] = [
 
 export const PermitsTab: React.FC<PermitsTabProps> = ({
   currentRole,
-  projectName = '73 Broadway, Hoboken',
+  projectName = 'Selected Project',
+  selectedProject,
 }) => {
+  const displayProjectName = selectedProject?.name || projectName;
   const [permits] = useState<PermitRecord[]>(INITIAL_PERMITS);
   const [selectedPermit, setSelectedPermit] = useState<PermitRecord | null>(null);
 
