@@ -105,6 +105,7 @@ export function useProjectDetailState(
   const cashExposure = totalSpent - totalFunded;
 
   return {
+    projectId,
     activeTab, setActiveTab,
     selectedProject,
     budgetLines, setBudgetLines,

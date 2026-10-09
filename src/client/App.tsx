@@ -96,7 +96,8 @@ export function App() {
           selectedProjectId={selectedProjectId}
           onSelectProject={handleSelectProject}
           onOpenDrawPacket={() => {
-            navigate(`/projects/${selectedProjectId}/draws/new`);
+            const targetId = selectedProjectId || projects[0]?.id || 'proj-73-broadway';
+            navigate(`/projects/${targetId}/draws/new`);
           }}
           onOpenChangeOrder={() => {
             handleNavigate('budget');

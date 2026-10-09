@@ -20,6 +20,7 @@ import {
   FileText,
   Camera,
   UserCheck,
+  Send,
 } from 'lucide-react';
 import { Project, ProjectFourTruthsSummary, UserRole } from '../../../shared/types';
 import { getProjectBudgetLines, getProjectDraws } from '../project-detail/initial-state';

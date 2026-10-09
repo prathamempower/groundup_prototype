@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ProjectDetailScreen, ProjectTab } from '../screens/ProjectDetailScreen';
 import { Project, ProjectFourTruthsSummary, UserRole } from '../../shared/types';
-import { isProjectTabPermitted, getRoleDefaultTab } from '../../shared/rbac';
+import { isProjectTabPermitted, getRoleDefaultTab, isScreenPermitted } from '../../shared/rbac';
 
 interface ProjectDetailRouteWrapperProps {
   projects: Project[];
@@ -66,10 +66,16 @@ export function ProjectDetailRouteWrapper({
         navigate(`/projects/${id}/${activeTab}`);
       }}
       summary={summary}
-      onBack={() => navigate('/portfolio')}
+      onBack={() => {
+        if (isScreenPermitted(currentRole, 'portfolio')) {
+          navigate('/portfolio');
+        } else {
+          navigate(`/projects/${activeProjectId}/${getRoleDefaultTab(currentRole)}`);
+        }
+      }}
       onSubmitDraw={() => setIsDrawPacketModalOpen(true)}
-      onOpenLenderPackage={() => {}}
-      onOpenInvoices={() => {}}
+      onOpenLenderPackage={() => navigate(`/projects/${activeProjectId}/draws/new`)}
+      onOpenInvoices={() => navigate(`/projects/${activeProjectId}/invoices`)}
       onOpenAIChat={() => setShowAIChat(true)}
       onInspectProvenance={(type, category) => setProvenanceTarget({ type, category })}
       initialTab={activeTab}
@@ -84,3 +90,4 @@ export function ProjectDetailRouteWrapper({
     />
   );
 }
+

@@ -5,12 +5,14 @@ interface PortfolioFooterLinksProps {
   onNavigateDraws: () => void;
   onOpenDealLab: () => void;
   onSelectProject: (id: string) => void;
+  selectedProjectId?: string;
 }
 
 export const PortfolioFooterLinks: React.FC<PortfolioFooterLinksProps> = ({
   onNavigateDraws,
   onOpenDealLab,
   onSelectProject,
+  selectedProjectId = 'proj-73-broadway',
 }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-200/80">
@@ -41,7 +43,7 @@ export const PortfolioFooterLinks: React.FC<PortfolioFooterLinksProps> = ({
       </button>
 
       <button
-        onClick={() => onSelectProject('proj-73-broadway')}
+        onClick={() => onSelectProject(selectedProjectId)}
         className="flex items-center gap-3 p-4 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl transition text-left cursor-pointer shadow-2xs group"
       >
         <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
@@ -55,3 +57,4 @@ export const PortfolioFooterLinks: React.FC<PortfolioFooterLinksProps> = ({
     </div>
   );
 };
+

@@ -8,6 +8,7 @@ import { SettingsScreen } from '../screens/SettingsScreen';
 import { DrawBuilderScreen } from '../screens/draw-builder/DrawBuilderScreen';
 import { DocumentReviewScreen } from '../screens/document-review/DocumentReviewScreen';
 import { InvoicesScreen } from '../screens/invoices/InvoicesScreen';
+import { NotFoundScreen } from '../components/NotFoundScreen';
 import { Project, ProjectFourTruthsSummary, UserRole } from '../../shared/types';
 import { ActiveNavScreen } from '../components/Sidebar';
 import { AuthenticatedUser } from '../screens/AuthScreen';
@@ -52,6 +53,15 @@ export function AppRoutes({
   onSaveDealAsProject,
 }: AppRoutesProps) {
   const navigate = useNavigate();
+  const safeProjectId = selectedProjectId || projects[0]?.id || 'proj-73-broadway';
+
+  const handleBackToSafeScreen = () => {
+    if (isScreenPermitted(currentRole, 'portfolio')) {
+      navigate('/portfolio');
+    } else {
+      navigate(defaultRolePath, { replace: true });
+    }
+  };
 
   return (
     <Routes>
@@ -69,7 +79,8 @@ export function AppRoutes({
               }}
               onAddProject={() => navigate('/new-project')}
               onOpenDealLab={() => onNavigate('deal-lab')}
-              onNavigateDraws={() => navigate(`/projects/${selectedProjectId}/draws/new`)}
+              onNavigateDraws={() => navigate(`/projects/${safeProjectId}/draws/new`)}
+              selectedProjectId={safeProjectId}
             />
           ) : (
             <Navigate to={defaultRolePath} replace />
@@ -93,9 +104,9 @@ export function AppRoutes({
                     arv: Number(data.estimatedTotalCost) ? Number(data.estimatedTotalCost) * 1.3 : 3200000,
                   });
                 }
-                navigate('/portfolio');
+                handleBackToSafeScreen();
               }}
-              onCancel={() => navigate('/portfolio')}
+              onCancel={handleBackToSafeScreen}
             />
           ) : (
             <Navigate to={defaultRolePath} replace />
@@ -150,7 +161,7 @@ export function AppRoutes({
             setShowAIChat={setShowAIChat}
             setProvenanceTarget={setProvenanceTarget}
             onSelectProject={onSelectProject}
-            selectedProjectId={selectedProjectId}
+            selectedProjectId={safeProjectId}
             setSelectedProjectId={setSelectedProjectId}
           />
         }
@@ -170,33 +181,33 @@ export function AppRoutes({
             setShowAIChat={setShowAIChat}
             setProvenanceTarget={setProvenanceTarget}
             onSelectProject={onSelectProject}
-            selectedProjectId={selectedProjectId}
+            selectedProjectId={safeProjectId}
             setSelectedProjectId={setSelectedProjectId}
           />
         }
       />
 
-      <Route path="/overview" element={<Navigate to={`/projects/${selectedProjectId}/overview`} replace />} />
-      <Route path="/acquisition" element={<Navigate to={`/projects/${selectedProjectId}/acquisition`} replace />} />
-      <Route path="/permits" element={<Navigate to={`/projects/${selectedProjectId}/permits`} replace />} />
-      <Route path="/financing" element={<Navigate to={`/projects/${selectedProjectId}/financing`} replace />} />
-      <Route path="/budget" element={<Navigate to={`/projects/${selectedProjectId}/budget`} replace />} />
-      <Route path="/draws" element={<Navigate to={`/projects/${selectedProjectId}/draws`} replace />} />
-      <Route path="/timeline" element={<Navigate to={`/projects/${selectedProjectId}/timeline`} replace />} />
-      <Route path="/recon" element={<Navigate to={`/projects/${selectedProjectId}/recon`} replace />} />
-      <Route path="/documents" element={<Navigate to={`/projects/${selectedProjectId}/documents`} replace />} />
-      <Route path="/disposition" element={<Navigate to={`/projects/${selectedProjectId}/disposition`} replace />} />
-      <Route path="/alerts" element={<Navigate to={`/projects/${selectedProjectId}/alerts`} replace />} />
-      <Route path="/reports" element={<Navigate to={`/projects/${selectedProjectId}/overview`} replace />} />
+      <Route path="/overview" element={<Navigate to={`/projects/${safeProjectId}/overview`} replace />} />
+      <Route path="/acquisition" element={<Navigate to={`/projects/${safeProjectId}/acquisition`} replace />} />
+      <Route path="/permits" element={<Navigate to={`/projects/${safeProjectId}/permits`} replace />} />
+      <Route path="/financing" element={<Navigate to={`/projects/${safeProjectId}/financing`} replace />} />
+      <Route path="/budget" element={<Navigate to={`/projects/${safeProjectId}/budget`} replace />} />
+      <Route path="/draws" element={<Navigate to={`/projects/${safeProjectId}/draws`} replace />} />
+      <Route path="/timeline" element={<Navigate to={`/projects/${safeProjectId}/timeline`} replace />} />
+      <Route path="/recon" element={<Navigate to={`/projects/${safeProjectId}/recon`} replace />} />
+      <Route path="/documents" element={<Navigate to={`/projects/${safeProjectId}/documents`} replace />} />
+      <Route path="/disposition" element={<Navigate to={`/projects/${safeProjectId}/disposition`} replace />} />
+      <Route path="/alerts" element={<Navigate to={`/projects/${safeProjectId}/alerts`} replace />} />
+      <Route path="/reports" element={<Navigate to={`/projects/${safeProjectId}/overview`} replace />} />
 
-      {renderPortalRoutes({ projects, selectedProjectId, onSelectProject })}
+      {renderPortalRoutes({ projects, selectedProjectId: safeProjectId, onSelectProject })}
 
       <Route
         path="/deal-lab"
         element={
           isScreenPermitted(currentRole, 'deal-lab') ? (
             <DealLabScreen
-              onBack={() => navigate('/portfolio')}
+              onBack={handleBackToSafeScreen}
               onSaveAsProject={onSaveDealAsProject}
             />
           ) : (
@@ -210,7 +221,7 @@ export function AppRoutes({
         element={
           isScreenPermitted(currentRole, 'settings') ? (
             <SettingsScreen 
-              onBack={() => navigate('/portfolio')} 
+              onBack={handleBackToSafeScreen} 
               onRestartOnboarding={() => setCurrentUser(prev => prev ? { ...prev, isNewUser: true } : null)}
             />
           ) : (
@@ -219,7 +230,16 @@ export function AppRoutes({
         }
       />
 
-      <Route path="*" element={<Navigate to={defaultRolePath} replace />} />
+      <Route
+        path="*"
+        element={
+          <NotFoundScreen
+            defaultRolePath={defaultRolePath}
+            onNavigateHome={() => navigate(defaultRolePath, { replace: true })}
+          />
+        }
+      />
     </Routes>
   );
 }
+

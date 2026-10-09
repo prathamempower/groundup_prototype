@@ -64,7 +64,7 @@ export const getProjectDraws = (projectId: string): DrawItem[] => {
         status: dl.status,
       }));
 
-    let status = d.status;
+    let status: string = d.status;
     if (status === 'approved_full') status = 'disbursed';
     if (status === 'submitted') status = 'pending';
 

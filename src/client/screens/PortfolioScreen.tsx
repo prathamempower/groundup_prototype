@@ -15,6 +15,7 @@ interface PortfolioScreenProps {
   onAddProject: () => void;
   onOpenDealLab: () => void;
   onNavigateDraws: () => void;
+  selectedProjectId?: string;
 }
 
 export const PortfolioScreen: React.FC<PortfolioScreenProps> = ({
@@ -23,6 +24,7 @@ export const PortfolioScreen: React.FC<PortfolioScreenProps> = ({
   onAddProject,
   onOpenDealLab,
   onNavigateDraws,
+  selectedProjectId,
 }) => {
   const [filter, setFilter] = useState<PortfolioFilter>('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,6 +54,8 @@ export const PortfolioScreen: React.FC<PortfolioScreenProps> = ({
 
     return matchesFilter && matchesSearch;
   });
+
+  const activeProjectId = selectedProjectId || projects[0]?.id || 'proj-73-broadway';
 
   return (
     <div className="flex flex-col min-h-full bg-slate-50 overflow-y-auto w-full select-none">
@@ -93,6 +97,7 @@ export const PortfolioScreen: React.FC<PortfolioScreenProps> = ({
           onNavigateDraws={onNavigateDraws}
           onOpenDealLab={onOpenDealLab}
           onSelectProject={onSelectProject}
+          selectedProjectId={activeProjectId}
         />
       </div>
     </div>

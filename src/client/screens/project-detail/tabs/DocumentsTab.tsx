@@ -24,6 +24,7 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({
   onConfirmAmexMatch,
   onSelectDocForReview,
   onReviewDoc,
+  onOpenInvoices,
 }) => {
   const handleReview = (doc: any) => {
     onSelectDocForReview?.(doc);
