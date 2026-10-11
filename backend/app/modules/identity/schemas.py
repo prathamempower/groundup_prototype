@@ -110,3 +110,31 @@ class PasswordResetConfirm(BaseModel):
 # Project Member Update
 class ProjectMemberUpdate(BaseModel):
     role: str | None = None  # If None or "REMOVE", removes member from project
+
+
+# Account Profile & Preferences
+class UpdateProfileRequest(BaseModel):
+    first_name: str | None = Field(default=None, min_length=1, max_length=100)
+    last_name: str | None = Field(default=None, min_length=1, max_length=100)
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=8)
+
+
+class NotificationPreferences(BaseModel):
+    email_draw_updates: bool = True
+    email_budget_overruns: bool = True
+    email_milestone_delays: bool = True
+    email_submission_activity: bool = True
+    in_app_sound: bool = False
+
+
+class UserSessionRead(BaseModel):
+    session_id: str
+    created_at: str
+    last_active: str
+    device: str
+    is_current: bool
+

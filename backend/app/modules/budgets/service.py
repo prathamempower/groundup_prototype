@@ -310,14 +310,34 @@ class BudgetService:
             if is_overrun:
                 has_any_overrun = True
 
-            tot_orig += bline.original_amount
-            tot_curr += bline.current_approved_amount
-            tot_spend += spend_sum
-            tot_committed += committed
+            # If user is PM: read-only without contingency balance or vendor-level spend
+            from app.core.auth import get_effective_role
+            eff_role = get_effective_role(user, project_id, self.db)
+            is_pm = eff_role == "PM"
+            is_contingency = bline.category == "CONTINGENCY" or bline.code == "CON"
+
+            if is_pm and is_contingency:
+                # PM does not see contingency balance
+                line_orig = 0
+                line_curr = 0
+                line_spend = 0
+                line_committed = 0
+                line_rem = 0
+            else:
+                line_orig = bline.original_amount
+                line_curr = bline.current_approved_amount
+                line_spend = 0 if is_pm else spend_sum
+                line_committed = committed
+                line_rem = remaining_exposure
+
+            tot_orig += line_orig
+            tot_curr += line_curr
+            tot_spend += line_spend
+            tot_committed += line_committed
             tot_draw_req += draw_req
             tot_draw_app += draw_app
             tot_draw_fund += draw_fund
-            tot_remaining_exp += remaining_exposure
+            tot_remaining_exp += line_rem
 
             line_views.append(
                 BudgetLineCurrentView(
@@ -326,14 +346,14 @@ class BudgetService:
                     name=bline.name,
                     category=bline.category,
                     parent_line_id=str(bline.parent_line_id) if bline.parent_line_id else None,
-                    original_amount=bline.original_amount,
-                    current_approved_amount=bline.current_approved_amount,
-                    spend_amount=spend_sum,
-                    committed_amount=committed,
+                    original_amount=line_orig,
+                    current_approved_amount=line_curr,
+                    spend_amount=line_spend,
+                    committed_amount=line_committed,
                     draw_requested_amount=draw_req,
                     draw_approved_amount=draw_app,
                     draw_funded_amount=draw_fund,
-                    remaining_exposure=remaining_exposure,
+                    remaining_exposure=line_rem,
                     is_overrun=is_overrun,
                     is_draw_eligible=bline.is_draw_eligible,
                     milestone_id=str(bline.milestone_id) if bline.milestone_id else None,

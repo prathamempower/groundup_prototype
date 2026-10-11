@@ -50,9 +50,57 @@ def get_current_user(
     return user
 
 
+def get_effective_role(
+    user: User,
+    project_id: uuid.UUID | None,
+    db: Session,
+) -> str:
+    """
+    Rule of truth: role comes from project_members for the ACTIVE project (not a single role on the user).
+    If no project is specified or user has no specific project membership, falls back to user.role.
+    Admin is treated as Owner permission.
+    """
+    if not project_id:
+        return "OWNER" if user.role.upper() == "ADMIN" else user.role.upper()
+
+    membership = db.scalars(
+        select(ProjectMember).where(
+            ProjectMember.project_id == project_id,
+            ProjectMember.user_id == user.id,
+        )
+    ).first()
+
+    if membership:
+        m_role = membership.role.upper()
+        return "OWNER" if m_role == "ADMIN" else m_role
+
+    # If user is OWNER or CFO at organization level, they have that role org-wide
+    u_role = "OWNER" if user.role.upper() == "ADMIN" else user.role.upper()
+    return u_role
+
+
 def require_role(allowed_roles: list[str]):
-    def role_checker(user: User = Depends(get_current_user)) -> User:
-        if user.role not in allowed_roles:
+    # Normalize ADMIN to OWNER in allowed_roles
+    normalized_allowed = set(r.upper() for r in allowed_roles)
+    if "OWNER" in normalized_allowed:
+        normalized_allowed.add("ADMIN")
+
+    def role_checker(
+        request: Request,
+        user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
+    ) -> User:
+        # Check if project ID is in path params or query params or header
+        pid_val = request.path_params.get("pid") or request.headers.get("x-project-id") or request.query_params.get("project_id")
+        project_uuid: uuid.UUID | None = None
+        if pid_val:
+            try:
+                project_uuid = uuid.UUID(str(pid_val))
+            except ValueError:
+                pass
+
+        effective_role = get_effective_role(user, project_uuid, db)
+        if effective_role not in normalized_allowed:
             raise ForbiddenException(
                 message=f"Action requires one of roles: {', '.join(allowed_roles)}"
             )
@@ -71,8 +119,9 @@ def require_project_scope(
         # Out of scope records return 404
         raise NotFoundException(message="Project not found.")
 
+    effective_role = get_effective_role(user, pid, db)
     # Owners and CFOs have organization-wide access to all projects in the org
-    if user.role in ["OWNER", "CFO"]:
+    if effective_role in ["OWNER", "CFO", "ADMIN"] or user.role in ["OWNER", "CFO", "ADMIN"]:
         return project
 
     # Check project membership
@@ -87,3 +136,4 @@ def require_project_scope(
         raise ProjectScopeDeniedException(message="User does not have access to this project.")
 
     return project
+

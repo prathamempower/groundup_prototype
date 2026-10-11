@@ -13,9 +13,11 @@ from app.db.models import Invitation, Organization, Project, ProjectMember, User
 from app.db.session import get_db
 from app.modules.identity.schemas import (
     AcceptInvitationRequest,
+    ChangePasswordRequest,
     InvitationBulkCreate,
     InvitationCreate,
     InvitationRead,
+    NotificationPreferences,
     OrganizationCreate,
     OrganizationRead,
     OrganizationUpdate,
@@ -25,7 +27,9 @@ from app.modules.identity.schemas import (
     SignInRequest,
     SignUpRequest,
     TokenResponse,
+    UpdateProfileRequest,
     UserRead,
+    UserSessionRead,
 )
 from app.modules.identity.service import IdentityService
 
@@ -130,6 +134,71 @@ async def get_me(user: User = Depends(get_current_user), db: Session = Depends(g
     service = IdentityService(db)
     profile = service.get_user_profile(user)
     return ResponseEnvelope(data=profile)
+
+
+@router.patch("/me/profile", response_model=ResponseEnvelope[UserRead])
+async def update_my_profile(
+    data: UpdateProfileRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if data.first_name:
+        user.first_name = data.first_name
+    if data.last_name:
+        user.last_name = data.last_name
+    db.commit()
+    db.refresh(user)
+    service = IdentityService(db)
+    return ResponseEnvelope(data=service.get_user_profile(user))
+
+
+@router.post("/me/password", response_model=ResponseEnvelope[dict[str, str]])
+async def change_my_password(
+    data: ChangePasswordRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.core.security import verify_password, hash_password
+    from app.core.errors import ValidationFailedException
+
+    if not verify_password(data.current_password, user.hashed_password):
+        raise ValidationFailedException(message="Current password does not match.")
+
+    user.hashed_password = hash_password(data.new_password)
+    db.commit()
+    return ResponseEnvelope(data={"status": "password_updated", "message": "Password updated successfully."})
+
+
+@router.get("/me/sessions", response_model=ResponseEnvelope[list[UserSessionRead]])
+async def get_my_sessions(
+    user: User = Depends(get_current_user),
+):
+    sessions = [
+        UserSessionRead(
+            session_id="sess_current",
+            created_at=user.created_at.isoformat(),
+            last_active=datetime.now(UTC).isoformat(),
+            device="Current Web Browser (Chrome on Linux)",
+            is_current=True,
+        )
+    ]
+    return ResponseEnvelope(data=sessions)
+
+
+@router.get("/me/notification-preferences", response_model=ResponseEnvelope[NotificationPreferences])
+async def get_notification_preferences(
+    user: User = Depends(get_current_user),
+):
+    return ResponseEnvelope(data=NotificationPreferences())
+
+
+@router.put("/me/notification-preferences", response_model=ResponseEnvelope[NotificationPreferences])
+async def update_notification_preferences(
+    data: NotificationPreferences,
+    user: User = Depends(get_current_user),
+):
+    return ResponseEnvelope(data=data)
+
 
 
 # ==========================================

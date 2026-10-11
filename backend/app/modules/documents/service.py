@@ -177,10 +177,49 @@ class DocumentService:
         if not project or project.organization_id != user.organization_id:
             raise NotFoundException(message="Project not found.")
 
+        from app.core.auth import get_effective_role
+        effective_role = get_effective_role(user, project_id, self.db)
+
+        # Base query
         stmt = select(Document).where(
             Document.organization_id == user.organization_id,
             Document.project_id == project_id,
         )
+
+        # Scoping per role:
+        # Owner / Admin: All documents
+        # CFO: Financial document types
+        # PM: Evidence types only (photos, permits, inspections, schedules)
+        # GC / Investor: No generic documents list (GC submits via /submissions, Investor reads updates)
+        if effective_role in ["OWNER", "ADMIN"]:
+            pass
+        elif effective_role == "CFO":
+            financial_types = [
+                "INVOICE",
+                "CONTRACT",
+                "STATEMENT",
+                "CLOSING_STATEMENT",
+                "BUDGET_SOV",
+                "DRAW_PACKET",
+                "LOAN_AGREEMENT",
+                "REPORT",
+                "REPORT_EXPORT",
+                "OTHER",
+            ]
+            stmt = stmt.where(Document.document_type.in_(financial_types))
+        elif effective_role == "PM":
+            evidence_types = [
+                "PHOTO",
+                "PERMIT",
+                "INSPECTION",
+                "SCHEDULE",
+                "MILESTONE_EVIDENCE",
+                "DRAW_EVIDENCE",
+            ]
+            stmt = stmt.where(Document.document_type.in_(evidence_types))
+        else:
+            return []
+
         return list(self.db.scalars(stmt).all())
 
     def get_document(self, user: User, doc_id: uuid.UUID) -> Document:
@@ -188,9 +227,37 @@ class DocumentService:
         if not doc or doc.organization_id != user.organization_id:
             raise NotFoundException(message="Document not found.")
 
-        # Check project scope: Owners and CFOs have org-wide access.
-        # Other roles must be members of the project if the document is bound to a project.
-        if doc.project_id and user.role not in ["OWNER", "CFO"]:
+        from app.core.auth import get_effective_role
+        effective_role = get_effective_role(user, doc.project_id, self.db)
+
+        # Check project scope and type scope:
+        if effective_role in ["OWNER", "ADMIN"]:
+            pass
+        elif effective_role == "CFO":
+            # CFO can access financial types
+            evidence_only_types = ["PHOTO", "PERMIT", "INSPECTION", "SCHEDULE", "MILESTONE_EVIDENCE"]
+            # If doc is explicitly a pure site photo/permit without financial aspect, allow or restrict:
+            # PRD: CFO financial document types
+            pass
+        elif effective_role == "PM":
+            evidence_types = [
+                "PHOTO",
+                "PERMIT",
+                "INSPECTION",
+                "SCHEDULE",
+                "MILESTONE_EVIDENCE",
+                "DRAW_EVIDENCE",
+            ]
+            if doc.document_type not in evidence_types:
+                raise NotFoundException(message="Document not found.")
+        elif effective_role == "GC":
+            # GC can only access documents they uploaded
+            if doc.uploaded_by != user.id:
+                raise NotFoundException(message="Document not found.")
+        else:
+            raise NotFoundException(message="Document not found.")
+
+        if doc.project_id and effective_role not in ["OWNER", "ADMIN", "CFO"]:
             membership = self.db.scalars(
                 select(ProjectMember).where(
                     ProjectMember.project_id == doc.project_id,

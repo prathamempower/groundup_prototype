@@ -67,7 +67,7 @@ def list_project_alerts(
     pid: uuid.UUID,
     severity: Annotated[str | None, Query()] = None,
     alert_status: Annotated[str | None, Query(alias="status")] = None,
-    user: User = Depends(require_role(["OWNER", "CFO", "PM", "GC"])),
+    user: User = Depends(require_role(["OWNER", "CFO", "PM"])),
     db: Session = Depends(get_db),
 ) -> ResponseEnvelope[list[AlertRead]]:
     service = ReportingService(db)
@@ -83,7 +83,7 @@ def list_project_alerts(
 def resolve_alert(
     id: uuid.UUID,
     data: AlertResolveRequest,
-    user: User = Depends(require_role(["OWNER", "CFO", "PM", "GC"])),
+    user: User = Depends(require_role(["OWNER", "CFO", "PM"])),
     db: Session = Depends(get_db),
 ) -> ResponseEnvelope[AlertRead]:
     service = ReportingService(db)
@@ -357,11 +357,14 @@ def list_notifications_endpoint(
     user: User = Depends(require_role(["OWNER", "CFO", "PM", "GC", "INVESTOR"])),
     db: Session = Depends(get_db),
 ) -> ResponseEnvelope[list[NotificationRead]]:
-    notifs = db.scalars(
-        select(Notification)
-        .where(Notification.organization_id == user.organization_id)
-        .order_by(Notification.created_at.desc())
-    ).all()
+    # Filter notifications: either assigned specifically to this user, or general/unassigned within the organization and appropriate for the role
+    query = select(Notification).where(Notification.organization_id == user.organization_id)
+    if user.role != "OWNER":
+        query = query.where(
+            (Notification.user_id == user.id) | (Notification.user_id.is_(None))
+        )
+    query = query.order_by(Notification.created_at.desc())
+    notifs = db.scalars(query).all()
     return ResponseEnvelope(
         data=[to_notification_dto(n) for n in notifs]
     )

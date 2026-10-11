@@ -388,13 +388,14 @@ async def withdraw_investor_update_endpoint(
 )
 async def list_project_investor_updates_endpoint(
     pid: uuid.UUID,
-    user: User = Depends(require_role(["OWNER", "CFO", "INVESTOR"])),
+    user: User = Depends(require_role(["OWNER"])),
     db: Session = Depends(get_db),
 ):
-    query = select(InvestorUpdate).where(InvestorUpdate.project_id == pid)
-    if user.role == "INVESTOR":
-        query = query.where(InvestorUpdate.status != "DRAFT")
-    query = query.order_by(InvestorUpdate.created_at.desc())
+    query = (
+        select(InvestorUpdate)
+        .where(InvestorUpdate.project_id == pid)
+        .order_by(InvestorUpdate.created_at.desc())
+    )
     updates = db.scalars(query).all()
     return ResponseEnvelope(data=[to_investor_update_dto(u) for u in updates])
 
