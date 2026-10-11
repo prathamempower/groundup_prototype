@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -9,6 +10,7 @@ import {
   Bell,
   ChevronDown,
   Building,
+  Building2,
   Check,
   AlertTriangle,
   Info,
@@ -96,6 +98,15 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
           >
             <Menu className="h-5 w-5" />
           </button>
+          <Link
+            href="/projects"
+            className="flex items-center gap-2 font-semibold text-slate-900 transition-opacity hover:opacity-80"
+          >
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 text-white shadow-2xs">
+              <Building2 className="h-4 w-4" />
+            </div>
+            <span className="text-sm font-bold tracking-tight">GroundUp</span>
+          </Link>
         </div>
 
         {/* Right: Tasks, Notifications & User Menu */}

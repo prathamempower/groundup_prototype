@@ -7,7 +7,6 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Project, UserRole } from "@/lib/types";
 import { getDefaultWorkspaceRoute } from "@/lib/navigation";
-import { PageHeader } from "@/components/layout/page-header";
 import { formatMoney, formatDate } from "@/lib/format";
 import {
   Building2,
@@ -19,16 +18,15 @@ import {
   CheckCircle2,
   Clock,
   ArrowRight,
-  ShieldCheck,
   TrendingUp,
   Landmark,
-  CalendarDays,
-  ExternalLink,
-  ChevronRight,
+  Calendar,
   Layers,
+  MapPin,
+  Briefcase,
+  ChevronRight,
+  Sparkles,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 export default function ProjectsPortfolioPage() {
   const router = useRouter();
@@ -36,7 +34,7 @@ export default function ProjectsPortfolioPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [stageFilter, setStageFilter] = useState<string>("ALL");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
-  const [sortBy, setSortBy] = useState<"NAME" | "STAGE" | "ACTIVITY">("ACTIVITY");
+  const [sortBy, setSortBy] = useState<"ACTIVITY" | "NAME" | "STAGE">("ACTIVITY");
 
   const { data: meData } = useQuery({
     queryKey: ["me"],
@@ -50,36 +48,37 @@ export default function ProjectsPortfolioPage() {
 
   const user = meData?.data;
   const globalRole = user?.role || "OWNER";
-  const projects = projectsData?.data?.projects || [];
+  const projects = useMemo(() => projectsData?.data?.projects || [], [projectsData]);
 
   // Filter & Search
   const filteredProjects = useMemo(() => {
-    return projects.filter((p) => {
-      const matchesSearch =
-        searchQuery.trim() === "" ||
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (p.project_entity && p.project_entity.toLowerCase().includes(searchQuery.toLowerCase()));
+    return projects
+      .filter((p) => {
+        const query = searchQuery.trim().toLowerCase();
+        const matchesSearch =
+          query === "" ||
+          p.name.toLowerCase().includes(query) ||
+          p.address.toLowerCase().includes(query) ||
+          (p.project_entity && p.project_entity.toLowerCase().includes(query));
 
-      const matchesStage = stageFilter === "ALL" || p.lifecycle_stage === stageFilter;
-      const matchesStatus =
-        statusFilter === "ALL" ||
-        (statusFilter === "HEALTHY" && p.health_status === "HEALTHY") ||
-        (statusFilter === "AT_RISK" && p.health_status === "AT_RISK") ||
-        (statusFilter === "CRITICAL" && p.health_status === "CRITICAL") ||
-        (statusFilter === "ACTIVE" && p.status === "ACTIVE") ||
-        (statusFilter === "COMPLETED" && p.status === "COMPLETED");
+        const matchesStage = stageFilter === "ALL" || p.lifecycle_stage === stageFilter;
+        const matchesStatus =
+          statusFilter === "ALL" ||
+          (statusFilter === "HEALTHY" && p.health_status === "HEALTHY") ||
+          (statusFilter === "AT_RISK" && p.health_status === "AT_RISK") ||
+          (statusFilter === "CRITICAL" && p.health_status === "CRITICAL") ||
+          (statusFilter === "ACTIVE" && p.status === "ACTIVE") ||
+          (statusFilter === "COMPLETED" && p.status === "COMPLETED");
 
-      return matchesSearch && matchesStage && matchesStatus;
-    }).sort((a, b) => {
-      if (sortBy === "NAME") return a.name.localeCompare(b.name);
-      if (sortBy === "STAGE") return a.lifecycle_stage.localeCompare(b.lifecycle_stage);
-      // Default to activity / created date
-      return new Date(b.created_at || "").getTime() - new Date(a.created_at || "").getTime();
-    });
+        return matchesSearch && matchesStage && matchesStatus;
+      })
+      .sort((a, b) => {
+        if (sortBy === "NAME") return a.name.localeCompare(b.name);
+        if (sortBy === "STAGE") return a.lifecycle_stage.localeCompare(b.lifecycle_stage);
+        return new Date(b.created_at || "").getTime() - new Date(a.created_at || "").getTime();
+      });
   }, [projects, searchQuery, stageFilter, statusFilter, sortBy]);
 
-  // Portfolio summary calculation for Owners/CFOs with 2+ projects
   const canSeeFinancialSummary = ["OWNER", "CFO"].includes(globalRole);
   const showPortfolioSummary = canSeeFinancialSummary && projects.length >= 2;
 
@@ -107,27 +106,35 @@ export default function ProjectsPortfolioPage() {
     router.push(destination);
   };
 
+  const formatStageLabel = (stage: string) => {
+    return stage
+      .toLowerCase()
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   const getHealthBadge = (health?: string) => {
     switch (health) {
       case "CRITICAL":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-danger-subtle px-2 py-0.5 text-[11px] font-semibold text-danger">
-            <span className="h-1.5 w-1.5 rounded-full bg-danger animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50/80 px-2.5 py-0.5 text-xs font-medium text-red-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
             Critical
           </span>
         );
       case "AT_RISK":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-warning-subtle px-2 py-0.5 text-[11px] font-semibold text-warning">
-            <span className="h-1.5 w-1.5 rounded-full bg-warning" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50/80 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
             At Risk
           </span>
         );
       case "HEALTHY":
       default:
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-success-subtle px-2 py-0.5 text-[11px] font-semibold text-success">
-            <span className="h-1.5 w-1.5 rounded-full bg-success" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50/80 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             Healthy
           </span>
         );
@@ -136,11 +143,11 @@ export default function ProjectsPortfolioPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 sm:p-8 space-y-6 max-w-7xl mx-auto">
-        <div className="h-24 bg-subtle animate-pulse rounded-lg" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="mx-auto max-w-7xl px-6 py-8 sm:px-8 space-y-6">
+        <div className="h-20 w-full animate-pulse rounded-xl bg-slate-100" />
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-56 bg-subtle animate-pulse rounded-lg" />
+            <div key={i} className="h-64 animate-pulse rounded-xl bg-slate-100" />
           ))}
         </div>
       </div>
@@ -148,90 +155,111 @@ export default function ProjectsPortfolioPage() {
   }
 
   return (
-    <div className="p-6 sm:p-8 space-y-6 max-w-7xl mx-auto">
-      {/* Portfolio Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-5">
+    <div className="mx-auto max-w-7xl px-6 py-8 sm:px-8 space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="rounded bg-primary-subtle px-2 py-0.5 text-caption font-semibold text-primary">
-              Multi-Project Portfolio
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-700 shadow-2xs">
+              <Layers className="h-3 w-3 text-blue-600" />
+              Portfolio
             </span>
-            <span className="text-caption text-text-muted">
+            <span className="text-xs text-slate-500">
               {projects.length} accessible project{projects.length === 1 ? "" : "s"}
             </span>
           </div>
-          <h1 className="text-display font-bold tracking-tight text-text-primary">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             Project Portfolio
           </h1>
-          <p className="text-body text-text-secondary mt-0.5">
-            Select a project to enter its dedicated, isolated workspace.
+          <p className="text-sm text-slate-500 mt-0.5">
+            Select a project to enter its dedicated, isolated financial and operational workspace.
           </p>
         </div>
 
         {globalRole === "OWNER" && (
           <div className="flex items-center gap-3">
-            <Link href="/projects/new">
-                  <Button variant="primary" size="default">
-                <Plus className="mr-1.5 h-4 w-4" />
-                Create project
-              </Button>
+            <Link
+              href="/projects/new"
+              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-slate-800 active:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Create project</span>
             </Link>
           </div>
         )}
       </div>
 
-      {/* Owner/CFO Portfolio Summary Row (when 2+ projects) */}
+      {/* High-Level Overview Metrics (Owners / CFOs with 2+ projects) */}
       {showPortfolioSummary && (
-        <div className="rounded-lg border border-border bg-surface p-4 shadow-xs">
-          <div className="text-caption font-semibold uppercase tracking-wider text-text-muted mb-3">
-            Portfolio Overview
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs transition-shadow hover:shadow-xs">
+            <div className="flex items-center justify-between text-xs font-medium text-slate-500">
+              <span>Active Projects</span>
+              <Building2 className="h-4 w-4 text-slate-400" />
+            </div>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-2xl font-bold tracking-tight text-slate-900">
+                {activeProjectsCount}
+              </span>
+              <span className="text-xs text-slate-500 font-normal">
+                of {projects.length} total
+              </span>
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
-            <div className="px-2">
-              <span className="text-caption text-text-muted">Active Projects</span>
-              <div className="text-title font-bold text-text-primary mt-0.5">
-                {activeProjectsCount}{" "}
-                <span className="text-caption font-normal text-text-muted">
-                  of {projects.length} total
-                </span>
-              </div>
+
+          <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs transition-shadow hover:shadow-xs">
+            <div className="flex items-center justify-between text-xs font-medium text-slate-500">
+              <span>Total Loan Commitment</span>
+              <Landmark className="h-4 w-4 text-slate-400" />
             </div>
-            <div className="px-2 sm:pl-4">
-              <span className="text-caption text-text-muted">Total Loan Commitment</span>
-              <div className="text-title font-bold text-text-primary mt-0.5">
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-2xl font-bold tracking-tight text-slate-900 tabular-nums">
                 {formatMoney(totalCommitted)}
-              </div>
+              </span>
             </div>
-            <div className="px-2 sm:pl-4">
-              <span className="text-caption text-text-muted">Open Exceptions Across Projects</span>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className={`text-title font-bold ${totalExceptions > 0 ? "text-warning" : "text-success"}`}>
-                  {totalExceptions}
-                </span>
-                <span className="text-caption text-text-muted">action items pending</span>
-              </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs transition-shadow hover:shadow-xs">
+            <div className="flex items-center justify-between text-xs font-medium text-slate-500">
+              <span>Open Exceptions</span>
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+            </div>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span
+                className={`text-2xl font-bold tracking-tight ${
+                  totalExceptions > 0 ? "text-amber-600" : "text-emerald-600"
+                }`}
+              >
+                {totalExceptions}
+              </span>
+              <span className="text-xs text-slate-500 font-normal">
+                action items across projects
+              </span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Filter & Search Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-1 items-center gap-3 max-w-lg">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-text-muted" />
-            <Input
+      {/* Control Bar: Search, Filters & View Toggle */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-1 flex-wrap items-center gap-2.5">
+          {/* Search Box */}
+          <div className="relative min-w-[240px] flex-1 sm:max-w-xs">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <input
               type="text"
-              placeholder="Search projects by name, address, entity…"
+              placeholder="Search by name, address, entity…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9"
+              className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 shadow-2xs transition-colors hover:border-slate-300 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
             />
           </div>
+
+          {/* Stage Filter */}
           <select
             value={stageFilter}
             onChange={(e) => setStageFilter(e.target.value)}
-            className="h-9 rounded-md border border-border bg-surface px-3 py-1 text-body text-text-primary focus:outline-primary"
+            className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 shadow-2xs transition-colors hover:border-slate-300 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15 cursor-pointer"
           >
             <option value="ALL">All Stages</option>
             <option value="ACQUISITION">Acquisition</option>
@@ -241,10 +269,12 @@ export default function ProjectsPortfolioPage() {
             <option value="DISPOSITION">Disposition</option>
             <option value="CLOSED">Closed</option>
           </select>
+
+          {/* Status Filter */}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-9 rounded-md border border-border bg-surface px-3 py-1 text-body text-text-primary focus:outline-primary"
+            className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 shadow-2xs transition-colors hover:border-slate-300 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15 cursor-pointer"
           >
             <option value="ALL">All Statuses</option>
             <option value="HEALTHY">Healthy</option>
@@ -253,131 +283,135 @@ export default function ProjectsPortfolioPage() {
           </select>
         </div>
 
-        {/* View Toggle */}
-        <div className="flex items-center gap-1.5 self-end md:self-auto">
+        {/* View Switcher */}
+        <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50/80 p-0.5 shadow-2xs self-end sm:self-auto">
           <button
             onClick={() => setViewMode("CARD")}
-            className={`p-1.5 rounded-md border transition-colors ${
-              viewMode === "CARD"
-                ? "bg-primary text-white border-primary"
-                : "bg-surface text-text-secondary border-border hover:bg-subtle"
-            }`}
             aria-label="Card view"
             title="Card view"
+            className={`flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-all ${
+              viewMode === "CARD"
+                ? "bg-white text-slate-900 shadow-2xs"
+                : "text-slate-500 hover:text-slate-900"
+            }`}
           >
-            <LayoutGrid className="h-4 w-4" />
+            <LayoutGrid className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Cards</span>
           </button>
           <button
             onClick={() => setViewMode("TABLE")}
-            className={`p-1.5 rounded-md border transition-colors ${
-              viewMode === "TABLE"
-                ? "bg-primary text-white border-primary"
-                : "bg-surface text-text-secondary border-border hover:bg-subtle"
-            }`}
             aria-label="Table view"
             title="Table view"
+            className={`flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-all ${
+              viewMode === "TABLE"
+                ? "bg-white text-slate-900 shadow-2xs"
+                : "text-slate-500 hover:text-slate-900"
+            }`}
           >
-            <List className="h-4 w-4" />
+            <List className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Table</span>
           </button>
         </div>
       </div>
 
-      {/* Projects Presentation */}
+      {/* Projects List / Cards */}
       {filteredProjects.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border bg-surface p-12 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-subtle text-text-muted mb-3">
+        <div className="rounded-xl border border-dashed border-slate-200 bg-white p-12 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 text-slate-400 mb-3 border border-slate-100">
             <Building2 className="h-6 w-6" />
           </div>
           {projects.length === 0 ? (
             globalRole === "OWNER" ? (
               <div className="space-y-3">
-                <h3 className="text-title font-semibold text-text-primary">No projects created yet</h3>
-                <p className="text-body text-text-secondary max-w-md mx-auto">
+                <h3 className="text-base font-semibold text-slate-900">No projects created yet</h3>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
                   Create your first development project to begin tracking budgets, draws, reconciliation, and construction milestones.
                 </p>
-                <Link href="/projects/new">
-                      <Button variant="primary" size="default">
-                    <Plus className="mr-1.5 h-4 w-4" />
-                    Create project
-                  </Button>
+                <Link
+                  href="/projects/new"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>Create project</span>
                 </Link>
               </div>
             ) : (
               <div className="space-y-2">
-                <h3 className="text-title font-semibold text-text-primary">No project access yet</h3>
-                <p className="text-body text-text-secondary max-w-md mx-auto">
+                <h3 className="text-base font-semibold text-slate-900">No project access yet</h3>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
                   You haven&apos;t been assigned to any project workspaces yet. Please contact your organization owner to request project membership.
                 </p>
               </div>
             )
           ) : (
             <div className="space-y-2">
-              <h3 className="text-title font-semibold text-text-primary">No matching projects found</h3>
-              <p className="text-body text-text-secondary">
-                Try adjusting your search criteria or stage filters.
+              <h3 className="text-base font-semibold text-slate-900">No matching projects found</h3>
+              <p className="text-xs text-slate-500">
+                Try adjusting your search query or stage filters.
               </p>
-              <Button
-                variant="secondary"
-                size="sm"
+              <button
                 onClick={() => {
                   setSearchQuery("");
                   setStageFilter("ALL");
                   setStatusFilter("ALL");
                 }}
+                className="mt-2 inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-50"
               >
-                Clear filters
-              </Button>
+                Clear all filters
+              </button>
             </div>
           )}
         </div>
       ) : viewMode === "CARD" ? (
-        /* Card Grid View */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        /* Modern Clean SaaS Card Grid */
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {filteredProjects.map((project) => {
             const effectiveRole = getEffectiveRoleOnProject(project);
-            const canSeeProfit = ["OWNER", "CFO"].includes(effectiveRole) && project.forecast_profit !== undefined;
+            const canSeeProfit =
+              ["OWNER", "CFO"].includes(effectiveRole) && project.forecast_profit !== undefined;
 
             return (
               <div
                 key={project.id}
                 onClick={() => handleOpenWorkspace(project)}
-                className="group relative flex flex-col justify-between rounded-lg border border-border bg-surface p-5 shadow-xs transition-all hover:border-primary/50 hover:shadow-md cursor-pointer"
+                className="group relative flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm cursor-pointer"
               >
-                {/* Header */}
                 <div>
-                  <div className="flex items-start justify-between gap-3 mb-2">
+                  {/* Card Top: Title, Address & Health Badge */}
+                  <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-title font-bold text-text-primary group-hover:text-primary transition-colors truncate">
+                      <h3 className="text-base font-semibold text-slate-900 transition-colors group-hover:text-blue-600 truncate">
                         {project.name}
                       </h3>
-                      <p className="text-caption text-text-muted truncate mt-0.5">
-                        {project.address}
+                      <p className="mt-0.5 flex items-center gap-1 text-xs text-slate-500 truncate">
+                        <MapPin className="h-3 w-3 shrink-0 text-slate-400" />
+                        <span className="truncate">{project.address}</span>
                       </p>
                     </div>
                     {getHealthBadge(project.health_status)}
                   </div>
 
-                  {/* Badges: Stage & Role */}
-                  <div className="flex flex-wrap items-center gap-1.5 my-3">
-                    <span className="rounded bg-primary-subtle px-2 py-0.5 text-[11px] font-semibold text-primary">
-                      {project.lifecycle_stage.replace("_", " ")}
+                  {/* Badges: Stage, Role, Status */}
+                  <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
+                    <span className="inline-flex items-center rounded-md border border-blue-100 bg-blue-50/70 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
+                      {formatStageLabel(project.lifecycle_stage)}
                     </span>
-                    <span className="rounded bg-subtle px-2 py-0.5 text-[11px] font-medium text-text-secondary">
-                      Your role: <strong className="text-text-primary">{effectiveRole}</strong>
+                    <span className="inline-flex items-center rounded-md border border-slate-200/80 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                      Role: <strong className="ml-1 text-slate-800">{effectiveRole}</strong>
                     </span>
                     {project.status === "COMPLETED" && (
-                      <span className="rounded bg-success-subtle px-2 py-0.5 text-[11px] font-semibold text-success">
+                      <span className="inline-flex items-center rounded-md border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
                         Completed
                       </span>
                     )}
                   </div>
 
-                  {/* Metrics Section */}
-                  <div className="space-y-2 border-t border-border pt-3 text-body">
+                  {/* Financial & Operational Metrics */}
+                  <div className="mt-4 space-y-2.5 rounded-lg border border-slate-100 bg-slate-50/50 p-3 text-xs">
                     {canSeeProfit && (
                       <div className="flex items-center justify-between">
-                        <span className="text-caption text-text-muted">Forecast Profit:</span>
-                        <span className="font-semibold text-text-primary">
+                        <span className="text-slate-500">Forecast Profit</span>
+                        <span className="font-semibold text-slate-900 tabular-nums">
                           {formatMoney(project.forecast_profit || 0)}
                         </span>
                       </div>
@@ -385,28 +419,30 @@ export default function ProjectsPortfolioPage() {
 
                     {project.loan_commitment && (
                       <div className="flex items-center justify-between">
-                        <span className="text-caption text-text-muted">Loan Commitment:</span>
-                        <span className="font-semibold text-text-primary">
+                        <span className="text-slate-500">Loan Commitment</span>
+                        <span className="font-semibold text-slate-900 tabular-nums">
                           {formatMoney(project.loan_commitment)}
                         </span>
                       </div>
                     )}
 
                     <div className="flex items-center justify-between">
-                      <span className="text-caption text-text-muted">Open Exceptions:</span>
+                      <span className="text-slate-500">Open Exceptions</span>
                       <span
-                        className={`text-caption font-semibold ${
-                          (project.open_exceptions_count || 0) > 0 ? "text-warning" : "text-text-muted"
+                        className={`font-semibold tabular-nums ${
+                          (project.open_exceptions_count || 0) > 0
+                            ? "text-amber-600"
+                            : "text-slate-500"
                         }`}
                       >
-                        {project.open_exceptions_count || 0} items
+                        {project.open_exceptions_count || 0} {(project.open_exceptions_count || 0) === 1 ? "item" : "items"}
                       </span>
                     </div>
 
                     {project.next_milestone && (
-                      <div className="flex items-center justify-between text-caption">
-                        <span className="text-text-muted">Next Milestone:</span>
-                        <span className="font-medium text-text-primary truncate max-w-[150px]">
+                      <div className="flex items-center justify-between pt-0.5">
+                        <span className="text-slate-500">Next Milestone</span>
+                        <span className="font-medium text-slate-800 truncate max-w-[170px]" title={project.next_milestone}>
                           {project.next_milestone}
                         </span>
                       </div>
@@ -414,17 +450,16 @@ export default function ProjectsPortfolioPage() {
                   </div>
                 </div>
 
-                {/* Footer / CTA */}
-                <div className="mt-4 border-t border-border pt-3 flex items-center justify-between text-caption text-text-muted">
-                  <span>
-                    Last activity:{" "}
+                {/* Card Footer: Last Activity & Open Workspace */}
+                <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3.5 text-xs text-slate-500">
+                  <span className="text-[11px]">
                     {project.last_activity
-                      ? formatDate(project.last_activity)
-                      : formatDate(project.created_at)}
+                      ? `Active ${formatDate(project.last_activity)}`
+                      : `Created ${formatDate(project.created_at)}`}
                   </span>
-                  <div className="flex items-center gap-1 font-semibold text-primary group-hover:translate-x-0.5 transition-transform">
+                  <div className="flex items-center gap-1 font-semibold text-blue-600 transition-transform group-hover:translate-x-0.5">
                     <span>Open workspace</span>
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-3.5 w-3.5" />
                   </div>
                 </div>
               </div>
@@ -432,80 +467,74 @@ export default function ProjectsPortfolioPage() {
           })}
         </div>
       ) : (
-        /* Table View */
-        <div className="overflow-hidden rounded-lg border border-border bg-surface shadow-xs">
+        /* Clean SaaS Table View */
+        <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-2xs">
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left text-body">
-              <thead className="border-b border-border bg-subtle/50 text-caption font-semibold uppercase tracking-wider text-text-muted">
+            <table className="w-full border-collapse text-left text-xs">
+              <thead className="border-b border-slate-200/80 bg-slate-50/75 font-semibold text-slate-600">
                 <tr>
-                  <th className="px-4 py-3">Project Name & Address</th>
+                  <th className="px-4 py-3">Project</th>
                   <th className="px-4 py-3">Stage</th>
                   <th className="px-4 py-3">Your Role</th>
                   <th className="px-4 py-3">Health</th>
                   {canSeeFinancialSummary && <th className="px-4 py-3 text-right">Forecast Profit</th>}
-                  <th className="px-4 py-3 text-center">Open Exceptions</th>
+                  <th className="px-4 py-3 text-center">Exceptions</th>
                   <th className="px-4 py-3">Next Milestone</th>
                   <th className="px-4 py-3 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-slate-100 text-slate-700">
                 {filteredProjects.map((project) => {
                   const effectiveRole = getEffectiveRoleOnProject(project);
-                  const canSeeProfit = ["OWNER", "CFO"].includes(effectiveRole) && project.forecast_profit !== undefined;
+                  const canSeeProfit =
+                    ["OWNER", "CFO"].includes(effectiveRole) && project.forecast_profit !== undefined;
 
                   return (
                     <tr
                       key={project.id}
                       onClick={() => handleOpenWorkspace(project)}
-                      className="hover:bg-subtle/50 cursor-pointer transition-colors"
+                      className="transition-colors hover:bg-slate-50/60 cursor-pointer"
                     >
-                      <td className="px-4 py-3">
-                        <div className="font-bold text-text-primary hover:text-primary transition-colors">
+                      <td className="px-4 py-3.5">
+                        <div className="font-semibold text-slate-900 hover:text-blue-600 transition-colors">
                           {project.name}
                         </div>
-                        <div className="text-caption text-text-muted truncate max-w-xs">
+                        <div className="text-[11px] text-slate-500 truncate max-w-xs mt-0.5">
                           {project.address}
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="rounded bg-primary-subtle px-2 py-0.5 text-[11px] font-semibold text-primary">
-                          {project.lifecycle_stage.replace("_", " ")}
+                      <td className="px-4 py-3.5">
+                        <span className="inline-flex rounded-md border border-blue-100 bg-blue-50/70 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
+                          {formatStageLabel(project.lifecycle_stage)}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="rounded bg-subtle px-2 py-0.5 text-[11px] font-semibold text-text-secondary">
+                      <td className="px-4 py-3.5">
+                        <span className="inline-flex rounded-md border border-slate-200/80 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700">
                           {effectiveRole}
                         </span>
                       </td>
-                      <td className="px-4 py-3">{getHealthBadge(project.health_status)}</td>
+                      <td className="px-4 py-3.5">{getHealthBadge(project.health_status)}</td>
                       {canSeeFinancialSummary && (
-                        <td className="px-4 py-3 text-right font-medium text-text-primary">
+                        <td className="px-4 py-3.5 text-right font-medium text-slate-900 tabular-nums">
                           {canSeeProfit ? formatMoney(project.forecast_profit || 0) : "—"}
                         </td>
                       )}
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-3.5 text-center">
                         <span
-                          className={`font-semibold text-caption ${
-                            (project.open_exceptions_count || 0) > 0 ? "text-warning" : "text-text-muted"
+                          className={`font-semibold tabular-nums ${
+                            (project.open_exceptions_count || 0) > 0 ? "text-amber-600" : "text-slate-400"
                           }`}
                         >
                           {project.open_exceptions_count || 0}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-caption text-text-secondary truncate max-w-[160px]">
+                      <td className="px-4 py-3.5 text-slate-600 truncate max-w-[160px]">
                         {project.next_milestone || "—"}
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenWorkspace(project);
-                          }}
-                        >
+                      <td className="px-4 py-3.5 text-right">
+                        <span className="inline-flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-700">
                           Open &rarr;
-                        </Button>
+                        </span>
                       </td>
                     </tr>
                   );
