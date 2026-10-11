@@ -392,7 +392,8 @@ def seed_database(wipe_first: bool = True):
         db.flush()
         print(f"🏗️ Created Project: 73 Broadway ({p73.id})")
 
-        # Project Members
+        # Project Members for 73 Broadway
+        # Marcus (OWNER), Sarah (CFO), David (PM), Frank (GC), Elena (INVESTOR), Kunal (OWNER)
         for u in users_list:
             db.add(
                 ProjectMember(
@@ -1420,15 +1421,17 @@ def seed_database(wipe_first: bool = True):
         db.flush()
         print(f"🏢 Created Project: 392 First Street ({p392.id})")
 
-        # Project Members
+        # Project Members for 392 First Street
+        # Kunal Shah has role CFO on 392 First Street, proving project role variance
         for u in users_list:
+            role_for_p392 = "CFO" if u.email == "kunal@builderscapital.com" else u.role
             db.add(
                 ProjectMember(
                     id=generate_uuid(),
                     organization_id=org.id,
                     project_id=p392.id,
                     user_id=u.id,
-                    role=u.role,
+                    role=role_for_p392,
                     created_at=utc_now(),
                 )
             )
@@ -2137,8 +2140,11 @@ def seed_database(wipe_first: bool = True):
         db.flush()
         print(f"📐 Created Project: 161 Woodlawn Ave ({p161.id})")
 
-        # Project Members
+        # Project Members for 161 Woodlawn Ave
+        # Kunal Shah has NO access to 161 Woodlawn Ave, proving complete project isolation
         for u in users_list:
+            if u.email == "kunal@builderscapital.com":
+                continue  # No membership on 161 Woodlawn!
             db.add(
                 ProjectMember(
                     id=generate_uuid(),
