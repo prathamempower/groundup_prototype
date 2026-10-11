@@ -40,7 +40,7 @@ Rules that drive every choice:
 | `success` / `success-subtle` | `#0D9488` / `#F0FDFA` | Verified, funded, reconciled (Teal/Emerald precision) |
 | `warning` / `warning-subtle` | `#D97706` / `#FFFBEB` | Provisional, short-funded, expiring (Warm Amber) |
 | `danger` / `danger-subtle` | `#DC2626` / `#FEF2F2` | Overrun, rejected, blocked, errors (Rose Crimson) |
-| `info` / `info-subtle` | `#0284C7` / `#F0F9FF` | Proposed by AI, pending human review (Sky Blue) |
+| `info` / `info-subtle` | `#0284C7` / `#F0F9FF` | Proposed matches, pending human review (Sky Blue) |
 
 Contrast: all text/background pairs strictly meet WCAG 2.2 AA (4.5:1 body, 3:1 large text and interactive components).
 
@@ -64,7 +64,7 @@ Contrast: all text/background pairs strictly meet WCAG 2.2 AA (4.5:1 body, 3:1 l
 |---|---|---|
 | Verified / reconciled | success | Verified |
 | Provisional / unreviewed | warning | Provisional |
-| AI proposal awaiting review | info | Proposed |
+| Proposed match awaiting review | info | Proposed |
 | Missing evidence / blocked | danger | Missing evidence / Blocked |
 | Over budget / negative variance | danger text, minus sign | Over budget |
 | Under budget / favorable | success text, plus sign | Under budget |
@@ -104,25 +104,39 @@ Line length for prose is capped at 72 characters. Minimum text size is 12px; int
 
 ## 5. Navigation and information architecture
 
-Sidebar, in this order, shown by role:
+**Rule of truth:** role comes from `project_members` for the ACTIVE project (not a single role on the user). Switching project can change navigation and permissions. Authorization is enforced in the backend API; the frontend only hides things for convenience.
 
-| Item | Owner | CFO | PM | GC | Investor |
-|---|:-:|:-:|:-:|:-:|:-:|
-| Control center | ✓ | ✓ | ✓ | | |
-| Documents | ✓ | ✓ | ✓ | | |
-| Budget | ✓ | ✓ | ✓ | | |
-| Reconciliation | ✓ | ✓ | | | |
-| Draws | ✓ | ✓ | ✓ | | |
-| Timeline | ✓ | ✓ | ✓ | | |
-| Economics | ✓ | ✓ | | | |
-| My submissions | | | | ✓ | |
-| Project update | | | | | ✓ |
-| Settings and team | ✓ | | | | |
+Admin is treated as an Owner permission. The sidebar matrix is implemented strictly in this order:
+
+| Item | Route | Owner | CFO | PM | GC | Investor | Notes |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| Control center | `/control-center` | ✓ | ✓ | ✓ | | | PM gets schedule-focused home (milestones, delays, inspections, tasks; no profit or cash-gap KPIs) |
+| Documents | `/documents` | ✓ | ✓ | ✓ | | | Owner all; CFO financial document types; PM evidence types only (photos, permits, inspections, schedules). Enforced in API. |
+| Budget | `/budget` | ✓ | ✓ | ✓ | | | Owner, CFO; PM read-only without contingency balance or vendor-level spend |
+| Reconciliation | `/reconciliation` | ✓ | ✓ | | | | Owner, CFO |
+| Draws | `/draws` | ✓ | ✓ | ✓ | | | Owner, CFO; PM read-only plus "verify work" action |
+| Timeline | `/timeline` | ✓ | ✓ | ✓ | | | Owner, PM edit; CFO read-only with carry-cost impact |
+| Economics | `/economics` | ✓ | ✓ | | | | Owner, CFO |
+| Submissions | `/submissions/review` | ✓ | ✓ | ✓ | | | Review queue: Owner, CFO (cost), PM (progress). Scoped review. |
+| Alerts & exceptions | `/alerts` | ✓ | ✓ | ✓ | | | Alerts and exceptions for Owner, CFO, PM. GC feedback and missing-document notices appear inside "My submissions" and notifications. |
+| Investor updates | `/investor-updates` | ✓ | | | | | Owner-only list of drafts and published, editor on its own page (`/investor-updates/[id]`). CFO has no investor access. |
+| Organization and team | `/settings` | ✓ | | | | | Owner-only organization settings, team, invites, roles, approval policy. |
+| My submissions | `/submissions` | | | | ✓ | | GC-only submission claims, cost evidence, and change requests. |
+| Project update | `/investor-update` | | | | | ✓ | Investor-only published snapshot view. |
+
+**Landing routes by role:**
+- Owner: `/control-center`
+- CFO: `/control-center`
+- PM: `/timeline`
+- GC: `/submissions`
+- Investor: `/investor-update`
 
 - Active item uses `primary-subtle` background and `primary` text with a 3px left bar.
 - A badge on an item shows the count of open, material work items only. No badge when zero.
 - Breadcrumbs appear on detail pages only: Project / Section / Record.
 - Global search finds documents, vendors, draws, and transactions within the user's scope.
+- Account page (`/account`) is available for every role in the user menu (profile, password, active sessions, notification preferences), separate from Organization and team.
+- Tasks entry in top bar for all roles shows onboarding and delegated tasks with a setup-progress banner on home until readiness tasks are done.
 
 ## 6. Components
 

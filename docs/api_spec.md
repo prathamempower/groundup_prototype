@@ -3,8 +3,8 @@
 ## 1. Principles
 
 - REST over HTTPS, versioned at `/api/v1`. FastAPI publishes the OpenAPI contract; the Next.js client is generated from it.
-- FastAPI is the only path that moves a proposal to verified/approved financial truth. Celery workers create proposals only.
-- Every request is checked for active account, organization, project membership, role, and record scope. PostgreSQL RLS is the second layer.
+- FastAPI is the only path that moves a proposal to verified/approved financial truth. Worker services create proposals only.
+- Every request is checked for active account, organization, project membership, role, and record scope. Authorization is enforced in the backend API layer (PostgreSQL RLS deferred). Out-of-scope records return 404; wrong-role actions return 403.
 - Budget, Spend, Funding, and Progress stay in separate resources. No endpoint returns a blended "total" without naming its basis.
 - Approved records are never edited. Corrections use `supersede`, `reverse`, or `adjust` actions.
 - Every material write records actor, time, previous value, new value, rationale, and source citation in `audit_events`.
@@ -21,7 +21,7 @@
 | Filtering | `?status=`, `?from=`, `?to=`, `?q=`. Sorting: `?sort=-created_at`. |
 | Idempotency | `Idempotency-Key` header required on imports, confirm-upload, approvals, and funding allocation. Same key + same payload returns the original result. |
 | Concurrency | Mutable drafts use `If-Match: <version>`. A stale version returns `409 VERSION_CONFLICT`. |
-| Async work | Long jobs return `202 Accepted` with a `job` resource; clients poll `GET /jobs/{id}`. |
+| Async work | Long jobs return `202 Accepted` with a `job` resource; clients poll `GET /jobs/{id}` |
 
 ### Response shape
 
@@ -55,9 +55,18 @@ Report and dashboard responses always include `as_of`, `data_quality` (`VERIFIED
 | 429 | `RATE_LIMITED` |
 | 5xx | `INTERNAL_ERROR`, `PROVIDER_UNAVAILABLE` |
 
-## 3. Roles
+## 3. Roles and Permission Principles
 
-`OWNER`, `CFO`, `PM`, `GC`, `INVESTOR`. Permissions follow PRD section 2. Investors can only call `/investor/*`. GCs can only read and write their own submissions.
+- Roles: `OWNER`, `CFO`, `PM`, `GC`, `INVESTOR`. Admin permissions are treated as Owner permissions.
+- **Rule of truth:** role comes from `project_members` for the ACTIVE project (not a single role on the user). Switching project can change navigation and permissions.
+- Authorization is strictly enforced in the backend API layer. The frontend hides actions and routes only for user convenience.
+- Out-of-scope records return 404; wrong-role actions return 403.
+- Investors can only call `/investor/*` (and profile/sessions on `/me`).
+- GCs can only read and write their own submissions (`/me/submissions` and `/projects/{pid}/submissions`). Feedback and missing documents appear inside their submissions.
+- Owner-only actions: approve budget baseline, approve change orders, move contingency, approve financial account mappings, publish or withdraw investor updates, invite and change member roles, approve closeouts.
+- Owner & CFO actions: create draft budget, run imports, allocate funding, post-closeout adjustments.
+- CFO actions: reconcile transactions, split allocations, period sign-off, verify draw cost. No investor access.
+- PM actions: verify draw work, update milestones, upload evidence. Read-only budget (no contingency balance or vendor spend). Evidence documents only.
 
 ## 4. Endpoints
 
@@ -155,7 +164,7 @@ Upload flow: `upload-url` → browser PUT to S3 → `confirm-upload` → worker 
 | POST | `/draws/{id}/lender-decision` | Record requested, recommended, approved values | O, C |
 | POST | `/draws/{id}/revisions` | Resubmit; creates child revision | O |
 | GET | `/projects/{pid}/funding/unallocated` | Cleared deposits not yet allocated | C |
-| POST | `/draws/{id}/fundings` | Allocate cleared transaction(s) to draw lines | C |
+| POST | `/draws/{id}/fundings` | Allocate cleared transaction(s) to draw lines | O, C |
 
 `fundings` only accepts transactions with `cleared_status = CLEARED`. One deposit can be split across draws. A draw becomes `FUNDED` only when the lender threshold is met.
 
@@ -164,18 +173,20 @@ Upload flow: `upload-url` → browser PUT to S3 → `confirm-upload` → worker 
 | Method | Path | Purpose | Roles |
 |---|---|---|---|
 | GET/POST | `/projects/{pid}/milestones` | Plan major milestones | P, O |
-| PATCH | `/milestones/{id}` | Update actuals, percent, forecast date (reason required when forecast moves) | P |
+| PATCH | `/milestones/{id}` | Update actuals, percent, forecast date (reason required when forecast moves) | P, O |
 | POST | `/milestones/{id}/evidence` | Attach photos, permits, inspections | P, G |
 | POST | `/milestones/{id}/verify` | Verify progress | P |
 | GET | `/projects/{pid}/schedule/forecast` | Forecast completion and carry impact | O, C, P |
 
-### 4.8 GC submissions
+### 4.8 Submissions (GC submissions & Review queue)
 
 | Method | Path | Purpose | Roles |
 |---|---|---|---|
 | GET | `/me/submissions` | GC's own submissions | G |
 | POST | `/projects/{pid}/submissions` | Milestone claim, cost evidence, or change request | G |
 | POST | `/submissions/{id}/submit` | Submit; creates tasks for Owner, CFO, PM | G |
+| GET | `/projects/{pid}/submissions` | Review queue of submissions | O, C, P |
+| POST | `/submissions/{id}/review` | Approve, reject, or request revision (scoped by role) | O, C, P |
 
 GC calls cannot approve, alter budget, or mark funding.
 
@@ -195,7 +206,7 @@ GC calls cannot approve, alter budget, or mark funding.
 
 | Method | Path | Purpose | Roles |
 |---|---|---|---|
-| GET | `/projects/{pid}/dashboard` | Control center: forecast, cash gap, draws, contingency, top exceptions | O |
+| GET | `/projects/{pid}/dashboard` | Control center: forecast, cash gap, draws, contingency, top exceptions (PM gets schedule-focused view) | O, C, P |
 | GET | `/projects/{pid}/alerts` | Open alerts by severity and owner | O, C, P |
 | POST | `/alerts/{id}/resolve` | Resolve with note | Assignee |
 | POST | `/alerts/{id}/waive` | Waive with reason and expiry | O, C |
