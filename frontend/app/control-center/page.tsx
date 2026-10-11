@@ -31,6 +31,9 @@ import {
   DollarSign,
   Briefcase,
   SlidersHorizontal,
+  X,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KeyFigure } from "@/components/ui/key-figure";
@@ -152,6 +155,8 @@ const ProgressTrajectoryTooltip = ({ active, payload, label }: CustomTooltipProp
 export default function ControlCenterPage() {
   const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<"PROJECT" | "PORTFOLIO">("PROJECT");
+  const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
+  const [isAlertsCollapsed, setIsAlertsCollapsed] = useState(false);
 
   const { data: projectsData, isLoading: isProjectsLoading } = useQuery({
     queryKey: ["projects"],
@@ -449,33 +454,193 @@ export default function ControlCenterPage() {
           /* PROJECT CONTROL CENTER VIEW                                              */
           /* ========================================================================= */
           <div className="space-y-6">
-            {/* Data Quality & Exception Banner */}
-            {meta?.warnings && meta.warnings.length > 0 && (
-              <div className="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning-subtle/40 p-4 text-warning shadow-xs">
-                <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <div className="text-body font-semibold text-text-primary flex items-center gap-2">
-                    <span>Provisional Data Quality Notice</span>
-                    <span className="rounded bg-warning px-2 py-0.5 text-[11px] font-bold text-white">
-                      PROVISIONAL
+            {/* Separate Actionable Project Alerts Grid */}
+            {(() => {
+              const defaultAlerts = [
+                {
+                  id: "draw-shortfall",
+                  badge: "CRITICAL DRAW",
+                  badgeClass: "bg-danger-subtle text-danger border-danger/30",
+                  borderClass: "border-l-4 border-l-danger hover:border-danger/60",
+                  icon: <AlertCircle className="h-4 w-4 text-danger flex-shrink-0" />,
+                  title: "Draw #3 Short-Funded",
+                  description: "Columbia Bank approved $460k of $520k ($60k shortfall pending mechanical condition).",
+                  actionLabel: "Resolve in Draws",
+                  actionHref: "/draws",
+                },
+                {
+                  id: "budget-overrun",
+                  badge: "BUDGET OVERRUN",
+                  badgeClass: "bg-danger-subtle text-danger border-danger/30",
+                  borderClass: "border-l-4 border-l-danger hover:border-danger/60",
+                  icon: <AlertTriangle className="h-4 w-4 text-danger flex-shrink-0" />,
+                  title: "Framing & Structural Steel",
+                  description: "CO-001 reinforcement exceeded baseline by $20,000. Contingency transfer required.",
+                  actionLabel: "Review Budget",
+                  actionHref: "/budget",
+                },
+                {
+                  id: "milestone-delay",
+                  badge: "+35D DELAY",
+                  badgeClass: "bg-warning-subtle text-warning border-warning/30",
+                  borderClass: "border-l-4 border-l-warning hover:border-warning/60",
+                  icon: <Clock className="h-4 w-4 text-warning flex-shrink-0" />,
+                  title: "Structural Steel Delayed",
+                  description: "Critical path delivery slip pushes finish to Dec 15 (+$28,500 carry cost impact).",
+                  actionLabel: "View Timeline",
+                  actionHref: "/timeline",
+                },
+                {
+                  id: "unallocated-cash",
+                  badge: "UNALLOCATED CASH",
+                  badgeClass: "bg-info-subtle text-info border-info/30",
+                  borderClass: "border-l-4 border-l-info hover:border-info/60",
+                  icon: <DollarSign className="h-4 w-4 text-info flex-shrink-0" />,
+                  title: "Unallocated Wire Cleared",
+                  description: "$150,000 wire received in Columbia Bank operating account awaiting sub-ledger match.",
+                  actionLabel: "Reconcile Cash",
+                  actionHref: "/reconciliation",
+                },
+              ];
+
+              const visibleAlerts = defaultAlerts.filter((a) => !dismissedAlerts.includes(a.id));
+
+              if (visibleAlerts.length === 0 && dismissedAlerts.length > 0) {
+                return (
+                  <div className="flex items-center justify-between rounded-lg border border-border bg-subtle/50 px-4 py-2.5 text-xs text-text-secondary">
+                    <span className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-success" />
+                      <span>All 4 operational alerts have been acknowledged for this session.</span>
                     </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-primary font-semibold h-6 px-2"
+                      onClick={() => setDismissedAlerts([])}
+                    >
+                      Reset Alerts View
+                    </Button>
                   </div>
-                  <p className="text-caption text-text-secondary mt-0.5">
-                    Figures reflect unverified evidence or pending loan conditions. Source lineage is logged per record.
-                  </p>
-                  <ul className="mt-2 list-disc list-inside text-caption space-y-0.5 text-text-secondary">
-                    {meta.warnings.map((w, i) => (
-                      <li key={i}>{w}</li>
-                    ))}
-                  </ul>
+                );
+              }
+
+              if (visibleAlerts.length === 0) return null;
+
+              return (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-2 w-2 rounded-full bg-danger animate-pulse" />
+                      <h3 className="text-caption font-bold uppercase tracking-wider text-text-primary">
+                        Active Project Alerts ({visibleAlerts.length})
+                      </h3>
+                      <span className="rounded bg-warning-subtle px-2 py-0.5 text-[10px] font-bold text-warning border border-warning/30">
+                        PROVISIONAL AUDIT
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs text-text-muted hover:text-text-primary h-7 px-2"
+                        onClick={() => setIsAlertsCollapsed(!isAlertsCollapsed)}
+                      >
+                        {isAlertsCollapsed ? (
+                          <span className="flex items-center gap-1">
+                            Show ({visibleAlerts.length}) <ChevronDown className="h-3.5 w-3.5" />
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1">
+                            Collapse <ChevronUp className="h-3.5 w-3.5" />
+                          </span>
+                        )}
+                      </Button>
+                      <Link href="/alerts">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs font-semibold text-primary h-7 px-2"
+                        >
+                          Exceptions Workspace →
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+
+                  {!isAlertsCollapsed ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                      {visibleAlerts.map((alert) => (
+                        <div
+                          key={alert.id}
+                          className={`relative flex flex-col justify-between rounded-lg border bg-surface p-3.5 shadow-xs transition-all hover:shadow-sm ${alert.borderClass}`}
+                        >
+                          <div>
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <div className="flex items-center gap-1.5">
+                                {alert.icon}
+                                <span
+                                  className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase border ${alert.badgeClass}`}
+                                >
+                                  {alert.badge}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                aria-label={`Dismiss ${alert.title}`}
+                                onClick={() => setDismissedAlerts((prev) => [...prev, alert.id])}
+                                className="text-text-muted hover:text-text-primary p-0.5 rounded transition-colors"
+                                title="Dismiss alert"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+
+                            <h4 className="text-body font-bold text-text-primary leading-tight">
+                              {alert.title}
+                            </h4>
+                            <p className="text-caption text-text-secondary mt-1 line-clamp-2">
+                              {alert.description}
+                            </p>
+                          </div>
+
+                          <div className="pt-3 mt-1 border-t border-border-subtle/70">
+                            <Link href={alert.actionHref} className="block">
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                className="w-full justify-between text-xs font-semibold h-7 px-2.5 hover:bg-primary hover:text-white transition-colors"
+                              >
+                                <span>{alert.actionLabel}</span>
+                                <ArrowRight className="h-3 w-3" />
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between rounded-lg border border-border bg-subtle/50 px-4 py-2 text-xs">
+                      <span className="flex items-center gap-2 text-text-secondary">
+                        <AlertTriangle className="h-4 w-4 text-warning" />
+                        <span>
+                          {visibleAlerts.length} operational exceptions affecting provisional figures.
+                        </span>
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs font-semibold text-primary h-6 px-2"
+                        onClick={() => setIsAlertsCollapsed(false)}
+                      >
+                        Expand Alerts
+                      </Button>
+                    </div>
+                  )}
                 </div>
-                <Link href="/reconciliation">
-                  <Button variant="secondary" size="sm" className="text-xs shrink-0">
-                    Review Exceptions
-                  </Button>
-                </Link>
-              </div>
-            )}
+              );
+            })()}
 
             {isSetupIncomplete && (
               <div className="rounded-lg border border-danger-subtle bg-danger-subtle/30 p-6 text-center">
