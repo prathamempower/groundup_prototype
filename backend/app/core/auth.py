@@ -74,9 +74,11 @@ def get_effective_role(
         m_role = membership.role.upper()
         return "OWNER" if m_role == "ADMIN" else m_role
 
-    # If user is OWNER or CFO at organization level, they have that role org-wide
-    u_role = "OWNER" if user.role.upper() == "ADMIN" else user.role.upper()
-    return u_role
+    # Org-level Owner/Admin acting on project defaults to OWNER if member or creator
+    if user.role.upper() in ["OWNER", "ADMIN"]:
+        return "OWNER"
+
+    return user.role.upper()
 
 
 def require_role(allowed_roles: list[str]):
@@ -99,6 +101,22 @@ def require_role(allowed_roles: list[str]):
             except ValueError:
                 pass
 
+        if project_uuid:
+            # Verify project exists and belongs to user organization
+            project = db.get(Project, project_uuid)
+            if not project or project.organization_id != user.organization_id:
+                raise NotFoundException(message="Project not found.")
+
+            # Verify membership: every user must be a member or org OWNER/ADMIN
+            membership = db.scalars(
+                select(ProjectMember).where(
+                    ProjectMember.project_id == project_uuid,
+                    ProjectMember.user_id == user.id,
+                )
+            ).first()
+            if not membership and user.role.upper() not in ["OWNER", "ADMIN"]:
+                raise NotFoundException(message="Project not found.")
+
         effective_role = get_effective_role(user, project_uuid, db)
         if effective_role not in normalized_allowed:
             raise ForbiddenException(
@@ -119,11 +137,6 @@ def require_project_scope(
         # Out of scope records return 404
         raise NotFoundException(message="Project not found.")
 
-    effective_role = get_effective_role(user, pid, db)
-    # Owners and CFOs have organization-wide access to all projects in the org
-    if effective_role in ["OWNER", "CFO", "ADMIN"] or user.role in ["OWNER", "CFO", "ADMIN"]:
-        return project
-
     # Check project membership
     membership = db.scalars(
         select(ProjectMember).where(
@@ -132,8 +145,9 @@ def require_project_scope(
         )
     ).first()
 
-    if not membership:
-        raise ProjectScopeDeniedException(message="User does not have access to this project.")
+    if not membership and user.role.upper() not in ["OWNER", "ADMIN"]:
+        # Cross-project access returns 404
+        raise NotFoundException(message="Project not found.")
 
     return project
 

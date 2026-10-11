@@ -68,6 +68,13 @@ class ProjectRead(BaseModel):
     version: int
     created_at: str
     updated_at: str
+    # Portfolio fields
+    role_on_project: str | None = None
+    health_status: str | None = "HEALTHY"  # HEALTHY, AT_RISK, CRITICAL
+    forecast_profit: int | None = None  # minor units, only for roles with economics access
+    open_exceptions_count: int = 0
+    next_milestone: str | None = None
+    last_activity: str | None = None
 
     model_config = {"from_attributes": True}
 

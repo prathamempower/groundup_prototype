@@ -1,7 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.auth import get_current_user, require_project_scope, require_role
@@ -48,29 +48,89 @@ async def list_projects(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    from app.core.auth import get_effective_role
+    from app.db.models import Alert, ProjectMilestone, ProjectFinancialPlan, AuditEvent
+
     service = OnboardingService(db)
     projects = service.list_projects_for_user(user)
-    results = [
-        ProjectRead(
-            id=str(p.id),
-            organization_id=str(p.organization_id),
-            name=p.name,
-            project_entity=p.project_entity,
-            address=p.address,
-            lifecycle_stage=p.lifecycle_stage,
-            contract_model=p.contract_model,
-            status=p.status,
-            currency=p.currency,
-            started_at=p.started_at.isoformat() if p.started_at else None,
-            target_completion_at=p.target_completion_at.isoformat()
-            if p.target_completion_at
-            else None,
-            version=p.version,
-            created_at=p.created_at.isoformat(),
-            updated_at=p.updated_at.isoformat(),
+    results = []
+
+    for p in projects:
+        effective_role = get_effective_role(user, p.id, db)
+
+        # Count open exceptions/alerts
+        open_alerts = db.scalar(
+            select(func.count(Alert.id)).where(
+                Alert.project_id == p.id,
+                Alert.status == "OPEN",
+            )
+        ) or 0
+
+        # Next upcoming milestone
+        next_ms = db.scalars(
+            select(ProjectMilestone)
+            .where(
+                ProjectMilestone.project_id == p.id,
+                ProjectMilestone.status.in_(["NOT_STARTED", "IN_PROGRESS"]),
+            )
+            .order_by(ProjectMilestone.planned_completion_date.asc().nulls_last())
+        ).first()
+
+        # Forecast profit: only visible to OWNER and CFO
+        forecast_profit_cents = None
+        if effective_role in ["OWNER", "CFO"]:
+            fin_plan = db.scalars(
+                select(ProjectFinancialPlan)
+                .where(
+                    ProjectFinancialPlan.project_id == p.id,
+                    ProjectFinancialPlan.is_active == True,
+                )
+                .order_by(ProjectFinancialPlan.version_number.desc())
+            ).first()
+            if fin_plan:
+                forecast_profit_cents = fin_plan.projected_revenue - fin_plan.projected_cost
+
+        # Health status
+        health = "HEALTHY"
+        if open_alerts > 3:
+            health = "CRITICAL"
+        elif open_alerts > 0 or (next_ms and next_ms.delay_days > 0):
+            health = "AT_RISK"
+
+        # Last activity timestamp
+        last_audit = db.scalars(
+            select(AuditEvent.occurred_at)
+            .where(AuditEvent.project_id == p.id)
+            .order_by(AuditEvent.occurred_at.desc())
+        ).first()
+        last_act_str = last_audit.isoformat() if last_audit else p.updated_at.isoformat()
+
+        results.append(
+            ProjectRead(
+                id=str(p.id),
+                organization_id=str(p.organization_id),
+                name=p.name,
+                project_entity=p.project_entity,
+                address=p.address,
+                lifecycle_stage=p.lifecycle_stage,
+                contract_model=p.contract_model,
+                status=p.status,
+                currency=p.currency,
+                started_at=p.started_at.isoformat() if p.started_at else None,
+                target_completion_at=p.target_completion_at.isoformat()
+                if p.target_completion_at
+                else None,
+                version=p.version,
+                created_at=p.created_at.isoformat(),
+                updated_at=p.updated_at.isoformat(),
+                role_on_project=effective_role,
+                health_status=health,
+                forecast_profit=forecast_profit_cents,
+                open_exceptions_count=open_alerts,
+                next_milestone=next_ms.name if next_ms else None,
+                last_activity=last_act_str,
+            )
         )
-        for p in projects
-    ]
     return ResponseEnvelope(data=results)
 
 

@@ -24,6 +24,7 @@ from app.db.audit import record_audit_event
 from app.db.models import (
     Invitation,
     Organization,
+    Project,
     ProjectMember,
     User,
     generate_uuid,
@@ -156,6 +157,15 @@ class IdentityService:
         token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
 
         project_id = uuid.UUID(data.project_id) if data.project_id else None
+        if not project_id and data.scope.upper() == "PROJECT":
+            # Default to the most recent project in organization if not explicitly supplied
+            first_p = self.db.scalars(
+                select(Project)
+                .where(Project.organization_id == inviter.organization_id)
+                .order_by(Project.created_at.desc())
+            ).first()
+            if first_p:
+                project_id = first_p.id
 
         invitation = Invitation(
             id=generate_uuid(),

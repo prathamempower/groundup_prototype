@@ -202,3 +202,65 @@ async def test_pm_document_type_scoping(db_session):
         # PM gets financial document directly -> 404 (out of scope)
         single_resp = await client.get(f"/api/v1/documents/{doc_finance.id}")
         assert single_resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_cross_project_and_organization_isolation(db_session):
+    """
+    Test that users without project membership or users from another organization
+    receive 404 across all project endpoints: dashboard, documents, alerts, tasks, etc.
+    """
+    # Org 1 with Project 1
+    org1 = Organization(name=f"Org1-{uuid.uuid4().hex[:6]}")
+    org2 = Organization(name=f"Org2-{uuid.uuid4().hex[:6]}")
+    db_session.add_all([org1, org2])
+    db_session.flush()
+
+    p1 = Project(organization_id=org1.id, name="P1", project_entity="P1 LLC", address="101 St")
+    p2 = Project(organization_id=org2.id, name="P2", project_entity="P2 LLC", address="202 St")
+    db_session.add_all([p1, p2])
+    db_session.flush()
+
+    user_org1_pm = User(
+        organization_id=org1.id,
+        email=f"u1_{uuid.uuid4().hex[:6]}@example.com",
+        hashed_password=hash_password("Password123!"),
+        first_name="User",
+        last_name="One",
+        role="PM",
+    )
+    user_org2_pm = User(
+        organization_id=org2.id,
+        email=f"u2_{uuid.uuid4().hex[:6]}@example.com",
+        hashed_password=hash_password("Password123!"),
+        first_name="User",
+        last_name="Two",
+        role="PM",
+    )
+    db_session.add_all([user_org1_pm, user_org2_pm])
+    db_session.flush()
+
+    # User 1 is ONLY member of Project 1
+    db_session.add(ProjectMember(organization_id=org1.id, project_id=p1.id, user_id=user_org1_pm.id, role="PM"))
+    db_session.commit()
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        await client.post("/api/v1/auth/signin", json={"email": user_org1_pm.email, "password": "Password123!"})
+
+        # 1. Accessing p1 works (200)
+        p1_resp = await client.get(f"/api/v1/projects/{p1.id}/dashboard")
+        assert p1_resp.status_code == 200
+
+        # 2. Accessing p2 (cross-organization) returns 404
+        p2_resp = await client.get(f"/api/v1/projects/{p2.id}/dashboard")
+        assert p2_resp.status_code == 404
+
+        p2_alerts = await client.get(f"/api/v1/projects/{p2.id}/alerts")
+        assert p2_alerts.status_code == 404
+
+        p2_docs = await client.get(f"/api/v1/projects/{p2.id}/documents")
+        assert p2_docs.status_code == 404
+
+        p2_tasks = await client.get(f"/api/v1/projects/{p2.id}/onboarding/tasks")
+        assert p2_tasks.status_code == 404
+

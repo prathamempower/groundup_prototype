@@ -15,6 +15,7 @@ from app.db.models import (
     OnboardingSession,
     OnboardingTask,
     Project,
+    ProjectMember,
     User,
     generate_uuid,
     utc_now,
@@ -120,6 +121,17 @@ class OnboardingService:
             rationale="Owner created project",
         )
 
+        # Automatically add the creator as OWNER in project_members
+        owner_member = ProjectMember(
+            id=generate_uuid(),
+            organization_id=owner.organization_id,
+            project_id=project.id,
+            user_id=owner.id,
+            role="OWNER",
+            created_at=utc_now(),
+        )
+        self.db.add(owner_member)
+
         # Automatically spawn initial onboarding tasks for CFO and PM
         cfo_task = OnboardingTask(
             id=generate_uuid(),
@@ -144,17 +156,22 @@ class OnboardingService:
         return project
 
     def list_projects_for_user(self, user: User) -> list[Project]:
-        if user.role in ["OWNER", "CFO"]:
-            stmt = select(Project).where(Project.organization_id == user.organization_id)
-            return list(self.db.scalars(stmt).all())
-
-        # For PM, GC, INVESTOR, filter by project memberships
         from app.db.models import ProjectMember
 
+        # If user is OWNER or ADMIN at org level, they can see all projects in their org
+        if user.role.upper() in ["OWNER", "ADMIN"]:
+            stmt = select(Project).where(Project.organization_id == user.organization_id).order_by(Project.created_at.desc())
+            return list(self.db.scalars(stmt).all())
+
+        # For all other users (CFO, PM, GC, INVESTOR), only show projects they have membership in
         stmt = (
             select(Project)
             .join(ProjectMember, ProjectMember.project_id == Project.id)
-            .where(ProjectMember.user_id == user.id)
+            .where(
+                Project.organization_id == user.organization_id,
+                ProjectMember.user_id == user.id,
+            )
+            .order_by(Project.created_at.desc())
         )
         return list(self.db.scalars(stmt).all())
 
