@@ -7,13 +7,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Eye,
   EyeOff,
-  LockKeyhole,
   Building2,
   HardHat,
   BarChart3,
   Briefcase,
   TrendingUp,
-  Sparkles,
 } from "lucide-react";
 import { authAdapter } from "@/lib/api/adapters/auth-adapter";
 import { getDefaultRouteForRole } from "@/lib/navigation";
@@ -21,79 +19,55 @@ import { Button } from "@/components/ui/button";
 
 interface DemoAccount {
   id: string;
-  label: string;
-  roleTitle: string;
-  roleBadge: string;
+  role: string;
   name: string;
   email: string;
   icon: typeof Building2;
-  colorClass: string;
-  badgeBg: string;
 }
 
 const DEMO_ACCOUNTS: DemoAccount[] = [
   {
     id: "owner",
-    label: "Login as Owner",
-    roleTitle: "Developer & Owner",
-    roleBadge: "OWNER",
+    role: "Owner",
     name: "Marcus Vance",
     email: "m.vance@vancedev.com",
     icon: Building2,
-    colorClass: "text-blue-600 dark:text-blue-400",
-    badgeBg: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800",
   },
   {
     id: "cfo",
-    label: "Login as CFO",
-    roleTitle: "Finance & Treasury",
-    roleBadge: "CFO",
+    role: "CFO",
     name: "Sarah Lin",
     email: "s.lin@vancedev.com",
     icon: BarChart3,
-    colorClass: "text-emerald-600 dark:text-emerald-400",
-    badgeBg: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800",
   },
   {
     id: "pm",
-    label: "Login as Project Manager",
-    roleTitle: "Field Lead & PM",
-    roleBadge: "PM",
+    role: "PM",
     name: "David Ross",
     email: "d.ross@vancedev.com",
     icon: Briefcase,
-    colorClass: "text-purple-600 dark:text-purple-400",
-    badgeBg: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800",
   },
   {
     id: "gc",
-    label: "Login as General Contractor",
-    roleTitle: "Submissions & Trades",
-    roleBadge: "GC",
+    role: "GC",
     name: "Frank Miller",
     email: "frank@apexconstruction.com",
     icon: HardHat,
-    colorClass: "text-amber-600 dark:text-amber-400",
-    badgeBg: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800",
   },
   {
     id: "investor",
-    label: "Login as Investor",
-    roleTitle: "Capital Partner / LP",
-    roleBadge: "INVESTOR",
+    role: "Investor",
     name: "Elena Rostova",
     email: "e.rostova@meridiancap.com",
     icon: TrendingUp,
-    colorClass: "text-indigo-600 dark:text-indigo-400",
-    badgeBg: "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800",
   },
 ];
 
 export default function LoginPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("m.vance@vancedev.com");
+  const [password, setPassword] = useState("Password123!");
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [validationError, setValidationError] = useState("");
@@ -132,21 +106,21 @@ export default function LoginPage() {
     event.preventDefault();
     setValidationError("");
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setValidationError("Enter a valid work email address.");
+      setValidationError("Please enter a valid work email address.");
       return;
     }
     if (!password) {
-      setValidationError("Enter your password.");
+      setValidationError("Please enter your password.");
       return;
     }
     setActiveDemoId(null);
     signIn.mutate({});
   };
 
-  const handleDemoLogin = (demo: DemoAccount) => {
+  const handleDemoSelect = (demo: DemoAccount) => {
     setValidationError("");
     setEmail(demo.email);
-    const demoPassword = process.env.NEXT_PUBLIC_DEMO_PASSWORD || "";
+    const demoPassword = process.env.NEXT_PUBLIC_DEMO_PASSWORD || "Password123!";
     setPassword(demoPassword);
     setActiveDemoId(demo.id);
     signIn.mutate({ emailToUse: demo.email, passwordToUse: demoPassword });
@@ -156,87 +130,81 @@ export default function LoginPage() {
     validationError || (signIn.error instanceof Error ? signIn.error.message : "");
 
   return (
-    <div className="space-y-6">
-      <div>
-        <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-md bg-primary-subtle text-primary">
-          <LockKeyhole className="h-5 w-5" aria-hidden="true" />
+    <div className="w-full space-y-6">
+      {/* Brand Header */}
+      <div className="text-center space-y-2">
+        <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm mb-1">
+          <Building2 className="h-6 w-6" />
         </div>
-        <h2 className="text-2xl font-semibold tracking-tight text-text-primary">Welcome back</h2>
-        <p className="mt-1 text-body text-text-secondary">
-          Sign in to access your project workspace.
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          Welcome back
+        </h1>
+        <p className="text-sm text-slate-500">
+          Sign in to your GroundUp workspace
         </p>
       </div>
 
-      {/* One-Click Project Roles Demo Section */}
-      <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-transparent p-4 shadow-xs">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Project Roles — Instant Login</span>
-          </div>
-          <span className="text-[11px] text-text-muted">Pre-seeded demo accounts</span>
+      {/* DEMO_ACCOUNTS Role Pills */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            Quick demo sign-in
+          </span>
+          <span className="text-[11px] text-slate-400">Click to switch</span>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {DEMO_ACCOUNTS.map((demo, idx) => {
+        <div className="grid grid-cols-5 gap-1.5">
+          {DEMO_ACCOUNTS.map((demo) => {
             const Icon = demo.icon;
-            const isThisLoading = signIn.isPending && activeDemoId === demo.id;
-            const isLastOdd = idx === DEMO_ACCOUNTS.length - 1 && DEMO_ACCOUNTS.length % 2 !== 0;
+            const isSelected = email === demo.email;
+            const isPendingThis = signIn.isPending && activeDemoId === demo.id;
+
             return (
               <button
                 key={demo.id}
                 type="button"
-                onClick={() => handleDemoLogin(demo)}
+                onClick={() => handleDemoSelect(demo)}
                 disabled={signIn.isPending}
-                className={`group flex flex-col items-start justify-between rounded-lg border border-border bg-surface p-2.5 text-left transition-all hover:border-primary hover:bg-subtle/80 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 ${
-                  isLastOdd ? "sm:col-span-2" : ""
-                }`}
+                title={`${demo.role}: ${demo.name} (${demo.email})`}
+                className={`flex flex-col items-center justify-center rounded-lg border py-2 px-1 text-center transition-all focus:outline-none ${
+                  isSelected
+                    ? "border-blue-600 bg-blue-50/70 text-blue-700 shadow-xs ring-1 ring-blue-600/30"
+                    : "border-slate-200 bg-slate-50/50 text-slate-700 hover:bg-slate-100 hover:border-slate-300"
+                } ${isPendingThis ? "animate-pulse" : ""}`}
               >
-                <div className="flex w-full items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <Icon className={`h-4 w-4 ${demo.colorClass}`} />
-                    <span className="text-xs font-semibold text-text-primary group-hover:text-primary">
-                      {demo.label}
-                    </span>
-                  </div>
-                  <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold border ${demo.badgeBg}`}>
-                    {demo.roleBadge}
-                  </span>
-                </div>
-                <div className="mt-1 flex w-full items-center justify-between text-[11px] text-text-muted">
-                  <span className="truncate">{demo.name}</span>
-                  <span className="text-[10px] text-text-muted/80">{demo.roleTitle}</span>
-                </div>
-                {isThisLoading && (
-                  <span className="mt-1 text-[10px] font-medium text-primary animate-pulse">
-                    Authenticating…
-                  </span>
-                )}
+                <Icon className={`h-4 w-4 mb-1 ${isSelected ? "text-blue-600" : "text-slate-500"}`} />
+                <span className="text-[11px] font-bold leading-tight truncate w-full">
+                  {demo.role}
+                </span>
               </button>
             );
           })}
         </div>
       </div>
 
+      {/* Divider */}
       <div className="relative flex items-center justify-center">
-        <div className="w-full border-t border-border" />
-        <span className="absolute bg-app px-2 text-xs uppercase tracking-wider text-text-muted">
-          Or sign in manually
+        <div className="w-full border-t border-slate-200" />
+        <span className="absolute bg-white px-3 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+          Or credentials
         </span>
       </div>
 
+      {/* Form */}
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
         {errorMessage && (
           <div
             role="alert"
-            className="rounded-md border border-danger bg-danger-subtle px-3 py-2.5 text-body text-danger"
+            className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700"
           >
             {errorMessage}
           </div>
         )}
 
-        <div>
-          <label htmlFor="email" className="mb-1.5 block text-label font-medium text-text-primary">
+        <div className="space-y-1.5">
+          <label
+            htmlFor="email"
+            className="block text-xs font-semibold text-slate-700"
+          >
             Work email
           </label>
           <input
@@ -247,19 +215,22 @@ export default function LoginPage() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             aria-invalid={Boolean(validationError && !email)}
-            className="h-10 w-full rounded-md border border-border-strong bg-surface px-3 text-body text-text-primary shadow-xs placeholder:text-text-muted focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20"
-            placeholder="you@company.com"
+            className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-3 focus:ring-blue-600/15"
+            placeholder="name@company.com"
           />
         </div>
 
-        <div>
-          <div className="mb-1.5 flex items-center justify-between">
-            <label htmlFor="password" className="text-label font-medium text-text-primary">
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="password"
+              className="block text-xs font-semibold text-slate-700"
+            >
               Password
             </label>
             <Link
               href="/auth/forgot-password"
-              className="text-xs font-medium text-primary hover:underline"
+              className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline"
             >
               Forgot password?
             </Link>
@@ -273,47 +244,55 @@ export default function LoginPage() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               aria-invalid={Boolean(validationError && !password)}
-              className="h-10 w-full rounded-md border border-border-strong bg-surface px-3 pr-10 text-body text-text-primary shadow-xs placeholder:text-text-muted focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20"
-              placeholder="Enter your password"
+              className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3.5 pr-10 text-sm text-slate-900 shadow-xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-3 focus:ring-blue-600/15"
+              placeholder="••••••••••••"
             />
             <button
               type="button"
               onClick={() => setShowPassword((visible) => !visible)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-text-muted hover:text-text-primary transition-colors"
+              className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
             >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </button>
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 text-xs text-text-secondary cursor-pointer">
+        <div className="flex items-center justify-between pt-0.5">
+          <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={rememberMe}
               onChange={(event) => setRememberMe(event.target.checked)}
-              className="h-4 w-4 rounded border-border-strong accent-primary"
+              className="h-4 w-4 rounded border-slate-300 text-blue-600 accent-blue-600 focus:ring-blue-500"
             />
-            Keep me signed in
+            <span>Keep me signed in</span>
           </label>
         </div>
 
-        <Button
+        <button
           type="submit"
-          className="h-10 w-full justify-center"
-          loading={signIn.isPending && activeDemoId === null}
+          disabled={signIn.isPending}
+          className="h-10 w-full rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-900/20 disabled:opacity-60 flex items-center justify-center cursor-pointer"
         >
-          Sign in
-        </Button>
-
-        <p className="text-center text-xs text-text-secondary pt-2">
-          New to GroundUp?{" "}
-          <Link href="/auth/sign-up" className="font-semibold text-primary hover:underline">
-            Create an account
-          </Link>
-        </p>
+          {signIn.isPending ? "Signing in…" : "Sign in"}
+        </button>
       </form>
+
+      {/* Footer */}
+      <div className="pt-2 text-center text-xs text-slate-500 border-t border-slate-100">
+        Don&apos;t have an account?{" "}
+        <Link
+          href="/auth/sign-up"
+          className="font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+        >
+          Create organization
+        </Link>
+      </div>
     </div>
   );
 }

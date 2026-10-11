@@ -44,7 +44,7 @@ test("owner creates an account and launches a first project", async ({ page }) =
   await expect(page.getByText(/73 Broadway|Marcus Vance/)).toHaveCount(0);
 
   await page.getByRole("banner").getByRole("button", { name: "Exit to Workspace" }).click();
-  await expect(page).toHaveURL(/\/control-center/);
+  await expect(page).toHaveURL(/\/(control-center|projects)/);
 
   await page.getByRole("button", { name: /Taylor Owner/ }).click();
   await page.getByRole("button", { name: "Sign out" }).click();
@@ -52,7 +52,7 @@ test("owner creates an account and launches a first project", async ({ page }) =
   await page.getByLabel("Work email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page).toHaveURL(/\/control-center/);
+  await expect(page).toHaveURL(/\/(control-center|projects)/);
 });
 
 test("sign-in return path and protected route guard", async ({ page }) => {

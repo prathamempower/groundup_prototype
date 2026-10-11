@@ -6,7 +6,13 @@ import { useQuery } from "@tanstack/react-query";
 import { authAdapter } from "@/lib/api/adapters/auth-adapter";
 import { Sidebar } from "./sidebar";
 import { TopBar } from "./top-bar";
-import { NAV_ITEMS, ROUTE_ACCESS_MAP, WORKSPACE_ROUTE_PERMISSIONS, getDefaultRouteForRole } from "@/lib/navigation";
+import {
+  NAV_ITEMS,
+  ROUTE_ACCESS_MAP,
+  WORKSPACE_ROUTE_PERMISSIONS,
+  getDefaultRouteForRole,
+  getDefaultWorkspaceRoute,
+} from "@/lib/navigation";
 import { ShieldAlert, ArrowLeft, RefreshCw, WifiOff } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -68,7 +74,7 @@ export function AppShell({ children }: AppShellProps) {
   const isUnauthorizedProject = Boolean(workspaceProjectId && !projectMembership);
 
   // Check if current route is allowed for the active role
-  const effectiveRole = projectMembership?.role || currentRole;
+  const effectiveRole = (projectMembership?.role as import("@/lib/types").UserRole) || currentRole;
   const sectionAllowedRoles = workspaceSection ? WORKSPACE_ROUTE_PERMISSIONS[workspaceSection] : null;
   const isSectionForbidden = Boolean(sectionAllowedRoles && !sectionAllowedRoles.includes(effectiveRole));
 
