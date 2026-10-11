@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: groundup_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: groundup
+      POSTGRES_PASSWORD: groundup_password
+      POSTGRES_DB: groundup_db
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U groundup -d groundup_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

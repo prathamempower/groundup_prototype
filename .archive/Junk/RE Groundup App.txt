@@ -1,0 +1,337 @@
+# RE Groundup App
+
+  Meeting started: 9/30/2026, 11:10:34 PM
+  Duration: 58 minutes
+  Participants: Dharmesh Gohil, Divyanshu Rai, Hardik Parikh, Karishma Sharma, Mohit Assudani, Pratham Rajbhar
+
+  [View original transcript](https://app.tactiq.io/api/2/u/m/r/eghvzzEZpGqglQU9Wq4y?o=txt)
+
+    
+
+  
+
+  
+    ## Highlights
+
+    > 08:49 Hardik Parikh: Will the GC give this data along with this. Yeah, I can. I can have the GC just fill up because any project you see, we don't do it because we've been doing multiple, we know our timelines. But for the, for this project, what I'll do is, I can fill in every line item when it will be done. So, let's say we start a new project tomorrow. I can fill in that site. Work will be done after four months, so if we, if we start the project in September December January, this will be done, and then you can use that data.
+> 13:07 Hardik Parikh: Yes. And there should be an option given to somebody who is using the system to match. Okay, I have this much contingency if somebody went over budget, so if something goes over budget, you ask, hey, was it planned over budget? And should this go from your contingency, or what is not planned? So this right now, guys! This is a very important this. This data is very, very important because this will tell you because our performers are done. Our our performance are done from this budget. We know that it's gonna cost me 1.2 million to build this house. I know my acquisition was 1 million. I know my total cost is 2.2 million with interest, and plus I add everything. So then I'm selling it at 3 million. That will give the investor that. Okay, that investor is making x amount in X many months in. This is his Roi. Now, if things change
+> 21:48 Dharmesh Gohil: It may tell, but like, I don't know whether it's reliable or not, but like, definitely, we need to take a second pass as well. Right. This is like this, each and every line item is very important.
+> 27:51 Hardik Parikh: because my ticket gets a profit sharing model. Okay, but there are other
+> 37:39 Hardik Parikh: Yeah. Yeah, but, but like I said, it's very important to keep important to keep in mind that. There are two models of this. What this is my model, but there are there.
+> 40:42 Hardik Parikh: So, what are? What are the things divyanshu bratham Mohit you are going to focus? The next two three days? What is your plan for? Today, tomorrow, and early next week. What are you working on?
+> 53:03 Dharmesh Gohil: So you can. You can share a draft version by end of this week before end of this week, right by Friday, and then we can review. And then, like, whatever the? Any Gap. We can just add, like, work from the next week. Sounds good.
+> 54:15 Hardik Parikh: Important will have data for this property. Yeah, so everything. So diving into another thing after this call right away.
+
+  ## Transcript
+
+  00:00 Hardik Parikh: Hi, dharmeshe! Hello, everyone.
+00:02 Dharmesh Gohil: Hey, hey, hardik?
+00:03 Hardik Parikh: Hey there, I'm sorry. Hi, mohited. Hey pratham. Yeah.
+00:11 Divyanshu Rai: Hello!
+00:11 Hardik Parikh: Hey guys, okay, so, are you glad that we could connect? Okay, I'm actually here come in the frame. Hello guys! Can you, if possible, can turn on your cameras? New York.
+00:40 Dharmesh Gohil: I see. Okay, I see.
+00:41 Hardik Parikh: Okay.
+00:44 Dharmesh Gohil: Good High.
+00:48 Hardik Parikh: All right. Good to see you all of you. So, yes, what? What are we be discussing today? First, let's, let's discuss that. There were a few open questions you guys had. We can address those questions, and then you may have some tech questions which dharmesh can address. But. Tell us what what we are discussing Kunal and I can then have a follow-up discussions as well. I just came here. So sorry for the delay and postponing the call a couple times. Yes, so all yours. Go ahead.
+01:19 Hardik Parikh: Are there any open questions you had a few questions you were asking Kunal?
+01:25 Divyanshu Rai: Uh, so actually, we requested for the documents, uh, draw documents, and the timeline. Is there any timeline for the construction? Like, we can track the progress of that current project. Uh, like if some work is being going on on the construction, so how will we track that? Is there any timeline document?
+01:50 Hardik Parikh: So, there is two ways to track it the, the one the first way to track it is. Every project is financed through. Uh, a back for the construction part of it, right, that you guys know already. So when we make draws? The bank will only fund us when the Milestone is completed. So, if my Plumbing, for example, if my rough Plumbing is done? That's when I can call the bank and the bank will fund me that amount. So when the bank funds me that I get a? Obviously, I get the report that they have funded me this. This line items from my budget. That will tell you that at that time. Uh, budget lines have been completed.
+02:37 Hardik Parikh: So, that's one way to know that. Okay, it's been September. We got funded for electrical. We got funded for rough Plumbing. That means we have completed our. This line line item of the budget. Okay, that's one way. And the other way it comes in is like we talked before that we will have somebody either manually a person to go and take pictures or. To record the data that this is the progress that's going on in the in the in the projects, and also sorry and also. I know we're making it for the, uh owner, but also the.
+03:15 Hardik Parikh: The other end has to be used by the GC or there because they have to also upload some stuff, so they will have something that they can enter when, whenever. For example, the plumbing has been, uh, passed by inspection. Then you know that the plumbing is finished. It's rough inspection is done. We got to prove, you know, Rock inspection has been done on this day. We got the approval on September 1st. That means rough inspection is done so. These are the two ways that we have to follow the timeline.
+03:42 Hardik Parikh: The Venture was that your question about the timelines in general or timelines to start with? What? What was your question specific?
+03:49 Divyanshu Rai: Actually, there were questions, uh, one for the draw timeline and one for the construction timeline. Like, how can we track the construction like, uh, if this project is being going on? Uh, let's say, uh, he has started. He has already acquired a land, and he has started a construction. So, there is a timeline for this construction, he has taken a draw, and for that particular work, he wants.
+04:18 Divyanshu Rai: He wants to complete that work, so I was asking it was, uh, was there any timeline for that work for that? Means construction.
+04:28 Hardik Parikh: So, let's take a step back. I want to ask her first a primary question. When we start a project? How do we first Define the entire timing? Okay, I'm starting this project today. My groundwork is done or. My timeline is 18 months to finish this, and this is how I want to break it down. Okay, in 4 months, I have to be at this stage in 6 months at this stage in 9 months at this stage, so that's the first initial information I have to input, then everything else is being tracked against that, that okay, my initial timeline was that I want to get everything done in 18 months from with some logic.
+05:09 Hardik Parikh: And then we track that okay. In 4 months, I had to. For example, my Plumbing has to be done. Then, I can track against it. Okay, is my Plumbing actually done in four months or not, which is tracked by two ways? One is the the GC manually uploading data and second is the you finish it and you give a bang drama and you give the information right. There are two ways you see whether they are reconciling, and that is the first information. How do you we give that so that that idea? As a GC gives that. So, any project you start a GC will give you a timeline. Any project if you're building a house, a GC will tell you it'll give you a timeline with the table that says, let's say, we, let's say, we bought the house. In September, you hired the GC. Now, the GC will tell you that permit's going to take 4 months.
+05:59 Hardik Parikh: Foundation will take two months after that January will be framing. March will be flooring, so you will get that whole timeline. We don't have that yet. You don't have that because we don't do it, but I could get that to you. Also, if you want on a new project. So now to under for you guys to understand.
+06:17 Divyanshu Rai: Okay.
+06:20 Hardik Parikh: Initially, when you are starting a project, or you create a project that is a mandatory field that needs to be inputted in the system. Yes, this is my entire timeline to finish the project with this specific Milestones. Now you have that entire data inputted into your system. Now, when you start the project, you start tracking all the information you start tracking the the inputs of the photos and the receipts and.
+06:48 Hardik Parikh: Everything else that comes, you know, whatever is coming in. And then, at one point, the GC will upload photos, also, where he says, okay, this this thing is done. The flooring is done, for example, and then you start putting a draw on the bank that now I need to. I'm done with phase one. Can you release between 10 of the money? So now you are tracking okay.
+07:16 Hardik Parikh: And another thing on that to make it even now. In technical terms, hardik and you guys have to think about this, but I'll say I. This is what I think. Another easier way to look at this. Uh, if can they pull up a screen on this? Yes, uh, can, can one of you? Do you have the budget handy? Any budget from any of my project, Woodlawn or Broadway. You have the budget handy.
+07:39 Divyanshu Rai: Just a minute. Yeah, I have the blanket sheet just a minute.
+07:41 Hardik Parikh: If you can? Better on the screen. Okay, perfect, so if you see this, this line item budget is extremely detailed. Okay it, so if you look at plans and permits, that's. One second. Yeah, that's your permit section. Okay, then, if you go down, you will see site work. So, maybe if this, I don't know if this is technically doable, but what we could do is we could add a field that the GC can put in there when all these light items will be done.
+08:18 Hardik Parikh: Before the start of the project, because the bank is only going. For example, if you go, uh, let's look at line 2.09 Foundation composition sequence. Yes, this is all sequenced. Okay, this is a complete. You have to start from permits site clearance, site work, framing mechanical interior. So, 2.09 has to be done before. Let's say 4.2, of course. 4.11, yes, yes, yeah. So, this is another data point for you guys, right? So, when you are doing this, the GC has to enter.
+08:49 Hardik Parikh: Will the GC give this data along with this. Yeah, I can. I can have the GC just fill up because any project you see, we don't do it because we've been doing multiple, we know our timelines. But for the, for this project, what I'll do is, I can fill in every line item when it will be done. So, let's say we start a new project tomorrow. I can fill in that site. Work will be done after four months, so if we, if we start the project in September December January, this will be done, and then you can use that data.
+09:19 Hardik Parikh: It. Also, it's it's better because you have the light in the budget. You have the timeline, and then you will see the draw that I got, and then you can reconcile with. How much will you have that timeline for each of them, and is that necessary. It's not each, it's not. This is very detailed, but I can tell you this, you can. If you go up right, for example. Section one.
+09:45 Hardik Parikh: Okay, so plans and permits, so I'm not gonna say every line item, but I can say that plans and permits is 3 months okay, and site work site work is four months. Okay, okay, not each and every end? No, but then, you also know from this sheet site, work is 3 months and the budgeted amount for site work is, whatever the total, everything is yes. And another thing, the pictures that we take we can take because bank needs pictures of all these things. So, every picture can be gone with can be attached to its line item. Okay, so now you have picture draw fund how much the bank approved. How much was our original budget timeline, all in one, and this is the best for an owner, because and an investor. If I am investing. This is the first thing I give my investors that this is how much it's going to cost us to build this house. Okay. Now, as an investor, I actually want to see that my line 2.09 is 45.
+10:46 Hardik Parikh: First of all, how much did the bank give me? Did they give me four? Did they fund me 45, 000? Next, how much did I spend? Did I actually spend 45 000 or did I spend 40, 000, but will the bank look at each and every line item like this and release money or or at specific points. Okay, the bank says, okay, site work is done. It was half a million. Here is half a million for you. No line item line. So, what happens if a couple of items are missing from this. So, let's say, 2.05 is missing fifteen thousand dollars. Voila! I don't have the photo. I don't. I don't get it, you have to have the phone. Okay, you have to have it or the bank or so. There's two ways we either upload a photo or the bank will set an appraiser.
+11:29 Hardik Parikh: To take the photos. Okay, if the appraiser comes, he has the same line items he has to take the picture of all those line items. This is with the bank as well. This is with the bank. This is the max format. This is the bank's format. Yeah, is this a common bank format across the board, or is it like different for different, mostly all of them are like this, you know, one or two?
+11:49 Dharmesh Gohil: Is it possible that this get revised?
+11:52 Hardik Parikh: By who?
+11:54 Dharmesh Gohil: Anybody, anybody? Let's say like, there is some changes in the like, land acquisition like, you know, now we want to make a make a bigger project, or there is some other unknown things came in, right?
+12:04 Hardik Parikh: Yeah, oh, so if you go so this, okay, so there is. There's two, two things to that. When you do a budget and you give it to the bank, and this gets approved, and your plans are approved then. If you want to change, you say, Hey, listen. Um, now my plans are changed. I'm gonna do this then then. That means you have to rework your entire budget, and you have to get underwriting to excel, but your second part of the question is, if it is small things there is. So, if you look at the line idea, if you scroll down all the way, uh, to raise a contingency, if you look at that. It says contingency right there 10 percent 82 000, so that is your they give you. The bank gives you 10 Reserve contingency.
+12:42 Hardik Parikh: So, if you have to make some changes, for example, I, let's say that I did a building. I started digging the foundation and the soil was not tough, right? It was very wet or whatever, right? It's not holding it, and I have to put piles to hold the building, and that's a 40, 000 cost. I can use it contingency because it's not in my budget.
+13:01 Dharmesh Gohil: I see, I see. So this is a. This is a reference plan and then rest of the things
+13:02 Hardik Parikh: So, for you.
+13:05 Dharmesh Gohil: should go against.
+13:07 Hardik Parikh: Yes. And there should be an option given to somebody who is using the system to match. Okay, I have this much contingency if somebody went over budget, so if something goes over budget, you ask, hey, was it planned over budget? And should this go from your contingency, or what is not planned? So this right now, guys! This is a very important this. This data is very, very important because this will tell you because our performers are done. Our our performance are done from this budget. We know that it's gonna cost me 1.2 million to build this house. I know my acquisition was 1 million. I know my total cost is 2.2 million with interest, and plus I add everything. So then I'm selling it at 3 million. That will give the investor that. Okay, that investor is making x amount in X many months in. This is his Roi. Now, if things change
+13:59 Hardik Parikh: here, it changes the entire. All the numbers. So, there are some blank items here. Like, yeah, low voltage wiring, fireplace, face, etc, etc, so some things we don't do so. We don't include, like, we don't do fireplaces. We don't include them now sometimes, but yeah, so sometimes I will. We will not include everything. So, for example, if you see, let me give an example, uh, window coverings right now. Window coverings, we don't include it, but it's already included in our window cost. So, when I put my window cost, if you scroll down, for example. Section 3 manager. Scroll down.
+14:42 Hardik Parikh: No, uh, oh yeah, yeah, Windows. There you go. So, here, skylights, you see 35, 000. For Windows, that already includes the window coverings. Okay, so yeah, sometimes you can break it, but small items we don't break in sometimes down.
+14:57 Dharmesh Gohil: Is it possible that there can be multiple developers involved in one project and the ownership of like certain item goes with one product developer? Another item is taken care by another developer and.
+15:11 Hardik Parikh: Usually only only one G. They will never be two GCS.
+15:15 Dharmesh Gohil: I see.
+15:16 Hardik Parikh: Are you asking GC or developer? Those are two different things.
+15:20 Dharmesh Gohil: I, I think, developer as well, like, um.
+15:22 Hardik Parikh: Yes.
+15:23 Dharmesh Gohil: So, this line item will be carried by the GC, right?
+15:26 Hardik Parikh: Nana Joe developer is the person who is investing and developing this property.
+15:32 Dharmesh Gohil: Yeah.
+15:33 Hardik Parikh: GC is the person who is actually building this so investors or developer can be many right. It can be Kunal, and you and me and five other friends together are investing in this property, so developers can be many, but the GCM is actually building this. It's only one.
+15:50 Dharmesh Gohil: Good, I see, so there is no multiple GC. Then there is no point of confliction here, right? Like, you know, so then they can have a subcontractor, right?
+15:57 Hardik Parikh: Yeah, then they get. Then the GC can hire a plumber electrician.
+16:01 Dharmesh Gohil: Yeah.
+16:02 Hardik Parikh: The concrete guy window guy, he can hire everybody.
+16:04 Dharmesh Gohil: Good.
+16:06 Hardik Parikh: But this is his budget for that.
+16:08 Dharmesh Gohil: I see. Okay.
+16:09 Hardik Parikh: And GT, and the GC is the one who fills this budget in because he knows the numbers. So, he's the one who fills his budgeted.
+16:17 Dharmesh Gohil: I see, so all right, so we, I think this is a reference point that this should be our estimated date. And then, what actually is actual date of, like, completion of the particular Milestone?
+16:28 Hardik Parikh: Yeah.
+16:29 Dharmesh Gohil: Right, and at that point of time we should have all the data available just to
+16:30 Hardik Parikh: Yeah.
+16:34 Dharmesh Gohil: get the date and the get the amount from the bank.
+16:37 Hardik Parikh: Yes. And, and I, I really think now, thinking about it, thinking out loud. I really think, uh, if it's doable, I think this is a great idea to just include this and add if we can create something that can in the in the in the app or whatever that can add that stuff in that. Every line item can get a picture and time. That can, they can reconsider. Yes, absolutely. That's how you do that, I think, would be one stop, because then I just have to look okay. This this this, this time this time that will be perfect. We don't have that.
+17:11 Dharmesh Gohil: Yeah, yeah. It's a it's a project management, right? Like, a project management screen. You just see this, where exactly the project is right now? By looking this one, you can just see.
+17:23 Hardik Parikh: Yes. By looking this one, I can see where the project is, but that's not what we are
+17:30 Dharmesh Gohil: Yep.
+17:31 Hardik Parikh: shooting for. That's not our value proposition. Our value proposition is to know whether your project is going to make you money or not.
+17:39 Dharmesh Gohil: Yeah.
+17:40 Hardik Parikh: So, wherever you may be, if you are over budget under budget, it should give you dashboard, which tells. You will make money, or you will lose money, or it will come be completed on time or not completed on time, and because of Reason a, b, and c.
+17:56 Dharmesh Gohil: Yep.
+17:57 Hardik Parikh: And obviously, apart from the budget you guys already know, there's other costs to it, too, right? So, there is taxes and other overhead carrying costs that we have for two years while we're doing the project that that stuff you will see in, uh, in the bank statements and and all that you will see the bank statements and everything. I am going to give you the 70, so there's something with the the bank we use BCB. There's some problem with their website, so that doesn't have access. So, he lost all the access from his username to, uh, the bank statement, so only I have it, but I'm gonna give you guys the bank statements to reconcile everything. Listen. Yeah, it's gonna.
+18:37 Dharmesh Gohil: Yeah.
+18:41 Hardik Parikh: Yeah, but does this make sense quies? Dharm.
+18:53 Divyanshu Rai: Uh, Kunal, uh, you mentioned something about interest rates of, uh, I asked a question, uh, regarding the loan part. So, you mentioned that you have a interest Reserve. So, can you tell us about that?
+19:06 Hardik Parikh: Okay, so do you have the hurt statement for? 73 Broadway.
+19:14 Divyanshu Rai: Yes.
+19:15 Hardik Parikh: Can you please pull that up right there? Can you zoom in please? Okay, perfect. Can you, uh? Scroll down. Interested Channel. Keep on going down. Command F percentage. No, no.
+19:43 Dharmesh Gohil: This is, this is image.
+19:44 Hardik Parikh: Oh no, no, not this one, not this one.
+19:46 Divyanshu Rai: This one is.
+19:47 Hardik Parikh: This is acquisition.
+19:48 Divyanshu Rai: Land acquisition.
+19:49 Hardik Parikh: That acquisition. Yes. Okay, so now you see where it says 8112 line item 812 interest Reserve 75, So, what? This is, is some loans are structured, where the bank will say that I'm giving you a loan of a million dollars, but we have to pay interest. It's always interest only loan until we sell it. Okay, so we did. The bank says, okay, your interest. What we're going to do in this case, they said, we're going to put 75,000 in Reserve account, so the bank actually takes our monthly interest from that account, so we don't pay interest monthly. It's, it's already taken out. It's already part of the loan.
+20:32 Hardik Parikh: Now, there's two ways to do it. The other way to do it is, I'll show you another statement, uh, from another property where we don't do interest Reserve. We just pay interest only whatever the monthly interest bill is. We paid every month. So interest. Reserve your question. It means that that money has been held back by the bank to pay monthly on the amount we use whatever is funded. So if the bank has funded me $200,000 in in month one and my interest is 2, 000 that 2000 is gonna come out of the 75 000, and when my 75 000 is complete, then the bank will say. Now, use, I start paying interest.
+21:18 Hardik Parikh: This is a new one. You have to understand guys in all these different statements and put it there because this is what you are gonna compare where your project project is on track or not, not not in terms of the timeline, but in terms of money economics, yeah.
+21:33 Dharmesh Gohil: Yeah, the understanding, uh, bank statement, it will take, uh, like, you know itself, we need to understand each and every line item. What and what exactly it means, right? So, so probably, that's when.
+21:42 Hardik Parikh: Can we throw it into an llm and it can tell you explain this to me?
+21:48 Dharmesh Gohil: It may tell, but like, I don't know whether it's reliable or not, but like, definitely, we need to take a second pass as well. Right. This is like this, each and every line item is very important.
+22:01 Hardik Parikh: Yeah, and like, for example, I'll I'll also like things we can't miss is. Now, I have recording fee. I have closing costs, right, just like you buy a house. There's closing cost on a loan that has to be also accounted for, because yes, it's not coming out of my pocket, but it's already in the loan. You know, so that has to be accounted for. So, if my, if, for example, if my budget, my line, you saw the budget, if it's 1.2 million, but my loan might actually be 1.25 million. Why? Because my closing cost is inside. Okay, right? So we have to account for all that. So this hard statement is the best way to do it.
+22:42 Dharmesh Gohil: So Kunal. After this, all of the thing, like, once the project is developed, uh, so you're tracking up till there, or like, you also want to track, like, hey, the property right now. The expense of this building, the whatever the building is. It's like a two million dollar, and then you're selling that property for three million so. You, are you also going to take that as a part of this project?
+23:05 Hardik Parikh: Yes, I, we, I think that has to be. That is the I think that has to be a part for the investor, especially because you have to know. Like, for example, you're
+23:14 Dharmesh Gohil: I see, so it's from like, starting to end. Everything included, right?
+23:17 Hardik Parikh: selling it for three million. What are your closing costs out of that? Your realtor, you mentioned Expos out of it, and then, after my net Pro, my net Roi is this for this project. Everything, and just the last unit is sold. Sale price is, how do we get the sale price from the starting? Of the starting. Yeah, I want to understand, right, this property I'm building for that. That's our projected price.
+23:44 Hardik Parikh: So, this is the property I'm building for 2.2. I'm assuming it will be sold for three minutes. Yes, and how do you get that three million, you're assuming we look at comps in the area so that the system does it or you put in. You know, we put in. Okay, I look at comps, so I will. If I'm buying 73 Broadway, I will look at the sold around property, and I will see that each Soul, each condominium, or let's say one house it sold for three million. So then, I will know that. Okay, I'm, I might be on a lower end of 2.8 and higher end of 3.2.
+24:17 Hardik Parikh: So, is there a or we have to find a way? Okay, that has to be inputted in the beginning. Also, guys. Yo property, a property. But then, you have to get that data from the developer as well. What do you anticipate to sell this for? And that that difference, minus the taxes and brokerage free. Whatever, 34% hockey. Everything else that becomes my profit, and then you can divide that profit with cost, and you can give an Roi percentage. And if you want, I can give you also data from.
+24:58 Hardik Parikh: Uh, last couple of Condominiums or apartments that are sold so you can Pro. You can understand also how the closing hard is like, you know, all the line items for that, too. So when you're making something for your, uh? You know, for the page, you can see that. Okay, we have to fill in commission. This closing costs a legal cost. You know, all that?
+25:28 Dharmesh Gohil: I think, um, so if they once the construction is over, and if there is any delay in selling the property? Is there any any any other thing in between?
+25:39 Hardik Parikh: No, once the construction of this delaying selling the property, then all your your basic, what you're losing is interest interest. Because my loan is there?
+25:46 Dharmesh Gohil: Yeah, yeah.
+25:48 Hardik Parikh: I'm not paid off, remember, and remember, it's an interest-only loan, so you pay interest. So, once this whole in, once I use all this 1.2 million to build it, my interest is gonna be like 10, 15, 000 a month. So, every month, the property
+26:01 Dharmesh Gohil: Yep.
+26:01 Hardik Parikh: is sitting there. I'm losing 10, 12, 000. So that probably sits there for a year. I just lost 130, 000 out of my profit that I was thinking I was going to get 400. Now, I might get 200.
+26:13 Dharmesh Gohil: Yeah, makes sense. Yeah, I think it's much more clear now. The entire picture how things works? So, the overall picture is clear. Now, we need to go much more detail on each and every line item. Like, what are the data we need to collect, right? Uh, the all the invoices draws the bank statements and the the tags, whatever it is, right, like? Um, and then also the input we need from the GC. Like, what kind of data we can get from GC is mostly invoices or anything else we need?
+26:48 Hardik Parikh: So? So I, invoices are sometimes little hard to get. Uh, because a lot of a lot of GCS, the way they have it, is they have. When they have companies that they're, they're doing this with. They have multiple projects, right? So, if, let's say, let's give an example concrete. Now, I have seven houses. I'm doing so. I, when I call my guy say, hey, Sylvia, I got concrete filling in 73 broadways like, okay, no problem. Here's the plan you look at the plan. You'll be like it's forty thousand dollars, so he's gonna come and pour the car. He won't give me any questions. Now, we can get it. We can get it. It's just that it's just a lot of GCS. Don't do it, they just
+27:25 Dharmesh Gohil: Sure.
+27:29 Hardik Parikh: because what happens is? But, but we can get it. Now, my deal is a little different, uh, dharmesh. I'll tell you why, uh, so there's two ways of this deal. My deal is different because
+27:41 Dharmesh Gohil: Yeah.
+27:41 Hardik Parikh: my GC is my partner, right? So, all these numbers that you see that I do in my projects are the cost price. It's my own cost. There's no profit added on it
+27:49 Dharmesh Gohil: Cut it.
+27:51 Hardik Parikh: because my ticket gets a profit sharing model. Okay, but there are other
+27:57 Hardik Parikh: developers that hire a GC, so, um, their profit is gonna be included in these line items, or they will do the line items and at the end, they will say gc15 profit or 20 profit, right? So for that you get, yes, we need to have that that the GC is required to show you invoices. So when they get an invoice wherever the PM project manager or somebody is, they have to get those ear voices.
+28:19 Dharmesh Gohil: Right. This is this is just for just for the tracking, right? It's not necessary
+28:19 Hardik Parikh: Yeah, yeah.
+28:22 Dharmesh Gohil: that, like, yeah, right? Like, you know, it will have some evidence thing. Hey
+28:23 Hardik Parikh: Yeah. Yeah.
+28:25 Dharmesh Gohil: now, this this work is costed like this much, right?
+28:26 Hardik Parikh: Yeah. Yeah.
+28:29 Dharmesh Gohil: You can also fill in the detail manually, but like, you know, we will have some
+28:32 Hardik Parikh: Yeah.
+28:33 Dharmesh Gohil: kind of backing.
+28:33 Hardik Parikh: Right? And and, and, and, and sometimes most of the times, what Jesus do, is they all they subcontract it, right? So, for example, if it's clumping, we don't need all plumbing invoices because the DC is already subcontracted it to a plumber for
+28:44 Dharmesh Gohil: Sure.
+28:47 Hardik Parikh: thirty thousand dollars. Then, all we need is that plumber's invoice for 30 000?
+28:52 Dharmesh Gohil: Yeah.
+28:53 Hardik Parikh: We don't need to know how many pipes he got. We just know that he has $30,000 for Plumbing.
+28:58 Dharmesh Gohil: I see other thing other way around, like, will work. Like, for example, GC is not giving a invoice. Can system generate a invoice saying, like how GCSI is? My bill is $30,000. Uh, and I don't have invoice. So, can we just like, do other way around, like saying system will generate invoice? Can we get assigned from that, saying, hey, we just paid you thirty thousand dollar, or it doesn't work that way.
+29:20 Hardik Parikh: No, you can. You can as long as if the GC, so if there's two ways, if the GC is using the bank account of the developer?
+29:29 Dharmesh Gohil: Yep.
+29:29 Hardik Parikh: Okay, then it's clear because you have the bank statement. Then you can know that gc paid this much money for that. That takes care of it, but if the GC is using his own account, and you're just paying the GC one lump sub check now. For example, you're building the house, and JJ says, okay, miles
+29:42 Dharmesh Gohil: Yeah.
+29:45 Hardik Parikh: sold. My uh, site work is done. Now, you owe me three hundred thousand. Now, in the 300 Foundation is done, uh, site clearance is done. Sewer is done all that is done right, so you don't, you don't know the actual breakdown. So that's one thing we have to think of that. Then, do we tell the GC to give us a breakdown,
+30:05 Dharmesh Gohil: Yes.
+30:07 Hardik Parikh: or do we just say then. In that case, do we say, okay, site work 200, 000? Here's the system invoice sign in that we paid.
+30:13 Dharmesh Gohil: Yes, that's, that's right, yeah. So, this is, like, otherwise, like reconciliation, will be difficult, right? Like, you know, if you just have a bank bank statement?
+30:20 Hardik Parikh: But dharmesh that can be done by human in the loop so that reconcilitation can be done by krutarth. So everybody will have an accountant. If not, we will use
+30:27 Dharmesh Gohil: For sure.
+30:31 Hardik Parikh: our own team to do the reconciliation as well. But at this point, the value proposition of our software is not reconciliation. We are not telling him, for example.
+30:40 Dharmesh Gohil: But that will give some ideas about hardik, like, where the money is going. Where, like, you know, the flow of the money we can understand, right, and then it it everything will be together tied together so that, like, we can better estimate whether, like, you know, project is delaying where exactly the project is, what will be the profit of the project? If there is any or if there have been loss or profit, right?
+31:02 Hardik Parikh: Yeah, no makes sense.
+31:06 Dharmesh Gohil: Okay, I think sure, like there'll be so many small, small details that will come up. But yeah, yeah.
+31:12 Hardik Parikh: So, that's what we'll keep doing, right? We'll keep keep having these calls to
+31:14 Dharmesh Gohil: Yep, yep.
+31:15 Hardik Parikh: solve those details before. We even, you know, develop anything. Yeah.
+31:20 Dharmesh Gohil: Yeah.
+31:20 Hardik Parikh: Like the hospital was very good that this way. Now, I think everybody has a clear picture the budget, the photos, the invoices, the, and what I do. Dharmesh is just so, so everybody knows because we're working on my projects right now, and what I do is I have a, so we have one corporate card, right? We have the
+31:39 Dharmesh Gohil: Got it.
+31:41 Hardik Parikh: American Express card now that, but I have seven eight different cards on that, so every project has a separate credit card number attached to it so. And I will, uh, I, I think rudad must have shared. If not, I'll show it to you, but it's basically we have. Uh, what do you call it? We have. So, at the end of the month after the billing cycle that goes in and he tags each and every expense, so he has a call with my PC every three days. And then let's say there's 10 home Depots, then my GC will just go and say, oh, this Home Depot is for this property. This property, this property, just to make sure there is no switches. Like, for example, accidentally, he used a different card, right? So, he, that's a a like a double
+32:20 Dharmesh Gohil: I see.
+32:24 Hardik Parikh: check, so I have to start doing that every three days just and then then what he does. He summarizes it and sends me PDFs of all different projects. So I have right now nine projects you'll send me nine PDFs of American Express. This project has 50, 000. This project 30, 000. That's what it is right now.
+32:42 Dharmesh Gohil: Makes sense. Got it. Yeah, it's easier to reconcile and understand the spend. Yeah.
+32:48 Hardik Parikh: Yes. Yeah.
+32:50 Dharmesh Gohil: Okay.
+32:50 Hardik Parikh: And in the and in the Amex, you will see that it's, it's every, uh, the charge, the recurring charges. So, you will see, like, if your system has that, we use conch Sylvia concrete, or whenever you see the concrete. For this, you will know that it's for the concrete for this property. Home Depot materials, you know, like that Lumber Company?
+33:13 Dharmesh Gohil: Got it. And okay, apart from this one, do you, uh, do you have any, uh, like? Um, do you like in your mind? Like, if you want to, uh, visualize a picture of a dashboard where you see? Uh, hey, this one, this dashboard is good enough for me. Do you have anything like that in your mind?
+33:32 Hardik Parikh: What I just said right now. I think that would be a very big help, because right now, what I, what I have to do what I'm just talking about the budget with the
+33:36 Dharmesh Gohil: Let's see.
+33:40 Hardik Parikh: time frame and how much was drawn right now. What I have to do. Okay, I got five thousand dollars from the bank. Now, I have to see, oh, how much did I actually feel like you have to go back and see. Okay, so, oh, it was. I filled out six thousand. Why did I get five thousand? Why did the bank short me thousand dollars? Is it something I didn't complete? So, then, I have to go back to the bank and ask him, hey, why did you short people one thousand dollars, right? So, I have to do all that if I had how much I got funded time frame. It would be clear to me very well. I'll know everything.
+34:13 Dharmesh Gohil: Makes sense. Okay. Um, yeah, guys, you guys have any other questions? Pratham, eventually Mohit.
+34:23 Divyanshu Rai: So Coral. Can you share us a document of a project which has been already completed, like, uh, from the start to the end, the BCB statement the bank used for getting the draw and overall invoices, checks, and overall document so that we can analyze that document. Know the pnl? Do you want the pnl tracking also?
+34:48 Hardik Parikh: Final tracking. What do you mean pnl tracking?
+34:49 Divyanshu Rai: Profit and loss, like the units sold and all.
+34:53 Hardik Parikh: Yeah, yeah, that's what we said we will want it, right? Initially, divyanshu, we decided budget year 2.2. We are going to sell it for 3 million. To 800.
+35:18 Divyanshu Rai: Also, can you share us a project which has already been completed with the unit sold in that project and the total profit you made. That's make us clear that how the numbers are going in that project, because.
+35:31 Hardik Parikh: So I will. I, I will tell kruta to share you 392 4th Street. I just sold all three units this year. Okay. It may. It will show you how much money we made closing hurt statements acquisition hurt statement. All the cost, construction, labor, every A to Z, and all the bank statements you'll get everything. That's, that's a completed project. It was completed this, this, I think I sold the last unit on in March 2026.
+36:00 Dharmesh Gohil: Hey, um, another question I have well is like? We project has a milestone and whenever they, when, whenever we have the bank statement, or like invoices, how do we connect together saying, like, hey, this invoice, invoices for this Milestone or like this bank statement. This entries for this Milestone. Do we have anything that is common that we can link together?
+36:24 Hardik Parikh: So, every check that is written, uh, that is gone, always has a memo what it's for.
+36:29 Dharmesh Gohil: I see. Okay.
+36:30 Hardik Parikh: Oh, if he writes a check for Plumbing, it will say Plumbing. If it's Electro, it will say electrical. It will say electrical some checks that are recurring companies that vendors that we have that we use in every property. For example, I'll give you one example. Like, I said, concrete, right. So, when that we don't write concuss, we know that Sylvia concrete is concrete. So, like otherwise, every check there is a memo.
+36:55 Hardik Parikh: And uh, your other question, uh, was what was your first question? What? How could you?
+37:00 Dharmesh Gohil: How do we tie together because, like, we need some kind of like, you know, the project Milestone? Is this right XYZ? Now you release some payment, right? You draw some payment. There are some invoices, right? So how do we tie together all the data? Against that Milestone, right? So that was my question.
+37:17 Hardik Parikh: Um, I think the best way would be if the check has the memo that what it's for, and you'll tie that to your line budget.
+37:27 Dharmesh Gohil: Yeah, so that, so maybe, like, I, I believe, like, every developer will have a kind of a GC will have different practices, right, like to crack, just saying,
+37:35 Hardik Parikh: Yes.
+37:36 Dharmesh Gohil: hey, this payment is for this.
+37:38 Hardik Parikh: Yes.
+37:38 Dharmesh Gohil: Uh, this Milestone so that we need to figure out a.
+37:39 Hardik Parikh: Yeah. Yeah, but, but like I said, it's very important to keep important to keep in mind that. There are two models of this. What this is my model, but there are there.
+37:51 Hardik Parikh: There's a lot of people out there that have the GE model that dharmesh is buying
+37:52 Dharmesh Gohil: Sure.
+37:55 Hardik Parikh: a property you're doing a strip mall, and you just you just hire a GC, and you made a two million dollar contract. Now, the GE is gonna give you.
+38:02 Dharmesh Gohil: Yeah.
+38:05 Hardik Parikh: Hey, he's gonna charge you an invoice you based on my stores. So, GC will come
+38:09 Dharmesh Gohil: Yeah.
+38:09 Hardik Parikh: and tell you their message. Your site work is done. Now, you owe me 300, 000. So, we gotta keep that in mind, too.
+38:15 Dharmesh Gohil: Yeah. Got it. It's like a lump sum amount, right? Like, you know, every Milestone?
+38:19 Hardik Parikh: Then, then you don't go into the details. You just get the high level.
+38:21 Dharmesh Gohil: Yeah, you don't go into detail. Yeah, in that case, it's like, overall, over Milestone, you need to track saying, hey, this is the timeline for this
+38:26 Hardik Parikh: Yeah. So, there must be some some information in the initial input data that we have
+38:28 Dharmesh Gohil: Milestone. How?
+38:33 Hardik Parikh: to get to know which track this project is. Is it a Lancome, or is it dead so
+38:37 Dharmesh Gohil: Correct? Yes.
+38:38 Hardik Parikh: that information and based on what the answer is selected? The whole thing will
+38:39 Dharmesh Gohil: Yeah, yeah.
+38:42 Hardik Parikh: move in that direction.
+38:43 Dharmesh Gohil: Yes, yes, yes, yeah, yeah. We need, like, some kind of type that will just like, uh, carry forward the project.
+38:50 Hardik Parikh: The best. The best way for that is every GC has a contract with the developer. Okay, so when the when you go right. So, when the developer uploads the
+38:56 Dharmesh Gohil: Hmm, yeah, that contact will have the detail.
+39:01 Hardik Parikh: contract, it will have everything broken down in there.
+39:04 Dharmesh Gohil: Yep.
+39:04 Hardik Parikh: Because there'll be two ways of it. If it's my way, you already know this is how we do it, but if it's a way of the actual way, where the GC just charges you on a milestone based. Then the GC will have those Milestone in their contract.
+39:20 Dharmesh Gohil: Call it, and then these invoices are like invoice or data flow. Is it through email, or like, what channel exactly?
+39:29 Hardik Parikh: All email, all email, all emails.
+39:30 Dharmesh Gohil: Polymers okay?
+39:33 Hardik Parikh: Everything is enough.
+39:36 Dharmesh Gohil: Good good?
+39:36 Hardik Parikh: I will. I will share you let me see something. I am not, but I will. I can email you. Just give me a minute guys. Go ahead. The damage. What's the next step here? While is focusing on emails, do we need to create these guys created kind of a PRD, which I looked at it. It was very confusing to me, but what, what?
+39:55 Dharmesh Gohil: Yeah, I need to. I need to take a look of the prds. Yeah.
+40:00 Hardik Parikh: Can you please check the PRD and guide or direct the team? What the next step to
+40:01 Dharmesh Gohil: Yeah.
+40:05 Hardik Parikh: do?
+40:06 Dharmesh Gohil: Yeah, so what? I think hardik is, like, why we need one overall document, right? Like, saying, like this oral architecture of the project, and each and every functionality will go much more detail. Like, oh, we're designing a particular screen for. Uh, invoice, or whatever draw. Like, you know, any functionality, right? Then we need to go a little bit detail, uh, and how it interacts with the other different things.
+40:34 Dharmesh Gohil: So, I will go through the erd PRD, whatever the data. The documents you have provided, and I'll give you providing feedbacks.
+40:42 Hardik Parikh: So, what are? What are the things divyanshu bratham Mohit you are going to focus? The next two three days? What is your plan for? Today, tomorrow, and early next week. What are you working on?
+41:00 Divyanshu Rai: So, you know, hardik. Like, currently, we were going through the data, which was provided by Kunal, and there were a lot of confusion regarding that data, so we need to clarify that first, like when we received the whole document, we will go through all that document understand each part of the data then. We can plan next any technicalities.
+41:25 Dharmesh Gohil: Okay.
+41:26 Hardik Parikh: And are you guys back from the exams? Have you done?
+41:26 Dharmesh Gohil: So?
+41:33 Divyanshu Rai: Uh.
+41:35 Hardik Parikh: So, you are now full time right, available back back. So 21st, to what time, time, what date?
+41:41 Mohit Assudani: No. On 21st of October, we have again exams 21st of October. Around two, three normal.
+41:54 Hardik Parikh: The 21st October to 2nd November, you are out.
+41:57 Mohit Assudani: Yes.
+41:58 Hardik Parikh: Okay, so damage, we, we have to plan accordingly that from now till 21st
+42:01 Mohit Assudani: Me and pratham.
+42:08 Hardik Parikh: October, what we can achieve.
+42:10 Dharmesh Gohil: So, I think you know what we need to do is, like, guys, we need to do exercise
+42:10 Hardik Parikh: So, and then the next steps.
+42:16 Dharmesh Gohil: where, like, we need to define the rules, like, how many different kind of roles we have here? Right? Uh, investor GC contractor, whatever it is, right. Like, let's define the rule. And we need to figure out, like, use case of each of the role. Like, you know, saying, as an investor, what I'm doing, and what do I need from this system?
+42:36 Karishma Sharma: Diwali Dusshera are around the corner too
+42:40 Dharmesh Gohil: And same thing for the GC and all the profiles. Okay, so you should. You should know the clear case about, like, each and every use case. Right, you should understand from the different perspective how the system is going to work, right? If I'm a developer, what what date I'm going to provide, and what is my expectation, right? So let's, let's, uh, flush out that thing, right? Like, use case rule by role? I figure out like, you know, all the use case? Once we know the use case, then, like, you know, we will know about, like, how systems should behave? Right, and once this exercise is done, the next exercise we can do is, like, the project plan. What Canal suggested right, like, you know? So study that project plan and on each line item.
+43:25 Dharmesh Gohil: How do we connect the dots? Like how the invoices or draw as a bank statement or whatever expense is going to be there, right? What are the data we need to put the, uh? For example, we have a um. Expected right expense. And then, what is, uh, sorry, that we have estimated like, and what is the actual expense on that one? What was the timeline and what is the current timeline here? Okay, just a second. I'm coming back.
+43:54 Hardik Parikh: I forwarded the email to all of them. Okay, so. You should have got an email now. Now, I'm going to show you another one. Another example, this is a very good, so you know how we were talking about? Some GCS have just, uh, a. Some GCS have category. Like site work, this much lump sum amount. So I just forwarded an email if you guys can pull it up on the screen. I know we're doing residential. This is a commercial project, so I'm building a Popeyes for somebody else, and this would be something that that would be good for him, too. But, uh. If someone can pull it up, anybody? I just emailed everybody. Including us.
+44:32 Dharmesh Gohil: Okay. Okay. Did you send me my Gmail?
+44:40 Hardik Parikh: I, that means, I think, Gmail to you, others empower.
+44:44 Dharmesh Gohil: Yeah, got it. Let me share.
+44:57 Hardik Parikh: Somebody's chatting.
+44:59 Dharmesh Gohil: Yeah, I'm sure. Okay.
+45:04 Hardik Parikh: Yeah, okay, so this. So now, this is a different. This is a commercial project, so I am building a Popeye's, uh. Respond for somebody else. Now, if you scroll down. You will see the way I'm charging him. Can you zoom in a little bit? There you go. So, I am charging him 315,000 right now. If you see, now, this one is not details how we're talking, right? This is all line items.
+45:33 Dharmesh Gohil: Yeah.
+45:34 Hardik Parikh: So this one is. We don't have to go into details, so when I'm when I'm when I am done with demolition. I just sent him a bill for $53,700. And that's it, so we don't have to go in detail pictures of approved. This is
+45:48 Dharmesh Gohil: I see. Okay.
+45:49 Hardik Parikh: how much he has to get. Okay. So, if we can upload a card like this, then we can have all the terms and
+45:56 Dharmesh Gohil: So, like, what are?
+46:00 Hardik Parikh: conditions of the gcn developer yeah internally.
+46:03 Dharmesh Gohil: So, is it like, easy to? Manage or maintain this project compared to the other project.
+46:12 Hardik Parikh: What do you mean by manager? Maintain which one is better?
+46:14 Dharmesh Gohil: So? Which one you know this? This one for you is like, it looks like a straight
+46:16 Hardik Parikh: For managing.
+46:20 Dharmesh Gohil: forward, right? You don't have to like, have much more detail.
+46:21 Hardik Parikh: Yeah. Well, the reason for that is because this, I don't deal with the bank. I don't deal with any heart statements I don't deal with any number. It's straightforward. I have seven line items. I go start work. I get paid on my Milestone.
+46:36 Dharmesh Gohil: So same thing for the developer as well. Like, you know, if there is a contract
+46:37 Hardik Parikh: Yes, but I managed the budget line by line and everything right, that one,
+46:39 Dharmesh Gohil: contract with?
+46:45 Hardik Parikh: because it's my own project. So that's the question dharmeshi is asking, I know what you're saying. Here you are the GC. There you are the developer, but the question is. Yes, here's the question. The question more is, which is better? To understand and manage like this or the other one, which is goes, so dharmesh, I think the answer to that question is. It depends on on the. If you are getting a loan from the bank, because if you are getting a big loan from the bank bank will require that line item by line item to approve it. Here, the there is no Bank involved.
+47:21 Dharmesh Gohil: No, but like he, I'm not. Maybe this project is exception. Maybe I'm taking another case. For example, I'm a developer. I'm hiring a GC. I have a contract saying, hey, I'm going to pay you million dollar. And this is my schedule, like if you. When you finish Milestone 1, I'm going to release 200, 000, and likewise, right. So, for me, in this case, I don't have to manage all the invoices related to, uh, you know, like, line by line item, right? Like, my page one is done. I'm going to just release 200, 000.
+47:50 Hardik Parikh: Yes.
+47:52 Dharmesh Gohil: Right. So in that case, it's it's easier to manage a project.
+47:55 Hardik Parikh: A much. It's yes to answer the question. It's much easier to manage in that way. Yes. Agreement.
+48:00 Dharmesh Gohil: Yes, and the system will be also very simple, right? Like, I know, okay, okay.
+48:03 Hardik Parikh: Very good. Yes.
+48:05 Dharmesh Gohil: In two months, I need to release 200, 000. Now, this little bit delayed or it's like ahead of the time, right? It's easier for me.
+48:12 Hardik Parikh: Yes. But that's that's a much simpler way, correct?
+48:14 Dharmesh Gohil: Got it. Got it. Okay.
+48:21 Hardik Parikh: But a lot of a lot of times now. The GC, also a lot of times now, is GCS are doing this, uh? Profit sharing model and that profit sharing. I wouldn't say what they do is, um, because of so much competition out there and all that. So, what GCS are doing now? They're saying that you know what we will do? Whatever, your uh, your your bank is giving will reconcile with them, just like what I'm doing with the houses, and we will manage the project for you. We will build the location for you. We will do everything and we will charge you whatever the total cost of the project is, and we'll charge you a 20 premium on top of that. That's what a lot of GCS are doing now.
+49:05 Dharmesh Gohil: Um, yeah, I think there's a lot of information guys, um. Okay, so what we can do is the exercise. I, I just mentioned, right. Like, let's
+49:19 Hardik Parikh: Capturing this information Tactiq ❤️. Any recording, what are you doing?
+49:19 Dharmesh Gohil: try to figure out. Okay, good, good sounds good. Right. So, what we can do is, like, guys, let's do the exercise, what I said, right, and then prepare a document, and then you can share with me.
+49:42 Hardik Parikh: Are you clear what you guys need to do and I'll show you all the files for it for? For the project that has been completed, will give it to you, but you guys are clear. What's the next step? I just want to, you know? Keep everything on track. Keep moving.
+49:56 Mohit Assudani: Yes, we are.
+49:58 Dharmesh Gohil: Yeah. So before we start in any technical work, this understanding everyone's role and what is their requirement use case by use case will help you understand the entire project right. Then, we can. Drill into technical detail.
+50:17 Hardik Parikh: Okay, when? When dharmesh, we need to have some timelines for that, too. For
+50:17 Dharmesh Gohil: Cool!
+50:22 Hardik Parikh: these guys, so that they know when to deliver?
+50:25 Dharmesh Gohil: Yeah. So, you guys, uh, you guys, three, um, three. Are there, right? So you can just, uh. Among among three of you just divide like in, I think we have three or four profiles, right? So you can just divide and like, decide the use case by use case, you know. Think in detail, like, for each use case, um, what will it need, right? So? Uh, it should be a little bit more in detail, so you will have like a stronger understanding of the use case. And technically, when we Define the technicality of the project.
+50:58 Dharmesh Gohil: We know that, oh, this user has this kind of requirement, right? And that way, you can better Define the technical functionality, or like, write it down. Okay, so what do you think like, I just want to hear from you guys? Like, how much time do you need?
+51:18 Hardik Parikh: You have been on the quieter side. How much time do you think you'll need to get this?
+51:30 Pratham Rajbhar: Data, which has been completed of complete project. And we need to plan how the things won't go in this project around. More.
+51:41 Dharmesh Gohil: Um. Pretty sure, four days like you like, because they, your three, three guys, right. You just take one profile and think about it. It's like, maybe, how many use case you can think of? One, one one profile would have how many, like? Less than 10, I think, right? So, you just think about it. Explore the document and.
+52:01 Hardik Parikh: Divine Joe. How much time do you think you'll need for this?
+52:14 Divyanshu Rai: Like, first, we have to go through the whole data. I can't give a timeline currently, but I can say that by today I will. Share you the timelines. But first, we have to go through the whole data because many questions are being arising from that data. Like, where is that number coming from, like, uh, in a single project, uh, when we were going through the bank statement? Uh, one was. The Woodlawn amount was also there means from another project the amount was coming and going, so we had a confusion about those data. So, first, we have to clarify that. And for the use cases, I think we will have to start, then only we can tell when we can end it. Like, we need some.
+53:01 Hardik Parikh: How to?
+53:03 Dharmesh Gohil: So you can. You can share a draft version by end of this week before end of this week, right by Friday, and then we can review. And then, like, whatever the? Any Gap. We can just add, like, work from the next week. Sounds good.
+53:17 Divyanshu Rai: Okay, yeah.
+53:28 Hardik Parikh: If you have any questions in the data, the event should just call krutarth. You have krutas, WhatsApp, just call him and ask him okay, I'm looking at this
+53:33 Divyanshu Rai: Yeah.
+53:33 Hardik Parikh: document. I don't understand this line item. What's the problem? Yeah, you are in India time zone. Both of you guys are in Gujarat, so why do waste time? Yeah, if you're stuck somewhere, like, like you just said perfect example, you saw, you saw some money coming from another project. So, what happens? This is not in every case. This is just my case because I have multiple projects. Sometimes projects get funded, delayed. We have to take short-term loan from somewhere, but it's paid back. It's like a short-term liability that is being paid back.
+54:07 Hardik Parikh: Okay, but again, if you're stuck somewhere like that, just call kruta then. Hey, I see fifteen thousand dollars coming in. Can you tell me why it's coming in and you will let you know right away?
+54:15 Divyanshu Rai: Okay.
+54:15 Hardik Parikh: Important will have data for this property. Yeah, so everything. So diving into another thing after this call right away.
+54:27 Hardik Parikh: Call krutarth and tell him that. Can you give me the end-to-end data for frustrating first treat property, write it down, or you should have it recorded for the first read property. Uh, Jack.
+55:32 Hardik Parikh: I'm gonna just give you.
+55:32 Mohit Assudani: Also hardik, we need a 532 Palestine data.
+56:00 Mohit Assudani: The new construction, the Kunala started.
+56:00 Hardik Parikh: No, no, five, five, five. Yeah, 532 Palisade is not. Yeah, he just started that, but that's that. We're not gonna be doing construction on that yet, so don't, don't do that. Whatever property kunal just said. Right now, I'm I'm acquiring that right now. Actually, I'm closing next. Actually, we have a WhatsApp. Okay, what I'm gonna do is, I'm gonna give you the
+56:45 Hardik Parikh: name of the company that you call krutad and just have to release all the like. He'll give you all the files for it. And I'm also gonna give you another, uh, in the chat. I'll give you another property that we are acquiring. Uh, in the next two weeks. Now, this is brand new start. So, which is easier. Like, we'll have all the data
+57:28 Hardik Parikh: we'll start putting in. Okay, so it's going to be a brand new property we're acquiring in two weeks that we're going to demo. We're gonna build four units same process. No, it should be there. Can you guys hear us? Hello!
+57:29 Divyanshu Rai: Your voice is little lagging.
+57:29 Dharmesh Gohil: Yes.
+57:29 Hardik Parikh: Hello!
+57:29 Dharmesh Gohil: It's a little bit delayed, but sorry.
+57:29 Hardik Parikh: It is stuck.
+57:29 Divyanshu Rai: Hello, Hardik.
+57:53 Karishma Sharma: Your network is intermittent
+58:09 Hardik Parikh: Money back to me just scumbed away. Yeah, I. My battery just died in the laptop, so hold on. I'll connect on. Yeah, give me a sec guys. Okay, can you hear me? Yeah, yeah, yeah. Yes, yes, excuse me.
+58:09 Mohit Assudani: Yes.
+58:09 Hardik Parikh: So, yeah, those are the two properties, uh, from my laptops, battery just died, so it's lagging. But any other questions?
+  

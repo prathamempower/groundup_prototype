@@ -1,0 +1,32 @@
+{
+  "timestamp": "2026-10-10T15:04:14.298Z",
+  "pagesChecked": 28,
+  "screenshotsTaken": 83,
+  "consoleErrors": [],
+  "failedRequests": [],
+  "placeholderViolations": [],
+  "roleGuardPasses": 24,
+  "roleGuardFailures": [],
+  "interactionResults": [
+    {
+      "name": "Reconciliation Accept / Split / Exclude",
+      "status": "PASS"
+    },
+    {
+      "name": "Budget Baseline Approval",
+      "status": "PASS"
+    },
+    {
+      "name": "Draws Deposit Allocation",
+      "status": "PASS"
+    },
+    {
+      "name": "Timeline Milestone Update",
+      "status": "PASS"
+    },
+    {
+      "name": "Investor Update Publish & View",
+      "status": "PASS"
+    }
+  ]
+}
