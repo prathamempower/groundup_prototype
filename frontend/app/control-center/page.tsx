@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { PageHeader } from "@/components/layout/page-header";
@@ -154,6 +155,8 @@ const ProgressTrajectoryTooltip = ({ active, payload, label }: CustomTooltipProp
 
 export default function ControlCenterPage() {
   const queryClient = useQueryClient();
+  const params = useParams();
+  const urlProjectId = (params?.projectId as string) || "";
   const [viewMode, setViewMode] = useState<"PROJECT" | "PORTFOLIO">("PROJECT");
   const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
   const [isAlertsCollapsed, setIsAlertsCollapsed] = useState(false);
@@ -164,7 +167,7 @@ export default function ControlCenterPage() {
   });
 
   const projects = projectsData?.data?.projects || [];
-  const currentProjectId = projectsData?.data?.current_project_id || "";
+  const currentProjectId = urlProjectId || projectsData?.data?.current_project_id || "";
   const currentProject = projects.find((p) => p.id === currentProjectId) || projects[0];
 
   const { data: dashboardData, isLoading: isDashboardLoading } = useQuery({
@@ -232,7 +235,7 @@ export default function ControlCenterPage() {
             : project?.address || "Real Estate Financial Control Workspace"
         }
         breadcrumbs={[
-          { label: "Portfolio", href: "/control-center" },
+          { label: "Portfolio", href: "/projects" },
           { label: viewMode === "PORTFOLIO" ? "All Projects" : project?.name || "Project overview" },
         ]}
         actions={

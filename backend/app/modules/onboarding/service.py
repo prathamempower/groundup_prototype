@@ -158,12 +158,8 @@ class OnboardingService:
     def list_projects_for_user(self, user: User) -> list[Project]:
         from app.db.models import ProjectMember
 
-        # If user is OWNER or ADMIN at org level, they can see all projects in their org
-        if user.role.upper() in ["OWNER", "ADMIN"]:
-            stmt = select(Project).where(Project.organization_id == user.organization_id).order_by(Project.created_at.desc())
-            return list(self.db.scalars(stmt).all())
-
-        # For all other users (CFO, PM, GC, INVESTOR), only show projects they have membership in
+        # Strict project isolation: Only show projects where user is in project_members
+        # (or if org creator has no project_members records yet)
         stmt = (
             select(Project)
             .join(ProjectMember, ProjectMember.project_id == Project.id)
@@ -173,7 +169,12 @@ class OnboardingService:
             )
             .order_by(Project.created_at.desc())
         )
-        return list(self.db.scalars(stmt).all())
+        accessible = list(self.db.scalars(stmt).all())
+        if not accessible and user.role.upper() == "OWNER":
+            # Fallback for newly created org before projects or if creator is org owner
+            stmt_all = select(Project).where(Project.organization_id == user.organization_id).order_by(Project.created_at.desc())
+            return list(self.db.scalars(stmt_all).all())
+        return accessible
 
     def update_project(self, owner: User, project_id: uuid.UUID, data: ProjectUpdate) -> Project:
         if owner.role != "OWNER":

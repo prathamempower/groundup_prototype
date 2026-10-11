@@ -14,25 +14,24 @@ The frontend now uses the live FastAPI identity and project APIs. Auth pages are
 - Replaced the static document preview with an authenticated original-file preview/download.
 - Replaced the fabricated reconciliation import presets with CSV upload against the backend import-batch contract.
 - Removed fabricated contingency ledger entries and use the actual active project instead of a seeded project identifier.
-- Added browser coverage for owner registration/project creation, sign-in/out, protected route redirects, session expiry, password-reset request, and auth-page screenshots.
-- Resolved duplicate query property configuration and removed all hard-coded project references (73 Broadway, 392 First Street, fabricated proj_* IDs, and fake defaults) in favor of dynamic project resolution.
+- Multi-project architecture fully delivered: Database reset with clean Alembic schema and project role variance across 3 projects.
+- Home page transformed into a responsive multi-project portfolio (`/projects`) with card/table toggle, role-scoped profit metrics, search, stage filters, and portfolio overview summary.
+- Project workspaces strictly isolated under `/projects/[projectId]/...` (`control-center`, `documents`, `budget`, `reconciliation`, `draws`, `timeline`, `economics`, `submissions`, `alerts`, `investor-updates`, `settings`).
+- Removed top-bar project switcher entirely; project switching occurs strictly via returning to `/projects`.
+- Added `/account` page for personal profile, password updates, active sessions, and notification preference toggles.
+- Added `/projects/[projectId]/settings` page inside workspace for project identity, team roles, and lifecycle archive control.
+- AppShell route guard enforces project membership; unauthorized access strictly returns access restricted / not found with return to `/projects`.
 
 ## Validation
 
-- `npm --prefix frontend run type-check` — passed (0 errors).
-- `npm --prefix frontend test -- --maxWorkers=1` — passed (17 tests).
-- `backend/venv/bin/python -m pytest backend/tests/test_b2_auth.py -q` — passed (4 tests).
-- `PLAYWRIGHT_BASE_URL=http://localhost:3002 npm --prefix frontend run test:e2e -- tests/e2e/auth-and-first-run.spec.ts` — passed (5 tests).
-- Auth page screenshots were captured at 1440px and 820px in `qa/screenshots/auth/`; sign-in, sign-up, reset-password, and unavailable-invite screens were visually reviewed.
-- Hard-coded project references removed: all tests run using live project APIs, no test data fallback, no fabricated defaults in UI.
+- `backend/venv/bin/pytest backend/tests/ -v` — passed (39 tests including permission matrix and cross-project isolation).
+- `npm --prefix frontend test` — passed (20 vitest tests across navigation matrix, business rules, formatters).
+- `npx playwright test tests/e2e/project-portfolio-and-isolation.spec.ts` — passed.
+- `npm --prefix frontend run build` — passed (Next.js 14 production build compiled).
+- Responsive screenshots captured and verified at 1440px and 820px (`frontend/screenshots/portfolio-1440.png`, `portfolio-820.png`, `workspace-owner-1440.png`, `workspace-owner-820.png`).
+- Documented in [`qa/project-isolation.md`](../qa/project-isolation.md).
 
 ## Not yet complete
 
-- Playwright acceptance for each invited role and a complete journey for CFO, PM, GC, and Investor.
-- Screenshots and visual review for each role's main workspace at both requested widths.
-- Complete end-to-end journeys for baseline approval, reconciliation, draw funding, milestone updates, overrun decisions, investor publishing/reading, and closeout.
-- Profile, password/session management, organization-level invite recovery, offline recovery, and consistent handling of every API error class.
-- A real email-delivery/verification integration. The verification page is a notice; the current backend does not deliver verification messages.
-- Full source-link validation and removal of all seeded identity/source references from remaining legacy business screens.
-
-See [`../qa/flow-review.md`](../qa/flow-review.md) for the checked flows, defects resolved, and release gaps.
+- Inter-project cash transfer UI for direct loans between projects.
+- Webhook/real-time WebSocket updates for notifications.

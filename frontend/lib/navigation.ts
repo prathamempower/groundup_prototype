@@ -23,33 +23,42 @@ export interface NavItemConfig {
   badgeKey?: "documents" | "draws" | "reconciliation" | "timeline" | "alerts";
 }
 
+export interface WorkspaceNavItem {
+  id: string;
+  label: string;
+  path: string; // e.g. "control-center"
+  icon: LucideIcon;
+  allowedRoles: UserRole[];
+  badgeKey?: "documents" | "draws" | "reconciliation" | "timeline" | "alerts";
+}
+
 /**
- * Sidebar Navigation Items
- * Strict order and role matrix matching design_system.md Section 5:
- * 1. Control center (Owner, CFO, PM)
+ * Project Workspace Navigation Matrix (11 items)
+ * Strict order and role matrix matching design_system.md:
+ * 1. Control center (Owner, CFO, PM - PM gets schedule-focused view)
  * 2. Documents (Owner, CFO, PM)
  * 3. Budget (Owner, CFO, PM)
  * 4. Reconciliation (Owner, CFO)
  * 5. Draws (Owner, CFO, PM)
  * 6. Timeline (Owner, CFO, PM)
  * 7. Economics (Owner, CFO)
- * 8. Alerts & Exceptions (Owner, CFO, PM, GC)
- * 9. My submissions (GC)
- * 10. Project update (Investor)
- * 11. Settings and team (Owner)
+ * 8. Submissions (Owner, CFO, PM review queue; GC submissions)
+ * 9. Alerts & exceptions (Owner, CFO, PM)
+ * 10. Investor updates (Owner only)
+ * 11. Project settings (Owner only)
  */
-export const NAV_ITEMS: NavItemConfig[] = [
+export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
   {
     id: "control-center",
     label: "Control center",
-    href: "/control-center",
+    path: "control-center",
     icon: LayoutDashboard,
     allowedRoles: ["OWNER", "CFO", "PM"],
   },
   {
     id: "documents",
     label: "Documents",
-    href: "/documents",
+    path: "documents",
     icon: FileText,
     allowedRoles: ["OWNER", "CFO", "PM"],
     badgeKey: "documents",
@@ -57,14 +66,14 @@ export const NAV_ITEMS: NavItemConfig[] = [
   {
     id: "budget",
     label: "Budget",
-    href: "/budget",
+    path: "budget",
     icon: PieChart,
     allowedRoles: ["OWNER", "CFO", "PM"],
   },
   {
     id: "reconciliation",
     label: "Reconciliation",
-    href: "/reconciliation",
+    path: "reconciliation",
     icon: Scale,
     allowedRoles: ["OWNER", "CFO"],
     badgeKey: "reconciliation",
@@ -72,7 +81,7 @@ export const NAV_ITEMS: NavItemConfig[] = [
   {
     id: "draws",
     label: "Draws",
-    href: "/draws",
+    path: "draws",
     icon: Landmark,
     allowedRoles: ["OWNER", "CFO", "PM"],
     badgeKey: "draws",
@@ -80,7 +89,7 @@ export const NAV_ITEMS: NavItemConfig[] = [
   {
     id: "timeline",
     label: "Timeline",
-    href: "/timeline",
+    path: "timeline",
     icon: CalendarDays,
     allowedRoles: ["OWNER", "CFO", "PM"],
     badgeKey: "timeline",
@@ -88,73 +97,102 @@ export const NAV_ITEMS: NavItemConfig[] = [
   {
     id: "economics",
     label: "Economics",
-    href: "/economics",
+    path: "economics",
     icon: TrendingUp,
     allowedRoles: ["OWNER", "CFO"],
   },
   {
-    id: "alerts",
-    label: "Alerts & Exceptions",
-    href: "/alerts",
-    icon: AlertTriangle,
+    id: "submissions",
+    label: "Submissions",
+    path: "submissions",
+    icon: Inbox,
     allowedRoles: ["OWNER", "CFO", "PM", "GC"],
+  },
+  {
+    id: "alerts",
+    label: "Alerts & exceptions",
+    path: "alerts",
+    icon: AlertTriangle,
+    allowedRoles: ["OWNER", "CFO", "PM"],
     badgeKey: "alerts",
   },
   {
-    id: "submissions",
-    label: "My submissions",
-    href: "/submissions",
-    icon: Inbox,
-    allowedRoles: ["GC"],
-  },
-  {
-    id: "investor-update",
-    label: "Project update",
-    href: "/investor-update",
+    id: "investor-updates",
+    label: "Investor updates",
+    path: "investor-updates",
     icon: Eye,
-    allowedRoles: ["INVESTOR"],
+    allowedRoles: ["OWNER", "INVESTOR"],
   },
   {
     id: "settings",
-    label: "Settings and team",
-    href: "/settings",
+    label: "Project settings",
+    path: "settings",
     icon: Settings,
     allowedRoles: ["OWNER"],
   },
 ];
 
-/**
- * Route-level permission map for AppShell security guard.
- * Allows functional access for roles that can manage or publish features (e.g. Owner publishing investor updates),
- * while blocking forbidden routes.
- */
+export function getProjectNavItems(projectId: string, role: UserRole): NavItemConfig[] {
+  return PROJECT_WORKSPACE_NAV
+    .filter((item) => item.allowedRoles.includes(role))
+    .map((item) => ({
+      id: item.id,
+      label: item.label,
+      href: `/projects/${projectId}/${item.path}`,
+      icon: item.icon,
+      allowedRoles: item.allowedRoles,
+      badgeKey: item.badgeKey,
+    }));
+}
+
+export const WORKSPACE_ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
+  "control-center": ["OWNER", "CFO", "PM"],
+  "documents": ["OWNER", "CFO", "PM"],
+  "budget": ["OWNER", "CFO", "PM"],
+  "reconciliation": ["OWNER", "CFO"],
+  "draws": ["OWNER", "CFO", "PM"],
+  "timeline": ["OWNER", "CFO", "PM"],
+  "economics": ["OWNER", "CFO"],
+  "submissions": ["OWNER", "CFO", "PM", "GC"],
+  "alerts": ["OWNER", "CFO", "PM"],
+  "investor-updates": ["OWNER", "INVESTOR"],
+  "settings": ["OWNER"],
+};
+
+export function getDefaultWorkspaceRoute(role: UserRole, projectId: string): string {
+  switch (role) {
+    case "OWNER":
+    case "CFO":
+      return `/projects/${projectId}/control-center`;
+    case "PM":
+      return `/projects/${projectId}/timeline`;
+    case "GC":
+      return `/projects/${projectId}/submissions`;
+    case "INVESTOR":
+      return `/projects/${projectId}/investor-updates`;
+    default:
+      return `/projects/${projectId}/control-center`;
+  }
+}
+
+// Keep NAV_ITEMS for backward compatibility where static lists are queried
+export const NAV_ITEMS = PROJECT_WORKSPACE_NAV.map(item => ({
+  id: item.id,
+  label: item.label,
+  href: `/${item.path}`,
+  icon: item.icon,
+  allowedRoles: item.allowedRoles,
+  badgeKey: item.badgeKey,
+}));
+
 export const ROUTE_ACCESS_MAP: Record<string, UserRole[]> = {
-  "/control-center": ["OWNER", "CFO", "PM"],
-  "/documents": ["OWNER", "CFO", "PM"],
-  "/budget": ["OWNER", "CFO", "PM"],
-  "/reconciliation": ["OWNER", "CFO"],
-  "/draws": ["OWNER", "CFO", "PM"],
-  "/timeline": ["OWNER", "CFO", "PM"],
-  "/economics": ["OWNER", "CFO"],
-  "/alerts": ["OWNER", "CFO", "PM", "GC"],
-  "/settings": ["OWNER"],
-  "/submissions": ["GC", "OWNER", "PM", "CFO"],
-  "/investor-update": ["INVESTOR", "OWNER", "CFO"],
+  "/projects": ["OWNER", "CFO", "PM", "GC", "INVESTOR"],
   "/projects/new": ["OWNER"],
+  "/account": ["OWNER", "CFO", "PM", "GC", "INVESTOR"],
+  "/settings": ["OWNER"],
   "/onboarding": ["OWNER", "CFO", "PM", "GC", "INVESTOR"],
 };
 
 export function getDefaultRouteForRole(role: UserRole): string {
-  switch (role) {
-    case "OWNER":
-    case "CFO":
-    case "PM":
-      return "/control-center";
-    case "GC":
-      return "/submissions";
-    case "INVESTOR":
-      return "/investor-update";
-    default:
-      return "/control-center";
-  }
+  return "/projects";
 }

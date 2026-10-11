@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { authAdapter } from "@/lib/api/adapters/auth-adapter";
 import { Sidebar } from "./sidebar";
 import { TopBar } from "./top-bar";
-import { NAV_ITEMS, ROUTE_ACCESS_MAP, getDefaultRouteForRole } from "@/lib/navigation";
+import { NAV_ITEMS, ROUTE_ACCESS_MAP, WORKSPACE_ROUTE_PERMISSIONS, getDefaultRouteForRole } from "@/lib/navigation";
 import { ShieldAlert, ArrowLeft, RefreshCw, WifiOff } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -55,13 +55,30 @@ export function AppShell({ children }: AppShellProps) {
 
   const currentRole = session?.user.role || "OWNER";
 
+  // Check if inside a workspace /projects/[projectId]/... route
+  const workspaceMatch = pathname.match(/^\/projects\/([^\/]+)(?:\/([^\/]+))?/);
+  const workspaceProjectId = workspaceMatch && workspaceMatch[1] !== "new" ? workspaceMatch[1] : null;
+  const workspaceSection = workspaceMatch ? workspaceMatch[2] || "control-center" : null;
+
+  // Verify project membership for workspace routes
+  const memberships = session?.user.project_memberships || [];
+  const projectMembership = workspaceProjectId
+    ? memberships.find((m: any) => m.project_id === workspaceProjectId)
+    : null;
+  const isUnauthorizedProject = Boolean(workspaceProjectId && !projectMembership);
+
   // Check if current route is allowed for the active role
+  const effectiveRole = projectMembership?.role || currentRole;
+  const sectionAllowedRoles = workspaceSection ? WORKSPACE_ROUTE_PERMISSIONS[workspaceSection] : null;
+  const isSectionForbidden = Boolean(sectionAllowedRoles && !sectionAllowedRoles.includes(effectiveRole));
+
   const matchingRouteKey = Object.keys(ROUTE_ACCESS_MAP).find(
     (route) => route === pathname || (route !== "/control-center" && pathname.startsWith(route))
   );
-
   const allowedRolesForRoute = matchingRouteKey ? ROUTE_ACCESS_MAP[matchingRouteKey] : undefined;
-  const isAccessDenied = allowedRolesForRoute ? !allowedRolesForRoute.includes(currentRole) : false;
+  const isGlobalAccessDenied = allowedRolesForRoute ? !allowedRolesForRoute.includes(currentRole) : false;
+
+  const isAccessDenied = isGlobalAccessDenied || isSectionForbidden;
 
   const isAuthRoute = pathname.startsWith("/auth/");
   const isDedicatedFlow = pathname === "/projects/new" || pathname === "/onboarding";
@@ -111,15 +128,19 @@ export function AppShell({ children }: AppShellProps) {
     );
   }
 
+  const isInsideWorkspace = Boolean(workspaceProjectId);
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-app">
-      {/* Sidebar */}
-      <Sidebar
-        collapsed={collapsed}
-        onToggleCollapse={() => setCollapsed(!collapsed)}
-        mobileOpen={mobileOpen}
-        onCloseMobile={() => setMobileOpen(false)}
-      />
+      {/* Sidebar - only rendered inside a project workspace */}
+      {isInsideWorkspace && (
+        <Sidebar
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed(!collapsed)}
+          mobileOpen={mobileOpen}
+          onCloseMobile={() => setMobileOpen(false)}
+        />
+      )}
 
       {/* Main Column */}
       <div className="flex flex-1 flex-col overflow-hidden">
@@ -128,7 +149,28 @@ export function AppShell({ children }: AppShellProps) {
 
         {/* Page Content / Route Guard */}
         <main className="flex-1 overflow-y-auto">
-          {isAccessDenied ? (
+          {isUnauthorizedProject ? (
+            <div className="flex h-full min-h-[400px] flex-col items-center justify-center p-8 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-danger-subtle text-danger mb-4">
+                <ShieldAlert className="h-6 w-6" />
+              </div>
+              <h2 className="text-title font-semibold text-text-primary">
+                Project Not Found or Access Restricted
+              </h2>
+              <p className="mt-2 max-w-md text-body text-text-secondary">
+                This project does not exist or you have not been granted membership in this project workspace.
+              </p>
+              <div className="mt-6">
+                <Link
+                  href="/projects"
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body font-medium text-white hover:bg-primary-hover focus-visible:outline-primary"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Return to Project Portfolio
+                </Link>
+              </div>
+            </div>
+          ) : isAccessDenied ? (
             <div className="flex h-full min-h-[400px] flex-col items-center justify-center p-8 text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-danger-subtle text-danger mb-4">
                 <ShieldAlert className="h-6 w-6" />
@@ -137,16 +179,16 @@ export function AppShell({ children }: AppShellProps) {
                 Access Restricted
               </h2>
               <p className="mt-2 max-w-md text-body text-text-secondary">
-                Your current role (<strong>{currentRole}</strong>) does not have permission
-                to view this workspace. Return to your role home or ask an organization owner to update your access.
+                Your current role on this project (<strong>{effectiveRole}</strong>) does not have permission
+                to view this section. Return to your workspace home or ask a project owner to update your access.
               </p>
               <div className="mt-6">
                 <Link
-                  href={getDefaultRouteForRole(currentRole)}
+                  href={workspaceProjectId ? getDefaultWorkspaceRoute(effectiveRole as any, workspaceProjectId) : getDefaultRouteForRole(currentRole)}
                   className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body font-medium text-white hover:bg-primary-hover focus-visible:outline-primary"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Return to your home workspace
+                  Return to workspace home
                 </Link>
               </div>
             </div>

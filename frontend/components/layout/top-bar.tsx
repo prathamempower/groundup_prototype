@@ -15,6 +15,7 @@ import {
   AlertCircle,
   Menu,
   LogOut,
+  CheckSquare,
 } from "lucide-react";
 import { authAdapter } from "@/lib/api/adapters/auth-adapter";
 
@@ -29,6 +30,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
   const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isTasksOpen, setIsTasksOpen] = useState(false);
   const { data: meData } = useQuery({
     queryKey: ["me"],
     queryFn: () => api.identity.getMe(),
@@ -85,7 +87,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
   return (
     <>
       <header className="sticky top-0 z-30 flex h-[56px] w-full items-center justify-between border-b border-border bg-surface/90 backdrop-blur-md px-4 shadow-xs">
-        {/* Left: Mobile Toggle & Project Switcher */}
+        {/* Left: Mobile Toggle & Portfolio Navigation Link */}
         <div className="flex items-center gap-3">
           <button
             onClick={onToggleSidebar}
@@ -94,64 +96,92 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
           >
             <Menu className="h-5 w-5" />
           </button>
+        </div>
 
-          {/* Project Switcher */}
+        {/* Right: Tasks, Notifications & User Menu */}
+        <div className="flex items-center gap-2">
+          {/* Tasks Trigger */}
           <div className="relative">
             <button
               onClick={() => {
-                setIsProjectDropdownOpen(!isProjectDropdownOpen);
-                setIsUserDropdownOpen(false);
+                setIsTasksOpen(!isTasksOpen);
                 setIsNotificationsOpen(false);
+                setIsUserDropdownOpen(false);
               }}
-              className="flex items-center gap-2 rounded-md border border-border bg-subtle/50 px-3 py-1.5 text-left text-body transition-all hover:bg-subtle hover:border-border-strong focus-visible:outline-primary shadow-xs"
+              className="relative flex h-9 items-center gap-1.5 px-2.5 rounded-md text-text-secondary hover:bg-subtle hover:text-text-primary focus-visible:outline-primary text-caption font-semibold"
+              aria-label="View onboarding and delegated tasks"
             >
-              <div className="flex h-5 w-5 items-center justify-center rounded bg-primary-subtle text-primary">
-                <Building className="h-3.5 w-3.5" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-body font-semibold leading-tight text-text-primary">
-                  {currentProject?.name || "Select Project"}
-                </span>
-              </div>
-              <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-[10px] font-semibold text-primary border border-primary/20">
-                {currentProject?.lifecycle_stage || "ACTIVE"}
-              </span>
-              <ChevronDown className="h-4 w-4 text-text-muted" />
+              <CheckSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">Tasks</span>
             </button>
 
-            {/* Project Switcher Dropdown */}
-            {isProjectDropdownOpen && (
-              <div className="absolute left-0 mt-1 w-64 rounded-md border border-border bg-surface p-1 shadow-overlay z-50">
-                <div className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
-                  Switch Project
+            {/* Tasks Dropdown */}
+            {isTasksOpen && (
+              <div className="absolute right-0 mt-1 w-96 rounded-lg border border-border bg-surface shadow-overlay z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                <div className="border-b border-border px-3.5 py-2.5 flex items-center justify-between bg-subtle/50">
+                  <div className="flex items-center gap-2">
+                    <span className="text-label font-bold text-text-primary">Onboarding & Delegated Tasks</span>
+                  </div>
+                  <span className="rounded bg-primary-subtle text-primary text-[11px] font-semibold px-2 py-0.5">
+                    {currentProject?.name || "Active Project"}
+                  </span>
                 </div>
-                {projects.map((proj) => {
-                  const isSelected = proj.id === currentProjectId;
-                  return (
-                    <button
-                      key={proj.id}
-                      onClick={() => switchProjectMutation.mutate(proj.id)}
-                      className={`flex w-full items-center justify-between rounded px-2 py-2 text-left text-body transition-colors ${
-                        isSelected
-                          ? "bg-primary-subtle font-medium text-primary"
-                          : "text-text-primary hover:bg-subtle"
-                      }`}
-                    >
-                      <div>
-                        <div className="text-body font-medium">{proj.name}</div>
-                        <div className="text-caption text-text-muted">{proj.address}</div>
+
+                <div className="max-h-80 overflow-y-auto divide-y divide-border">
+                  <div className="p-3.5 hover:bg-subtle/50 transition-colors">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="space-y-1">
+                        <span className="rounded bg-primary-subtle text-primary text-[10px] font-bold px-1.5 py-0.2">
+                          {currentProject?.name || "73 Broadway"}
+                        </span>
+                        <h5 className="text-caption font-bold text-text-primary">
+                          Approve verified budget baseline
+                        </h5>
+                        <p className="text-caption text-text-secondary">
+                          Confirm line item allowances and assign $350k contingency reserve.
+                        </p>
                       </div>
-                      {isSelected && <Check className="h-4 w-4 text-primary" />}
-                    </button>
-                  );
-                })}
+                      <span className="rounded bg-warning-subtle text-warning text-[10px] font-bold px-1.5 py-0.5 shrink-0">
+                        PENDING
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 hover:bg-subtle/50 transition-colors">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="space-y-1">
+                        <span className="rounded bg-primary-subtle text-primary text-[10px] font-bold px-1.5 py-0.2">
+                          {currentProject?.name || "73 Broadway"}
+                        </span>
+                        <h5 className="text-caption font-bold text-text-primary">
+                          Map dedicated operating bank account
+                        </h5>
+                        <p className="text-caption text-text-secondary">
+                          Link Columbia Bank operating account for automated statement matching.
+                        </p>
+                      </div>
+                      <span className="rounded bg-warning-subtle text-warning text-[10px] font-bold px-1.5 py-0.5 shrink-0">
+                        PENDING
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t border-border p-2 bg-subtle/30 text-center">
+                  <button
+                    onClick={() => {
+                      setIsTasksOpen(false);
+                      router.push("/onboarding");
+                    }}
+                    className="text-caption font-semibold text-primary hover:text-primary-hover"
+                  >
+                    Open Onboarding Checklist &rarr;
+                  </button>
+                </div>
               </div>
             )}
           </div>
-        </div>
 
-        {/* Right: Notifications & User Menu */}
-        <div className="flex items-center gap-2">
           {/* Notifications Trigger */}
           <div className="relative">
             <button
@@ -159,6 +189,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
                 setIsNotificationsOpen(!isNotificationsOpen);
                 setIsUserDropdownOpen(false);
                 setIsProjectDropdownOpen(false);
+                setIsTasksOpen(false);
               }}
               className="relative flex h-9 w-9 items-center justify-center rounded-md text-text-secondary hover:bg-subtle hover:text-text-primary focus-visible:outline-primary"
               aria-label="View notifications"
@@ -297,17 +328,26 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
                     )}
                   </div>
                 </div>
-                {currentUser?.role === "OWNER" && (
                   <button
                     onClick={() => {
                       setIsUserDropdownOpen(false);
-                      router.push("/settings");
+                      router.push("/account");
                     }}
                     className="flex w-full items-center rounded px-2 py-2 text-left text-body text-text-primary hover:bg-subtle"
                   >
-                    Organization settings and team
+                    Account settings
                   </button>
-                )}
+                  {currentUser?.role === "OWNER" && (
+                    <button
+                      onClick={() => {
+                        setIsUserDropdownOpen(false);
+                        router.push("/settings");
+                      }}
+                      className="flex w-full items-center rounded px-2 py-2 text-left text-body text-text-primary hover:bg-subtle"
+                    >
+                      Organization settings and team
+                    </button>
+                  )}
                 {signOutMutation.error instanceof Error && (
                   <p role="alert" className="px-2 py-1 text-caption text-danger">{signOutMutation.error.message}</p>
                 )}

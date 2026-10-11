@@ -41,10 +41,17 @@ export interface Project {
   contract_model: ContractModel;
   status: "ACTIVE" | "COMPLETED" | "SETUP_INCOMPLETE";
   currency: string;
-  loan_commitment: string; // minor units in cents as string
+  loan_commitment?: string; // minor units in cents as string
   started_at: string;
   target_completion_at: string;
   created_at: string;
+  // Portfolio fields
+  role_on_project?: UserRole;
+  health_status?: "HEALTHY" | "AT_RISK" | "CRITICAL";
+  forecast_profit?: number; // minor units
+  open_exceptions_count?: number;
+  next_milestone?: string | null;
+  last_activity?: string | null;
 }
 
 export interface ApiMeta {

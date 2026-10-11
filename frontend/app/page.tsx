@@ -15,11 +15,8 @@ export default function HomePage() {
   });
 
   useEffect(() => {
-    if (meData?.data) {
-      const target = getDefaultRouteForRole(meData.data.role);
-      router.replace(target);
-    }
-  }, [meData, router]);
+    router.replace("/projects");
+  }, [router]);
 
   return (
     <div className="flex h-[400px] w-full items-center justify-center">

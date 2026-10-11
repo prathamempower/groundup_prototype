@@ -92,9 +92,15 @@ async def list_projects(
 
         # Health status
         health = "HEALTHY"
+        has_delay = False
+        if next_ms and next_ms.planned_completion_date and next_ms.forecast_completion_date:
+            has_delay = next_ms.forecast_completion_date > next_ms.planned_completion_date
+        elif next_ms and next_ms.status == "DELAYED":
+            has_delay = True
+
         if open_alerts > 3:
             health = "CRITICAL"
-        elif open_alerts > 0 or (next_ms and next_ms.delay_days > 0):
+        elif open_alerts > 0 or has_delay:
             health = "AT_RISK"
 
         # Last activity timestamp
