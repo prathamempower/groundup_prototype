@@ -192,7 +192,7 @@ export default function OnboardingPage() {
           </h1>
           <p className="mx-auto mt-2 max-w-lg text-body text-text-secondary leading-relaxed">
             All required governance and decision-graph steps for your role have been recorded.
-            Your answers establish the project's baseline without fabricating missing data.
+            Your answers establish the project&apos;s baseline without fabricating missing data.
           </p>
 
           <div className="mt-8 rounded-lg border border-border-subtle bg-subtle p-4 text-left">
@@ -547,6 +547,7 @@ export default function OnboardingPage() {
                 </Button>
               </div>
             </form>
+          </section>
         </div>
       </div>
     </main>
