@@ -39,12 +39,17 @@ test.describe("Full Navigation & Workspaces Verification", () => {
     await expect(page).toHaveURL(/\/economics/);
     await expect(page.getByRole("heading", { name: "Economics & Pro Forma" })).toBeVisible();
 
-    // 8. Settings & Team
+    // 8. Alerts & Exceptions
+    await page.getByRole("link", { name: /Alerts & Exceptions/ }).click();
+    await expect(page).toHaveURL(/\/alerts/);
+    await expect(page.getByRole("heading", { name: "Alerts & Exceptions" })).toBeVisible();
+
+    // 9. Settings & Team
     await page.getByRole("link", { name: "Settings and team" }).click();
     await expect(page).toHaveURL(/\/settings/);
     await expect(page.getByRole("heading", { name: "Settings, Governance & Administration" })).toBeVisible();
 
-    // 9. Onboarding Setup
+    // 10. Onboarding Setup
     await page.goto("/onboarding");
     await expect(page).toHaveURL(/\/onboarding/);
   });
@@ -102,14 +107,62 @@ test.describe("Full Navigation & Workspaces Verification", () => {
     await page.goto("/reconciliation");
     await expect(page.getByRole("heading", { name: "Reconciliation Workbench" })).toBeVisible();
 
-    const tabs = ["Reconciliation Queue", "Bank Transactions", "Statement Periods", "Inter-Project Transfers"];
-    for (const tab of tabs) {
-      const tabButton = page.getByRole("button", { name: new RegExp(tab, "i") });
-      if (await tabButton.isVisible()) {
-        await tabButton.click();
-        await page.waitForTimeout(200);
-      }
+    const tabNames = [
+      /Reconciliation Queue/i,
+      /Transactions Register/i,
+      /Statement Periods & Sign-Off/i,
+      /Inter-Project Transfers/i,
+      /Import Batches/i,
+    ];
+
+    for (const name of tabNames) {
+      const tabButton = page.getByRole("navigation").getByRole("button", { name });
+      await expect(tabButton).toBeVisible();
+      await tabButton.click();
+      await page.waitForTimeout(100);
     }
+  });
+
+  test("alerts & exceptions page renders metrics, tabs, and filters cleanly", async ({ page }) => {
+    await loginAsOwner(page);
+    await page.goto("/alerts");
+    await expect(page.getByRole("heading", { name: "Alerts & Exceptions" })).toBeVisible();
+
+    // Check KPI cards are visible
+    await expect(page.getByText("Active Exceptions").first()).toBeVisible();
+    await expect(page.getByText("Audited History").first()).toBeVisible();
+
+    // Switch between work tabs and verify populated DQIs
+    await page.getByRole("button", { name: /Data Quality Issues/i }).click();
+    await expect(page.getByText(/GroundUp AI Continuous Integrity Engine/i)).toBeVisible();
+    await expect(page.getByText(/FORMULA TOTAL MISMATCH|DRAW DEPOSIT MISMATCH|STATEMENT COVERAGE GAP/i).first()).toBeVisible();
+
+    await page.getByRole("button", { name: /Audit Archive/i }).click();
+    await expect(page).toHaveURL(/\/alerts/);
+
+    await page.getByRole("button", { name: /Active Exceptions/i }).click();
+  });
+
+  test("pro-forma, reconciliation queue, and project data are populated across views", async ({ page }) => {
+    await loginAsOwner(page);
+
+    // 1. Reconciliation page has pending AI matches in queue
+    await page.goto("/reconciliation");
+    await expect(page.getByRole("heading", { name: "Reconciliation Workbench" })).toBeVisible();
+    await expect(page.getByText(/Pending AI Matches/i).first()).toBeVisible();
+    // Ensure table rows or matching items are visible
+    await expect(page.locator("button:has-text('Accept')").first()).toBeVisible();
+
+    // 2. Economics page has populated pro-forma lines
+    await page.goto("/economics");
+    await expect(page.getByRole("heading", { name: "Economics & Pro Forma" })).toBeVisible();
+    await expect(page.getByText(/Direct Construction Hard Costs/i).first()).toBeVisible();
+    await expect(page.getByText(/Gross Revenues & Net Disposition Proceeds/i).first()).toBeVisible();
+
+    // 3. Timeline page has populated milestones
+    await page.goto("/timeline");
+    await expect(page.getByRole("heading", { name: "Timeline & Progress" })).toBeVisible();
+    await expect(page.getByText(/Demolition|Foundation|Structural Steel/i).first()).toBeVisible();
   });
 });
 

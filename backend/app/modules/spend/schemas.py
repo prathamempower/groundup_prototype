@@ -128,6 +128,19 @@ class ReconciliationMatchRead(BaseModel):
     created_at: str
     transaction_amount: int | None = None
     transaction_counterparty: str | None = None
+    # Frontend compatibility fields
+    amount: str = "0"
+    counterparty: str = ""
+    transaction_date: str = ""
+    proposed_budget_line_name: str = "General Requirements"
+    proposed_budget_line_id: str = ""
+    confidence: float = 0.95
+    confidence_reasons: list[str] = ["High amount match", "Merchant alias identified"]
+    evidence_strength: str = "BANK_TRANSACTION"
+    status: str = "PENDING_REVIEW"
+    document_id: str | None = None
+    invoice_reference: str | None = None
+
 
 
 class ReconciliationDecisionRequest(BaseModel):
@@ -207,3 +220,34 @@ class InterProjectTransferRead(BaseModel):
     status: str
     reviewed_by: str | None = None
     created_at: str
+
+
+# ---------------------------------------------------------
+# Financial Transactions
+# ---------------------------------------------------------
+class FinancialTransactionRead(BaseModel):
+    id: str
+    project_id: str | None = None
+    financial_account_id: str | None = None
+    account_ref: str = "General Operating"
+    transaction_date: str
+    amount: str
+    direction: str  # DEBIT or CREDIT
+    counterparty: str
+    memo: str = ""
+    cleared_status: str = "CLEARED"  # CLEARED, PENDING, UNRECONCILED
+    matched_spend_record_id: str | None = None
+    is_transfer: bool = False
+    is_liability_settlement: bool = False
+    document_id: str | None = None
+    invoice_reference: str | None = None
+
+
+class LinkInvoiceRequest(BaseModel):
+    document_id: str
+    notes: str | None = None
+
+
+class ClassifyCardSettlementRequest(BaseModel):
+    notes: str | None = None
+

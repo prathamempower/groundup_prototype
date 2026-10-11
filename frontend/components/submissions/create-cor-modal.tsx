@@ -54,11 +54,11 @@ export function CreateCorModal({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [reasonCategory, setReasonCategory] = useState("UNFORESEEN_CONDITION");
-  const [csiCode, setCsiCode] = useState("15-300");
-  const [requestedAmount, setRequestedAmount] = useState("3500000"); // $35,000.00
-  const [scheduleDelayDays, setScheduleDelayDays] = useState(14);
+  const [csiCode, setCsiCode] = useState("02-100");
+  const [requestedAmount, setRequestedAmount] = useState("");
+  const [scheduleDelayDays, setScheduleDelayDays] = useState(0);
   const [quoteNumber, setQuoteNumber] = useState("");
-  const [contractorName, setContractorName] = useState("Apex Construction Services LLC");
+  const [contractorName, setContractorName] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");

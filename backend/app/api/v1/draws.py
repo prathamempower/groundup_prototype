@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import require_role
 from app.core.envelope import ResponseEnvelope
-from app.db.models import User
+from app.db.models import User, Draw, DrawRequirement
 from app.db.session import get_db
 from app.modules.draws.schemas import (
     DrawCreate,
@@ -27,6 +27,91 @@ from app.modules.draws.service import DrawService
 router = APIRouter(tags=["Draws & Funding"])
 
 
+def serialize_draw(draw: Draw) -> DrawRead:
+    tot_req = sum(dline.requested_amount for dline in draw.lines)
+    tot_rec = sum(dline.recommended_amount for dline in draw.lines)
+    tot_app = sum(dline.approved_amount for dline in draw.lines)
+    tot_fun = sum(dline.funded_amount for dline in draw.lines)
+    shortfall = max(0, tot_req - tot_app) if tot_app > 0 else 0
+    lender_name = "Columbia Bank"
+    if draw.loan and getattr(draw.loan, "lender_party", None):
+        lender_name = draw.loan.lender_party.name
+
+    return DrawRead(
+        id=str(draw.id),
+        organization_id=str(draw.organization_id),
+        project_id=str(draw.project_id),
+        loan_id=str(draw.loan_id),
+        draw_number=draw.draw_number,
+        parent_draw_id=str(draw.parent_draw_id) if draw.parent_draw_id else None,
+        status=draw.status,
+        period_start=draw.period_start.isoformat(),
+        period_end=draw.period_end.isoformat(),
+        submitted_at=draw.submitted_at.isoformat() if draw.submitted_at else None,
+        approved_at=draw.approved_at.isoformat() if draw.approved_at else None,
+        rejected_at=draw.rejected_at.isoformat() if draw.rejected_at else None,
+        lender_party_id=str(draw.lender_party_id) if draw.lender_party_id else None,
+        source_document_id=str(draw.source_document_id) if draw.source_document_id else None,
+        created_at=draw.created_at.isoformat(),
+        total_requested=tot_req,
+        total_recommended=tot_rec,
+        total_approved=tot_app,
+        total_funded=tot_fun,
+        requested_amount=str(tot_req),
+        recommended_amount=str(tot_rec),
+        approved_amount=str(tot_app),
+        funded_amount=str(tot_fun),
+        shortfall_amount=str(shortfall),
+        lender_name=lender_name,
+        conditions=[
+            {"id": str(r.id), "title": r.title, "status": r.status, "type": r.requirement_type}
+            for r in draw.requirements
+        ],
+        packet_checklist=[
+            {"id": str(r.id), "requirement": r.title, "status": r.status, "document_name": ""}
+            for r in draw.requirements
+        ],
+        lines=[
+            DrawLineRead(
+                id=str(dline.id),
+                draw_id=str(dline.draw_id),
+                budget_line_id=str(dline.budget_line_id),
+                requested_amount=dline.requested_amount,
+                recommended_amount=dline.recommended_amount,
+                approved_amount=dline.approved_amount,
+                funded_amount=dline.funded_amount,
+                reason=dline.reason,
+                evidence_status=dline.evidence_status,
+                created_at=dline.created_at.isoformat(),
+            )
+            for dline in draw.lines
+        ],
+        requirements=[
+            DrawRequirementRead(
+                id=str(r.id),
+                draw_id=str(r.draw_id),
+                title=r.title,
+                requirement_type=r.requirement_type,
+                status=r.status,
+                document_id=str(r.document_id) if r.document_id else None,
+                created_at=r.created_at.isoformat(),
+            )
+            for r in draw.requirements
+        ],
+    )
+
+
+@router.get("/projects/{pid}/draws", response_model=ResponseEnvelope[list[DrawRead]])
+async def list_project_draws_endpoint(
+    pid: uuid.UUID,
+    user: User = Depends(require_role(["OWNER", "CFO", "PM", "INVESTOR"])),
+    db: Session = Depends(get_db),
+):
+    service = DrawService(db)
+    draws = service.list_draws(user, pid)
+    return ResponseEnvelope(data=[serialize_draw(d) for d in draws])
+
+
 @router.post("/projects/{pid}/draws", response_model=ResponseEnvelope[DrawRead])
 async def create_draw_endpoint(
     pid: uuid.UUID,
@@ -37,57 +122,7 @@ async def create_draw_endpoint(
     service = DrawService(db)
     draw = service.create_draw(user, pid, data)
     db.commit()
-
-    return ResponseEnvelope(
-        data=DrawRead(
-            id=str(draw.id),
-            organization_id=str(draw.organization_id),
-            project_id=str(draw.project_id),
-            loan_id=str(draw.loan_id),
-            draw_number=draw.draw_number,
-            parent_draw_id=str(draw.parent_draw_id) if draw.parent_draw_id else None,
-            status=draw.status,
-            period_start=draw.period_start.isoformat(),
-            period_end=draw.period_end.isoformat(),
-            submitted_at=draw.submitted_at.isoformat() if draw.submitted_at else None,
-            approved_at=draw.approved_at.isoformat() if draw.approved_at else None,
-            rejected_at=draw.rejected_at.isoformat() if draw.rejected_at else None,
-            lender_party_id=str(draw.lender_party_id) if draw.lender_party_id else None,
-            source_document_id=str(draw.source_document_id) if draw.source_document_id else None,
-            created_at=draw.created_at.isoformat(),
-            total_requested=sum(dline.requested_amount for dline in draw.lines),
-            total_recommended=sum(dline.recommended_amount for dline in draw.lines),
-            total_approved=sum(dline.approved_amount for dline in draw.lines),
-            total_funded=sum(dline.funded_amount for dline in draw.lines),
-            lines=[
-                DrawLineRead(
-                    id=str(dline.id),
-                    draw_id=str(dline.draw_id),
-                    budget_line_id=str(dline.budget_line_id),
-                    requested_amount=dline.requested_amount,
-                    recommended_amount=dline.recommended_amount,
-                    approved_amount=dline.approved_amount,
-                    funded_amount=dline.funded_amount,
-                    reason=dline.reason,
-                    evidence_status=dline.evidence_status,
-                    created_at=dline.created_at.isoformat(),
-                )
-                for dline in draw.lines
-            ],
-            requirements=[
-                DrawRequirementRead(
-                    id=str(r.id),
-                    draw_id=str(r.draw_id),
-                    title=r.title,
-                    requirement_type=r.requirement_type,
-                    status=r.status,
-                    document_id=str(r.document_id) if r.document_id else None,
-                    created_at=r.created_at.isoformat(),
-                )
-                for r in draw.requirements
-            ],
-        )
-    )
+    return ResponseEnvelope(data=serialize_draw(draw))
 
 
 @router.get("/draws/{id}", response_model=ResponseEnvelope[DrawRead])
@@ -98,57 +133,23 @@ async def get_draw_endpoint(
 ):
     service = DrawService(db)
     draw = service.get_draw(user, id)
+    return ResponseEnvelope(data=serialize_draw(draw))
 
-    return ResponseEnvelope(
-        data=DrawRead(
-            id=str(draw.id),
-            organization_id=str(draw.organization_id),
-            project_id=str(draw.project_id),
-            loan_id=str(draw.loan_id),
-            draw_number=draw.draw_number,
-            parent_draw_id=str(draw.parent_draw_id) if draw.parent_draw_id else None,
-            status=draw.status,
-            period_start=draw.period_start.isoformat(),
-            period_end=draw.period_end.isoformat(),
-            submitted_at=draw.submitted_at.isoformat() if draw.submitted_at else None,
-            approved_at=draw.approved_at.isoformat() if draw.approved_at else None,
-            rejected_at=draw.rejected_at.isoformat() if draw.rejected_at else None,
-            lender_party_id=str(draw.lender_party_id) if draw.lender_party_id else None,
-            source_document_id=str(draw.source_document_id) if draw.source_document_id else None,
-            created_at=draw.created_at.isoformat(),
-            total_requested=sum(dline.requested_amount for dline in draw.lines),
-            total_recommended=sum(dline.recommended_amount for dline in draw.lines),
-            total_approved=sum(dline.approved_amount for dline in draw.lines),
-            total_funded=sum(dline.funded_amount for dline in draw.lines),
-            lines=[
-                DrawLineRead(
-                    id=str(dline.id),
-                    draw_id=str(dline.draw_id),
-                    budget_line_id=str(dline.budget_line_id),
-                    requested_amount=dline.requested_amount,
-                    recommended_amount=dline.recommended_amount,
-                    approved_amount=dline.approved_amount,
-                    funded_amount=dline.funded_amount,
-                    reason=dline.reason,
-                    evidence_status=dline.evidence_status,
-                    created_at=dline.created_at.isoformat(),
-                )
-                for dline in draw.lines
-            ],
-            requirements=[
-                DrawRequirementRead(
-                    id=str(r.id),
-                    draw_id=str(r.draw_id),
-                    title=r.title,
-                    requirement_type=r.requirement_type,
-                    status=r.status,
-                    document_id=str(r.document_id) if r.document_id else None,
-                    created_at=r.created_at.isoformat(),
-                )
-                for r in draw.requirements
-            ],
-        )
-    )
+
+@router.post("/draws/{id}/conditions/{condition_id}/resolve", response_model=ResponseEnvelope[DrawRead])
+async def resolve_draw_condition_endpoint(
+    id: uuid.UUID,
+    condition_id: uuid.UUID,
+    user: User = Depends(require_role(["OWNER", "CFO"])),
+    db: Session = Depends(get_db),
+):
+    service = DrawService(db)
+    draw = service.get_draw(user, id)
+    req = db.get(DrawRequirement, condition_id)
+    if req and req.draw_id == draw.id:
+        req.status = "FULFILLED"
+        db.commit()
+    return ResponseEnvelope(data=serialize_draw(draw))
 
 
 @router.post("/draws/{id}/lines", response_model=ResponseEnvelope[list[DrawLineRead]])

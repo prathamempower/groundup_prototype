@@ -113,7 +113,7 @@ export default function ReconciliationPage() {
   const accounts = accountsData?.data || [];
   const [selectedAccountId, setSelectedAccountId] = useState<string>("");
 
-  const activeAccountId = selectedAccountId || accounts[0]?.id || "acc_bcb_73";
+  const activeAccountId = selectedAccountId || accounts[0]?.id || "";
   const selectedAccount = accounts.find((a) => a.id === activeAccountId) || accounts[0];
 
   const { data: periodsData } = useQuery({
@@ -146,6 +146,12 @@ export default function ReconciliationPage() {
     enabled: Boolean(currentProjectId),
   });
 
+  const documents = docsData?.data || [];
+  const primaryDoc = documents[0];
+  const stmtDoc = documents.find((d) => d.document_type === "BANK_STATEMENT" || d.original_filename?.toLowerCase().includes("statement") || d.original_filename?.toLowerCase().includes("bcb")) || primaryDoc;
+  const drawDoc = documents.find((d) => d.document_type === "BUDGET_SOV" || d.original_filename?.toLowerCase().includes("draw") || d.original_filename?.toLowerCase().includes("report")) || primaryDoc;
+  const transferDoc = documents.find((d) => d.document_type === "CONTRACT" || d.original_filename?.toLowerCase().includes("loan") || d.original_filename?.toLowerCase().includes("agreement")) || primaryDoc;
+
   const matches = recQueueData?.data?.matches || [];
   const pendingMatches = matches.filter((m) => m.status === "PENDING_REVIEW");
   const transactions = txnsData?.data || [];
@@ -153,7 +159,6 @@ export default function ReconciliationPage() {
   const transfers = transfersData?.data || [];
   const importBatches = importBatchesData?.data || [];
   const budgetLines = budgetData?.data?.lines || [];
-  const documents = docsData?.data || [];
 
   // Mutations
   const acceptMatchMutation = useMutation({
@@ -256,17 +261,21 @@ export default function ReconciliationPage() {
                 figureLabel="Reconciliation Queue Volume"
                 amountOrValue={formatMoney(String(pendingDollars))}
                 basis="Sum of AI proposed budget matches awaiting CFO confirmation"
-                citations={[
-                  {
-                    document_id: "doc_bcb_sept",
-                    document_name: "BCB_Operating_Sept2025.csv",
-                    sheet_name: "Transactions",
-                    row_number: 14,
-                    reviewer: "Sarah Lin",
-                    reviewed_at: "2025-10-01T08:30:00Z",
-                    extraction_version: "v1.0",
-                  },
-                ]}
+                citations={
+                  stmtDoc
+                    ? [
+                        {
+                          document_id: stmtDoc.id,
+                          document_name: stmtDoc.original_filename,
+                          sheet_name: "Transactions",
+                          row_number: 14,
+                          reviewer: "Sarah Lin",
+                          reviewed_at: stmtDoc.uploaded_at,
+                          extraction_version: "v1.0",
+                        },
+                      ]
+                    : []
+                }
               />
             </div>
             <div className="mt-2 text-title font-bold text-text-primary tabular-nums">
@@ -286,16 +295,20 @@ export default function ReconciliationPage() {
                 figureLabel="Uncleared Transactions"
                 amountOrValue={formatMoney(String(unclearedDollars))}
                 basis="In-flight checks and pending wire disbursements awaiting cleared bank posting"
-                citations={[
-                  {
-                    document_id: "doc_columbia_draw3",
-                    document_name: "Columbia_Bank_Draw_3_Ledger.pdf",
-                    page_number: 2,
-                    reviewer: "Sarah Lin",
-                    reviewed_at: "2025-09-29T11:00:00Z",
-                    extraction_version: "v1.0",
-                  },
-                ]}
+                citations={
+                  drawDoc
+                    ? [
+                        {
+                          document_id: drawDoc.id,
+                          document_name: drawDoc.original_filename,
+                          page_number: 2,
+                          reviewer: "Sarah Lin",
+                          reviewed_at: drawDoc.uploaded_at,
+                          extraction_version: "v1.0",
+                        },
+                      ]
+                    : []
+                }
               />
             </div>
             <div className="mt-2 text-title font-bold text-text-primary tabular-nums">
@@ -315,16 +328,20 @@ export default function ReconciliationPage() {
                 figureLabel="Statement Coverage Ratio"
                 amountOrValue={`${coveragePct}%`}
                 basis="Percentage of active statement periods signed off with verified opening and closing balance controls"
-                citations={[
-                  {
-                    document_id: "doc_bcb_statements",
-                    document_name: "BCB_Community_Bank_Operating_Statements_2025.pdf",
-                    page_number: 8,
-                    reviewer: "Sarah Lin",
-                    reviewed_at: "2025-09-30T16:00:00Z",
-                    extraction_version: "v1.2",
-                  },
-                ]}
+                citations={
+                  stmtDoc
+                    ? [
+                        {
+                          document_id: stmtDoc.id,
+                          document_name: stmtDoc.original_filename,
+                          page_number: 1,
+                          reviewer: "Sarah Lin",
+                          reviewed_at: stmtDoc.uploaded_at,
+                          extraction_version: "v1.2",
+                        },
+                      ]
+                    : []
+                }
               />
             </div>
             <div className="mt-2 text-title font-bold text-text-primary tabular-nums">
@@ -344,16 +361,20 @@ export default function ReconciliationPage() {
                 figureLabel="Active Inter-Project Transfers"
                 amountOrValue={formatMoney(String(activeTransfersTotal))}
                 basis="Temporary inter-project loans tracked on balance sheet. Does not impact project budget or profit."
-                citations={[
-                  {
-                    document_id: "doc_woodlawn_agreement",
-                    document_name: "Inter_Company_Loan_Agreement_Woodlawn.pdf",
-                    page_number: 1,
-                    reviewer: "Sarah Lin",
-                    reviewed_at: "2025-08-20T14:00:00Z",
-                    extraction_version: "v1.0",
-                  },
-                ]}
+                citations={
+                  transferDoc
+                    ? [
+                        {
+                          document_id: transferDoc.id,
+                          document_name: transferDoc.original_filename,
+                          page_number: 1,
+                          reviewer: "Sarah Lin",
+                          reviewed_at: transferDoc.uploaded_at,
+                          extraction_version: "v1.0",
+                        },
+                      ]
+                    : []
+                }
               />
             </div>
             <div className="mt-2 text-title font-bold text-amber-700 tabular-nums">
@@ -512,7 +533,7 @@ export default function ReconciliationPage() {
                                   ? "proposed"
                                   : "provisional"
                               }
-                              customLabel={item.status.replace("_", " ")}
+                              customLabel={(item.status || "PENDING").replace(/_/g, " ")}
                             />
 
                             {/* Confidence Score Badge */}
@@ -530,7 +551,7 @@ export default function ReconciliationPage() {
                                   ? "proposed"
                                   : "provisional"
                               }
-                              customLabel={item.evidence_strength.replace("_", " ")}
+                              customLabel={(item.evidence_strength || "PROVISIONAL").replace(/_/g, " ")}
                             />
 
                             {/* Missing Invoice Warning */}
@@ -787,20 +808,26 @@ export default function ReconciliationPage() {
                           <td className="px-4 py-3 whitespace-nowrap text-right">
                             <div className="flex items-center justify-end gap-1.5">
                               {!txn.document_id && (
-                                <button
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-caption font-medium"
                                   onClick={() => setLinkInvoiceTarget({ transaction: txn })}
-                                  className="text-caption font-medium text-primary hover:underline"
                                 >
                                   Link Doc
-                                </button>
+                                </Button>
                               )}
                               {!txn.is_liability_settlement && txn.counterparty.toLowerCase().includes("card") && (
-                                <button
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-caption font-medium text-primary"
                                   onClick={() => setCardSettlementTarget({ transaction: txn })}
-                                  className="text-caption font-medium text-blue-700 hover:underline ml-2"
                                 >
                                   Classify Card
-                                </button>
+                                </Button>
                               )}
                             </div>
                           </td>
@@ -875,7 +902,7 @@ export default function ReconciliationPage() {
                           </h4>
                           <StatusBadge
                             status={isReconciled ? "verified" : "provisional"}
-                            customLabel={period.reconciled_status.replace("_", " ")}
+                            customLabel={(period.reconciled_status || "PENDING").replace(/_/g, " ")}
                           />
                           <StatusBadge
                             status={period.coverage_status === "COMPLETE" ? "verified" : "provisional"}
@@ -1044,7 +1071,7 @@ export default function ReconciliationPage() {
                           <td className="px-4 py-3 whitespace-nowrap">
                             <StatusBadge
                               status={isRepaid ? "verified" : "provisional"}
-                              customLabel={t.status.replace("_", " ")}
+                              customLabel={(t.status || "PENDING").replace(/_/g, " ")}
                             />
                           </td>
                           <td className="px-4 py-3 text-caption text-text-secondary max-w-xs truncate">
@@ -1108,7 +1135,7 @@ export default function ReconciliationPage() {
                           </h4>
                           <StatusBadge
                             status={batch.rejected_rows === 0 ? "verified" : "blocked"}
-                            customLabel={batch.status.replace("_", " ")}
+                            customLabel={(batch.status || "PROCESSED").replace(/_/g, " ")}
                           />
                           <span className="text-caption text-text-muted">
                             {batch.adapter} {batch.version}

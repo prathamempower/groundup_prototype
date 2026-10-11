@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -51,6 +52,74 @@ export function DrawDetailDrawer({
   const [activeTab, setActiveTab] = useState<"lines" | "packet" | "conditions">("lines");
   const [isSubmittingAction, setIsSubmittingAction] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const { data: documentsData } = useQuery({
+    queryKey: ["documents", draw?.project_id],
+    queryFn: () => api.documents.list(draw!.project_id),
+    enabled: Boolean(draw?.project_id && open),
+  });
+
+  const projectDocs = documentsData?.data || [];
+  const primaryDoc = projectDocs[0];
+  const payAppDoc = projectDocs.find((d) => d.document_type === "BUDGET_SOV" || d.original_filename?.toLowerCase().includes("budget") || d.original_filename?.toLowerCase().includes("application")) || primaryDoc;
+  const inspDoc = projectDocs.find((d) => d.document_type === "INSPECTION" || d.original_filename?.toLowerCase().includes("report") || d.original_filename?.toLowerCase().includes("inspection")) || primaryDoc;
+  const advanceNoticeDoc = projectDocs.find((d) => d.document_type === "CONTRACT" || d.original_filename?.toLowerCase().includes("loan")) || primaryDoc;
+  const bankWireDoc = projectDocs.find((d) => d.document_type === "BANK_STATEMENT" || d.original_filename?.toLowerCase().includes("bank") || d.original_filename?.toLowerCase().includes("statement")) || primaryDoc;
+
+  const requestedCitations = payAppDoc
+    ? [
+        {
+          document_id: payAppDoc.id,
+          document_name: payAppDoc.original_filename,
+          page_number: 1,
+          row_number: 6,
+          reviewer: "David Ross (PM)",
+          reviewed_at: payAppDoc.uploaded_at,
+          extraction_version: "v1.0",
+        },
+      ]
+    : [];
+
+  const recommendedCitations = inspDoc
+    ? [
+        {
+          document_id: inspDoc.id,
+          document_name: inspDoc.original_filename,
+          page_number: 1,
+          row_number: 12,
+          reviewer: "David Ross (PM)",
+          reviewed_at: inspDoc.uploaded_at,
+          extraction_version: "v1.0",
+        },
+      ]
+    : [];
+
+  const approvedCitations = advanceNoticeDoc
+    ? [
+        {
+          document_id: advanceNoticeDoc.id,
+          document_name: advanceNoticeDoc.original_filename,
+          page_number: 1,
+          reviewer: "Sarah Lin (CFO)",
+          reviewed_at: advanceNoticeDoc.uploaded_at,
+          extraction_version: "v1.0",
+        },
+      ]
+    : [];
+
+  const fundedCitations = bankWireDoc
+    ? [
+        {
+          document_id: bankWireDoc.id,
+          document_name: bankWireDoc.original_filename,
+          page_number: 1,
+          row_number: 14,
+          reviewer: "Sarah Lin (CFO)",
+          reviewed_at: bankWireDoc.uploaded_at,
+          extraction_version: "v1.0",
+        },
+      ]
+    : [];
 
   if (!open || !draw) return null;
 
@@ -246,17 +315,7 @@ export function DrawDetailDrawer({
                     figureLabel={`Draw #${draw.draw_number} Requested Amount`}
                     amountOrValue={formatMoney(draw.requested_amount)}
                     basis="Developer-certified AIA G702 itemized Schedule of Values"
-                    citations={[
-                      {
-                        document_id: "doc_73_draw1_packet",
-                        document_name: "AIA G702 Pay Application Line 6",
-                        page_number: 1,
-                        row_number: 6,
-                        reviewer: "David Ross",
-                        reviewed_at: "2025-06-05T10:00:00Z",
-                        extraction_version: "2025.3",
-                      },
-                    ]}
+                    citations={requestedCitations}
                   />
                 </div>
               </div>
@@ -277,17 +336,7 @@ export function DrawDetailDrawer({
                     figureLabel={`Draw #${draw.draw_number} Recommended Amount`}
                     amountOrValue={formatMoney(draw.recommended_amount)}
                     basis="Independent architectural/engineering field inspection report"
-                    citations={[
-                      {
-                        document_id: "doc_73_draw3_insp",
-                        document_name: "ATD Field Inspection Report Page 2",
-                        page_number: 2,
-                        row_number: 12,
-                        reviewer: "David Ross",
-                        reviewed_at: "2025-09-19T09:40:00Z",
-                        extraction_version: "2025.3",
-                      },
-                    ]}
+                    citations={recommendedCitations}
                   />
                 </div>
               </div>
@@ -308,16 +357,7 @@ export function DrawDetailDrawer({
                     figureLabel={`Draw #${draw.draw_number} Approved Amount`}
                     amountOrValue={formatMoney(draw.approved_amount)}
                     basis="Formal loan advance approval letter from construction lender"
-                    citations={[
-                      {
-                        document_id: "doc_73_draw1_packet",
-                        document_name: "Lender Credit Committee Formal Advance Notice",
-                        page_number: 1,
-                        reviewer: "Sarah Lin",
-                        reviewed_at: "2025-09-28T16:00:00Z",
-                        extraction_version: "2025.3",
-                      },
-                    ]}
+                    citations={approvedCitations}
                   />
                 </div>
               </div>
@@ -338,17 +378,7 @@ export function DrawDetailDrawer({
                     figureLabel={`Draw #${draw.draw_number} Cleared Cash Funded`}
                     amountOrValue={formatMoney(draw.funded_amount || "0")}
                     basis="Bank-confirmed wire deposit with status CLEARED"
-                    citations={[
-                      {
-                        document_id: "doc_73_columbia_stmt_sept",
-                        document_name: "Columbia Bank Cleared Wire Ref #CB-84920",
-                        page_number: 2,
-                        row_number: 14,
-                        reviewer: "Sarah Lin",
-                        reviewed_at: "2025-10-01T11:20:00Z",
-                        extraction_version: "2025.3",
-                      },
-                    ]}
+                    citations={fundedCitations}
                   />
                 </div>
               </div>
@@ -609,47 +639,48 @@ export function DrawDetailDrawer({
                   </div>
 
                   <div className="space-y-2">
-                    {(draw.packet_checklist || [
-                      { id: "1", requirement: "AIA G702 / G703 Pay Application", status: "COMPLETE", document_name: "73_Broadway_Lender_Draw_1_Certified.pdf" },
-                      { id: "2", requirement: "Certified ATD Progress Inspection Report", status: "COMPLETE", document_name: "Inspection_Report_Certified.pdf" },
-                      { id: "3", requirement: "Conditional Lien Waivers from Major Subcontractors", status: "COMPLETE", document_name: "Lien_Waivers_Sept.pdf" },
-                      { id: "4", requirement: "Mechanical Engineering Certificate", status: "PENDING_SIGNOFF", notes: "Lender condition blocking disbursement" },
-                    ]).map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center justify-between p-2.5 rounded border border-border bg-subtle/30 text-body-sm"
-                      >
-                        <div className="flex items-center gap-3">
-                          <FileText className="h-4 w-4 text-text-muted shrink-0" />
-                          <div>
-                            <span className="font-semibold text-text-primary block">
-                              {item.requirement}
-                            </span>
-                            {item.document_name && (
-                              <span className="text-caption text-primary hover:underline cursor-pointer">
-                                {item.document_name}
+                    {draw.packet_checklist && draw.packet_checklist.length > 0 ? (
+                      draw.packet_checklist.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between p-2.5 rounded border border-border bg-subtle/30 text-body-sm"
+                        >
+                          <div className="flex items-center gap-3">
+                            <FileText className="h-4 w-4 text-text-muted shrink-0" />
+                            <div>
+                              <span className="font-semibold text-text-primary block">
+                                {item.requirement}
                               </span>
-                            )}
-                            {item.notes && (
-                              <span className="text-caption text-warning block">
-                                {item.notes}
-                              </span>
-                            )}
+                              {item.document_name && (
+                                <span className="text-caption text-primary hover:underline cursor-pointer">
+                                  {item.document_name}
+                                </span>
+                              )}
+                              {item.notes && (
+                                <span className="text-caption text-warning block">
+                                  {item.notes}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
 
-                        <StatusBadge
-                          status={
-                            item.status === "COMPLETE"
-                              ? "verified"
-                              : item.status === "PENDING_SIGNOFF"
-                              ? "under_review"
-                              : "missing_evidence"
-                          }
-                          customLabel={item.status.replace("_", " ")}
-                        />
-                      </div>
-                    ))}
+                          <StatusBadge
+                            status={
+                              item.status === "COMPLETE"
+                                ? "verified"
+                                : item.status === "PENDING_SIGNOFF"
+                                ? "under_review"
+                                : "missing_evidence"
+                            }
+                            customLabel={item.status.replace("_", " ")}
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-caption text-text-secondary py-2">
+                        No packet checklist items specified for this draw.
+                      </p>
+                    )}
                   </div>
                 </div>
 

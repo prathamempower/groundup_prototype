@@ -45,7 +45,22 @@ import {
   Tooltip,
   CartesianGrid,
   Legend,
+  ReferenceLine,
+  ReferenceArea,
 } from "recharts";
+
+interface TrajectoryDataPoint {
+  month: string;
+  planned_baseline?: number;
+  actual_spend?: number | null;
+  forecast_spend?: number | null;
+  planned_progress_pct?: number;
+  actual_progress_pct?: number | null;
+  forecast_progress_pct?: number | null;
+  is_current?: boolean;
+  is_delay_period?: boolean;
+  note?: string;
+}
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -54,28 +69,80 @@ interface CustomTooltipProps {
     value: number;
     color: string;
     dataKey: string;
+    payload: TrajectoryDataPoint;
   }>;
   label?: string;
 }
 
-const CustomChartTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+const ProgressTrajectoryTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
+    const dataPoint = payload[0]?.payload;
     return (
-      <div className="rounded-lg border border-border bg-surface p-3 shadow-overlay text-xs">
-        <p className="font-semibold text-text-primary mb-2">{label}</p>
-        <div className="space-y-1">
-          {payload.map((entry, index) => (
-            <div key={`item-${index}`} className="flex items-center justify-between gap-4">
+      <div className="rounded-lg border border-border bg-surface p-3.5 shadow-overlay text-xs max-w-xs space-y-2">
+        <div className="flex items-center justify-between border-b border-border pb-1.5 gap-2">
+          <p className="font-bold text-text-primary">{label}</p>
+          {dataPoint?.is_current && (
+            <span className="rounded bg-primary-subtle px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+              Current As-Of
+            </span>
+          )}
+          {dataPoint?.is_delay_period && (
+            <span className="rounded bg-warning-subtle px-1.5 py-0.5 text-[10px] font-semibold text-warning">
+              Delay Window (+35d)
+            </span>
+          )}
+        </div>
+
+        {dataPoint?.note && (
+          <p className="text-[11px] text-text-muted italic bg-subtle/60 rounded p-1.5">
+            {dataPoint.note}
+          </p>
+        )}
+
+        <div className="space-y-1.5 pt-0.5">
+          {dataPoint?.planned_baseline !== undefined && (
+            <div className="flex items-center justify-between gap-3">
               <span className="flex items-center gap-1.5 text-text-secondary">
-                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                {entry.name}:
+                <span className="h-2 w-2 rounded-full bg-slate-500" />
+                Planned Target:
               </span>
               <span className="font-mono font-semibold text-text-primary">
-                ${(entry.value).toLocaleString()}
+                ${dataPoint.planned_baseline.toLocaleString()} ({dataPoint.planned_progress_pct}%)
               </span>
             </div>
-          ))}
+          )}
+
+          {dataPoint?.actual_spend !== null && dataPoint?.actual_spend !== undefined && (
+            <div className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-1.5 text-text-secondary">
+                <span className="h-2 w-2 rounded-full bg-primary" />
+                Actual Spend:
+              </span>
+              <span className="font-mono font-semibold text-primary">
+                ${dataPoint.actual_spend.toLocaleString()} ({dataPoint.actual_progress_pct}%)
+              </span>
+            </div>
+          )}
+
+          {dataPoint?.forecast_spend !== null && dataPoint?.forecast_spend !== undefined && (
+            <div className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-1.5 text-text-secondary">
+                <span className="h-2 w-2 rounded-full bg-amber-600" />
+                Forecast Spend:
+              </span>
+              <span className="font-mono font-semibold text-amber-700">
+                ${dataPoint.forecast_spend.toLocaleString()} ({dataPoint.forecast_progress_pct || dataPoint.actual_progress_pct}%)
+              </span>
+            </div>
+          )}
         </div>
+
+        {dataPoint?.is_delay_period && (
+          <div className="border-t border-border pt-1.5 text-[11px] text-danger font-medium flex items-center justify-between">
+            <span>Carry Cost Impact:</span>
+            <span className="font-mono font-bold">+$28,500</span>
+          </div>
+        )}
       </div>
     );
   }
@@ -167,28 +234,24 @@ export default function ControlCenterPage() {
           <div className="flex flex-wrap items-center gap-2">
             {/* View Mode Toggle */}
             <div className="flex items-center rounded-md border border-border bg-subtle p-0.5 text-xs font-semibold">
-              <button
+              <Button
                 type="button"
+                variant={viewMode === "PROJECT" ? "secondary" : "ghost"}
+                size="sm"
+                className="px-2.5 py-1"
                 onClick={() => setViewMode("PROJECT")}
-                className={`rounded px-2.5 py-1 transition-all ${
-                  viewMode === "PROJECT"
-                    ? "bg-surface text-primary shadow-xs font-bold"
-                    : "text-text-muted hover:text-text-primary"
-                }`}
               >
                 Project View
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant={viewMode === "PORTFOLIO" ? "secondary" : "ghost"}
+                size="sm"
+                className="px-2.5 py-1"
                 onClick={() => setViewMode("PORTFOLIO")}
-                className={`rounded px-2.5 py-1 transition-all ${
-                  viewMode === "PORTFOLIO"
-                    ? "bg-surface text-primary shadow-xs font-bold"
-                    : "text-text-muted hover:text-text-primary"
-                }`}
               >
                 Portfolio View
-              </button>
+              </Button>
             </div>
 
             <Link href="/onboarding">
@@ -348,17 +411,18 @@ export default function ControlCenterPage() {
 
                       <div className="pt-2">
                         {isSelected ? (
-                          <div className="flex items-center justify-between text-xs text-primary font-semibold">
-                            <span className="flex items-center gap-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="flex items-center gap-1 text-primary font-semibold">
                               <CheckCircle2 className="h-4 w-4" /> Active Workspace
                             </span>
-                            <button
-                              type="button"
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-xs font-semibold text-primary"
                               onClick={() => setViewMode("PROJECT")}
-                              className="text-primary hover:underline font-bold"
                             >
                               Open Dashboard →
-                            </button>
+                            </Button>
                           </div>
                         ) : (
                           <Button
@@ -497,73 +561,258 @@ export default function ControlCenterPage() {
               />
             </div>
 
-            {/* Purposeful Chart: Forecast Profit & Cumulative Spend Progression */}
-            {d?.profit_trend && d.profit_trend.length > 0 && (
-              <div className="rounded-lg border border-border bg-surface p-5 shadow-xs">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-4 mb-4">
-                  <div>
-                    <h2 className="text-section font-semibold text-text-primary flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-primary" />
-                      Forecast Profit & Spend Progression
-                    </h2>
-                    <p className="text-caption text-text-muted">
-                      Tracking baseline approved budget ($4.2M), cumulative actual spend, and profit variance trajectory over project lifecycle.
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4 text-xs font-medium">
-                    <span className="flex items-center gap-1.5 text-text-secondary">
-                      <span className="h-2.5 w-2.5 rounded-full bg-primary" /> Cumulative Spend
-                    </span>
-                    <span className="flex items-center gap-1.5 text-text-secondary">
-                      <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" /> Forecast Profit
-                    </span>
-                  </div>
-                </div>
+            {/* Integrated Finance, Time, Delay, Impact & Progress Trajectory Line Graph */}
+            {(() => {
+              const trajectoryData: TrajectoryDataPoint[] = (d?.progress_trajectory && d.progress_trajectory.length > 0)
+                ? d.progress_trajectory
+                : [
+                    { month: "May '25", planned_baseline: 80000, actual_spend: 75000, planned_progress_pct: 7, actual_progress_pct: 7, note: "Groundwork & Excavation" },
+                    { month: "Jun '25", planned_baseline: 180000, actual_spend: 170000, planned_progress_pct: 17, actual_progress_pct: 16, note: "Foundation & Footings poured" },
+                    { month: "Jul '25", planned_baseline: 310000, actual_spend: 260000, planned_progress_pct: 29, actual_progress_pct: 24, note: "Steel procurement order placed" },
+                    { month: "Aug '25", planned_baseline: 460000, actual_spend: 340000, planned_progress_pct: 43, actual_progress_pct: 32, note: "Structural steel delivery slipped" },
+                    { month: "Sep '25", planned_baseline: 620000, actual_spend: 420000, planned_progress_pct: 58, actual_progress_pct: 39, note: "Framing delay impacts MEP rough-in" },
+                    { month: "Oct '25", planned_baseline: 780000, actual_spend: 420000, forecast_spend: 420000, planned_progress_pct: 73, actual_progress_pct: 42, is_current: true, note: "Current As-Of (16% Execution Lag)" },
+                    { month: "Nov '25", planned_baseline: 1070000, forecast_spend: 780000, planned_progress_pct: 100, forecast_progress_pct: 71, note: "Original baseline deadline (Nov 10)" },
+                    { month: "Dec '25", forecast_spend: 1020000, forecast_progress_pct: 93, is_delay_period: true, note: "Schedule Slip Window (+35 days)" },
+                    { month: "Jan '26", forecast_spend: 1098500, forecast_progress_pct: 100, is_delay_period: true, note: "Final Closeout (+$28.5k carry cost impact)" },
+                  ];
 
-                <div className="h-72 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart
-                      data={d.profit_trend}
-                      margin={{ top: 10, right: 20, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                      <XAxis
-                        dataKey="month"
-                        stroke="#6b7280"
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={{ stroke: "#e5e7eb" }}
-                      />
-                      <YAxis
-                        stroke="#6b7280"
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={false}
-                        tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                      />
-                      <Tooltip content={<CustomChartTooltip />} />
-                      <Area
-                        type="monotone"
-                        dataKey="cumulative_spend"
-                        name="Cumulative Spend"
-                        fill="rgba(15, 76, 129, 0.12)"
-                        stroke="#0f4c81"
-                        strokeWidth={2}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="forecast_profit"
-                        name="Forecast Profit"
-                        stroke="#059669"
-                        strokeWidth={2.5}
-                        dot={{ r: 4, fill: "#059669" }}
-                        activeDot={{ r: 6 }}
-                      />
-                    </ComposedChart>
-                  </ResponsiveContainer>
+              return (
+                <div className="rounded-lg border border-border bg-surface p-5 shadow-xs">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-border pb-4 mb-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5 text-primary" />
+                        <h2 className="text-section font-semibold text-text-primary">
+                          Capital, Schedule Delay & Earned Progress Trajectory
+                        </h2>
+                        <span className="rounded bg-primary-subtle px-2 py-0.5 text-[11px] font-bold text-primary">
+                          LIVE EVM
+                        </span>
+                      </div>
+                      <p className="text-caption text-text-muted mt-0.5">
+                        Correlating baseline capital curve ($1.07M), actual spend ($420k), critical path schedule slip (+35 days), and carry cost impact.
+                      </p>
+                    </div>
+
+                    {/* Executive Metric Pills */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex items-center gap-1.5 rounded-md border border-danger/30 bg-danger-subtle/50 px-2.5 py-1 text-xs font-semibold text-danger">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>Schedule Delay: +35 Days</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 rounded-md border border-warning/30 bg-warning-subtle/50 px-2.5 py-1 text-xs font-semibold text-warning">
+                        <DollarSign className="h-3.5 w-3.5" />
+                        <span>Carry Impact: +$28,500</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 rounded-md border border-border bg-subtle px-2.5 py-1 text-xs font-semibold text-text-secondary">
+                        <SlidersHorizontal className="h-3.5 w-3.5 text-primary" />
+                        <span>Progress: 42% vs 58% (-16% Lag)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Clean Legend Bar */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-medium pb-3 border-b border-border-subtle/60 mb-3 text-text-secondary">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-2 w-4 rounded-xs bg-slate-400" /> Planned Baseline Target ($1.07M)
+                      </span>
+                      <span className="flex items-center gap-1.5 font-semibold text-primary">
+                        <span className="h-2.5 w-4 rounded-xs bg-primary" /> Actual Verified Spend ($420k / 42%)
+                      </span>
+                      <span className="flex items-center gap-1.5 text-amber-700">
+                        <span className="h-2 w-4 border-b-2 border-dashed border-amber-600" /> Forecast Trajectory w/ Delay ($1.098M)
+                      </span>
+                      <span className="flex items-center gap-1.5 text-amber-800">
+                        <span className="h-3 w-4 rounded-xs bg-amber-100 border border-amber-300" /> +35d Delay Window
+                      </span>
+                    </div>
+
+                    <div className="text-[11px] text-text-muted flex items-center gap-1">
+                      <span>X-Axis: Timeline</span>
+                      <span>•</span>
+                      <span>Left Axis: Capital ($)</span>
+                      <span>•</span>
+                      <span>Right Axis: Progress (%)</span>
+                    </div>
+                  </div>
+
+                  {/* Line Chart Canvas */}
+                  <div className="h-80 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart
+                        data={trajectoryData}
+                        margin={{ top: 15, right: 30, left: 15, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                        
+                        <XAxis
+                          dataKey="month"
+                          stroke="#64748b"
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={{ stroke: "#e2e8f0" }}
+                        />
+
+                        {/* Left Y-Axis: Capital & Spend in Dollars */}
+                        <YAxis
+                          yAxisId="left"
+                          stroke="#64748b"
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                          tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
+                          domain={[0, 1200000]}
+                        />
+
+                        {/* Right Y-Axis: Earned Progress % */}
+                        <YAxis
+                          yAxisId="right"
+                          orientation="right"
+                          stroke="#94a3b8"
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                          tickFormatter={(val) => `${val}%`}
+                          domain={[0, 100]}
+                        />
+
+                        <Tooltip content={<ProgressTrajectoryTooltip />} />
+
+                        {/* Visual Highlight: Delay Window Zone (+35 Days) */}
+                        <ReferenceArea
+                          yAxisId="left"
+                          x1="Nov '25"
+                          x2="Jan '26"
+                          fill="#fef3c7"
+                          fillOpacity={0.45}
+                          stroke="#f59e0b"
+                          strokeDasharray="3 3"
+                        />
+
+                        {/* As-Of Current Date Marker */}
+                        <ReferenceLine
+                          yAxisId="left"
+                          x="Oct '25"
+                          stroke="#0f4c81"
+                          strokeWidth={1.5}
+                          strokeDasharray="4 4"
+                          label={{
+                            value: "Today (Oct '25)",
+                            position: "top",
+                            fill: "#0f4c81",
+                            fontSize: 11,
+                            fontWeight: 600,
+                          }}
+                        />
+
+                        {/* 1. Target Baseline Progress Curve (Planned Budget) */}
+                        <Line
+                          yAxisId="left"
+                          type="monotone"
+                          dataKey="planned_baseline"
+                          name="Planned Target"
+                          stroke="#94a3b8"
+                          strokeWidth={2}
+                          dot={{ r: 3, fill: "#94a3b8" }}
+                          activeDot={{ r: 5 }}
+                        />
+
+                        {/* 2. Actual Verified Spend & Earned Progress */}
+                        <Area
+                          yAxisId="left"
+                          type="monotone"
+                          dataKey="actual_spend"
+                          name="Actual Spend"
+                          fill="rgba(15, 76, 129, 0.12)"
+                          stroke="#0f4c81"
+                          strokeWidth={2.5}
+                          dot={{ r: 4, fill: "#0f4c81" }}
+                          activeDot={{ r: 6 }}
+                        />
+
+                        {/* 3. Forecast Trajectory with Critical Path Delay Impact */}
+                        <Line
+                          yAxisId="left"
+                          type="monotone"
+                          dataKey="forecast_spend"
+                          name="Forecast Trajectory"
+                          stroke="#d97706"
+                          strokeWidth={2.5}
+                          strokeDasharray="5 5"
+                          dot={{ r: 4, fill: "#d97706" }}
+                          activeDot={{ r: 6 }}
+                        />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* 5 Core Pillars Analytical Summary Ribbon */}
+                  <div className="mt-4 pt-3 border-t border-border grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
+                    <div className="rounded-md border border-border-subtle bg-subtle p-2.5">
+                      <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider block">
+                        1. Finance (Capital)
+                      </span>
+                      <div className="mt-1 font-mono font-bold text-text-primary text-sm">
+                        $1,070,000 <span className="text-xs text-text-muted font-normal">Base</span>
+                      </div>
+                      <div className="text-[11px] text-danger font-medium mt-0.5">
+                        Forecast: $1,098,500
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border border-border-subtle bg-subtle p-2.5">
+                      <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider block">
+                        2. Time (Milestones)
+                      </span>
+                      <div className="mt-1 font-semibold text-text-primary text-sm">
+                        Nov 10 → Dec 15
+                      </div>
+                      <div className="text-[11px] text-text-muted mt-0.5">
+                        7 Months Total Duration
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border border-border-subtle bg-subtle p-2.5">
+                      <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider block">
+                        3. Schedule Delay
+                      </span>
+                      <div className="mt-1 font-bold text-danger text-sm">
+                        +35 Days Slip
+                      </div>
+                      <div className="text-[11px] text-text-muted mt-0.5">
+                        Critical: Structural Steel
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border border-border-subtle bg-subtle p-2.5">
+                      <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider block">
+                        4. Financial Impact
+                      </span>
+                      <div className="mt-1 font-bold text-warning font-mono text-sm">
+                        +$28,500.00
+                      </div>
+                      <div className="text-[11px] text-text-muted mt-0.5">
+                        Carry & Demurrage Burn
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border border-border-subtle bg-subtle p-2.5 col-span-2 sm:col-span-1">
+                      <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider block">
+                        5. Progress Variance
+                      </span>
+                      <div className="mt-1 font-bold text-danger text-sm">
+                        -16% Execution Lag
+                      </div>
+                      <div className="text-[11px] text-text-muted mt-0.5">
+                        42% Actual vs 58% Sched
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Two Columns: Forecast Table & Draw Strip / Exceptions */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -10,6 +10,7 @@ import {
   Inbox,
   Eye,
   Settings,
+  AlertTriangle,
   LucideIcon,
 } from "lucide-react";
 
@@ -19,7 +20,7 @@ export interface NavItemConfig {
   href: string;
   icon: LucideIcon;
   allowedRoles: UserRole[];
-  badgeKey?: "documents" | "draws" | "reconciliation" | "timeline";
+  badgeKey?: "documents" | "draws" | "reconciliation" | "timeline" | "alerts";
 }
 
 /**
@@ -32,9 +33,10 @@ export interface NavItemConfig {
  * 5. Draws (Owner, CFO, PM)
  * 6. Timeline (Owner, CFO, PM)
  * 7. Economics (Owner, CFO)
- * 8. My submissions (GC)
- * 9. Project update (Investor)
- * 10. Settings and team (Owner)
+ * 8. Alerts & Exceptions (Owner, CFO, PM, GC)
+ * 9. My submissions (GC)
+ * 10. Project update (Investor)
+ * 11. Settings and team (Owner)
  */
 export const NAV_ITEMS: NavItemConfig[] = [
   {
@@ -91,6 +93,14 @@ export const NAV_ITEMS: NavItemConfig[] = [
     allowedRoles: ["OWNER", "CFO"],
   },
   {
+    id: "alerts",
+    label: "Alerts & Exceptions",
+    href: "/alerts",
+    icon: AlertTriangle,
+    allowedRoles: ["OWNER", "CFO", "PM", "GC"],
+    badgeKey: "alerts",
+  },
+  {
     id: "submissions",
     label: "My submissions",
     href: "/submissions",
@@ -126,6 +136,7 @@ export const ROUTE_ACCESS_MAP: Record<string, UserRole[]> = {
   "/draws": ["OWNER", "CFO", "PM"],
   "/timeline": ["OWNER", "CFO", "PM"],
   "/economics": ["OWNER", "CFO"],
+  "/alerts": ["OWNER", "CFO", "PM", "GC"],
   "/settings": ["OWNER"],
   "/submissions": ["GC", "OWNER", "PM", "CFO"],
   "/investor-update": ["INVESTOR", "OWNER", "CFO"],

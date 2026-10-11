@@ -1,7 +1,9 @@
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.responses import Response as RawResponse
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth import get_current_user, require_project_scope, require_role
@@ -313,3 +315,37 @@ async def decide_extraction_field_endpoint(
             created_at=field.created_at.isoformat(),
         )
     )
+
+
+@router.post("/documents/{id}/accept-all", response_model=ResponseEnvelope[dict[str, Any]])
+async def accept_all_extractions_endpoint(
+    id: uuid.UUID,
+    user: User = Depends(require_role(["OWNER", "CFO", "PM"])),
+    db: Session = Depends(get_db),
+):
+    from app.db.models import ExtractionField, DocumentExtraction
+    fields = db.scalars(
+        select(ExtractionField)
+        .join(DocumentExtraction, DocumentExtraction.id == ExtractionField.extraction_id)
+        .where(DocumentExtraction.document_id == id)
+    ).all()
+    for f in fields:
+        f.status = "ACCEPTED"
+        f.accepted_value = f.proposed_value
+    db.commit()
+    return ResponseEnvelope(data={"status": "all_accepted", "count": len(fields)})
+
+
+@router.post("/documents/{id}/complete-review", response_model=ResponseEnvelope[dict[str, Any]])
+async def complete_document_review_endpoint(
+    id: uuid.UUID,
+    user: User = Depends(require_role(["OWNER", "CFO", "PM"])),
+    db: Session = Depends(get_db),
+):
+    from app.db.models import Document
+    doc = db.get(Document, id)
+    if doc:
+        doc.ingestion_status = "READY"
+        db.commit()
+    return ResponseEnvelope(data={"status": "review_completed", "document_id": str(id)})
+

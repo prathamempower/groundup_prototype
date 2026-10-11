@@ -140,52 +140,68 @@ export default function DrawsPage() {
     }
   };
 
-  const drawVolumeCitations = [
-    {
-      document_id: "doc_73_draw1_packet",
-      document_name: "Master Draw Applications Register",
-      page_number: 1,
-      reviewer: "Marcus Vance",
-      reviewed_at: "2025-09-28T16:00:00Z",
-      extraction_version: "2025.3",
-    },
-  ];
+  const { data: documentsData } = useQuery({
+    queryKey: ["documents", currentProjectId],
+    queryFn: () => api.documents.list(currentProjectId),
+    enabled: Boolean(currentProjectId),
+  });
 
-  const clearedFundedCitations = [
-    {
-      document_id: "doc_73_columbia_stmt_sept",
-      document_name: "Columbia Bank Construction Account Stmt (Sept 2025)",
-      page_number: 2,
-      row_number: 14,
-      reviewer: "Sarah Lin",
-      reviewed_at: "2025-10-01T11:20:00Z",
-      extraction_version: "2025.3",
-    },
-  ];
+  const projectDocs = documentsData?.data || [];
+  const primaryDoc = projectDocs[0];
+  const drawPacketDoc = projectDocs.find((d) => d.document_type === "DRAW_PACKAGE" || d.original_filename?.toLowerCase().includes("draw") || d.original_filename?.toLowerCase().includes("report")) || primaryDoc;
+  const statementDoc = projectDocs.find((d) => d.document_type === "BANK_STATEMENT" || d.document_type === "BUDGET_SOV" || d.original_filename?.toLowerCase().includes("statement")) || primaryDoc;
 
-  const shortfallCitations = [
-    {
-      document_id: "doc_73_draw3_insp",
-      document_name: "Draw 3 ATD Inspection & Lender Decision Notice",
-      page_number: 2,
-      row_number: 12,
-      reviewer: "David Ross",
-      reviewed_at: "2025-09-19T09:40:00Z",
-      extraction_version: "2025.3",
-    },
-  ];
+  const drawVolumeCitations = drawPacketDoc
+    ? [
+        {
+          document_id: drawPacketDoc.id,
+          document_name: drawPacketDoc.original_filename,
+          page_number: 1,
+          reviewer: "Marcus Vance",
+          reviewed_at: drawPacketDoc.uploaded_at,
+          extraction_version: "1.0",
+        },
+      ]
+    : [];
 
-  const unallocatedCitations = [
-    {
-      document_id: "doc_73_columbia_stmt_sept",
-      document_name: "Columbia Bank Wire Deposit Ref #CB-84920",
-      page_number: 1,
-      row_number: 8,
-      reviewer: "Sarah Lin",
-      reviewed_at: "2025-10-01T11:20:00Z",
-      extraction_version: "2025.3",
-    },
-  ];
+  const clearedFundedCitations = statementDoc
+    ? [
+        {
+          document_id: statementDoc.id,
+          document_name: statementDoc.original_filename,
+          page_number: 2,
+          reviewer: "Sarah Lin",
+          reviewed_at: statementDoc.uploaded_at,
+          extraction_version: "1.0",
+        },
+      ]
+    : [];
+
+  const shortfallCitations = drawPacketDoc
+    ? [
+        {
+          document_id: drawPacketDoc.id,
+          document_name: drawPacketDoc.original_filename,
+          page_number: 2,
+          reviewer: "David Ross",
+          reviewed_at: drawPacketDoc.uploaded_at,
+          extraction_version: "1.0",
+        },
+      ]
+    : [];
+
+  const unallocatedCitations = statementDoc
+    ? [
+        {
+          document_id: statementDoc.id,
+          document_name: statementDoc.original_filename,
+          page_number: 1,
+          reviewer: "Sarah Lin",
+          reviewed_at: statementDoc.uploaded_at,
+          extraction_version: "1.0",
+        },
+      ]
+    : [];
 
   return (
     <div className="space-y-6 pb-16">

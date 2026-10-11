@@ -337,6 +337,7 @@ class Loan(Base):
         back_populates="loan", cascade="all, delete-orphan"
     )
     draws: Mapped[list["Draw"]] = relationship(back_populates="loan", cascade="all, delete-orphan")
+    lender_party: Mapped[Optional["Party"]] = relationship(foreign_keys=[lender_party_id])
 
 
 class LoanTerm(Base):
@@ -1583,3 +1584,105 @@ class ConfigurationVersion(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, nullable=False
     )
+
+
+# ==========================================
+# 12. CONTRACTOR SUBMISSIONS & NOTIFICATIONS
+# ==========================================
+
+
+class GCSubmission(Base):
+    __tablename__ = "gc_submissions"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=generate_uuid
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False
+    )
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    )
+    submission_number: Mapped[str] = mapped_column(String(50), nullable=False)
+    type: Mapped[str] = mapped_column(String(50), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    contract_model: Mapped[str] = mapped_column(String(50), default="COST_PLUS", nullable=False)
+    status: Mapped[str] = mapped_column(String(50), default="UNDER_REVIEW", nullable=False)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    submitted_by: Mapped[str] = mapped_column(String(255), nullable=False)
+    contractor_name: Mapped[str] = mapped_column(String(255), default="Apex Construction LLC", nullable=False)
+    milestone_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("project_milestones.id", ondelete="SET NULL"), nullable=True
+    )
+    milestone_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    csi_code: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    csi_category: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    claimed_amount: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    retainage_rate_pct: Mapped[float] = mapped_column(Numeric(5, 2), default=10.0, nullable=False)
+    retainage_amount: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    net_payable_amount: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    prior_claimed_pct: Mapped[float] = mapped_column(Numeric(5, 2), default=0.0, nullable=False)
+    current_claimed_pct: Mapped[float] = mapped_column(Numeric(5, 2), default=0.0, nullable=False)
+    incremental_claimed_pct: Mapped[float] = mapped_column(Numeric(5, 2), default=0.0, nullable=False)
+    schedule_delay_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    evidence_items: Mapped[list[dict]] = mapped_column(JSONB, default=list, nullable=False)
+    invoice_numbers: Mapped[list[str]] = mapped_column(JSONB, default=list, nullable=False)
+    reviews: Mapped[list[dict]] = mapped_column(JSONB, default=list, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    project: Mapped["Project"] = relationship()
+
+
+class InvestorUpdate(Base):
+    __tablename__ = "investor_updates"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=generate_uuid
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False
+    )
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    )
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    as_of_date: Mapped[date] = mapped_column(Date, nullable=False)
+    status: Mapped[str] = mapped_column(String(50), default="DRAFT", nullable=False)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    gross_development_value: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    current_forecast_profit: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    senior_debt_drawn: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    equity_funded: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    progress_summary: Mapped[str] = mapped_column(Text, nullable=False)
+    material_disclosures: Mapped[list[str]] = mapped_column(JSONB, default=list, nullable=False)
+    recipients: Mapped[list[str]] = mapped_column(JSONB, default=list, nullable=False)
+    expiry_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    project: Mapped["Project"] = relationship()
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=generate_uuid
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False
+    )
+    project_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE"), nullable=True
+    )
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    type: Mapped[str] = mapped_column(String(50), default="GENERAL", nullable=False)
+    severity: Mapped[str] = mapped_column(String(50), default="INFO", nullable=False)
+    read: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    link_url: Mapped[str] = mapped_column(String(255), default="/", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)

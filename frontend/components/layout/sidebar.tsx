@@ -49,11 +49,16 @@ export function Sidebar({
   });
 
   // Calculate material badges
+  const openAlertsCount = (alertsData?.data || []).filter(
+    (a) => a.status === "OPEN"
+  ).length;
+
   const badgeCounts: Record<string, number> = {
     documents: 0,
     draws: 0,
     reconciliation: recData?.data?.total_pending || 0,
     timeline: 0,
+    alerts: openAlertsCount,
   };
 
   const visibleNavItems = NAV_ITEMS.filter((item) =>

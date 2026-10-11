@@ -1,5 +1,5 @@
 import uuid
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import select
@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import require_role
 from app.core.envelope import ResponseEnvelope, ResponseMeta
-from app.db.models import User
+from app.core.errors import NotFoundException
+from app.db.models import Notification, User
 from app.db.session import get_db
 from app.modules.reporting.schemas import (
     AlertEscalateRequest,
@@ -18,11 +19,14 @@ from app.modules.reporting.schemas import (
     DashboardControlCenterRead,
     DataQualityIssueRead,
     DataQualityResolveRequest,
+    DQIWaiveRequest,
+    NotificationRead,
     ReportExportRead,
     ReportExportRequest,
     ReportRead,
 )
 from app.modules.reporting.service import ReportingService
+
 
 router = APIRouter()
 
@@ -254,3 +258,155 @@ def query_audit_events(
         project_id=project_id,
     )
     return ResponseEnvelope(data=events)
+
+
+# -----------------------------------------------------------------------------
+# Report Exports List & Request Alias
+# -----------------------------------------------------------------------------
+@router.get(
+    "/projects/{pid}/exports",
+    response_model=ResponseEnvelope[list[ReportExportRead]],
+)
+def list_project_report_exports(
+    pid: uuid.UUID,
+    user: User = Depends(require_role(["OWNER", "CFO", "PM"])),
+    db: Session = Depends(get_db),
+) -> ResponseEnvelope[list[ReportExportRead]]:
+    from app.db.models import Document
+    docs = db.scalars(
+        select(Document).where(
+            Document.project_id == pid,
+            Document.document_type.in_(["REPORT", "EXPORT", "AIA_G702", "SOV_BASELINE"]),
+        ).order_by(Document.uploaded_at.desc())
+    ).all()
+
+    return ResponseEnvelope(
+        data=[
+            ReportExportRead(
+                id=str(d.id),
+                project_id=str(d.project_id),
+                report_type=d.document_type,
+                format="PDF" if "pdf" in d.mime_type else "XLSX",
+                status="COMPLETED",
+                download_url=f"/api/v1/documents/{d.id}/download",
+                created_at=d.uploaded_at.isoformat(),
+            )
+            for d in docs
+        ]
+    )
+
+
+@router.post(
+    "/projects/{pid}/exports/request",
+    response_model=ResponseEnvelope[ReportExportRead],
+)
+def request_report_export_alias(
+    pid: uuid.UUID,
+    req: ReportExportRequest,
+    user: User = Depends(require_role(["OWNER", "CFO"])),
+    db: Session = Depends(get_db),
+) -> ResponseEnvelope[ReportExportRead]:
+    return create_report_export(pid, req, user, db)
+
+
+# -----------------------------------------------------------------------------
+# Data Quality Issues Waive
+# -----------------------------------------------------------------------------
+@router.post(
+    "/data-quality-issues/{id}/waive",
+    response_model=ResponseEnvelope[DataQualityIssueRead],
+)
+def waive_dqi_endpoint(
+    id: uuid.UUID,
+    req: DQIWaiveRequest,
+    user: User = Depends(require_role(["OWNER", "CFO"])),
+    db: Session = Depends(get_db),
+) -> ResponseEnvelope[DataQualityIssueRead]:
+    service = ReportingService(db)
+    resolve_req = DataQualityResolveRequest(
+        resolution=f"Waived: {req.reason}",
+        waive=True,
+    )
+    dqi = service.resolve_data_quality_issue(user, id, resolve_req)
+    db.commit()
+    return ResponseEnvelope(data=dqi)
+
+
+# -----------------------------------------------------------------------------
+# In-App Notifications
+# -----------------------------------------------------------------------------
+def to_notification_dto(n: Notification) -> NotificationRead:
+    return NotificationRead(
+        id=str(n.id),
+        project_id=str(n.project_id) if n.project_id else None,
+        title=n.title,
+        message=n.message,
+        type=n.type,
+        severity=n.severity,
+        read=n.read,
+        link_url=n.link_url,
+        created_at=n.created_at.isoformat() if n.created_at else "",
+    )
+
+
+@router.get(
+    "/notifications",
+    response_model=ResponseEnvelope[list[NotificationRead]],
+)
+def list_notifications_endpoint(
+    user: User = Depends(require_role(["OWNER", "CFO", "PM", "GC", "INVESTOR"])),
+    db: Session = Depends(get_db),
+) -> ResponseEnvelope[list[NotificationRead]]:
+    notifs = db.scalars(
+        select(Notification)
+        .where(Notification.organization_id == user.organization_id)
+        .order_by(Notification.created_at.desc())
+    ).all()
+    return ResponseEnvelope(
+        data=[to_notification_dto(n) for n in notifs]
+    )
+
+
+@router.post(
+    "/notifications/{id}/read",
+    response_model=ResponseEnvelope[NotificationRead],
+)
+def mark_notification_read_endpoint(
+    id: str,
+    user: User = Depends(require_role(["OWNER", "CFO", "PM", "GC", "INVESTOR"])),
+    db: Session = Depends(get_db),
+) -> ResponseEnvelope[NotificationRead]:
+    try:
+        notif_uuid = uuid.UUID(id)
+        notif = db.get(Notification, notif_uuid)
+    except ValueError:
+        notif = None
+
+    if not notif:
+        raise NotFoundException(message=f"Notification {id} not found.")
+
+    notif.read = True
+    db.commit()
+    db.refresh(notif)
+    return ResponseEnvelope(data=to_notification_dto(notif))
+
+
+@router.post(
+    "/notifications/read-all",
+    response_model=ResponseEnvelope[dict[str, str]],
+)
+def mark_all_notifications_read_endpoint(
+    user: User = Depends(require_role(["OWNER", "CFO", "PM", "GC", "INVESTOR"])),
+    db: Session = Depends(get_db),
+) -> ResponseEnvelope[dict[str, str]]:
+    notifs = db.scalars(
+        select(Notification).where(
+            Notification.organization_id == user.organization_id,
+            Notification.read.is_(False),
+        )
+    ).all()
+    for n in notifs:
+        n.read = True
+    db.commit()
+    return ResponseEnvelope(data={"status": "all_marked_read"})
+

@@ -118,6 +118,13 @@ class ChangeOrderRead(BaseModel):
     approved_at: str | None = None
     created_at: str
     lines: list[ChangeOrderLineRead] = []
+    # Frontend compatibility fields
+    scope_description: str = ""
+    target_budget_line_id: str = ""
+    funding_source: str = "CONTINGENCY"
+    requested_at: str = ""
+    rejection_reason: str | None = None
+
 
 
 class ChangeOrderRejectRequest(BaseModel):

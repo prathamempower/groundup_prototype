@@ -116,9 +116,9 @@ export function InvestorUpdatePreview({
                 <Building2 className="h-4 w-4 text-primary" />
                 <span>Vance Development LLC &bull; Investor Brief</span>
               </div>
-              <h1 className="text-title font-bold text-text-primary tracking-tight">
+              <h2 className="text-title font-bold text-text-primary tracking-tight">
                 {snapshot.title}
-              </h1>
+              </h2>
               <p className="text-body text-text-secondary">
                 {projectName} &bull; {projectAddress}
               </p>

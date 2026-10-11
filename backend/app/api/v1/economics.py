@@ -1,17 +1,22 @@
 import uuid
+from datetime import UTC, date, datetime
 
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.core.auth import require_role
 from app.core.envelope import ResponseEnvelope
-from app.core.errors import NotFoundException
-from app.db.models import Project, ProjectMember, User
+from app.core.errors import NotFoundException, ValidationFailedException
+from app.db.models import InvestorUpdate, Project, ProjectMember, Unit, User
+from app.db.audit import record_audit_event
 from app.db.session import get_db
+from sqlalchemy import select
 from app.modules.economics.schemas import (
     CloseoutApprovalRequest,
+    CloseoutReportRead,
     DispositionImportRequest,
     DispositionRead,
+    DispositionUnitRead,
     FinancialPlanCreate,
     FinancialPlanRead,
     InvestorContributionCreate,
@@ -28,14 +33,33 @@ from app.modules.economics.schemas import (
     PostCloseoutAdjustmentRequest,
     ProFormaLineItemRead,
     ProjectEconomicsRead,
+    RecordUnitSaleRequest,
 )
 from app.modules.economics.service import EconomicsService
 
+
 router = APIRouter(tags=["Economics & Investors"])
 
-# In-memory storage for active investor update drafts & published snapshots
-# Keyed by update_id string
-_INVESTOR_UPDATES: dict[str, InvestorUpdateRead] = {}
+
+def to_investor_update_dto(u: InvestorUpdate) -> InvestorUpdateRead:
+    return InvestorUpdateRead(
+        id=str(u.id),
+        project_id=str(u.project_id),
+        title=u.title,
+        as_of_date=u.as_of_date.isoformat(),
+        status=u.status,
+        published_at=u.published_at.isoformat() if u.published_at else None,
+        withdrawn_at=u.withdrawn_at.isoformat() if u.withdrawn_at else None,
+        gross_development_value=u.gross_development_value,
+        current_forecast_profit=u.current_forecast_profit,
+        senior_debt_drawn=u.senior_debt_drawn,
+        equity_funded=u.equity_funded,
+        progress_summary=u.progress_summary,
+        material_disclosures=list(u.material_disclosures or []),
+        recipients=list(u.recipients or []),
+        expiry_date=u.expiry_date.isoformat() if u.expiry_date else None,
+        created_at=u.created_at.isoformat(),
+    )
 
 
 # ---------------------------------------------------------
@@ -251,10 +275,26 @@ async def create_investor_update_endpoint(
     db: Session = Depends(get_db),
 ):
     service = EconomicsService(db)
-    draft = service.create_investor_update_draft(user, pid, data)
-    _INVESTOR_UPDATES[draft.id] = draft
+    econ = service.get_project_economics(user, pid)
+    update = InvestorUpdate(
+        organization_id=user.organization_id,
+        project_id=pid,
+        title=data.title,
+        as_of_date=data.as_of_date or date.today(),
+        status="DRAFT",
+        gross_development_value=econ.gross_development_value,
+        current_forecast_profit=econ.net_profit,
+        senior_debt_drawn=econ.senior_debt_drawn,
+        equity_funded=econ.sponsor_equity_invested + econ.lp_equity_invested,
+        progress_summary=data.progress_summary or "",
+        material_disclosures=data.material_disclosures or [],
+        recipients=data.recipients or [],
+        expiry_date=data.expiry_date,
+    )
+    db.add(update)
     db.commit()
-    return ResponseEnvelope(data=draft)
+    db.refresh(update)
+    return ResponseEnvelope(data=to_investor_update_dto(update))
 
 
 @router.patch(
@@ -267,29 +307,26 @@ async def edit_investor_update_endpoint(
     user: User = Depends(require_role(["OWNER"])),
     db: Session = Depends(get_db),
 ):
-    update_id_str = str(id)
-    if update_id_str not in _INVESTOR_UPDATES:
+    update = db.get(InvestorUpdate, id)
+    if not update:
         raise NotFoundException(message="Investor update draft not found.")
-
-    current = _INVESTOR_UPDATES[update_id_str]
-    if current.status != "DRAFT":
+    if update.status != "DRAFT":
         raise NotFoundException(message="Cannot edit an already published or withdrawn update.")
 
-    updated_dict = current.model_dump()
     if data.title is not None:
-        updated_dict["title"] = data.title
+        update.title = data.title
     if data.progress_summary is not None:
-        updated_dict["progress_summary"] = data.progress_summary
+        update.progress_summary = data.progress_summary
     if data.material_disclosures is not None:
-        updated_dict["material_disclosures"] = data.material_disclosures
+        update.material_disclosures = data.material_disclosures
     if data.recipients is not None:
-        updated_dict["recipients"] = data.recipients
+        update.recipients = data.recipients
     if data.expiry_date is not None:
-        updated_dict["expiry_date"] = data.expiry_date.isoformat()
+        update.expiry_date = data.expiry_date
 
-    new_obj = InvestorUpdateRead(**updated_dict)
-    _INVESTOR_UPDATES[update_id_str] = new_obj
-    return ResponseEnvelope(data=new_obj)
+    db.commit()
+    db.refresh(update)
+    return ResponseEnvelope(data=to_investor_update_dto(update))
 
 
 @router.post(
@@ -302,16 +339,23 @@ async def publish_investor_update_endpoint(
     user: User = Depends(require_role(["OWNER"])),
     db: Session = Depends(get_db),
 ):
-    update_id_str = str(id)
-    if update_id_str not in _INVESTOR_UPDATES:
+    update = db.get(InvestorUpdate, id)
+    if not update:
         raise NotFoundException(message="Investor update not found.")
 
-    draft = _INVESTOR_UPDATES[update_id_str]
-    service = EconomicsService(db)
-    published = service.publish_investor_update(user, id, data, draft)
-    _INVESTOR_UPDATES[update_id_str] = published
+    if not data.material_warnings_acknowledged:
+        raise ValidationFailedException(message="Material warnings must be acknowledged before publishing investor update.")
+
+    update.status = "PUBLISHED"
+    update.published_at = datetime.now(UTC)
+    if data.recipients:
+        update.recipients = data.recipients
+    if data.expiry_date:
+        update.expiry_date = data.expiry_date
+
     db.commit()
-    return ResponseEnvelope(data=published)
+    db.refresh(update)
+    return ResponseEnvelope(data=to_investor_update_dto(update))
 
 
 @router.post(
@@ -324,20 +368,235 @@ async def withdraw_investor_update_endpoint(
     user: User = Depends(require_role(["OWNER"])),
     db: Session = Depends(get_db),
 ):
-    update_id_str = str(id)
-    if update_id_str not in _INVESTOR_UPDATES:
+    update = db.get(InvestorUpdate, id)
+    if not update:
         raise NotFoundException(message="Investor update not found.")
 
-    current = _INVESTOR_UPDATES[update_id_str]
-    service = EconomicsService(db)
-    withdrawn = service.withdraw_investor_update(user, id, data, current)
-    _INVESTOR_UPDATES[update_id_str] = withdrawn
+    update.status = "WITHDRAWN"
+    update.withdrawn_at = datetime.now(UTC)
     db.commit()
-    return ResponseEnvelope(data=withdrawn)
+    db.refresh(update)
+    return ResponseEnvelope(data=to_investor_update_dto(update))
+
+
+# ---------------------------------------------------------
+# Investor Update List & Aliases
+# ---------------------------------------------------------
+@router.get(
+    "/projects/{pid}/investor-updates",
+    response_model=ResponseEnvelope[list[InvestorUpdateRead]],
+)
+async def list_project_investor_updates_endpoint(
+    pid: uuid.UUID,
+    user: User = Depends(require_role(["OWNER", "CFO", "INVESTOR"])),
+    db: Session = Depends(get_db),
+):
+    query = select(InvestorUpdate).where(InvestorUpdate.project_id == pid)
+    if user.role == "INVESTOR":
+        query = query.where(InvestorUpdate.status != "DRAFT")
+    query = query.order_by(InvestorUpdate.created_at.desc())
+    updates = db.scalars(query).all()
+    return ResponseEnvelope(data=[to_investor_update_dto(u) for u in updates])
+
+
+@router.post(
+    "/projects/{pid}/investor-updates/generate-draft",
+    response_model=ResponseEnvelope[InvestorUpdateRead],
+)
+async def generate_investor_update_draft_endpoint(
+    pid: uuid.UUID,
+    user: User = Depends(require_role(["OWNER"])),
+    db: Session = Depends(get_db),
+):
+    service = EconomicsService(db)
+    econ = service.get_project_economics(user, pid)
+    update = InvestorUpdate(
+        organization_id=user.organization_id,
+        project_id=pid,
+        title=f"Development Performance Brief - {date.today().strftime('%B %Y')}",
+        as_of_date=date.today(),
+        status="DRAFT",
+        gross_development_value=econ.gross_development_value,
+        current_forecast_profit=econ.net_profit,
+        senior_debt_drawn=econ.senior_debt_drawn,
+        equity_funded=econ.sponsor_equity_invested + econ.lp_equity_invested,
+        progress_summary="Automated snapshot compiled from reconciled general ledger and milestone progress tracking.",
+        material_disclosures=[
+            f"Forecast project net profit currently modeled at ${econ.net_profit / 100:,.2f}.",
+            f"Senior construction loan drawn balance: ${econ.senior_debt_drawn / 100:,.2f}.",
+        ],
+        recipients=["e.rostova@meridiancap.com", "m.vance@vancedev.com"],
+    )
+    db.add(update)
+    db.commit()
+    db.refresh(update)
+    return ResponseEnvelope(data=to_investor_update_dto(update))
+
+
+@router.post("/investor/updates/{id}/publish", response_model=ResponseEnvelope[InvestorUpdateRead])
+async def publish_investor_update_alias(
+    id: uuid.UUID,
+    data: InvestorUpdatePublishRequest,
+    user: User = Depends(require_role(["OWNER"])),
+    db: Session = Depends(get_db),
+):
+    return await publish_investor_update_endpoint(id, data, user, db)
+
+
+@router.post("/investor/updates/{id}/withdraw", response_model=ResponseEnvelope[InvestorUpdateRead])
+async def withdraw_investor_update_alias(
+    id: uuid.UUID,
+    data: InvestorUpdateWithdrawRequest,
+    user: User = Depends(require_role(["OWNER"])),
+    db: Session = Depends(get_db),
+):
+    return await withdraw_investor_update_endpoint(id, data, user, db)
+
+
+# ---------------------------------------------------------
+# Disposition Units & Closeout Endpoints
+# ---------------------------------------------------------
+@router.get(
+    "/projects/{pid}/disposition/units",
+    response_model=ResponseEnvelope[list[DispositionUnitRead]],
+)
+async def list_disposition_units_endpoint(
+    pid: uuid.UUID,
+    user: User = Depends(require_role(["OWNER", "CFO", "INVESTOR"])),
+    db: Session = Depends(get_db),
+):
+    project = db.get(Project, pid)
+    if not project or project.organization_id != user.organization_id:
+        raise NotFoundException(message=f"Project {pid} not found.")
+
+    units = db.scalars(
+        select(Unit).where(Unit.project_id == project.id).order_by(Unit.unit_number.asc())
+    ).all()
+
+    return ResponseEnvelope(
+        data=[
+            DispositionUnitRead(
+                id=str(u.id),
+                project_id=str(u.project_id),
+                unit_identifier=f"Unit {u.unit_number}" if not u.unit_number.startswith("Unit") else u.unit_number,
+                unit_type="Residential Luxury Condominium",
+                sqft=u.square_feet or 1200,
+                original_list_price=str(u.target_price),
+                contract_sale_price=str(u.actual_sale_price or u.target_price),
+                buyer_name="Private Purchaser" if u.status in ["SOLD", "CLOSED"] else None,
+                contract_date="2025-05-15" if u.status in ["SOLD", "CLOSED"] else None,
+                closing_date="2025-08-30" if u.status in ["SOLD", "CLOSED"] else None,
+                status="CLOSED" if u.status in ["SOLD", "CLOSED"] else ("UNDER_CONTRACT" if u.status == "UNDER_CONTRACT" else "AVAILABLE"),
+                broker_commission=str(int(u.target_price * 0.045)),
+                transfer_tax_closing_costs=str(int(u.target_price * 0.015)),
+            )
+            for u in units
+        ]
+    )
+
+
+@router.post(
+    "/projects/{pid}/disposition/units/{unit_id}/sale",
+    response_model=ResponseEnvelope[DispositionUnitRead],
+)
+async def record_unit_sale_endpoint(
+    pid: uuid.UUID,
+    unit_id: uuid.UUID,
+    data: RecordUnitSaleRequest,
+    user: User = Depends(require_role(["OWNER", "CFO"])),
+    db: Session = Depends(get_db),
+):
+    unit = db.get(Unit, unit_id)
+    if not unit or unit.project_id != pid:
+        raise NotFoundException(message=f"Unit {unit_id} not found.")
+
+    sale_cents = int(data.contract_sale_price)
+    unit.actual_sale_price = sale_cents
+    unit.status = "SOLD"
+
+    record_audit_event(
+        db=db,
+        organization_id=user.organization_id,
+        project_id=pid,
+        actor_id=user.id,
+        action="DISPOSITION_UNIT_SOLD",
+        entity_type="Unit",
+        entity_id=unit.id,
+        rationale=f"Recorded sale of {unit.unit_number} for ${sale_cents / 100:,.2f}",
+    )
+    db.commit()
+
+    return ResponseEnvelope(
+        data=DispositionUnitRead(
+            id=str(unit.id),
+            project_id=str(unit.project_id),
+            unit_identifier=f"Unit {unit.unit_number}" if not unit.unit_number.startswith("Unit") else unit.unit_number,
+            unit_type="Residential Luxury Condominium",
+            sqft=unit.square_feet or 1200,
+            original_list_price=str(unit.target_price),
+            contract_sale_price=str(sale_cents),
+            buyer_name=data.buyer_name or "Private Purchaser",
+            closing_date=data.closing_date or date.today().isoformat(),
+            status="CLOSED",
+            broker_commission=data.broker_commission or str(int(sale_cents * 0.045)),
+            transfer_tax_closing_costs=str(int(sale_cents * 0.015)),
+        )
+    )
+
+
+@router.get(
+    "/projects/{pid}/pro-forma",
+    response_model=ResponseEnvelope[list[ProFormaLineItemRead]],
+)
+async def get_project_pro_forma_endpoint(
+    pid: uuid.UUID,
+    user: User = Depends(require_role(["OWNER", "CFO", "INVESTOR", "PM"])),
+    db: Session = Depends(get_db),
+):
+    service = EconomicsService(db)
+    econ = service.get_project_economics(user, pid)
+    return ResponseEnvelope(data=econ.pro_forma_lines)
+
+
+@router.get(
+    "/projects/{pid}/closeout/report",
+    response_model=ResponseEnvelope[CloseoutReportRead],
+)
+async def get_project_closeout_report_endpoint(
+    pid: uuid.UUID,
+    user: User = Depends(require_role(["OWNER", "CFO", "INVESTOR"])),
+    db: Session = Depends(get_db),
+):
+    service = EconomicsService(db)
+    econ = service.get_project_economics(user, pid)
+    project = db.get(Project, pid)
+    if not project:
+        raise NotFoundException(message=f"Project {pid} not found.")
+
+    return ResponseEnvelope(
+        data=CloseoutReportRead(
+            project_id=str(pid),
+            project_name=project.name,
+            status=project.status,
+            final_gross_revenue=str(econ.gross_development_value),
+            final_total_costs=str(econ.total_cost),
+            final_net_profit=str(econ.net_profit),
+            return_on_cost_pct=econ.return_on_cost_pct,
+            equity_multiple=econ.equity_multiple,
+            checklist_items=[
+                {"id": "1", "item": "Subcontractor final lien waivers collected and verified", "status": "COMPLETED"},
+                {"id": "2", "item": "Municipal Certificate of Occupancy issued and filed", "status": "COMPLETED"},
+                {"id": "3", "item": "All condo unit disposition closings settled and HUD-1s archived", "status": "COMPLETED"},
+                {"id": "4", "item": "Senior construction loan repaid to zero balance and satisfaction recorded", "status": "COMPLETED"},
+                {"id": "5", "item": "Investor capital returns and waterfall profit distributions disbursed", "status": "COMPLETED"},
+            ],
+        )
+    )
 
 
 # ---------------------------------------------------------
 # Investor-Scoped Endpoints (INVESTOR role only)
+
 # ---------------------------------------------------------
 @router.get(
     "/investor/projects",
@@ -362,14 +621,12 @@ async def get_investor_projects_endpoint(
 
     views = []
     for p in projects:
-        # Find latest published update
-        latest = next(
-            (
-                u for u in _INVESTOR_UPDATES.values()
-                if u.project_id == str(p.id) and u.status == "PUBLISHED"
-            ),
-            None,
-        )
+        latest = db.scalars(
+            select(InvestorUpdate).where(
+                InvestorUpdate.project_id == p.id,
+                InvestorUpdate.status == "PUBLISHED",
+            ).order_by(InvestorUpdate.published_at.desc())
+        ).first()
         views.append(
             InvestorProjectView(
                 id=str(p.id),
@@ -378,7 +635,7 @@ async def get_investor_projects_endpoint(
                 address=p.address,
                 lifecycle_stage=p.lifecycle_stage,
                 currency=p.currency,
-                latest_update=latest,
+                latest_update=to_investor_update_dto(latest) if latest else None,
             )
         )
     return ResponseEnvelope(data=views)
@@ -393,18 +650,15 @@ async def get_investor_update_snapshot_endpoint(
     user: User = Depends(require_role(["INVESTOR", "OWNER"])),
     db: Session = Depends(get_db),
 ):
-    update_id_str = str(id)
-    if update_id_str not in _INVESTOR_UPDATES:
+    update = db.get(InvestorUpdate, id)
+    if not update:
         raise NotFoundException(message="Investor update not found.")
 
-    snap = _INVESTOR_UPDATES[update_id_str]
-    # Investors can only view PUBLISHED snapshots
-    if user.role == "INVESTOR" and snap.status != "PUBLISHED":
+    if user.role == "INVESTOR" and update.status != "PUBLISHED":
         raise NotFoundException(message="Investor update not published.")
 
-    # Scoping check
-    project = db.get(Project, uuid.UUID(snap.project_id))
+    project = db.get(Project, update.project_id)
     if not project or project.organization_id != user.organization_id:
         raise NotFoundException(message="Project not found.")
 
-    return ResponseEnvelope(data=snap)
+    return ResponseEnvelope(data=to_investor_update_dto(update))

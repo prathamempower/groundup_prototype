@@ -148,6 +148,18 @@ export interface ProjectDashboard {
     cumulative_spend: number;
     approved_budget: number;
   }>;
+  progress_trajectory?: Array<{
+    month: string;
+    planned_baseline: number;
+    actual_spend?: number | null;
+    forecast_spend?: number | null;
+    planned_progress_pct: number;
+    actual_progress_pct?: number | null;
+    forecast_progress_pct?: number | null;
+    is_current?: boolean;
+    is_delay_period?: boolean;
+    note?: string;
+  }>;
 }
 
 // ----------------- ONBOARDING & READINESS TYPES -----------------

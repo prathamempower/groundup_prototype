@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { KeyFigure } from "@/components/ui/key-figure";
 import { MilestoneItem, SourceCitation } from "@/lib/types";
 import { formatDate, formatMoney } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 import {
   Calendar,
   Clock,
@@ -114,58 +115,69 @@ export default function TimelinePage() {
     return matchesSearch && matchesStatus;
   });
 
+  const { data: documentsData } = useQuery({
+    queryKey: ["documents", currentProjectId],
+    queryFn: () => api.documents.list(currentProjectId),
+    enabled: Boolean(currentProjectId),
+  });
+
+  const projectDocs = documentsData?.data || [];
+  const primaryDoc = projectDocs[0];
+  const reportDoc = projectDocs.find((d) => d.document_type === "INSPECTION" || d.original_filename?.toLowerCase().includes("report")) || primaryDoc;
+  const loanDoc = projectDocs.find((d) => d.document_type === "CONTRACT" || d.original_filename?.toLowerCase().includes("loan")) || primaryDoc;
+
   // Citations for Sources Modal
-  const forecastCompletionCitations: SourceCitation[] = [
-    {
-      document_id: "doc_73_sched_01",
-      document_name: "73_Broadway_Master_CPM_Schedule_Revision_3.pdf",
-      page_number: 4,
-      reviewer: "David Ross (PM)",
-      reviewed_at: "2025-09-18T16:00:00Z",
-      extraction_version: "v2.1",
-    },
-    {
-      document_id: "doc_73_steel_memo",
-      document_name: "Atlantic_Iron_Works_Fabrication_Delay_Notice.pdf",
-      page_number: 1,
-      reviewer: "Frank Miller (GC)",
-      reviewed_at: "2025-09-10T11:30:00Z",
-      extraction_version: "v1.0",
-    },
-  ];
+  const forecastCompletionCitations: SourceCitation[] = reportDoc
+    ? [
+        {
+          document_id: reportDoc.id,
+          document_name: reportDoc.original_filename,
+          page_number: 1,
+          reviewer: "David Ross (PM)",
+          reviewed_at: reportDoc.uploaded_at,
+          extraction_version: "1.0",
+        },
+      ]
+    : [];
 
-  const scheduleDelayCitations: SourceCitation[] = [
-    {
-      document_id: "doc_73_cpm_baseline",
-      document_name: "Initial_Approved_Milestone_Baseline.pdf",
-      page_number: 2,
-      reviewer: "Marcus Vance (Owner)",
-      reviewed_at: "2025-03-25T14:00:00Z",
-      extraction_version: "v1.0",
-    },
-  ];
+  const scheduleDelayCitations: SourceCitation[] = reportDoc
+    ? [
+        {
+          document_id: reportDoc.id,
+          document_name: reportDoc.original_filename,
+          page_number: 2,
+          reviewer: "Marcus Vance (Owner)",
+          reviewed_at: reportDoc.uploaded_at,
+          extraction_version: "1.0",
+        },
+      ]
+    : [];
 
-  const carryImpactCitations: SourceCitation[] = [
-    {
-      document_id: "doc_73_loan_columbia",
-      document_name: "Columbia_Bank_Construction_Loan_Agreement.pdf",
-      page_number: 12,
-      reviewer: "Sarah Lin (CFO)",
-      reviewed_at: "2025-04-02T10:00:00Z",
-      extraction_version: "v1.0",
-    },
-  ];
+  const carryImpactCitations: SourceCitation[] = loanDoc
+    ? [
+        {
+          document_id: loanDoc.id,
+          document_name: loanDoc.original_filename,
+          page_number: 1,
+          reviewer: "Sarah Lin (CFO)",
+          reviewed_at: loanDoc.uploaded_at,
+          extraction_version: "1.0",
+        },
+      ]
+    : [];
 
-  const disputeCitations: SourceCitation[] = [
-    {
-      document_id: "doc_73_insp_03",
-      document_name: "73_Broadway_Draw_3_Lender_Inspection_Report.pdf",
-      page_number: 3,
-      reviewer: "ATD Certified Inspector",
-      reviewed_at: "2025-09-15T09:30:00Z",
-      extraction_version: "v1.2",
-    },
-  ];
+  const disputeCitations: SourceCitation[] = reportDoc
+    ? [
+        {
+          document_id: reportDoc.id,
+          document_name: reportDoc.original_filename,
+          page_number: 3,
+          reviewer: "David Ross (PM)",
+          reviewed_at: reportDoc.uploaded_at,
+          extraction_version: "1.0",
+        },
+      ]
+    : [];
 
   // Discrepancy milestone if active
   const disputedMilestone = milestones.find(
@@ -565,36 +577,41 @@ export default function TimelinePage() {
                           </td>
 
                           <td className="py-3.5 px-4">
-                            <button
+                            <Button
                               type="button"
+                              variant="secondary"
+                              size="sm"
+                              className="px-2 py-1 text-[11px] gap-1"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleOpenAttach(ms);
                               }}
-                              className="inline-flex items-center gap-1 rounded bg-subtle px-2 py-1 text-[11px] font-medium text-text-secondary hover:bg-subtle/80 hover:text-text-primary"
                             >
                               <FileCheck className="h-3 w-3 text-primary" />
                               <span>{ms.evidence_count || 0} Files</span>
-                            </button>
+                            </Button>
                           </td>
 
                           <td className="py-3.5 px-4 text-right">
                             <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                              <button
+                              <Button
                                 type="button"
+                                variant="tertiary"
+                                size="sm"
+                                className="px-2.5 py-1"
                                 onClick={() => handleOpenUpdate(ms)}
-                                className="rounded px-2.5 py-1 text-caption font-medium text-primary hover:bg-primary-subtle transition-colors"
                               >
                                 Update
-                              </button>
-                              <button
+                              </Button>
+                              <Button
                                 type="button"
+                                variant="ghost"
+                                size="icon"
                                 onClick={() => handleOpenMilestoneDrawer(ms)}
-                                className="rounded p-1 text-text-muted hover:text-text-primary hover:bg-subtle"
                                 title="View Milestone Details"
                               >
                                 <ArrowRight className="h-4 w-4" />
-                              </button>
+                              </Button>
                             </div>
                           </td>
                         </tr>

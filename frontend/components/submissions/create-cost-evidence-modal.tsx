@@ -47,30 +47,21 @@ export function CreateCostEvidenceModal({
   project,
   onSuccess,
 }: CreateCostEvidenceModalProps) {
-  const [title, setTitle] = useState("Cost Package — Concrete & Subgrade Works");
-  const [description, setDescription] = useState("Direct subcontractor billing and material testing receipts for continuous foundation mat pour.");
-  const [contractorName, setContractorName] = useState("Apex Construction Services LLC");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [contractorName, setContractorName] = useState("");
   const [gcFeePct, setGcFeePct] = useState(8.5); // 8.5% GC fee markup cap
   const [retainageRatePct, setRetainageRatePct] = useState(10);
   
   const [items, setItems] = useState<CostLineItem[]>([
     {
-      id: "line_1",
-      vendor_name: "Red Hook Concrete LLC",
-      invoice_number: "RH-4492",
-      csi_code: "03-200",
-      csi_category: "Concrete & Foundation",
-      amount: "1840000", // $18,400.00
-      has_lien_waiver: true,
-    },
-    {
-      id: "line_2",
-      vendor_name: "Empire Geotechnical Engineering",
-      invoice_number: "EMP-GEO-108",
-      csi_code: "03-200",
-      csi_category: "Concrete Core Compressive Testing",
-      amount: "320000", // $3,200.00
-      has_lien_waiver: true,
+      id: "item_1",
+      vendor_name: "",
+      invoice_number: "",
+      csi_code: "",
+      csi_category: "",
+      amount: "0",
+      has_lien_waiver: false,
     },
   ]);
 

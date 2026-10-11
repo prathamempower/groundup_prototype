@@ -30,8 +30,8 @@ export function CloseoutChecklistCard({
   if (!report) return null;
 
   const isClosed = report.lifecycle_stage === "CLOSED" || report.status === "CLOSED";
-  const checklist = report.checklist || [];
-  const adjustments = report.post_closeout_adjustments || [];
+  const checklist = (report.checklist && Array.isArray(report.checklist)) ? report.checklist : [];
+  const adjustments = (report.post_closeout_adjustments && Array.isArray(report.post_closeout_adjustments)) ? report.post_closeout_adjustments : [];
   const satisfiedCount = checklist.filter((c) => c.is_satisfied).length;
   const pct = Math.round((satisfiedCount / Math.max(1, checklist.length)) * 100);
 

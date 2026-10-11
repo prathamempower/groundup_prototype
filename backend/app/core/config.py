@@ -10,20 +10,17 @@ class Settings(BaseSettings):
     ENV: str = "development"
     DEBUG: bool = True
 
-    # Database
-    DATABASE_URL: str = (
-        "postgresql+psycopg2://groundup:groundup_password@localhost:5436/groundup_db"
-    )
-    ASYNC_DATABASE_URL: str = (
-        "postgresql+asyncpg://groundup:groundup_password@localhost:5436/groundup_db"
-    )
+    # Database (loaded from .env; no hardcoded fallback)
+    DATABASE_URL: str
+    ASYNC_DATABASE_URL: str
     DB_ECHO: bool = False
 
-    # Security
-    SECRET_KEY: str = "groundup-dev-secret-key-change-in-production-min-32-chars-long"
+    # Security (loaded from .env; no hardcoded fallback)
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    SEED_DEFAULT_PASSWORD: str
 
     # CORS
     BACKEND_CORS_ORIGINS: list[str] = [
@@ -37,7 +34,11 @@ class Settings(BaseSettings):
     STORAGE_DIR: str = str(Path(__file__).resolve().parent.parent.parent.parent / "storage_data")
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=[
+            str(Path(__file__).resolve().parent.parent.parent.parent / ".env"),
+            str(Path(__file__).resolve().parent.parent.parent / ".env"),
+            ".env",
+        ],
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="ignore",

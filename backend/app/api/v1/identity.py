@@ -290,7 +290,7 @@ async def create_invitation_endpoint(
         scope=inv.scope,
         expires_at=inv.expires_at.isoformat(),
         invited_by=str(inv.invited_by),
-        invitation_url=f"/auth/invite/{raw_token}",
+        invitation_url=f"/auth/invite/{raw_token}?token={raw_token}",
         organization_name=db.get(Organization, inv.organization_id).name,
         project_name=db.get(Project, inv.project_id).name if inv.project_id else None,
     )
@@ -317,7 +317,7 @@ async def create_bulk_invitations(
                 scope=inv.scope,
                 expires_at=inv.expires_at.isoformat(),
                 invited_by=str(inv.invited_by),
-                invitation_url=f"/auth/invite/{raw_token}",
+                invitation_url=f"/auth/invite/{raw_token}?token={raw_token}",
                 organization_name=db.get(Organization, inv.organization_id).name,
                 project_name=db.get(Project, inv.project_id).name if inv.project_id else None,
             )
@@ -360,6 +360,7 @@ async def list_project_team(
 
 
 @router.post("/invitations/{token}/accept", response_model=ResponseEnvelope[UserRead])
+@router.post("/invitations/{token}", response_model=ResponseEnvelope[UserRead])
 async def accept_invitation_endpoint(
     token: str,
     data: AcceptInvitationRequest,

@@ -171,6 +171,7 @@ class PostCloseoutAdjustmentRead(BaseModel):
 # ---------------------------------------------------------
 class InvestorUpdateCreate(BaseModel):
     title: str = Field(min_length=1)
+    as_of_date: date | None = None
     progress_summary: str = Field(min_length=1)
     material_disclosures: list[str] = []
     recipients: list[str] = []
@@ -179,6 +180,7 @@ class InvestorUpdateCreate(BaseModel):
 
 class InvestorUpdatePatch(BaseModel):
     title: str | None = None
+    as_of_date: date | None = None
     progress_summary: str | None = None
     material_disclosures: list[str] | None = None
     recipients: list[str] | None = None
@@ -223,3 +225,44 @@ class InvestorProjectView(BaseModel):
     lifecycle_stage: str
     currency: str
     latest_update: InvestorUpdateRead | None = None
+
+
+# ---------------------------------------------------------
+# Disposition Units & Closeout
+# ---------------------------------------------------------
+class DispositionUnitRead(BaseModel):
+    id: str
+    project_id: str
+    unit_identifier: str
+    unit_type: str = "Residential Condominium"
+    sqft: int = 1200
+    original_list_price: str
+    contract_sale_price: str
+    buyer_name: str | None = None
+    contract_date: str | None = None
+    closing_date: str | None = None
+    status: str = "AVAILABLE"
+    hud_settlement_id: str | None = None
+    settlement_document_name: str | None = None
+    broker_commission: str = "0"
+    transfer_tax_closing_costs: str = "0"
+
+
+class RecordUnitSaleRequest(BaseModel):
+    contract_sale_price: str
+    buyer_name: str | None = None
+    closing_date: str | None = None
+    broker_commission: str | None = None
+
+
+class CloseoutReportRead(BaseModel):
+    project_id: str
+    project_name: str
+    status: str
+    final_gross_revenue: str
+    final_total_costs: str
+    final_net_profit: str
+    return_on_cost_pct: float
+    equity_multiple: float
+    checklist_items: list[dict[str, str]] = []
+

@@ -50,26 +50,13 @@ export function CreateClaimModal({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [milestoneId, setMilestoneId] = useState("");
-  const [contractorName, setContractorName] = useState("Apex Construction Services LLC");
-  const [claimedAmount, setClaimedAmount] = useState("4500000"); // $45,000.00
+  const [contractorName, setContractorName] = useState("");
+  const [claimedAmount, setClaimedAmount] = useState("");
   const [retainageRatePct, setRetainageRatePct] = useState(10);
-  const [priorClaimedPct, setPriorClaimedPct] = useState(45);
-  const [currentClaimedPct, setCurrentClaimedPct] = useState(65);
+  const [priorClaimedPct, setPriorClaimedPct] = useState(0);
+  const [currentClaimedPct, setCurrentClaimedPct] = useState(0);
   const [invoiceNumber, setInvoiceNumber] = useState("");
-  const [evidenceList, setEvidenceList] = useState<EvidenceDraft[]>([
-    {
-      filename: "Framing_Progress_Photo_Elev_East.jpg",
-      type: "PHOTO",
-      file_size_bytes: 3200000,
-      notes: "East elevation steel connector inspection",
-    },
-    {
-      filename: "Partial_Conditional_Lien_Waiver_Steel.pdf",
-      type: "LIEN_WAIVER",
-      file_size_bytes: 1400000,
-      notes: "Trade contractor partial lien waiver",
-    },
-  ]);
+  const [evidenceList, setEvidenceList] = useState<EvidenceDraft[]>([]);
 
   const [checkingInvoice, setCheckingInvoice] = useState(false);
   const [duplicateCheckResult, setDuplicateCheckResult] = useState<DuplicateInvoiceCheckResult | null>(null);

@@ -92,6 +92,16 @@ export default function BudgetPage() {
     queryFn: () => api.identity.getMe(),
   });
 
+  const { data: documentsData } = useQuery({
+    queryKey: ["documents", currentProjectId],
+    queryFn: () => api.documents.list(currentProjectId),
+    enabled: Boolean(currentProjectId),
+  });
+
+  const projectDocs = documentsData?.data || [];
+  const budgetDoc = projectDocs.find((d) => d.document_type === "BUDGET_SOV") || projectDocs[0];
+  const statementDoc = projectDocs.find((d) => d.document_type === "BANK_STATEMENT" || d.original_filename?.toLowerCase().includes("statement") || d.original_filename?.toLowerCase().includes("report")) || projectDocs[0];
+
   const lines = budgetData?.data?.lines || [];
   const changeOrders = changeOrdersData?.data || [];
   const milestones = milestonesData?.data || [];
@@ -183,17 +193,21 @@ export default function BudgetPage() {
             label="Original Baseline"
             value={formatMoney(String(totalOriginalCents))}
             basis="Approved Schedule of Values baseline locked 2025-03-25"
-            citations={[
-              {
-                document_id: "doc_73_budget",
-                document_name: "73_Broadway_Approved_Budget_2025.xlsx",
-                sheet_name: "Master_Budget",
-                page_number: 1,
-                reviewer: "Marcus Vance",
-                reviewed_at: "2025-03-26T14:32:00Z",
-                extraction_version: "2025.1",
-              },
-            ]}
+            citations={
+              budgetDoc
+                ? [
+                    {
+                      document_id: budgetDoc.id,
+                      document_name: budgetDoc.original_filename,
+                      sheet_name: "Master_Budget",
+                      page_number: 1,
+                      reviewer: "Marcus Vance",
+                      reviewed_at: budgetDoc.uploaded_at,
+                      extraction_version: "1.0",
+                    },
+                  ]
+                : []
+            }
           />
 
           <KeyFigure
@@ -214,32 +228,40 @@ export default function BudgetPage() {
               isFavorable: totalCurrentApprovedCents <= totalOriginalCents,
               comparisonLabel: "vs original baseline",
             }}
-            citations={[
-              {
-                document_id: "doc_73_budget",
-                document_name: "Approved Change Orders Register (CO-01 to CO-03)",
-                page_number: 1,
-                reviewer: "Marcus Vance",
-                reviewed_at: "2025-08-18T14:00:00Z",
-                extraction_version: "2025.3",
-              },
-            ]}
+            citations={
+              budgetDoc
+                ? [
+                    {
+                      document_id: budgetDoc.id,
+                      document_name: budgetDoc.original_filename,
+                      page_number: 1,
+                      reviewer: "Marcus Vance",
+                      reviewed_at: budgetDoc.uploaded_at,
+                      extraction_version: "1.0",
+                    },
+                  ]
+                : []
+            }
           />
 
           <KeyFigure
             label="Actual Cleared Spend"
             value={formatMoney(String(totalActualSpendCents))}
             basis="Sum of verified bank debits allocated to active CSI lines"
-            citations={[
-              {
-                document_id: "doc_73_columbia_stmt_sept",
-                document_name: "Columbia Bank & BCB Monthly Statements",
-                page_number: 1,
-                reviewer: "Sarah Lin",
-                reviewed_at: "2025-10-01T11:20:00Z",
-                extraction_version: "2025.3",
-              },
-            ]}
+            citations={
+              statementDoc
+                ? [
+                    {
+                      document_id: statementDoc.id,
+                      document_name: statementDoc.original_filename,
+                      page_number: 1,
+                      reviewer: "Sarah Lin",
+                      reviewed_at: statementDoc.uploaded_at,
+                      extraction_version: "1.0",
+                    },
+                  ]
+                : []
+            }
           />
 
           <KeyFigure
@@ -262,16 +284,20 @@ export default function BudgetPage() {
               isFavorable: contingencyAvailableCents >= contingencyOriginalCents,
               comparisonLabel: "transferred to overruns",
             }}
-            citations={[
-              {
-                document_id: "doc_73_budget",
-                document_name: "Contingency Allocation Ledger (Line 20-000)",
-                row_number: 7,
-                reviewer: "Marcus Vance",
-                reviewed_at: "2025-08-18T14:00:00Z",
-                extraction_version: "2025.3",
-              },
-            ]}
+            citations={
+              budgetDoc
+                ? [
+                    {
+                      document_id: budgetDoc.id,
+                      document_name: budgetDoc.original_filename,
+                      row_number: 7,
+                      reviewer: "Marcus Vance",
+                      reviewed_at: budgetDoc.uploaded_at,
+                      extraction_version: "1.0",
+                    },
+                  ]
+                : []
+            }
           />
         </div>
 
@@ -484,17 +510,21 @@ export default function BudgetPage() {
                               figureLabel={`${line.code} - ${line.name}`}
                               amountOrValue={formatMoney(line.current_approved_amount)}
                               basis={`Approved baseline: ${formatMoney(line.original_amount)}`}
-                              citations={[
-                                {
-                                  document_id: "doc_73_budget",
-                                  document_name: "73_Broadway_Approved_Budget_2025.xlsx",
-                                  sheet_name: "Master_Budget",
-                                  row_number: line.sort_order,
-                                  reviewer: "Marcus Vance",
-                                  reviewed_at: "2025-03-26T14:32:00Z",
-                                  extraction_version: "2025.1",
-                                },
-                              ]}
+                              citations={
+                                budgetDoc
+                                  ? [
+                                      {
+                                        document_id: budgetDoc.id,
+                                        document_name: budgetDoc.original_filename,
+                                        sheet_name: "Master_Budget",
+                                        row_number: line.sort_order,
+                                        reviewer: "Marcus Vance",
+                                        reviewed_at: budgetDoc.uploaded_at,
+                                        extraction_version: "1.0",
+                                      },
+                                    ]
+                                  : []
+                              }
                             />
                           </td>
                         </tr>
@@ -529,16 +559,20 @@ export default function BudgetPage() {
                           figureLabel="Master Construction Budget"
                           amountOrValue={formatMoney(String(totalCurrentApprovedCents))}
                           basis="Master Schedule of Values locked baseline + verified Change Orders"
-                          citations={[
-                            {
-                              document_id: "doc_73_budget",
-                              document_name: "73_Broadway_Approved_Budget_2025.xlsx",
-                              sheet_name: "Summary_Page",
-                              reviewer: "Marcus Vance",
-                              reviewed_at: "2025-03-26T14:32:00Z",
-                              extraction_version: "2025.1",
-                            },
-                          ]}
+                          citations={
+                            budgetDoc
+                              ? [
+                                  {
+                                    document_id: budgetDoc.id,
+                                    document_name: budgetDoc.original_filename,
+                                    sheet_name: "Summary_Page",
+                                    reviewer: "Marcus Vance",
+                                    reviewed_at: budgetDoc.uploaded_at,
+                                    extraction_version: "1.0",
+                                  },
+                                ]
+                              : []
+                          }
                         />
                       </td>
                     </tr>

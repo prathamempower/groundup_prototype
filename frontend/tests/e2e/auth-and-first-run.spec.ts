@@ -17,14 +17,34 @@ test("owner creates an account and launches a first project", async ({ page }) =
   await page.getByRole("button", { name: "Create account and organization" }).click();
   await expect(page).toHaveURL(/\/projects\/new\?firstRun=1/);
 
+  // Stage 0: Welcome & Choice
+  await page.getByRole("heading", { name: "Create a New Project" }).click();
+
+  // Stage 1: Identity & Structure
   await page.getByPlaceholder("e.g. 161 Woodlawn Avenue").fill(`First Project ${Date.now()}`);
   await page.getByPlaceholder("e.g. 161 Woodlawn Ave, Jersey City, NJ").fill("100 Main Street, Boston, MA");
-  await page.getByRole("button", { name: "Next: Project Setup" }).click();
-  await page.getByRole("button", { name: "Next: Review Project" }).click();
-  await page.getByRole("button", { name: "Create Project & Launch Onboarding" }).click();
+  await page.getByRole("button", { name: /Next: Capital & Debt/ }).click();
+
+  // Stage 2: Acquisition & Debt
+  await page.getByRole("button", { name: /Next: Contract & Governance/ }).click();
+
+  // Stage 3: Construction & Operating Model
+  await page.getByRole("button", { name: /Next: Team Delegation/ }).click();
+
+  // Stage 4: Team Delegation
+  await page.getByRole("button", { name: /Next: Source Documents/ }).click();
+
+  // Stage 5: Source Documents Checklist
+  await page.getByRole("button", { name: /Next: Review & Launch/ }).click();
+
+  // Stage 6: Review & Launch
+  await page.getByRole("button", { name: /Launch Project Workspace/ }).click();
   await expect(page).toHaveURL(/\/onboarding/);
   await expect(page.getByText(/Setup/i)).toBeVisible();
   await expect(page.getByText(/73 Broadway|Marcus Vance/)).toHaveCount(0);
+
+  await page.getByRole("banner").getByRole("button", { name: "Exit to Workspace" }).click();
+  await expect(page).toHaveURL(/\/control-center/);
 
   await page.getByRole("button", { name: /Taylor Owner/ }).click();
   await page.getByRole("button", { name: "Sign out" }).click();

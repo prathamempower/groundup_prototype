@@ -157,6 +157,16 @@ class DashboardControlCenterRead(BaseModel):
     open_exceptions_count: int
     top_exceptions: list[DashboardExceptionSummary]
     source_refs: list[SourceRef] = Field(default_factory=list)
+    # Frontend control-center compatibility fields
+    project: dict[str, Any] | None = None
+    kpis: dict[str, Any] | None = None
+    forecast_table: list[dict[str, Any]] | None = None
+    draw_summary: dict[str, Any] | None = None
+    open_exceptions: list[dict[str, Any]] | None = None
+    schedule_risk: dict[str, Any] | None = None
+    progress_trajectory: list[dict[str, Any]] | None = None
+    profit_trend: list[dict[str, Any]] | None = None
+
 
 
 # -----------------------------------------------------------------------------
@@ -199,3 +209,21 @@ class AuditEventRead(BaseModel):
     rationale: str | None = None
     source_citation: str | None = None
     occurred_at: str
+
+
+class NotificationRead(BaseModel):
+    id: str
+    project_id: str = ""
+    title: str
+    message: str
+    type: str = "SYSTEM"  # ALERT, DRAW, SUBMISSION, RECONCILIATION, MILESTONE, SYSTEM
+    severity: str = "INFO"  # CRITICAL, WARNING, INFO, SUCCESS
+    read: bool = False
+    created_at: str
+    link_url: str | None = None
+
+
+
+class DQIWaiveRequest(BaseModel):
+    reason: str = Field(min_length=1)
+

@@ -37,8 +37,8 @@ export function GcRoleBoundaryBanner({ currentRole, project }: GcRoleBoundaryBan
               </span>
             </div>
             <p className="text-caption text-text-secondary mt-0.5">
-              Project: <strong>{project?.name || "Current project"}</strong> • Contractor:{" "}
-              <strong>Apex Construction Services LLC</strong>
+              Project: <strong>{project?.name || "Current project"}</strong> • Entity:{" "}
+              <strong>{project?.project_entity || "Active Development Entity"}</strong>
             </p>
           </div>
         </div>

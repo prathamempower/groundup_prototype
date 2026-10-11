@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import require_role
 from app.core.envelope import ResponseEnvelope
-from app.db.models import User
+from app.db.models import User, ChangeOrder
 from app.db.session import get_db
 from app.modules.budgets.schemas import (
     BudgetCreate,
@@ -23,6 +23,41 @@ from app.modules.budgets.schemas import (
 from app.modules.budgets.service import BudgetService
 
 router = APIRouter(tags=["Budgets"])
+
+
+def serialize_change_order(co: ChangeOrder) -> ChangeOrderRead:
+    target_bl = str(co.lines[0].budget_line_id) if co.lines else ""
+    return ChangeOrderRead(
+        id=str(co.id),
+        organization_id=str(co.organization_id),
+        project_id=str(co.project_id),
+        change_order_number=co.change_order_number,
+        title=co.title,
+        reason=co.reason,
+        scope_description=co.reason,
+        target_budget_line_id=target_bl,
+        funding_source="CONTINGENCY",
+        status=co.status,
+        requested_amount=co.requested_amount,
+        approved_amount=co.approved_amount,
+        requested_by=str(co.requested_by),
+        requested_at=co.created_at.isoformat(),
+        approved_by=str(co.approved_by) if co.approved_by else None,
+        approved_at=co.approved_at.isoformat() if co.approved_at else None,
+        created_at=co.created_at.isoformat(),
+        lines=[
+            ChangeOrderLineRead(
+                id=str(coline.id),
+                change_order_id=str(coline.change_order_id),
+                budget_line_id=str(coline.budget_line_id),
+                amount=coline.amount,
+                description=coline.description,
+                created_at=coline.created_at.isoformat(),
+            )
+            for coline in co.lines
+        ],
+    )
+
 
 
 @router.post("/projects/{pid}/budgets", response_model=ResponseEnvelope[BudgetRead])
@@ -158,6 +193,17 @@ async def approve_budget_endpoint(
     )
 
 
+@router.get("/projects/{pid}/change-orders", response_model=ResponseEnvelope[list[ChangeOrderRead]])
+async def list_change_orders_endpoint(
+    pid: uuid.UUID,
+    user: User = Depends(require_role(["OWNER", "CFO", "GC", "PM"])),
+    db: Session = Depends(get_db),
+):
+    service = BudgetService(db)
+    cos = service.list_change_orders(user, pid)
+    return ResponseEnvelope(data=[serialize_change_order(co) for co in cos])
+
+
 @router.post("/projects/{pid}/change-orders", response_model=ResponseEnvelope[ChangeOrderRead])
 async def request_change_order_endpoint(
     pid: uuid.UUID,
@@ -168,35 +214,8 @@ async def request_change_order_endpoint(
     service = BudgetService(db)
     co = service.request_change_order(user, pid, data)
     db.commit()
+    return ResponseEnvelope(data=serialize_change_order(co))
 
-    return ResponseEnvelope(
-        data=ChangeOrderRead(
-            id=str(co.id),
-            organization_id=str(co.organization_id),
-            project_id=str(co.project_id),
-            change_order_number=co.change_order_number,
-            title=co.title,
-            reason=co.reason,
-            status=co.status,
-            requested_amount=co.requested_amount,
-            approved_amount=co.approved_amount,
-            requested_by=str(co.requested_by),
-            approved_by=str(co.approved_by) if co.approved_by else None,
-            approved_at=co.approved_at.isoformat() if co.approved_at else None,
-            created_at=co.created_at.isoformat(),
-            lines=[
-                ChangeOrderLineRead(
-                    id=str(coline.id),
-                    change_order_id=str(coline.change_order_id),
-                    budget_line_id=str(coline.budget_line_id),
-                    amount=coline.amount,
-                    description=coline.description,
-                    created_at=coline.created_at.isoformat(),
-                )
-                for coline in co.lines
-            ],
-        )
-    )
 
 
 @router.post("/change-orders/{id}/approve", response_model=ResponseEnvelope[ChangeOrderRead])
@@ -208,35 +227,7 @@ async def approve_change_order_endpoint(
     service = BudgetService(db)
     co = service.approve_change_order(user, id)
     db.commit()
-
-    return ResponseEnvelope(
-        data=ChangeOrderRead(
-            id=str(co.id),
-            organization_id=str(co.organization_id),
-            project_id=str(co.project_id),
-            change_order_number=co.change_order_number,
-            title=co.title,
-            reason=co.reason,
-            status=co.status,
-            requested_amount=co.requested_amount,
-            approved_amount=co.approved_amount,
-            requested_by=str(co.requested_by),
-            approved_by=str(co.approved_by) if co.approved_by else None,
-            approved_at=co.approved_at.isoformat() if co.approved_at else None,
-            created_at=co.created_at.isoformat(),
-            lines=[
-                ChangeOrderLineRead(
-                    id=str(coline.id),
-                    change_order_id=str(coline.change_order_id),
-                    budget_line_id=str(coline.budget_line_id),
-                    amount=coline.amount,
-                    description=coline.description,
-                    created_at=coline.created_at.isoformat(),
-                )
-                for coline in co.lines
-            ],
-        )
-    )
+    return ResponseEnvelope(data=serialize_change_order(co))
 
 
 @router.post("/change-orders/{id}/reject", response_model=ResponseEnvelope[ChangeOrderRead])
@@ -249,35 +240,8 @@ async def reject_change_order_endpoint(
     service = BudgetService(db)
     co = service.reject_change_order(user, id, data)
     db.commit()
+    return ResponseEnvelope(data=serialize_change_order(co))
 
-    return ResponseEnvelope(
-        data=ChangeOrderRead(
-            id=str(co.id),
-            organization_id=str(co.organization_id),
-            project_id=str(co.project_id),
-            change_order_number=co.change_order_number,
-            title=co.title,
-            reason=co.reason,
-            status=co.status,
-            requested_amount=co.requested_amount,
-            approved_amount=co.approved_amount,
-            requested_by=str(co.requested_by),
-            approved_by=str(co.approved_by) if co.approved_by else None,
-            approved_at=co.approved_at.isoformat() if co.approved_at else None,
-            created_at=co.created_at.isoformat(),
-            lines=[
-                ChangeOrderLineRead(
-                    id=str(coline.id),
-                    change_order_id=str(coline.change_order_id),
-                    budget_line_id=str(coline.budget_line_id),
-                    amount=coline.amount,
-                    description=coline.description,
-                    created_at=coline.created_at.isoformat(),
-                )
-                for coline in co.lines
-            ],
-        )
-    )
 
 
 @router.post(

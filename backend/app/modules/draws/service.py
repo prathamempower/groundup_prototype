@@ -140,6 +140,15 @@ class DrawService:
             raise NotFoundException(message="Draw not found.")
         return draw
 
+    def list_draws(self, user: User, project_id: uuid.UUID) -> list[Draw]:
+        project = self._get_project_with_access(user, project_id)
+        return list(
+            self.db.scalars(
+                select(Draw).where(Draw.project_id == project.id).order_by(Draw.created_at.asc())
+            ).all()
+        )
+
+
     def update_draw_lines(
         self, user: User, draw_id: uuid.UUID, data: UpdateDrawLinesRequest
     ) -> list[DrawLine]:

@@ -490,23 +490,25 @@ export default function DocumentsPage() {
                             </button>
                           )}
 
-                          <button
+                          <Button
                             type="button"
-                            onClick={() => setManualEntryDoc(doc)}
+                            variant="ghost"
+                            size="icon"
                             title="Manual Line Entry Fallback"
-                            className="p-1 rounded text-text-muted hover:text-text-primary hover:bg-subtle transition-colors"
+                            onClick={() => setManualEntryDoc(doc)}
                           >
                             <Edit className="h-3.5 w-3.5" />
-                          </button>
+                          </Button>
 
-                          <button
+                          <Button
                             type="button"
-                            onClick={() => handleDownload(doc.id, doc.original_filename)}
+                            variant="ghost"
+                            size="icon"
                             title="Download Source Document"
-                            className="p-1 rounded text-text-muted hover:text-text-primary hover:bg-subtle transition-colors"
+                            onClick={() => handleDownload(doc.id, doc.original_filename)}
                           >
                             <Download className="h-3.5 w-3.5" />
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>

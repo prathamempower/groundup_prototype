@@ -38,7 +38,12 @@ export function AppShell({ children }: AppShellProps) {
     const previouslyAuthenticated =
       typeof window !== "undefined" && window.localStorage.getItem("groundup_session_seen") === "1";
     if (previouslyAuthenticated) {
-      router.replace("/auth/session-expired");
+      window.localStorage.removeItem("groundup_session_seen");
+      const returnTo =
+        typeof window !== "undefined"
+          ? `${window.location.pathname}${window.location.search}`
+          : pathname;
+      router.replace(`/auth/session-expired?returnTo=${encodeURIComponent(returnTo)}`);
       return;
     }
     const returnTo =

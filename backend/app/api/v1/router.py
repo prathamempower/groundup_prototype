@@ -11,6 +11,7 @@ from app.api.v1 import (
     progress,
     reporting,
     spend,
+    submissions,
 )
 
 api_v1_router = APIRouter()
@@ -44,3 +45,6 @@ api_v1_router.include_router(economics.router, tags=["Economics & Investors"])
 
 # Alerts, Reports & Audit router
 api_v1_router.include_router(reporting.router, tags=["Alerts, Reports & Audit"])
+
+# GC Submissions router
+api_v1_router.include_router(submissions.router, tags=["General Contractor Submissions"])

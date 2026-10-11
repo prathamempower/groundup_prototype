@@ -55,6 +55,18 @@ export default function SubmissionsPage() {
   const submissions = submissionsData?.data || [];
   const milestones = milestonesData?.data || [];
 
+  const { data: documentsData } = useQuery({
+    queryKey: ["documents", currentProjectId],
+    queryFn: () => api.documents.list(currentProjectId),
+    enabled: Boolean(currentProjectId),
+  });
+
+  const projectDocs = documentsData?.data || [];
+  const primaryDoc = projectDocs[0];
+  const inspectionDoc = projectDocs.find((d) => d.document_type === "INSPECTION" || d.original_filename?.toLowerCase().includes("report")) || primaryDoc;
+  const sovDoc = projectDocs.find((d) => d.document_type === "BUDGET_SOV" || d.original_filename?.toLowerCase().includes("budget")) || primaryDoc;
+  const contractDoc = projectDocs.find((d) => d.document_type === "CONTRACT" || d.original_filename?.toLowerCase().includes("loan")) || primaryDoc;
+
   // Metrics computation
   const totalClaimed = submissions.reduce((acc, s) => acc + Number(s.claimed_amount || 0), 0);
   const underReviewAmount = submissions
@@ -123,65 +135,81 @@ export default function SubmissionsPage() {
             label="Total Claims Submitted"
             value={formatMoney(String(totalClaimed))}
             basis={`${submissions.length} Total packages across all CSI divisions`}
-            citations={[
-              {
-                document_id: "doc_gc_billing_log",
-                document_name: "General Contractor Certified Billing Log",
-                page_number: 1,
-                row_number: 4,
-                reviewer: "Sarah Lin (CFO)",
-                reviewed_at: new Date().toISOString(),
-                extraction_version: "v2.1",
-              },
-            ]}
+            citations={
+              primaryDoc
+                ? [
+                    {
+                      document_id: primaryDoc.id,
+                      document_name: primaryDoc.original_filename,
+                      page_number: 1,
+                      row_number: 4,
+                      reviewer: "Sarah Lin (CFO)",
+                      reviewed_at: primaryDoc.uploaded_at,
+                      extraction_version: "v2.1",
+                    },
+                  ]
+                : []
+            }
           />
 
           <KeyFigure
             label="Under Sponsor Review"
             value={formatMoney(String(underReviewAmount))}
             basis={`${submissions.filter((s) => s.status === "UNDER_REVIEW").length} Active package(s) awaiting PM/CFO signoff`}
-            citations={[
-              {
-                document_id: "doc_73_draw3_insp",
-                document_name: "73_Broadway_Draw_3_Lender_Inspection_Report.pdf",
-                page_number: 2,
-                reviewer: "David Ross (PM)",
-                reviewed_at: "2025-09-18T10:30:00Z",
-                extraction_version: "v2.0",
-              },
-            ]}
+            citations={
+              inspectionDoc
+                ? [
+                    {
+                      document_id: inspectionDoc.id,
+                      document_name: inspectionDoc.original_filename,
+                      page_number: 2,
+                      reviewer: "David Ross (PM)",
+                      reviewed_at: inspectionDoc.uploaded_at,
+                      extraction_version: "v2.0",
+                    },
+                  ]
+                : []
+            }
           />
 
           <KeyFigure
             label="Approved & Certified"
             value={formatMoney(String(approvedAmount))}
             basis={`${submissions.filter((s) => s.status === "APPROVED").length} Certified package(s) eligible for draw`}
-            citations={[
-              {
-                document_id: "doc_draw_sov_cert",
-                document_name: "Certified Draw Schedule of Values",
-                page_number: 1,
-                reviewer: "Marcus Vance (Owner)",
-                reviewed_at: "2025-08-18T14:00:00Z",
-                extraction_version: "v1.4",
-              },
-            ]}
+            citations={
+              sovDoc
+                ? [
+                    {
+                      document_id: sovDoc.id,
+                      document_name: sovDoc.original_filename,
+                      page_number: 1,
+                      reviewer: "Marcus Vance (Owner)",
+                      reviewed_at: sovDoc.uploaded_at,
+                      extraction_version: "v1.4",
+                    },
+                  ]
+                : []
+            }
           />
 
           <KeyFigure
             label="Retainage Withheld (10%)"
             value={formatMoney(String(totalRetainage))}
             basis="Cumulative escrow reserve for final closeout"
-            citations={[
-              {
-                document_id: "doc_contract_escrow",
-                document_name: "Master Construction Contract Escrow Schedule",
-                page_number: 6,
-                reviewer: "Sarah Lin (CFO)",
-                reviewed_at: "2025-03-11T14:20:00Z",
-                extraction_version: "v1.0",
-              },
-            ]}
+            citations={
+              contractDoc
+                ? [
+                    {
+                      document_id: contractDoc.id,
+                      document_name: contractDoc.original_filename,
+                      page_number: 1,
+                      reviewer: "Sarah Lin (CFO)",
+                      reviewed_at: contractDoc.uploaded_at,
+                      extraction_version: "v1.0",
+                    },
+                  ]
+                : []
+            }
           />
         </div>
 

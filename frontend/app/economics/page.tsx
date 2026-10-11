@@ -117,6 +117,38 @@ export default function EconomicsPage() {
 
   const closeoutReport = closeoutData?.data;
 
+  // Project Documents Query
+  const { data: documentsData } = useQuery({
+    queryKey: ["documents", currentProjectId],
+    queryFn: () => api.documents.list(currentProjectId),
+    enabled: Boolean(currentProjectId),
+  });
+
+  const projectDocs = documentsData?.data || [];
+  const primaryDoc = projectDocs[0];
+  const proFormaDoc = projectDocs.find((d) => d.document_type === "BUDGET_SOV" || d.original_filename?.toLowerCase().includes("budget") || d.original_filename?.toLowerCase().includes("loan")) || primaryDoc;
+  const costDoc = projectDocs.find((d) => d.document_type === "BUDGET_SOV" || d.original_filename?.toLowerCase().includes("budget")) || primaryDoc;
+  const closeoutDoc = projectDocs.find((d) => d.original_filename?.toLowerCase().includes("closeout") || d.original_filename?.toLowerCase().includes("settlement") || d.original_filename?.toLowerCase().includes("payoff")) || primaryDoc;
+
+  // Change Orders Query
+  const { data: changeOrdersData } = useQuery({
+    queryKey: ["change-orders", currentProjectId],
+    queryFn: () => api.budget.getChangeOrders(currentProjectId),
+    enabled: Boolean(currentProjectId),
+  });
+
+  const changeOrders = changeOrdersData?.data || [];
+  const approvedChangeOrders = changeOrders.filter((co) => co.status === "APPROVED");
+
+  // Schedule Forecast Query
+  const { data: scheduleForecastData } = useQuery({
+    queryKey: ["scheduleForecast", currentProjectId],
+    queryFn: () => api.progress.getScheduleForecast(currentProjectId),
+    enabled: Boolean(currentProjectId),
+  });
+
+  const scheduleForecast = scheduleForecastData?.data;
+
   // The current user determines which economics actions are available.
   const { data: currentUserData } = useQuery({
     queryKey: ["me"],
@@ -132,49 +164,57 @@ export default function EconomicsPage() {
   };
 
   // Citations for Sources Modal
-  const gdvCitations: SourceCitation[] = [
-    {
-      document_id: "doc_73_proforma",
-      document_name: "73_Broadway_Approved_Offering_Pro_Forma.pdf",
-      page_number: 2,
-      reviewer: "Marcus Vance (Owner)",
-      reviewed_at: "2025-03-10T14:00:00Z",
-      extraction_version: "v1.4",
-    },
-  ];
+  const gdvCitations: SourceCitation[] = proFormaDoc
+    ? [
+        {
+          document_id: proFormaDoc.id,
+          document_name: proFormaDoc.original_filename,
+          page_number: 1,
+          reviewer: "Marcus Vance (Owner)",
+          reviewed_at: proFormaDoc.uploaded_at,
+          extraction_version: "v1.4",
+        },
+      ]
+    : [];
 
-  const costCitations: SourceCitation[] = [
-    {
-      document_id: "doc_73_budget_master",
-      document_name: "73_Broadway_Master_Budget_Schedule_of_Values.pdf",
-      page_number: 1,
-      reviewer: "Sarah Lin (CFO)",
-      reviewed_at: "2025-04-01T09:30:00Z",
-      extraction_version: "v2.0",
-    },
-  ];
+  const costCitations: SourceCitation[] = costDoc
+    ? [
+        {
+          document_id: costDoc.id,
+          document_name: costDoc.original_filename,
+          page_number: 1,
+          reviewer: "Sarah Lin (CFO)",
+          reviewed_at: costDoc.uploaded_at,
+          extraction_version: "v2.0",
+        },
+      ]
+    : [];
 
-  const profitCitations: SourceCitation[] = [
-    {
-      document_id: "doc_73_proforma",
-      document_name: "73_Broadway_Approved_Offering_Pro_Forma.pdf",
-      page_number: 5,
-      reviewer: "Sarah Lin (CFO)",
-      reviewed_at: "2025-04-01T10:15:00Z",
-      extraction_version: "v2.0",
-    },
-  ];
+  const profitCitations: SourceCitation[] = proFormaDoc
+    ? [
+        {
+          document_id: proFormaDoc.id,
+          document_name: proFormaDoc.original_filename,
+          page_number: 1,
+          reviewer: "Sarah Lin (CFO)",
+          reviewed_at: proFormaDoc.uploaded_at,
+          extraction_version: "v2.0",
+        },
+      ]
+    : [];
 
-  const returnCitations: SourceCitation[] = [
-    {
-      document_id: "doc_392_closeout",
-      document_name: "392_First_St_Final_Audited_Settlement_and_IRR_Model.xlsx",
-      page_number: 1,
-      reviewer: "Sarah Lin (CFO)",
-      reviewed_at: "2025-02-14T16:30:00Z",
-      extraction_version: "v1.0",
-    },
-  ];
+  const returnCitations: SourceCitation[] = closeoutDoc
+    ? [
+        {
+          document_id: closeoutDoc.id,
+          document_name: closeoutDoc.original_filename,
+          page_number: 1,
+          reviewer: "Sarah Lin (CFO)",
+          reviewed_at: closeoutDoc.uploaded_at,
+          extraction_version: "v1.0",
+        },
+      ]
+    : [];
 
   return (
     <div className="space-y-6 pb-16">
@@ -397,26 +437,34 @@ export default function EconomicsPage() {
                   <div className="text-caption font-bold text-text-primary">
                     1. Approved Change Orders & Scope Adjustments
                   </div>
-                  <ul className="text-caption text-text-secondary space-y-1.5 list-disc list-inside">
-                    <li>
-                      <strong className="text-text-primary">CO-01 Subgrade Rock Ledge:</strong> +$20,000.00 funded from Contingency line 20-000.
-                    </li>
-                    <li>
-                      <strong className="text-text-primary">CO-02 Structural Steel Surcharge:</strong> +$80,000.00 ASTM A992 wide-flange mill surcharge funded from Contingency.
-                    </li>
-                    <li>
-                      <strong className="text-text-primary">CO-03 HVAC VRF Efficiency Upgrade:</strong> +$50,000.00 rooftop VRF heat pump upgrade funded from Contingency.
-                    </li>
-                  </ul>
+                  {approvedChangeOrders.length > 0 ? (
+                    <ul className="text-caption text-text-secondary space-y-1.5 list-disc list-inside">
+                      {approvedChangeOrders.map((co) => (
+                        <li key={co.id}>
+                          <strong className="text-text-primary">{co.title}:</strong> +{formatMoney(co.approved_amount || co.requested_amount)} funded from {co.funding_source || "Contingency"}.
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-caption text-text-secondary">
+                      No approved change order adjustments recorded. Baseline contingency preserved.
+                    </p>
+                  )}
                 </div>
 
                 <div className="rounded-lg border border-danger/30 bg-danger-subtle/30 p-4 space-y-2">
                   <div className="text-caption font-bold text-danger">
                     2. Schedule Delay Financing Carry Cost Exposure
                   </div>
-                  <p className="text-caption text-text-secondary">
-                    Structural steel fabrication delay pushes milestone completion by 45 days. At $18,500/month carrying cost on senior construction debt, carrying cost accumulates <strong className="text-danger">+$27,750.00</strong> in projected interest exposure.
-                  </p>
+                  {scheduleForecast && (scheduleForecast.delay_days > 0 || Number(scheduleForecast.total_carry_cost_exposure) > 0) ? (
+                    <p className="text-caption text-text-secondary">
+                      Milestone &quot;{scheduleForecast.critical_path_milestone}&quot; slippage pushes completion by {scheduleForecast.delay_days} days. Projected debt carrying cost accumulates <strong className="text-danger">+{formatMoney(scheduleForecast.total_carry_cost_exposure || "0")}</strong> in interest exposure.
+                    </p>
+                  ) : (
+                    <p className="text-caption text-text-secondary">
+                      Project is tracking on schedule with no projected debt carry cost variance.
+                    </p>
+                  )}
                 </div>
               </div>
 

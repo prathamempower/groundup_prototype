@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import { PageHeader } from "@/components/layout/page-header";
 import { PublicationManagerPanel } from "@/components/investor/publication-manager-panel";
 import { InvestorUpdatePreview } from "@/components/investor/investor-update-preview";
+import { Button } from "@/components/ui/button";
 import {
   ShieldCheck,
   Printer,
@@ -65,36 +66,36 @@ export default function InvestorUpdatePage() {
           <div className="flex items-center gap-2">
             {!isInvestorRole && (
               <div className="flex rounded-md border border-border bg-subtle p-0.5 text-caption print:hidden">
-                <button
+                <Button
+                  type="button"
+                  variant={viewMode === "MANAGER" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="px-3 py-1"
                   onClick={() => setViewMode("MANAGER")}
-                  className={`rounded px-3 py-1 font-medium transition-colors ${
-                    viewMode === "MANAGER"
-                      ? "bg-surface text-text-primary shadow-xs font-semibold"
-                      : "text-text-muted hover:text-text-primary"
-                  }`}
                 >
                   Publication Manager
-                </button>
-                <button
+                </Button>
+                <Button
+                  type="button"
+                  variant={viewMode === "INVESTOR_VIEW" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="px-3 py-1"
                   onClick={() => setViewMode("INVESTOR_VIEW")}
-                  className={`rounded px-3 py-1 font-medium transition-colors ${
-                    viewMode === "INVESTOR_VIEW"
-                      ? "bg-surface text-text-primary shadow-xs font-semibold"
-                      : "text-text-muted hover:text-text-primary"
-                  }`}
                 >
                   Investor Portal View
-                </button>
+                </Button>
               </div>
             )}
 
-            <button
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 print:hidden"
               onClick={() => window.print()}
-              className="flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-1.5 text-body font-medium text-text-primary hover:bg-subtle shadow-xs focus-visible:outline-primary print:hidden"
             >
               <Printer className="h-4 w-4 text-text-muted" />
               <span>Print Snapshot</span>
-            </button>
+            </Button>
           </div>
         }
       />

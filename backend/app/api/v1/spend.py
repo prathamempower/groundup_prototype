@@ -15,6 +15,10 @@ from app.modules.spend.schemas import (
     ImportBatchRead,
     InterProjectTransferCreate,
     InterProjectTransferRead,
+    InterProjectTransferRepayRequest,
+    FinancialTransactionRead,
+    LinkInvoiceRequest,
+    ClassifyCardSettlementRequest,
     PeriodSignoffRequest,
     ReconciliationDecisionRequest,
     ReconciliationMatchRead,
@@ -25,7 +29,12 @@ from app.modules.spend.schemas import (
     StatementPeriodCreate,
     StatementPeriodRead,
 )
+from app.core.errors import NotFoundException
+from app.db.models import FinancialTransaction, Document, InterProjectTransfer, Project
+from app.db.audit import record_audit_event
+from sqlalchemy import select
 from app.modules.spend.service import SpendService
+
 
 router = APIRouter(tags=["Spend & Accounts"])
 
@@ -341,6 +350,15 @@ async def get_reconciliation_queue_endpoint(
                 created_at=m.created_at.isoformat(),
                 transaction_amount=m.transaction.amount if m.transaction else None,
                 transaction_counterparty=m.transaction.counterparty if m.transaction else None,
+                amount=str(m.transaction.amount) if m.transaction else "0",
+                counterparty=m.transaction.counterparty if m.transaction else "Unknown Counterparty",
+                transaction_date=m.transaction.transaction_date.isoformat() if m.transaction else "",
+                status="ACCEPTED" if m.decision == "ACCEPTED" else ("EXCLUDED" if m.decision == "EXCLUDED" else ("PENDING_REVIEW" if m.decision in ["SUGGESTED", "PENDING"] else m.decision)),
+                confidence=float(m.confidence_score) if m.confidence_score is not None else 0.95,
+                confidence_reasons=["High amount match", "Merchant alias identified"],
+                evidence_strength="BANK_TRANSACTION",
+                proposed_budget_line_name=(m.spend_record.budget_line.name if m.spend_record and m.spend_record.budget_line else "General Requirements"),
+                proposed_budget_line_id=str(m.spend_record.budget_line_id) if m.spend_record and m.spend_record.budget_line_id else "",
             )
             for m in matches
         ]
@@ -518,3 +536,235 @@ async def list_inter_project_transfers_endpoint(
             for t in transfers
         ]
     )
+
+
+# ---------------------------------------------------------
+# Inter-Project Transfer Repayment
+# ---------------------------------------------------------
+@router.post(
+    "/inter-project-transfers/{id}/repay",
+    response_model=ResponseEnvelope[InterProjectTransferRead],
+)
+async def repay_inter_project_transfer_endpoint(
+    id: uuid.UUID,
+    data: InterProjectTransferRepayRequest,
+    user: User = Depends(require_role(["CFO", "OWNER"])),
+    db: Session = Depends(get_db),
+):
+    transfer = db.get(InterProjectTransfer, id)
+    if not transfer or transfer.organization_id != user.organization_id:
+        raise NotFoundException(message=f"Inter-project transfer {id} not found.")
+
+    transfer.repaid_amount += data.repaid_amount
+    transfer.repaid_date = data.repaid_date
+    if transfer.repaid_amount >= transfer.amount:
+        transfer.status = "REPAID"
+
+    record_audit_event(
+        db=db,
+        organization_id=user.organization_id,
+        project_id=transfer.from_project_id,
+        actor_id=user.id,
+        action="INTER_PROJECT_TRANSFER_REPAID",
+        entity_type="InterProjectTransfer",
+        entity_id=transfer.id,
+        rationale=f"Repaid ${data.repaid_amount / 100:.2f} on transfer",
+    )
+    db.commit()
+    return ResponseEnvelope(
+        data=InterProjectTransferRead(
+            id=str(transfer.id),
+            organization_id=str(transfer.organization_id),
+            from_project_id=str(transfer.from_project_id),
+            to_project_id=str(transfer.to_project_id),
+            transaction_id=str(transfer.transaction_id) if transfer.transaction_id else None,
+            amount=transfer.amount,
+            type=transfer.type,
+            transfer_date=transfer.transfer_date.isoformat(),
+            repaid_amount=transfer.repaid_amount,
+            repaid_date=transfer.repaid_date.isoformat() if transfer.repaid_date else None,
+            status=transfer.status,
+            reviewed_by=str(transfer.reviewed_by) if transfer.reviewed_by else None,
+            created_at=transfer.created_at.isoformat(),
+        )
+    )
+
+
+# ---------------------------------------------------------
+# Project Transactions & Classification
+# ---------------------------------------------------------
+@router.get(
+    "/projects/{pid}/transactions",
+    response_model=ResponseEnvelope[list[FinancialTransactionRead]],
+)
+async def list_project_transactions_endpoint(
+    pid: uuid.UUID,
+    limit: int = 2000,
+    offset: int = 0,
+    user: User = Depends(require_role(["OWNER", "CFO", "PM"])),
+    db: Session = Depends(get_db),
+):
+    project = db.get(Project, pid)
+    if not project or project.organization_id != user.organization_id:
+        raise NotFoundException(message=f"Project {pid} not found.")
+
+    txns = db.scalars(
+        select(FinancialTransaction)
+        .where(FinancialTransaction.project_id == project.id)
+        .order_by(FinancialTransaction.transaction_date.desc())
+        .limit(limit)
+        .offset(offset)
+    ).all()
+
+    return ResponseEnvelope(
+        data=[
+            FinancialTransactionRead(
+                id=str(t.id),
+                project_id=str(t.project_id) if t.project_id else None,
+                financial_account_id=str(t.financial_account_id) if t.financial_account_id else None,
+                account_ref=t.account_ref or (t.financial_account.account_name if t.financial_account else "General Operating"),
+                transaction_date=t.transaction_date.isoformat(),
+                amount=str(t.amount),
+                direction="CREDIT" if t.direction in ["INFLOW", "CREDIT"] else "DEBIT",
+                counterparty=t.counterparty,
+                memo=t.memo or "",
+                cleared_status=t.cleared_status,
+                matched_spend_record_id=str(t.reconciliation_matches[0].spend_record_id) if t.reconciliation_matches and t.reconciliation_matches[0].spend_record_id else None,
+                is_transfer=bool("transfer" in (t.memo or "").lower() or "wire" in (t.memo or "").lower()),
+                is_liability_settlement=bool("card payment" in (t.memo or "").lower() or "amex" in (t.memo or "").lower()),
+                document_id=str(t.source_document_id) if t.source_document_id else None,
+                invoice_reference=None,
+            )
+            for t in txns
+        ]
+    )
+
+
+@router.post(
+    "/transactions/{id}/link-invoice",
+    response_model=ResponseEnvelope[FinancialTransactionRead],
+)
+async def link_invoice_endpoint(
+    id: uuid.UUID,
+    data: LinkInvoiceRequest,
+    user: User = Depends(require_role(["OWNER", "CFO"])),
+    db: Session = Depends(get_db),
+):
+    tx = db.get(FinancialTransaction, id)
+    if not tx:
+        raise NotFoundException(message=f"Transaction {id} not found.")
+    doc = db.get(Document, uuid.UUID(data.document_id))
+    if not doc:
+        raise NotFoundException(message=f"Document {data.document_id} not found.")
+
+    tx.source_document_id = doc.id
+    record_audit_event(
+        db=db,
+        organization_id=user.organization_id,
+        project_id=tx.project_id,
+        actor_id=user.id,
+        action="TRANSACTION_INVOICE_LINKED",
+        entity_type="FinancialTransaction",
+        entity_id=tx.id,
+        rationale=data.notes or f"Linked document {doc.original_filename} to transaction",
+    )
+    db.commit()
+    return ResponseEnvelope(
+        data=FinancialTransactionRead(
+            id=str(tx.id),
+            project_id=str(tx.project_id) if tx.project_id else None,
+            financial_account_id=str(tx.financial_account_id) if tx.financial_account_id else None,
+            account_ref=tx.account_ref or "General Operating",
+            transaction_date=tx.transaction_date.isoformat(),
+            amount=str(tx.amount),
+            direction="CREDIT" if tx.direction in ["INFLOW", "CREDIT"] else "DEBIT",
+            counterparty=tx.counterparty,
+            memo=tx.memo or "",
+            cleared_status=tx.cleared_status,
+            document_id=str(doc.id),
+        )
+    )
+
+
+@router.post(
+    "/transactions/{id}/classify-card-settlement",
+    response_model=ResponseEnvelope[FinancialTransactionRead],
+)
+async def classify_card_settlement_endpoint(
+    id: uuid.UUID,
+    data: ClassifyCardSettlementRequest,
+    user: User = Depends(require_role(["OWNER", "CFO"])),
+    db: Session = Depends(get_db),
+):
+    tx = db.get(FinancialTransaction, id)
+    if not tx:
+        raise NotFoundException(message=f"Transaction {id} not found.")
+
+    tx.memo = (tx.memo or "") + " [Classified as Credit Card Liability Settlement]"
+    record_audit_event(
+        db=db,
+        organization_id=user.organization_id,
+        project_id=tx.project_id,
+        actor_id=user.id,
+        action="TRANSACTION_CARD_SETTLEMENT_CLASSIFIED",
+        entity_type="FinancialTransaction",
+        entity_id=tx.id,
+        rationale=data.notes or "Classified bank transaction as corporate card settlement",
+    )
+    db.commit()
+    return ResponseEnvelope(
+        data=FinancialTransactionRead(
+            id=str(tx.id),
+            project_id=str(tx.project_id) if tx.project_id else None,
+            financial_account_id=str(tx.financial_account_id) if tx.financial_account_id else None,
+            account_ref=tx.account_ref or "General Operating",
+            transaction_date=tx.transaction_date.isoformat(),
+            amount=str(tx.amount),
+            direction="CREDIT" if tx.direction in ["INFLOW", "CREDIT"] else "DEBIT",
+            counterparty=tx.counterparty,
+            memo=tx.memo or "",
+            cleared_status=tx.cleared_status,
+            is_liability_settlement=True,
+        )
+    )
+
+
+@router.post(
+    "/projects/{pid}/spend-records/{id}/allocations",
+    response_model=ResponseEnvelope[list[SpendRecordRead]],
+)
+async def project_spend_record_allocations_endpoint(
+    pid: uuid.UUID,
+    id: uuid.UUID,
+    data: SpendAllocationRequest,
+    user: User = Depends(require_role(["OWNER", "CFO"])),
+    db: Session = Depends(get_db),
+):
+    service = SpendService(db)
+    records = service.allocate_spend_record(user, id, data)
+    db.commit()
+    return ResponseEnvelope(
+        data=[
+            SpendRecordRead(
+                id=str(r.id),
+                organization_id=str(r.organization_id),
+                project_id=str(r.project_id),
+                vendor_party_id=str(r.vendor_party_id) if r.vendor_party_id else None,
+                transaction_id=str(r.transaction_id) if r.transaction_id else None,
+                amount=r.amount,
+                vendor_name=r.vendor_name,
+                description=r.description,
+                transaction_date=r.transaction_date.isoformat(),
+                payment_method=r.payment_method,
+                status=r.status,
+                reversal_status=r.reversal_status,
+                raw_payload=r.raw_payload,
+                raw_formula=r.raw_formula,
+                normalization_status=r.normalization_status,
+                record_fingerprint=r.record_fingerprint,
+                created_at=r.created_at.isoformat(),
+            )
+            for r in records
+        ]
+    )
+

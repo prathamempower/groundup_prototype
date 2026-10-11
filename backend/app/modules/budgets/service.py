@@ -356,9 +356,20 @@ class BudgetService:
             lines=line_views,
         )
 
+    def list_change_orders(self, user: User, project_id: uuid.UUID) -> list[ChangeOrder]:
+        project = self._get_project_with_access(user, project_id)
+        return list(
+            self.db.scalars(
+                select(ChangeOrder)
+                .where(ChangeOrder.project_id == project.id)
+                .order_by(ChangeOrder.created_at.desc())
+            ).all()
+        )
+
     def request_change_order(
         self, user: User, project_id: uuid.UUID, data: ChangeOrderCreate
     ) -> ChangeOrder:
+
         if user.role not in ["OWNER", "CFO", "GC"]:
             raise ForbiddenException(message="Role not permitted to request change order.")
 

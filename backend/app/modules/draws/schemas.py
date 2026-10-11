@@ -87,6 +87,16 @@ class DrawRead(BaseModel):
     total_funded: int = 0
     lines: list[DrawLineRead] = []
     requirements: list[DrawRequirementRead] = []
+    # Frontend compatibility fields
+    requested_amount: str = "0"
+    recommended_amount: str = "0"
+    approved_amount: str = "0"
+    funded_amount: str = "0"
+    shortfall_amount: str = "0"
+    lender_name: str = "Columbia Bank"
+    conditions: list[dict[str, str]] = []
+    packet_checklist: list[dict[str, str]] = []
+
 
 
 class UpdateDrawLinesRequest(BaseModel):
