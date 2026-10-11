@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -157,49 +158,62 @@ export default function CreateProjectPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-app">
+    <div className="min-h-screen bg-[#f8fafc]">
       {/* Top Navbar */}
-      <header className="border-b border-border bg-surface px-6 py-3.5 sticky top-0 z-20 shadow-xs">
+      <header className="border-b border-slate-200/80 bg-white px-6 py-3 sticky top-0 z-20 shadow-2xs">
         <div className="mx-auto max-w-6xl flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-hover text-white shadow-xs">
-              <Layers className="h-4 w-4" />
+          <Link href="/projects" className="flex items-center gap-2.5 transition-opacity hover:opacity-85">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 text-white shadow-2xs">
+              <Building2 className="h-4 w-4" />
             </div>
-            <span className="text-section font-bold tracking-tight text-text-primary">
-              GroundUp <span className="text-primary-accent font-extrabold">AI</span>
+            <span className="text-sm font-bold tracking-tight text-slate-900">
+              GroundUp
             </span>
-          </div>
+          </Link>
           <div className="flex items-center gap-3">
-            <Button variant="tertiary" size="sm" onClick={handleSaveDraft} disabled={createMutation.isPending}>
-              <Save className="mr-1.5 h-3.5 w-3.5" />
+            <button
+              type="button"
+              onClick={handleSaveDraft}
+              disabled={createMutation.isPending}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              <Save className="h-3.5 w-3.5 text-slate-500" />
               Save Draft
-            </Button>
-            <Button variant="secondary" size="sm" onClick={() => router.push("/control-center")}>
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/projects")}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition-colors cursor-pointer"
+            >
               Exit Setup
-            </Button>
+            </button>
           </div>
         </div>
       </header>
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Top Header */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="rounded bg-primary-subtle px-2 py-0.5 text-xs font-semibold text-primary">
-                Owner Workspace
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-700 shadow-2xs">
+                <Building2 className="h-3 w-3 text-blue-600" />
+                Owner Setup
               </span>
-              <span className="text-caption text-text-muted">UF-01 Project Bootstrap</span>
+              <span className="text-xs text-slate-500">Project Workspace Configuration</span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Project Bootstrap & Governance Setup
             </h1>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Configure project identity, capital structures, contracting models, and delegate team access.
+            </p>
           </div>
         </div>
 
         {errorMessage && (
-          <div className="mb-6 rounded-lg border border-danger-subtle bg-danger-subtle/40 p-4 text-sm text-danger flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 shrink-0" />
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50/80 p-4 text-xs font-medium text-red-700 flex items-center gap-2.5">
+            <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
             <span>{errorMessage}</span>
           </div>
         )}
@@ -207,9 +221,9 @@ export default function CreateProjectPage() {
         {/* Two-Column Responsive Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Progress Rail */}
-          <aside className="lg:col-span-4 rounded-xl border border-border bg-surface p-5 shadow-xs">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-4">
-              Bootstrap Stages
+          <aside className="lg:col-span-4 rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3.5">
+              Setup Stages
             </h2>
             <nav className="space-y-1">
               {stagesList.map((s) => (
@@ -217,21 +231,21 @@ export default function CreateProjectPage() {
                   key={s.num}
                   type="button"
                   onClick={() => s.num <= stage && setStage(s.num as any)}
-                  className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-all ${
+                  className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-left text-xs transition-all ${
                     stage === s.num
-                      ? "bg-primary text-white font-semibold"
+                      ? "bg-slate-900 text-white font-semibold shadow-xs"
                       : stage > s.num
-                      ? "text-text-primary hover:bg-subtle font-medium"
-                      : "text-text-muted cursor-not-allowed opacity-75"
+                      ? "text-slate-800 hover:bg-slate-50 font-medium"
+                      : "text-slate-400 cursor-not-allowed opacity-60"
                   }`}
                 >
                   <span
-                    className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs ${
+                    className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[11px] ${
                       stage === s.num
-                        ? "bg-white text-primary font-bold"
+                        ? "bg-white/20 text-white font-bold"
                         : stage > s.num
-                        ? "bg-success-subtle text-success font-bold"
-                        : "bg-subtle text-text-muted"
+                        ? "bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold"
+                        : "bg-slate-100 text-slate-400"
                     }`}
                   >
                     {stage > s.num ? "✓" : s.num}
@@ -241,9 +255,9 @@ export default function CreateProjectPage() {
               ))}
             </nav>
 
-            <div className="mt-8 border-t border-border pt-4 text-xs text-text-muted space-y-2">
-              <p className="font-semibold text-text-secondary">Progressive Activation</p>
-              <p>
+            <div className="mt-6 border-t border-slate-100 pt-4 text-xs text-slate-500 space-y-1.5">
+              <p className="font-semibold text-slate-700">Progressive Activation</p>
+              <p className="text-[11px] leading-relaxed">
                 GroundUp does not require every detail upfront. Core identity creates the workspace;
                 detailed financing and milestones can be completed progressively by the team.
               </p>
@@ -251,40 +265,44 @@ export default function CreateProjectPage() {
           </aside>
 
           {/* Right Main Work Area */}
-          <main className="lg:col-span-8 rounded-xl border border-border bg-surface p-6 sm:p-8 shadow-xs">
+          <main className="lg:col-span-8 rounded-xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-2xs">
             {/* Stage 0: Welcome & Choices */}
             {stage === 0 && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-xl font-bold text-text-primary">Welcome to Project Setup</h2>
-                  <p className="mt-1 text-sm text-text-secondary leading-relaxed">
-                    GroundUp AI provides real-time control across identity, loans, budgets, field evidence,
+                  <h2 className="text-lg font-bold text-slate-900">Welcome to Project Setup</h2>
+                  <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                    GroundUp provides real-time control across identity, loans, budgets, field evidence,
                     and investor distributions. Choose how you would like to initiate this workspace.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                   <div
                     onClick={() => setStage(1)}
-                    className="cursor-pointer rounded-xl border-2 border-primary bg-primary-subtle/10 p-5 hover:bg-primary-subtle/20 transition-all"
+                    className="cursor-pointer rounded-xl border-2 border-blue-600 bg-blue-50/20 p-5 hover:bg-blue-50/40 transition-all duration-150 shadow-2xs hover:shadow-xs group"
                   >
-                    <FolderPlus className="h-8 w-8 text-primary mb-3" />
-                    <h3 className="font-bold text-text-primary text-base">Create a New Project</h3>
-                    <p className="mt-1 text-xs text-text-secondary leading-relaxed">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white mb-3.5 shadow-2xs group-hover:scale-105 transition-transform">
+                      <FolderPlus className="h-5 w-5" />
+                    </div>
+                    <h3 className="font-bold text-slate-900 text-sm">Create a New Project</h3>
+                    <p className="mt-1.5 text-xs text-slate-500 leading-relaxed">
                       Establish core entity, acquisition path, loan model, and delegate roles to CFO, PM, and GC.
                     </p>
-                    <span className="mt-4 inline-flex items-center text-xs font-bold text-primary">
+                    <span className="mt-4 inline-flex items-center text-xs font-bold text-blue-600 group-hover:translate-x-0.5 transition-transform">
                       Begin Setup <ArrowRight className="ml-1 h-3.5 w-3.5" />
                     </span>
                   </div>
 
-                  <div className="rounded-xl border border-border bg-subtle/50 p-5 opacity-75">
-                    <Clock className="h-8 w-8 text-text-muted mb-3" />
-                    <h3 className="font-bold text-text-muted text-base">Import Existing Pro-Forma</h3>
-                    <p className="mt-1 text-xs text-text-muted leading-relaxed">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-5 opacity-75">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-200 text-slate-600 mb-3.5">
+                      <Clock className="h-5 w-5" />
+                    </div>
+                    <h3 className="font-bold text-slate-700 text-sm">Import Existing Pro-Forma</h3>
+                    <p className="mt-1.5 text-xs text-slate-500 leading-relaxed">
                       Reconstruct from historical Excel / QuickBooks files. Available once initial identity is verified.
                     </p>
-                    <span className="mt-4 inline-block text-xs font-semibold text-text-muted">
+                    <span className="mt-4 inline-block text-[11px] font-semibold text-slate-400">
                       Available via Document Inbox
                     </span>
                   </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,7 +23,7 @@ import {
   X,
 } from "lucide-react";
 import { api } from "@/lib/api";
-import { getDefaultRouteForRole } from "@/lib/navigation";
+import { getDefaultRouteForRole, getDefaultWorkspaceRoute } from "@/lib/navigation";
 import type { SpecialAnswerType } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 
@@ -222,26 +223,31 @@ export default function OnboardingPage() {
   // Completion State
   if (!question) {
     return (
-      <div className="min-h-screen bg-app">
+      <div className="min-h-screen bg-[#f8fafc]">
         {/* Top Navbar */}
-        <header className="border-b border-border bg-surface px-6 py-3.5 sticky top-0 z-20 shadow-xs">
+        <header className="border-b border-slate-200/80 bg-white px-6 py-3 sticky top-0 z-20 shadow-2xs">
           <div className="mx-auto max-w-6xl flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-hover text-white shadow-xs">
-                <Layers className="h-4 w-4" />
+            <Link href="/projects" className="flex items-center gap-2.5 transition-opacity hover:opacity-85">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 text-white shadow-2xs">
+                <Building2 className="h-4 w-4" />
               </div>
-              <span className="text-section font-bold tracking-tight text-text-primary">
-                GroundUp <span className="text-primary-accent font-extrabold">AI</span>
+              <span className="text-sm font-bold tracking-tight text-slate-900">
+                GroundUp
               </span>
-            </div>
+            </Link>
             <div className="flex items-center gap-3">
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => router.replace(getDefaultRouteForRole(user.role))}
+              <button
+                type="button"
+                onClick={() => {
+                  const target = effectiveProjectId
+                    ? getDefaultWorkspaceRoute(user.role as any, effectiveProjectId)
+                    : "/projects";
+                  router.push(target);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition-colors cursor-pointer"
               >
-                Go to Workspace <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-              </Button>
+                Exit to Workspace
+              </button>
             </div>
           </div>
         </header>
@@ -397,30 +403,31 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-app">
+    <div className="min-h-screen bg-[#f8fafc]">
       {/* Top Navbar */}
-      <header className="border-b border-border bg-surface px-6 py-3.5 sticky top-0 z-20 shadow-xs">
+      <header className="border-b border-slate-200/80 bg-white px-6 py-3 sticky top-0 z-20 shadow-2xs">
         <div className="mx-auto max-w-6xl flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-hover text-white shadow-xs">
-              <Layers className="h-4 w-4" />
+          <Link href="/projects" className="flex items-center gap-2.5 transition-opacity hover:opacity-85">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 text-white shadow-2xs">
+              <Building2 className="h-4 w-4" />
             </div>
-            <span className="text-section font-bold tracking-tight text-text-primary">
-              GroundUp <span className="text-primary-accent font-extrabold">AI</span>
+            <span className="text-sm font-bold tracking-tight text-slate-900">
+              GroundUp
             </span>
-          </div>
+          </Link>
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 text-caption text-text-secondary border-r border-border pr-3 mr-1">
-              <Building2 className="h-4 w-4 text-text-muted" />
-              <span>Org: {user.organization_id.substring(0, 8)}...</span>
-            </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => router.push(getDefaultRouteForRole(user.role))}
+            <button
+              type="button"
+              onClick={() => {
+                const target = effectiveProjectId
+                  ? getDefaultWorkspaceRoute(user.role as any, effectiveProjectId)
+                  : "/projects";
+                router.push(target);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition-colors cursor-pointer"
             >
               Exit to Workspace
-            </Button>
+            </button>
           </div>
         </div>
       </header>
@@ -708,7 +715,12 @@ export default function OnboardingPage() {
                 <Button
                   type="button"
                   variant="tertiary"
-                  onClick={() => router.push(getDefaultRouteForRole(user.role))}
+                  onClick={() => {
+                    const target = effectiveProjectId
+                      ? getDefaultWorkspaceRoute(user.role as any, effectiveProjectId)
+                      : "/projects";
+                    router.push(target);
+                  }}
                 >
                   Exit to Workspace
                 </Button>
