@@ -71,7 +71,7 @@ export default function ResetPasswordPage() {
           <div>
             <label htmlFor="new-password" className="mb-1.5 block text-label font-medium text-text-primary">New password</label>
             <div className="relative">
-              <input id="new-password" type={showPassword ? "text" : "password"} autoComplete="new-password" autoFocus required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 pr-11 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" />
+              <input id="new-password" type={showPassword ? "text" : "password"} autoComplete="new-password" autoFocus required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 pr-11 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" placeholder="••••••••••••" />
               <button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-md text-text-muted hover:text-text-primary hover:bg-subtle transition-colors">
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -79,7 +79,7 @@ export default function ResetPasswordPage() {
           </div>
           <div>
             <label htmlFor="confirm-password" className="mb-1.5 block text-label font-medium text-text-primary">Confirm new password</label>
-            <input id="confirm-password" type="password" autoComplete="new-password" required minLength={8} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" />
+            <input id="confirm-password" type="password" autoComplete="new-password" required minLength={8} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" placeholder="••••••••••••" />
           </div>
           <Button type="submit" className="h-11 w-full justify-center" loading={reset.isPending}>Update password</Button>
           <p className="text-center text-sm text-text-secondary">

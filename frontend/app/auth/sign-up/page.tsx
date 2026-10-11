@@ -81,26 +81,26 @@ export default function SignUpPage() {
         )}
         <div>
           <label htmlFor="organization" className="mb-1.5 block text-label font-medium text-text-primary">Organization name</label>
-          <input id="organization" autoComplete="organization" required value={organization} onChange={(event) => setOrganization(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" />
+          <input id="organization" autoComplete="organization" required value={organization} onChange={(event) => setOrganization(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" placeholder="e.g. Vance Development LLC" />
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="first-name" className="mb-1.5 block text-label font-medium text-text-primary">First name</label>
-            <input id="first-name" autoComplete="given-name" required value={firstName} onChange={(event) => setFirstName(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" />
+            <input id="first-name" autoComplete="given-name" required value={firstName} onChange={(event) => setFirstName(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" placeholder="e.g. Marcus" />
           </div>
           <div>
             <label htmlFor="last-name" className="mb-1.5 block text-label font-medium text-text-primary">Last name</label>
-            <input id="last-name" autoComplete="family-name" required value={lastName} onChange={(event) => setLastName(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" />
+            <input id="last-name" autoComplete="family-name" required value={lastName} onChange={(event) => setLastName(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" placeholder="e.g. Vance" />
           </div>
         </div>
         <div>
           <label htmlFor="signup-email" className="mb-1.5 block text-label font-medium text-text-primary">Work email</label>
-          <input id="signup-email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" placeholder="you@company.com" />
+          <input id="signup-email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" placeholder="name@company.com" />
         </div>
         <div>
           <label htmlFor="signup-password" className="mb-1.5 block text-label font-medium text-text-primary">Password</label>
           <div className="relative">
-            <input id="signup-password" type={showPassword ? "text" : "password"} autoComplete="new-password" required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 pr-11 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" />
+            <input id="signup-password" type={showPassword ? "text" : "password"} autoComplete="new-password" required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 pr-11 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" placeholder="••••••••••••" />
             <button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-md text-text-muted hover:text-text-primary hover:bg-subtle transition-colors">
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>

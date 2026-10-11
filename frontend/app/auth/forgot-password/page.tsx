@@ -50,7 +50,7 @@ export default function ForgotPasswordPage() {
           )}
           <div>
             <label htmlFor="reset-email" className="mb-1.5 block text-label font-medium text-text-primary">Work email</label>
-            <input id="reset-email" type="email" autoComplete="email" autoFocus required value={email} onChange={(event) => setEmail(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" />
+            <input id="reset-email" type="email" autoComplete="email" autoFocus required value={email} onChange={(event) => setEmail(event.target.value)} className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-body focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20" placeholder="name@company.com" />
           </div>
           <Button type="submit" className="h-11 w-full justify-center" loading={requestReset.isPending}>Send reset link</Button>
         </form>
