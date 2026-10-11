@@ -16,6 +16,10 @@ import {
   Briefcase,
   ChevronRight,
   Info,
+  CheckCircle2,
+  ListTodo,
+  Check,
+  X,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { getDefaultRouteForRole } from "@/lib/navigation";
@@ -97,6 +101,38 @@ export default function OnboardingPage() {
   const session = sessionQuery.data?.data;
   const question = session?.next_question;
   const user = userQuery.data?.data;
+  const effectiveProjectId = session?.project_id || undefined;
+
+  // Onboarding tasks query
+  const tasksQuery = useQuery({
+    queryKey: ["onboarding-tasks", effectiveProjectId],
+    queryFn: () => (effectiveProjectId ? api.onboarding.getTasks(effectiveProjectId) : null),
+    enabled: !!effectiveProjectId,
+  });
+
+  // Readiness / configuration approvals query
+  const readinessQuery = useQuery({
+    queryKey: ["project-readiness-details", effectiveProjectId],
+    queryFn: () => (effectiveProjectId ? api.readiness.getProjectReadiness(effectiveProjectId) : null),
+    enabled: !!effectiveProjectId,
+  });
+
+  const approveConfigMutation = useMutation({
+    mutationFn: (versionId: string) => api.readiness.approveConfiguration(versionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["project-readiness-details"] });
+      queryClient.invalidateQueries({ queryKey: ["onboarding-tasks"] });
+    },
+  });
+
+  const rejectConfigMutation = useMutation({
+    mutationFn: ({ versionId, reason }: { versionId: string; reason: string }) =>
+      api.readiness.rejectConfiguration(versionId, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["project-readiness-details"] });
+      queryClient.invalidateQueries({ queryKey: ["onboarding-tasks"] });
+    },
+  });
 
   const answerMutation = useMutation({
     mutationFn: () => {
@@ -118,6 +154,8 @@ export default function OnboardingPage() {
       setReason("");
       setValidationError("");
       await queryClient.invalidateQueries({ queryKey: ["onboardingSession"] });
+      await queryClient.invalidateQueries({ queryKey: ["onboarding-tasks"] });
+      await queryClient.invalidateQueries({ queryKey: ["project-readiness-details"] });
     },
   });
 
@@ -176,45 +214,185 @@ export default function OnboardingPage() {
     badge: user.role,
   };
 
+  const tasks = tasksQuery.data?.data || [];
+  const readinessData = readinessQuery.data?.data;
+  const pendingApprovals = readinessData?.pending_approvals || [];
+  const gates = readinessData?.gates || [];
+
   // Completion State
   if (!question) {
     return (
-      <main className="min-h-screen bg-app px-4 py-12 sm:px-6">
-        <section className="mx-auto max-w-2xl rounded-xl border border-border bg-surface p-8 sm:p-10 text-center shadow-sm">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-success-subtle text-success">
-            <CircleCheck className="h-10 w-10" />
+      <div className="min-h-screen bg-app">
+        {/* Top Navbar */}
+        <header className="border-b border-border bg-surface px-6 py-3.5 sticky top-0 z-20 shadow-xs">
+          <div className="mx-auto max-w-6xl flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-hover text-white shadow-xs">
+                <Layers className="h-4 w-4" />
+              </div>
+              <span className="text-section font-bold tracking-tight text-text-primary">
+                GroundUp <span className="text-primary-accent font-extrabold">AI</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => router.replace(getDefaultRouteForRole(user.role))}
+              >
+                Go to Workspace <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              </Button>
+            </div>
           </div>
-          <span className="mt-4 inline-block rounded-full bg-success-subtle px-3 py-1 text-xs font-semibold text-success">
-            {roleMeta.badge} Verified
-          </span>
-          <h1 className="mt-3 text-2xl font-bold tracking-tight text-text-primary">
-            Role Setup Complete
-          </h1>
-          <p className="mx-auto mt-2 max-w-lg text-body text-text-secondary leading-relaxed">
-            All required governance and decision-graph steps for your role have been recorded.
-            Your answers establish the project&apos;s baseline without fabricating missing data.
-          </p>
+        </header>
 
-          <div className="mt-8 rounded-lg border border-border-subtle bg-subtle p-4 text-left">
-            <h3 className="text-caption font-bold uppercase tracking-wider text-text-muted mb-2">
-              Next Actionable Step
-            </h3>
-            <p className="text-body font-medium text-text-primary flex items-center gap-2">
-              <ChevronRight className="h-4 w-4 text-primary shrink-0" />
-              Proceed to your workspace to view assigned tasks and project readiness status.
+        <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+          <section className="rounded-xl border border-border bg-surface p-8 sm:p-10 shadow-sm text-center">
+            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-success-subtle text-success">
+              <CircleCheck className="h-10 w-10" />
+            </div>
+            <span className="mt-4 inline-block rounded-full bg-success-subtle px-3 py-1 text-xs font-semibold text-success">
+              {roleMeta.badge} Verified
+            </span>
+            <h1 className="mt-3 text-2xl font-bold tracking-tight text-text-primary">
+              Role Setup & Onboarding Complete
+            </h1>
+            <p className="mx-auto mt-2 max-w-lg text-body text-text-secondary leading-relaxed">
+              All required governance decisions for your role have been recorded. Your answers
+              establish the project&apos;s verified foundation without guessing missing data.
             </p>
-          </div>
 
-          <Button
-            className="mt-8 w-full sm:w-auto"
-            size="lg"
-            variant="primary"
-            onClick={() => router.replace(getDefaultRouteForRole(user.role))}
-          >
-            Launch {roleMeta.title} Workspace <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </section>
-      </main>
+            {/* Governance Activation Gates Status */}
+            {gates.length > 0 && (
+              <div className="mt-8 text-left rounded-lg border border-border bg-subtle p-5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-3 flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  Governance & Activation Status
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {gates.map((g) => (
+                    <div
+                      key={g.id}
+                      className="rounded-lg border border-border bg-surface p-3 flex items-center justify-between"
+                    >
+                      <div>
+                        <div className="text-sm font-semibold text-text-primary">{g.name}</div>
+                        <div className="text-xs text-text-muted">{g.description}</div>
+                      </div>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded font-semibold ${
+                          g.is_unlocked
+                            ? "bg-success-subtle text-success border border-success/30"
+                            : "bg-warning-subtle text-warning border border-warning/30"
+                        }`}
+                      >
+                        {g.is_unlocked ? "Unlocked" : "Pending Tasks"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Pending Approvals (For Owners) */}
+            {user.role === "OWNER" && pendingApprovals.length > 0 && (
+              <div className="mt-6 text-left rounded-lg border border-warning/30 bg-warning-subtle/10 p-5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-warning mb-3 flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-warning" />
+                  Pending Configuration Approvals ({pendingApprovals.length})
+                </h3>
+                <p className="text-xs text-text-secondary mb-3">
+                  As the Project Sponsor, review and confirm configuration values submitted by other team members:
+                </p>
+                <div className="space-y-3">
+                  {pendingApprovals.map((cfg) => (
+                    <div
+                      key={cfg.id}
+                      className="rounded-lg border border-border bg-surface p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                    >
+                      <div>
+                        <div className="font-semibold text-sm text-text-primary">{cfg.title}</div>
+                        <div className="text-xs text-text-secondary mt-0.5">{cfg.summary}</div>
+                        <div className="text-xs text-text-muted mt-1">
+                          Proposed value: <span className="font-mono text-text-primary">{cfg.proposed_value}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          disabled={rejectConfigMutation.isPending}
+                          onClick={() => {
+                            const reason = prompt("Enter reason for rejecting this configuration:") || "Rejected by owner";
+                            rejectConfigMutation.mutate({ versionId: cfg.id, reason });
+                          }}
+                        >
+                          <X className="h-3.5 w-3.5 mr-1 text-danger" /> Reject
+                        </Button>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          loading={approveConfigMutation.isPending}
+                          onClick={() => approveConfigMutation.mutate(cfg.id)}
+                        >
+                          <Check className="h-3.5 w-3.5 mr-1" /> Approve
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Generated Onboarding Tasks */}
+            {tasks.length > 0 && (
+              <div className="mt-6 text-left rounded-lg border border-border bg-subtle p-5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-3 flex items-center gap-2">
+                  <ListTodo className="h-4 w-4 text-primary" />
+                  Accountable Onboarding Tasks ({tasks.length})
+                </h3>
+                <p className="text-xs text-text-secondary mb-3">
+                  The following action items have been generated based on unknown/pending dependencies:
+                </p>
+                <div className="space-y-2">
+                  {tasks.map((task) => (
+                    <div
+                      key={task.id}
+                      className="rounded-lg border border-border bg-surface p-3 flex items-center justify-between gap-3"
+                    >
+                      <div>
+                        <div className="font-medium text-sm text-text-primary">{task.title}</div>
+                        <div className="text-xs text-text-muted">
+                          Assigned to: <span className="font-semibold">{task.assigned_to_role || task.assigned_to_name}</span> • Gate: {task.blocking_gate}
+                        </div>
+                      </div>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded font-semibold ${
+                          task.status === "RESOLVED"
+                            ? "bg-success-subtle text-success"
+                            : "bg-warning-subtle text-warning"
+                        }`}
+                      >
+                        {task.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Button
+                size="lg"
+                variant="primary"
+                onClick={() => router.replace(getDefaultRouteForRole(user.role))}
+              >
+                Launch {roleMeta.title} Workspace <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </section>
+        </main>
+      </div>
     );
   }
 
@@ -530,9 +708,9 @@ export default function OnboardingPage() {
                 <Button
                   type="button"
                   variant="tertiary"
-                  onClick={() => router.push("/readiness")}
+                  onClick={() => router.push(getDefaultRouteForRole(user.role))}
                 >
-                  View Current Readiness
+                  Exit to Workspace
                 </Button>
 
                 <Button

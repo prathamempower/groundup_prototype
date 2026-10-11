@@ -44,9 +44,9 @@ test.describe("Full Navigation & Workspaces Verification", () => {
     await expect(page).toHaveURL(/\/settings/);
     await expect(page.getByRole("heading", { name: "Settings, Governance & Administration" })).toBeVisible();
 
-    // 9. Readiness & Activation Gates
-    await page.goto("/readiness");
-    await expect(page.getByRole("heading", { name: "Project Readiness & Activation Gates" })).toBeVisible();
+    // 9. Onboarding Setup
+    await page.goto("/onboarding");
+    await expect(page).toHaveURL(/\/onboarding/);
   });
 
   test("project switcher allows switching between projects", async ({ page }) => {

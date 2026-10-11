@@ -191,10 +191,10 @@ export default function ControlCenterPage() {
               </button>
             </div>
 
-            <Link href="/readiness">
+            <Link href="/onboarding">
               <Button variant="secondary" size="sm">
                 <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />
-                Readiness Gates
+                Setup & Onboarding
               </Button>
             </Link>
 
@@ -340,7 +340,7 @@ export default function ControlCenterPage() {
                           <div className="flex items-center justify-between border-t border-border-subtle pt-1.5">
                             <span className="text-caption text-text-muted">Open Exceptions</span>
                             <span className="font-semibold text-warning text-xs">
-                              {p.status === "ACTIVE" ? "Review readiness" : p.status}
+                              {p.status === "ACTIVE" ? "Operational" : p.status}
                             </span>
                           </div>
                         </div>
@@ -424,9 +424,9 @@ export default function ControlCenterPage() {
                   Financial KPIs are withheld until baseline sign-off.
                 </p>
                 <div className="mt-4">
-                  <Link href="/readiness">
+                  <Link href="/onboarding">
                     <Button variant="primary">
-                      Open Setup Checklist & Readiness
+                      Open Role Setup & Onboarding
                     </Button>
                   </Link>
                 </div>

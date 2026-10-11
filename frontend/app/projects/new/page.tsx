@@ -121,7 +121,7 @@ export default function CreateProjectPage() {
     onSuccess: (res) => {
       localStorage.setItem("groundup_active_project_id", res.data.id);
       queryClient.invalidateQueries();
-      router.push("/readiness");
+      router.push(`/onboarding?projectId=${encodeURIComponent(res.data.id)}`);
     },
     onError: (err: Error) => {
       setErrorMessage(err.message || "Failed to create project.");

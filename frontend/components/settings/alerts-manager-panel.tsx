@@ -223,7 +223,7 @@ export function AlertsManagerPanel({ projectId }: AlertsManagerPanelProps) {
           <div className="rounded-lg border border-border bg-surface p-4 text-caption text-text-secondary flex items-start gap-2.5">
             <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
             <span>
-              Data quality issues block dashboard verification and readiness gates until human review is confirmed.
+              Data quality issues block dashboard verification and workflow progression until human review is confirmed.
             </span>
           </div>
 

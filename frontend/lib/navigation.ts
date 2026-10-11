@@ -126,7 +126,6 @@ export const ROUTE_ACCESS_MAP: Record<string, UserRole[]> = {
   "/draws": ["OWNER", "CFO", "PM"],
   "/timeline": ["OWNER", "CFO", "PM"],
   "/economics": ["OWNER", "CFO"],
-  "/readiness": ["OWNER", "CFO", "PM"],
   "/settings": ["OWNER"],
   "/submissions": ["GC", "OWNER", "PM", "CFO"],
   "/investor-update": ["INVESTOR", "OWNER", "CFO"],

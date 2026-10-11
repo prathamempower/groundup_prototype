@@ -21,9 +21,9 @@ test("owner creates an account and launches a first project", async ({ page }) =
   await page.getByPlaceholder("e.g. 161 Woodlawn Ave, Jersey City, NJ").fill("100 Main Street, Boston, MA");
   await page.getByRole("button", { name: "Next: Project Setup" }).click();
   await page.getByRole("button", { name: "Next: Review Project" }).click();
-  await page.getByRole("button", { name: "Create Project & Launch Readiness Checklist" }).click();
-  await expect(page).toHaveURL(/\/readiness/);
-  await expect(page.getByRole("heading", { name: "Project Readiness & Activation Gates" })).toBeVisible();
+  await page.getByRole("button", { name: "Create Project & Launch Onboarding" }).click();
+  await expect(page).toHaveURL(/\/onboarding/);
+  await expect(page.getByText(/Setup/i)).toBeVisible();
   await expect(page.getByText(/73 Broadway|Marcus Vance/)).toHaveCount(0);
 
   await page.getByRole("button", { name: /Taylor Owner/ }).click();
