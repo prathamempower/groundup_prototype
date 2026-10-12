@@ -320,9 +320,159 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
           >
             <Bell className="h-4 w-4" />
             {unreadNotificationsCount > 0 && (
-              <span className="absolute top-1 right-1 flex h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+              <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-xs">
+                {unreadNotificationsCount}
+              </span>
             )}
           </button>
+
+          {/* Notifications Slide-out Drawer */}
+          <Drawer open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
+            <DrawerContent width="default" className="flex flex-col h-full bg-surface">
+              <DrawerHeader className="border-b border-border bg-surface px-5 py-4 flex-shrink-0">
+                <div className="flex items-center justify-between pr-8">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                      <Bell className="h-4 w-4" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <DrawerTitle className="text-sm font-bold text-slate-900">
+                        Notifications
+                      </DrawerTitle>
+                      {unreadNotificationsCount > 0 ? (
+                        <span className="rounded-full bg-rose-50 border border-rose-200 px-2 py-0.5 text-[11px] font-semibold text-rose-700">
+                          {unreadNotificationsCount} unread
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                          {notifications.length} total
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {unreadNotificationsCount > 0 && (
+                    <button
+                      onClick={() => markAllReadMutation.mutate()}
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+                    >
+                      Mark all read
+                    </button>
+                  )}
+                </div>
+                <DrawerDescription className="sr-only">
+                  System and project notifications
+                </DrawerDescription>
+              </DrawerHeader>
+
+              <DrawerBody className="p-4 space-y-2.5">
+                {notifications.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 mb-2">
+                      <Bell className="h-5 w-5" />
+                    </div>
+                    <p className="text-xs font-semibold text-slate-900">No notifications yet</p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      You will be notified about project milestones, draws, and alerts here.
+                    </p>
+                  </div>
+                ) : (
+                  notifications.map((notif) => {
+                    const isUnread = !notif.read;
+
+                    return (
+                      <div
+                        key={notif.id}
+                        onClick={() => {
+                          if (isUnread) markReadMutation.mutate(notif.id);
+                          if (notif.link_url) {
+                            setIsNotificationsOpen(false);
+                            router.push(notif.link_url);
+                          }
+                        }}
+                        className={`group relative flex items-start gap-3 rounded-xl border p-3.5 transition-all cursor-pointer shadow-2xs ${
+                          isUnread
+                            ? "border-blue-200 bg-blue-50/40 hover:bg-blue-50/70"
+                            : "border-slate-200/80 bg-white hover:bg-slate-50/60"
+                        }`}
+                      >
+                        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+                          {notif.severity === "CRITICAL" ? (
+                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-100 text-red-600">
+                              <AlertCircle className="h-4 w-4" />
+                            </div>
+                          ) : notif.severity === "WARNING" ? (
+                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+                              <AlertTriangle className="h-4 w-4" />
+                            </div>
+                          ) : notif.severity === "SUCCESS" ? (
+                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                              <Check className="h-4 w-4" />
+                            </div>
+                          ) : (
+                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                              <Info className="h-4 w-4" />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <h5
+                              className={`text-xs font-semibold leading-tight ${
+                                isUnread ? "text-slate-900 font-bold" : "text-slate-700"
+                              }`}
+                            >
+                              {notif.title}
+                            </h5>
+                            {isUnread && (
+                              <span className="h-2 w-2 rounded-full bg-blue-600 shrink-0" />
+                            )}
+                          </div>
+
+                          <p className="text-[12px] text-slate-500 mt-1 leading-relaxed line-clamp-2">
+                            {notif.message}
+                          </p>
+
+                          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400">
+                            <span className="font-medium text-slate-500 uppercase text-[10px] tracking-wider">
+                              {notif.type}
+                            </span>
+                            {notif.created_at && (
+                              <>
+                                <span>•</span>
+                                <span>
+                                  {new Date(notif.created_at).toLocaleDateString(undefined, {
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </DrawerBody>
+
+              <DrawerFooter className="border-t border-border p-4 bg-surface">
+                <button
+                  onClick={() => {
+                    setIsNotificationsOpen(false);
+                    router.push("/alerts");
+                  }}
+                  className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 active:bg-slate-950 transition-colors cursor-pointer"
+                >
+                  <span>View All in Alerts Workspace</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
 
           {/* User menu */}
           <div className="relative ml-1">

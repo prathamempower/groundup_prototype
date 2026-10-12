@@ -48,9 +48,6 @@ export function UploadModal({
   const { toast } = useToast();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [targetProjectId, setTargetProjectId] = useState(currentProjectId);
-  const [documentType, setDocumentType] = useState<DocumentItem["document_type"]>("INVOICE");
-  const [notes, setNotes] = useState("");
   const [step, setStep] = useState<UploadStep>("SELECT");
   const [progress, setProgress] = useState(0);
   const [createdDocument, setCreatedDocument] = useState<DocumentItem | null>(null);
@@ -61,11 +58,9 @@ export function UploadModal({
       setStep("SELECT");
       setProgress(0);
       setSelectedFile(null);
-      setTargetProjectId(currentProjectId);
-      setNotes("");
       setCreatedDocument(null);
     }
-  }, [open, currentProjectId]);
+  }, [open]);
 
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -77,19 +72,6 @@ export function UploadModal({
 
   const handleFileSelected = (file: File) => {
     setSelectedFile(file);
-    // Auto-detect type from filename
-    const name = file.name.toLowerCase();
-    if (name.includes("statement") || name.includes("bank") || name.includes("stmt")) {
-      setDocumentType("BANK_STATEMENT");
-    } else if (name.includes("budget") || name.includes("sov") || name.includes("schedule")) {
-      setDocumentType("BUDGET_SOV");
-    } else if (name.includes("insp") || name.includes("report") || name.includes("walkthrough")) {
-      setDocumentType("INSPECTION");
-    } else if (name.includes("draw") || name.includes("packet") || name.includes("payapp")) {
-      setDocumentType("DRAW_PACKAGE");
-    } else {
-      setDocumentType("INVOICE");
-    }
   };
 
   const handleStartUpload = async () => {
@@ -104,7 +86,7 @@ export function UploadModal({
       const res = await api.documents.uploadMultipart(
         selectedFile,
         selectedFile.name,
-        targetProjectId || undefined
+        currentProjectId || undefined
       );
       setProgress(85);
 
@@ -205,57 +187,6 @@ export function UploadModal({
                 )}
               </div>
 
-              {/* Form Metadata */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-body">
-                <div>
-                  <label className="block text-caption font-semibold text-text-primary mb-1">
-                    Document Classification
-                  </label>
-                  <select
-                    value={documentType}
-                    onChange={(e) => setDocumentType(e.target.value as DocumentItem["document_type"])}
-                    className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary focus-visible:outline-primary"
-                  >
-                    <option value="INVOICE">Commercial Invoice / Pay App</option>
-                    <option value="BANK_STATEMENT">Bank Account Statement</option>
-                    <option value="BUDGET_SOV">Schedule of Values / Budget Model</option>
-                    <option value="INSPECTION">Lender Inspection Report</option>
-                    <option value="DRAW_PACKAGE">Certified Draw Package</option>
-                    <option value="CONTRACT">Contract / Agreement</option>
-                    <option value="PERMIT">Permit / Regulatory Approval</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-caption font-semibold text-text-primary mb-1">
-                    Target Project Workspace
-                  </label>
-                  <select
-                    value={targetProjectId}
-                    onChange={(e) => setTargetProjectId(e.target.value)}
-                    className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary focus-visible:outline-primary"
-                  >
-                    {projects.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} ({p.project_entity})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-caption font-semibold text-text-primary mb-1">
-                    Review Notes / Audit Memo (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="e.g. October draw certified inspection report from Columbia Bank"
-                    className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary placeholder:text-text-muted focus-visible:outline-primary"
-                  />
-                </div>
-              </div>
             </>
           )}
 

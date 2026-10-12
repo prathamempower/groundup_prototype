@@ -15,6 +15,7 @@ import {
   LayoutGrid,
   List,
   AlertTriangle,
+  Bell,
   CheckCircle2,
   Clock,
   ArrowRight,
@@ -221,8 +222,8 @@ export default function ProjectsPortfolioPage() {
 
           <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs transition-shadow hover:shadow-xs">
             <div className="flex items-center justify-between text-xs font-medium text-slate-500">
-              <span>Open Exceptions</span>
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              <span>Notifications</span>
+              <Bell className="h-4 w-4 text-amber-500" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span
@@ -427,7 +428,7 @@ export default function ProjectsPortfolioPage() {
                     )}
 
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500">Open Exceptions</span>
+                      <span className="text-slate-500">Notifications</span>
                       <span
                         className={`font-semibold tabular-nums ${
                           (project.open_exceptions_count || 0) > 0
@@ -478,7 +479,7 @@ export default function ProjectsPortfolioPage() {
                   <th className="px-4 py-3">Your Role</th>
                   <th className="px-4 py-3">Health</th>
                   {canSeeFinancialSummary && <th className="px-4 py-3 text-right">Forecast Profit</th>}
-                  <th className="px-4 py-3 text-center">Exceptions</th>
+                  <th className="px-4 py-3 text-center">Notifications</th>
                   <th className="px-4 py-3">Next Milestone</th>
                   <th className="px-4 py-3 text-right">Action</th>
                 </tr>

@@ -354,11 +354,16 @@ def to_notification_dto(n: Notification) -> NotificationRead:
     response_model=ResponseEnvelope[list[NotificationRead]],
 )
 def list_notifications_endpoint(
+    project_id: Annotated[uuid.UUID | None, Query()] = None,
     user: User = Depends(require_role(["OWNER", "CFO", "PM", "GC", "INVESTOR"])),
     db: Session = Depends(get_db),
 ) -> ResponseEnvelope[list[NotificationRead]]:
     # Filter notifications: either assigned specifically to this user, or general/unassigned within the organization and appropriate for the role
     query = select(Notification).where(Notification.organization_id == user.organization_id)
+    if project_id:
+        query = query.where(
+            (Notification.project_id == project_id) | (Notification.project_id.is_(None))
+        )
     if user.role != "OWNER":
         query = query.where(
             (Notification.user_id == user.id) | (Notification.user_id.is_(None))

@@ -20,8 +20,6 @@ import {
   FileSpreadsheet,
   Layers,
   ArrowUpDown,
-  ExternalLink,
-  Edit,
   FolderSync,
   Download,
   Sparkles,
@@ -34,7 +32,6 @@ import { useToast } from "@/components/ui/toast";
 import { UploadModal } from "@/components/documents/upload-modal";
 import { DocumentReviewDrawer } from "@/components/documents/document-review-drawer";
 import { QuarantineResolverModal } from "@/components/documents/quarantine-resolver-modal";
-import { ManualEntryModal } from "@/components/documents/manual-entry-modal";
 
 type FilterTab = "ALL" | "NEEDS_REVIEW" | "REVIEWED" | "QUARANTINED" | "DUPLICATES";
 
@@ -51,7 +48,6 @@ export default function DocumentsPage() {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [reviewingDocId, setReviewingDocId] = useState<string | null>(null);
   const [quarantinedDoc, setQuarantinedDoc] = useState<DocumentItem | null>(null);
-  const [manualEntryDoc, setManualEntryDoc] = useState<DocumentItem | null>(null);
 
   // Load Projects
   const { data: projectsData } = useQuery({
@@ -489,17 +485,6 @@ export default function DocumentsPage() {
                               Review
                             </button>
                           )}
-
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            title="Manual Line Entry Fallback"
-                            onClick={() => setManualEntryDoc(doc)}
-                          >
-                            <Edit className="h-3.5 w-3.5" />
-                          </Button>
-
                           <Button
                             type="button"
                             variant="ghost"
@@ -550,17 +535,6 @@ export default function DocumentsPage() {
         }}
         projects={projects}
         onResolved={() => {
-          queryClient.invalidateQueries({ queryKey: ["documents"] });
-        }}
-      />
-
-      <ManualEntryModal
-        document={manualEntryDoc}
-        open={!!manualEntryDoc}
-        onOpenChange={(open) => {
-          if (!open) setManualEntryDoc(null);
-        }}
-        onSuccess={() => {
           queryClient.invalidateQueries({ queryKey: ["documents"] });
         }}
       />

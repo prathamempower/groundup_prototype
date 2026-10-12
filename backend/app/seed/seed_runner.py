@@ -295,7 +295,8 @@ def seed_database(wipe_first: bool = True):
             db.add(u)
             db.flush()
             users_list.append(u)
-            users_by_role[u_def["role"]] = u
+            if u_def["role"] not in users_by_role:
+                users_by_role[u_def["role"]] = u
             users_by_role[u_def["email"]] = u
             print(f"👤 Created user: {u.first_name} {u.last_name} ({u.role}) - {u.email}")
         users = users_by_role
