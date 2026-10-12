@@ -144,8 +144,10 @@ export function SourcesButton({
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-1 text-caption font-medium text-primary hover:underline hover:text-primary-hover focus-visible:outline-primary"
+        className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+        title="View calculation sources and citations"
       >
+        <ShieldCheck className="h-3 w-3 text-slate-400" />
         <span>Sources</span>
       </button>
 

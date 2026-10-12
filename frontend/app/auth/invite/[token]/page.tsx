@@ -41,8 +41,8 @@ export default function AcceptInvitePage() {
       queryClient.setQueryData(["me"], { data: user });
       router.replace(
         invitation.data?.project_id
-          ? `/onboarding?projectId=${encodeURIComponent(invitation.data.project_id)}`
-          : "/onboarding"
+          ? `/projects/${invitation.data.project_id}/control-center`
+          : "/projects"
       );
     },
   });

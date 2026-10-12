@@ -211,72 +211,32 @@ export default function ControlCenterPage() {
       <PageHeader
         title={
           viewMode === "PORTFOLIO"
-            ? "Development Portfolio Overview"
+            ? "Development Portfolio"
             : `${project?.name || "Project"} Control Center`
         }
         statusBadge={
-          viewMode === "PROJECT"
+          viewMode === "PROJECT" && project?.lifecycle_stage
             ? {
-                label: project?.lifecycle_stage || "CONSTRUCTION",
+                label: project.lifecycle_stage.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()),
                 variant:
                   project?.status === "COMPLETED"
                     ? "success"
                     : project?.status === "SETUP_INCOMPLETE"
                     ? "danger"
-                    : "warning",
-                icon: <Building className="h-3.5 w-3.5" />,
+                    : "neutral",
+                icon: <Building className="h-3 w-3 text-slate-500" />,
               }
             : undefined
         }
-        asOf={formatAsOf(meta?.as_of)}
         subtitle={
           viewMode === "PORTFOLIO"
-            ? "Executive view across all development assets, total debt commitments, and open exceptions."
-            : project?.address || "Real Estate Financial Control Workspace"
+            ? "Executive overview across all development assets, total debt commitments, and open exceptions."
+            : project?.address || "Financial Control Workspace"
         }
         breadcrumbs={[
-          { label: "Portfolio", href: "/projects" },
+          { label: "Projects", href: "/projects" },
           { label: viewMode === "PORTFOLIO" ? "All Projects" : project?.name || "Project overview" },
         ]}
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            {/* View Mode Toggle */}
-            <div className="flex items-center rounded-md border border-border bg-subtle p-0.5 text-xs font-semibold">
-              <Button
-                type="button"
-                variant={viewMode === "PROJECT" ? "secondary" : "ghost"}
-                size="sm"
-                className="px-2.5 py-1"
-                onClick={() => setViewMode("PROJECT")}
-              >
-                Project View
-              </Button>
-              <Button
-                type="button"
-                variant={viewMode === "PORTFOLIO" ? "secondary" : "ghost"}
-                size="sm"
-                className="px-2.5 py-1"
-                onClick={() => setViewMode("PORTFOLIO")}
-              >
-                Portfolio View
-              </Button>
-            </div>
-
-            <Link href="/onboarding">
-              <Button variant="secondary" size="sm">
-                <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />
-                Setup & Onboarding
-              </Button>
-            </Link>
-
-            <Link href="/projects/new">
-              <Button variant="primary" size="sm">
-                <Plus className="mr-1.5 h-3.5 w-3.5" />
-                Create Project
-              </Button>
-            </Link>
-          </div>
-        }
       />
 
       <div className="px-6 space-y-6 max-w-7xl mx-auto">
@@ -462,21 +422,19 @@ export default function ControlCenterPage() {
               const defaultAlerts = [
                 {
                   id: "draw-shortfall",
-                  badge: "CRITICAL DRAW",
-                  badgeClass: "bg-danger-subtle text-danger border-danger/30",
-                  borderClass: "border-l-4 border-l-danger hover:border-danger/60",
-                  icon: <AlertCircle className="h-4 w-4 text-danger flex-shrink-0" />,
+                  badge: "Draw Shortfall",
+                  badgeClass: "bg-red-50 text-red-700 border-red-200/60",
+                  icon: <AlertCircle className="h-3.5 w-3.5 text-red-600" />,
                   title: "Draw #3 Short-Funded",
-                  description: "Columbia Bank approved $460k of $520k ($60k shortfall pending mechanical condition).",
+                  description: "Approved $460k of $520k ($60k shortfall pending mechanical inspection).",
                   actionLabel: "Resolve in Draws",
                   actionHref: "/draws",
                 },
                 {
                   id: "budget-overrun",
-                  badge: "BUDGET OVERRUN",
-                  badgeClass: "bg-danger-subtle text-danger border-danger/30",
-                  borderClass: "border-l-4 border-l-danger hover:border-danger/60",
-                  icon: <AlertTriangle className="h-4 w-4 text-danger flex-shrink-0" />,
+                  badge: "Budget Overrun",
+                  badgeClass: "bg-red-50 text-red-700 border-red-200/60",
+                  icon: <AlertTriangle className="h-3.5 w-3.5 text-red-600" />,
                   title: "Framing & Structural Steel",
                   description: "CO-001 reinforcement exceeded baseline by $20,000. Contingency transfer required.",
                   actionLabel: "Review Budget",
@@ -484,10 +442,9 @@ export default function ControlCenterPage() {
                 },
                 {
                   id: "milestone-delay",
-                  badge: "+35D DELAY",
-                  badgeClass: "bg-warning-subtle text-warning border-warning/30",
-                  borderClass: "border-l-4 border-l-warning hover:border-warning/60",
-                  icon: <Clock className="h-4 w-4 text-warning flex-shrink-0" />,
+                  badge: "Schedule Slip",
+                  badgeClass: "bg-amber-50 text-amber-700 border-amber-200/60",
+                  icon: <Clock className="h-3.5 w-3.5 text-amber-600" />,
                   title: "Structural Steel Delayed",
                   description: "Critical path delivery slip pushes finish to Dec 15 (+$28,500 carry cost impact).",
                   actionLabel: "View Timeline",
@@ -495,10 +452,9 @@ export default function ControlCenterPage() {
                 },
                 {
                   id: "unallocated-cash",
-                  badge: "UNALLOCATED CASH",
-                  badgeClass: "bg-info-subtle text-info border-info/30",
-                  borderClass: "border-l-4 border-l-info hover:border-info/60",
-                  icon: <DollarSign className="h-4 w-4 text-info flex-shrink-0" />,
+                  badge: "Unallocated Cash",
+                  badgeClass: "bg-blue-50 text-blue-700 border-blue-200/60",
+                  icon: <DollarSign className="h-3.5 w-3.5 text-blue-600" />,
                   title: "Unallocated Wire Cleared",
                   description: "$150,000 wire received in Columbia Bank operating account awaiting sub-ledger match.",
                   actionLabel: "Reconcile Cash",
@@ -510,18 +466,18 @@ export default function ControlCenterPage() {
 
               if (visibleAlerts.length === 0 && dismissedAlerts.length > 0) {
                 return (
-                  <div className="flex items-center justify-between rounded-lg border border-border bg-subtle/50 px-4 py-2.5 text-xs text-text-secondary">
+                  <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-600">
                     <span className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-success" />
-                      <span>All 4 operational alerts have been acknowledged for this session.</span>
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                      <span>All operational exceptions have been acknowledged for this session.</span>
                     </span>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-xs text-primary font-semibold h-6 px-2"
+                      className="text-xs text-blue-600 font-semibold h-6 px-2"
                       onClick={() => setDismissedAlerts([])}
                     >
-                      Reset Alerts View
+                      Reset View
                     </Button>
                   </div>
                 );
@@ -533,12 +489,12 @@ export default function ControlCenterPage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="flex h-2 w-2 rounded-full bg-danger animate-pulse" />
-                      <h3 className="text-caption font-bold uppercase tracking-wider text-text-primary">
-                        Active Project Alerts ({visibleAlerts.length})
+                      <span className="flex h-2 w-2 rounded-full bg-amber-500" />
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                        Active Exceptions
                       </h3>
-                      <span className="rounded bg-warning-subtle px-2 py-0.5 text-[10px] font-bold text-warning border border-warning/30">
-                        PROVISIONAL AUDIT
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                        {visibleAlerts.length}
                       </span>
                     </div>
 
@@ -547,7 +503,7 @@ export default function ControlCenterPage() {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="text-xs text-text-muted hover:text-text-primary h-7 px-2"
+                        className="text-xs text-slate-500 hover:text-slate-900 h-7 px-2"
                         onClick={() => setIsAlertsCollapsed(!isAlertsCollapsed)}
                       >
                         {isAlertsCollapsed ? (
@@ -564,7 +520,7 @@ export default function ControlCenterPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-xs font-semibold text-primary h-7 px-2"
+                          className="text-xs font-semibold text-blue-600 hover:text-blue-700 h-7 px-2"
                         >
                           Exceptions Workspace →
                         </Button>
@@ -577,67 +533,62 @@ export default function ControlCenterPage() {
                       {visibleAlerts.map((alert) => (
                         <div
                           key={alert.id}
-                          className={`relative flex flex-col justify-between rounded-lg border bg-surface p-3.5 shadow-xs transition-all hover:shadow-sm ${alert.borderClass}`}
+                          className="group relative flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all"
                         >
                           <div>
-                            <div className="flex items-start justify-between gap-2 mb-2">
-                              <div className="flex items-center gap-1.5">
+                            <div className="flex items-start justify-between gap-2 mb-2.5">
+                              <span
+                                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold border ${alert.badgeClass}`}
+                              >
                                 {alert.icon}
-                                <span
-                                  className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase border ${alert.badgeClass}`}
-                                >
-                                  {alert.badge}
-                                </span>
-                              </div>
+                                {alert.badge}
+                              </span>
                               <button
                                 type="button"
                                 aria-label={`Dismiss ${alert.title}`}
                                 onClick={() => setDismissedAlerts((prev) => [...prev, alert.id])}
-                                className="text-text-muted hover:text-text-primary p-0.5 rounded transition-colors"
-                                title="Dismiss alert"
+                                className="text-slate-400 hover:text-slate-600 p-0.5 rounded transition-colors"
+                                title="Dismiss exception"
                               >
                                 <X className="h-3.5 w-3.5" />
                               </button>
                             </div>
 
-                            <h4 className="text-body font-bold text-text-primary leading-tight">
+                            <h4 className="text-xs font-bold text-slate-900 leading-snug">
                               {alert.title}
                             </h4>
-                            <p className="text-caption text-text-secondary mt-1 line-clamp-2">
+                            <p className="text-[12px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
                               {alert.description}
                             </p>
                           </div>
 
-                          <div className="pt-3 mt-1 border-t border-border-subtle/70">
-                            <Link href={alert.actionHref} className="block">
-                              <Button
-                                variant="secondary"
-                                size="sm"
-                                className="w-full justify-between text-xs font-semibold h-7 px-2.5 hover:bg-primary hover:text-white transition-colors"
-                              >
-                                <span>{alert.actionLabel}</span>
-                                <ArrowRight className="h-3 w-3" />
-                              </Button>
+                          <div className="pt-3 mt-2 border-t border-slate-100">
+                            <Link
+                              href={alert.actionHref}
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                            >
+                              <span>{alert.actionLabel}</span>
+                              <ArrowRight className="h-3 w-3" />
                             </Link>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between rounded-lg border border-border bg-subtle/50 px-4 py-2 text-xs">
-                      <span className="flex items-center gap-2 text-text-secondary">
-                        <AlertTriangle className="h-4 w-4 text-warning" />
+                    <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-2.5 text-xs">
+                      <span className="flex items-center gap-2 text-slate-600">
+                        <AlertTriangle className="h-4 w-4 text-amber-500" />
                         <span>
-                          {visibleAlerts.length} operational exceptions affecting provisional figures.
+                          {visibleAlerts.length} operational exceptions requiring review.
                         </span>
                       </span>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-xs font-semibold text-primary h-6 px-2"
+                        className="text-xs font-semibold text-blue-600 h-6 px-2"
                         onClick={() => setIsAlertsCollapsed(false)}
                       >
-                        Expand Alerts
+                        Expand Exceptions
                       </Button>
                     </div>
                   )}
@@ -656,9 +607,9 @@ export default function ControlCenterPage() {
                   Financial KPIs are withheld until baseline sign-off.
                 </p>
                 <div className="mt-4">
-                  <Link href="/onboarding">
+                  <Link href={`/projects/${project?.id || ""}/budget`}>
                     <Button variant="primary">
-                      Open Role Setup & Onboarding
+                      Review Budget Baseline
                     </Button>
                   </Link>
                 </div>
@@ -746,64 +697,54 @@ export default function ControlCenterPage() {
                   ];
 
               return (
-                <div className="rounded-lg border border-border bg-surface p-5 shadow-xs">
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-border pb-4 mb-4">
+                <div className="rounded-xl border border-slate-200/90 bg-white p-6 shadow-2xs">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-5">
                     <div>
                       <div className="flex items-center gap-2">
                         <TrendingUp className="h-5 w-5 text-primary" />
-                        <h2 className="text-section font-semibold text-text-primary">
-                          Capital, Schedule Delay & Earned Progress Trajectory
+                        <h2 className="text-base font-semibold text-slate-900">
+                          Capital & Schedule Trajectory
                         </h2>
-                        <span className="rounded bg-primary-subtle px-2 py-0.5 text-[11px] font-bold text-primary">
-                          LIVE EVM
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                          EVM
                         </span>
                       </div>
-                      <p className="text-caption text-text-muted mt-0.5">
-                        Correlating baseline capital curve ($1.07M), actual spend ($420k), critical path schedule slip (+35 days), and carry cost impact.
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Correlating baseline capital curve against actual verified spend and critical path milestones
                       </p>
                     </div>
 
                     {/* Executive Metric Pills */}
                     <div className="flex flex-wrap items-center gap-2">
-                      <div className="flex items-center gap-1.5 rounded-md border border-danger/30 bg-danger-subtle/50 px-2.5 py-1 text-xs font-semibold text-danger">
+                      <div className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50/80 px-2.5 py-1 text-xs font-semibold text-rose-700">
                         <Clock className="h-3.5 w-3.5" />
-                        <span>Schedule Delay: +35 Days</span>
+                        <span>+35d Delay Window</span>
                       </div>
-                      <div className="flex items-center gap-1.5 rounded-md border border-warning/30 bg-warning-subtle/50 px-2.5 py-1 text-xs font-semibold text-warning">
+                      <div className="flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50/80 px-2.5 py-1 text-xs font-semibold text-amber-700">
                         <DollarSign className="h-3.5 w-3.5" />
-                        <span>Carry Impact: +$28,500</span>
+                        <span>+$28.5k Carry Impact</span>
                       </div>
-                      <div className="flex items-center gap-1.5 rounded-md border border-border bg-subtle px-2.5 py-1 text-xs font-semibold text-text-secondary">
+                      <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
                         <SlidersHorizontal className="h-3.5 w-3.5 text-primary" />
-                        <span>Progress: 42% vs 58% (-16% Lag)</span>
+                        <span>42% Progress (-16% Lag)</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Clean Legend Bar */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-medium pb-3 border-b border-border-subtle/60 mb-3 text-text-secondary">
-                    <div className="flex flex-wrap items-center gap-4">
-                      <span className="flex items-center gap-1.5">
-                        <span className="h-2 w-4 rounded-xs bg-slate-400" /> Planned Baseline Target ($1.07M)
-                      </span>
-                      <span className="flex items-center gap-1.5 font-semibold text-primary">
-                        <span className="h-2.5 w-4 rounded-xs bg-primary" /> Actual Verified Spend ($420k / 42%)
-                      </span>
-                      <span className="flex items-center gap-1.5 text-amber-700">
-                        <span className="h-2 w-4 border-b-2 border-dashed border-amber-600" /> Forecast Trajectory w/ Delay ($1.098M)
-                      </span>
-                      <span className="flex items-center gap-1.5 text-amber-800">
-                        <span className="h-3 w-4 rounded-xs bg-amber-100 border border-amber-300" /> +35d Delay Window
-                      </span>
-                    </div>
-
-                    <div className="text-[11px] text-text-muted flex items-center gap-1">
-                      <span>X-Axis: Timeline</span>
-                      <span>•</span>
-                      <span>Left Axis: Capital ($)</span>
-                      <span>•</span>
-                      <span>Right Axis: Progress (%)</span>
-                    </div>
+                  <div className="flex flex-wrap items-center gap-5 text-xs font-medium pb-4 border-b border-slate-100 mb-4 text-slate-600">
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2 w-3 rounded-xs bg-slate-300" /> Planned Baseline ($1.07M)
+                    </span>
+                    <span className="flex items-center gap-1.5 font-semibold text-primary">
+                      <span className="h-2.5 w-3 rounded-xs bg-primary" /> Actual Spend ($420k)
+                    </span>
+                    <span className="flex items-center gap-1.5 text-amber-800">
+                      <span className="h-2 w-3 border-b-2 border-dashed border-amber-500" /> Forecast with Delay ($1.098M)
+                    </span>
+                    <span className="flex items-center gap-1.5 text-amber-700">
+                      <span className="h-2.5 w-3 rounded-xs bg-amber-200/80 border border-amber-300" /> Delay Window Zone
+                    </span>
                   </div>
 
                   {/* Line Chart Canvas */}
@@ -917,64 +858,64 @@ export default function ControlCenterPage() {
                   </div>
 
                   {/* 5 Core Pillars Analytical Summary Ribbon */}
-                  <div className="mt-4 pt-3 border-t border-border grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
-                    <div className="rounded-md border border-border-subtle bg-subtle p-2.5">
-                      <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider block">
-                        1. Finance (Capital)
+                  <div className="mt-5 pt-4 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
+                    <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3">
+                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                        Capital Target
                       </span>
-                      <div className="mt-1 font-mono font-bold text-text-primary text-sm">
-                        $1,070,000 <span className="text-xs text-text-muted font-normal">Base</span>
+                      <div className="mt-1 font-mono font-bold text-slate-900 text-sm">
+                        $1,070,000
                       </div>
-                      <div className="text-[11px] text-danger font-medium mt-0.5">
+                      <div className="text-[11px] text-rose-600 font-medium mt-0.5">
                         Forecast: $1,098,500
                       </div>
                     </div>
 
-                    <div className="rounded-md border border-border-subtle bg-subtle p-2.5">
-                      <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider block">
-                        2. Time (Milestones)
+                    <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3">
+                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                        Target Timeline
                       </span>
-                      <div className="mt-1 font-semibold text-text-primary text-sm">
+                      <div className="mt-1 font-semibold text-slate-900 text-sm">
                         Nov 10 → Dec 15
                       </div>
-                      <div className="text-[11px] text-text-muted mt-0.5">
-                        7 Months Total Duration
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        7 Months Total
                       </div>
                     </div>
 
-                    <div className="rounded-md border border-border-subtle bg-subtle p-2.5">
-                      <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider block">
-                        3. Schedule Delay
+                    <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3">
+                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                        Critical Slip
                       </span>
-                      <div className="mt-1 font-bold text-danger text-sm">
-                        +35 Days Slip
+                      <div className="mt-1 font-bold text-rose-600 text-sm">
+                        +35 Days Delay
                       </div>
-                      <div className="text-[11px] text-text-muted mt-0.5">
-                        Critical: Structural Steel
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        Structural Steel
                       </div>
                     </div>
 
-                    <div className="rounded-md border border-border-subtle bg-subtle p-2.5">
-                      <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider block">
-                        4. Financial Impact
+                    <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3">
+                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                        Carry Cost Burn
                       </span>
-                      <div className="mt-1 font-bold text-warning font-mono text-sm">
-                        +$28,500.00
+                      <div className="mt-1 font-bold text-amber-700 font-mono text-sm">
+                        +$28,500
                       </div>
-                      <div className="text-[11px] text-text-muted mt-0.5">
-                        Carry & Demurrage Burn
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        Interest & Demurrage
                       </div>
                     </div>
 
-                    <div className="rounded-md border border-border-subtle bg-subtle p-2.5 col-span-2 sm:col-span-1">
-                      <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider block">
-                        5. Progress Variance
+                    <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 col-span-2 sm:col-span-1">
+                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                        Schedule Variance
                       </span>
-                      <div className="mt-1 font-bold text-danger text-sm">
-                        -16% Execution Lag
+                      <div className="mt-1 font-bold text-rose-600 text-sm">
+                        -16% Progress Lag
                       </div>
-                      <div className="text-[11px] text-text-muted mt-0.5">
-                        42% Actual vs 58% Sched
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        42% Act. vs 58% Target
                       </div>
                     </div>
                   </div>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Project } from "@/lib/types";
+import { Project, OnboardingTask } from "@/lib/types";
 import {
   Bell,
   ChevronDown,
@@ -18,6 +18,7 @@ import {
   Menu,
   LogOut,
   CheckSquare,
+  ArrowRight,
 } from "lucide-react";
 import { authAdapter } from "@/lib/api/adapters/auth-adapter";
 import {
@@ -95,32 +96,80 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
     },
   });
 
+  const { data: onboardingTasksData } = useQuery({
+    queryKey: ["onboarding-tasks", currentProjectId],
+    queryFn: () =>
+      currentProjectId
+        ? api.onboarding.getTasks(currentProjectId)
+        : Promise.resolve({ data: [] as OnboardingTask[] }),
+    enabled: Boolean(currentProjectId),
+  });
+
+  const serverTasks: OnboardingTask[] = onboardingTasksData?.data || [];
+  const defaultTasks = [
+    {
+      id: "task-1",
+      title: "Approve verified budget baseline",
+      project: currentProject?.name || "Active Project",
+      status: "PENDING" as const,
+      category: "Baseline review",
+    },
+    {
+      id: "task-2",
+      title: "Map dedicated operating bank account",
+      project: currentProject?.name || "Active Project",
+      status: "PENDING" as const,
+      category: "Account mapping",
+    },
+    {
+      id: "task-3",
+      title: "Audit period compliance verification",
+      project: "Portfolio Wide",
+      status: "RESOLVED" as const,
+      category: "Compliance",
+    },
+  ];
+
+  const tasks =
+    serverTasks.length > 0
+      ? serverTasks.map((t: OnboardingTask) => ({
+          id: t.id,
+          title: t.title,
+          project: currentProject?.name || "Active Project",
+          status: t.status === "RESOLVED" ? ("RESOLVED" as const) : ("PENDING" as const),
+          category: t.task_type.replace(/_/g, " ").toLowerCase(),
+        }))
+      : defaultTasks;
+
+  const pendingTasksCount = tasks.filter((t) => t.status !== "RESOLVED").length;
+
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-[56px] w-full items-center justify-between border-b border-border bg-surface/90 backdrop-blur-md px-4 shadow-xs">
-        {/* Left: Mobile Toggle & Portfolio Navigation Link */}
+      <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-5">
+        {/* Left: Mobile Toggle & Contextual Breadcrumb / Title */}
         <div className="flex items-center gap-3">
           <button
             onClick={onToggleSidebar}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-subtle hover:text-text-primary md:hidden"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 md:hidden"
             aria-label="Toggle navigation sidebar"
           >
             <Menu className="h-5 w-5" />
           </button>
-          <Link
-            href="/projects"
-            className="flex items-center gap-2 font-semibold text-slate-900 transition-opacity hover:opacity-80"
-          >
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 text-white shadow-2xs">
-              <Building2 className="h-4 w-4" />
-            </div>
-            <span className="text-sm font-bold tracking-tight">GroundUp</span>
-          </Link>
+
+          {/* Clean title or breadcrumb */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider hidden sm:inline">
+              Workspace
+            </span>
+            <span className="text-slate-300 hidden sm:inline">/</span>
+            <span className="text-sm font-semibold text-slate-900 truncate max-w-[200px] sm:max-w-[320px]">
+              {currentProject?.name || "GroundUp AI"}
+            </span>
+          </div>
         </div>
 
         {/* Right: Tasks, Notifications & User Menu */}
-        <div className="flex items-center gap-2">
-          {/* Tasks Trigger */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Tasks Trigger */}
           <button
             onClick={() => {
@@ -128,110 +177,131 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
               setIsNotificationsOpen(false);
               setIsUserDropdownOpen(false);
             }}
-            className="relative flex h-9 items-center gap-1.5 px-2.5 rounded-md text-text-secondary hover:bg-subtle hover:text-text-primary focus-visible:outline-primary text-caption font-semibold"
+            className="relative flex h-8 items-center gap-1.5 px-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
             aria-label="View onboarding and delegated tasks"
           >
-            <CheckSquare className="h-4 w-4" />
+            <CheckSquare className="h-3.5 w-3.5 text-slate-500" />
             <span className="hidden sm:inline">Tasks</span>
+            {pendingTasksCount > 0 && (
+              <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-slate-200 px-1 text-[10px] font-semibold text-slate-700">
+                {pendingTasksCount}
+              </span>
+            )}
           </button>
 
           {/* Tasks Slide-out Drawer */}
           <Drawer open={isTasksOpen} onOpenChange={setIsTasksOpen}>
             <DrawerContent width="default" className="flex flex-col h-full bg-surface">
-              <DrawerHeader className="border-b border-border bg-subtle/30 px-5 py-4 flex-shrink-0">
-                <div className="flex items-center justify-between pr-6">
-                  <div className="flex items-center gap-2">
-                    <CheckSquare className="h-5 w-5 text-primary" />
-                    <DrawerTitle className="text-section font-bold text-text-primary">
-                      Tasks & Action Items
-                    </DrawerTitle>
+              <DrawerHeader className="border-b border-border bg-surface px-5 py-4 flex-shrink-0">
+                <div className="flex items-center justify-between pr-8">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                      <CheckSquare className="h-4 w-4" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <DrawerTitle className="text-sm font-bold text-slate-900">
+                        Tasks
+                      </DrawerTitle>
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                        {pendingTasksCount} pending
+                      </span>
+                    </div>
                   </div>
-                  <span className="rounded bg-primary-subtle text-primary text-[11px] font-semibold px-2 py-0.5">
-                    {currentProject?.name || "Active Project"}
-                  </span>
+                  {currentProject?.name && (
+                    <span className="text-xs font-medium text-slate-500 truncate max-w-[140px]">
+                      {currentProject.name}
+                    </span>
+                  )}
                 </div>
-                <DrawerDescription className="text-caption text-text-secondary mt-1">
-                  Onboarding milestones, pending approvals, and delegated sponsor duties.
+                <DrawerDescription className="sr-only">
+                  Project tasks and action items
                 </DrawerDescription>
               </DrawerHeader>
 
-              <DrawerBody className="p-4 space-y-3">
-                <div className="rounded-lg border border-border bg-surface p-3.5 hover:bg-subtle/40 transition-colors">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="rounded bg-primary-subtle text-primary text-[10px] font-bold px-1.5 py-0.5">
-                          {currentProject?.name || "73 Broadway"}
-                        </span>
-                        <span className="rounded bg-warning-subtle text-warning text-[10px] font-bold px-1.5 py-0.5 shrink-0">
-                          PENDING
-                        </span>
-                      </div>
-                      <h5 className="text-caption font-bold text-text-primary pt-0.5">
-                        Approve verified budget baseline
-                      </h5>
-                      <p className="text-caption text-text-secondary">
-                        Confirm line item allowances and assign $350k contingency reserve.
-                      </p>
+              <DrawerBody className="p-4 space-y-2.5">
+                {tasks.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 mb-2">
+                      <Check className="h-5 w-5" />
                     </div>
+                    <p className="text-xs font-semibold text-slate-900">All caught up</p>
+                    <p className="text-xs text-slate-500 mt-0.5">No pending tasks or action items</p>
                   </div>
-                </div>
+                ) : (
+                  tasks.map((task) => {
+                    const isDone = task.status === "RESOLVED";
 
-                <div className="rounded-lg border border-border bg-surface p-3.5 hover:bg-subtle/40 transition-colors">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="rounded bg-primary-subtle text-primary text-[10px] font-bold px-1.5 py-0.5">
-                          {currentProject?.name || "73 Broadway"}
-                        </span>
-                        <span className="rounded bg-warning-subtle text-warning text-[10px] font-bold px-1.5 py-0.5 shrink-0">
-                          PENDING
-                        </span>
-                      </div>
-                      <h5 className="text-caption font-bold text-text-primary pt-0.5">
-                        Map dedicated operating bank account
-                      </h5>
-                      <p className="text-caption text-text-secondary">
-                        Link Columbia Bank operating account for automated statement matching.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                    return (
+                      <div
+                        key={task.id}
+                        onClick={() => {
+                          setIsTasksOpen(false);
+                          if (currentProjectId) {
+                            router.push(`/projects/${currentProjectId}/budget`);
+                          } else {
+                            router.push("/projects");
+                          }
+                        }}
+                        className="group flex items-start gap-3 rounded-xl border border-slate-200/80 bg-white p-3.5 hover:border-slate-300 hover:bg-slate-50/60 transition-all cursor-pointer shadow-xs"
+                      >
+                        <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center">
+                          {isDone ? (
+                            <div className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                              <Check className="h-2.5 w-2.5 stroke-[3]" />
+                            </div>
+                          ) : (
+                            <div className="h-4 w-4 rounded-full border-2 border-slate-300 group-hover:border-slate-400 transition-colors" />
+                          )}
+                        </div>
 
-                <div className="rounded-lg border border-border bg-surface p-3.5 hover:bg-subtle/40 transition-colors">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="rounded bg-primary-subtle text-primary text-[10px] font-bold px-1.5 py-0.5">
-                          Portfolio Wide
-                        </span>
-                        <span className="rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold px-1.5 py-0.5 shrink-0">
-                          UP TO DATE
-                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <h5
+                              className={`text-xs font-semibold leading-tight truncate ${
+                                isDone
+                                  ? "text-slate-400 line-through"
+                                  : "text-slate-900 group-hover:text-blue-600 transition-colors"
+                              }`}
+                            >
+                              {task.title}
+                            </h5>
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold shrink-0 ${
+                                isDone
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+                                  : "bg-amber-50 text-amber-700 border border-amber-200/60"
+                              }`}
+                            >
+                              {isDone ? "Done" : "Pending"}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 mt-1.5 text-[11px] text-slate-500">
+                            <span className="font-medium text-slate-600 truncate">{task.project}</span>
+                            <span>•</span>
+                            <span className="text-slate-400 capitalize truncate">{task.category}</span>
+                          </div>
+                        </div>
                       </div>
-                      <h5 className="text-caption font-bold text-text-primary pt-0.5">
-                        Audit period compliance verification
-                      </h5>
-                      <p className="text-caption text-text-secondary">
-                        All invoices and monthly draw disbursements reconciled with ledger records.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                    );
+                  })
+                )}
               </DrawerBody>
 
-              <DrawerFooter className="border-t border-border p-4 bg-subtle/30 flex items-center justify-between">
-                <span className="text-caption text-text-muted">
-                  Need to review full setup checklist?
-                </span>
+              <DrawerFooter className="border-t border-border p-4 bg-surface">
                 <button
                   onClick={() => {
                     setIsTasksOpen(false);
-                    router.push("/onboarding");
+                    if (currentProjectId) {
+                      router.push(`/projects/${currentProjectId}/control-center`);
+                    } else {
+                      router.push("/projects");
+                    }
                   }}
-                  className="rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-primary-hover transition-colors"
+                  className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 active:bg-slate-950 transition-colors cursor-pointer"
                 >
-                  Open Onboarding Checklist &rarr;
+                  <span>Go to Project Control Center</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </DrawerFooter>
             </DrawerContent>
@@ -245,140 +315,33 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
               setIsProjectDropdownOpen(false);
               setIsTasksOpen(false);
             }}
-            className="relative flex h-9 w-9 items-center justify-center rounded-md text-text-secondary hover:bg-subtle hover:text-text-primary focus-visible:outline-primary"
+            className="relative flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
             aria-label="View notifications and alerts"
           >
             <Bell className="h-4 w-4" />
             {unreadNotificationsCount > 0 && (
-              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white leading-none tabular-nums">
-                {unreadNotificationsCount}
-              </span>
+              <span className="absolute top-1 right-1 flex h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
             )}
           </button>
 
-          {/* Notifications / Alerts Slide-out Drawer */}
-          <Drawer open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
-            <DrawerContent width="default" className="flex flex-col h-full bg-surface">
-              <DrawerHeader className="border-b border-border bg-subtle/30 px-5 py-4 flex-shrink-0">
-                <div className="flex items-center justify-between pr-6">
-                  <div className="flex items-center gap-2">
-                    <Bell className="h-5 w-5 text-primary" />
-                    <DrawerTitle className="text-section font-bold text-text-primary">
-                      Alerts & Notifications
-                    </DrawerTitle>
-                  </div>
-                  {unreadNotificationsCount > 0 ? (
-                    <span className="rounded bg-danger/10 text-danger text-caption font-bold px-2 py-0.5">
-                      {unreadNotificationsCount} unread
-                    </span>
-                  ) : (
-                    <span className="rounded bg-emerald-50 text-emerald-700 text-caption font-medium px-2 py-0.5">
-                      All caught up
-                    </span>
-                  )}
-                </div>
-                <DrawerDescription className="text-caption text-text-secondary mt-1 flex items-center justify-between">
-                  <span>Critical project exceptions, draw milestones, and system notices.</span>
-                  {unreadNotificationsCount > 0 && (
-                    <button
-                      onClick={() => markAllReadMutation.mutate()}
-                      className="text-caption font-semibold text-primary hover:text-primary-hover shrink-0 ml-2"
-                    >
-                      Mark all read
-                    </button>
-                  )}
-                </DrawerDescription>
-              </DrawerHeader>
-
-              <DrawerBody className="p-4 space-y-2.5">
-                {notifications.length === 0 ? (
-                  <div className="p-8 text-center text-caption text-text-muted">
-                    No active notifications or alerts to display.
-                  </div>
-                ) : (
-                  notifications.map((notif) => (
-                    <div
-                      key={notif.id}
-                      onClick={() => {
-                        if (!notif.read) markReadMutation.mutate(notif.id);
-                        if (notif.link_url) {
-                          setIsNotificationsOpen(false);
-                          router.push(notif.link_url);
-                        }
-                      }}
-                      className={`flex items-start gap-3 p-3.5 rounded-lg border transition-all cursor-pointer ${
-                        notif.read
-                          ? "border-border/60 bg-surface hover:bg-subtle/50"
-                          : "border-primary/20 bg-primary-subtle/15 hover:bg-primary-subtle/25 shadow-2xs"
-                      }`}
-                    >
-                      {notif.severity === "CRITICAL" ? (
-                        <AlertCircle className="mt-0.5 h-4 w-4 text-danger flex-shrink-0" />
-                      ) : notif.severity === "WARNING" ? (
-                        <AlertTriangle className="mt-0.5 h-4 w-4 text-warning flex-shrink-0" />
-                      ) : notif.severity === "SUCCESS" ? (
-                        <Check className="mt-0.5 h-4 w-4 text-success flex-shrink-0" />
-                      ) : (
-                        <Info className="mt-0.5 h-4 w-4 text-primary flex-shrink-0" />
-                      )}
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-1">
-                          <h5
-                            className={`text-caption ${
-                              notif.read ? "font-semibold text-text-primary" : "font-bold text-text-primary"
-                            }`}
-                          >
-                            {notif.title}
-                          </h5>
-                          {!notif.read && (
-                            <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                          )}
-                        </div>
-                        <p className="text-caption text-text-secondary mt-1 leading-relaxed">
-                          {notif.message}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </DrawerBody>
-
-              <DrawerFooter className="border-t border-border p-4 bg-subtle/30 flex items-center justify-between">
-                <span className="text-caption text-text-muted">
-                  Manage notification preferences
-                </span>
-                <button
-                  onClick={() => {
-                    setIsNotificationsOpen(false);
-                    router.push("/settings");
-                  }}
-                  className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-subtle transition-colors shadow-2xs"
-                >
-                  View All in Settings &rarr;
-                </button>
-              </DrawerFooter>
-            </DrawerContent>
-          </Drawer>
-
           {/* User menu */}
-          <div className="relative">
+          <div className="relative ml-1">
             <button
               onClick={() => {
                 setIsUserDropdownOpen(!isUserDropdownOpen);
                 setIsProjectDropdownOpen(false);
                 setIsNotificationsOpen(false);
               }}
-              className="flex items-center gap-2 rounded-md p-1.5 hover:bg-subtle focus-visible:outline-primary"
+              className="flex items-center gap-2 rounded-lg p-1 hover:bg-slate-100 transition-colors"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
                 {currentUser?.avatarInitials || "U"}
               </div>
               <div className="hidden sm:flex flex-col text-left">
-                <span className="text-body font-medium leading-none text-text-primary">
+                <span className="text-xs font-semibold leading-none text-slate-800">
                   {currentUser?.name || "User"}
                 </span>
-                <span className="text-[11px] text-text-muted leading-tight mt-0.5">
+                <span className="text-[10px] text-slate-400 leading-tight mt-0.5">
                   {currentUser?.role}
                 </span>
               </div>

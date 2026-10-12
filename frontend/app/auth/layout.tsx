@@ -23,14 +23,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (data?.user) {
-      const completedSignup =
-        pathname === "/auth/sign-up" &&
-        window.sessionStorage.getItem("groundup_signup_completed") === "1";
-      router.replace(
-        completedSignup
-          ? "/projects/new?firstRun=1"
-          : getDefaultRouteForRole(data.user.role)
-      );
+      if (pathname === "/auth/sign-up") {
+        const completedSignup = window.sessionStorage.getItem("groundup_signup_completed") === "1";
+        if (completedSignup) {
+          router.replace(getDefaultRouteForRole(data.user.role));
+        }
+        return;
+      }
+      router.replace(getDefaultRouteForRole(data.user.role));
     }
   }, [data, pathname, router]);
 
