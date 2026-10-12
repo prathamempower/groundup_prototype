@@ -33,6 +33,7 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Info,
+  DollarSign,
 } from "lucide-react";
 
 import { ImportWizardModal } from "@/components/reconciliation/import-wizard-modal";
@@ -44,6 +45,11 @@ import { RepayTransferModal } from "@/components/reconciliation/repay-transfer-m
 import { StatementPeriodSignoffModal } from "@/components/reconciliation/statement-period-signoff-modal";
 import { LinkInvoiceModal } from "@/components/reconciliation/link-invoice-modal";
 import { CardSettlementModal } from "@/components/reconciliation/card-settlement-modal";
+import {
+  OwnerResolutionModal,
+  ReviewItemData,
+  ResolutionActionType,
+} from "@/components/reconciliation/owner-resolution-modal";
 
 import {
   ReconciliationMatch,
@@ -91,6 +97,7 @@ export default function ReconciliationPage() {
   } | null>(null);
   const [signoffPeriod, setSignoffPeriod] = useState<StatementPeriod | null>(null);
   const [repayTransfer, setRepayTransfer] = useState<InterProjectTransfer | null>(null);
+  const [resolutionModalItem, setResolutionModalItem] = useState<ReviewItemData | null>(null);
 
   // Data Queries
   const { data: projectsData } = useQuery({
@@ -397,12 +404,60 @@ export default function ReconciliationPage() {
     },
   ];
 
-  // Stateful review items list so Accept, Split, etc. dynamically update the view
-  const [reviewItems, setReviewItems] = useState(defaultReviewItems);
+  // Stateful review items list with owner resolution support
+  const [reviewItems, setReviewItems] = useState<ReviewItemData[]>(defaultReviewItems);
   const [activeMoreMenuId, setActiveMoreMenuId] = useState<string | null>(null);
 
+  // Dynamic metrics derived from reviewItems state
+  const unresolvedItems = reviewItems.filter((item) => item.status !== "Resolved");
+  const resolvedItems = reviewItems.filter((item) => item.status === "Resolved");
+  const unresolvedCount = unresolvedItems.length;
+
+  const totalUnresolvedDollars = unresolvedItems.reduce((acc, item) => {
+    const raw = item.amount.replace(/[^0-9.]/g, "");
+    return acc + (parseFloat(raw) || 0);
+  }, 0);
+
+  const missingEvidenceItems = unresolvedItems.filter((item) => item.evidence === "Missing");
+  const missingEvidenceCount = missingEvidenceItems.length;
+  const missingEvidenceDollars = missingEvidenceItems.reduce((acc, item) => {
+    const raw = item.amount.replace(/[^0-9.]/g, "");
+    return acc + (parseFloat(raw) || 0);
+  }, 0);
+
+  // Filtered Review Items
+  const filteredReviewItems = reviewItems.filter((item) => {
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchSearch =
+        item.description.toLowerCase().includes(q) ||
+        item.account.toLowerCase().includes(q) ||
+        item.proposedLink.toLowerCase().includes(q) ||
+        Boolean(item.resolutionNote && item.resolutionNote.toLowerCase().includes(q));
+      if (!matchSearch) return false;
+    }
+
+    if (accountFilter !== "ALL") {
+      if (accountFilter === "OPERATING" && !item.account.includes("4821")) return false;
+      if (accountFilter === "CARD" && !item.account.includes("1108")) return false;
+    }
+
+    if (statusFilter !== "ALL") {
+      if (statusFilter === "PENDING" && item.status === "Resolved") return false;
+      if (statusFilter === "RESOLVED" && item.status !== "Resolved") return false;
+    }
+
+    if (evidenceFilter !== "ALL") {
+      if (evidenceFilter === "STRONG" && item.evidence !== "Strong") return false;
+      if (evidenceFilter === "PARTIAL" && item.evidence !== "Partial") return false;
+      if (evidenceFilter === "MISSING" && item.evidence !== "Missing") return false;
+    }
+
+    return true;
+  });
+
   // Helper to convert review item to ReconciliationMatch object for existing modals
-  const getMatchFromRow = (row: typeof defaultReviewItems[0]): ReconciliationMatch => {
+  const getMatchFromRow = (row: ReviewItemData): ReconciliationMatch => {
     // Check if there is an existing live match with this id
     const liveMatch = matches.find((m) => m.id === row.id);
     if (liveMatch) return liveMatch;
@@ -420,53 +475,110 @@ export default function ReconciliationPage() {
       confidence: row.evidence === "Strong" ? 0.94 : 0.75,
       confidence_reasons: [row.whyMatches],
       evidence_strength: row.evidence === "Strong" ? "VERIFIED_INVOICE" : "BANK_TRANSACTION",
-      status: row.status === "Accepted" ? "ACCEPTED" : "PENDING_REVIEW",
+      status: row.status === "Resolved" ? "ACCEPTED" : "PENDING_REVIEW",
     };
   };
 
-  const handleAcceptItem = (id: string) => {
-    // If it's a real backend match, trigger mutation
-    const isLive = matches.some((m) => m.id === id);
+  const handleResolveItem = (
+    itemId: string,
+    actionType: ResolutionActionType,
+    reason: string
+  ) => {
+    const isLive = matches.some((m) => m.id === itemId);
     if (isLive) {
-      acceptMatchMutation.mutate(id);
+      acceptMatchMutation.mutate(itemId);
     }
-    // Update local state to mark accepted
     setReviewItems((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, status: "Accepted" } : item
+        item.id === itemId
+          ? {
+              ...item,
+              status: "Resolved",
+              resolutionType: actionType,
+              resolutionNote: reason,
+            }
+          : item
       )
     );
+    setResolutionModalItem(null);
     setActiveMoreMenuId(null);
   };
 
-  const handleOpenSplit = (row: typeof defaultReviewItems[0]) => {
+  const getResolutionBadge = (type?: string) => {
+    switch (type) {
+      case "REQUEST_INVOICE":
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 border border-blue-200">
+            <FileText className="h-2.5 w-2.5" /> Invoice Requested
+          </span>
+        );
+      case "ASSIGN_TRADE":
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
+            <DollarSign className="h-2.5 w-2.5" /> Budget Assigned
+          </span>
+        );
+      case "TRANSFER_PROJECT":
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-700 border border-purple-200">
+            <ArrowRightLeft className="h-2.5 w-2.5" /> Project Advance
+          </span>
+        );
+      case "CONFIRM_DRAW":
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
+            <Building2 className="h-2.5 w-2.5" /> Draw Linked
+          </span>
+        );
+      case "SETTLE_LIABILITY":
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 border border-amber-200">
+            <CreditCard className="h-2.5 w-2.5" /> Card Settlement
+          </span>
+        );
+      case "EXCLUDE_NON_PROJECT":
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700 border border-slate-200">
+            <Ban className="h-2.5 w-2.5" /> Excluded
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
+            <CheckCircle2 className="h-2.5 w-2.5" /> Resolved
+          </span>
+        );
+    }
+  };
+
+  const handleOpenSplit = (row: ReviewItemData) => {
     setSplitMatch(getMatchFromRow(row));
     setActiveMoreMenuId(null);
   };
 
-  const handleOpenRemap = (row: typeof defaultReviewItems[0]) => {
+  const handleOpenRemap = (row: ReviewItemData) => {
     setRemapMatch(getMatchFromRow(row));
     setActiveMoreMenuId(null);
   };
 
-  const handleOpenTransfer = (row: typeof defaultReviewItems[0]) => {
+  const handleOpenTransfer = (row: ReviewItemData) => {
     setTransferMatch(getMatchFromRow(row));
     setActiveMoreMenuId(null);
   };
 
-  const handleOpenExclude = (row: typeof defaultReviewItems[0]) => {
+  const handleOpenExclude = (row: ReviewItemData) => {
     setExcludeMatch(getMatchFromRow(row));
     setActiveMoreMenuId(null);
   };
 
-  const handleOpenLinkInvoice = (row: typeof defaultReviewItems[0]) => {
+  const handleOpenLinkInvoice = (row: ReviewItemData) => {
     setLinkInvoiceTarget({ match: getMatchFromRow(row) });
     setActiveMoreMenuId(null);
   };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedMatchIds(reviewItems.map((item) => item.id));
+      setSelectedMatchIds(filteredReviewItems.map((item) => item.id));
     } else {
       setSelectedMatchIds([]);
     }
@@ -521,10 +633,10 @@ export default function ReconciliationPage() {
               Unmatched transactions
             </span>
             <div className="mt-2 text-xl font-bold font-mono text-slate-900 tabular-nums">
-              $76,375.00
+              ${totalUnresolvedDollars.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <p className="mt-1 text-[11px] text-slate-400">
-              <strong className="text-slate-700 font-semibold">8 items</strong> awaiting review
+              <strong className="text-slate-700 font-semibold">{unresolvedCount} items</strong> awaiting review
             </p>
           </div>
 
@@ -534,10 +646,10 @@ export default function ReconciliationPage() {
               Missing evidence
             </span>
             <div className="mt-2 text-xl font-bold font-mono text-slate-900 tabular-nums">
-              $1,435.00
+              ${missingEvidenceDollars.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <p className="mt-1 text-[11px] text-slate-400">
-              <strong className="text-slate-700 font-semibold">2 items</strong> need invoice or receipt
+              <strong className="text-slate-700 font-semibold">{missingEvidenceCount} items</strong> need invoice or receipt
             </p>
           </div>
 
@@ -593,7 +705,7 @@ export default function ReconciliationPage() {
               }`}
             >
               <span>Review queue</span>
-              <span className="text-[10px] text-slate-400 font-mono">8</span>
+              <span className="text-[10px] text-slate-400 font-mono">{unresolvedCount}</span>
             </button>
 
             <button
@@ -654,11 +766,11 @@ export default function ReconciliationPage() {
               <div>
                 <h3 className="text-sm font-bold text-slate-900">Review queue</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Unresolved transactions only. Confirm a link or correct the proposed allocation.
+                  Specify owner resolution actions and audit reasons to clear transactions.
                 </p>
               </div>
               <span className="text-xs text-slate-500 font-medium">
-                8 items need review
+                {unresolvedCount} items need review
               </span>
             </div>
 
@@ -668,7 +780,7 @@ export default function ReconciliationPage() {
                 <Search className="h-3.5 w-3.5 absolute left-3 top-2.5 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search description, vendor, account..."
+                  placeholder="Search description, vendor, account, or audit note..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full rounded-lg border border-slate-200/90 bg-white pl-8 pr-3 py-1.5 text-xs placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
@@ -691,8 +803,9 @@ export default function ReconciliationPage() {
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
                 >
-                  <option value="ALL">Pending review</option>
-                  <option value="ACCEPTED">Accepted</option>
+                  <option value="ALL">All statuses</option>
+                  <option value="PENDING">Pending action ({unresolvedCount})</option>
+                  <option value="RESOLVED">Resolved by owner ({resolvedItems.length})</option>
                 </select>
 
                 <select
@@ -717,7 +830,7 @@ export default function ReconciliationPage() {
               </div>
             </div>
 
-            {/* Exact Table Component */}
+            {/* Exact Table Component with Owner-Driven Actions */}
             <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
@@ -726,7 +839,10 @@ export default function ReconciliationPage() {
                       <th className="px-3.5 py-2.5 w-8">
                         <input
                           type="checkbox"
-                          checked={selectedMatchIds.length === defaultReviewItems.length}
+                          checked={
+                            selectedMatchIds.length === filteredReviewItems.length &&
+                            filteredReviewItems.length > 0
+                          }
                           onChange={(e) => handleSelectAll(e.target.checked)}
                           className="rounded border-slate-300 text-slate-900 focus:ring-0"
                         />
@@ -735,170 +851,189 @@ export default function ReconciliationPage() {
                       <th className="px-3.5 py-2.5">Account</th>
                       <th className="px-3.5 py-2.5">Description</th>
                       <th className="px-3.5 py-2.5">Amount</th>
-                      <th className="px-3.5 py-2.5">Proposed Link</th>
-                      <th className="px-3.5 py-2.5">Why It Matches</th>
+                      <th className="px-3.5 py-2.5">Proposed Allocation</th>
                       <th className="px-3.5 py-2.5">Evidence</th>
-                      <th className="px-3.5 py-2.5">Status</th>
+                      <th className="px-3.5 py-2.5">Owner Status & Reason</th>
                       <th className="px-3.5 py-2.5 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
-                    {reviewItems.map((row) => {
-                      const isSelected = selectedMatchIds.includes(row.id);
-                      const isAccepted = row.status === "Accepted";
-                      const isMenuOpen = activeMoreMenuId === row.id;
-
-                      return (
-                        <tr
-                          key={row.id}
-                          className={`hover:bg-slate-50/60 transition-colors ${
-                            isSelected ? "bg-blue-50/20" : ""
-                          }`}
+                    {filteredReviewItems.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={9}
+                          className="py-10 text-center text-xs text-slate-400"
                         >
-                          <td className="px-3.5 py-3">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => handleToggleSelect(row.id)}
-                              className="rounded border-slate-300 text-slate-900 focus:ring-0"
-                            />
-                          </td>
-                          <td className="px-3.5 py-3 whitespace-nowrap text-slate-600">
-                            {row.date}
-                          </td>
-                          <td className="px-3.5 py-3 whitespace-nowrap text-slate-600">
-                            {row.account}
-                          </td>
-                          <td className="px-3.5 py-3">
-                            <div className="font-bold text-slate-900">{row.description}</div>
-                            <div className="text-[10px] text-slate-400 mt-0.5">{row.type}</div>
-                          </td>
-                          <td className="px-3.5 py-3 whitespace-nowrap">
-                            <span
-                              className={`font-mono font-bold ${
-                                row.direction === "in" ? "text-emerald-700" : "text-slate-900"
-                              }`}
-                            >
-                              {row.amount}
-                            </span>
-                            <span className="block text-[10px] text-slate-400 font-normal mt-0.5">
-                              {row.direction === "in" ? "Money in" : "Money out"}
-                            </span>
-                          </td>
-                          <td className="px-3.5 py-3">
-                            <span className="inline-block rounded-md bg-slate-100/90 text-slate-700 px-2 py-0.5 text-[11px] border border-slate-200">
-                              {row.proposedLink}
-                            </span>
-                          </td>
-                          <td className="px-3.5 py-3 text-slate-600 max-w-xs text-[11px]">
-                            {row.whyMatches}
-                          </td>
-                          <td className="px-3.5 py-3 whitespace-nowrap">
-                            {row.evidence === "Strong" && (
-                              <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-bold border border-emerald-200">
-                                Strong
-                              </span>
-                            )}
-                            {row.evidence === "Partial" && (
-                              <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-bold border border-amber-200">
-                                Partial
-                              </span>
-                            )}
-                            {row.evidence === "Missing" && (
-                              <span className="rounded bg-rose-50 text-rose-800 px-2 py-0.5 text-[10px] font-bold border border-rose-200">
-                                Missing
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-3.5 py-3 whitespace-nowrap">
-                            {isAccepted ? (
-                              <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-semibold border border-emerald-200 flex items-center gap-1 w-fit">
-                                <CheckCircle2 className="h-3 w-3" /> Reconciled
-                              </span>
-                            ) : (
-                              <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-semibold border border-amber-200">
-                                Pending review
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-3.5 py-3 whitespace-nowrap text-right relative">
-                            <div className="flex items-center justify-end gap-1">
-                              {isAccepted ? (
-                                <span className="text-[11px] text-slate-400 font-medium">Logged</span>
-                              ) : (
-                                <>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleAcceptItem(row.id)}
-                                    className="rounded bg-slate-900 text-white px-2.5 py-1 text-[11px] font-semibold hover:bg-slate-800 transition-colors shadow-2xs"
-                                  >
-                                    Accept
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenSplit(row)}
-                                    className="rounded border border-slate-200 text-slate-700 px-2 py-1 text-[11px] font-medium hover:bg-slate-50 transition-colors"
-                                  >
-                                    Split
-                                  </button>
-                                </>
-                              )}
+                          No transactions match your current filters.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredReviewItems.map((row) => {
+                        const isSelected = selectedMatchIds.includes(row.id);
+                        const isResolved = row.status === "Resolved";
+                        const isMenuOpen = activeMoreMenuId === row.id;
 
-                              <div className="relative inline-block text-left">
-                                <button
-                                  type="button"
-                                  onClick={() => setActiveMoreMenuId(isMenuOpen ? null : row.id)}
-                                  className="text-slate-400 hover:text-slate-700 px-1.5 py-1 text-[11px] font-medium rounded hover:bg-slate-100 transition-colors"
-                                >
-                                  More
-                                </button>
-
-                                {isMenuOpen && (
-                                  <div className="absolute right-0 top-full mt-1 w-44 rounded-lg border border-slate-200 bg-white py-1 shadow-lg z-20 text-left">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleOpenRemap(row)}
-                                      className="flex w-full items-center px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
-                                    >
-                                      Remap Category
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleOpenTransfer(row)}
-                                      className="flex w-full items-center px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
-                                    >
-                                      Transfer to Project
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleOpenLinkInvoice(row)}
-                                      className="flex w-full items-center px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
-                                    >
-                                      Link Document
-                                    </button>
-                                    <div className="my-1 border-t border-slate-100" />
-                                    <button
-                                      type="button"
-                                      onClick={() => handleOpenExclude(row)}
-                                      className="flex w-full items-center px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-50"
-                                    >
-                                      Exclude Transaction
-                                    </button>
-                                  </div>
-                                )}
+                        return (
+                          <tr
+                            key={row.id}
+                            className={`hover:bg-slate-50/60 transition-colors ${
+                              isSelected ? "bg-blue-50/20" : ""
+                            }`}
+                          >
+                            <td className="px-3.5 py-3">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleToggleSelect(row.id)}
+                                className="rounded border-slate-300 text-slate-900 focus:ring-0"
+                              />
+                            </td>
+                            <td className="px-3.5 py-3 whitespace-nowrap text-slate-600">
+                              {row.date}
+                            </td>
+                            <td className="px-3.5 py-3 whitespace-nowrap text-slate-600">
+                              {row.account}
+                            </td>
+                            <td className="px-3.5 py-3">
+                              <div className="font-bold text-slate-900">{row.description}</div>
+                              <div className="text-[10px] text-slate-400 mt-0.5">{row.type}</div>
+                            </td>
+                            <td className="px-3.5 py-3 whitespace-nowrap">
+                              <span
+                                className={`font-mono font-bold ${
+                                  row.direction === "in" ? "text-emerald-700" : "text-slate-900"
+                                }`}
+                              >
+                                {row.amount}
+                              </span>
+                              <span className="block text-[10px] text-slate-400 font-normal mt-0.5">
+                                {row.direction === "in" ? "Money in" : "Money out"}
+                              </span>
+                            </td>
+                            <td className="px-3.5 py-3">
+                              <span className="inline-block rounded-md bg-slate-100/90 text-slate-700 px-2 py-0.5 text-[11px] border border-slate-200">
+                                {row.proposedLink}
+                              </span>
+                              <div
+                                className="text-[10px] text-slate-400 mt-1 flex items-center gap-1"
+                                title={row.whyMatches}
+                              >
+                                <Sparkles className="h-2.5 w-2.5 text-slate-400 shrink-0" />
+                                <span className="truncate max-w-[170px]">{row.whyMatches}</span>
                               </div>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                            </td>
+                            <td className="px-3.5 py-3 whitespace-nowrap">
+                              {row.evidence === "Strong" && (
+                                <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-bold border border-emerald-200">
+                                  Strong
+                                </span>
+                              )}
+                              {row.evidence === "Partial" && (
+                                <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-bold border border-amber-200">
+                                  Partial
+                                </span>
+                              )}
+                              {row.evidence === "Missing" && (
+                                <span className="rounded bg-rose-50 text-rose-800 px-2 py-0.5 text-[10px] font-bold border border-rose-200">
+                                  Missing
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-3.5 py-3">
+                              {isResolved ? (
+                                <div className="space-y-0.5">
+                                  <div>{getResolutionBadge(row.resolutionType)}</div>
+                                  {row.resolutionNote && (
+                                    <p
+                                      className="text-[10px] text-slate-500 italic max-w-[210px] truncate"
+                                      title={row.resolutionNote}
+                                    >
+                                      "{row.resolutionNote}"
+                                    </p>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-semibold border border-amber-200">
+                                  Pending action
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-3.5 py-3 whitespace-nowrap text-right relative">
+                              <div className="flex items-center justify-end gap-1.5">
+                                {isResolved ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setResolutionModalItem(row)}
+                                    className="rounded border border-slate-200 bg-white text-slate-700 px-2.5 py-1 text-[11px] font-medium hover:bg-slate-50 transition-colors shadow-2xs"
+                                  >
+                                    Edit Reason
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => setResolutionModalItem(row)}
+                                    className="rounded bg-slate-900 text-white px-2.5 py-1 text-[11px] font-semibold hover:bg-slate-800 transition-colors shadow-2xs flex items-center gap-1"
+                                  >
+                                    Specify Action
+                                  </button>
+                                )}
+
+                                <div className="relative inline-block text-left">
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveMoreMenuId(isMenuOpen ? null : row.id)}
+                                    className="text-slate-400 hover:text-slate-700 px-1.5 py-1 text-[11px] font-medium rounded hover:bg-slate-100 transition-colors"
+                                  >
+                                    More
+                                  </button>
+
+                                  {isMenuOpen && (
+                                    <div className="absolute right-0 top-full mt-1 w-44 rounded-lg border border-slate-200 bg-white py-1 shadow-lg z-20 text-left">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenRemap(row)}
+                                        className="flex w-full items-center px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
+                                      >
+                                        Remap Category
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenTransfer(row)}
+                                        className="flex w-full items-center px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
+                                      >
+                                        Transfer to Project
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenLinkInvoice(row)}
+                                        className="flex w-full items-center px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
+                                      >
+                                        Link Document
+                                      </button>
+                                      <div className="my-1 border-t border-slate-100" />
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenExclude(row)}
+                                        className="flex w-full items-center px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-50"
+                                      >
+                                        Exclude Transaction
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
                   </tbody>
                 </table>
               </div>
 
               {/* Bottom Pagination Strip */}
               <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-white text-xs text-slate-500">
-                <span>Showing 8 items</span>
+                <span>Showing {filteredReviewItems.length} items</span>
                 <div className="flex items-center gap-1 font-mono text-xs">
                   <button className="h-6 w-6 rounded border border-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center">
                     ‹
@@ -1280,6 +1415,15 @@ export default function ReconciliationPage() {
         match={cardSettlementTarget?.match}
         transaction={cardSettlementTarget?.transaction}
         onSuccess={handleRefreshAll}
+      />
+
+      <OwnerResolutionModal
+        open={Boolean(resolutionModalItem)}
+        onOpenChange={(open) => {
+          if (!open) setResolutionModalItem(null);
+        }}
+        item={resolutionModalItem}
+        onResolve={handleResolveItem}
       />
     </div>
   );
