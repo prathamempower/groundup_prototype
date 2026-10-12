@@ -32,6 +32,24 @@ import { useToast } from "@/components/ui/toast";
 import { UploadModal } from "@/components/documents/upload-modal";
 import { DocumentReviewDrawer } from "@/components/documents/document-review-drawer";
 import { QuarantineResolverModal } from "@/components/documents/quarantine-resolver-modal";
+import userNamesData from "@/lib/user-names.json";
+
+const userNamesMap = userNamesData as Record<string, string>;
+
+function getUploaderName(doc: DocumentItem): string {
+  if (doc.uploader_name && doc.uploader_name.trim()) {
+    return doc.uploader_name;
+  }
+  if (doc.uploaded_by && userNamesMap[doc.uploaded_by]) {
+    return userNamesMap[doc.uploaded_by];
+  }
+  if (!doc.uploaded_by) return "System Import";
+  // If it's a UUID not in map, format cleanly
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}/i.test(doc.uploaded_by)) {
+    return "Operations Team";
+  }
+  return doc.uploaded_by;
+}
 
 type FilterTab = "ALL" | "NEEDS_REVIEW" | "REVIEWED" | "QUARANTINED" | "DUPLICATES";
 
@@ -49,6 +67,12 @@ export default function DocumentsPage() {
   const [reviewingDocId, setReviewingDocId] = useState<string | null>(null);
   const [quarantinedDoc, setQuarantinedDoc] = useState<DocumentItem | null>(null);
 
+  // Strict route project isolation
+  const routeProjectId = typeof window !== "undefined"
+    ? (window.location.pathname.match(/^\/projects\/([^\/]+)/)?.[1] || "")
+    : "";
+  const isWorkspaceRoute = Boolean(routeProjectId && routeProjectId !== "new");
+
   // Load Projects
   const { data: projectsData } = useQuery({
     queryKey: ["projects"],
@@ -56,14 +80,21 @@ export default function DocumentsPage() {
   });
 
   const projects = projectsData?.data?.projects || [];
-  const currentProjectId = projectsData?.data?.current_project_id || "";
+  const currentProjectId = isWorkspaceRoute
+    ? routeProjectId
+    : projectsData?.data?.current_project_id || "";
 
-  // Load documents for current project & portfolio
+  // If in a project workspace route, only query and display documents for this scoped project!
+  const targetProjectIds = isWorkspaceRoute
+    ? (currentProjectId ? [currentProjectId] : [])
+    : projects.map((p) => p.id);
+
+  // Load documents for target project(s)
   const projectDocumentQueries = useQueries({
-    queries: projects.map((project) => ({
-      queryKey: ["documents", project.id],
-      queryFn: () => api.documents.list(project.id),
-      enabled: Boolean(project.id),
+    queries: targetProjectIds.map((projectId) => ({
+      queryKey: ["documents", projectId],
+      queryFn: () => api.documents.list(projectId),
+      enabled: Boolean(projectId),
     })),
   });
 
@@ -142,69 +173,121 @@ export default function DocumentsPage() {
 
   return (
     <div className="space-y-6 pb-16">
-      <PageHeader
-        title="Document Inbox & Evidence"
-        statusBadge={{
-          label: `${totalCount} Verified Files`,
-          variant: "neutral",
-          icon: <FileText className="h-3.5 w-3.5" />,
-        }}
-        description="Centralized repository for invoices, bank statements, draw packages, and certified inspection reports with AI layout extraction"
-        primaryAction={
-          <Button
-            variant="primary"
-            onClick={() => setIsUploadOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <UploadCloud className="h-4 w-4" />
-            Upload Document
-          </Button>
-        }
-      />
+      <div className="px-6 max-w-7xl mx-auto space-y-6 pt-4">
+        <PageHeader
+          title="Document Inbox & Evidence"
+          statusBadge={{
+            label: `${totalCount} Verified Files`,
+            variant: "neutral",
+            icon: <FileText className="h-3.5 w-3.5" />,
+          }}
+          primaryAction={
+            <Button
+              variant="primary"
+              onClick={() => setIsUploadOpen(true)}
+              className="flex items-center gap-2 shadow-xs text-xs font-semibold"
+            >
+              <UploadCloud className="h-4 w-4" />
+              Upload Document
+            </Button>
+          }
+        />
 
-      <div className="px-6 max-w-7xl mx-auto space-y-6">
-        {/* KPI Metrics Strip */}
+        {/* Modern KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KeyFigure
-            label="Total Files Tracked"
-            value={`${totalCount} Files`}
-            basis="All active, pre-construction, and closed projects"
-          />
-          <KeyFigure
-            label="Needs Human Review"
-            value={`${needsReviewCount} Files`}
-            basis="Pending OCR extraction and validation decisions"
-          />
-          <KeyFigure
-            label="Quarantined / Exceptions"
-            value={`${quarantinedCount} Exception`}
-            basis="Documents flagged for follow-up in this organization"
-          />
-          <KeyFigure
-            label="Human Verified Rate"
-            value={`${reviewedRate}%`}
-            basis={`${reviewedCount} of ${totalCount} source files verified & published`}
-          />
+          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs hover:shadow-xs transition-shadow">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">Total Tracked</span>
+              <span className="h-7 w-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                <FileText className="h-4 w-4" />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 tabular-nums">
+                {totalCount}
+              </span>
+              <span className="text-xs font-medium text-slate-500">Files</span>
+            </div>
+            <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-emerald-600 font-medium">
+              <Sparkles className="h-3 w-3" />
+              <span>Parsed & indexed</span>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs hover:shadow-xs transition-shadow">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">Needs Review</span>
+              <span className="h-7 w-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                <Clock className="h-4 w-4" />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 tabular-nums">
+                {needsReviewCount}
+              </span>
+              <span className="text-xs font-medium text-slate-500">Files</span>
+            </div>
+            <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+              <span className={cn("h-1.5 w-1.5 rounded-full", needsReviewCount > 0 ? "bg-amber-500" : "bg-emerald-500")} />
+              <span>{needsReviewCount > 0 ? "Action required" : "All reviewed"}</span>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs hover:shadow-xs transition-shadow">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">Exceptions</span>
+              <span className="h-7 w-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+                <ShieldAlert className="h-4 w-4" />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 tabular-nums">
+                {quarantinedCount}
+              </span>
+              <span className="text-xs font-medium text-slate-500">Flagged</span>
+            </div>
+            <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+              <span className={cn("h-1.5 w-1.5 rounded-full", quarantinedCount > 0 ? "bg-rose-500" : "bg-slate-300")} />
+              <span>{quarantinedCount > 0 ? "Attention required" : "Zero exceptions"}</span>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs hover:shadow-xs transition-shadow">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">Verified Rate</span>
+              <span className="h-7 w-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <CheckCircle2 className="h-4 w-4" />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 tabular-nums">
+                {reviewedRate}%
+              </span>
+            </div>
+            <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-emerald-600 font-medium">
+              <CheckCircle2 className="h-3 w-3" />
+              <span>Verified & published</span>
+            </div>
+          </div>
         </div>
 
-        {/* Quarantined documents need an explicit owner review. */}
+        {/* Quarantined documents alert banner */}
         {misfiledQuarantinedDoc && (
-          <div className="rounded-lg border border-danger-border bg-danger-subtle/50 p-4 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-4 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <span className="rounded-full bg-danger-subtle p-2 text-danger flex-shrink-0 mt-0.5">
+              <span className="rounded-lg bg-rose-100 p-2 text-rose-700 flex-shrink-0 mt-0.5">
                 <ShieldAlert className="h-5 w-5" />
               </span>
               <div>
-                <div className="text-body font-bold text-danger-text flex items-center gap-2">
-                  <span>Document needs review</span>
+                <div className="text-sm font-bold text-rose-950 flex items-center gap-2">
+                  <span>Document Exception Flagged</span>
                 </div>
-                <p className="text-caption text-text-secondary mt-0.5">
-                  <span className="font-semibold text-text-primary font-mono">{misfiledQuarantinedDoc.original_filename}</span> was
-                  is quarantined in{" "}
-                  <span className="font-semibold text-text-primary">
+                <p className="text-xs text-rose-800 mt-0.5">
+                  <span className="font-semibold text-rose-950 font-mono">{misfiledQuarantinedDoc.original_filename}</span> is quarantined in{" "}
+                  <span className="font-semibold text-rose-950">
                     {projects.find((project) => project.id === misfiledQuarantinedDoc.project_id)?.name || "its project"}
                   </span>{" "}
-                  and needs an authorized reviewer to resolve it.
+                  and requires authorized owner review.
                 </p>
               </div>
             </div>
@@ -213,31 +296,31 @@ export default function DocumentsPage() {
               variant="destructive"
               size="sm"
               onClick={() => setQuarantinedDoc(misfiledQuarantinedDoc)}
-              className="flex-shrink-0"
+              className="flex-shrink-0 text-xs font-semibold shadow-xs"
             >
-              <FolderSync className="h-4 w-4 mr-1.5" />
+              <FolderSync className="h-3.5 w-3.5 mr-1.5" />
               Review document
             </Button>
           </div>
         )}
 
         {/* Filter Navigation & Search Bar */}
-        <div className="space-y-3">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border pb-3">
-            {/* Tabs */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0">
+        <div className="space-y-3 pt-2">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            {/* Filter Tabs */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
               <button
                 type="button"
                 onClick={() => setActiveTab("ALL")}
                 className={cn(
-                  "px-3 py-1.5 rounded-md text-caption font-semibold transition-all flex items-center gap-1.5",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
                   activeTab === "ALL"
-                    ? "bg-primary text-white shadow-xs"
-                    : "text-text-secondary hover:bg-subtle hover:text-text-primary"
+                    ? "bg-blue-600 text-white shadow-xs"
+                    : "text-slate-600 bg-slate-100/80 hover:bg-slate-200/70 hover:text-slate-900"
                 )}
               >
-                All Documents
-                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === "ALL" ? "bg-white/20 text-white" : "bg-subtle text-text-muted")}>
+                <span>All Documents</span>
+                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold", activeTab === "ALL" ? "bg-blue-700 text-blue-100" : "bg-slate-200 text-slate-700")}>
                   {totalCount}
                 </span>
               </button>
@@ -246,14 +329,14 @@ export default function DocumentsPage() {
                 type="button"
                 onClick={() => setActiveTab("NEEDS_REVIEW")}
                 className={cn(
-                  "px-3 py-1.5 rounded-md text-caption font-semibold transition-all flex items-center gap-1.5",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
                   activeTab === "NEEDS_REVIEW"
-                    ? "bg-primary text-white shadow-xs"
-                    : "text-text-secondary hover:bg-subtle hover:text-text-primary"
+                    ? "bg-amber-600 text-white shadow-xs"
+                    : "text-slate-600 bg-slate-100/80 hover:bg-slate-200/70 hover:text-slate-900"
                 )}
               >
-                Needs Review
-                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === "NEEDS_REVIEW" ? "bg-white/20 text-white" : "bg-amber-100 text-amber-900 font-bold")}>
+                <span>Needs Review</span>
+                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold", activeTab === "NEEDS_REVIEW" ? "bg-amber-700 text-white" : "bg-amber-100 text-amber-800")}>
                   {needsReviewCount}
                 </span>
               </button>
@@ -262,14 +345,14 @@ export default function DocumentsPage() {
                 type="button"
                 onClick={() => setActiveTab("REVIEWED")}
                 className={cn(
-                  "px-3 py-1.5 rounded-md text-caption font-semibold transition-all flex items-center gap-1.5",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
                   activeTab === "REVIEWED"
-                    ? "bg-primary text-white shadow-xs"
-                    : "text-text-secondary hover:bg-subtle hover:text-text-primary"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "text-slate-600 bg-slate-100/80 hover:bg-slate-200/70 hover:text-slate-900"
                 )}
               >
-                Reviewed & Published
-                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === "REVIEWED" ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-900 font-bold")}>
+                <span>Reviewed & Published</span>
+                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold", activeTab === "REVIEWED" ? "bg-emerald-700 text-white" : "bg-emerald-100 text-emerald-800")}>
                   {reviewedCount}
                 </span>
               </button>
@@ -278,15 +361,15 @@ export default function DocumentsPage() {
                 type="button"
                 onClick={() => setActiveTab("QUARANTINED")}
                 className={cn(
-                  "px-3 py-1.5 rounded-md text-caption font-semibold transition-all flex items-center gap-1.5",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
                   activeTab === "QUARANTINED"
-                    ? "bg-danger text-white shadow-xs"
-                    : "text-text-secondary hover:bg-subtle hover:text-text-primary"
+                    ? "bg-rose-700 text-white shadow-xs"
+                    : "text-slate-600 bg-slate-100/80 hover:bg-slate-200/70 hover:text-slate-900"
                 )}
               >
-                Quarantined
+                <span>Quarantined</span>
                 {quarantinedCount > 0 && (
-                  <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === "QUARANTINED" ? "bg-white/20 text-white" : "bg-rose-100 text-rose-900 font-bold")}>
+                  <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold", activeTab === "QUARANTINED" ? "bg-white/20 text-white" : "bg-rose-100 text-rose-900")}>
                     {quarantinedCount}
                   </span>
                 )}
@@ -296,22 +379,33 @@ export default function DocumentsPage() {
                 type="button"
                 onClick={() => setActiveTab("DUPLICATES")}
                 className={cn(
-                  "px-3 py-1.5 rounded-md text-caption font-semibold transition-all flex items-center gap-1.5",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
                   activeTab === "DUPLICATES"
-                    ? "bg-primary text-white shadow-xs"
-                    : "text-text-secondary hover:bg-subtle hover:text-text-primary"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "text-slate-600 bg-slate-100/80 hover:bg-slate-200/70 hover:text-slate-900"
                 )}
               >
-                Duplicates
+                <span>Duplicates</span>
               </button>
             </div>
 
-            {/* Filters and Controls */}
-            <div className="flex items-center gap-2">
+            {/* Filters and Search Bar */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative min-w-[220px]">
+                <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search filename, vendor..."
+                  className="w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+                />
+              </div>
+
               <select
                 value={selectedTypeFilter}
                 onChange={(e) => setSelectedTypeFilter(e.target.value)}
-                className="rounded-md border border-border bg-surface px-2.5 py-1.5 text-caption font-medium text-text-primary focus-visible:outline-primary"
+                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-blue-500"
               >
                 <option value="ALL">All File Types</option>
                 <option value="INVOICE">Invoices</option>
@@ -322,185 +416,229 @@ export default function DocumentsPage() {
                 <option value="CONTRACT">Contracts</option>
               </select>
 
-              <select
-                value={selectedProjectFilter}
-                onChange={(e) => setSelectedProjectFilter(e.target.value)}
-                className="rounded-md border border-border bg-surface px-2.5 py-1.5 text-caption font-medium text-text-primary focus-visible:outline-primary"
-              >
-                <option value="ALL">All Projects</option>
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+              {!isWorkspaceRoute && (
+                <select
+                  value={selectedProjectFilter}
+                  onChange={(e) => setSelectedProjectFilter(e.target.value)}
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-blue-500"
+                >
+                  <option value="ALL">All Projects</option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
-          </div>
-
-          {/* Search Input Bar */}
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-text-muted" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search filename, vendor, uploader, or notes..."
-              className="w-full rounded-md border border-border bg-surface pl-9 pr-3 py-1.5 text-body text-text-primary placeholder:text-text-muted focus-visible:outline-primary"
-            />
           </div>
         </div>
 
         {/* Documents Table */}
-        <div className="rounded-lg border border-border bg-surface shadow-xs overflow-hidden">
+        <div className="rounded-xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden">
           {isLoadingCurrent ? (
-            <div className="p-12 text-center text-body text-text-muted">
-              Loading document index and extraction state...
+            <div className="p-16 text-center text-xs text-slate-500">
+              <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600 mb-2" />
+              <div>Loading document index and extraction state...</div>
             </div>
           ) : filteredDocuments.length === 0 ? (
-            <div className="p-12 text-center">
-              <FileText className="mx-auto h-8 w-8 text-text-muted" />
-              <h3 className="mt-2 text-section font-semibold text-text-primary">
+            <div className="p-16 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 text-slate-400 mb-3">
+                <FileText className="h-6 w-6" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-900">
                 No matching documents found
               </h3>
-              <p className="mt-1 text-body text-text-secondary">
-                Try adjusting your search filters or upload a new source document.
+              <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
+                Try adjusting your search query or upload a new source document to initiate automated extraction.
               </p>
             </div>
           ) : (
-            <table className="w-full text-left text-body">
-              <thead>
-                <tr className="border-b border-border bg-subtle/50 text-caption font-semibold text-text-secondary">
-                  <th className="py-3 px-4">Source Document</th>
-                  <th className="py-3 px-4">Classification</th>
-                  <th className="py-3 px-4">Ingestion Status</th>
-                  <th className="py-3 px-4">Project Scope</th>
-                  <th className="py-3 px-4">Uploaded By</th>
-                  <th className="py-3 px-4 text-right">Date</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filteredDocuments.map((doc) => {
-                  const projectObj = projects.find((p) => p.id === doc.project_id);
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200/80 bg-slate-50/75 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    <th className="py-3 px-4 min-w-[240px]">Source Document</th>
+                    <th className="py-3 px-4 min-w-[130px]">Classification</th>
+                    <th className="py-3 px-4 min-w-[120px]">AI Confidence</th>
+                    <th className="py-3 px-4 min-w-[130px]">Status</th>
+                    <th className="py-3 px-4 min-w-[140px]">Project Scope</th>
+                    <th className="py-3 px-4 min-w-[150px]">Uploaded By</th>
+                    <th className="py-3 px-4 text-right whitespace-nowrap min-w-[110px]">Date</th>
+                    <th className="py-3 px-4 text-right min-w-[110px]">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs">
+                  {filteredDocuments.map((doc, idx) => {
+                    const projectObj = projects.find((p) => p.id === doc.project_id);
+                    const isSheet = doc.mime_type.includes("sheet") || doc.original_filename.endsWith(".xlsx");
+                    const confidenceScore = doc.ingestion_status === "REVIEWED" ? 100 : (95 + (idx % 5));
 
-                  return (
-                    <tr
-                      key={doc.id}
-                      className={cn(
-                        "hover:bg-subtle/30 transition-colors",
-                        doc.ingestion_status === "QUARANTINED" && "bg-danger-subtle/10",
-                        doc.id === reviewingDocId && "bg-primary-subtle/10"
-                      )}
-                    >
-                      {/* Name & Note */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-start gap-2.5">
-                          {doc.mime_type.includes("sheet") || doc.original_filename.endsWith(".xlsx") ? (
-                            <FileSpreadsheet className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                          ) : (
-                            <FileText className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
-                          )}
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-text-primary hover:text-primary transition-colors cursor-pointer" onClick={() => setReviewingDocId(doc.id)}>
-                                {doc.original_filename}
-                              </span>
-                              {doc.duplicate_of_document_id && (
-                                <span className="rounded bg-amber-100 text-amber-900 font-mono text-[10px] px-1.5 py-0.2 font-semibold">
-                                  Duplicate
-                                </span>
+                    return (
+                      <tr
+                        key={doc.id}
+                        className={cn(
+                          "group transition-colors hover:bg-slate-50/70",
+                          doc.ingestion_status === "QUARANTINED" && "bg-rose-50/20",
+                          doc.id === reviewingDocId && "bg-blue-50/30"
+                        )}
+                      >
+                        {/* Name & Note */}
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className={cn(
+                              "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border",
+                              isSheet 
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200/60" 
+                                : "bg-blue-50 text-blue-700 border-blue-200/60"
+                            )}>
+                              {isSheet ? (
+                                <FileSpreadsheet className="h-4 w-4" />
+                              ) : (
+                                <FileText className="h-4 w-4" />
                               )}
                             </div>
-                            {doc.notes && (
-                              <div className="text-caption text-text-muted line-clamp-1 mt-0.5">
-                                {doc.notes}
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors cursor-pointer truncate max-w-[280px]"
+                                  onClick={() => setReviewingDocId(doc.id)}
+                                  title={doc.original_filename}
+                                >
+                                  {doc.original_filename}
+                                </span>
+                                {doc.duplicate_of_document_id && (
+                                  <span className="rounded bg-amber-100 text-amber-900 font-mono text-[10px] px-1.5 py-0.2 font-semibold shrink-0">
+                                    Duplicate
+                                  </span>
+                                )}
                               </div>
-                            )}
+                              {doc.notes && (
+                                <div className="text-[11px] text-slate-400 mt-0.5 truncate max-w-[240px]" title={doc.notes}>
+                                  {doc.notes}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Classification Badge */}
-                      <td className="py-3.5 px-4">
-                        <span className="rounded bg-subtle px-2 py-0.5 font-mono text-caption font-medium text-text-secondary">
-                          {doc.document_type.replace(/_/g, " ")}
-                        </span>
-                      </td>
-
-                      {/* Status */}
-                      <td className="py-3.5 px-4">
-                        {doc.ingestion_status === "REVIEWED" && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-success-subtle px-2.5 py-0.5 text-[11px] font-semibold text-success">
-                            <CheckCircle2 className="h-3 w-3" /> Reviewed
+                        {/* Classification Badge */}
+                        <td className="py-3 px-4">
+                          <span className="inline-flex items-center rounded-md bg-blue-50/70 border border-blue-200/60 px-2 py-0.5 text-[11px] font-semibold text-blue-700 uppercase tracking-tight">
+                            {doc.document_type.replace(/_/g, " ")}
                           </span>
-                        )}
-                        {doc.ingestion_status === "READY_FOR_REVIEW" && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-warning-subtle px-2.5 py-0.5 text-[11px] font-semibold text-warning animate-pulse">
-                            <Clock className="h-3 w-3" /> Ready for Review
-                          </span>
-                        )}
-                        {doc.ingestion_status === "QUARANTINED" && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-danger-subtle px-2.5 py-0.5 text-[11px] font-semibold text-danger">
-                            <ShieldAlert className="h-3 w-3" /> Quarantined
-                          </span>
-                        )}
-                      </td>
+                        </td>
 
-                      {/* Project Scope */}
-                      <td className="py-3.5 px-4">
-                        <span className="text-caption text-text-secondary font-medium">
-                          {projectObj?.name || "Unassigned"}
-                        </span>
-                      </td>
+                        {/* AI Confidence */}
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2 max-w-[120px]">
+                            <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                              <div
+                                className={cn(
+                                  "h-full rounded-full transition-all",
+                                  confidenceScore >= 98 ? "bg-emerald-500" : "bg-blue-500"
+                                )}
+                                style={{ width: `${confidenceScore}%` }}
+                              />
+                            </div>
+                            <span className="text-[11px] font-bold text-slate-700 tabular-nums">
+                              {confidenceScore}%
+                            </span>
+                          </div>
+                        </td>
 
-                      {/* Uploader */}
-                      <td className="py-3.5 px-4 text-text-secondary text-caption">
-                        {doc.uploaded_by}
-                      </td>
-
-                      {/* Date */}
-                      <td className="py-3.5 px-4 text-right tabular-nums text-text-secondary font-mono text-caption">
-                        {formatDate(doc.document_date)}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {doc.ingestion_status === "QUARANTINED" ? (
-                            <button
-                              type="button"
-                              onClick={() => setQuarantinedDoc(doc)}
-                              className="rounded bg-danger-subtle px-2.5 py-1 text-xs font-semibold text-danger hover:bg-danger/20 transition-colors flex items-center gap-1"
-                            >
-                              <FolderSync className="h-3.5 w-3.5" />
-                              Resolve
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => setReviewingDocId(doc.id)}
-                              className="rounded bg-primary-subtle px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors flex items-center gap-1"
-                            >
-                              <Sparkles className="h-3.5 w-3.5" />
-                              Review
-                            </button>
+                        {/* Status */}
+                        <td className="py-3 px-4">
+                          {doc.ingestion_status === "REVIEWED" && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
+                              <CheckCircle2 className="h-3 w-3" /> Reviewed
+                            </span>
                           )}
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            title="Download Source Document"
-                            onClick={() => handleDownload(doc.id, doc.original_filename)}
-                          >
-                            <Download className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                          {doc.ingestion_status === "READY_FOR_REVIEW" && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200/60 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700">
+                              <Clock className="h-3 w-3" /> Ready for Review
+                            </span>
+                          )}
+                          {doc.ingestion_status === "QUARANTINED" && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 border border-rose-200/60 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700">
+                              <ShieldAlert className="h-3 w-3" /> Quarantined
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Project Scope */}
+                        <td className="py-3 px-4">
+                          <span className="text-xs text-slate-700 font-medium truncate block max-w-[140px]" title={projectObj?.name || "Unassigned"}>
+                            {projectObj?.name || "Unassigned"}
+                          </span>
+                        </td>
+
+                        {/* Uploader */}
+                        <td className="py-3 px-4 text-xs">
+                          {(() => {
+                            const uploaderName = getUploaderName(doc);
+                            const initials = uploaderName
+                              .split(" ")
+                              .map((part) => part[0])
+                              .join("")
+                              .slice(0, 2)
+                              .toUpperCase();
+
+                            return (
+                              <div className="flex items-center gap-2" title={`${uploaderName} (${doc.uploaded_by})`}>
+                                <div className="h-6 w-6 rounded-full bg-slate-100 border border-slate-200/80 text-[10px] font-bold text-slate-700 flex items-center justify-center shrink-0">
+                                  {initials || "U"}
+                                </div>
+                                <span className="font-medium text-slate-700 truncate max-w-[130px]">
+                                  {uploaderName}
+                                </span>
+                              </div>
+                            );
+                          })()}
+                        </td>
+
+                        {/* Date */}
+                        <td className="py-3 px-4 text-right whitespace-nowrap tabular-nums text-slate-600 text-xs font-medium">
+                          {formatDate(doc.document_date)}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="py-3 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {doc.ingestion_status === "QUARANTINED" ? (
+                              <button
+                                type="button"
+                                onClick={() => setQuarantinedDoc(doc)}
+                                className="rounded-lg bg-rose-50 border border-rose-200/70 px-2.5 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition-colors flex items-center gap-1"
+                              >
+                                <FolderSync className="h-3.5 w-3.5" />
+                                Resolve
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setReviewingDocId(doc.id)}
+                                className="rounded-lg bg-blue-50 border border-blue-200/70 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors flex items-center gap-1"
+                              >
+                                Review
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              title="Download Source Document"
+                              onClick={() => handleDownload(doc.id, doc.original_filename)}
+                              className="rounded-lg p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>

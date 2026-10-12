@@ -115,27 +115,111 @@ export default function ProjectsPortfolioPage() {
       .join(" ");
   };
 
-  const getHealthBadge = (health?: string) => {
-    switch (health) {
+  const getProjectImage = (project: Project) => {
+    const nameLower = project.name.toLowerCase();
+    const addressLower = (project.address || "").toLowerCase();
+
+    if (nameLower.includes("woodlawn") || addressLower.includes("woodlawn")) {
+      return "/projects/woodlawn-new.jpg";
+    }
+    if (nameLower.includes("first") || addressLower.includes("first")) {
+      return "/projects/first-street-new.jpg";
+    }
+    if (nameLower.includes("broadway") || addressLower.includes("broadway")) {
+      return "/projects/gable-residence.jpg";
+    }
+    return "/projects/broadway-new.jpg";
+  };
+
+  const getProjectProgress = (project: Project) => {
+    if (project.progress_pct !== undefined) return project.progress_pct;
+    if (project.status === "COMPLETED" || project.lifecycle_stage === "CLOSED" || project.lifecycle_stage === "DISPOSITION") {
+      return 100;
+    }
+    switch (project.lifecycle_stage) {
+      case "ACQUISITION":
+        return 15;
+      case "PRE_CONSTRUCTION":
+        return 35;
+      case "CONSTRUCTION":
+        return 68;
+      case "COMPLETION":
+        return 92;
+      default:
+        return 45;
+    }
+  };
+
+  const formatCompactProfit = (cents?: number | null) => {
+    if (cents === null || cents === undefined) return "—";
+    const dollars = cents / 100;
+    if (dollars >= 1_000_000) {
+      const millions = dollars / 1_000_000;
+      return `$${millions.toFixed(2).replace(/\.00$/, "")}M`;
+    }
+    if (dollars >= 1_000) {
+      const thousands = Math.round(dollars / 1_000);
+      return `$${thousands}K`;
+    }
+    return `$${Math.round(dollars)}`;
+  };
+
+  const getCardStatusBadge = (project: Project) => {
+    if (project.status === "COMPLETED") {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-md bg-blue-600/90 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm shadow-xs">
+          <CheckCircle2 className="h-3 w-3" />
+          Completed
+        </span>
+      );
+    }
+    switch (project.health_status) {
       case "CRITICAL":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50/80 px-2.5 py-0.5 text-xs font-medium text-red-700">
-            <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+          <span className="inline-flex items-center gap-1 rounded-md bg-rose-600/90 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm shadow-xs">
+            <AlertTriangle className="h-3 w-3" />
             Critical
           </span>
         );
       case "AT_RISK":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50/80 px-2.5 py-0.5 text-xs font-medium text-amber-700">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+          <span className="inline-flex items-center gap-1 rounded-md bg-amber-600/90 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm shadow-xs">
+            <span className="h-1.5 w-1.5 rounded-full bg-white" />
             At Risk
           </span>
         );
       case "HEALTHY":
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50/80 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-600/90 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm shadow-xs">
+            <span className="h-1.5 w-1.5 rounded-full bg-white" />
+            Healthy
+          </span>
+        );
+    }
+  };
+
+  const getTableHealthBadge = (health?: string) => {
+    switch (health) {
+      case "CRITICAL":
+        return (
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-rose-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-rose-600" />
+            Critical
+          </span>
+        );
+      case "AT_RISK":
+        return (
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-600" />
+            At Risk
+          </span>
+        );
+      case "HEALTHY":
+      default:
+        return (
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
             Healthy
           </span>
         );
@@ -144,11 +228,11 @@ export default function ProjectsPortfolioPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-7xl px-6 py-8 sm:px-8 space-y-6">
-        <div className="h-20 w-full animate-pulse rounded-xl bg-slate-100" />
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
+        <div className="h-16 w-full animate-pulse rounded-xl bg-slate-100" />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-64 animate-pulse rounded-xl bg-slate-100" />
+            <div key={i} className="h-80 animate-pulse rounded-xl bg-slate-100" />
           ))}
         </div>
       </div>
@@ -156,103 +240,49 @@ export default function ProjectsPortfolioPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8 sm:px-8 space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+      {/* Clean Page Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-700 shadow-2xs">
-              <Layers className="h-3 w-3 text-blue-600" />
-              Portfolio
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Workspace
             </span>
+            <span className="text-slate-300">/</span>
             <span className="text-xs text-slate-500">
-              {projects.length} accessible project{projects.length === 1 ? "" : "s"}
+              {projects.length} accessible {projects.length === 1 ? "project" : "projects"}
             </span>
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             Project Portfolio
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Select a project to enter its dedicated, isolated financial and operational workspace.
-          </p>
         </div>
 
         {globalRole === "OWNER" && (
           <div className="flex items-center gap-3">
             <Link
               href="/projects/new"
-              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-slate-800 active:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
             >
               <Plus className="h-4 w-4" />
-              <span>Create project</span>
+              <span>Create Project</span>
             </Link>
           </div>
         )}
       </div>
 
-      {/* High-Level Overview Metrics (Owners / CFOs with 2+ projects) */}
-      {showPortfolioSummary && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs transition-shadow hover:shadow-xs">
-            <div className="flex items-center justify-between text-xs font-medium text-slate-500">
-              <span>Active Projects</span>
-              <Building2 className="h-4 w-4 text-slate-400" />
-            </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold tracking-tight text-slate-900">
-                {activeProjectsCount}
-              </span>
-              <span className="text-xs text-slate-500 font-normal">
-                of {projects.length} total
-              </span>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs transition-shadow hover:shadow-xs">
-            <div className="flex items-center justify-between text-xs font-medium text-slate-500">
-              <span>Total Loan Commitment</span>
-              <Landmark className="h-4 w-4 text-slate-400" />
-            </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold tracking-tight text-slate-900 tabular-nums">
-                {formatMoney(totalCommitted)}
-              </span>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs transition-shadow hover:shadow-xs">
-            <div className="flex items-center justify-between text-xs font-medium text-slate-500">
-              <span>Notifications</span>
-              <Bell className="h-4 w-4 text-amber-500" />
-            </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span
-                className={`text-2xl font-bold tracking-tight ${
-                  totalExceptions > 0 ? "text-amber-600" : "text-emerald-600"
-                }`}
-              >
-                {totalExceptions}
-              </span>
-              <span className="text-xs text-slate-500 font-normal">
-                action items across projects
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Control Bar: Search, Filters & View Toggle */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 flex-wrap items-center gap-2.5">
+      {/* Control Filter Bar */}
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-slate-200 bg-white p-2.5 shadow-2xs">
+        <div className="flex flex-1 flex-wrap items-center gap-2">
           {/* Search Box */}
-          <div className="relative min-w-[240px] flex-1 sm:max-w-xs">
+          <div className="relative min-w-[240px] flex-1 sm:max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search by name, address, entity…"
+              placeholder="Search projects, addresses, metrics…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 shadow-2xs transition-colors hover:border-slate-300 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
+              className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50/50 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 transition-colors hover:border-slate-300 focus:border-slate-900 focus:bg-white focus:outline-none"
             />
           </div>
 
@@ -260,7 +290,7 @@ export default function ProjectsPortfolioPage() {
           <select
             value={stageFilter}
             onChange={(e) => setStageFilter(e.target.value)}
-            className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 shadow-2xs transition-colors hover:border-slate-300 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15 cursor-pointer"
+            className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 focus:border-slate-900 focus:outline-none cursor-pointer"
           >
             <option value="ALL">All Stages</option>
             <option value="ACQUISITION">Acquisition</option>
@@ -275,47 +305,58 @@ export default function ProjectsPortfolioPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 shadow-2xs transition-colors hover:border-slate-300 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15 cursor-pointer"
+            className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 focus:border-slate-900 focus:outline-none cursor-pointer"
           >
             <option value="ALL">All Statuses</option>
             <option value="HEALTHY">Healthy</option>
             <option value="AT_RISK">At Risk</option>
             <option value="CRITICAL">Critical</option>
           </select>
+
+          {(searchQuery || stageFilter !== "ALL" || statusFilter !== "ALL") && (
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setStageFilter("ALL");
+                setStatusFilter("ALL");
+              }}
+              className="text-xs font-medium text-slate-500 hover:text-slate-900 px-2 py-1 transition-colors"
+            >
+              Reset
+            </button>
+          )}
         </div>
 
         {/* View Switcher */}
-        <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50/80 p-0.5 shadow-2xs self-end sm:self-auto">
+        <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5 self-end sm:self-auto">
           <button
             onClick={() => setViewMode("CARD")}
             aria-label="Card view"
-            title="Card view"
             className={`flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-all ${
               viewMode === "CARD"
-                ? "bg-white text-slate-900 shadow-2xs"
+                ? "bg-white text-slate-900 shadow-2xs font-semibold"
                 : "text-slate-500 hover:text-slate-900"
             }`}
           >
             <LayoutGrid className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Cards</span>
+            <span>Cards</span>
           </button>
           <button
             onClick={() => setViewMode("TABLE")}
             aria-label="Table view"
-            title="Table view"
             className={`flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-all ${
               viewMode === "TABLE"
-                ? "bg-white text-slate-900 shadow-2xs"
+                ? "bg-white text-slate-900 shadow-2xs font-semibold"
                 : "text-slate-500 hover:text-slate-900"
             }`}
           >
             <List className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Table</span>
+            <span>Table</span>
           </button>
         </div>
       </div>
 
-      {/* Projects List / Cards */}
+      {/* Projects Display */}
       {filteredProjects.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-200 bg-white p-12 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 text-slate-400 mb-3 border border-slate-100">
@@ -326,7 +367,7 @@ export default function ProjectsPortfolioPage() {
               <div className="space-y-3">
                 <h3 className="text-base font-semibold text-slate-900">No projects created yet</h3>
                 <p className="text-xs text-slate-500 max-w-md mx-auto">
-                  Create your first development project to begin tracking budgets, draws, reconciliation, and construction milestones.
+                  Create your first development project to begin tracking budgets, draws, reconciliation, and milestones.
                 </p>
                 <Link
                   href="/projects/new"
@@ -364,103 +405,117 @@ export default function ProjectsPortfolioPage() {
           )}
         </div>
       ) : viewMode === "CARD" ? (
-        /* Modern Clean SaaS Card Grid */
+        /* Clean Professional Architectural Card Grid */
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {filteredProjects.map((project) => {
             const effectiveRole = getEffectiveRoleOnProject(project);
             const canSeeProfit =
               ["OWNER", "CFO"].includes(effectiveRole) && project.forecast_profit !== undefined;
+            const heroImage = getProjectImage(project);
+            const progress = getProjectProgress(project);
 
             return (
               <div
                 key={project.id}
                 onClick={() => handleOpenWorkspace(project)}
-                className="group relative flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm cursor-pointer"
+                className="group flex flex-col justify-between overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-xs cursor-pointer"
               >
                 <div>
-                  {/* Card Top: Title, Address & Health Badge */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-base font-semibold text-slate-900 transition-colors group-hover:text-blue-600 truncate">
+                  {/* Hero Image Section */}
+                  <div className="relative h-44 w-full overflow-hidden bg-slate-900">
+                    {heroImage ? (
+                      <img
+                        src={heroImage}
+                        alt={project.name}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-102"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-slate-800 text-slate-400">
+                        <Building2 className="h-10 w-10 opacity-30" />
+                      </div>
+                    )}
+
+                    {/* Gradient overlay for clear title readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
+
+                    {/* Top Right Floating Badge */}
+                    <div className="absolute top-2.5 right-2.5 z-10">
+                      {getCardStatusBadge(project)}
+                    </div>
+
+                    {/* Bottom Title & Address Overlaid */}
+                    <div className="absolute bottom-2.5 left-3.5 right-3.5 z-10 text-white">
+                      <h3 className="text-base font-bold leading-tight truncate">
                         {project.name}
                       </h3>
-                      <p className="mt-0.5 flex items-center gap-1 text-xs text-slate-500 truncate">
-                        <MapPin className="h-3 w-3 shrink-0 text-slate-400" />
+                      <p className="mt-0.5 flex items-center gap-1 text-[11px] text-slate-200/90 truncate">
+                        <MapPin className="h-3 w-3 shrink-0 text-slate-300" />
                         <span className="truncate">{project.address}</span>
                       </p>
                     </div>
-                    {getHealthBadge(project.health_status)}
                   </div>
 
-                  {/* Badges: Stage, Role, Status */}
-                  <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
-                    <span className="inline-flex items-center rounded-md border border-blue-100 bg-blue-50/70 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
-                      {formatStageLabel(project.lifecycle_stage)}
-                    </span>
-                    <span className="inline-flex items-center rounded-md border border-slate-200/80 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600">
-                      Role: <strong className="ml-1 text-slate-800">{effectiveRole}</strong>
-                    </span>
-                    {project.status === "COMPLETED" && (
-                      <span className="inline-flex items-center rounded-md border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
-                        Completed
+                  {/* Body Content */}
+                  <div className="p-4 space-y-3.5">
+                    {/* Stage & Role Badges */}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                        {formatStageLabel(project.lifecycle_stage)}
                       </span>
-                    )}
-                  </div>
-
-                  {/* Financial & Operational Metrics */}
-                  <div className="mt-4 space-y-2.5 rounded-lg border border-slate-100 bg-slate-50/50 p-3 text-xs">
-                    {canSeeProfit && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-500">Forecast Profit</span>
-                        <span className="font-semibold text-slate-900 tabular-nums">
-                          {formatMoney(project.forecast_profit || 0)}
-                        </span>
-                      </div>
-                    )}
-
-                    {project.loan_commitment && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-500">Loan Commitment</span>
-                        <span className="font-semibold text-slate-900 tabular-nums">
-                          {formatMoney(project.loan_commitment)}
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500">Notifications</span>
-                      <span
-                        className={`font-semibold tabular-nums ${
-                          (project.open_exceptions_count || 0) > 0
-                            ? "text-amber-600"
-                            : "text-slate-500"
-                        }`}
-                      >
-                        {project.open_exceptions_count || 0} {(project.open_exceptions_count || 0) === 1 ? "item" : "items"}
+                      <span className="inline-flex items-center rounded border border-blue-100 bg-blue-50/70 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
+                        Role: {effectiveRole}
                       </span>
                     </div>
 
-                    {project.next_milestone && (
-                      <div className="flex items-center justify-between pt-0.5">
-                        <span className="text-slate-500">Next Milestone</span>
-                        <span className="font-medium text-slate-800 truncate max-w-[170px]" title={project.next_milestone}>
-                          {project.next_milestone}
+                    {/* Progress Bar */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="font-semibold text-slate-500 uppercase tracking-wider text-[10px]">
+                          Progress
+                        </span>
+                        <span className="font-bold text-slate-900 tabular-nums">
+                          {progress}%
                         </span>
                       </div>
-                    )}
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Financial Metrics & Next Milestone */}
+                    <div className="grid grid-cols-2 gap-3 pt-1 border-t border-slate-100">
+                      <div>
+                        <div className="font-semibold text-slate-400 uppercase text-[10px] tracking-wider">
+                          Forecast Profit
+                        </div>
+                        <div className="mt-0.5 text-sm font-bold text-slate-900 tabular-nums truncate">
+                          {canSeeProfit ? formatCompactProfit(project.forecast_profit) : "—"}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="font-semibold text-slate-400 uppercase text-[10px] tracking-wider truncate">
+                          Next Milestone
+                        </div>
+                        <div
+                          className="mt-0.5 text-[11px] font-medium text-slate-700 truncate"
+                          title={project.next_milestone || "Handover & Final Audit"}
+                        >
+                          {project.next_milestone || "Handover & Final Audit"}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Card Footer: Last Activity & Open Workspace */}
-                <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3.5 text-xs text-slate-500">
-                  <span className="text-[11px]">
-                    {project.last_activity
-                      ? `Active ${formatDate(project.last_activity)}`
-                      : `Created ${formatDate(project.created_at)}`}
-                  </span>
-                  <div className="flex items-center gap-1 font-semibold text-blue-600 transition-transform group-hover:translate-x-0.5">
-                    <span>Open workspace</span>
-                    <ChevronRight className="h-3.5 w-3.5" />
+                {/* Card Action Link */}
+                <div className="p-4 pt-0">
+                  <div className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50/60 py-2 text-xs font-semibold text-slate-700 transition-colors group-hover:border-slate-300 group-hover:bg-slate-100/80 group-hover:text-slate-900">
+                    <span>Open Workspace</span>
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 text-slate-400 group-hover:text-slate-700" />
                   </div>
                 </div>
               </div>
@@ -469,19 +524,19 @@ export default function ProjectsPortfolioPage() {
         </div>
       ) : (
         /* Clean SaaS Table View */
-        <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-2xs">
+        <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs">
-              <thead className="border-b border-slate-200/80 bg-slate-50/75 font-semibold text-slate-600">
+              <thead className="border-b border-slate-200 bg-slate-50/80 font-bold uppercase tracking-wider text-[10px] text-slate-500">
                 <tr>
-                  <th className="px-4 py-3">Project</th>
-                  <th className="px-4 py-3">Stage</th>
-                  <th className="px-4 py-3">Your Role</th>
-                  <th className="px-4 py-3">Health</th>
-                  {canSeeFinancialSummary && <th className="px-4 py-3 text-right">Forecast Profit</th>}
-                  <th className="px-4 py-3 text-center">Notifications</th>
-                  <th className="px-4 py-3">Next Milestone</th>
-                  <th className="px-4 py-3 text-right">Action</th>
+                  <th className="px-5 py-3.5">Project</th>
+                  <th className="px-4 py-3.5">Stage</th>
+                  <th className="px-4 py-3.5">Your Role</th>
+                  <th className="px-4 py-3.5">Health</th>
+                  <th className="px-4 py-3.5">Progress</th>
+                  {canSeeFinancialSummary && <th className="px-4 py-3.5 text-right">Forecast Profit</th>}
+                  <th className="px-4 py-3.5">Next Milestone</th>
+                  <th className="px-5 py-3.5 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -489,51 +544,53 @@ export default function ProjectsPortfolioPage() {
                   const effectiveRole = getEffectiveRoleOnProject(project);
                   const canSeeProfit =
                     ["OWNER", "CFO"].includes(effectiveRole) && project.forecast_profit !== undefined;
+                  const progress = getProjectProgress(project);
 
                   return (
                     <tr
                       key={project.id}
                       onClick={() => handleOpenWorkspace(project)}
-                      className="transition-colors hover:bg-slate-50/60 cursor-pointer"
+                      className="transition-colors hover:bg-slate-50/80 cursor-pointer"
                     >
-                      <td className="px-4 py-3.5">
-                        <div className="font-semibold text-slate-900 hover:text-blue-600 transition-colors">
+                      <td className="px-5 py-4">
+                        <div className="font-bold text-slate-900 hover:text-blue-600 transition-colors">
                           {project.name}
                         </div>
                         <div className="text-[11px] text-slate-500 truncate max-w-xs mt-0.5">
                           {project.address}
                         </div>
                       </td>
-                      <td className="px-4 py-3.5">
-                        <span className="inline-flex rounded-md border border-blue-100 bg-blue-50/70 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
+                      <td className="px-4 py-4">
+                        <span className="inline-flex rounded-lg border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
                           {formatStageLabel(project.lifecycle_stage)}
                         </span>
                       </td>
-                      <td className="px-4 py-3.5">
-                        <span className="inline-flex rounded-md border border-slate-200/80 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                      <td className="px-4 py-4">
+                        <span className="inline-flex rounded-lg border border-blue-100 bg-blue-50/80 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
                           {effectiveRole}
                         </span>
                       </td>
-                      <td className="px-4 py-3.5">{getHealthBadge(project.health_status)}</td>
+                      <td className="px-4 py-4">{getTableHealthBadge(project.health_status)}</td>
+                      <td className="px-4 py-4 min-w-[120px]">
+                        <div className="flex items-center gap-2">
+                          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                            <div className="h-full bg-blue-600 rounded-full" style={{ width: `${progress}%` }} />
+                          </div>
+                          <span className="text-[11px] font-bold text-slate-700 tabular-nums">
+                            {progress}%
+                          </span>
+                        </div>
+                      </td>
                       {canSeeFinancialSummary && (
-                        <td className="px-4 py-3.5 text-right font-medium text-slate-900 tabular-nums">
+                        <td className="px-4 py-4 text-right font-extrabold text-slate-900 tabular-nums">
                           {canSeeProfit ? formatMoney(project.forecast_profit || 0) : "—"}
                         </td>
                       )}
-                      <td className="px-4 py-3.5 text-center">
-                        <span
-                          className={`font-semibold tabular-nums ${
-                            (project.open_exceptions_count || 0) > 0 ? "text-amber-600" : "text-slate-400"
-                          }`}
-                        >
-                          {project.open_exceptions_count || 0}
-                        </span>
+                      <td className="px-4 py-4 text-slate-600 truncate max-w-[170px]">
+                        {project.next_milestone || "Handover & Final Audit"}
                       </td>
-                      <td className="px-4 py-3.5 text-slate-600 truncate max-w-[160px]">
-                        {project.next_milestone || "—"}
-                      </td>
-                      <td className="px-4 py-3.5 text-right">
-                        <span className="inline-flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-700">
+                      <td className="px-5 py-4 text-right">
+                        <span className="inline-flex items-center gap-1 font-bold text-blue-600 hover:text-blue-700">
                           Open &rarr;
                         </span>
                       </td>

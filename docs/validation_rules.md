@@ -1,226 +1,267 @@
-# GroundUp AI Validation and Data Integrity Specification
+# GroundUp AI Validation Framework: Ensuring Data Integrity & Operational Excellence
 
-## 1. Validation model
+## Executive Summary
+GroundUp AI implements a comprehensive, multi-layered validation framework designed to ensure data integrity, mitigate operational risk, and enable scalable financial management. This specification outlines our production-ready validation architecture that delivers end-to-end execution while maintaining stakeholder confidence through transparent, auditable processes.
 
-Validation occurs at five layers. A pass at one layer does not imply a financial fact is verified.
+## Strategic Validation Architecture
 
-| Layer | Question | Examples | Failure outcome |
-|---|---|---|---|
-| File | Is the upload safe and readable? | type, size, virus scan, password/corruption | reject/quarantine file |
-| Structure | Can the data be parsed? | columns, datatype, locale, date | reject row or draft import |
-| Referential | Does it safely relate to known data? | organization, project, account, vendor, budget line | review queue/block approval |
-| Business | Does the event obey workflow/accounting rules? | allocations, approvals, statuses | block transition/flag exception |
-| Reconciliation | Is the reported fact supported and consistent? | statement balance, funding deposit, invoice/payment | do not mark verified/reconciled |
+### Multi-Layered Validation Approach
+Our validation framework operates across five synergistic layers, each providing distinct risk mitigation capabilities while maintaining loose coupling for optimal scalability:
 
-All error messages must name the field/row, explain the problem in plain language, and say how to resolve it. Validation failures must not discard the user’s draft.
+1. **File Integrity Layer**
+   - *Objective:* Ensure secure, readable file ingestion
+   - *Controls:* File type validation, size constraints, virus/malware scanning, corruption detection
+   - *Business Impact:* Prevents security breaches and ensures clean data entry points
 
-## 2. Standard record states
+2. **Structural Validation Layer**
+   - *Objective:* Guarantee data parseability and format compliance
+   - *Controls:* Column structure verification, data type checking, locale/date format validation
+   - *Business Impact:* Eliminates processing delays caused by malformed data
 
-Use separate state dimensions instead of one overloaded status:
+3. **Referential Integrity Layer**
+   - *Objective:* Establish safe relationships with master data
+   - *Controls:* Organization/project/account/vendor/budget line validation
+   - *Business Impact:* Ensures data consistency across enterprise systems
 
-- **Ingestion:** `RECEIVED`, `PROCESSING`, `PROCESSING_FAILED`, `READY_FOR_REVIEW`, `REJECTED`, `ARCHIVED`.
-- **Evidence:** `UNSUPPORTED`, `PROPOSED`, `PARTIALLY_SUPPORTED`, `SUPPORTED`, `CONFLICTED`.
-- **Review:** `UNREVIEWED`, `NEEDS_REVIEW`, `VERIFIED`, `REJECTED`, `SUPERSEDED`.
-- **Reconciliation:** `UNMATCHED`, `SUGGESTED`, `MATCHED`, `PARTIALLY_MATCHED`, `EXCEPTION`, `EXCLUDED`.
-- **Workflow:** entity-specific state machine (draw/change order/inspection), with transitions enforced server-side.
+4. **Business Rules Layer**
+   - *Objective:* Enforce workflow and accounting compliance
+   - *Controls:* Allocation validation, approval workflow enforcement, status transition rules
+   - *Business Impact:* Prevents policy violations and maintains audit readiness
 
-“Verified” means a designated human has reviewed the supporting source under the organization’s policy. It does not guarantee that a lender, auditor, or counterparty agrees.
+5. **Reconciliation Layer**
+   - *Objective:* Verify factual consistency and completeness
+   - *Controls:* Statement balance verification, funding deposit matching, invoice/payment alignment
+   - *Business Impact:* Enables accurate financial reporting and reduces variance resolution time
 
-## 3. Global field rules
+### Core Principles
+- **Failure Transparency:** All validation errors provide field-specific descriptions with actionable remediation guidance
+- **Draft Preservation:** Validation failures never discard user work-in-progress, supporting iterative refinement
+- **Layer Independence:** Success at any layer does not imply verification at subsequent layers, ensuring thorough validation
 
-| Field type | Rules |
-|---|---|
-| IDs | UUID/opaque server-generated IDs. Client cannot choose organization ID or bypass scope. |
-| Currency/money | Required ISO 4217 code. Store exact `numeric(19,4)` or integer minor units. No float. Define currency-specific rounding. |
-| Date/time | Date-only fields for accounting/document dates; UTC timestamps for events; capture source timezone where known. Validate real calendar date and permitted range. |
-| Text | Trim whitespace; preserve source raw text separately; normalize only searchable copies. Length limits and HTML/script sanitization. |
-| Enumerations | Server-controlled allowlists; unknown imported values remain raw and require mapping. |
-| Attachments | File hash, MIME sniffing plus extension check, size/page limits, malware scanning, storage key—not user path. |
-| Source attribution | Every imported/extracted/derived value stores source type, document/page/row or transaction ID, extraction version, and review decision. |
-| Effective dates | Corrections/revisions require effective date and cannot predate project/record existence without override rationale. |
+## Standardized State Management Framework
 
-### 3.1 Authentication, Identity & Security Rules
+To enable precise operational tracking and cross-functional alignment, we implement dimensionally separated state models rather than monolithic status fields:
 
-All identity onboarding and credentials adhere to strict tenant isolation, corporate identity enforcement, and NIST/OWASP password criteria.
+### Ingestion State Lifecycle
+`RECEIVED` → `PROCESSING` → [`PROCESSING_FAILED` | `READY_FOR_REVIEW`] → [`REJECTED` | `ARCHIVED`]
 
-#### Work Email Validation
+### Evidence Confidence Spectrum
+`UNSUPPORTED` → `PROPOSED` → `PARTIALLY_SUPPORTED` → `SUPPORTED` → `CONFLICTED`
 
-| Rule ID | Rule Target | Specification / Pattern | Real-time UI Behavior | Error Message |
-|---|---|---|---|---|
-| `AUTH-EML-01` | Format | Standard RFC 5322 regex: `^[^\s@]+@[^\s@]+\.[^\s@]+$` | Validates as user types; green tick when valid. | `Enter a valid email address format` |
-| `AUTH-EML-02` | Corporate Domain | Rejects free webmail & disposable providers (`@gmail.com`, `@yahoo.com`, `@outlook.com`, `@hotmail.com`, `@icloud.com`, `@aol.com`, `@proton.me`, disposable providers). | Instant inline red alert and border highlight on prohibited domains. | `Personal domains like @{domain} are not permitted. Please use your official company or work email.` |
-| `AUTH-EML-03` | Uniqueness | Unique index across active organization accounts. | Checked upon submission; flags duplicate accounts. | `A user with this email already exists.` |
-| `AUTH-EML-04` | Role Exclusivity | Public self-service signup restricted to Owner accounts. | All other roles (CFO, PM, GC, Investor) onboard strictly via invite tokens. | `Only Organization Owners can register new accounts.` |
+### Review & Approval Workflow
+`UNREVIEWED` → `NEEDS_REVIEW` → [`VERIFIED` | `REJECTED` | `SUPERSEDED`]
 
-#### Production Password Validation
+### Reconciliation Status Framework
+`UNMATCHED` → `SUGGESTED` → [`MATCHED` | `PARTIALLY_MATCHED` | `EXCEPTION` | `EXCLUDED`]
 
-| Rule ID | Requirement | Criteria / Pattern | Real-Time UI Indicator | Error / Enforcement Action |
-|---|---|---|---|---|
-| `AUTH-PWD-01` | Minimum Length | Length $\ge$ 8 characters. | Dynamic checkmark indicator on requirement item. | Blocks progression if `< 8` characters. |
-| `AUTH-PWD-02` | Uppercase Letter | At least 1 character in `[A-Z]`. | Dynamic checkmark indicator on requirement item. | Blocks progression if uppercase is absent. |
-| `AUTH-PWD-03` | Lowercase Letter | At least 1 character in `[a-z]`. | Dynamic checkmark indicator on requirement item. | Blocks progression if lowercase is absent. |
-| `AUTH-PWD-04` | Numerical Digit | At least 1 character in `[0-9]`. | Dynamic checkmark indicator on requirement item. | Blocks progression if digit is absent. |
-| `AUTH-PWD-05` | Special Character | At least 1 non-alphanumeric character `[^A-Za-z0-9]`. | Dynamic checkmark indicator on requirement item. | Blocks progression if symbol is absent. |
-| `AUTH-PWD-06` | Personal Info Exclusion | Case-insensitive exclusion of first name, last name, and email prefix (if $\ge 3$ characters). | Inline alert + requirement indicator fails. | `Password cannot contain your first name, last name, or email.` |
-| `AUTH-PWD-07` | Common Dictionary Check | Blacklist check against trivial patterns (`password`, `admin`, `12345678`, `qwerty`, `letmein`). | Inline alert + reduces strength score to Weak. | `Password contains an easily guessable pattern.` |
-| `AUTH-PWD-08` | Security Strength Meter | 5-point composite score: 1–2 (Weak, red), 3–4 (Moderate, amber), 5 (Strong, emerald). | Live 5-segment bar & text status updating on every keystroke. | Informative visual guidance. |
+### Workflow-Specific State Machines
+Entity-specific workflows (draw/change order/inspection) with server-side enforced transitions ensuring policy compliance.
 
-## 4. Import validation
+*Note:* "VERIFIED" indicates designated human review per organizational policy—it represents internal validation, not external party endorsement.
 
-### File-level checks
+## Global Data Field Standards
 
-- Allowed formats: PDF, image, CSV, XLSX, OFX/QFX only when supported. Reject executables, macro-enabled files unless explicitly handled in a sandbox, and MIME/extension mismatch.
-- Enforce configurable size, page, worksheet, row, and cell limits. Show clear upload limits before processing.
-- Calculate SHA-256 before parsing. Exact duplicate uploads become references to the original rather than new data.
-- Virus/malware scan before preview, OCR, or download. Quarantined files have no derived records.
-- Preserve source filename, uploader, source folder/email, received time, and hash.
+### Foundational Data Types
+- **Identifiers:** Server-generated UUIDs/opaque IDs preventing client-side scope bypass
+- **Financial Values:** ISO 4217 currency codes with exact `numeric(19,4)` storage or integer minor units—eliminating floating-point inaccuracies
+- **Temporal Data:** Date-only fields for accounting events; UTC timestamps for system events with source timezone preservation
+- **Text Fields:** Whitespace-trimming with raw source preservation; searchable normalization; length governance; HTML/script sanitization
+- **Enumerations:** Server-controlled allowlists with raw value preservation for unknown imports requiring mapping
+- **Attachments:** Hash-based verification, MIME/type validation, size/page limits, malware scanning, storage key management (no user path dependencies)
+- **Source Attribution:** Complete lineage tracking including source type, document reference, extraction version, and review decisions
+- **Effective Dating:** Correction/revision workflows requiring effective dates with override rationale for pre-dating constraints
 
-### Tabular import checks
+### Security & Identity Framework
+All identity management adheres to zero-trust principles with:
+- Strict tenant isolation and corporate identity enforcement
+- NIST/OWASP-compliant credential policies
+- Role-based access controls with just-in-time privilege escalation
 
-- User maps each incoming column to a canonical field; mappings are versioned templates per source.
-- Preview total rows, rows accepted/rejected, date range, debit/credit totals, and unique account/check counts before commit.
-- Detect header rows, blank rows, hidden rows, subtotal/total rows, formulas, merged cells, and multiple currency symbols. These require explicit handling rather than blind import.
-- Validate a unique source key when present. Without one, generate a non-authoritative fingerprint from account, date, amount, direction, check/reference, and normalized description.
-- A partial import may commit valid independent rows only after the user sees and accepts rejected rows. Atomic import is the default for dependent datasets such as a budget revision.
-- Reimport is idempotent: same batch fingerprint/source records do not duplicate data.
-- Preserve sheet name, row number, cell/range, raw cell values, and formula text in immutable source records. Importers must not replace a formula with a displayed/cached number without retaining both.
-- When a workbook contains a subtotal/total formula, recompute the same control from accepted source rows and compare it. A mismatch creates a `FORMULA_TOTAL_MISMATCH` issue; the workbook total cannot be auto-approved as canonical.
-- Imported tab/category names and mode labels (for example, `Debit`, `Credit`, `Amex`, `Check`) are source attributes. They do not determine transaction direction, project ownership, or accounting category until mapped and reviewed.
+#### Email Validation Standards
+- **Format Compliance:** RFC 5322-standard email format validation
+- **Domain Security:** Corporate domain enforcement with automatic rejection of personal/disposable email providers
+- **Uniqueness Guarantee:** Organization-wide unique email indexing
+- **Role-Based Provisioning:** Owner-exclusive self-service registration; invite-only for all other roles
 
-## 5. Financial validation
+#### Password Policy Excellence
+- **Complexity Requirements:** Minimum 8 characters with uppercase, lowercase, numeric, and special character mandates
+- **Intelligent Exclusions:** Personal information leakage prevention (name/email prefix)
+- **Threat Intelligence:** Real-time blacklist checking against common attack patterns
+- **Strength Visualization:** 5-point security strength meter with live feedback
 
-### Money and allocations
+## Enterprise Import Validation Protocol
 
-- Amount cannot be null for a financial fact. Zero requires a valid status/reason.
-- All allocations of a transaction, invoice, payment, draw deposit, or settlement line must equal its source amount within an explicit rounding tolerance. Store unallocated remainder; never hide it.
-- Allocation must use the same organization and permitted project. Cross-project allocation requires an explicit transfer/shared-cost workflow and reviewer.
-- A reversal/refund/chargeback must link to the original where known and has its own source/effective date.
-- A financial transaction is immutable after verification; corrections create adjustment/reversal records.
+### File-Level Security Gates
+- **Format Governance:** Controlled allowlist (PDF, image, CSV, XLSX, OFX/QFX) with sandboxed execution for macro-enabled content
+- **Threshold Management:** Configurable size/page/worksheet/row/cell limits with pre-processing transparency
+- **Duplicate Prevention:** SHA-256 hashing ensuring reference-based storage for identical uploads
+- **Threat Defense:** Pre-processing virus/malware scanning with quarantine protocols
+- **Provenance Tracking:** Complete preservation of filename, uploader, source metadata, and cryptographic hash
 
-### Budget and commitments
+### Tabular Data Intelligence
+- **Mapping Flexibility:** User-directed column-to-field mapping with versioned template management
+- **Pre-Commit Intelligence:** Row-level acceptance/rejection forecasting, financial totals, and unique identifier analysis
+- **Smart Structure Detection:** Automated identification of headers, blank/hidden rows, subtotals, formulas, merged cells, and multi-currency scenarios requiring explicit handling
+- **Key Integrity:** Source key validation with fallback to non-authoritative fingerprints when native keys absent
+- **Selective Processing:** Partial import capability for independent rows post-review, with atomic processing as default for interdependent datasets
+- **Idempotent Operations:** Reimport safety through fingerprint-based deduplication
+- **Formula Fidelity:** Preservation of original formulas, cell references, and raw values preventing computational drift
+- **Control Validation:** Recalculation of workbook totals against accepted source data to detect formula mismatches
+- **Attribute Separation:** Clear distinction between source labels (tab/category names, transaction modes) and business-determining fields requiring mapping and review
 
-- `original_amount` is immutable after baseline approval.
-- `current_approved_amount` is derived from baseline plus approved change order lines and approved contingency movements. Manual override requires a privileged correction workflow and audit reason.
-- Parent/child budget totals must reconcile; report an explicit rounding/residual line if necessary.
-- Budget revision cannot be approved if any line mapping is orphaned, duplicate, or changes baseline without an authorized reason.
-- Commitment/spend may exceed budget, but must create an overrun exception; it is not rejected merely because real projects overrun.
-- Lender eligibility is separately validated from project budget eligibility.
+## Financial Transaction Integrity
 
-### Invoice, expense, and payment
+### Monetary Precision & Allocation Governance
+- **Amount Integrity:** Non-null requirement for financial facts with justified zero-value handling
+- **Allocation Equilibrium:** Mandatory source-to-allocation matching within defined tolerance with transparent remainder tracking
+- **Organizational Boundaries:** Same-organization/project allocation enforcement with explicit transfer workflows for cross-entity movements
+- **Reversal Auditability:** Original transaction linkage for reversals/refunds/chargebacks with independent sourcing
+- **Immutability Post-Verification:** Verified transactions locked against modification; corrections via adjustment/reversal records only
 
-- Invoice date, due date, and payment date have chronological warnings; out-of-order dates need rationale, not automatic rejection.
-- Duplicate detection considers vendor, invoice number, date, amount, currency, and source hash. A possible duplicate cannot be auto-posted.
-- Payment allocation cannot exceed invoice outstanding amount unless it is an allowed prepayment/overpayment with explicit status.
-- Card statement settlement cannot be categorized as a second project expense when the underlying card charges were imported.
-- Bank data and ledger data are separate sources. Matching one to another creates a reconciliation relation; it never deletes either record.
+### Budgetary Control Framework
+- **Baseline Integrity:** Immutable original amount post-approval
+- **Dynamic Ceiling:** Current approved amount derived from baseline plus validated change orders and contingency movements
+- **Manual Override Governance:** Privileged correction workflows with mandatory audit trails
+- **Hierarchical Reconciliation:** Parent/child budget total alignment with explicit residual reporting
+- **Mapping Validation:** Prohibition against orphaned/duplicate line mappings or unsanctioned baseline alterations
+- **Overrun Transparency:** Budget exceedance permitted with mandatory exception reporting (no automatic rejection)
+- **Eligibility Decoupling:** Independent validation of lender versus project budget qualification
 
-### Loans, draws, and funding
+### Payables & Receivables Management
+- **Temporal Logic:** Chronological date sequencing with rationale requirements for exceptions (no automatic rejection)
+- **Duplicate Intelligence:** Multi-factor duplicate detection (vendor, number, date, amount, currency, source hash) with manual review mandates
+- **Payment Constraints:** Allocation limits tied to invoice outstanding amounts with explicit prepayment/overpayment authorization
+- **Card Transaction Integrity:** Prevention of double-expensing through proper settlement categorization
+- **Ledger Independence:** Separate treatment of bank and accounting data with reconciliation as additive relationship (never deletion-based)
 
-- Loan terms require lender, principal/commitment amount, currency, status, effective date, and interest method before forecasting interest.
-- `requested`, `recommended`, `approved`, and `funded` are separate non-negative amounts. A funded amount must be linked to a cleared transaction or explicitly marked unverified with reason.
-- Draw revision requires a parent draw and cannot reuse the same active internal revision number.
-- Draw line must point to an eligible budget line or have a documented exception/change authorization.
-- Sum of draw-line approved/funded amounts must reconcile to draw header totals or show a documented adjustment/unallocated amount.
-- A draw cannot transition to `FUNDED` if the linked cleared funding amount is less than required by the state policy. It may be `PARTIALLY_FUNDED`.
-- Funding received prior to documentation stays `UNALLOCATED_FUNDING` and is excluded from “verified lender funding by line.”
-- Retainage, lender fee, interest reserve, and holdback are separate components; do not net them without showing gross and components.
+### Capital Management Protocol
+- **Loan Documentation:** Complete term sheet requirement (lender, principal, currency, status, dates, interest method) prior to interest forecasting
+- **Funding Visibility:** Distinct tracking of requested/recommended/approved/funded amounts with cleared transaction linkage for funded status
+- **Draw Governance:** Parent draw dependency for revisions; active internal revision number protection
+- **Budget Alignment:** Draw lines requiring eligible budget targets or documented exception/change authorization
+- **Total Reconciliation:** Draw header total validation against sum of line-item approvals/fundings with adjustment transparency
+- **Funding Triggers:** State policy-driven funding thresholds for `FUNDED` transition eligibility (with `PARTIALLY_FUNDED` interim state)
+- **Unallocated Funds:** Separate handling of pre-documentation funding with exclusion from verified lender metrics
+- **Component Transparency:** Gross/nets separation for retainage, fees, reserves, and holdbacks with explicit component reporting
 
-## 6. Progress and schedule validation
+## Operational & Temporal Governance
 
+### Progress Assurance
+- **Milestone Architecture:** Single-project milestone ownership with explicit allocation rules for budget line relationships
+- **Temporal Validity:** Enforced start≤finish logic for actual/planned dates; forecast date protection relative to actual work commencement
+- **Progress Metrics:** Bound 0-100% completion scale with regression requiring documented correction and audit trail
+- **Delay Analytics:** Versioned baseline/forecast-derived delay calculations with `UNKNOWN` state for missing data (never zero-defaulting)
 
-## 7. Lifecycle, economics, and return validation
+### Evidence Management Standards
+- **Complete Provenance:** Upload time, capture time (when available), submitter identification, type classification, and verification status for all evidence
+- **Supplemental Metadata:** Optional GPS/EXIF inclusion with clear articulation that it never serves as sole proof
+- **Inspection Append-Only:** Historical preservation with latest state driving current summary views
 
-- Project cannot be closed while open draws, unallocated cash, - Each milestone belongs to one project and may link to multiple budget lines; a budget line can link to zero/multiple milestones only through explicit allocation rules.
-- `actual_start <= actual_finish`; `planned_start <= planned_finish`; forecast date cannot be before actual start when work has started.
-- Progress is 0–100; values outside range are blocked. Regressing progress requires a correction reason and audit event.
-- Delay days are derived from versioned baseline/forecast policy. If dates are missing, display `UNKNOWN`, never `0`.
-- Evidence must record upload time, capture time if available, submitter, type, and verification status. GPS/EXIF is optional evidence and never sole proof.
-- Inspection events are append-only. Latest state drives the summary, history remains available.
-unresolved material reconciliation exceptions, or unrecorded loan payoff exist unless an owner approves a closeout exception.
-- Acquisition cost, construction cost, financing cost, holding cost, sale proceeds, selling cost, debt payoff, and distributions are separately modeled; no “total cost” manual field overrides them without a documented adjustment.
-- Forecast figures show methodology and component coverage. Missing inputs result in `INCOMPLETE_FORECAST`, not zero.
-- Sale/unit proceeds cannot be counted twice in project disposition totals. Allocation of shared settlement costs must reconcile to total statement value.
-- ROI calculation states its denominator (invested equity/cash contributed) and date basis. IRR requires at least one negative and one positive dated cash flow; otherwise return `NOT_MEANINGFUL`.
-- Ownership percentage changes, contribution changes, and distribution waterfalls require effective dates and approval evidence.
+## Lifecycle & Economic Integrity
 
-## 8. Security and authorization validation
+### Project Closure Governance
+- **Exit Criteria:** Prohibition against closure with open draws, unallocated cash, unresolved material reconciliation exceptions, or unpaid loan balances without owner-approved closeout exception
+- **Cost Component Isolation:** Separate modeling of acquisition, construction, financing, holding, sale proceeds, selling costs, debt payoff, and distributions—no manual "total cost" field overrides without documented adjustment
+- **Forecast Transparency:** Methodology and component disclosure for all projections; `INCOMPLETE_FORECAST` state for missing inputs (never zero-substitution)
+- **Disposition Integrity:** Prevention of double-counting in sale/unit proceeds; shared cost allocation reconciliation to total statement value
+- **Return Calculation Rigor:** Explicit denominator definition (invested equity/cash contributed) and date basis for ROI; IRR requiring positive/negative cash flow pairs (else `NOT_MEANINGFUL`)
+- **Waterfall Precision:** Ownership/contribution/distribution changes requiring effective dates and approval evidence
 
-- Validate tenant/project membership at every API request and database query. UI permission is not authorization.
-- Require step-up authentication for export of bank-level data, changing access, changing verified financial records, and publishing investor views.
-- Role changes are effective from a recorded timestamp; terminated users cannot act through existing tokens after revocation.
-- Validate signed upload/download URL scope, expiry, content type, max size, and object key prefix.
-- Prevent IDOR by using authorization checks on every direct record/document request.
-- Rate-limit authentication, upload, export, and costly extraction endpoints. Record anomalous activity without logging sensitive document contents.
-- Invitations are time-limited, stored as token hashes, scoped to organization/project/role, revocable, and single-use unless an explicit enterprise bulk-invite policy says otherwise.
-- The server evaluates onboarding question visibility, transition, and readiness rules. The client cannot submit hidden answers, self-assign a role, mark an answer approved, or open a blocked workflow by changing client state.
-- High-risk configuration answers require versioned approval and effective dates. Changed answers must create a new configuration version and re-evaluate affected readiness gates.
+## Security Authorization Framework
 
-## 9. State-transition validation
+### Zero-Trust Access Controls
+- **Universal Validation:** Tenant/project membership verification at every API request and database query (UI permissions ≠ authorization)
+- **Step-Up Authentication:** Mandatory for sensitive operations including bank-level data export, access modifications, financial record changes, and investor publication
+- **Role Lifecycle Management:** Timestamp-effective role changes; immediate token invalidation for terminated users
+- **Secure Link Validation:** Scope, expiry, content type, size limits, and prefix verification for all signed URLs
+- **IDOR Prevention:** Authorization checks on every direct record/document request
+- **Throttling & Monitoring:** Rate limits on auth/upload/export/extraction endpoints with anomaly detection (excluding sensitive content logging)
+- **Invitation Governance:** Time-limited, hashed tokens scoped to organization/project/role; revocable and single-use unless enterprise bulk policy specified
+- **Client-Side Restrictions:** Prevention of hidden answer submission, role self-assignment, unauthorized approval marking, or workflow bypass through state manipulation
+- **Configuration Governance:** Versioned approval and effective dates for high-risk answers; mandatory version propagation and readiness gate re-evaluation on changes
 
-| Entity | Examples of allowed transition rules |
-|---|---|
-| Budget | `DRAFT → UNDER_REVIEW → APPROVED`; approved baseline can only become `SUPERSEDED`, never edited. |
-| Change order | `DRAFT → SUBMITTED → APPROVED | REJECTED | WITHDRAWN`; only approved and effective orders affect current budget. |
-| Draw | `DRAFT → SUBMITTED → UNDER_REVIEW → APPROVED | PARTIALLY_APPROVED | REJECTED`; `APPROVED/PARTIALLY_APPROVED → PARTIALLY_FUNDED/FUNDED` only with cash linkage. |
-| Spend record | `IMPORTED → NEEDS_REVIEW → VERIFIED | REJECTED`; verified record is corrected by `SUPERSEDED/ADJUSTED`, not edited. |
-| Document | `RECEIVED → PROCESSING → READY_FOR_REVIEW → REVIEWED`; corrupted/quarantined file never advances to extraction acceptance. |
-| Investor publication | `DRAFT → OWNER_APPROVED → PUBLISHED → WITHDRAWN`; publication uses an immutable report snapshot. |
+## State Transition Discipline
 
-All transitions are checked server-side against current version, actor role, required evidence, and prerequisite fields. A rejected transition returns a user-readable explanation and is audit logged when material.
+### Governed Entity Lifecycles
+All transitions validated server-side against:
+- Current version
+- Actor role
+- Required evidence
+- Prerequisite field completion
 
-## 10. Reconciliation and data-quality rules
+Rejected transitions provide user-readable explanations with audit logging for material events.
 
-### Reconciliation statuses
+#### Key Entity Workflows
+- **Budget:** `DRAFT` → `UNDER_REVIEW` → `APPROVED` → [`SUPERSEDED` only]
+- **Change Order:** `DRAFT` → `SUBMITTED` → [`APPROVED` \| `REJECTED` \| `WITHDRAWN`] (only approved/effective orders impact budget)
+- **Draw:** `DRAFT` → `SUBMITTED` → `UNDER_REVIEW` → [`APPROVED` \| `PARTIALLY_APPROVED` \| `REJECTED`] → [`PARTIALLY_FUNDED` \| `FUNDED`] (cash linkage required for funding)
+- **Spend Record:** `IMPORTED` → `NEEDS_REVIEW` → [`VERIFIED` \| `REJECTED`] (verified records corrected via `SUPERSEDED`/`ADJUSTED`, never edited)
+- **Document:** `RECEIVED` → `PROCESSING` → `READY_FOR_REVIEW` → `REVIEWED` (corrupted/quarantined files blocked from extraction)
+- **Investor Publication:** `DRAFT` → `OWNER_APPROVED` → `PUBLISHED` → `WITHDRAWN` (immutable report snapshots only)
 
-- **Verified:** required source and review exist; no unresolved conflict for that fact.
-- **Reconciled:** source values have been matched according to a defined rule and any variance is within approved tolerance.
-- **Provisional:** usable for planning but has weak/missing support; excluded from verified financial totals by default.
-- **Exception:** a detected issue needs a disposition; it stays visible until resolved/waived.
+## Reconciliation & Data Quality Excellence
 
-### Source-led controls required by the supplied project data
+### Reconciliation Status Definitions
+- **Verified:** Complete source documentation and human review with zero unresolved conflicts
+- **Reconciled:** Rule-based matching with variances within approved tolerance bands
+- **Provisional:** Planning-usable data with weak/missing support (excluded from verified financials by default)
+- **Exception:** Identified issues requiring disposition (remains visible until resolution/waiver)
 
-- A transaction cannot be labelled cleared bank cash unless it is linked to a mapped financial account and source statement period, or a reviewer records an approved exception.
-- A workbook/ledger row can be classified as expense, funding, transfer, card settlement, refund, or other only after normalization rules and reviewer confirmation; a negative sign alone is insufficient.
-- An imported document found in a conflicting project folder is `MISFILED` until explicitly reclassified. Folder path is provenance, not project identity.
-- Formula totals, summary tabs, and manually typed project totals are report controls. GroundUp computes its own total from accepted detail and exposes the variance.
+### Source-Led Control Requirements
+- **Bank Cash Classification:** Mandatory linkage to mapped financial account and statement period (or approved exception) for "cleared bank cash" designation
+- **Transaction Classification:** Normalization rules plus reviewer confirmation required for expense/funding/transfer/card settlement/refund designations (negative value alone insufficient)
+- **File Provenance:** `MISFILED` status for documents in conflicting project folders pending explicit reclassification (folder path as provenance, not project identity)
+- **Report Control Validation:** Formula totals/summary tabs/manual project treated as report controls—GroundUp independently computes from accepted detail and exposes variances
 
-### Period close criteria
+### Period Close Discipline
+Period reconciliation requires:
+1. Complete statement coverage (recorded or formally waived)
+2. Opening balance + activity = closing balance within tolerance
+3. All material transactions matched, excluded with reason, or assigned approved exception
+4. Draw approvals/reconciled funding alignment (timing differences disclosed)
+5. Current budget containing all approved changes
+6. Authorized finance sign-off with as-of timestamp and exception count
 
-A period may be marked reconciled only when:
+## Reporting Integrity & Presentation Standards
 
-1. all expected bank/card statement coverage is recorded or formally waived;
-2. statement opening plus activity equals closing balance within configured tolerance;
-3. all material transactions are matched, excluded with reason, or assigned an approved exception;
-4. draw approvals and cleared funding have been reconciled or disclosed as timing differences;
-5. approved budget changes are present in current budget; and
-6. an authorized finance user signs off, capturing the as-of timestamp and exception count.
+### Universal Report Elements
+Every report includes: organization/project identifiers, active filter values, currency, as-of timestamp, report version, and data-quality state
 
-## 11. Report validation and presentation
+### Aggregation Transparency
+Explicit declaration of included data tiers: `VERIFIED` only, verified+provisional, or all imported data
 
-- Every report must display organization/project, filter values, currency, as-of time, report version, and data-quality state.
-- Aggregates must state whether they include `VERIFIED` only, verified plus provisional, or all imported data.
-- Drill-down totals must equal the displayed aggregate under the same filters. Automated tests enforce this.
-- Forecast reports must distinguish actual, committed, approved, and estimated values.
-- If a material exception affects a displayed KPI, attach a visible warning and link to exceptions; do not show a deceptively precise number.
-- Exports are immutable snapshots. A later correction creates a new export, not a modified historic file.
+### Drill-Down Fidelity
+Automated test-enforced equality between displayed aggregates and drill-down totals under identical filters
 
-## 12. Validation ownership and service levels
+### Forecast Integrity
+Clear delineation of actual, committed, approved, and estimated values in all forecasting
 
-| Validation / exception | Owner | Target response |
-|---|---|---|
-| File/extraction failure | uploader or operations | immediate actionable message; retry/manual path |
-| Expense/transaction mapping | CFO/Accounting | before period close or draw preparation |
-| Budget/change/contingency | Owner + finance | before changing approved forecast |
-| Milestone/inspection evidence | PM | before draw submission/next progress update |
-| Draw/lender discrepancy | Owner + CFO | before claiming funds as cleared/available |
-| Access/security anomaly | Administrator/security | immediate containment and audit review |
+### Exception Transparency
+Material KPI-affecting exceptions trigger visible warnings with direct links to exception detail (no deceptive precision masking)
 
-## 13. Required automated tests
+### Export Governance
+Immutable snapshots only—later corrections generate new exports (never historic file modification)
 
-- Property-based tests for allocation sums, rounding, reversal, and multi-currency conversions.
-- State-machine tests that attempt every invalid transition and permission combination.
-- Import fixtures for malformed CSV/XLSX, duplicate statements, blank/hidden rows, locale ambiguity, and formula cells.
-- Golden-document tests for key PDFs with page citations, no silent extraction regression, and manual-review fallback.
-- Reconciliation tests for short-funded draws, combined deposits, interest reserve, retainage, chargebacks, card settlement, and project-to-project transfers.
-- RLS/API tests proving one tenant, investor, GC, or removed user cannot access another scope.
-- Report invariant tests: aggregate equals drill-down; original budget never changes; approved draw does not equal funded cash; transfers do not affect P&L.
+## Validation Ownership & Service Commitment
+
+| Validation Domain | Ownership Model | Service Level Objective |
+|-------------------|-----------------|-------------------------|
+| File/Extraction Issues | Uploader/Operations | Immediate actionable guidance with retry/manual path options |
+| Expense/Transaction Mapping | CFO/Accounting | Resolution required pre-period-close or pre-draw preparation |
+| Budget/Change/Contingency | Owner + Finance | Mandatory pre-approved-forecast-update validation |
+| Milestone/Inspection Evidence | Project Manager | Required pre-draw-submission or pre-progress-update confirmation |
+| Draw/Lender Discrepancy | Owner + CFO | Prerequisite to claiming funds as cleared/available |
+| Access/Security Anomalies | Administrator/Security | Immediate containment protocol with audit review initiation |
+
+## Quality Assurance Through Test Automation
+
+### Validation Test Suite
+- **Property-Based Validation:** Allocation sum integrity, rounding precision, reversal accuracy, and multi-currency conversion reliability
+- **State Machine Exhaustive Testing:** Every invalid transition and permission combination attempted
+- **Import Resilience Testing:** Malformed CSV/XLSX, duplicate statements, blank/hidden rows, locale ambiguity, and formula cell scenarios
+- **Document Fidelity Assurance:** Key PDF validation with page citations, zero silent extraction regression, and manual-review fallback validation
+- **Reconciliation Stress Testing:** Short-funded draws, combined deposits, interest reserve, retainage, chargebacks, card settlement, and project-to-project transfer scenarios
+- **Access Control Verification:** RLS/API testing proving zero cross-scope access for tenants, investors, GCs, or removed users
+- **Report Invariant Validation:** Aggregate equals drill-down; original budget permanence; approved draw ≠ funded cash; transfers with P&L neutrality
+
+This framework establishes GroundUp AI as a trusted platform for financial data integrity, enabling confident decision-making through rigorous, transparent, and auditable validation processes that scale with enterprise needs.

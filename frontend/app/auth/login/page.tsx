@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -85,9 +86,16 @@ export default function LoginPage() {
     <>
       <div className="w-full space-y-6">
         {/* Brand Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm mb-1">
-            <Building2 className="h-6 w-6" />
+        <div className="text-center space-y-3">
+          <div className="flex justify-center mb-1">
+            <Image
+              src="/logo.png"
+              alt="GroundUp"
+              width={200}
+              height={52}
+              className="h-10 w-auto object-contain"
+              priority
+            />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             Welcome back

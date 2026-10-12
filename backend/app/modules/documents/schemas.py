@@ -15,6 +15,7 @@ class DocumentRead(BaseModel):
     ingestion_status: str
     duplicate_of_document_id: str | None = None
     uploaded_by: str
+    uploader_name: str | None = None
     uploaded_at: str
 
     model_config = {"from_attributes": True}

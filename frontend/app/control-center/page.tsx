@@ -36,119 +36,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { KeyFigure } from "@/components/ui/key-figure";
 import { StatusBadge } from "@/components/ui/status-badge";
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Area,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  Legend,
-  ReferenceLine,
-  ReferenceArea,
-} from "recharts";
-
-interface TrajectoryDataPoint {
-  month: string;
-  planned_baseline?: number;
-  actual_spend?: number | null;
-  forecast_spend?: number | null;
-  planned_progress_pct?: number;
-  actual_progress_pct?: number | null;
-  forecast_progress_pct?: number | null;
-  is_current?: boolean;
-  is_delay_period?: boolean;
-  note?: string;
-}
-
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: Array<{
-    name: string;
-    value: number;
-    color: string;
-    dataKey: string;
-    payload: TrajectoryDataPoint;
-  }>;
-  label?: string;
-}
-
-const ProgressTrajectoryTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-  if (active && payload && payload.length) {
-    const dataPoint = payload[0]?.payload;
-    return (
-      <div className="rounded-lg border border-border bg-surface p-3.5 shadow-overlay text-xs max-w-xs space-y-2">
-        <div className="flex items-center justify-between border-b border-border pb-1.5 gap-2">
-          <p className="font-bold text-text-primary">{label}</p>
-          {dataPoint?.is_current && (
-            <span className="rounded bg-primary-subtle px-1.5 py-0.5 text-[10px] font-semibold text-primary">
-              Current As-Of
-            </span>
-          )}
-          {dataPoint?.is_delay_period && (
-            <span className="rounded bg-warning-subtle px-1.5 py-0.5 text-[10px] font-semibold text-warning">
-              Delay Window (+35d)
-            </span>
-          )}
-        </div>
-
-        {dataPoint?.note && (
-          <p className="text-[11px] text-text-muted italic bg-subtle/60 rounded p-1.5">
-            {dataPoint.note}
-          </p>
-        )}
-
-        <div className="space-y-1.5 pt-0.5">
-          {dataPoint?.planned_baseline !== undefined && (
-            <div className="flex items-center justify-between gap-3">
-              <span className="flex items-center gap-1.5 text-text-secondary">
-                <span className="h-2 w-2 rounded-full bg-slate-500" />
-                Planned Target:
-              </span>
-              <span className="font-mono font-semibold text-text-primary">
-                ${dataPoint.planned_baseline.toLocaleString()} ({dataPoint.planned_progress_pct}%)
-              </span>
-            </div>
-          )}
-
-          {dataPoint?.actual_spend !== null && dataPoint?.actual_spend !== undefined && (
-            <div className="flex items-center justify-between gap-3">
-              <span className="flex items-center gap-1.5 text-text-secondary">
-                <span className="h-2 w-2 rounded-full bg-primary" />
-                Actual Spend:
-              </span>
-              <span className="font-mono font-semibold text-primary">
-                ${dataPoint.actual_spend.toLocaleString()} ({dataPoint.actual_progress_pct}%)
-              </span>
-            </div>
-          )}
-
-          {dataPoint?.forecast_spend !== null && dataPoint?.forecast_spend !== undefined && (
-            <div className="flex items-center justify-between gap-3">
-              <span className="flex items-center gap-1.5 text-text-secondary">
-                <span className="h-2 w-2 rounded-full bg-amber-600" />
-                Forecast Spend:
-              </span>
-              <span className="font-mono font-semibold text-amber-700">
-                ${dataPoint.forecast_spend.toLocaleString()} ({dataPoint.forecast_progress_pct || dataPoint.actual_progress_pct}%)
-              </span>
-            </div>
-          )}
-        </div>
-
-        {dataPoint?.is_delay_period && (
-          <div className="border-t border-border pt-1.5 text-[11px] text-danger font-medium flex items-center justify-between">
-            <span>Carry Cost Impact:</span>
-            <span className="font-mono font-bold">+$28,500</span>
-          </div>
-        )}
-      </div>
-    );
-  }
-  return null;
-};
+import { ControlCenterAnalytics } from "@/components/control-center/analytics-charts";
 
 export default function ControlCenterPage() {
   const queryClient = useQueryClient();
@@ -203,37 +91,15 @@ export default function ControlCenterPage() {
   return (
     <div className="space-y-6 pb-16">
       <div className="px-6 space-y-6 max-w-7xl mx-auto pt-4">
-        {/* Page Header */}
-        <PageHeader
-          title={
-            viewMode === "PORTFOLIO"
-              ? "Development Portfolio"
-              : project?.name || "Project Overview"
-          }
-          statusBadge={
-            viewMode === "PROJECT" && project?.lifecycle_stage
-              ? {
-                  label: project.lifecycle_stage.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()),
-                  variant:
-                    project?.status === "COMPLETED"
-                      ? "success"
-                      : project?.status === "SETUP_INCOMPLETE"
-                      ? "danger"
-                      : "neutral",
-                }
-              : undefined
-          }
-          subtitle={
-            viewMode === "PORTFOLIO"
-              ? "Portfolio summary across active assets and commitments"
-              : project?.address || ""
-          }
-        />
         {/* ========================================================================= */}
         {/* PORTFOLIO VIEW                                                           */}
         {/* ========================================================================= */}
         {viewMode === "PORTFOLIO" ? (
           <div className="space-y-8">
+            <PageHeader
+              title="Development Portfolio"
+              subtitle="Portfolio summary across active assets and commitments"
+            />
             {/* Portfolio Key Summary Band */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="rounded-lg border border-border bg-surface p-5 shadow-xs">
@@ -406,6 +272,44 @@ export default function ControlCenterPage() {
           /* PROJECT CONTROL CENTER VIEW                                              */
           /* ========================================================================= */
           <div className="space-y-6">
+            {/* ========================================================================= */}
+            {/* EXECUTIVE PROJECT HEADER                                                  */}
+            {/* ========================================================================= */}
+            <div className="rounded-xl border border-border bg-surface p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-5">
+              <div className="space-y-1.5">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h1 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight">
+                    {project?.name || "161 Woodlawn Ave"}
+                  </h1>
+                  <span className="rounded-full bg-primary-subtle text-primary border border-primary/20 px-2.5 py-0.5 text-xs font-semibold">
+                    {project?.lifecycle_stage
+                      ? project.lifecycle_stage.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
+                      : "Pre Construction"}
+                  </span>
+                  <span className="rounded-md bg-subtle text-text-muted px-2 py-0.5 text-[11px] font-mono font-medium">
+                    #{project?.id?.slice(0, 6) || "161-JC"}
+                  </span>
+                </div>
+                <p className="text-sm text-text-secondary flex flex-wrap items-center gap-x-2">
+                  <span>{project?.address || "161 Woodlawn Ave, Jersey City, NJ 07305"}</span>
+                  <span className="hidden sm:inline text-text-muted">·</span>
+                  <span className="text-text-muted">General Contractor: <strong className="text-text-secondary font-medium">Apex Build Corp</strong></span>
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 shrink-0">
+                <Link href={currentProjectId ? `/projects/${currentProjectId}/draws` : "/projects"}>
+                  <Button variant="outline" size="sm" className="gap-1.5 text-xs font-medium">
+                    Loan Draws <ExternalLink className="h-3.5 w-3.5 text-text-muted" />
+                  </Button>
+                </Link>
+                <Link href={currentProjectId ? `/projects/${currentProjectId}/budget` : "/projects"}>
+                  <Button variant="primary" size="sm" className="gap-1.5 text-xs font-semibold shadow-xs">
+                    <Plus className="h-3.5 w-3.5" /> Full Budget
+                  </Button>
+                </Link>
+              </div>
+            </div>
 
             {isSetupIncomplete && (
               <div className="rounded-lg border border-danger-subtle bg-danger-subtle/30 p-6 text-center">
@@ -427,533 +331,524 @@ export default function ControlCenterPage() {
               </div>
             )}
 
-            {/* 4 Key Figures KPI Band */}
+            {/* ========================================================================= */}
+            {/* 4 CORE METRIC CARDS                                                       */}
+            {/* ========================================================================= */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* 1. Forecast Profit */}
-              <KeyFigure
-                label="Forecast Profit"
-                value={formatMoney(kpis?.forecast_profit?.amount)}
-                basis={kpis?.forecast_profit?.basis || "Approved budget + approved change orders + carry delay estimate"}
-                variance={
-                  kpis?.forecast_profit?.variance_from_original
-                    ? {
-                        formattedAmount: formatMoney(kpis.forecast_profit.variance_from_original),
-                        percentage: kpis.forecast_profit.variance_pct,
-                        isFavorable: Number(kpis.forecast_profit.variance_from_original) >= 0,
-                        comparisonLabel: "vs original baseline",
-                      }
-                    : undefined
-                }
-                citations={kpis?.forecast_profit?.sources}
-              />
-
-              {/* 2. Cash Gap */}
-              <KeyFigure
-                label="Cash / Funding Gap"
-                value={formatMoney(kpis?.cash_gap?.amount)}
-                basis={kpis?.cash_gap?.basis || "Actual disbursed cash exceeds cleared draws & equity"}
-                variance={{
-                  formattedAmount: Number(kpis?.cash_gap?.amount || 0) > 0 ? "Active Deficit" : "Balanced",
-                  isFavorable: Number(kpis?.cash_gap?.amount || 0) <= 0,
-                  comparisonLabel: "reconciled funding",
-                }}
-                citations={kpis?.cash_gap?.sources}
-              />
-
-              {/* 3. Contingency Remaining */}
-              <KeyFigure
-                label="Contingency Remaining"
-                value={formatMoney(kpis?.contingency_left?.amount)}
-                basis={kpis?.contingency_left?.basis || "Original baseline minus allocated change orders"}
-                progress={{
-                  current: Number(kpis?.contingency_left?.amount || 0),
-                  max: Number(kpis?.contingency_left?.total_contingency || 35000000),
-                  label: "Remaining Reserve",
-                }}
-                citations={kpis?.contingency_left?.sources}
-              />
-
-              {/* 4. Forecast Completion */}
-              <KeyFigure
-                label="Forecast Completion"
-                value={formatDate(kpis?.forecast_completion?.date)}
-                basis={kpis?.forecast_completion?.basis || "Critical path milestones and supplier lead times"}
-                variance={
-                  kpis?.forecast_completion?.delay_days
-                    ? {
-                        formattedAmount: `+${kpis.forecast_completion.delay_days} days`,
-                        isFavorable: false,
-                        comparisonLabel: "schedule variance",
-                      }
-                    : undefined
-                }
-                citations={kpis?.forecast_completion?.sources}
-              />
-            </div>
-
-            {/* Integrated Finance, Time, Delay, Impact & Progress Trajectory Line Graph */}
-            {(() => {
-              const trajectoryData: TrajectoryDataPoint[] = (d?.progress_trajectory && d.progress_trajectory.length > 0)
-                ? d.progress_trajectory
-                : [
-                    { month: "May '25", planned_baseline: 80000, actual_spend: 75000, planned_progress_pct: 7, actual_progress_pct: 7, note: "Groundwork & Excavation" },
-                    { month: "Jun '25", planned_baseline: 180000, actual_spend: 170000, planned_progress_pct: 17, actual_progress_pct: 16, note: "Foundation & Footings poured" },
-                    { month: "Jul '25", planned_baseline: 310000, actual_spend: 260000, planned_progress_pct: 29, actual_progress_pct: 24, note: "Steel procurement order placed" },
-                    { month: "Aug '25", planned_baseline: 460000, actual_spend: 340000, planned_progress_pct: 43, actual_progress_pct: 32, note: "Structural steel delivery slipped" },
-                    { month: "Sep '25", planned_baseline: 620000, actual_spend: 420000, planned_progress_pct: 58, actual_progress_pct: 39, note: "Framing delay impacts MEP rough-in" },
-                    { month: "Oct '25", planned_baseline: 780000, actual_spend: 420000, forecast_spend: 420000, planned_progress_pct: 73, actual_progress_pct: 42, is_current: true, note: "Current As-Of (16% Execution Lag)" },
-                    { month: "Nov '25", planned_baseline: 1070000, forecast_spend: 780000, planned_progress_pct: 100, forecast_progress_pct: 71, note: "Original baseline deadline (Nov 10)" },
-                    { month: "Dec '25", forecast_spend: 1020000, forecast_progress_pct: 93, is_delay_period: true, note: "Schedule Slip Window (+35 days)" },
-                    { month: "Jan '26", forecast_spend: 1098500, forecast_progress_pct: 100, is_delay_period: true, note: "Final Closeout (+$28.5k carry cost impact)" },
-                  ];
-
-              return (
-                <div className="rounded-xl border border-slate-200/90 bg-white p-6 shadow-2xs">
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-5">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="h-5 w-5 text-primary" />
-                        <h2 className="text-base font-semibold text-slate-900">
-                          Capital & Schedule Trajectory
-                        </h2>
-                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                          EVM
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        Correlating baseline capital curve against actual verified spend and critical path milestones
-                      </p>
-                    </div>
-
-                    {/* Executive Metric Pills */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <div className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50/80 px-2.5 py-1 text-xs font-semibold text-rose-700">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span>+35d Delay Window</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50/80 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                        <DollarSign className="h-3.5 w-3.5" />
-                        <span>+$28.5k Carry Impact</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                        <SlidersHorizontal className="h-3.5 w-3.5 text-primary" />
-                        <span>42% Progress (-16% Lag)</span>
-                      </div>
-                    </div>
+              {/* Card 1: TOTAL BUDGET */}
+              <div className="rounded-xl border border-border bg-surface p-5 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                      Total Budget
+                    </span>
+                    <SourcesButton
+                      figureLabel="Total Budget"
+                      amountOrValue={formatMoney((kpis as any)?.approved_budget?.amount || 147112000, { showCents: false })}
+                      basis={(kpis as any)?.approved_budget?.basis || "Baseline contract + approved change orders"}
+                      citations={(kpis as any)?.approved_budget?.sources || kpis?.forecast_profit?.sources}
+                    />
                   </div>
-
-                  {/* Clean Legend Bar */}
-                  <div className="flex flex-wrap items-center gap-5 text-xs font-medium pb-4 border-b border-slate-100 mb-4 text-slate-600">
-                    <span className="flex items-center gap-1.5">
-                      <span className="h-2 w-3 rounded-xs bg-slate-300" /> Planned Baseline ($1.07M)
+                  <div className="mt-2.5 flex items-baseline justify-between gap-2">
+                    <span className="text-2xl font-bold font-mono tracking-tight text-text-primary">
+                      {formatMoney((kpis as any)?.approved_budget?.amount || 147112000, { showCents: false })}
                     </span>
-                    <span className="flex items-center gap-1.5 font-semibold text-primary">
-                      <span className="h-2.5 w-3 rounded-xs bg-primary" /> Actual Spend ($420k)
+                    <span className="text-xs font-medium text-text-secondary font-mono">
+                      +$16.1k vs start
                     </span>
-                    <span className="flex items-center gap-1.5 text-amber-800">
-                      <span className="h-2 w-3 border-b-2 border-dashed border-amber-500" /> Forecast with Delay ($1.098M)
-                    </span>
-                    <span className="flex items-center gap-1.5 text-amber-700">
-                      <span className="h-2.5 w-3 rounded-xs bg-amber-200/80 border border-amber-300" /> Delay Window Zone
-                    </span>
-                  </div>
-
-                  {/* Line Chart Canvas */}
-                  <div className="h-80 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart
-                        data={trajectoryData}
-                        margin={{ top: 15, right: 30, left: 15, bottom: 5 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                        
-                        <XAxis
-                          dataKey="month"
-                          stroke="#64748b"
-                          fontSize={12}
-                          tickLine={false}
-                          axisLine={{ stroke: "#e2e8f0" }}
-                        />
-
-                        {/* Left Y-Axis: Capital & Spend in Dollars */}
-                        <YAxis
-                          yAxisId="left"
-                          stroke="#64748b"
-                          fontSize={12}
-                          tickLine={false}
-                          axisLine={false}
-                          tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
-                          domain={[0, 1200000]}
-                        />
-
-                        {/* Right Y-Axis: Earned Progress % */}
-                        <YAxis
-                          yAxisId="right"
-                          orientation="right"
-                          stroke="#94a3b8"
-                          fontSize={12}
-                          tickLine={false}
-                          axisLine={false}
-                          tickFormatter={(val) => `${val}%`}
-                          domain={[0, 100]}
-                        />
-
-                        <Tooltip content={<ProgressTrajectoryTooltip />} />
-
-                        {/* Visual Highlight: Delay Window Zone (+35 Days) */}
-                        <ReferenceArea
-                          yAxisId="left"
-                          x1="Nov '25"
-                          x2="Jan '26"
-                          fill="#fef3c7"
-                          fillOpacity={0.45}
-                          stroke="#f59e0b"
-                          strokeDasharray="3 3"
-                        />
-
-                        {/* As-Of Current Date Marker */}
-                        <ReferenceLine
-                          yAxisId="left"
-                          x="Oct '25"
-                          stroke="#0f4c81"
-                          strokeWidth={1.5}
-                          strokeDasharray="4 4"
-                          label={{
-                            value: "Today (Oct '25)",
-                            position: "top",
-                            fill: "#0f4c81",
-                            fontSize: 11,
-                            fontWeight: 600,
-                          }}
-                        />
-
-                        {/* 1. Target Baseline Progress Curve (Planned Budget) */}
-                        <Line
-                          yAxisId="left"
-                          type="monotone"
-                          dataKey="planned_baseline"
-                          name="Planned Target"
-                          stroke="#94a3b8"
-                          strokeWidth={2}
-                          dot={{ r: 3, fill: "#94a3b8" }}
-                          activeDot={{ r: 5 }}
-                        />
-
-                        {/* 2. Actual Verified Spend & Earned Progress */}
-                        <Area
-                          yAxisId="left"
-                          type="monotone"
-                          dataKey="actual_spend"
-                          name="Actual Spend"
-                          fill="rgba(15, 76, 129, 0.12)"
-                          stroke="#0f4c81"
-                          strokeWidth={2.5}
-                          dot={{ r: 4, fill: "#0f4c81" }}
-                          activeDot={{ r: 6 }}
-                        />
-
-                        {/* 3. Forecast Trajectory with Critical Path Delay Impact */}
-                        <Line
-                          yAxisId="left"
-                          type="monotone"
-                          dataKey="forecast_spend"
-                          name="Forecast Trajectory"
-                          stroke="#d97706"
-                          strokeWidth={2.5}
-                          strokeDasharray="5 5"
-                          dot={{ r: 4, fill: "#d97706" }}
-                          activeDot={{ r: 6 }}
-                        />
-                      </ComposedChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  {/* 5 Core Pillars Analytical Summary Ribbon */}
-                  <div className="mt-5 pt-4 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
-                    <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3">
-                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
-                        Capital Target
-                      </span>
-                      <div className="mt-1 font-mono font-bold text-slate-900 text-sm">
-                        $1,070,000
-                      </div>
-                      <div className="text-[11px] text-rose-600 font-medium mt-0.5">
-                        Forecast: $1,098,500
-                      </div>
-                    </div>
-
-                    <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3">
-                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
-                        Target Timeline
-                      </span>
-                      <div className="mt-1 font-semibold text-slate-900 text-sm">
-                        Nov 10 → Dec 15
-                      </div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">
-                        7 Months Total
-                      </div>
-                    </div>
-
-                    <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3">
-                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
-                        Critical Slip
-                      </span>
-                      <div className="mt-1 font-bold text-rose-600 text-sm">
-                        +35 Days Delay
-                      </div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">
-                        Structural Steel
-                      </div>
-                    </div>
-
-                    <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3">
-                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
-                        Carry Cost Burn
-                      </span>
-                      <div className="mt-1 font-bold text-amber-700 font-mono text-sm">
-                        +$28,500
-                      </div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">
-                        Interest & Demurrage
-                      </div>
-                    </div>
-
-                    <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 col-span-2 sm:col-span-1">
-                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
-                        Schedule Variance
-                      </span>
-                      <div className="mt-1 font-bold text-rose-600 text-sm">
-                        -16% Progress Lag
-                      </div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">
-                        42% Act. vs 58% Target
-                      </div>
-                    </div>
                   </div>
                 </div>
-              );
-            })()}
 
-            {/* Two Columns: Forecast Table & Draw Strip / Exceptions */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column (2 spans): Original vs Current Forecast Table */}
-              <div className="lg:col-span-2 rounded-lg border border-border bg-surface p-5 shadow-xs">
-                <div className="flex items-center justify-between border-b border-border pb-3">
-                  <div>
-                    <h2 className="text-section font-semibold text-text-primary">
-                      Original vs Current Forecast
-                    </h2>
-                    <p className="text-caption text-text-muted">
-                      CSI Category baselines and variance explanations
-                    </p>
+                <div className="mt-4 pt-3 border-t border-border flex items-center justify-between gap-3">
+                  <div className="text-xs text-text-muted">
+                    <span className="block font-medium text-text-secondary">Contracts Signed</span>
+                    <span className="text-[11px]">100% committed</span>
                   </div>
-                  <Link href="/budget">
-                    <Button variant="tertiary" size="sm">
-                      Open Full Budget <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                    </Button>
-                  </Link>
-                </div>
-
-                <div className="mt-4 overflow-x-auto">
-                  <table className="w-full text-left text-body">
-                    <thead>
-                      <tr className="border-b border-border bg-subtle/50 text-caption font-semibold text-text-secondary">
-                        <th className="py-2.5 px-3">Category</th>
-                        <th className="py-2.5 px-3 text-right">Original</th>
-                        <th className="py-2.5 px-3 text-right">Approved</th>
-                        <th className="py-2.5 px-3 text-right">Actual Spend</th>
-                        <th className="py-2.5 px-3 text-right">Variance</th>
-                        <th className="py-2.5 px-3 text-center">Sources</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {d?.forecast_table?.map((row, idx) => (
-                        <tr key={idx} className="hover:bg-subtle/30 transition-colors">
-                          <td className="py-3 px-3 font-medium text-text-primary">
-                            <div>{row.category}</div>
-                            <div className="text-caption text-text-muted font-normal mt-0.5">
-                              {row.variance_reason}
-                            </div>
-                          </td>
-                          <td className="py-3 px-3 text-right tabular-nums font-mono text-text-secondary">
-                            {formatMoney(row.original_budget)}
-                          </td>
-                          <td className="py-3 px-3 text-right tabular-nums font-mono font-medium text-text-primary">
-                            {formatMoney(row.current_approved)}
-                          </td>
-                          <td className="py-3 px-3 text-right tabular-nums font-mono text-text-secondary">
-                            {formatMoney(row.actual_spend)}
-                          </td>
-                          <td className={`py-3 px-3 text-right tabular-nums font-mono font-semibold ${
-                            Number(row.variance) < 0
-                              ? "text-danger"
-                              : Number(row.variance) > 0
-                              ? "text-success"
-                              : "text-text-muted"
-                          }`}>
-                            {formatMoney(row.variance)}
-                          </td>
-                          <td className="py-3 px-3 text-center">
-                            <SourcesButton
-                              figureLabel={row.category}
-                              amountOrValue={formatMoney(row.current_approved)}
-                              basis={row.variance_reason}
-                              citations={row.sources}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <div className="relative h-11 w-11 flex items-center justify-center shrink-0">
+                    <svg className="h-11 w-11 -rotate-90 transform" viewBox="0 0 36 36">
+                      <circle cx="18" cy="18" r="14" fill="transparent" stroke="#e2e8f0" strokeWidth="3" />
+                      <circle
+                        cx="18"
+                        cy="18"
+                        r="14"
+                        fill="transparent"
+                        stroke="#2563eb"
+                        strokeWidth="3"
+                        strokeDasharray="88"
+                        strokeDashoffset="0"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="absolute text-[10px] font-bold text-text-primary">100%</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Right Column (1 span): Draw Workspace Status, Schedule Risk & Open Exceptions */}
-              <div className="space-y-6">
-                {/* Draw Truth Strip */}
-                <div className="rounded-lg border border-border bg-surface p-5 shadow-xs">
-                  <div className="flex items-center justify-between border-b border-border pb-3">
-                    <h3 className="text-section font-semibold text-text-primary flex items-center gap-1.5">
-                      <Landmark className="h-4 w-4 text-primary" />
-                      Draw Status Summary
-                    </h3>
-                    <span className="rounded bg-primary-subtle px-2 py-0.5 text-caption font-semibold text-primary">
-                      Draw #{d?.draw_summary?.latest_draw_number}
+              {/* Card 2: MONEY SPENT */}
+              <div className="rounded-xl border border-border bg-surface p-5 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                      Money Spent
+                    </span>
+                    <span className="rounded bg-primary-subtle px-2 py-0.5 text-[11px] font-semibold text-primary">
+                      63.6% Spent
                     </span>
                   </div>
-
-                  <div className="mt-4 space-y-3">
-                    <div className="flex items-center justify-between text-body">
-                      <span className="text-text-secondary text-sm">Requested Amount</span>
-                      <span className="font-mono font-medium text-text-primary tabular-nums">
-                        {formatMoney(d?.draw_summary?.requested)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-body">
-                      <span className="text-text-secondary text-sm">Inspector Recommended</span>
-                      <span className="font-mono font-medium text-text-primary tabular-nums">
-                        {formatMoney(d?.draw_summary?.recommended)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-body">
-                      <span className="text-text-secondary text-sm">Lender Approved</span>
-                      <span className="font-mono font-medium text-text-primary tabular-nums">
-                        {formatMoney(d?.draw_summary?.approved)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-body border-t border-border pt-2">
-                      <span className="font-semibold text-success text-sm">Cleared Cash Funded</span>
-                      <span className="font-mono font-bold text-success tabular-nums">
-                        {formatMoney(d?.draw_summary?.cleared_funded)}
-                      </span>
-                    </div>
-
-                    {Number(d?.draw_summary?.shortfall || 0) > 0 && (
-                      <div className="rounded-md border border-danger/30 bg-danger-subtle/50 p-2.5 text-caption font-medium text-danger flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4 shrink-0" />
-                        <span>Lender Shortfall: {formatMoney(d?.draw_summary?.shortfall)} pending mechanical condition.</span>
-                      </div>
-                    )}
-
-                    {Number(d?.draw_summary?.unallocated_deposit || 0) > 0 && (
-                      <div className="rounded-md border border-info/30 bg-info-subtle/50 p-2.5 text-caption font-medium text-info flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4 shrink-0" />
-                        <span>Unallocated Wire: {formatMoney(d?.draw_summary?.unallocated_deposit)} cleared in account.</span>
-                      </div>
-                    )}
-
-                    <div className="pt-2">
-                      <Link href="/draws">
-                        <Button variant="secondary" size="sm" className="w-full justify-center text-xs">
-                          Open Draw Workspace <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                        </Button>
-                      </Link>
-                    </div>
+                  <div className="mt-2.5 flex items-baseline justify-between gap-2">
+                    <span className="text-2xl font-bold font-mono tracking-tight text-text-primary">
+                      {formatMoney((kpis as any)?.actual_spend?.amount || 93660000, { showCents: false })}
+                    </span>
+                    <span className="text-xs text-text-muted">
+                      Hard $702.5k · Soft $234.1k
+                    </span>
                   </div>
                 </div>
 
-                {/* Schedule Risk Card */}
-                <div className="rounded-lg border border-border bg-surface p-5 shadow-xs">
-                  <div className="flex items-center justify-between border-b border-border pb-3">
-                    <h3 className="text-section font-semibold text-text-primary flex items-center gap-1.5">
-                      <Clock className="h-4 w-4 text-warning" />
-                      Critical Path Risk
-                    </h3>
+                <div className="mt-4 pt-3 border-t border-border space-y-1.5">
+                  <div className="flex justify-between text-[11px] text-text-muted font-mono">
+                    <span>$0</span>
+                    <span className="font-medium text-text-secondary">Budget: $1.47M</span>
                   </div>
+                  <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden flex">
+                    <div className="h-full bg-blue-600 rounded-l-full" style={{ width: "47.7%" }} />
+                    <div className="h-full bg-teal-500 rounded-r-full" style={{ width: "15.9%" }} />
+                  </div>
+                </div>
+              </div>
 
-                  <div className="mt-3 space-y-2 text-sm">
+              {/* Card 3: AVAILABLE CASH */}
+              <div className="rounded-xl border border-border bg-surface p-5 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                      Available Cash
+                    </span>
+                    <span className="rounded bg-teal-50 text-teal-700 px-2 py-0.5 text-[11px] font-semibold">
+                      Funded
+                    </span>
+                  </div>
+                  <div className="mt-2.5 flex items-baseline justify-between gap-2">
+                    <span className="text-2xl font-bold font-mono tracking-tight text-text-primary">
+                      {formatMoney((kpis as any)?.cash_funded?.amount || 108600000, { showCents: false })}
+                    </span>
+                    <span className="text-xs text-text-muted">
+                      In Bank & Escrow
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-border flex items-center justify-between gap-3">
+                  <div className="text-xs text-text-muted">
+                    <span className="block font-medium text-text-secondary">Draws Received</span>
+                    <span className="text-[11px]">Paid Draws #1 to #3</span>
+                  </div>
+                  <div className="relative h-11 w-11 flex items-center justify-center shrink-0">
+                    <svg className="h-11 w-11 -rotate-90 transform" viewBox="0 0 36 36">
+                      <circle cx="18" cy="18" r="14" fill="transparent" stroke="#e2e8f0" strokeWidth="3" />
+                      <circle
+                        cx="18"
+                        cy="18"
+                        r="14"
+                        fill="transparent"
+                        stroke="#0d9488"
+                        strokeWidth="3"
+                        strokeDasharray="88"
+                        strokeDashoffset="23"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="absolute text-[10px] font-bold text-text-primary">73.8%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 4: EXPECTED FINISH */}
+              <div className="rounded-xl border border-border bg-surface p-5 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                      Expected Finish
+                    </span>
+                    <span className="rounded bg-amber-50 text-amber-700 px-2 py-0.5 text-[11px] font-semibold flex items-center gap-1">
+                      <Clock className="h-3 w-3" /> 35 Days Late
+                    </span>
+                  </div>
+                  <div className="mt-2.5 flex items-baseline justify-between gap-2">
+                    <span className="text-2xl font-bold font-mono tracking-tight text-text-primary">
+                      {formatDate(kpis?.forecast_completion?.date || "2025-12-15")}
+                    </span>
+                    <span className="text-xs font-semibold text-danger">
+                      +$28.5k Delay Cost
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-border space-y-1.5">
+                  <div className="flex justify-between text-[11px] text-text-muted">
+                    <span>Planned: Nov 10</span>
+                    <span className="font-medium text-amber-700">Expected: Dec 15</span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden relative">
+                    <div className="h-full bg-amber-500 rounded-full" style={{ width: "82%" }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ========================================================================= */}
+            {/* SPEND & TIMELINE CHART                                                   */}
+            {/* ========================================================================= */}
+            <ControlCenterAnalytics
+              projectName={project?.name ? `${project.name} · ${project.project_entity || "Development"}` : "161 Woodlawn Ave · Pre-Construction"}
+              asOfDate={formatAsOf(meta?.as_of) || "Actuals through Oct 26"}
+            />
+
+            {/* ========================================================================= */}
+            {/* QUICK PROJECT STATS                                                       */}
+            {/* ========================================================================= */}
+            <div className="rounded-xl border border-border bg-surface p-4 shadow-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
+                <div className="sm:px-3 pt-2 sm:pt-0">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted block">
+                    Initial Budget
+                  </span>
+                  <div className="mt-1 text-base font-bold text-text-primary font-mono tabular-nums">
+                    $1,070,000
+                  </div>
+                  <span className="text-[11px] text-text-muted">Expected: $1,471,120</span>
+                </div>
+
+                <div className="sm:px-3 pt-2 sm:pt-0">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted block">
+                    Timeline
+                  </span>
+                  <div className="mt-1 text-base font-bold text-text-primary font-mono tabular-nums">
+                    Nov 10 → Dec 15
+                  </div>
+                  <span className="text-[11px] text-text-muted">7 Months Total</span>
+                </div>
+
+                <div className="sm:px-3 pt-2 sm:pt-0">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted block">
+                    Schedule Delay
+                  </span>
+                  <div className="mt-1 text-base font-bold text-amber-600 font-mono tabular-nums">
+                    +35 Days Delay
+                  </div>
+                  <span className="text-[11px] text-text-muted">Structural steel delivery</span>
+                </div>
+
+                <div className="sm:px-3 pt-2 sm:pt-0">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted block">
+                    Extra Delay Cost
+                  </span>
+                  <div className="mt-1 text-base font-bold text-danger font-mono tabular-nums">
+                    +$28,500
+                  </div>
+                  <span className="text-[11px] text-text-muted">Loan interest & site fees</span>
+                </div>
+
+                <div className="sm:px-3 pt-2 sm:pt-0">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted block">
+                    Progress vs Plan
+                  </span>
+                  <div className="mt-1 text-base font-bold text-danger font-mono tabular-nums">
+                    -16% Behind Plan
+                  </div>
+                  <span className="text-[11px] text-text-muted">42% done vs 58% planned</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ========================================================================= */}
+            {/* TWO COLUMNS: BUDGET TABLE & CATEGORY DONUT / DRAWS                        */}
+            {/* ========================================================================= */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column (2 spans): Budget vs Actuals Table */}
+              <div className="lg:col-span-2 rounded-xl border border-border bg-surface p-5 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between border-b border-border pb-3">
                     <div>
-                      <span className="text-caption text-text-muted block">At-Risk Milestone</span>
-                      <span className="font-semibold text-text-primary">
-                        {d?.schedule_risk?.at_risk_milestone}
-                      </span>
+                      <h2 className="text-base font-bold text-text-primary">
+                        Budget vs. Actuals
+                      </h2>
+                      <p className="text-xs text-text-muted mt-0.5">
+                        Planned budget compared with money spent and remaining balance
+                      </p>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-2 pt-1">
-                      <div>
-                        <span className="text-caption text-text-muted block">Schedule Slip</span>
-                        <span className="font-bold text-danger">
-                          +{d?.schedule_risk?.delay_days} days
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-caption text-text-muted block">Carry Impact</span>
-                        <span className="font-semibold text-text-primary">
-                          {d?.schedule_risk?.carry_cost_impact}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="pt-2">
-                      <Link href="/timeline">
-                        <Button variant="secondary" size="sm" className="w-full justify-center text-xs">
-                          View Milestone Schedule <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Top Exceptions Card */}
-                <div className="rounded-lg border border-border bg-surface p-5 shadow-xs">
-                  <div className="flex items-center justify-between border-b border-border pb-3">
-                    <h3 className="text-section font-semibold text-text-primary">
-                      Top Exceptions ({d?.open_exceptions?.length || 0})
-                    </h3>
-                    <Link href="/reconciliation" className="text-caption text-primary hover:underline font-semibold">
-                      View all
+                    <Link href={currentProjectId ? `/projects/${currentProjectId}/budget` : "/projects"}>
+                      <Button variant="ghost" size="sm" className="text-xs font-semibold text-primary">
+                        View All <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                      </Button>
                     </Link>
                   </div>
 
-                  <div className="mt-3 divide-y divide-border-subtle">
-                    {d?.open_exceptions?.map((exc) => (
-                      <div key={exc.id} className="py-2.5 first:pt-0 last:pb-0">
-                        <div className="flex items-start gap-2">
-                          <AlertCircle
-                            className={`mt-0.5 h-4 w-4 flex-shrink-0 ${
-                              exc.severity === "danger"
-                                ? "text-danger"
-                                : exc.severity === "warning"
-                                ? "text-warning"
-                                : "text-info"
-                            }`}
-                          />
-                          <div>
-                            <p className="text-caption font-semibold text-text-primary">
-                              {exc.title}
-                            </p>
-                            <div className="mt-1 flex items-center gap-2 text-[11px] text-text-muted">
-                              <span className="rounded bg-subtle px-1.5 py-0.2 text-[10px] font-medium text-text-secondary">
-                                {exc.category}
-                              </span>
-                              <span>Owner: {exc.owner}</span>
-                              <span>•</span>
-                              <span>{exc.age_days}d open</span>
-                            </div>
-                          </div>
-                        </div>
+                  <div className="mt-3 overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+                          <th className="py-2.5 px-3">Category</th>
+                          <th className="py-2.5 px-3 text-right">Original</th>
+                          <th className="py-2.5 px-3 text-right">Approved</th>
+                          <th className="py-2.5 px-3 text-right">Spent</th>
+                          <th className="py-2.5 px-3 text-right">Difference</th>
+                          <th className="py-2.5 px-3 text-center min-w-[100px]">Progress</th>
+                          <th className="py-2.5 px-2 text-center">Docs</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border text-xs">
+                        {(d?.forecast_table || [
+                          {
+                            category: "Direct Construction / Hard Costs",
+                            variance_reason: "Structural steel and foundation concrete adjustment",
+                            original_budget: "950000",
+                            current_approved: "1045000",
+                            actual_spend: "702450",
+                            forecast_final: "1045000",
+                            variance: "-95000",
+                            sources: []
+                          },
+                          {
+                            category: "Soft Costs & Professional Fees",
+                            variance_reason: "Architectural revision & expediter permits",
+                            original_budget: "280000",
+                            current_approved: "295000",
+                            actual_spend: "234150",
+                            forecast_final: "295000",
+                            variance: "-15000",
+                            sources: []
+                          },
+                          {
+                            category: "Buffer Reserve",
+                            variance_reason: "Buffer reserve absorbed into hard cost structural scope",
+                            original_budget: "50000",
+                            current_approved: "35000",
+                            actual_spend: "0",
+                            forecast_final: "35000",
+                            variance: "15000",
+                            sources: []
+                          },
+                          {
+                            category: "Total Project Capital",
+                            variance_reason: "Cumulative capital portfolio status",
+                            original_budget: "1280000",
+                            current_approved: "1375000",
+                            actual_spend: "936600",
+                            forecast_final: "1375000",
+                            variance: "-95000",
+                            sources: []
+                          }
+                        ]).map((row, idx) => {
+                          const isTotal = row.category.toLowerCase().includes("total");
+                          const approvedNum = Number(row.current_approved) || 0;
+                          const actualNum = Number(row.actual_spend) || 0;
+                          const spendPct = approvedNum > 0
+                            ? Math.min(100, Math.round((actualNum / approvedNum) * 100))
+                            : 0;
+
+                          return (
+                            <tr
+                              key={idx}
+                              className={`transition-colors ${
+                                isTotal ? "font-bold bg-subtle/40" : "hover:bg-subtle/30"
+                              }`}
+                            >
+                              <td className="py-3 px-3 text-text-primary">
+                                <div className={isTotal ? "text-sm font-bold" : "font-medium"}>
+                                  {row.category}
+                                </div>
+                                {!isTotal && row.variance_reason && (
+                                  <div className="text-[11px] text-text-muted font-normal mt-0.5 line-clamp-1">
+                                    {row.variance_reason}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="py-3 px-3 text-right tabular-nums font-mono text-text-muted">
+                                {formatMoney(Number(row.original_budget) * 100, { showCents: false })}
+                              </td>
+                              <td className="py-3 px-3 text-right tabular-nums font-mono font-medium text-text-primary">
+                                {formatMoney(Number(row.current_approved) * 100, { showCents: false })}
+                              </td>
+                              <td className="py-3 px-3 text-right tabular-nums font-mono text-text-secondary">
+                                {formatMoney(Number(row.actual_spend) * 100, { showCents: false })}
+                              </td>
+                              <td
+                                className={`py-3 px-3 text-right tabular-nums font-mono font-semibold ${
+                                  Number(row.variance) < 0
+                                    ? "text-danger"
+                                    : Number(row.variance) > 0
+                                    ? "text-success"
+                                    : "text-text-muted"
+                                }`}
+                              >
+                                {Number(row.variance) > 0
+                                  ? `+${formatMoney(Number(row.variance) * 100, { showCents: false })}`
+                                  : formatMoney(Number(row.variance) * 100, { showCents: false })}
+                              </td>
+                              <td className="py-3 px-3">
+                                <div className="space-y-1">
+                                  <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                                    <div
+                                      className={`h-full rounded-full ${
+                                        spendPct > 90 ? "bg-amber-500" : "bg-primary"
+                                      }`}
+                                      style={{ width: `${spendPct}%` }}
+                                    />
+                                  </div>
+                                  <div className="text-[10px] text-right font-mono text-text-muted">
+                                    {spendPct}%
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-3 px-2 text-center">
+                                <SourcesButton
+                                  figureLabel={row.category}
+                                  amountOrValue={formatMoney(row.current_approved)}
+                                  basis={row.variance_reason}
+                                  citations={row.sources}
+                                />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column (1 span): Category Distribution Donut Chart & Draw Summary */}
+              <div className="space-y-6">
+                {/* Category Distribution Donut Card */}
+                <div className="rounded-xl border border-border bg-surface p-5 shadow-xs">
+                  <div className="flex items-center justify-between border-b border-border pb-3">
+                    <h3 className="text-sm font-bold text-text-primary">
+                      Where the Money Goes
+                    </h3>
+                    <span className="text-[11px] font-medium text-text-muted">
+                      Total: $936.6k
+                    </span>
+                  </div>
+
+                  <div className="mt-4 flex flex-col items-center">
+                    {/* SVG Donut Visual */}
+                    <div className="relative h-32 w-32 flex items-center justify-center my-2">
+                      <svg className="h-32 w-32 -rotate-90 transform" viewBox="0 0 36 36">
+                        {/* Background track */}
+                        <circle cx="18" cy="18" r="14" fill="transparent" stroke="#f1f5f9" strokeWidth="4.5" />
+                        {/* Segment 1: Hard Costs ~ 75% */}
+                        <circle
+                          cx="18"
+                          cy="18"
+                          r="14"
+                          fill="transparent"
+                          stroke="#2563eb"
+                          strokeWidth="4.5"
+                          strokeDasharray="66 88"
+                          strokeDashoffset="0"
+                        />
+                        {/* Segment 2: Soft Costs ~ 22% */}
+                        <circle
+                          cx="18"
+                          cy="18"
+                          r="14"
+                          fill="transparent"
+                          stroke="#0d9488"
+                          strokeWidth="4.5"
+                          strokeDasharray="19.3 88"
+                          strokeDashoffset="-66"
+                        />
+                        {/* Segment 3: Contingency ~ 3% */}
+                        <circle
+                          cx="18"
+                          cy="18"
+                          r="14"
+                          fill="transparent"
+                          stroke="#d97706"
+                          strokeWidth="4.5"
+                          strokeDasharray="2.7 88"
+                          strokeDashoffset="-85.3"
+                        />
+                      </svg>
+                      <div className="absolute text-center">
+                        <span className="text-xs font-bold text-text-primary font-mono block">$936.6k</span>
+                        <span className="text-[10px] text-text-muted block">Spent</span>
                       </div>
-                    ))}
+                    </div>
+
+                    {/* Legend Breakdown */}
+                    <div className="w-full mt-3 space-y-2 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-1.5 text-text-secondary">
+                          <span className="h-2 w-2 rounded-full bg-blue-600" />
+                          Construction Work
+                        </span>
+                        <span className="font-mono font-semibold text-text-primary">$702,450 (75%)</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-1.5 text-text-secondary">
+                          <span className="h-2 w-2 rounded-full bg-teal-600" />
+                          Fees & Permits
+                        </span>
+                        <span className="font-mono font-semibold text-text-primary">$234,150 (22%)</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-1.5 text-text-secondary">
+                          <span className="h-2 w-2 rounded-full bg-amber-600" />
+                          Emergency Reserve
+                        </span>
+                        <span className="font-mono font-semibold text-text-primary">$35,000 (3%)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Draw Status Summary */}
+                <div className="rounded-xl border border-border bg-surface p-5 shadow-xs">
+                  <div className="flex items-center justify-between border-b border-border pb-3">
+                    <h3 className="text-sm font-bold text-text-primary flex items-center gap-1.5">
+                      <Landmark className="h-4 w-4 text-primary" />
+                      Loan Draw Status
+                    </h3>
+                    <span className="rounded bg-primary-subtle px-2 py-0.5 text-caption font-semibold text-primary">
+                      Draw #{d?.draw_summary?.latest_draw_number || 1}
+                    </span>
+                  </div>
+
+                  <div className="mt-3.5 space-y-2.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-text-secondary">Requested by Builder</span>
+                      <span className="font-mono font-medium text-text-primary tabular-nums">
+                        {formatMoney(Number(d?.draw_summary?.requested || 350000) * 100, { showCents: false })}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-text-secondary">Inspector Approved</span>
+                      <span className="font-mono font-medium text-text-primary tabular-nums">
+                        {formatMoney(Number(d?.draw_summary?.recommended || 342500) * 100, { showCents: false })}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-text-secondary">Bank Approved</span>
+                      <span className="font-mono font-medium text-text-primary tabular-nums">
+                        {formatMoney(Number(d?.draw_summary?.approved || 335000) * 100, { showCents: false })}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-border pt-2">
+                      <span className="font-semibold text-success">Cash Paid Out</span>
+                      <span className="font-mono font-bold text-success tabular-nums">
+                        {formatMoney(Number(d?.draw_summary?.cleared_funded || 335000) * 100, { showCents: false })}
+                      </span>
+                    </div>
+
+                    <div className="pt-2">
+                      <Link href={currentProjectId ? `/projects/${currentProjectId}/draws` : "/projects"}>
+                        <Button variant="outline" size="sm" className="w-full justify-center text-xs font-semibold">
+                          View Loan Draws <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -90,7 +90,12 @@ export default function ReconciliationPage() {
   });
 
   const projects = projectsData?.data?.projects || [];
-  const currentProjectId = projectsData?.data?.current_project_id || "";
+  const routeProjectId = typeof window !== "undefined"
+    ? (window.location.pathname.match(/^\/projects\/([^\/]+)/)?.[1] || "")
+    : "";
+  const currentProjectId = (routeProjectId && routeProjectId !== "new")
+    ? routeProjectId
+    : projectsData?.data?.current_project_id || "";
   const currentProject = projects.find((p) => p.id === currentProjectId);
 
   const { data: recQueueData, isLoading: isQueueLoading } = useQuery({
@@ -219,37 +224,36 @@ export default function ReconciliationPage() {
 
   return (
     <div className="space-y-6 pb-16">
-      {/* Page Header */}
-      <PageHeader
-        title="Reconciliation Workbench"
-        statusBadge={{
-          label: `${pendingMatches.length} Pending AI Matches`,
-          variant: pendingMatches.length > 0 ? "warning" : "success",
-          icon: <Scale className="h-3.5 w-3.5" />,
-        }}
-        description="Verify bank statement lines against Schedule of Values (SOV) budget codes, enforce balanced allocations, and govern statement sign-offs."
-        primaryAction={
-          <div className="flex items-center gap-2.5">
-            <Button
-              variant="outline"
-              onClick={() => setIsTransferModalOpen(true)}
-              className="bg-surface"
-            >
-              <ArrowRightLeft className="h-4 w-4 mr-1.5 text-text-secondary" />
-              New Transfer
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => setIsImportOpen(true)}
-            >
-              <UploadCloud className="h-4 w-4 mr-1.5" />
-              Import Statement (CSV / XLSX)
-            </Button>
-          </div>
-        }
-      />
-
-      <div className="px-6 max-w-7xl mx-auto space-y-6">
+      <div className="px-6 max-w-7xl mx-auto space-y-6 pt-4">
+        {/* Page Header */}
+        <PageHeader
+          title="Reconciliation Workbench"
+          statusBadge={{
+            label: `${pendingMatches.length} Matches Pending`,
+            variant: pendingMatches.length > 0 ? "warning" : "success",
+            icon: <Scale className="h-3.5 w-3.5" />,
+          }}
+          primaryAction={
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsTransferModalOpen(true)}
+                className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold"
+              >
+                <ArrowRightLeft className="h-3.5 w-3.5 mr-1.5 text-slate-500" />
+                Transfer
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => setIsImportOpen(true)}
+                className="text-xs font-semibold shadow-xs"
+              >
+                <UploadCloud className="h-3.5 w-3.5 mr-1.5" />
+                Import Statement
+              </Button>
+            </div>
+          }
+        />
         {/* KPI Summary Strip */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="rounded-lg border border-border bg-surface p-4 shadow-xs relative">
@@ -387,20 +391,22 @@ export default function ReconciliationPage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="border-b border-border">
-          <nav className="flex space-x-6">
+        <div className="border-b border-slate-200/80 pb-2">
+          <nav className="flex items-center gap-1 overflow-x-auto py-1">
             <button
               onClick={() => setActiveTab("queue")}
-              className={`flex items-center gap-2 py-3 border-b-2 text-body font-medium transition-colors ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                 activeTab === "queue"
-                  ? "border-primary text-primary font-semibold"
-                  : "border-transparent text-text-secondary hover:text-text-primary"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
-              <Sparkles className="h-4 w-4" />
-              Reconciliation Queue
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Queue</span>
               {pendingMatches.length > 0 && (
-                <span className="ml-1.5 rounded-full bg-amber-100 px-2 py-0.5 text-caption font-semibold text-amber-800">
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                  activeTab === "queue" ? "bg-amber-500 text-slate-950" : "bg-amber-100 text-amber-800"
+                }`}>
                   {pendingMatches.length}
                 </span>
               )}
@@ -408,54 +414,62 @@ export default function ReconciliationPage() {
 
             <button
               onClick={() => setActiveTab("transactions")}
-              className={`flex items-center gap-2 py-3 border-b-2 text-body font-medium transition-colors ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                 activeTab === "transactions"
-                  ? "border-primary text-primary font-semibold"
-                  : "border-transparent text-text-secondary hover:text-text-primary"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
-              <Layers className="h-4 w-4" />
-              Transactions Register
-              <span className="ml-1 text-caption text-text-muted">({transactions.length})</span>
+              <Layers className="h-3.5 w-3.5" />
+              <span>Transactions</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                activeTab === "transactions" ? "bg-slate-800 text-slate-200" : "bg-slate-200 text-slate-700"
+              }`}>
+                {transactions.length}
+              </span>
             </button>
 
             <button
               onClick={() => setActiveTab("statement-periods")}
-              className={`flex items-center gap-2 py-3 border-b-2 text-body font-medium transition-colors ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                 activeTab === "statement-periods"
-                  ? "border-primary text-primary font-semibold"
-                  : "border-transparent text-text-secondary hover:text-text-primary"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
-              <Building2 className="h-4 w-4" />
-              Statement Periods & Sign-Off
+              <Building2 className="h-3.5 w-3.5" />
+              <span>Statement Periods</span>
             </button>
 
             <button
               onClick={() => setActiveTab("transfers")}
-              className={`flex items-center gap-2 py-3 border-b-2 text-body font-medium transition-colors ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                 activeTab === "transfers"
-                  ? "border-primary text-primary font-semibold"
-                  : "border-transparent text-text-secondary hover:text-text-primary"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
-              <ArrowRightLeft className="h-4 w-4" />
-              Inter-Project Transfers
+              <ArrowRightLeft className="h-3.5 w-3.5" />
+              <span>Transfers</span>
               {transfers.length > 0 && (
-                <span className="ml-1 text-caption text-text-muted">({transfers.length})</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                  activeTab === "transfers" ? "bg-slate-800 text-slate-200" : "bg-slate-200 text-slate-700"
+                }`}>
+                  {transfers.length}
+                </span>
               )}
             </button>
 
             <button
               onClick={() => setActiveTab("import-batches")}
-              className={`flex items-center gap-2 py-3 border-b-2 text-body font-medium transition-colors ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                 activeTab === "import-batches"
-                  ? "border-primary text-primary font-semibold"
-                  : "border-transparent text-text-secondary hover:text-text-primary"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
-              <FileSpreadsheet className="h-4 w-4" />
-              Import Batches
+              <FileSpreadsheet className="h-3.5 w-3.5" />
+              <span>Import Batches</span>
             </button>
           </nav>
         </div>

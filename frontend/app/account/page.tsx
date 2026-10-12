@@ -345,7 +345,7 @@ export default function AccountPage() {
                 <div>
                   <div className="font-semibold text-text-primary text-body">Budget Overrun Warnings</div>
                   <div className="text-caption text-text-secondary">
-                    Notify when invoice lines or change orders exceed line baselines or deplete contingency reserve.
+                    Notify when invoice lines or change orders exceed line baselines or deplete buffer reserve.
                   </div>
                 </div>
               </label>

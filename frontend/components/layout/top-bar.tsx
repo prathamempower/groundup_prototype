@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Project, OnboardingTask } from "@/lib/types";
@@ -37,6 +37,7 @@ interface TopBarProps {
 
 export function TopBar({ onToggleSidebar }: TopBarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
 
   const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
@@ -55,8 +56,15 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
 
   const currentUser = meData?.data;
   const projects = projectsData?.data?.projects || [];
-  const currentProjectId = projectsData?.data?.current_project_id;
-  const currentProject = projects.find((p) => p.id === currentProjectId) || projects[0];
+
+  // Match /projects/[projectId] strictly from current route if active inside workspace
+  const projectRouteMatch = pathname.match(/^\/projects\/([^\/]+)/);
+  const routeProjectId = projectRouteMatch && projectRouteMatch[1] !== "new" ? projectRouteMatch[1] : null;
+
+  // STRICT PROJECT ISOLATION: When outside a specific project workspace route (e.g. on /projects portfolio),
+  // do not latch onto a random project or leak project-specific tasks/alerts.
+  const currentProjectId = routeProjectId || null;
+  const currentProject = routeProjectId ? projects.find((p) => p.id === routeProjectId) : null;
   const signOutMutation = useMutation({
     mutationFn: () => authAdapter.signOut(),
     onSuccess: async () => {
@@ -76,7 +84,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
 
   const { data: notificationsData } = useQuery({
     queryKey: ["notifications", currentProjectId],
-    queryFn: () => api.notifications.list(currentProjectId),
+    queryFn: () => api.notifications.list(currentProjectId || undefined),
   });
 
   const notifications = notificationsData?.data || [];
@@ -90,7 +98,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
   });
 
   const markAllReadMutation = useMutation({
-    mutationFn: () => api.notifications.markAllRead(currentProjectId),
+    mutationFn: () => api.notifications.markAllRead(currentProjectId || undefined),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
@@ -163,7 +171,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
             </span>
             <span className="text-slate-300 hidden sm:inline">/</span>
             <span className="text-sm font-semibold text-slate-900 truncate max-w-[200px] sm:max-w-[320px]">
-              {currentProject?.name || "GroundUp AI"}
+              {currentProject ? currentProject.name : pathname.startsWith("/projects") ? "Project Portfolio" : "GroundUp AI"}
             </span>
           </div>
         </div>
@@ -463,7 +471,11 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
                 <button
                   onClick={() => {
                     setIsNotificationsOpen(false);
-                    router.push("/alerts");
+                    if (currentProjectId) {
+                      router.push(`/projects/${currentProjectId}/alerts`);
+                    } else {
+                      router.push("/projects");
+                    }
                   }}
                   className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 active:bg-slate-950 transition-colors cursor-pointer"
                 >

@@ -196,3 +196,18 @@ export const ROUTE_ACCESS_MAP: Record<string, UserRole[]> = {
 export function getDefaultRouteForRole(role: UserRole): string {
   return "/projects";
 }
+
+/**
+ * Resolves the strict active project ID for workspace views.
+ * Prioritizes the route path param `/projects/[projectId]/...` so workspace views
+ * NEVER leak or bleed data from other projects.
+ */
+export function useActiveProjectId(fallbackProjectId?: string): string {
+  if (typeof window === "undefined") return fallbackProjectId || "";
+  const pathname = window.location.pathname;
+  const match = pathname.match(/^\/projects\/([^\/]+)/);
+  if (match && match[1] && match[1] !== "new") {
+    return match[1];
+  }
+  return fallbackProjectId || "";
+}
