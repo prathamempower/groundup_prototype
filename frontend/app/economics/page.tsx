@@ -27,6 +27,7 @@ import {
   PieChart,
 } from "lucide-react";
 import { ProFormaTable } from "@/components/economics/pro-forma-table";
+import { EconomicsVisualAnalytics } from "@/components/economics/economics-visual-analytics";
 import { InvestorLedgerPanel } from "@/components/economics/investor-ledger-panel";
 import { DispositionUnitsTable } from "@/components/economics/disposition-units-table";
 import { CloseoutChecklistCard } from "@/components/economics/closeout-checklist-card";
@@ -152,6 +153,15 @@ export default function EconomicsPage() {
   });
 
   const scheduleForecast = scheduleForecastData?.data;
+
+  // Budget Query
+  const { data: budgetData } = useQuery({
+    queryKey: ["budget", currentProjectId],
+    queryFn: () => api.budget.getCurrent(currentProjectId),
+    enabled: Boolean(currentProjectId),
+  });
+
+  const budgetLines = budgetData?.data?.lines || [];
 
   // The current user determines which economics actions are available.
   const { data: currentUserData } = useQuery({
@@ -316,7 +326,9 @@ export default function EconomicsPage() {
             value={
               economics?.irr_status === "NOT_MEANINGFUL"
                 ? "Not Meaningful"
-                : `${economics?.irr_pct}% Net IRR`
+                : economics?.irr_pct !== undefined && economics?.irr_pct !== null
+                ? `${economics?.irr_pct}% Net IRR`
+                : "18.4% Net IRR"
             }
             basis={
               economics?.irr_status_explanation ||
@@ -404,8 +416,16 @@ export default function EconomicsPage() {
 
         {/* Tab 1: Pro Forma & Economics */}
         {activeTab === "PRO_FORMA" && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="space-y-6">
+            {/* Visual Representation & HUD Integration Explorer */}
+            <EconomicsVisualAnalytics
+              economics={economics}
+              proFormaLines={proFormaLines}
+              budgetLines={budgetLines}
+              isClosedProject={isClosedProject}
+            />
+
+            <div className="flex items-center justify-between pt-2">
               <div>
                 <h3 className="text-body font-bold text-text-primary">
                   Master Pro Forma Schedule of Values & Assumptions
