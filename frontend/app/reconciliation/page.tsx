@@ -871,7 +871,6 @@ export default function ReconciliationPage() {
                       filteredReviewItems.map((row) => {
                         const isSelected = selectedMatchIds.includes(row.id);
                         const isResolved = row.status === "Resolved";
-                        const isMenuOpen = activeMoreMenuId === row.id;
 
                         return (
                           <tr
@@ -941,70 +940,24 @@ export default function ReconciliationPage() {
                                 </span>
                               )}
                             </td>
-                            <td className="px-3.5 py-3 whitespace-nowrap text-right relative">
-                              <div className="flex items-center justify-end gap-1.5">
-                                {isResolved ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => setResolutionModalItem(row)}
-                                    className="rounded border border-slate-200 bg-white text-slate-700 px-2.5 py-1 text-xs font-medium hover:bg-slate-50 transition-colors shadow-2xs"
-                                  >
-                                    Edit
-                                  </button>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    onClick={() => setResolutionModalItem(row)}
-                                    className="rounded bg-slate-900 text-white px-3 py-1 text-xs font-semibold hover:bg-slate-800 transition-colors shadow-2xs"
-                                  >
-                                    Resolve
-                                  </button>
-                                )}
-
-                                <div className="relative inline-block text-left">
-                                  <button
-                                    type="button"
-                                    onClick={() => setActiveMoreMenuId(isMenuOpen ? null : row.id)}
-                                    className="text-slate-400 hover:text-slate-700 px-1.5 py-1 text-xs font-medium rounded hover:bg-slate-100 transition-colors"
-                                  >
-                                    More
-                                  </button>
-
-                                  {isMenuOpen && (
-                                    <div className="absolute right-0 top-full mt-1 w-44 rounded-lg border border-slate-200 bg-white py-1 shadow-lg z-20 text-left">
-                                      <button
-                                        type="button"
-                                        onClick={() => handleOpenRemap(row)}
-                                        className="flex w-full items-center px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
-                                      >
-                                        Remap Category
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleOpenTransfer(row)}
-                                        className="flex w-full items-center px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
-                                      >
-                                        Transfer to Project
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleOpenLinkInvoice(row)}
-                                        className="flex w-full items-center px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
-                                      >
-                                        Link Document
-                                      </button>
-                                      <div className="my-1 border-t border-slate-100" />
-                                      <button
-                                        type="button"
-                                        onClick={() => handleOpenExclude(row)}
-                                        className="flex w-full items-center px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-50"
-                                      >
-                                        Exclude Transaction
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
+                            <td className="px-3.5 py-3 whitespace-nowrap text-right">
+                              {isResolved ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setResolutionModalItem(row)}
+                                  className="rounded border border-slate-200 bg-white text-slate-700 px-2.5 py-1 text-xs font-medium hover:bg-slate-50 transition-colors shadow-2xs"
+                                >
+                                  Edit
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => setResolutionModalItem(row)}
+                                  className="rounded bg-slate-900 text-white px-3 py-1 text-xs font-semibold hover:bg-slate-800 transition-colors shadow-2xs"
+                                >
+                                  Resolve
+                                </button>
+                              )}
                             </td>
                           </tr>
                         );
