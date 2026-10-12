@@ -39,23 +39,23 @@ export function PageHeader({
   const getBadgeClasses = (variant: string) => {
     switch (variant) {
       case "success":
-        return "bg-success-subtle text-success border border-success/30";
+        return "bg-emerald-50 text-emerald-700 border border-emerald-200/70";
       case "warning":
-        return "bg-warning-subtle text-warning border border-warning/30";
+        return "bg-amber-50 text-amber-700 border border-amber-200/70";
       case "danger":
-        return "bg-danger-subtle text-danger border border-danger/30";
+        return "bg-rose-50 text-rose-700 border border-rose-200/70";
       case "info":
-        return "bg-info-subtle text-info border border-info/30";
+        return "bg-blue-50 text-blue-700 border border-blue-200/70";
       default:
-        return "bg-subtle text-text-secondary border border-border";
+        return "bg-slate-100 text-slate-700 border border-slate-200/80";
     }
   };
 
   return (
-    <div className="border-b border-border bg-surface px-6 py-5 shadow-xs">
+    <div className="pt-2 pb-1 w-full">
       {/* Breadcrumbs if present */}
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav aria-label="Breadcrumb" className="mb-2.5 flex items-center gap-1.5 text-caption text-text-muted">
+        <nav aria-label="Breadcrumb" className="mb-2 flex items-center gap-1.5 text-xs text-slate-400">
           {breadcrumbs.map((crumb, idx) => {
             const isLast = idx === breadcrumbs.length - 1;
             return (
@@ -63,16 +63,16 @@ export function PageHeader({
                 {crumb.href && !isLast ? (
                   <Link
                     href={crumb.href}
-                    className="hover:text-primary transition-colors focus-visible:outline-primary font-medium"
+                    className="hover:text-slate-900 transition-colors font-medium text-slate-500"
                   >
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span className={isLast ? "font-semibold text-text-primary" : ""}>
+                  <span className={isLast ? "font-semibold text-slate-700" : ""}>
                     {crumb.label}
                   </span>
                 )}
-                {!isLast && <ChevronRight className="h-3 w-3 text-text-muted" />}
+                {!isLast && <ChevronRight className="h-3 w-3 text-slate-300" />}
               </React.Fragment>
             );
           })}
@@ -80,34 +80,36 @@ export function PageHeader({
       )}
 
       {/* Main Header Row */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-title font-bold tracking-tight text-text-primary">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">
               {title}
             </h1>
 
             {statusBadge && (
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-caption font-semibold shadow-xs ${getBadgeClasses(
+                className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ${getBadgeClasses(
                   statusBadge.variant
                 )}`}
               >
                 {statusBadge.icon}
-                {statusBadge.label}
+                <span>{statusBadge.label}</span>
               </span>
             )}
           </div>
 
-          <div className="mt-1 flex flex-wrap items-center gap-3 text-caption text-text-muted">
-            {asOf && <span>{asOf.toLowerCase().startsWith("as of") ? asOf : `As of ${asOf}`}</span>}
-            {(description || subtitle) && (
-              <>
-                {asOf && <span>•</span>}
-                <span>{subtitle || description}</span>
-              </>
-            )}
-          </div>
+          {(subtitle || description || asOf) && (
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+              {(subtitle || description) && <span>{subtitle || description}</span>}
+              {asOf && (
+                <>
+                  {(subtitle || description) && <span className="text-slate-300">•</span>}
+                  <span>{asOf.toLowerCase().startsWith("as of") ? asOf : `As of ${asOf}`}</span>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}

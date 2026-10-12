@@ -39,6 +39,32 @@ Use separate state dimensions instead of one overloaded status:
 | Source attribution | Every imported/extracted/derived value stores source type, document/page/row or transaction ID, extraction version, and review decision. |
 | Effective dates | Corrections/revisions require effective date and cannot predate project/record existence without override rationale. |
 
+### 3.1 Authentication, Identity & Security Rules
+
+All identity onboarding and credentials adhere to strict tenant isolation, corporate identity enforcement, and NIST/OWASP password criteria.
+
+#### Work Email Validation
+
+| Rule ID | Rule Target | Specification / Pattern | Real-time UI Behavior | Error Message |
+|---|---|---|---|---|
+| `AUTH-EML-01` | Format | Standard RFC 5322 regex: `^[^\s@]+@[^\s@]+\.[^\s@]+$` | Validates as user types; green tick when valid. | `Enter a valid email address format` |
+| `AUTH-EML-02` | Corporate Domain | Rejects free webmail & disposable providers (`@gmail.com`, `@yahoo.com`, `@outlook.com`, `@hotmail.com`, `@icloud.com`, `@aol.com`, `@proton.me`, disposable providers). | Instant inline red alert and border highlight on prohibited domains. | `Personal domains like @{domain} are not permitted. Please use your official company or work email.` |
+| `AUTH-EML-03` | Uniqueness | Unique index across active organization accounts. | Checked upon submission; flags duplicate accounts. | `A user with this email already exists.` |
+| `AUTH-EML-04` | Role Exclusivity | Public self-service signup restricted to Owner accounts. | All other roles (CFO, PM, GC, Investor) onboard strictly via invite tokens. | `Only Organization Owners can register new accounts.` |
+
+#### Production Password Validation
+
+| Rule ID | Requirement | Criteria / Pattern | Real-Time UI Indicator | Error / Enforcement Action |
+|---|---|---|---|---|
+| `AUTH-PWD-01` | Minimum Length | Length $\ge$ 8 characters. | Dynamic checkmark indicator on requirement item. | Blocks progression if `< 8` characters. |
+| `AUTH-PWD-02` | Uppercase Letter | At least 1 character in `[A-Z]`. | Dynamic checkmark indicator on requirement item. | Blocks progression if uppercase is absent. |
+| `AUTH-PWD-03` | Lowercase Letter | At least 1 character in `[a-z]`. | Dynamic checkmark indicator on requirement item. | Blocks progression if lowercase is absent. |
+| `AUTH-PWD-04` | Numerical Digit | At least 1 character in `[0-9]`. | Dynamic checkmark indicator on requirement item. | Blocks progression if digit is absent. |
+| `AUTH-PWD-05` | Special Character | At least 1 non-alphanumeric character `[^A-Za-z0-9]`. | Dynamic checkmark indicator on requirement item. | Blocks progression if symbol is absent. |
+| `AUTH-PWD-06` | Personal Info Exclusion | Case-insensitive exclusion of first name, last name, and email prefix (if $\ge 3$ characters). | Inline alert + requirement indicator fails. | `Password cannot contain your first name, last name, or email.` |
+| `AUTH-PWD-07` | Common Dictionary Check | Blacklist check against trivial patterns (`password`, `admin`, `12345678`, `qwerty`, `letmein`). | Inline alert + reduces strength score to Weak. | `Password contains an easily guessable pattern.` |
+| `AUTH-PWD-08` | Security Strength Meter | 5-point composite score: 1–2 (Weak, red), 3–4 (Moderate, amber), 5 (Strong, emerald). | Live 5-segment bar & text status updating on every keystroke. | Informative visual guidance. |
+
 ## 4. Import validation
 
 ### File-level checks

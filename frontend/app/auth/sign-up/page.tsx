@@ -100,19 +100,64 @@ export default function SignUpPage() {
 
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Live Password Checklist Criteria
+  // Production-grade Password Checklist Criteria
   const passwordCriteria = useMemo(() => {
+    const hasMinLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[^A-Za-z0-9]/.test(password);
+
+    // Common weak patterns check (exact matches or common trivial passwords)
+    const isCommonWeak =
+      /^(password|admin|administrator|12345678|123456789|qwerty|letmein|welcome|pass123|root)$/i.test(
+        password.trim()
+      );
+
+    // Security requirement: Password must not contain user's name or email prefix (min 3 chars)
+    const lowerPw = password.toLowerCase();
+    const fn = firstName.trim().toLowerCase();
+    const ln = lastName.trim().toLowerCase();
+    const emailPrefix = email.includes("@")
+      ? email.split("@")[0].trim().toLowerCase()
+      : "";
+
+    const containsFirstName = fn.length >= 3 && lowerPw.includes(fn);
+    const containsLastName = ln.length >= 3 && lowerPw.includes(ln);
+    const containsEmailPrefix = emailPrefix.length >= 3 && lowerPw.includes(emailPrefix);
+    const containsUserInfo = containsFirstName || containsLastName || containsEmailPrefix;
+
     return {
-      length: password.length >= 8,
-      uppercase: /[A-Z]/.test(password),
-      numberOrSymbol: /[\d\W]/.test(password),
+      minLength: hasMinLength,
+      uppercase: hasUpper,
+      lowercase: hasLower,
+      number: hasNumber,
+      special: hasSpecial,
+      doesNotContainName: !containsUserInfo,
+      notCommon: !isCommonWeak,
     };
-  }, [password]);
+  }, [password, firstName, lastName, email]);
+
+  const passwordScore = useMemo(() => {
+    if (!password) return 0;
+    if (!passwordCriteria.notCommon || !passwordCriteria.doesNotContainName) return 1;
+    let score = 0;
+    if (passwordCriteria.minLength) score += 1;
+    if (passwordCriteria.uppercase) score += 1;
+    if (passwordCriteria.lowercase) score += 1;
+    if (passwordCriteria.number) score += 1;
+    if (passwordCriteria.special) score += 1;
+    return score;
+  }, [password, passwordCriteria]);
 
   const isPasswordValid =
-    passwordCriteria.length &&
+    passwordCriteria.minLength &&
     passwordCriteria.uppercase &&
-    passwordCriteria.numberOrSymbol;
+    passwordCriteria.lowercase &&
+    passwordCriteria.number &&
+    passwordCriteria.special &&
+    passwordCriteria.doesNotContainName &&
+    passwordCriteria.notCommon;
 
   // Live Email Validation State
   const emailValidation = useMemo(() => {
@@ -378,14 +423,34 @@ export default function SignUpPage() {
             )}
           </div>
 
-          {/* Password with Real-Time List-Wise Validation */}
+          {/* Password with Production-Grade Real-Time Validation */}
           <div className="space-y-1.5">
-            <label
-              htmlFor="password"
-              className="block text-xs font-semibold text-slate-700"
-            >
-              Password
-            </label>
+            <div className="flex items-center justify-between">
+              <label
+                htmlFor="password"
+                className="block text-xs font-semibold text-slate-700"
+              >
+                Password
+              </label>
+              {password && (
+                <span
+                  className={`text-[11px] font-medium transition-colors ${
+                    passwordScore <= 2
+                      ? "text-rose-500"
+                      : passwordScore <= 4
+                      ? "text-amber-600"
+                      : "text-emerald-600"
+                  }`}
+                >
+                  {passwordScore <= 2
+                    ? "Weak"
+                    : passwordScore <= 4
+                    ? "Moderate"
+                    : "Strong"}
+                </span>
+              )}
+            </div>
+
             <div className="relative">
               <input
                 id="password"
@@ -399,10 +464,12 @@ export default function SignUpPage() {
                   setPassword(e.target.value);
                   if (errorMessage) setErrorMessage("");
                 }}
-                className={`h-10 w-full rounded-lg border bg-white px-3.5 pr-10 text-sm text-slate-900 shadow-xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:outline-none focus:ring-3 ${
+                className={`h-10 w-full rounded-lg border bg-white px-3.5 pr-10 text-sm text-slate-900 shadow-xs transition-colors placeholder:text-slate-400 focus:outline-none focus:ring-3 ${
                   password && isPasswordValid
                     ? "border-emerald-500 focus:border-emerald-500 focus:ring-emerald-500/15"
-                    : "border-slate-300 focus:border-blue-600 focus:ring-blue-600/15"
+                    : password && passwordScore <= 2
+                    ? "border-rose-300 focus:border-rose-400 focus:ring-rose-400/15"
+                    : "border-slate-300 hover:border-slate-400 focus:border-blue-600 focus:ring-blue-600/15"
                 }`}
                 placeholder="••••••••••••"
               />
@@ -416,71 +483,186 @@ export default function SignUpPage() {
               </button>
             </div>
 
-            {/* Clean List-Wise Password Validation */}
+            {/* Live Strength Meter Bar */}
+            {password && (
+              <div className="pt-1">
+                <div className="grid grid-cols-5 gap-1.5 h-1">
+                  {[1, 2, 3, 4, 5].map((level) => {
+                    let barColor = "bg-slate-200";
+                    if (passwordScore >= level) {
+                      if (passwordScore <= 2) barColor = "bg-rose-500";
+                      else if (passwordScore <= 4) barColor = "bg-amber-500";
+                      else barColor = "bg-emerald-500";
+                    }
+                    return (
+                      <div
+                        key={level}
+                        className={`h-full rounded-full transition-all duration-200 ${barColor}`}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Common Weak Password Warning */}
+            {password && !passwordCriteria.notCommon && (
+              <p className="text-[11px] font-medium text-rose-600 flex items-center gap-1.5 pt-0.5">
+                <AlertCircle className="h-3 w-3 shrink-0" />
+                <span>Password contains an easily guessable pattern.</span>
+              </p>
+            )}
+
+            {/* Production Real-Time Password Requirements: Clean 2-column Grid */}
             {(password || passwordFocused) && (
-              <div className="pt-1.5 pb-0.5 space-y-1.5">
-                <div className="flex items-center gap-2 text-xs transition-colors">
-                  <div
-                    className={`flex h-4 w-4 items-center justify-center rounded-full transition-colors ${
-                      passwordCriteria.length
-                        ? "bg-emerald-100 text-emerald-600"
-                        : "bg-slate-100 text-slate-400"
-                    }`}
-                  >
-                    <Check className="h-2.5 w-2.5 stroke-[3]" />
+              <div className="pt-2 pb-1 space-y-2 bg-slate-50/80 rounded-lg p-2.5 border border-slate-200/80">
+                <div className="grid grid-cols-2 gap-x-2.5 gap-y-1.5">
+                  {/* 1. Min 8 characters */}
+                  <div className="flex items-center gap-1.5 text-[11px] transition-colors">
+                    <div
+                      className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full transition-colors ${
+                        passwordCriteria.minLength
+                          ? "bg-emerald-100 text-emerald-600"
+                          : "bg-slate-200 text-slate-400"
+                      }`}
+                    >
+                      <Check className="h-2 w-2 stroke-[3]" />
+                    </div>
+                    <span
+                      className={
+                        passwordCriteria.minLength
+                          ? "text-emerald-700 font-medium"
+                          : "text-slate-500"
+                      }
+                    >
+                      8+ characters
+                    </span>
                   </div>
-                  <span
-                    className={
-                      passwordCriteria.length
-                        ? "text-emerald-700 font-medium"
-                        : "text-slate-500"
-                    }
-                  >
-                    At least 8 characters
-                  </span>
+
+                  {/* 2. Uppercase letter */}
+                  <div className="flex items-center gap-1.5 text-[11px] transition-colors">
+                    <div
+                      className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full transition-colors ${
+                        passwordCriteria.uppercase
+                          ? "bg-emerald-100 text-emerald-600"
+                          : "bg-slate-200 text-slate-400"
+                      }`}
+                    >
+                      <Check className="h-2 w-2 stroke-[3]" />
+                    </div>
+                    <span
+                      className={
+                        passwordCriteria.uppercase
+                          ? "text-emerald-700 font-medium"
+                          : "text-slate-500"
+                      }
+                    >
+                      Uppercase (A-Z)
+                    </span>
+                  </div>
+
+                  {/* 3. Lowercase letter */}
+                  <div className="flex items-center gap-1.5 text-[11px] transition-colors">
+                    <div
+                      className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full transition-colors ${
+                        passwordCriteria.lowercase
+                          ? "bg-emerald-100 text-emerald-600"
+                          : "bg-slate-200 text-slate-400"
+                      }`}
+                    >
+                      <Check className="h-2 w-2 stroke-[3]" />
+                    </div>
+                    <span
+                      className={
+                        passwordCriteria.lowercase
+                          ? "text-emerald-700 font-medium"
+                          : "text-slate-500"
+                      }
+                    >
+                      Lowercase (a-z)
+                    </span>
+                  </div>
+
+                  {/* 4. Number */}
+                  <div className="flex items-center gap-1.5 text-[11px] transition-colors">
+                    <div
+                      className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full transition-colors ${
+                        passwordCriteria.number
+                          ? "bg-emerald-100 text-emerald-600"
+                          : "bg-slate-200 text-slate-400"
+                      }`}
+                    >
+                      <Check className="h-2 w-2 stroke-[3]" />
+                    </div>
+                    <span
+                      className={
+                        passwordCriteria.number
+                          ? "text-emerald-700 font-medium"
+                          : "text-slate-500"
+                      }
+                    >
+                      Number (0-9)
+                    </span>
+                  </div>
+
+                  {/* 5. Special character */}
+                  <div className="flex items-center gap-1.5 text-[11px] transition-colors">
+                    <div
+                      className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full transition-colors ${
+                        passwordCriteria.special
+                          ? "bg-emerald-100 text-emerald-600"
+                          : "bg-slate-200 text-slate-400"
+                      }`}
+                    >
+                      <Check className="h-2 w-2 stroke-[3]" />
+                    </div>
+                    <span
+                      className={
+                        passwordCriteria.special
+                          ? "text-emerald-700 font-medium"
+                          : "text-slate-500"
+                      }
+                    >
+                      Special symbol (!@#...)
+                    </span>
+                  </div>
+
+                  {/* 6. No personal name in password */}
+                  <div className="flex items-center gap-1.5 text-[11px] transition-colors">
+                    <div
+                      className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full transition-colors ${
+                        passwordCriteria.doesNotContainName
+                          ? "bg-emerald-100 text-emerald-600"
+                          : "bg-slate-200 text-slate-400"
+                      }`}
+                    >
+                      <Check className="h-2 w-2 stroke-[3]" />
+                    </div>
+                    <span
+                      className={
+                        passwordCriteria.doesNotContainName
+                          ? "text-emerald-700 font-medium"
+                          : "text-slate-500"
+                      }
+                    >
+                      No personal name/email
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs transition-colors">
-                  <div
-                    className={`flex h-4 w-4 items-center justify-center rounded-full transition-colors ${
-                      passwordCriteria.uppercase
-                        ? "bg-emerald-100 text-emerald-600"
-                        : "bg-slate-100 text-slate-400"
-                    }`}
-                  >
-                    <Check className="h-2.5 w-2.5 stroke-[3]" />
-                  </div>
-                  <span
-                    className={
-                      passwordCriteria.uppercase
-                        ? "text-emerald-700 font-medium"
-                        : "text-slate-500"
-                    }
-                  >
-                    At least one uppercase letter
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 text-xs transition-colors">
-                  <div
-                    className={`flex h-4 w-4 items-center justify-center rounded-full transition-colors ${
-                      passwordCriteria.numberOrSymbol
-                        ? "bg-emerald-100 text-emerald-600"
-                        : "bg-slate-100 text-slate-400"
-                    }`}
-                  >
-                    <Check className="h-2.5 w-2.5 stroke-[3]" />
-                  </div>
-                  <span
-                    className={
-                      passwordCriteria.numberOrSymbol
-                        ? "text-emerald-700 font-medium"
-                        : "text-slate-500"
-                    }
-                  >
-                    At least one number or special character
-                  </span>
-                </div>
+                {/* Inline alerts only if specific condition failed */}
+                {!passwordCriteria.doesNotContainName && (
+                  <p className="text-[11px] font-medium text-rose-600 flex items-center gap-1 pt-1 border-t border-slate-200/60">
+                    <AlertCircle className="h-3 w-3 shrink-0" />
+                    <span>Password cannot include your name or email.</span>
+                  </p>
+                )}
+                {!passwordCriteria.notCommon && (
+                  <p className="text-[11px] font-medium text-rose-600 flex items-center gap-1 pt-1 border-t border-slate-200/60">
+                    <AlertCircle className="h-3 w-3 shrink-0" />
+                    <span>Password is too predictable. Choose a less common phrase.</span>
+                  </p>
+                )}
               </div>
             )}
           </div>

@@ -207,39 +207,33 @@ export default function ControlCenterPage() {
 
   return (
     <div className="space-y-6 pb-16">
-      {/* Page Header */}
-      <PageHeader
-        title={
-          viewMode === "PORTFOLIO"
-            ? "Development Portfolio"
-            : `${project?.name || "Project"} Control Center`
-        }
-        statusBadge={
-          viewMode === "PROJECT" && project?.lifecycle_stage
-            ? {
-                label: project.lifecycle_stage.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()),
-                variant:
-                  project?.status === "COMPLETED"
-                    ? "success"
-                    : project?.status === "SETUP_INCOMPLETE"
-                    ? "danger"
-                    : "neutral",
-                icon: <Building className="h-3 w-3 text-slate-500" />,
-              }
-            : undefined
-        }
-        subtitle={
-          viewMode === "PORTFOLIO"
-            ? "Executive overview across all development assets, total debt commitments, and open exceptions."
-            : project?.address || "Financial Control Workspace"
-        }
-        breadcrumbs={[
-          { label: "Projects", href: "/projects" },
-          { label: viewMode === "PORTFOLIO" ? "All Projects" : project?.name || "Project overview" },
-        ]}
-      />
-
-      <div className="px-6 space-y-6 max-w-7xl mx-auto">
+      <div className="px-6 space-y-6 max-w-7xl mx-auto pt-4">
+        {/* Page Header */}
+        <PageHeader
+          title={
+            viewMode === "PORTFOLIO"
+              ? "Development Portfolio"
+              : project?.name || "Project Overview"
+          }
+          statusBadge={
+            viewMode === "PROJECT" && project?.lifecycle_stage
+              ? {
+                  label: project.lifecycle_stage.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()),
+                  variant:
+                    project?.status === "COMPLETED"
+                      ? "success"
+                      : project?.status === "SETUP_INCOMPLETE"
+                      ? "danger"
+                      : "neutral",
+                }
+              : undefined
+          }
+          subtitle={
+            viewMode === "PORTFOLIO"
+              ? "Portfolio summary across active assets and commitments"
+              : project?.address || ""
+          }
+        />
         {/* ========================================================================= */}
         {/* PORTFOLIO VIEW                                                           */}
         {/* ========================================================================= */}
