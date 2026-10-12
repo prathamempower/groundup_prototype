@@ -50,7 +50,7 @@ export interface WorkspaceNavItem {
 export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
   {
     id: "control-center",
-    label: "Control center",
+    label: "Control Center",
     path: "control-center",
     icon: LayoutDashboard,
     allowedRoles: ["OWNER", "CFO", "PM"],
@@ -110,7 +110,7 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
   },
   {
     id: "alerts",
-    label: "Alerts & exceptions",
+    label: "Alerts & Exceptions",
     path: "alerts",
     icon: AlertTriangle,
     allowedRoles: ["OWNER", "CFO", "PM"],
@@ -118,14 +118,14 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
   },
   {
     id: "investor-updates",
-    label: "Investor updates",
+    label: "Investor Updates",
     path: "investor-updates",
     icon: Eye,
     allowedRoles: ["OWNER", "INVESTOR"],
   },
   {
     id: "settings",
-    label: "Project settings",
+    label: "Project Settings",
     path: "settings",
     icon: Settings,
     allowedRoles: ["OWNER"],

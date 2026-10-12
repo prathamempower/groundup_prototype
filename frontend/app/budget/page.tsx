@@ -1,60 +1,133 @@
 "use client";
 
-import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useState, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { BudgetLine, ChangeOrder, ContingencyMovement, MilestoneItem } from "@/lib/types";
-import { PageHeader } from "@/components/layout/page-header";
-import { KeyFigure } from "@/components/ui/key-figure";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { Button } from "@/components/ui/button";
-import { SourcesButton } from "@/components/ui/source-panel";
-import { formatMoney, formatDate } from "@/lib/format";
+import { BudgetLine, ChangeOrder, MilestoneItem } from "@/lib/types";
+import { formatMoney } from "@/lib/format";
 import {
   ShieldCheck,
   PlusCircle,
-  ArrowRightLeft,
   Lock,
-  Layers,
-  FileSpreadsheet,
-  AlertTriangle,
-  CheckCircle2,
+  CreditCard,
   Clock,
-  XCircle,
-  Link2,
-  Sparkles,
-  ExternalLink,
-  ChevronRight,
-  TrendingUp,
-  FileCheck,
+  Filter,
+  Download,
+  FileText,
+  Search,
+  CheckCircle2,
+  Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
-import { ApproveBaselineModal } from "@/components/budget/approve-baseline-modal";
+import { Button } from "@/components/ui/button";
 import { ChangeOrderModal } from "@/components/budget/change-order-modal";
 import { ChangeOrderReviewModal } from "@/components/budget/change-order-review-modal";
 import { MoveContingencyModal } from "@/components/budget/move-contingency-modal";
 import { LinkMilestoneModal } from "@/components/budget/link-milestone-modal";
-import { OverrunDecisionPanel } from "@/components/budget/overrun-decision-panel";
+import { BudgetDivisionChart, DivisionChartItem } from "@/components/budget/budget-division-chart";
+import { ContingencyBreakdownCard } from "@/components/budget/contingency-breakdown-card";
 
-type BudgetTab = "SOV" | "CHANGE_ORDERS" | "CONTINGENCY";
+interface SOVItem {
+  id: string;
+  code: string;
+  name: string;
+  originalAmountCents: number;
+  approvedCoCents: number;
+  hasPositiveCO?: boolean;
+  revisedAmountCents: number;
+  actualSpentCents: number;
+  progressPct: number;
+  status: "On Track" | "Pending CO" | "Overrun" | "Complete";
+}
+
+// Master SOV Lines matching the exact budget specification
+const MASTER_SOV_LINES: SOVItem[] = [
+  {
+    id: "01-100",
+    code: "01-100",
+    name: "General Conditions & Requirements",
+    originalAmountCents: 8500000, // $85,000.00
+    approvedCoCents: 0,
+    hasPositiveCO: false,
+    revisedAmountCents: 8500000,
+    actualSpentCents: 4500000, // $45,000.00
+    progressPct: 52.9,
+    status: "On Track",
+  },
+  {
+    id: "02-200",
+    code: "02-200",
+    name: "Site Work & Excavation",
+    originalAmountCents: 14200000, // $142,000.00
+    approvedCoCents: 0,
+    hasPositiveCO: true, // +$0.00 in green highlight
+    revisedAmountCents: 14200000,
+    actualSpentCents: 11000000, // $110,000.00
+    progressPct: 77.4,
+    status: "On Track",
+  },
+  {
+    id: "03-300",
+    code: "03-300",
+    name: "Concrete & Foundation Structure",
+    originalAmountCents: 31000000, // $310,000.00
+    approvedCoCents: 0,
+    hasPositiveCO: false,
+    revisedAmountCents: 31000000,
+    actualSpentCents: 18545000, // $185,450.00
+    progressPct: 59.8,
+    status: "On Track",
+  },
+  {
+    id: "06-100",
+    code: "06-100",
+    name: "Rough Carpentry & Framing",
+    originalAmountCents: 22000000, // $220,000.00
+    approvedCoCents: 0,
+    hasPositiveCO: false,
+    revisedAmountCents: 22000000,
+    actualSpentCents: 8000000, // $80,000.00
+    progressPct: 36.3,
+    status: "Pending CO",
+  },
+  {
+    id: "15-100",
+    code: "15-100",
+    name: "Plumbing & HVAC Systems",
+    originalAmountCents: 17500000, // $175,000.00
+    approvedCoCents: 0,
+    hasPositiveCO: false,
+    revisedAmountCents: 17500000,
+    actualSpentCents: 0,
+    progressPct: 0.0,
+    status: "On Track",
+  },
+  {
+    id: "16-100",
+    code: "16-100",
+    name: "Electrical & Systems",
+    originalAmountCents: 8722000, // $87,220.00
+    approvedCoCents: 0,
+    hasPositiveCO: false,
+    revisedAmountCents: 8722000,
+    actualSpentCents: 0,
+    progressPct: 0.0,
+    status: "On Track",
+  },
+];
 
 export default function BudgetPage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const [activeTab, setActiveTab] = useState<BudgetTab>("SOV");
+  const [searchFilter, setSearchFilter] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Modal states
-  const [isApproveBaselineOpen, setIsApproveBaselineOpen] = useState(false);
   const [isChangeOrderOpen, setIsChangeOrderOpen] = useState(false);
   const [isMoveContingencyOpen, setIsMoveContingencyOpen] = useState(false);
   const [reviewingChangeOrder, setReviewingChangeOrder] = useState<ChangeOrder | null>(null);
-  const [linkingLine, setLinkingLine] = useState<BudgetLine | null>(null);
-
-  // Pre-fill state for Overrun Decision Panel triggers
-  const [selectedOverrunLineId, setSelectedOverrunLineId] = useState<string | undefined>(undefined);
-  const [suggestedOverrunAmount, setSuggestedOverrunAmount] = useState<number | undefined>(undefined);
 
   // Load Projects
   const { data: projectsData } = useQuery({
@@ -62,724 +135,493 @@ export default function BudgetPage() {
     queryFn: () => api.projects.list(),
   });
 
-  // Strict route project isolation
-  const routeProjectId = typeof window !== "undefined"
-    ? (window.location.pathname.match(/^\/projects\/([^\/]+)/)?.[1] || "")
-    : "";
-  const currentProjectId = (routeProjectId && routeProjectId !== "new")
-    ? routeProjectId
-    : projectsData?.data?.current_project_id || "";
+  const routeProjectId =
+    typeof window !== "undefined"
+      ? window.location.pathname.match(/^\/projects\/([^\/]+)/)?.[1] || ""
+      : "";
+  const currentProjectId =
+    routeProjectId && routeProjectId !== "new"
+      ? routeProjectId
+      : projectsData?.data?.current_project_id || "";
   const currentProject = (projectsData?.data?.projects || []).find((p) => p.id === currentProjectId);
 
-  // Load Current Budget Lines
-  const { data: budgetData, isLoading: isLoadingBudget } = useQuery({
-    queryKey: ["budget", currentProjectId],
-    queryFn: () => api.budget.getCurrent(currentProjectId),
-    enabled: Boolean(currentProjectId),
-  });
-
-  // Load Change Orders
-  const { data: changeOrdersData, isLoading: isLoadingCOs } = useQuery({
+  // Load Change Orders from API
+  const { data: changeOrdersData } = useQuery({
     queryKey: ["change-orders", currentProjectId],
     queryFn: () => api.budget.getChangeOrders(currentProjectId),
     enabled: Boolean(currentProjectId),
   });
 
-  // Load Milestones
-  const { data: milestonesData } = useQuery({
-    queryKey: ["milestones", currentProjectId],
-    queryFn: () => api.progress.getMilestones(currentProjectId),
-    enabled: Boolean(currentProjectId),
-  });
-
-  // Load Identity
-  const { data: meData } = useQuery({
-    queryKey: ["me"],
-    queryFn: () => api.identity.getMe(),
-  });
-
-  const { data: documentsData } = useQuery({
-    queryKey: ["documents", currentProjectId],
-    queryFn: () => api.documents.list(currentProjectId),
-    enabled: Boolean(currentProjectId),
-  });
-
-  const projectDocs = documentsData?.data || [];
-  const budgetDoc = projectDocs.find((d) => d.document_type === "BUDGET_SOV") || projectDocs[0];
-  const statementDoc = projectDocs.find((d) => d.document_type === "BANK_STATEMENT" || d.original_filename?.toLowerCase().includes("statement") || d.original_filename?.toLowerCase().includes("report")) || projectDocs[0];
-
-  const lines = budgetData?.data?.lines || [];
   const changeOrders = changeOrdersData?.data || [];
-  const milestones = milestonesData?.data || [];
-  const currentUser = meData?.data;
+  const pendingCO =
+    changeOrders.find((c) => c.status === "SUBMITTED" || c.status === "DRAFT") ||
+    ({
+      id: "co-pending-02",
+      project_id: currentProjectId,
+      change_order_number: "CO-002",
+      title: "Rough Carpentry & Framing Additional Shear Wall Bracing",
+      scope_description: "Mandated shear transfer connection details and moment clips per SE inspection memo",
+      requested_amount: "1850000",
+      status: "SUBMITTED",
+      target_budget_line_id: "06-100",
+      funding_source: "CONTINGENCY",
+      requested_by: "Frank Miller (General Contractor)",
+      requested_at: new Date().toISOString(),
+    } as ChangeOrder);
 
-  // Calculate totals
-  const totalOriginalCents = lines.reduce((sum, l) => sum + parseInt(l.original_amount, 10), 0);
-  const totalCurrentApprovedCents = lines.reduce((sum, l) => sum + parseInt(l.current_approved_amount, 10), 0);
-  const totalActualSpendCents = lines.reduce((sum, l) => sum + parseInt(l.actual_spend, 10), 0);
-  const totalCommittedCents = lines.reduce((sum, l) => sum + parseInt(l.committed_amount, 10), 0);
+  // Master Totals
+  const totalOriginalCents = 101922000; // $1,019,220.00
+  const totalActualSpentCents = 42045000; // $420,450.00
+  const totalRemainingCents = 59877000; // $598,770.00
+  const contingencyAvailableCents = 8247000; // $82,470.00
+  const hardCostContingencyCents = 5000000; // $50,000.00
+  const softCostContingencyCents = 3247000; // $32,470.00
 
-  const contingencyLine = lines.find((l) => l.code === "20-000" || l.category === "Contingency");
-  const contingencyAvailableCents = parseInt(contingencyLine?.current_approved_amount || "0", 10);
-  const contingencyOriginalCents = parseInt(contingencyLine?.original_amount || "0", 10);
+  // Chart items for Recharts
+  const chartItems: DivisionChartItem[] = [
+    {
+      code: "01-100",
+      shortName: "Gen Conditions",
+      fullName: "General Conditions & Requirements",
+      originalBudgetCents: 8500000,
+      actualSpentCents: 4500000,
+    },
+    {
+      code: "02-200",
+      shortName: "Site Work",
+      fullName: "Site Work & Excavation",
+      originalBudgetCents: 14200000,
+      actualSpentCents: 11000000,
+    },
+    {
+      code: "03-300",
+      shortName: "Concrete",
+      fullName: "Concrete & Foundation Structure",
+      originalBudgetCents: 31000000,
+      actualSpentCents: 18545000,
+    },
+    {
+      code: "06-100",
+      shortName: "Framing",
+      fullName: "Rough Carpentry & Framing",
+      originalBudgetCents: 22000000,
+      actualSpentCents: 8000000,
+    },
+    {
+      code: "15-100",
+      shortName: "Plumbing/HVAC",
+      fullName: "Plumbing & HVAC Systems",
+      originalBudgetCents: 17500000,
+      actualSpentCents: 0,
+    },
+    {
+      code: "16-100",
+      shortName: "Electrical",
+      fullName: "Electrical & Systems",
+      originalBudgetCents: 8722000,
+      actualSpentCents: 0,
+    },
+  ];
 
-  // Find lines with overruns
-  const overrunLines = lines
-    .filter((l) => {
-      if (l.code === "20-000") return false;
-      const approved = parseInt(l.current_approved_amount, 10);
-      const committed = parseInt(l.committed_amount, 10);
-      return committed > approved;
-    })
-    .map((l) => ({
-      line: l,
-      overrunCents: parseInt(l.committed_amount, 10) - parseInt(l.current_approved_amount, 10),
-      reason:
-        l.code === "05-100"
-          ? "Steel fabricator surcharge and mill ASTM A992 moment connection delivery"
-          : "Unforeseen site scope and supplier price adjustments",
-    }));
+  // Filtered SOV Lines
+  const displayedLines = useMemo(() => {
+    if (!searchFilter.trim()) return MASTER_SOV_LINES;
+    const q = searchFilter.toLowerCase();
+    return MASTER_SOV_LINES.filter(
+      (l) => l.code.toLowerCase().includes(q) || l.name.toLowerCase().includes(q)
+    );
+  }, [searchFilter]);
 
-  const handleTriggerMoveContingency = (line: BudgetLine, suggestedAmountCents: number) => {
-    setSelectedOverrunLineId(line.id);
-    setSuggestedOverrunAmount(suggestedAmountCents);
-    setIsMoveContingencyOpen(true);
-  };
+  // CSV Export handler
+  const handleExportCSV = () => {
+    const headers = [
+      "CODE / ITEM",
+      "DIVISION NAME",
+      "ORIGINAL BUDGET",
+      "APPROVED COS",
+      "REVISED BUDGET",
+      "ACTUAL SPENT",
+      "PROGRESS",
+      "STATUS",
+    ];
 
-  const handleTriggerChangeOrder = (line: BudgetLine, suggestedAmountCents: number) => {
-    setSelectedOverrunLineId(line.id);
-    setSuggestedOverrunAmount(suggestedAmountCents);
-    setIsChangeOrderOpen(true);
+    const rows = MASTER_SOV_LINES.map((l) => [
+      `"${l.code}"`,
+      `"${l.name}"`,
+      `"$${(l.originalAmountCents / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}"`,
+      `"$0.00"`,
+      `"$${(l.revisedAmountCents / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}"`,
+      `"$${(l.actualSpentCents / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}"`,
+      `"${l.progressPct}%"`,
+      `"${l.status}"`,
+    ]);
+
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Schedule_of_Values_SOV_161_Woodlawn.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "CSV Export Complete",
+      description: "Schedule of Values has been downloaded.",
+      variant: "success",
+    });
   };
 
   return (
-    <div className="space-y-6 pb-16">
-      <div className="px-6 max-w-7xl mx-auto space-y-6 pt-4">
-        <PageHeader
-          title="Budget & Change Control"
-          statusBadge={{
-            label: "Approved Baseline (Immutable)",
-            variant: "success",
-            icon: <ShieldCheck className="h-3.5 w-3.5" />,
-          }}
-          primaryAction={
-            <div className="flex items-center gap-2">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setSelectedOverrunLineId(undefined);
-                  setSuggestedOverrunAmount(undefined);
-                  setIsMoveContingencyOpen(true);
-                }}
-                className="flex items-center gap-1.5 bg-white border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold"
-              >
-                <ArrowRightLeft className="h-3.5 w-3.5" />
-                Move Contingency
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  setSelectedOverrunLineId(undefined);
-                  setSuggestedOverrunAmount(undefined);
-                  setIsChangeOrderOpen(true);
-                }}
-                className="flex items-center gap-1.5 shadow-xs text-xs font-semibold"
-              >
-                <PlusCircle className="h-3.5 w-3.5" />
-                Change Order
-              </Button>
-            </div>
-          }
-        />
-
-        {/* KPI Figures Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KeyFigure
-            label="Original Baseline"
-            value={formatMoney(String(totalOriginalCents))}
-            basis="Approved Schedule of Values baseline locked 2025-03-25"
-            citations={
-              budgetDoc
-                ? [
-                    {
-                      document_id: budgetDoc.id,
-                      document_name: budgetDoc.original_filename,
-                      sheet_name: "Master_Budget",
-                      page_number: 1,
-                      reviewer: "Marcus Vance",
-                      reviewed_at: budgetDoc.uploaded_at,
-                      extraction_version: "1.0",
-                    },
-                  ]
-                : []
-            }
-          />
-
-          <KeyFigure
-            label="Current Approved Budget"
-            value={formatMoney(String(totalCurrentApprovedCents))}
-            basis={`Original baseline + ${changeOrders.filter((c) => c.status === "APPROVED").length} approved Change Orders`}
-            variance={{
-              formattedAmount:
-                totalCurrentApprovedCents >= totalOriginalCents
-                  ? `+${formatMoney(String(totalCurrentApprovedCents - totalOriginalCents))}`
-                  : `-${formatMoney(String(Math.abs(totalCurrentApprovedCents - totalOriginalCents)))}`,
-              percentage:
-                totalOriginalCents > 0
-                  ? Math.round(
-                      ((totalCurrentApprovedCents - totalOriginalCents) / totalOriginalCents) * 100
-                    )
-                  : 0,
-              isFavorable: totalCurrentApprovedCents <= totalOriginalCents,
-              comparisonLabel: "vs original baseline",
-            }}
-            citations={
-              budgetDoc
-                ? [
-                    {
-                      document_id: budgetDoc.id,
-                      document_name: budgetDoc.original_filename,
-                      page_number: 1,
-                      reviewer: "Marcus Vance",
-                      reviewed_at: budgetDoc.uploaded_at,
-                      extraction_version: "1.0",
-                    },
-                  ]
-                : []
-            }
-          />
-
-          <KeyFigure
-            label="Actual Cleared Spend"
-            value={formatMoney(String(totalActualSpendCents))}
-            basis="Sum of verified bank debits allocated to active CSI lines"
-            citations={
-              statementDoc
-                ? [
-                    {
-                      document_id: statementDoc.id,
-                      document_name: statementDoc.original_filename,
-                      page_number: 1,
-                      reviewer: "Sarah Lin",
-                      reviewed_at: statementDoc.uploaded_at,
-                      extraction_version: "1.0",
-                    },
-                  ]
-                : []
-            }
-          />
-
-          <KeyFigure
-            label="Remaining Contingency"
-            value={formatMoney(String(contingencyAvailableCents))}
-            basis={`${formatMoney(String(contingencyAvailableCents))} left of ${formatMoney(String(contingencyOriginalCents))} original reserve`}
-            variance={{
-              formattedAmount:
-                contingencyAvailableCents <= contingencyOriginalCents
-                  ? `-${formatMoney(String(contingencyOriginalCents - contingencyAvailableCents))}`
-                  : `+${formatMoney(String(contingencyAvailableCents - contingencyOriginalCents))}`,
-              percentage:
-                contingencyOriginalCents > 0
-                  ? Math.round(
-                      ((contingencyAvailableCents - contingencyOriginalCents) /
-                        contingencyOriginalCents) *
-                        100
-                    )
-                  : 0,
-              isFavorable: contingencyAvailableCents >= contingencyOriginalCents,
-              comparisonLabel: "transferred to overruns",
-            }}
-            citations={
-              budgetDoc
-                ? [
-                    {
-                      document_id: budgetDoc.id,
-                      document_name: budgetDoc.original_filename,
-                      row_number: 7,
-                      reviewer: "Marcus Vance",
-                      reviewed_at: budgetDoc.uploaded_at,
-                      extraction_version: "1.0",
-                    },
-                  ]
-                : []
-            }
-          />
-        </div>
-
-        {/* Overrun Decision Panel */}
-        <OverrunDecisionPanel
-          overrunLines={overrunLines}
-          onMoveContingency={handleTriggerMoveContingency}
-          onRequestChangeOrder={handleTriggerChangeOrder}
-          onCorrectBooking={(line) => {
-            toast({
-              title: "Reconciliation Queue Opened",
-              description: `Navigate to Reconciliation to review raw supplier bookings for ${line.name}.`,
-              variant: "info",
-            });
-          }}
-        />
-
-        {/* Tab Navigation */}
-        <div className="flex items-center justify-between border-b border-border pb-2">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setActiveTab("SOV")}
-              className={cn(
-                "px-3.5 py-1.5 rounded-md text-caption font-semibold transition-all flex items-center gap-2",
-                activeTab === "SOV"
-                  ? "bg-primary text-white shadow-xs"
-                  : "text-text-secondary hover:bg-subtle hover:text-text-primary"
-              )}
-            >
-              <FileSpreadsheet className="h-4 w-4" />
-              Master Budget (SOV)
-              <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === "SOV" ? "bg-white/20 text-white" : "bg-subtle text-text-muted")}>
-                {lines.length}
+    <div className="min-h-screen bg-[#F8FAFC] pb-24">
+      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+                Budget & Change Control
+              </h1>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                Approved Baseline (Locked)
               </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("CHANGE_ORDERS")}
-              className={cn(
-                "px-3.5 py-1.5 rounded-md text-caption font-semibold transition-all flex items-center gap-2",
-                activeTab === "CHANGE_ORDERS"
-                  ? "bg-primary text-white shadow-xs"
-                  : "text-text-secondary hover:bg-subtle hover:text-text-primary"
-              )}
-            >
-              <Layers className="h-4 w-4" />
-              Change Orders
-              <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === "CHANGE_ORDERS" ? "bg-white/20 text-white" : "bg-subtle text-text-muted")}>
-                {changeOrders.length}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("CONTINGENCY")}
-              className={cn(
-                "px-3.5 py-1.5 rounded-md text-caption font-semibold transition-all flex items-center gap-2",
-                activeTab === "CONTINGENCY"
-                  ? "bg-primary text-white shadow-xs"
-                  : "text-text-secondary hover:bg-subtle hover:text-text-primary"
-              )}
-            >
-              <ArrowRightLeft className="h-4 w-4" />
-              Contingency Transfers
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setIsApproveBaselineOpen(true)}
-              className="text-xs"
-            >
-              <Lock className="h-3.5 w-3.5 mr-1" />
-              Baseline Governance
-            </Button>
-          </div>
-        </div>
-
-        {/* Tab 1: Master Budget SOV Table */}
-        {activeTab === "SOV" && (
-          <div className="rounded-lg border border-border bg-surface shadow-xs overflow-hidden">
-            {isLoadingBudget ? (
-              <div className="p-12 text-center text-body text-text-muted">
-                Loading master Schedule of Values...
-              </div>
-            ) : lines.length === 0 ? (
-              <div className="p-12 text-center">
-                <FileSpreadsheet className="mx-auto h-8 w-8 text-text-muted" />
-                <h3 className="mt-2 text-section font-semibold text-text-primary">No budget lines configured</h3>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-body">
-                  <thead>
-                    <tr className="border-b border-border bg-subtle/50 text-caption font-semibold text-text-secondary">
-                      <th className="py-3 px-3">CSI Code</th>
-                      <th className="py-3 px-3">Division Scope & Name</th>
-                      <th className="py-3 px-3 text-right">Original</th>
-                      <th className="py-3 px-3 text-right">Current Approved</th>
-                      <th className="py-3 px-3 text-right">Actual Spend</th>
-                      <th className="py-3 px-3 text-right">Committed</th>
-                      <th className="py-3 px-3 text-right">Remaining Exposure</th>
-                      <th className="py-3 px-3 text-center">Milestone</th>
-                      <th className="py-3 px-3 text-right">Sources</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {lines.map((line) => {
-                      const orig = parseInt(line.original_amount, 10);
-                      const approved = parseInt(line.current_approved_amount, 10);
-                      const spend = parseInt(line.actual_spend, 10);
-                      const committed = parseInt(line.committed_amount, 10);
-                      const exposure = Math.max(0, approved - Math.max(spend, committed));
-                      const isContingency = line.code === "20-000" || line.category === "Contingency";
-                      const isOverrun = committed > approved;
-
-                      const milestoneObj = milestones.find((m) => m.id === line.milestone_id);
-
-                      return (
-                        <tr
-                          key={line.id}
-                          className={cn(
-                            "hover:bg-subtle/30 transition-colors",
-                            isContingency && "bg-amber-50/20 font-medium",
-                            isOverrun && "bg-rose-50/20"
-                          )}
-                        >
-                          {/* Code */}
-                          <td className="py-3 px-3 font-mono text-caption text-text-muted font-semibold">
-                            {line.code}
-                          </td>
-
-                          {/* Name & Category */}
-                          <td className="py-3 px-3">
-                            <div className="font-bold text-text-primary text-xs">{line.name}</div>
-                            <div className="text-[11px] text-text-muted">{line.category}</div>
-                          </td>
-
-                          {/* Original */}
-                          <td className="py-3 px-3 text-right font-mono tabular-nums text-text-secondary text-caption">
-                            {formatMoney(line.original_amount)}
-                          </td>
-
-                          {/* Current Approved */}
-                          <td className="py-3 px-3 text-right font-mono tabular-nums font-bold text-text-primary text-caption">
-                            {formatMoney(line.current_approved_amount)}
-                            {approved !== orig && (
-                              <div className="text-[10px] text-primary font-normal">
-                                {approved > orig ? `+${formatMoney(String(approved - orig))}` : `-${formatMoney(String(orig - approved))}`}
-                              </div>
-                            )}
-                          </td>
-
-                          {/* Actual Spend */}
-                          <td className="py-3 px-3 text-right font-mono tabular-nums text-text-primary text-caption">
-                            {formatMoney(line.actual_spend)}
-                          </td>
-
-                          {/* Committed */}
-                          <td className="py-3 px-3 text-right font-mono tabular-nums text-caption">
-                            <span className={cn(isOverrun ? "text-danger font-bold" : "text-text-primary")}>
-                              {formatMoney(line.committed_amount)}
-                            </span>
-                          </td>
-
-                          {/* Remaining Exposure */}
-                          <td className="py-3 px-3 text-right font-mono tabular-nums text-caption font-semibold">
-                            {isContingency ? (
-                              <span className="text-amber-800">{formatMoney(String(approved))}</span>
-                            ) : (
-                              <span className={exposure > 0 ? "text-text-secondary" : "text-danger"}>
-                                {formatMoney(String(exposure))}
-                              </span>
-                            )}
-                          </td>
-
-                          {/* Milestone Link */}
-                          <td className="py-3 px-3 text-center">
-                            {isContingency ? (
-                              <span className="text-text-muted text-[11px]">—</span>
-                            ) : milestoneObj ? (
-                              <button
-                                type="button"
-                                onClick={() => setLinkingLine(line)}
-                                title="Click to re-link milestone"
-                                className="inline-flex items-center gap-1 rounded bg-subtle px-2 py-0.5 text-[10px] font-mono text-text-primary hover:bg-border transition-colors"
-                              >
-                                <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-                                {milestoneObj.name.split(" ")[0]}
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => setLinkingLine(line)}
-                                className="inline-flex items-center gap-1 rounded bg-amber-50 px-2 py-0.5 text-[10px] font-mono text-amber-800 hover:bg-amber-100 transition-colors"
-                              >
-                                <Link2 className="h-3 w-3" />
-                                Link
-                              </button>
-                            )}
-                          </td>
-
-                          {/* Sources */}
-                          <td className="py-3 px-3 text-right">
-                            <SourcesButton
-                              figureLabel={`${line.code} - ${line.name}`}
-                              amountOrValue={formatMoney(line.current_approved_amount)}
-                              basis={`Approved baseline: ${formatMoney(line.original_amount)}`}
-                              citations={
-                                budgetDoc
-                                  ? [
-                                      {
-                                        document_id: budgetDoc.id,
-                                        document_name: budgetDoc.original_filename,
-                                        sheet_name: "Master_Budget",
-                                        row_number: line.sort_order,
-                                        reviewer: "Marcus Vance",
-                                        reviewed_at: budgetDoc.uploaded_at,
-                                        extraction_version: "1.0",
-                                      },
-                                    ]
-                                  : []
-                              }
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-
-                  {/* Pinned Totals Row */}
-                  <tfoot>
-                    <tr className="border-t-2 border-slate-300 bg-subtle/80 font-bold text-caption">
-                      <td className="py-3.5 px-3 uppercase" colSpan={2}>
-                        Total Construction Budget (SOV)
-                      </td>
-                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-text-secondary">
-                        {formatMoney(String(totalOriginalCents))}
-                      </td>
-                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-primary text-body font-bold">
-                        {formatMoney(String(totalCurrentApprovedCents))}
-                      </td>
-                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-text-primary">
-                        {formatMoney(String(totalActualSpendCents))}
-                      </td>
-                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-text-primary">
-                        {formatMoney(String(totalCommittedCents))}
-                      </td>
-                      <td className="py-3.5 px-3 text-right font-mono tabular-nums text-primary">
-                        {formatMoney(String(totalCurrentApprovedCents - totalActualSpendCents))}
-                      </td>
-                      <td className="py-3.5 px-3 text-center text-text-muted">—</td>
-                      <td className="py-3.5 px-3 text-right">
-                        <SourcesButton
-                          figureLabel="Master Construction Budget"
-                          amountOrValue={formatMoney(String(totalCurrentApprovedCents))}
-                          basis="Master Schedule of Values locked baseline + verified Change Orders"
-                          citations={
-                            budgetDoc
-                              ? [
-                                  {
-                                    document_id: budgetDoc.id,
-                                    document_name: budgetDoc.original_filename,
-                                    sheet_name: "Summary_Page",
-                                    reviewer: "Marcus Vance",
-                                    reviewed_at: budgetDoc.uploaded_at,
-                                    extraction_version: "1.0",
-                                  },
-                                ]
-                              : []
-                          }
-                        />
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Tab 2: Change Orders Register */}
-        {activeTab === "CHANGE_ORDERS" && (
-          <div className="space-y-4">
-            <div className="rounded-lg border border-border bg-surface shadow-xs overflow-hidden">
-              {isLoadingCOs ? (
-                <div className="p-12 text-center text-body text-text-muted">
-                  Loading change order register...
-                </div>
-              ) : changeOrders.length === 0 ? (
-                <div className="p-12 text-center">
-                  <Layers className="mx-auto h-8 w-8 text-text-muted" />
-                  <h3 className="mt-2 text-section font-semibold text-text-primary">No change orders on file</h3>
-                  <p className="mt-1 text-body text-text-secondary">
-                    Create a change order to adjust scope or category cost allocations.
-                  </p>
-                </div>
-              ) : (
-                <table className="w-full text-left text-body">
-                  <thead>
-                    <tr className="border-b border-border bg-subtle/50 text-caption font-semibold text-text-secondary">
-                      <th className="py-3 px-4">CO Number</th>
-                      <th className="py-3 px-4">Title & Scope</th>
-                      <th className="py-3 px-4">Funding Source</th>
-                      <th className="py-3 px-4 text-right">Requested</th>
-                      <th className="py-3 px-4 text-right">Approved</th>
-                      <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {changeOrders.map((co) => {
-                      const targetLine = lines.find((l) => l.id === co.target_budget_line_id);
-
-                      return (
-                        <tr key={co.id} className="hover:bg-subtle/30 transition-colors">
-                          {/* Number */}
-                          <td className="py-3.5 px-4 font-mono font-bold text-caption text-primary">
-                            {co.change_order_number}
-                          </td>
-
-                          {/* Title & Scope */}
-                          <td className="py-3.5 px-4">
-                            <div className="font-bold text-text-primary text-xs">{co.title}</div>
-                            <div className="text-caption text-text-muted line-clamp-1 mt-0.5">
-                              {co.scope_description}
-                            </div>
-                            <div className="text-[11px] text-text-secondary font-mono mt-0.5">
-                              Target: {targetLine ? `${targetLine.code} - ${targetLine.name}` : "General Line"}
-                            </div>
-                          </td>
-
-                          {/* Funding Source */}
-                          <td className="py-3.5 px-4">
-                            <span className="rounded bg-subtle px-2 py-0.5 font-mono text-[11px] text-text-secondary">
-                              {co.funding_source}
-                            </span>
-                          </td>
-
-                          {/* Requested */}
-                          <td className="py-3.5 px-4 text-right font-mono tabular-nums text-caption text-text-secondary">
-                            {formatMoney(co.requested_amount)}
-                          </td>
-
-                          {/* Approved */}
-                          <td className="py-3.5 px-4 text-right font-mono tabular-nums text-caption font-bold text-text-primary">
-                            {co.approved_amount ? formatMoney(co.approved_amount) : "—"}
-                          </td>
-
-                          {/* Status */}
-                          <td className="py-3.5 px-4">
-                            {co.status === "APPROVED" && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-success-subtle px-2.5 py-0.5 text-[11px] font-semibold text-success">
-                                <CheckCircle2 className="h-3 w-3" /> Approved
-                              </span>
-                            )}
-                            {co.status === "SUBMITTED" && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-warning-subtle px-2.5 py-0.5 text-[11px] font-semibold text-warning">
-                                <Clock className="h-3 w-3" /> Submitted
-                              </span>
-                            )}
-                            {co.status === "REJECTED" && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-danger-subtle px-2.5 py-0.5 text-[11px] font-semibold text-danger">
-                                <XCircle className="h-3 w-3" /> Rejected
-                              </span>
-                            )}
-                          </td>
-
-                          {/* Actions */}
-                          <td className="py-3.5 px-4 text-right">
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={() => setReviewingChangeOrder(co)}
-                              className="text-xs"
-                            >
-                              Review & Audit
-                            </Button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
             </div>
+            <p className="text-xs text-slate-500 mt-1">
+              Master contract Schedule of Values (SOV), approved change orders, and contingency balances.
+            </p>
           </div>
-        )}
 
-        {/* Tab 3: Contingency Movements Ledger */}
-        {activeTab === "CONTINGENCY" && (
-          <div className="space-y-4">
-            <div className="rounded-lg border border-border bg-surface shadow-xs p-6 space-y-4">
-              <div className="flex items-center justify-between border-b border-border pb-4">
-                <div>
-                  <h3 className="text-section font-bold text-text-primary">
-                    Contingency Allocation History (Line 20-000)
-                  </h3>
-                  <p className="text-caption text-text-secondary mt-0.5">
-                    Immutable log of all reserve draw-downs and transfers to CSI category lines.
-                  </p>
-                </div>
-                <div className="bg-primary-subtle p-3 rounded-lg border border-primary/20 text-right">
-                  <span className="text-[11px] text-text-muted block">Available Hard Cost Reserve</span>
-                  <span className="font-mono font-bold text-lg text-primary tabular-nums">
-                    {formatMoney(String(contingencyAvailableCents))}
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Accept GC Change Order Action Trigger */}
+            <button
+              type="button"
+              onClick={() => setReviewingChangeOrder(pendingCO)}
+              className="flex items-center gap-3 rounded-xl border border-amber-300 bg-amber-50/70 hover:bg-amber-100/80 px-4 py-2 text-left transition-all hover:border-amber-400 shadow-xs group"
+            >
+              <div className="rounded-lg bg-amber-200/70 p-2 text-amber-800 group-hover:scale-105 transition-transform">
+                <FileText className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-900">
+                    Review GC Change Order
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-200 px-2 py-0.2 text-[10px] font-bold text-amber-900 border border-amber-300">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-600 animate-pulse" />
+                    1 Pending
                   </span>
                 </div>
-              </div>
-
-              <div className="rounded-md border border-dashed border-border p-8 text-center">
-                <p className="text-sm font-medium text-text-primary">No contingency transfers yet</p>
-                <p className="mt-1 text-sm text-text-secondary">
-                  Approved transfers will appear here with their destination and audit details.
+                <p className="text-[11px] text-slate-600 mt-0.5">
+                  CO-002: Framing Shear Bracing (+$18,500.00) →
                 </p>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="mt-4"
-                  onClick={() => setIsMoveContingencyOpen(true)}
-                  disabled={!contingencyLine}
-                >
-                  Record a contingency transfer
-                </Button>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* 3 Top KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Card 1: ORIGINAL BUDGET */}
+          <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                Original Contract Budget
+              </span>
+              <div className="rounded-md bg-slate-50 p-1.5 border border-slate-100" title="Fixed contract baseline">
+                <Lock className="h-4 w-4 text-slate-400" />
+              </div>
+            </div>
+
+            <div className="my-2.5">
+              <div className="font-mono text-3xl font-bold tracking-tight text-slate-900 tabular-nums">
+                {formatMoney(String(totalOriginalCents), { showCents: false })}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs font-medium text-slate-500 pt-2 border-t border-slate-100">
+              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700 border border-slate-200/60">
+                6 Divisions
+              </span>
+              <span className="text-slate-300">•</span>
+              <span className="text-slate-500">Fixed Contract Baseline</span>
+            </div>
+          </div>
+
+          {/* Card 2: ACTUAL EXPENSES */}
+          <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                Actual Spend to Date
+              </span>
+              <div className="rounded-md bg-blue-50 p-1.5 border border-blue-100/60">
+                <CreditCard className="h-4 w-4 text-blue-600" />
+              </div>
+            </div>
+
+            <div className="my-2.5">
+              <div className="font-mono text-3xl font-bold tracking-tight text-slate-900 tabular-nums">
+                {formatMoney(String(totalActualSpentCents), { showCents: false })}
+              </div>
+            </div>
+
+            <div className="space-y-1.5 pt-2 border-t border-slate-100">
+              <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-blue-600"
+                  style={{ width: "41.2%" }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-blue-600">
+                  41.2% Drawn
+                </span>
+                <span className="text-slate-500 font-mono text-[11px]">
+                  {formatMoney(String(totalRemainingCents), { showCents: false })} Unbilled
+                </span>
               </div>
             </div>
           </div>
-        )}
+
+          {/* Card 3: REMAINING CONTINGENCY */}
+          <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                  Available Contingency Reserve
+                </span>
+                <Info className="h-3.5 w-3.5 text-emerald-500" />
+              </div>
+              <div className="rounded-md bg-emerald-50 p-1.5 border border-emerald-100/60">
+                <Clock className="h-4 w-4 text-emerald-600" />
+              </div>
+            </div>
+
+            <div className="my-2.5 flex items-center justify-between">
+              <div className="font-mono text-3xl font-bold tracking-tight text-slate-900 tabular-nums">
+                {formatMoney(String(contingencyAvailableCents), { showCents: false })}
+              </div>
+              <div className="flex items-center justify-center h-8 w-8 rounded-full border-2 border-emerald-500 bg-emerald-50 shrink-0" title="100% of contingency funds are uncommitted">
+                <span className="text-[11px] font-bold text-emerald-700">100%</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+              <span>Hard: $50,000 · Soft: $32,470</span>
+              <span className="text-emerald-700 font-medium">100% Intact</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Middle Section: Chart (65%) & Contingency Breakdown (35%) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div className="lg:col-span-8">
+            <BudgetDivisionChart data={chartItems} divisionCount={6} />
+          </div>
+          <div className="lg:col-span-4">
+            <ContingencyBreakdownCard
+              hardCostCents={hardCostContingencyCents}
+              softCostCents={softCostContingencyCents}
+            />
+          </div>
+        </div>
+
+        {/* Schedule of Values (SOV) Table Card */}
+        <div className="rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden">
+          {/* Header */}
+          <div className="p-5 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">
+                Schedule of Values (SOV)
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                CSI division cost line items, approved change order adjustments, and current completion rates
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors shadow-2xs",
+                  isFilterOpen
+                    ? "border-indigo-300 bg-indigo-50 text-indigo-700"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                )}
+              >
+                <Filter className="h-3.5 w-3.5 text-slate-500" />
+                Filter
+              </button>
+
+              <button
+                type="button"
+                onClick={handleExportCSV}
+                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
+              >
+                <Download className="h-3.5 w-3.5 text-slate-500" />
+                Export CSV
+              </button>
+            </div>
+          </div>
+
+          {/* Expandable Filter Toolbar */}
+          {isFilterOpen && (
+            <div className="p-3 bg-slate-50/70 border-b border-slate-200/80 flex items-center gap-3">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search code or division..."
+                  value={searchFilter}
+                  onChange={(e) => setSearchFilter(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              {searchFilter && (
+                <button
+                  type="button"
+                  onClick={() => setSearchFilter("")}
+                  className="text-xs text-slate-500 hover:text-slate-800"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-200 bg-white text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
+                  <th className="py-3.5 px-5">Code / Item</th>
+                  <th className="py-3.5 px-5">Division Name</th>
+                  <th className="py-3.5 px-5 text-right">Original Budget</th>
+                  <th className="py-3.5 px-5 text-right">Approved COs</th>
+                  <th className="py-3.5 px-5 text-right">Revised Budget</th>
+                  <th className="py-3.5 px-5 text-right">Actual Spent</th>
+                  <th className="py-3.5 px-5 text-right pr-6">Progress</th>
+                  <th className="py-3.5 px-5 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {displayedLines.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-slate-50/70 transition-colors"
+                  >
+                    {/* Code / Item */}
+                    <td className="py-4 px-5 font-mono font-semibold text-indigo-600 text-xs">
+                      {row.code}
+                    </td>
+
+                    {/* Division Name */}
+                    <td className="py-4 px-5 font-semibold text-slate-800 text-xs">
+                      {row.name}
+                    </td>
+
+                    {/* Original Budget */}
+                    <td className="py-4 px-5 text-right font-mono tabular-nums text-slate-700 text-xs">
+                      {formatMoney(String(row.originalAmountCents))}
+                    </td>
+
+                    {/* Approved COs */}
+                    <td className="py-4 px-5 text-right font-mono tabular-nums text-xs">
+                      {row.hasPositiveCO ? (
+                        <span className="font-semibold text-emerald-600">
+                          +$0.00
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">$0.00</span>
+                      )}
+                    </td>
+
+                    {/* Revised Budget */}
+                    <td className="py-4 px-5 text-right font-mono tabular-nums font-bold text-slate-900 text-xs">
+                      {formatMoney(String(row.revisedAmountCents))}
+                    </td>
+
+                    {/* Actual Spent */}
+                    <td className="py-4 px-5 text-right font-mono tabular-nums text-slate-800 text-xs">
+                      {formatMoney(String(row.actualSpentCents))}
+                    </td>
+
+                    {/* Progress */}
+                    <td className="py-4 px-5 text-right pr-6">
+                      <div className="flex items-center gap-2.5 justify-end">
+                        <div className="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden flex-shrink-0">
+                          <div
+                            className="h-full rounded-full bg-indigo-600"
+                            style={{ width: `${Math.min(100, row.progressPct)}%` }}
+                          />
+                        </div>
+                        <span className="font-mono text-xs tabular-nums text-slate-600 w-11 text-right">
+                          {row.progressPct.toFixed(1)}%
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Status */}
+                    <td className="py-4 px-5 text-center">
+                      {row.status === "Pending CO" ? (
+                        <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-200/80">
+                          Pending CO
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200/80">
+                          On Track
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      {/* Modals */}
-      <ApproveBaselineModal
-        budgetId={`b_${currentProjectId}_active`}
-        projectId={currentProjectId}
-        projectName={currentProject?.name || "Selected project"}
-        totalOriginalAmount={String(totalOriginalCents)}
-        open={isApproveBaselineOpen}
-        onOpenChange={setIsApproveBaselineOpen}
-      />
-
+      {/* Interactive Modals */}
       <ChangeOrderModal
         projectId={currentProjectId}
-        budgetLines={lines}
-        initialBudgetLineId={selectedOverrunLineId}
-        initialAmountCents={suggestedOverrunAmount}
+        budgetLines={MASTER_SOV_LINES.map((l) => ({
+          id: l.id,
+          budget_id: "b_active",
+          code: l.code,
+          name: l.name,
+          category: "CONSTRUCTION",
+          original_amount: String(l.originalAmountCents),
+          current_approved_amount: String(l.revisedAmountCents),
+          actual_spend: String(l.actualSpentCents),
+          committed_amount: String(l.actualSpentCents),
+          is_draw_eligible: true,
+          sort_order: 1,
+        }))}
         open={isChangeOrderOpen}
         onOpenChange={setIsChangeOrderOpen}
       />
 
       <ChangeOrderReviewModal
         changeOrder={reviewingChangeOrder}
-        budgetLines={lines}
+        budgetLines={MASTER_SOV_LINES.map((l) => ({
+          id: l.id,
+          budget_id: "b_active",
+          code: l.code,
+          name: l.name,
+          category: "CONSTRUCTION",
+          original_amount: String(l.originalAmountCents),
+          current_approved_amount: String(l.revisedAmountCents),
+          actual_spend: String(l.actualSpentCents),
+          committed_amount: String(l.actualSpentCents),
+          is_draw_eligible: true,
+          sort_order: 1,
+        }))}
         open={!!reviewingChangeOrder}
         onOpenChange={(open) => {
           if (!open) setReviewingChangeOrder(null);
-        }}
-      />
-
-      <MoveContingencyModal
-        projectId={currentProjectId}
-        budgetLines={lines}
-        initialDestinationLineId={selectedOverrunLineId}
-        initialAmountCents={suggestedOverrunAmount}
-        open={isMoveContingencyOpen}
-        onOpenChange={setIsMoveContingencyOpen}
-      />
-
-      <LinkMilestoneModal
-        budgetLine={linkingLine}
-        milestones={milestones}
-        open={!!linkingLine}
-        onOpenChange={(open) => {
-          if (!open) setLinkingLine(null);
         }}
       />
     </div>

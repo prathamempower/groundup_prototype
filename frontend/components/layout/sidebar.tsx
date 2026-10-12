@@ -164,20 +164,22 @@ export function Sidebar({
 
           {/* Active Project Switcher Pill */}
           {!collapsed ? (
-            <div className="mt-3.5 rounded-xl border border-slate-200/80 bg-white p-3 shadow-2xs">
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-xs font-semibold text-slate-900 truncate leading-snug flex-1" title={activeProject?.name}>
+            <div className="mt-3 rounded-xl border border-slate-200/80 bg-white p-3 shadow-2xs">
+              <div className="mb-1.5">
+                <span className="text-xs font-bold text-slate-900 block truncate" title={activeProject?.name}>
                   {activeProject?.name || "Project Workspace"}
                 </span>
-                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700 shrink-0 border border-slate-200/80">
-                  {formatStageLabel(activeProject?.lifecycle_stage)}
+                <span className="text-[11px] text-slate-500 block truncate mt-0.5">
+                  {activeProject?.address || "Active Construction"}
                 </span>
               </div>
-              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-1.5 border-t border-slate-100">
-                <span className="capitalize">{effectiveRole.toLowerCase()}</span>
+              <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1.5 border-t border-slate-100">
+                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700 border border-slate-200/80">
+                  {formatStageLabel(activeProject?.lifecycle_stage)}
+                </span>
                 <Link
                   href="/projects"
-                  className="font-medium text-slate-600 hover:text-slate-900 transition-colors text-[11px]"
+                  className="font-semibold text-primary hover:text-primary/80 transition-colors text-[11px]"
                 >
                   Switch
                 </Link>
@@ -232,7 +234,14 @@ export function Sidebar({
 
                 {!collapsed && (
                   <div className="flex flex-1 items-center justify-between overflow-hidden">
-                    <span className="truncate">{item.label}</span>
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="truncate">{item.label}</span>
+                      {item.id === "budget" && (
+                        <span className="rounded bg-slate-100 px-1.5 py-0.2 font-mono text-[10px] font-semibold text-slate-500 border border-slate-200">
+                          CSI
+                        </span>
+                      )}
+                    </div>
                     {badgeCount > 0 && (
                       <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-2xs">
                         {badgeCount}

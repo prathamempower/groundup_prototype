@@ -101,7 +101,7 @@ export default function TimelinePage() {
   };
 
   // Filtered Milestones for Table
-  const filteredMilestones = milestones.filter((m) => {
+  const filteredMilestones = milestones.filter((m: MilestoneItem) => {
     const matchesSearch =
       m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (m.budget_line_name &&

@@ -19,6 +19,8 @@ import {
   LogOut,
   CheckSquare,
   ArrowRight,
+  Search,
+  Moon,
 } from "lucide-react";
 import { authAdapter } from "@/lib/api/adapters/auth-adapter";
 import {
@@ -166,13 +168,29 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
 
           {/* Clean title or breadcrumb */}
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider hidden sm:inline">
-              Workspace
+            <Link
+              href="/projects"
+              className="text-xs font-semibold text-slate-400 hover:text-slate-800 uppercase tracking-wider hidden sm:inline transition-colors"
+            >
+              WORKSPACE
+            </Link>
+            <span className="text-blue-600 hidden sm:inline font-bold">›</span>
+            <span className="h-2 w-2 rounded-full bg-blue-600 hidden sm:inline" />
+            <span className="text-sm font-bold text-slate-900 truncate max-w-[200px] sm:max-w-[320px]">
+              {currentProject ? currentProject.name : pathname.startsWith("/projects") ? "Project Portfolio" : "161 Woodlawn Ave"}
             </span>
-            <span className="text-slate-300 hidden sm:inline">/</span>
-            <span className="text-sm font-semibold text-slate-900 truncate max-w-[200px] sm:max-w-[320px]">
-              {currentProject ? currentProject.name : pathname.startsWith("/projects") ? "Project Portfolio" : "GroundUp AI"}
-            </span>
+          </div>
+        </div>
+
+        {/* Center: Global Search Bar */}
+        <div className="hidden md:flex items-center flex-1 max-w-md mx-6">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search line items, draws, risks..."
+              className="w-full rounded-lg border border-slate-200/80 bg-slate-50/70 pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300 transition-all"
+            />
           </div>
         </div>
 
@@ -496,18 +514,17 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
               }}
               className="flex items-center gap-2 rounded-lg p-1 hover:bg-slate-100 transition-colors"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
-                {currentUser?.avatarInitials || "U"}
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white tracking-wider">
+                {currentUser?.avatarInitials || "MV"}
               </div>
               <div className="hidden sm:flex flex-col text-left">
-                <span className="text-xs font-semibold leading-none text-slate-800">
-                  {currentUser?.name || "User"}
+                <span className="text-xs font-bold leading-tight text-slate-900">
+                  {currentUser?.name || "Marcus Vance"}
                 </span>
-                <span className="text-[10px] text-slate-400 leading-tight mt-0.5">
-                  {currentUser?.role}
+                <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">
+                  {currentUser?.role || "OWNER"}
                 </span>
               </div>
-              <ChevronDown className="h-4 w-4 text-text-muted" />
             </button>
 
             {/* User Dropdown */}

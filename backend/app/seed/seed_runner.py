@@ -606,6 +606,33 @@ def seed_database(wipe_first: bool = True):
         )
         b73_lines_map["6.02"].current_approved_amount -= 1500000
 
+        # Pending GC Change Order for 73 Broadway
+        co73_2 = ChangeOrder(
+            id=generate_uuid(),
+            organization_id=org.id,
+            project_id=p73.id,
+            change_order_number="CO-002",
+            title="Rough Carpentry Seismic Shear Wall Bracing",
+            reason="Mandated lateral tie-downs and shear clips per engineer review",
+            status="SUBMITTED",
+            requested_amount=1850000,
+            requested_by=users["GC"].id,
+            created_at=utc_now(),
+        )
+        db.add(co73_2)
+        db.flush()
+
+        db.add(
+            ChangeOrderLine(
+                id=generate_uuid(),
+                change_order_id=co73_2.id,
+                budget_line_id=b73_lines_map["3.01"].id,
+                amount=1850000,
+                description="Structural moment framing tie-down clips and shear paneling",
+                created_at=utc_now(),
+            )
+        )
+
         # Physical Documents on Disk for 73 Broadway
         p73_docs_to_seed = [
             ("73 Broadway - Report #1.pdf", "REPORT", date(2025, 6, 1)),
@@ -628,6 +655,53 @@ def seed_database(wipe_first: bool = True):
                 db, fpath, org.id, p73.id, dtype, fdate, users["OWNER"].id, storage
             )
             doc73_map[fname] = d
+
+        # Seed realistic spend records for 73 Broadway ($420,450.00 total)
+        p73_spend_records = [
+            ("1.05", 4500000, vendor_jc_tax, "Permits, architectural filings, and municipal inspections", date(2025, 4, 15)),
+            ("2.05", 11000000, parties.get("Tri-State Excavation", gc_apex), "Mass site excavation, rock breaking, cut & fill grading", date(2025, 5, 20)),
+            ("2.09", 18545000, parties.get("Precision Rebar & Concrete", gc_apex), "Continuous footings, rebar cages, and foundation concrete pour", date(2025, 6, 25)),
+            ("3.01", 8000000, parties.get("Apex Lumber Supply", gc_apex), "Superstructure rough carpentry lumber package & shear panels", date(2025, 7, 30)),
+        ]
+        for bcode_73, amt_c_73, vnd_73, dsc_73, dt_73 in p73_spend_records:
+            tx_73_id = generate_uuid()
+            db.add(
+                FinancialTransaction(
+                    id=tx_73_id,
+                    project_id=p73.id,
+                    financial_account_id=acc_bcb_73.id,
+                    account_ref=f"73B-BCB-{bcode_73}",
+                    transaction_date=dt_73,
+                    posted_date=dt_73,
+                    amount=amt_c_73,
+                    direction="OUTFLOW",
+                    counterparty=vnd_73.name,
+                    memo=dsc_73,
+                    external_id=f"73B-SP-{bcode_73}-{dt_73}",
+                    cleared_status="CLEARED",
+                    created_at=utc_now(),
+                )
+            )
+            db.add(
+                SpendRecord(
+                    id=generate_uuid(),
+                    project_id=p73.id,
+                    vendor_party_id=vnd_73.id,
+                    transaction_date=dt_73,
+                    amount=amt_c_73,
+                    currency="USD",
+                    description=dsc_73,
+                    status="VERIFIED",
+                    evidence_strength="BANK_TRANSACTION",
+                    source_document_id=doc73_map["73 Broadway - Report #1.pdf"].id if "73 Broadway - Report #1.pdf" in doc73_map else list(doc73_map.values())[0].id,
+                    transaction_id=tx_73_id,
+                    budget_line_id=b73_lines_map[bcode_73].id,
+                    match_status="MATCHED",
+                    reviewed_by=users["CFO"].id,
+                    reviewed_at=utc_now(),
+                    created_at=utc_now(),
+                )
+            )
 
         # Draws for 73 Broadway (Draw 1 Approved & Funded, Draw 3 Short-Funded)
         draw1_73 = Draw(
@@ -2215,15 +2289,15 @@ def seed_database(wipe_first: bool = True):
         )
         db.add(lt161)
 
-        # Budget for 161 Woodlawn
+        # Budget for 161 Woodlawn ($1,019,220.00 baseline across 6 CSI Divisions + Contingency Reserve)
         budget161 = Budget(
             id=generate_uuid(),
             organization_id=org.id,
             project_id=p161.id,
             version_number=1,
             status="APPROVED",
-            total_original_amount=156100000,  # $1,561,000.00
-            total_current_approved_amount=156100000,
+            total_original_amount=101922000,  # $1,019,220.00
+            total_current_approved_amount=101922000,
             approved_by=users["OWNER"].id,
             approved_at=utc_now(),
             created_at=utc_now(),
@@ -2232,22 +2306,22 @@ def seed_database(wipe_first: bool = True):
         db.flush()
 
         b161_lines_data = [
-            ("1.00", "Land Acquisition", 37736794),
-            ("2.00", "Construction Cost", 84821056),
-            ("3.00", "Labour", 17339800),
-            ("4.00", "Municipality & Environmental Fees", 639825),
-            ("5.00", "Bank & Financing Fees", 19160),
-            ("6.00", "Loan Payments / Debt Service", 15237949),
-            ("7.00", "Accounting & Legal", 255000),
+            ("01-100", "General Conditions & Requirements", 8500000, "SOFT_COST"),     # $85,000.00
+            ("02-200", "Site Work & Excavation", 14200000, "HARD_COST"),               # $142,000.00
+            ("03-300", "Concrete & Foundation Structure", 31000000, "HARD_COST"),      # $310,000.00
+            ("06-100", "Rough Carpentry & Framing", 22000000, "HARD_COST"),            # $220,000.00
+            ("15-100", "Plumbing & HVAC Systems", 17500000, "HARD_COST"),              # $175,000.00
+            ("16-100", "Electrical & Systems", 8722000, "HARD_COST"),                  # $87,220.00
+            ("20-000", "Contingency Reserve", 8247000, "CONTINGENCY"),                  # $82,470.00
         ]
         b161_lines_map: dict[str, BudgetLine] = {}
-        for idx, (code, desc, amt) in enumerate(b161_lines_data):
+        for idx, (code, desc, amt, cat) in enumerate(b161_lines_data):
             bl = BudgetLine(
                 id=generate_uuid(),
                 budget_id=budget161.id,
                 code=code,
                 name=desc,
-                category="SOFT_COST" if code in ["1.00", "4.00", "5.00", "7.00"] else "HARD_COST",
+                category=cat,
                 original_amount=amt,
                 current_approved_amount=amt,
                 is_draw_eligible=True,
@@ -2257,6 +2331,15 @@ def seed_database(wipe_first: bool = True):
             db.add(bl)
             db.flush()
             b161_lines_map[code] = bl
+
+        # Aliases for backwards compatibility with legacy sheet mapping and draws
+        b161_lines_map["1.00"] = b161_lines_map["01-100"]
+        b161_lines_map["2.00"] = b161_lines_map["02-200"]
+        b161_lines_map["3.00"] = b161_lines_map["03-300"]
+        b161_lines_map["4.00"] = b161_lines_map["15-100"]
+        b161_lines_map["5.00"] = b161_lines_map["16-100"]
+        b161_lines_map["6.00"] = b161_lines_map["06-100"]
+        b161_lines_map["7.00"] = b161_lines_map["20-000"]
 
         # Investors (Partner ratios: Kirit 25%, Nilesh 25%, Kunal 25%, Swekit 25% = $475,000)
         for inv_p in [investor_kirit, investor_nilesh, investor_kunal, investor_swekit]:
@@ -2393,32 +2476,150 @@ def seed_database(wipe_first: bool = True):
                         )
                     )
 
-        # Pre-construction Milestones for 161 Woodlawn Ave
-        ms_161 = [
-            ("Site Acquisition & Due Diligence", "W-01", date(2024, 4, 24), date(2024, 5, 20), 100, "COMPLETED"),
-            ("Architectural Plans & Zoning Variances", "W-02", date(2024, 6, 1), date(2024, 12, 1), 100, "COMPLETED"),
-            ("Environmental Permits & Sewage Approvals", "W-03", date(2024, 12, 2), date(2025, 4, 30), 80, "IN_PROGRESS"),
-            ("Demolition & Site Remediation", "W-04", date(2025, 5, 1), date(2025, 8, 30), 20, "IN_PROGRESS"),
-            ("Foundation Excavation", "W-05", date(2025, 9, 1), date(2026, 3, 31), 0, "PLANNED"),
+        # Change Orders for 161 Woodlawn Ave
+        co1_161 = ChangeOrder(
+            id=generate_uuid(),
+            organization_id=org.id,
+            project_id=p161.id,
+            change_order_number="CO-001",
+            title="Foundation Soil Stabilization & Footing Extension",
+            reason="Geotechnical variance on bedrock elevation for column footings",
+            status="APPROVED",
+            requested_amount=0,
+            approved_amount=0,
+            requested_by=users["GC"].id,
+            approved_by=users["OWNER"].id,
+            approved_at=utc_now(),
+            created_at=utc_now(),
+        )
+        db.add(co1_161)
+        db.flush()
+
+        db.add(
+            ChangeOrderLine(
+                id=generate_uuid(),
+                change_order_id=co1_161.id,
+                budget_line_id=b161_lines_map["03-300"].id,
+                amount=0,
+                description="Subgrade soil stabilization and bedrock anchoring",
+                created_at=utc_now(),
+            )
+        )
+
+        co2_161 = ChangeOrder(
+            id=generate_uuid(),
+            organization_id=org.id,
+            project_id=p161.id,
+            change_order_number="CO-002",
+            title="Framing Additional Shear Wall & Moment Framing",
+            reason="Mandated shear transfer connection details per SE inspection memo",
+            status="SUBMITTED",
+            requested_amount=1850000,  # $18,500.00
+            requested_by=users["GC"].id,
+            created_at=utc_now(),
+        )
+        db.add(co2_161)
+        db.flush()
+
+        db.add(
+            ChangeOrderLine(
+                id=generate_uuid(),
+                change_order_id=co2_161.id,
+                budget_line_id=b161_lines_map["06-100"].id,
+                amount=1850000,
+                description="Structural moment framing steel plate clips and shear paneling",
+                created_at=utc_now(),
+            )
+        )
+
+        # Seed realistic spend records for 161 Woodlawn Ave ($420,450.00 total)
+        woodlawn_spend_allocations = [
+            ("01-100", 2500000, parties.get("Site Services LLC", gc_apex), "Site trailer mobilization, perimeter fencing, security & jobsite facilities", date(2025, 1, 15)),
+            ("01-100", 2000000, gc_apex, "Superintendent supervisory fees & engineering field coordination", date(2025, 2, 1)),
+            ("02-200", 6500000, parties.get("Tri-State Excavation", gc_apex), "Mass earthwork excavation, rock breaking, and sub-base grading", date(2025, 2, 10)),
+            ("02-200", 4500000, parties.get("Underground Dynamics", gc_apex), "Sheet piling, perimeter soldier piles & dewatering pump operations", date(2025, 3, 5)),
+            ("03-300", 9545000, parties.get("Precision Rebar & Concrete", gc_apex), "Rebar cage fabrication, grade 60 steel placement & anchor bolts", date(2025, 3, 20)),
+            ("03-300", 9000000, parties.get("Metro Concrete Pumping", gc_apex), "Foundation spread footings & 4,500 PSI continuous wall concrete pour", date(2025, 4, 10)),
+            ("06-100", 5000000, parties.get("Apex Lumber Supply", gc_apex), "Superstructure engineered lumber, LVL beams & subfloor deck package", date(2025, 4, 25)),
+            ("06-100", 3000000, gc_apex, "Rough carpentry framing crew labor draw #1", date(2025, 5, 10)),
         ]
-        for name, code, p_start, p_comp, pct, m_status in ms_161:
+        for code_wl, amt_cents_wl, vendor_p_wl, desc_str_wl, tx_dt_wl in woodlawn_spend_allocations:
+            tx_id_wl = generate_uuid()
             db.add(
-                ProjectMilestone(
-                    id=generate_uuid(),
-                    organization_id=org.id,
+                FinancialTransaction(
+                    id=tx_id_wl,
                     project_id=p161.id,
-                    name=name,
-                    code=code,
-                    planned_start_date=p_start,
-                    planned_completion_date=p_comp,
-                    actual_start_date=p_start if pct > 0 else None,
-                    actual_completion_date=p_comp if pct == 100 else None,
-                    forecast_completion_date=p_comp,
-                    progress_percentage=pct,
-                    status=m_status,
+                    financial_account_id=acc_bcb_161.id,
+                    account_ref=f"161-BCB-{code_wl}",
+                    transaction_date=tx_dt_wl,
+                    posted_date=tx_dt_wl,
+                    amount=amt_cents_wl,
+                    direction="OUTFLOW",
+                    counterparty=vendor_p_wl.name,
+                    memo=desc_str_wl,
+                    external_id=f"161-WL-{code_wl}-{tx_dt_wl}",
+                    cleared_status="CLEARED",
                     created_at=utc_now(),
                 )
             )
+            db.add(
+                SpendRecord(
+                    id=generate_uuid(),
+                    project_id=p161.id,
+                    vendor_party_id=vendor_p_wl.id,
+                    transaction_date=tx_dt_wl,
+                    amount=amt_cents_wl,
+                    currency="USD",
+                    description=desc_str_wl,
+                    status="VERIFIED",
+                    evidence_strength="BANK_TRANSACTION",
+                    source_document_id=doc161_map["161 Woodlawn Ave.xlsx"].id if "161 Woodlawn Ave.xlsx" in doc161_map else list(doc161_map.values())[0].id,
+                    transaction_id=tx_id_wl,
+                    budget_line_id=b161_lines_map[code_wl].id,
+                    match_status="MATCHED",
+                    reviewed_by=users["CFO"].id,
+                    reviewed_at=utc_now(),
+                    created_at=utc_now(),
+                )
+            )
+
+        # Pre-construction Milestones for 161 Woodlawn Ave
+        ms_161_objs = []
+        ms_161 = [
+            ("Pre-Construction & Permitting", "W-01", date(2024, 4, 24), date(2024, 5, 20), 100, "COMPLETED"),
+            ("Site Excavation & Grading", "W-02", date(2024, 6, 1), date(2024, 12, 1), 100, "COMPLETED"),
+            ("Foundation & Concrete Pour", "W-03", date(2024, 12, 2), date(2025, 4, 30), 80, "IN_PROGRESS"),
+            ("Superstructure Framing", "W-04", date(2025, 5, 1), date(2025, 8, 30), 35, "IN_PROGRESS"),
+            ("MEP Rough-Ins", "W-05", date(2025, 9, 1), date(2025, 11, 30), 0, "PLANNED"),
+            ("Electrical & Low Voltage", "W-06", date(2025, 12, 1), date(2026, 3, 31), 0, "PLANNED"),
+        ]
+        for name, code, p_start, p_comp, pct, m_status in ms_161:
+            pm = ProjectMilestone(
+                id=generate_uuid(),
+                organization_id=org.id,
+                project_id=p161.id,
+                name=name,
+                code=code,
+                planned_start_date=p_start,
+                planned_completion_date=p_comp,
+                actual_start_date=p_start if pct > 0 else None,
+                actual_completion_date=p_comp if pct == 100 else None,
+                forecast_completion_date=p_comp,
+                progress_percentage=pct,
+                status=m_status,
+                created_at=utc_now(),
+            )
+            db.add(pm)
+            db.flush()
+            ms_161_objs.append(pm)
+
+        # Link budget lines to milestones
+        b161_lines_map["01-100"].milestone_id = ms_161_objs[0].id
+        b161_lines_map["02-200"].milestone_id = ms_161_objs[1].id
+        b161_lines_map["03-300"].milestone_id = ms_161_objs[2].id
+        b161_lines_map["06-100"].milestone_id = ms_161_objs[3].id
+        b161_lines_map["15-100"].milestone_id = ms_161_objs[4].id
+        b161_lines_map["16-100"].milestone_id = ms_161_objs[5].id
 
         # -------------------------------------------------------------------------
         # Underwriting Financial Plan (Pro-Forma) for 161 Woodlawn Ave

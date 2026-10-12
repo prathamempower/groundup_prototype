@@ -584,10 +584,41 @@ export const api = {
   },
 
   progress: {
-    getMilestones: (projectId: string) =>
-      request<MilestoneItem[]>(`/projects/${projectId}/milestones`),
-    getMilestoneById: (milestoneId: string) =>
-      request<MilestoneItem>(`/milestones/${milestoneId}`),
+    getMilestones: async (projectId: string) => {
+      const res = await request<any[]>(`/projects/${projectId}/milestones`);
+      if (res.data && Array.isArray(res.data)) {
+        res.data = res.data.map((m: any) => ({
+          ...m,
+          planned_start: m.planned_start_date || m.planned_start || new Date().toISOString(),
+          planned_end: m.planned_completion_date || m.planned_end || new Date().toISOString(),
+          actual_start: m.actual_start_date || m.actual_start,
+          actual_end: m.actual_completion_date || m.actual_end,
+          forecast_end: m.forecast_completion_date || m.forecast_end || m.planned_completion_date || m.planned_end,
+          percent_complete: typeof m.progress_percentage === "number" ? m.progress_percentage : (m.percent_complete || 0),
+          critical_path: Boolean(m.critical_path ?? (m.code === "W-01" || m.code === "W-02" || m.code === "W-03")),
+          evidence_count: Array.isArray(m.evidence) ? m.evidence.length : (m.evidence_count || 0),
+          evidence_attachments: m.evidence || [],
+        }));
+      }
+      return res as ApiResponse<MilestoneItem[]>;
+    },
+    getMilestoneById: async (milestoneId: string) => {
+      const res = await request<any>(`/milestones/${milestoneId}`);
+      if (res.data) {
+        const m = res.data;
+        res.data = {
+          ...m,
+          planned_start: m.planned_start_date || m.planned_start,
+          planned_end: m.planned_completion_date || m.planned_end,
+          actual_start: m.actual_start_date || m.actual_start,
+          actual_end: m.actual_completion_date || m.actual_end,
+          forecast_end: m.forecast_completion_date || m.forecast_end,
+          percent_complete: typeof m.progress_percentage === "number" ? m.progress_percentage : (m.percent_complete || 0),
+          critical_path: Boolean(m.critical_path),
+        };
+      }
+      return res as ApiResponse<MilestoneItem>;
+    },
     createMilestone: (projectId: string, data: Partial<MilestoneItem>) =>
       request<MilestoneItem>(`/projects/${projectId}/milestones`, {
         method: "POST",
