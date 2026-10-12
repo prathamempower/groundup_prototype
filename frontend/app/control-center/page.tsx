@@ -32,9 +32,6 @@ import {
   DollarSign,
   Briefcase,
   SlidersHorizontal,
-  X,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KeyFigure } from "@/components/ui/key-figure";
@@ -158,8 +155,6 @@ export default function ControlCenterPage() {
   const params = useParams();
   const urlProjectId = (params?.projectId as string) || "";
   const [viewMode, setViewMode] = useState<"PROJECT" | "PORTFOLIO">("PROJECT");
-  const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
-  const [isAlertsCollapsed, setIsAlertsCollapsed] = useState(false);
 
   const { data: projectsData, isLoading: isProjectsLoading } = useQuery({
     queryKey: ["projects"],
@@ -411,188 +406,6 @@ export default function ControlCenterPage() {
           /* PROJECT CONTROL CENTER VIEW                                              */
           /* ========================================================================= */
           <div className="space-y-6">
-            {/* Separate Actionable Project Alerts Grid */}
-            {(() => {
-              const defaultAlerts = [
-                {
-                  id: "draw-shortfall",
-                  badge: "Draw Shortfall",
-                  badgeClass: "bg-rose-50 text-rose-700 border-rose-200",
-                  cardClass: "border-l-4 border-l-rose-500 hover:border-slate-300",
-                  icon: <AlertCircle className="h-3.5 w-3.5 text-rose-600" />,
-                  title: "Draw #3 Short-Funded",
-                  description: "Approved $460k of $520k ($60k shortfall pending mechanical inspection).",
-                  actionLabel: "Resolve in Draws",
-                  actionHref: "/draws",
-                },
-                {
-                  id: "budget-overrun",
-                  badge: "Budget Overrun",
-                  badgeClass: "bg-red-50 text-red-700 border-red-200",
-                  cardClass: "border-l-4 border-l-red-500 hover:border-slate-300",
-                  icon: <AlertTriangle className="h-3.5 w-3.5 text-red-600" />,
-                  title: "Framing & Structural Steel",
-                  description: "CO-001 reinforcement exceeded baseline by $20,000. Contingency transfer required.",
-                  actionLabel: "Review Budget",
-                  actionHref: "/budget",
-                },
-                {
-                  id: "milestone-delay",
-                  badge: "Schedule Slip",
-                  badgeClass: "bg-amber-50 text-amber-700 border-amber-200",
-                  cardClass: "border-l-4 border-l-amber-500 hover:border-slate-300",
-                  icon: <Clock className="h-3.5 w-3.5 text-amber-600" />,
-                  title: "Structural Steel Delayed",
-                  description: "Critical path delivery slip pushes finish to Dec 15 (+$28,500 carry cost impact).",
-                  actionLabel: "View Timeline",
-                  actionHref: "/timeline",
-                },
-                {
-                  id: "unallocated-cash",
-                  badge: "Unallocated Cash",
-                  badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
-                  cardClass: "border-l-4 border-l-blue-500 hover:border-slate-300",
-                  icon: <DollarSign className="h-3.5 w-3.5 text-blue-600" />,
-                  title: "Unallocated Wire Cleared",
-                  description: "$150,000 wire received in Columbia Bank operating account awaiting sub-ledger match.",
-                  actionLabel: "Reconcile Cash",
-                  actionHref: "/reconciliation",
-                },
-              ];
-
-              const visibleAlerts = defaultAlerts.filter((a) => !dismissedAlerts.includes(a.id));
-
-              if (visibleAlerts.length === 0 && dismissedAlerts.length > 0) {
-                return (
-                  <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-600">
-                    <span className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                      <span>All operational notifications have been acknowledged for this session.</span>
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs text-blue-600 font-semibold h-6 px-2"
-                      onClick={() => setDismissedAlerts([])}
-                    >
-                      Reset View
-                    </Button>
-                  </div>
-                );
-              }
-
-              if (visibleAlerts.length === 0) return null;
-
-              return (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-2 w-2 rounded-full bg-amber-500" />
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                        Active Notifications
-                      </h3>
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-                        {visibleAlerts.length}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="text-xs text-slate-500 hover:text-slate-900 h-7 px-2"
-                        onClick={() => setIsAlertsCollapsed(!isAlertsCollapsed)}
-                      >
-                        {isAlertsCollapsed ? (
-                          <span className="flex items-center gap-1">
-                            Show ({visibleAlerts.length}) <ChevronDown className="h-3.5 w-3.5" />
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1">
-                            Collapse <ChevronUp className="h-3.5 w-3.5" />
-                          </span>
-                        )}
-                      </Button>
-                      <Link href="/alerts">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-xs font-semibold text-blue-600 hover:text-blue-700 h-7 px-2"
-                        >
-                          Notifications Workspace →
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-
-                  {!isAlertsCollapsed ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-                      {visibleAlerts.map((alert) => (
-                        <div
-                          key={alert.id}
-                          className={`group relative flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs hover:shadow-xs transition-all ${alert.cardClass}`}
-                        >
-                          <div>
-                            <div className="flex items-start justify-between gap-2 mb-2.5">
-                              <span
-                                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold border ${alert.badgeClass}`}
-                              >
-                                {alert.icon}
-                                {alert.badge}
-                              </span>
-                              <button
-                                type="button"
-                                aria-label={`Dismiss ${alert.title}`}
-                                onClick={() => setDismissedAlerts((prev) => [...prev, alert.id])}
-                                className="text-slate-400 hover:text-slate-600 p-0.5 rounded transition-colors"
-                                title="Dismiss notification"
-                              >
-                                <X className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
-
-                            <h4 className="text-xs font-bold text-slate-900 leading-snug">
-                              {alert.title}
-                            </h4>
-                            <p className="text-[12px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                              {alert.description}
-                            </p>
-                          </div>
-
-                          <div className="pt-3 mt-2 border-t border-slate-100">
-                            <Link
-                              href={alert.actionHref}
-                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-                            >
-                              <span>{alert.actionLabel}</span>
-                              <ArrowRight className="h-3 w-3" />
-                            </Link>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-2.5 text-xs">
-                      <span className="flex items-center gap-2 text-slate-600">
-                        <AlertTriangle className="h-4 w-4 text-amber-500" />
-                        <span>
-                          {visibleAlerts.length} operational notifications requiring review.
-                        </span>
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-xs font-semibold text-blue-600 h-6 px-2"
-                        onClick={() => setIsAlertsCollapsed(false)}
-                      >
-                        Expand Notifications
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
 
             {isSetupIncomplete && (
               <div className="rounded-lg border border-danger-subtle bg-danger-subtle/30 p-6 text-center">
