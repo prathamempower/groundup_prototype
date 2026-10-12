@@ -99,8 +99,8 @@ export function AppShell({ children }: AppShellProps) {
     if (!session || !activeProjectId) return;
     if (standaloneSection && legacyWorkspaceSections.includes(standaloneSection)) {
       router.replace(`/projects/${activeProjectId}/${standaloneSection}`);
-    } else if (pathname === "/investor-update") {
-      router.replace(`/projects/${activeProjectId}/investor-updates`);
+    } else if (pathname === "/investor-update" || pathname.includes("/investor-updates")) {
+      router.replace(`/projects/${activeProjectId}/control-center`);
     }
   }, [pathname, session, activeProjectId, standaloneSection, router]);
 
