@@ -780,7 +780,7 @@ export default function ReconciliationPage() {
                 <Search className="h-3.5 w-3.5 absolute left-3 top-2.5 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search description, vendor, account, or audit note..."
+                  placeholder="Search transactions..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full rounded-lg border border-slate-200/90 bg-white pl-8 pr-3 py-1.5 text-xs placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
@@ -804,8 +804,8 @@ export default function ReconciliationPage() {
                   className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
                 >
                   <option value="ALL">All statuses</option>
-                  <option value="PENDING">Pending action ({unresolvedCount})</option>
-                  <option value="RESOLVED">Resolved by owner ({resolvedItems.length})</option>
+                  <option value="PENDING">Pending action</option>
+                  <option value="RESOLVED">Resolved</option>
                 </select>
 
                 <select
@@ -830,7 +830,7 @@ export default function ReconciliationPage() {
               </div>
             </div>
 
-            {/* Exact Table Component with Owner-Driven Actions */}
+            {/* Clean, Simple Table Component */}
             <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
@@ -851,9 +851,9 @@ export default function ReconciliationPage() {
                       <th className="px-3.5 py-2.5">Account</th>
                       <th className="px-3.5 py-2.5">Description</th>
                       <th className="px-3.5 py-2.5">Amount</th>
-                      <th className="px-3.5 py-2.5">Proposed Allocation</th>
+                      <th className="px-3.5 py-2.5">Category</th>
                       <th className="px-3.5 py-2.5">Evidence</th>
-                      <th className="px-3.5 py-2.5">Owner Status & Reason</th>
+                      <th className="px-3.5 py-2.5">Status</th>
                       <th className="px-3.5 py-2.5 text-right">Actions</th>
                     </tr>
                   </thead>
@@ -864,7 +864,7 @@ export default function ReconciliationPage() {
                           colSpan={9}
                           className="py-10 text-center text-xs text-slate-400"
                         >
-                          No transactions match your current filters.
+                          No transactions found.
                         </td>
                       </tr>
                     ) : (
@@ -910,17 +910,10 @@ export default function ReconciliationPage() {
                                 {row.direction === "in" ? "Money in" : "Money out"}
                               </span>
                             </td>
-                            <td className="px-3.5 py-3">
+                            <td className="px-3.5 py-3 whitespace-nowrap">
                               <span className="inline-block rounded-md bg-slate-100/90 text-slate-700 px-2 py-0.5 text-[11px] border border-slate-200">
                                 {row.proposedLink}
                               </span>
-                              <div
-                                className="text-[10px] text-slate-400 mt-1 flex items-center gap-1"
-                                title={row.whyMatches}
-                              >
-                                <Sparkles className="h-2.5 w-2.5 text-slate-400 shrink-0" />
-                                <span className="truncate max-w-[170px]">{row.whyMatches}</span>
-                              </div>
                             </td>
                             <td className="px-3.5 py-3 whitespace-nowrap">
                               {row.evidence === "Strong" && (
@@ -939,22 +932,12 @@ export default function ReconciliationPage() {
                                 </span>
                               )}
                             </td>
-                            <td className="px-3.5 py-3">
+                            <td className="px-3.5 py-3 whitespace-nowrap">
                               {isResolved ? (
-                                <div className="space-y-0.5">
-                                  <div>{getResolutionBadge(row.resolutionType)}</div>
-                                  {row.resolutionNote && (
-                                    <p
-                                      className="text-[10px] text-slate-500 italic max-w-[210px] truncate"
-                                      title={row.resolutionNote}
-                                    >
-                                      "{row.resolutionNote}"
-                                    </p>
-                                  )}
-                                </div>
+                                getResolutionBadge(row.resolutionType)
                               ) : (
-                                <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-semibold border border-amber-200">
-                                  Pending action
+                                <span className="rounded-full bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-semibold border border-amber-200">
+                                  Pending
                                 </span>
                               )}
                             </td>
@@ -964,17 +947,17 @@ export default function ReconciliationPage() {
                                   <button
                                     type="button"
                                     onClick={() => setResolutionModalItem(row)}
-                                    className="rounded border border-slate-200 bg-white text-slate-700 px-2.5 py-1 text-[11px] font-medium hover:bg-slate-50 transition-colors shadow-2xs"
+                                    className="rounded border border-slate-200 bg-white text-slate-700 px-2.5 py-1 text-xs font-medium hover:bg-slate-50 transition-colors shadow-2xs"
                                   >
-                                    Edit Reason
+                                    Edit
                                   </button>
                                 ) : (
                                   <button
                                     type="button"
                                     onClick={() => setResolutionModalItem(row)}
-                                    className="rounded bg-slate-900 text-white px-2.5 py-1 text-[11px] font-semibold hover:bg-slate-800 transition-colors shadow-2xs flex items-center gap-1"
+                                    className="rounded bg-slate-900 text-white px-3 py-1 text-xs font-semibold hover:bg-slate-800 transition-colors shadow-2xs"
                                   >
-                                    Specify Action
+                                    Resolve
                                   </button>
                                 )}
 
@@ -982,7 +965,7 @@ export default function ReconciliationPage() {
                                   <button
                                     type="button"
                                     onClick={() => setActiveMoreMenuId(isMenuOpen ? null : row.id)}
-                                    className="text-slate-400 hover:text-slate-700 px-1.5 py-1 text-[11px] font-medium rounded hover:bg-slate-100 transition-colors"
+                                    className="text-slate-400 hover:text-slate-700 px-1.5 py-1 text-xs font-medium rounded hover:bg-slate-100 transition-colors"
                                   >
                                     More
                                   </button>
