@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import require_role
 from app.core.envelope import ResponseEnvelope
-from app.db.models import User, ChangeOrder
+from app.db.models import ChangeOrder, User
 from app.db.session import get_db
 from app.modules.budgets.schemas import (
     BudgetCreate,

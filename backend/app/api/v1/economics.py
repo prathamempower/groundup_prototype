@@ -2,15 +2,15 @@ import uuid
 from datetime import UTC, date, datetime
 
 from fastapi import APIRouter, Depends, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth import require_role
 from app.core.envelope import ResponseEnvelope
 from app.core.errors import NotFoundException, ValidationFailedException
-from app.db.models import InvestorUpdate, Project, ProjectMember, Unit, User
 from app.db.audit import record_audit_event
+from app.db.models import InvestorUpdate, Project, ProjectMember, Unit, User
 from app.db.session import get_db
-from sqlalchemy import select
 from app.modules.economics.schemas import (
     CloseoutApprovalRequest,
     CloseoutReportRead,
@@ -36,7 +36,6 @@ from app.modules.economics.schemas import (
     RecordUnitSaleRequest,
 )
 from app.modules.economics.service import EconomicsService
-
 
 router = APIRouter(tags=["Economics & Investors"])
 

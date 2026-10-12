@@ -2,15 +2,15 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, Query, status
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.auth import require_role
 from app.core.envelope import ResponseEnvelope
 from app.core.errors import NotFoundException
-from app.db.models import GCSubmission, Project, SpendRecord, User
+from app.db.models import GCSubmission, SpendRecord, User
 from app.db.session import get_db
 
 router = APIRouter(tags=["General Contractor Submissions"])

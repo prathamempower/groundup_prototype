@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import require_role
 from app.core.envelope import ResponseEnvelope
-from app.db.models import User, Draw, DrawRequirement
+from app.db.models import Draw, DrawRequirement, User
 from app.db.session import get_db
 from app.modules.draws.schemas import (
     DrawCreate,

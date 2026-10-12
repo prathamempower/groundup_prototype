@@ -49,7 +49,7 @@ async def list_projects(
     db: Session = Depends(get_db),
 ):
     from app.core.auth import get_effective_role
-    from app.db.models import Alert, ProjectMilestone, ProjectFinancialPlan, AuditEvent
+    from app.db.models import Alert, AuditEvent, ProjectFinancialPlan, ProjectMilestone
 
     service = OnboardingService(db)
     projects = service.list_projects_for_user(user)

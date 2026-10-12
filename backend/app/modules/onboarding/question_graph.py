@@ -1,4 +1,5 @@
-from typing import Any, Callable
+from typing import Any
+
 from app.modules.onboarding.schemas import OnboardingQuestion, QuestionOption
 
 # ==========================================
@@ -698,7 +699,7 @@ def get_next_question_for_role(
         # 1. Has property been acquired?
         if "OWNER_PROPERTY_ACQUIRED" not in answered_keys:
             return QUESTIONS_BY_KEY["OWNER_PROPERTY_ACQUIRED"]
-        
+
         acquired = _get_answer_val(answers, "OWNER_PROPERTY_ACQUIRED")
         if acquired in ["true", "True", "YES"]:
             if "OWNER_ACQUISITION_FUNDING" not in answered_keys:

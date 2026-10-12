@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from app.core.errors import (
     ForbiddenException,
     NotFoundException,
-    ProjectScopeDeniedException,
     UnauthenticatedException,
 )
 from app.core.security import decode_token

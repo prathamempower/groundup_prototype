@@ -1,9 +1,10 @@
 import uuid
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 
 from app.core.security import hash_password
-from app.db.models import Organization, Project, ProjectMember, User, Document
+from app.db.models import Document, Organization, Project, ProjectMember, User
 from app.db.session import SessionLocal
 from app.main import app
 

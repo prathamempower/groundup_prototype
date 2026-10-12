@@ -253,7 +253,7 @@ async def accept_all_extractions_endpoint(
     user: User = Depends(require_role(["OWNER", "CFO", "PM"])),
     db: Session = Depends(get_db),
 ):
-    from app.db.models import ExtractionField, DocumentExtraction
+    from app.db.models import DocumentExtraction, ExtractionField
     fields = db.scalars(
         select(ExtractionField)
         .join(DocumentExtraction, DocumentExtraction.id == ExtractionField.extraction_id)

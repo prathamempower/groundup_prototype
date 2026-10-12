@@ -1,5 +1,5 @@
 import uuid
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import select
@@ -26,7 +26,6 @@ from app.modules.reporting.schemas import (
     ReportRead,
 )
 from app.modules.reporting.service import ReportingService
-
 
 router = APIRouter()
 

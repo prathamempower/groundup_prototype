@@ -45,7 +45,7 @@ if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
 import openpyxl
-from sqlalchemy import select, text
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -182,7 +182,7 @@ def copy_and_register_document(
             content = f.read()
             sha256 = hashlib.sha256(content).hexdigest()
     else:
-        content = f"Simulated content for {filename}".encode("utf-8")
+        content = f"Simulated content for {filename}".encode()
         with open(target_path, "wb") as f_out:
             f_out.write(content)
         sha256 = hashlib.sha256(content).hexdigest()
@@ -1907,7 +1907,7 @@ def seed_database(wipe_first: bool = True):
             / "Builders capital 25-26 American Express - Account Activity.md"
         )
         if amex_md.exists():
-            with open(amex_md, "r", encoding="utf-8", errors="ignore") as fp:
+            with open(amex_md, encoding="utf-8", errors="ignore") as fp:
                 lines = [l.strip() for l in fp if l.strip()]
             i = 0
             while i < len(lines):

@@ -3,6 +3,7 @@ import uuid
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Cookie, Depends, Request, Response
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth import get_current_user, require_role
@@ -32,8 +33,6 @@ from app.modules.identity.schemas import (
     UserSessionRead,
 )
 from app.modules.identity.service import IdentityService
-
-from sqlalchemy import select
 
 router = APIRouter()
 
@@ -158,8 +157,8 @@ async def change_my_password(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    from app.core.security import verify_password, hash_password
     from app.core.errors import ValidationFailedException
+    from app.core.security import hash_password, verify_password
 
     if not verify_password(data.current_password, user.hashed_password):
         raise ValidationFailedException(message="Current password does not match.")
