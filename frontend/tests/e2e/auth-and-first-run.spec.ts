@@ -20,9 +20,11 @@ test("owner creates an account and launches a first project", async ({ page }) =
   // Stage 0: Welcome & Choice
   await page.getByRole("heading", { name: "Create a New Project" }).click();
 
-  // Stage 1: Identity & Structure
+  // Stage 1: Identity & Structure (Progressive sub-steps: 1-2 questions per step)
   await page.getByPlaceholder("e.g. 161 Woodlawn Avenue").fill(`First Project ${Date.now()}`);
+  await page.getByRole("button", { name: "Next Step" }).click();
   await page.getByPlaceholder("e.g. 161 Woodlawn Ave, Jersey City, NJ").fill("100 Main Street, Boston, MA");
+  await page.getByRole("button", { name: "Next Step" }).click();
   await page.getByRole("button", { name: /Next: Capital & Debt/ }).click();
 
   // Stage 2: Acquisition & Debt

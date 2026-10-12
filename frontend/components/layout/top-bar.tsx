@@ -20,6 +20,15 @@ import {
   CheckSquare,
 } from "lucide-react";
 import { authAdapter } from "@/lib/api/adapters/auth-adapter";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerBody,
+  DrawerFooter,
+} from "@/components/ui/drawer";
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -112,191 +121,245 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
         {/* Right: Tasks, Notifications & User Menu */}
         <div className="flex items-center gap-2">
           {/* Tasks Trigger */}
-          <div className="relative">
-            <button
-              onClick={() => {
-                setIsTasksOpen(!isTasksOpen);
-                setIsNotificationsOpen(false);
-                setIsUserDropdownOpen(false);
-              }}
-              className="relative flex h-9 items-center gap-1.5 px-2.5 rounded-md text-text-secondary hover:bg-subtle hover:text-text-primary focus-visible:outline-primary text-caption font-semibold"
-              aria-label="View onboarding and delegated tasks"
-            >
-              <CheckSquare className="h-4 w-4" />
-              <span className="hidden sm:inline">Tasks</span>
-            </button>
+          {/* Tasks Trigger */}
+          <button
+            onClick={() => {
+              setIsTasksOpen(true);
+              setIsNotificationsOpen(false);
+              setIsUserDropdownOpen(false);
+            }}
+            className="relative flex h-9 items-center gap-1.5 px-2.5 rounded-md text-text-secondary hover:bg-subtle hover:text-text-primary focus-visible:outline-primary text-caption font-semibold"
+            aria-label="View onboarding and delegated tasks"
+          >
+            <CheckSquare className="h-4 w-4" />
+            <span className="hidden sm:inline">Tasks</span>
+          </button>
 
-            {/* Tasks Dropdown */}
-            {isTasksOpen && (
-              <div className="absolute right-0 mt-1 w-96 rounded-lg border border-border bg-surface shadow-overlay z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                <div className="border-b border-border px-3.5 py-2.5 flex items-center justify-between bg-subtle/50">
+          {/* Tasks Slide-out Drawer */}
+          <Drawer open={isTasksOpen} onOpenChange={setIsTasksOpen}>
+            <DrawerContent width="default" className="flex flex-col h-full bg-surface">
+              <DrawerHeader className="border-b border-border bg-subtle/30 px-5 py-4 flex-shrink-0">
+                <div className="flex items-center justify-between pr-6">
                   <div className="flex items-center gap-2">
-                    <span className="text-label font-bold text-text-primary">Onboarding & Delegated Tasks</span>
+                    <CheckSquare className="h-5 w-5 text-primary" />
+                    <DrawerTitle className="text-section font-bold text-text-primary">
+                      Tasks & Action Items
+                    </DrawerTitle>
                   </div>
                   <span className="rounded bg-primary-subtle text-primary text-[11px] font-semibold px-2 py-0.5">
                     {currentProject?.name || "Active Project"}
                   </span>
                 </div>
+                <DrawerDescription className="text-caption text-text-secondary mt-1">
+                  Onboarding milestones, pending approvals, and delegated sponsor duties.
+                </DrawerDescription>
+              </DrawerHeader>
 
-                <div className="max-h-80 overflow-y-auto divide-y divide-border">
-                  <div className="p-3.5 hover:bg-subtle/50 transition-colors">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="space-y-1">
-                        <span className="rounded bg-primary-subtle text-primary text-[10px] font-bold px-1.5 py-0.2">
+              <DrawerBody className="p-4 space-y-3">
+                <div className="rounded-lg border border-border bg-surface p-3.5 hover:bg-subtle/40 transition-colors">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="rounded bg-primary-subtle text-primary text-[10px] font-bold px-1.5 py-0.5">
                           {currentProject?.name || "73 Broadway"}
                         </span>
-                        <h5 className="text-caption font-bold text-text-primary">
-                          Approve verified budget baseline
-                        </h5>
-                        <p className="text-caption text-text-secondary">
-                          Confirm line item allowances and assign $350k contingency reserve.
-                        </p>
-                      </div>
-                      <span className="rounded bg-warning-subtle text-warning text-[10px] font-bold px-1.5 py-0.5 shrink-0">
-                        PENDING
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-3.5 hover:bg-subtle/50 transition-colors">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="space-y-1">
-                        <span className="rounded bg-primary-subtle text-primary text-[10px] font-bold px-1.5 py-0.2">
-                          {currentProject?.name || "73 Broadway"}
+                        <span className="rounded bg-warning-subtle text-warning text-[10px] font-bold px-1.5 py-0.5 shrink-0">
+                          PENDING
                         </span>
-                        <h5 className="text-caption font-bold text-text-primary">
-                          Map dedicated operating bank account
-                        </h5>
-                        <p className="text-caption text-text-secondary">
-                          Link Columbia Bank operating account for automated statement matching.
-                        </p>
                       </div>
-                      <span className="rounded bg-warning-subtle text-warning text-[10px] font-bold px-1.5 py-0.5 shrink-0">
-                        PENDING
-                      </span>
+                      <h5 className="text-caption font-bold text-text-primary pt-0.5">
+                        Approve verified budget baseline
+                      </h5>
+                      <p className="text-caption text-text-secondary">
+                        Confirm line item allowances and assign $350k contingency reserve.
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="border-t border-border p-2 bg-subtle/30 text-center">
-                  <button
-                    onClick={() => {
-                      setIsTasksOpen(false);
-                      router.push("/onboarding");
-                    }}
-                    className="text-caption font-semibold text-primary hover:text-primary-hover"
-                  >
-                    Open Onboarding Checklist &rarr;
-                  </button>
+                <div className="rounded-lg border border-border bg-surface p-3.5 hover:bg-subtle/40 transition-colors">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="rounded bg-primary-subtle text-primary text-[10px] font-bold px-1.5 py-0.5">
+                          {currentProject?.name || "73 Broadway"}
+                        </span>
+                        <span className="rounded bg-warning-subtle text-warning text-[10px] font-bold px-1.5 py-0.5 shrink-0">
+                          PENDING
+                        </span>
+                      </div>
+                      <h5 className="text-caption font-bold text-text-primary pt-0.5">
+                        Map dedicated operating bank account
+                      </h5>
+                      <p className="text-caption text-text-secondary">
+                        Link Columbia Bank operating account for automated statement matching.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
 
-          {/* Notifications Trigger */}
-          <div className="relative">
-            <button
-              onClick={() => {
-                setIsNotificationsOpen(!isNotificationsOpen);
-                setIsUserDropdownOpen(false);
-                setIsProjectDropdownOpen(false);
-                setIsTasksOpen(false);
-              }}
-              className="relative flex h-9 w-9 items-center justify-center rounded-md text-text-secondary hover:bg-subtle hover:text-text-primary focus-visible:outline-primary"
-              aria-label="View notifications"
-            >
-              <Bell className="h-4 w-4" />
-              {unreadNotificationsCount > 0 && (
-                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white leading-none tabular-nums">
-                  {unreadNotificationsCount}
+                <div className="rounded-lg border border-border bg-surface p-3.5 hover:bg-subtle/40 transition-colors">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="rounded bg-primary-subtle text-primary text-[10px] font-bold px-1.5 py-0.5">
+                          Portfolio Wide
+                        </span>
+                        <span className="rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold px-1.5 py-0.5 shrink-0">
+                          UP TO DATE
+                        </span>
+                      </div>
+                      <h5 className="text-caption font-bold text-text-primary pt-0.5">
+                        Audit period compliance verification
+                      </h5>
+                      <p className="text-caption text-text-secondary">
+                        All invoices and monthly draw disbursements reconciled with ledger records.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </DrawerBody>
+
+              <DrawerFooter className="border-t border-border p-4 bg-subtle/30 flex items-center justify-between">
+                <span className="text-caption text-text-muted">
+                  Need to review full setup checklist?
                 </span>
-              )}
-            </button>
+                <button
+                  onClick={() => {
+                    setIsTasksOpen(false);
+                    router.push("/onboarding");
+                  }}
+                  className="rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-primary-hover transition-colors"
+                >
+                  Open Onboarding Checklist &rarr;
+                </button>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
 
-            {/* Notifications Dropdown */}
-            {isNotificationsOpen && (
-              <div className="absolute right-0 mt-1 w-88 rounded-lg border border-border bg-surface shadow-overlay z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                <div className="border-b border-border px-3.5 py-2.5 flex items-center justify-between bg-subtle/50">
+          {/* Notifications / Alerts Trigger */}
+          <button
+            onClick={() => {
+              setIsNotificationsOpen(true);
+              setIsUserDropdownOpen(false);
+              setIsProjectDropdownOpen(false);
+              setIsTasksOpen(false);
+            }}
+            className="relative flex h-9 w-9 items-center justify-center rounded-md text-text-secondary hover:bg-subtle hover:text-text-primary focus-visible:outline-primary"
+            aria-label="View notifications and alerts"
+          >
+            <Bell className="h-4 w-4" />
+            {unreadNotificationsCount > 0 && (
+              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white leading-none tabular-nums">
+                {unreadNotificationsCount}
+              </span>
+            )}
+          </button>
+
+          {/* Notifications / Alerts Slide-out Drawer */}
+          <Drawer open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
+            <DrawerContent width="default" className="flex flex-col h-full bg-surface">
+              <DrawerHeader className="border-b border-border bg-subtle/30 px-5 py-4 flex-shrink-0">
+                <div className="flex items-center justify-between pr-6">
                   <div className="flex items-center gap-2">
-                    <span className="text-label font-bold text-text-primary">System Notifications</span>
-                    {unreadNotificationsCount > 0 && (
-                      <span className="rounded bg-danger/10 text-danger text-caption font-bold px-1.5 py-0.2">
-                        {unreadNotificationsCount} unread
-                      </span>
-                    )}
+                    <Bell className="h-5 w-5 text-primary" />
+                    <DrawerTitle className="text-section font-bold text-text-primary">
+                      Alerts & Notifications
+                    </DrawerTitle>
                   </div>
+                  {unreadNotificationsCount > 0 ? (
+                    <span className="rounded bg-danger/10 text-danger text-caption font-bold px-2 py-0.5">
+                      {unreadNotificationsCount} unread
+                    </span>
+                  ) : (
+                    <span className="rounded bg-emerald-50 text-emerald-700 text-caption font-medium px-2 py-0.5">
+                      All caught up
+                    </span>
+                  )}
+                </div>
+                <DrawerDescription className="text-caption text-text-secondary mt-1 flex items-center justify-between">
+                  <span>Critical project exceptions, draw milestones, and system notices.</span>
                   {unreadNotificationsCount > 0 && (
                     <button
                       onClick={() => markAllReadMutation.mutate()}
-                      className="text-caption font-medium text-primary hover:text-primary-hover"
+                      className="text-caption font-semibold text-primary hover:text-primary-hover shrink-0 ml-2"
                     >
                       Mark all read
                     </button>
                   )}
-                </div>
+                </DrawerDescription>
+              </DrawerHeader>
 
-                <div className="max-h-80 overflow-y-auto divide-y divide-border">
-                  {notifications.length === 0 ? (
-                    <div className="p-6 text-center text-caption text-text-muted">
-                      No notifications to display.
-                    </div>
-                  ) : (
-                    notifications.map((notif) => (
-                      <div
-                        key={notif.id}
-                        onClick={() => {
-                          if (!notif.read) markReadMutation.mutate(notif.id);
-                          if (notif.link_url) {
-                            setIsNotificationsOpen(false);
-                            router.push(notif.link_url);
-                          }
-                        }}
-                        className={`flex items-start gap-2.5 p-3 cursor-pointer transition-colors ${
-                          notif.read ? "bg-surface hover:bg-subtle/50" : "bg-primary-subtle/20 hover:bg-primary-subtle/30"
-                        }`}
-                      >
-                        {notif.severity === "CRITICAL" ? (
-                          <AlertCircle className="mt-0.5 h-4 w-4 text-danger flex-shrink-0" />
-                        ) : notif.severity === "WARNING" ? (
-                          <AlertTriangle className="mt-0.5 h-4 w-4 text-warning flex-shrink-0" />
-                        ) : notif.severity === "SUCCESS" ? (
-                          <Check className="mt-0.5 h-4 w-4 text-success flex-shrink-0" />
-                        ) : (
-                          <Info className="mt-0.5 h-4 w-4 text-primary flex-shrink-0" />
-                        )}
+              <DrawerBody className="p-4 space-y-2.5">
+                {notifications.length === 0 ? (
+                  <div className="p-8 text-center text-caption text-text-muted">
+                    No active notifications or alerts to display.
+                  </div>
+                ) : (
+                  notifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      onClick={() => {
+                        if (!notif.read) markReadMutation.mutate(notif.id);
+                        if (notif.link_url) {
+                          setIsNotificationsOpen(false);
+                          router.push(notif.link_url);
+                        }
+                      }}
+                      className={`flex items-start gap-3 p-3.5 rounded-lg border transition-all cursor-pointer ${
+                        notif.read
+                          ? "border-border/60 bg-surface hover:bg-subtle/50"
+                          : "border-primary/20 bg-primary-subtle/15 hover:bg-primary-subtle/25 shadow-2xs"
+                      }`}
+                    >
+                      {notif.severity === "CRITICAL" ? (
+                        <AlertCircle className="mt-0.5 h-4 w-4 text-danger flex-shrink-0" />
+                      ) : notif.severity === "WARNING" ? (
+                        <AlertTriangle className="mt-0.5 h-4 w-4 text-warning flex-shrink-0" />
+                      ) : notif.severity === "SUCCESS" ? (
+                        <Check className="mt-0.5 h-4 w-4 text-success flex-shrink-0" />
+                      ) : (
+                        <Info className="mt-0.5 h-4 w-4 text-primary flex-shrink-0" />
+                      )}
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-1">
-                            <h5 className={`text-caption ${notif.read ? "font-semibold text-text-primary" : "font-bold text-text-primary"}`}>
-                              {notif.title}
-                            </h5>
-                            {!notif.read && (
-                              <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                            )}
-                          </div>
-                          <p className="text-caption text-text-secondary mt-0.5 line-clamp-2">
-                            {notif.message}
-                          </p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <h5
+                            className={`text-caption ${
+                              notif.read ? "font-semibold text-text-primary" : "font-bold text-text-primary"
+                            }`}
+                          >
+                            {notif.title}
+                          </h5>
+                          {!notif.read && (
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                          )}
                         </div>
+                        <p className="text-caption text-text-secondary mt-1 leading-relaxed">
+                          {notif.message}
+                        </p>
                       </div>
-                    ))
-                  )}
-                </div>
+                    </div>
+                  ))
+                )}
+              </DrawerBody>
 
-                <div className="border-t border-border p-2 bg-subtle/30 text-center">
-                  <button
-                    onClick={() => {
-                      setIsNotificationsOpen(false);
-                      router.push("/settings");
-                    }}
-                    className="text-caption font-semibold text-primary hover:text-primary-hover"
-                  >
-                    View All in Settings &rarr;
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+              <DrawerFooter className="border-t border-border p-4 bg-subtle/30 flex items-center justify-between">
+                <span className="text-caption text-text-muted">
+                  Manage notification preferences
+                </span>
+                <button
+                  onClick={() => {
+                    setIsNotificationsOpen(false);
+                    router.push("/settings");
+                  }}
+                  className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-subtle transition-colors shadow-2xs"
+                >
+                  View All in Settings &rarr;
+                </button>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
 
           {/* User menu */}
           <div className="relative">
