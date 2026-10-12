@@ -120,7 +120,7 @@ export default function DrawsPage() {
   ];
 
   // Core Showcase Rows from design (matching Screenshot 1)
-  const showcaseRows = [
+  const SHOWCASE_ROWS = [
     {
       id: "drw-15",
       badge: "15",
@@ -171,13 +171,13 @@ export default function DrawsPage() {
 
   // Filter logic
   const filteredShowcaseRows = useMemo(() => {
-    return showcaseRows.filter((r) => {
+    return SHOWCASE_ROWS.filter((r) => {
       if (filterTab === "ACTIVE") return r.statusType === "PENDING";
       if (filterTab === "FUNDED") return r.statusType === "FUNDED";
       if (filterTab === "DISCREPANCY") return r.statusType === "REJECTED";
       return true;
     });
-  }, [filterTab, showcaseRows]);
+  }, [filterTab]);
 
   return (
     <div className="space-y-6 pb-16">

@@ -234,14 +234,7 @@ export function Sidebar({
 
                 {!collapsed && (
                   <div className="flex flex-1 items-center justify-between overflow-hidden">
-                    <div className="flex items-center gap-2 truncate">
-                      <span className="truncate">{item.label}</span>
-                      {item.id === "budget" && (
-                        <span className="rounded bg-slate-100 px-1.5 py-0.2 font-mono text-[10px] font-semibold text-slate-500 border border-slate-200">
-                          CSI
-                        </span>
-                      )}
-                    </div>
+                    <span className="truncate">{item.label}</span>
                     {badgeCount > 0 && (
                       <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-2xs">
                         {badgeCount}
