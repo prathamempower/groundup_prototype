@@ -69,7 +69,7 @@ export default function ReconciliationPage() {
   // 4: Transfers
   // 5: Imports
   const [activeTab, setActiveTab] = useState<
-    "queue" | "statement-coverage" | "exceptions" | "transfers" | "imports"
+    "queue" | "statement-coverage" | "exceptions" | "imports"
   >("queue");
 
   // Filters and search for Review Queue
@@ -304,12 +304,12 @@ export default function ReconciliationPage() {
       id: "rq-7",
       date: "Sep 22, 2026",
       account: "Operating · 4821",
-      description: "Transfer to 73 Broadway",
+      description: "Jersey City Lumber Co.",
       type: "Bank transaction",
       direction: "out",
       amount: "-$5,000.00",
-      proposedLink: "Inter-project transfer",
-      whyMatches: "Memo suggests movement between project accounts",
+      proposedLink: "Rough carpentry framing",
+      whyMatches: "Vendor and memo match framing lumber package",
       evidence: "Partial",
       status: "Pending review",
     },
@@ -518,12 +518,6 @@ export default function ReconciliationPage() {
             <DollarSign className="h-2.5 w-2.5" /> Budget Assigned
           </span>
         );
-      case "TRANSFER_PROJECT":
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-700 border border-purple-200">
-            <ArrowRightLeft className="h-2.5 w-2.5" /> Project Advance
-          </span>
-        );
       case "CONFIRM_DRAW":
         return (
           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
@@ -625,8 +619,8 @@ export default function ReconciliationPage() {
           </Button>
         </div>
 
-        {/* 5 KPI Metric Cards Strip matching exact screenshot */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+        {/* 4 KPI Metric Cards Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           {/* Card 1: Unmatched transactions */}
           <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
             <span className="text-[11px] font-semibold text-slate-500 block">
@@ -666,20 +660,7 @@ export default function ReconciliationPage() {
             </p>
           </div>
 
-          {/* Card 4: Outstanding transfers */}
-          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
-            <span className="text-[11px] font-semibold text-slate-500 block">
-              Outstanding transfers
-            </span>
-            <div className="mt-2 text-xl font-bold font-mono text-slate-900 tabular-nums">
-              $5,000.00
-            </div>
-            <p className="mt-1 text-[11px] text-slate-400">
-              Temporary project-to-project balance
-            </p>
-          </div>
-
-          {/* Card 5: Periods signed off */}
+          {/* Card 4: Periods signed off */}
           <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
             <span className="text-[11px] font-semibold text-slate-500 block">
               Periods signed off
@@ -693,7 +674,7 @@ export default function ReconciliationPage() {
           </div>
         </div>
 
-        {/* Segmented Underline Navigation Tabs matching Screenshots */}
+        {/* Segmented Underline Navigation Tabs */}
         <div className="border-b border-slate-200">
           <nav className="flex items-center gap-6 text-xs font-semibold">
             <button
@@ -730,17 +711,6 @@ export default function ReconciliationPage() {
             >
               <span>Evidence and exceptions</span>
               <span className="text-[10px] text-slate-400 font-mono">2</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("transfers")}
-              className={`flex items-center gap-1.5 pb-2.5 transition-colors border-b-2 -mb-px ${
-                activeTab === "transfers"
-                  ? "border-slate-900 text-slate-900 font-bold"
-                  : "border-transparent text-slate-500 hover:text-slate-800"
-              }`}
-            >
-              <span>Transfers</span>
             </button>
 
             <button
@@ -1150,55 +1120,7 @@ export default function ReconciliationPage() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 4: TRANSFERS (Screenshot 4)                                           */}
-        {/* ========================================================================= */}
-        {activeTab === "transfers" && (
-          <div className="space-y-4">
-            {/* Callout Notice */}
-            <div className="rounded-xl border border-amber-200/80 bg-amber-50/50 p-4">
-              <div className="flex items-start gap-2.5 text-xs text-amber-900">
-                <Info className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
-                <div>
-                  <span className="font-bold block">Transfers don't affect revenue, cost, or profit.</span>
-                  <span className="text-amber-800 text-[11px] mt-0.5 block">
-                    Record both sides of the movement and track repayment separately.
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Header + Record Transfer action */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">Project transfers</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Temporary balances between projects, tracked independently from spend.
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => setIsTransferModalOpen(true)}
-                className="text-xs font-semibold bg-white border-slate-200 text-slate-800 hover:bg-slate-50"
-              >
-                + Record transfer
-              </Button>
-            </div>
-
-            {/* Empty State matching Screenshot 4 */}
-            <div className="rounded-xl border border-slate-200/90 bg-white p-16 text-center shadow-xs flex flex-col items-center justify-center">
-              <div className="h-10 w-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 mb-3">
-                <ArrowRightLeft className="h-4 w-4" />
-              </div>
-              <h4 className="text-sm font-bold text-slate-900">No outstanding transfers</h4>
-              <p className="text-xs text-slate-500 mt-1 max-w-sm">
-                Transfers will appear here when a movement between projects is recorded.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 5: IMPORTS (Screenshot 5)                                             */}
+        {/* TAB 4: IMPORTS (Screenshot 5)                                             */}
         {/* ========================================================================= */}
         {activeTab === "imports" && (
           <div className="space-y-3.5">

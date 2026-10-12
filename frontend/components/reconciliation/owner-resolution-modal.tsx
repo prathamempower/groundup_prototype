@@ -38,7 +38,6 @@ export interface ReviewItemData {
 export type ResolutionActionType =
   | "REQUEST_INVOICE"
   | "ASSIGN_TRADE"
-  | "TRANSFER_PROJECT"
   | "CONFIRM_DRAW"
   | "SETTLE_LIABILITY"
   | "EXCLUDE_NON_PROJECT";
@@ -62,12 +61,6 @@ const ACTION_OPTIONS: ActionConfig[] = [
     label: "Assign Budget Code",
     quickTags: ["Direct trade scope", "Change order scope", "Material order"],
     icon: DollarSign,
-  },
-  {
-    id: "TRANSFER_PROJECT",
-    label: "Project Loan / Transfer",
-    quickTags: ["Advance to 73 Broadway", "Repay next draw", "Entity loan"],
-    icon: ArrowRightLeft,
   },
   {
     id: "CONFIRM_DRAW",
@@ -117,10 +110,8 @@ export function OwnerResolutionModal({
       let initialAction: ResolutionActionType = "REQUEST_INVOICE";
       if (item.evidence === "Missing") {
         initialAction = "REQUEST_INVOICE";
-      } else if (item.proposedLink.toLowerCase().includes("unallocated")) {
+      } else if (item.proposedLink.toLowerCase().includes("unallocated") || item.direction === "in") {
         initialAction = "CONFIRM_DRAW";
-      } else if (item.proposedLink.toLowerCase().includes("transfer")) {
-        initialAction = "TRANSFER_PROJECT";
       } else if (item.proposedLink.toLowerCase().includes("liability")) {
         initialAction = "SETTLE_LIABILITY";
       } else {
