@@ -56,14 +56,23 @@ import {
 export default function ReconciliationPage() {
   const queryClient = useQueryClient();
 
-  // Active Tab
+  // Active Tab matching Screenshot tabs:
+  // 1: Review queue (8)
+  // 2: Statement coverage (2)
+  // 3: Evidence and exceptions (2)
+  // 4: Transfers
+  // 5: Imports
   const [activeTab, setActiveTab] = useState<
-    "queue" | "transactions" | "statement-periods" | "transfers" | "import-batches"
+    "queue" | "statement-coverage" | "exceptions" | "transfers" | "imports"
   >("queue");
 
-  // Filters for Transactions tab
-  const [txnFilter, setTxnFilter] = useState<"ALL" | "CLEARED" | "PENDING" | "TRANSFERS" | "LIABILITY">("ALL");
+  // Filters and search for Review Queue
   const [searchQuery, setSearchQuery] = useState("");
+  const [accountFilter, setAccountFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [evidenceFilter, setEvidenceFilter] = useState("ALL");
+  const [sortOrder, setSortOrder] = useState<"NEWEST" | "OLDEST">("NEWEST");
+  const [selectedMatchIds, setSelectedMatchIds] = useState<string[]>([]);
 
   // Modal States
   const [isImportOpen, setIsImportOpen] = useState(false);
@@ -204,645 +213,680 @@ export default function ReconciliationPage() {
   const reconciledPeriodsCount = periods.filter((p) => p.reconciled_status === "RECONCILED").length;
   const coveragePct = periods.length > 0 ? Math.round((reconciledPeriodsCount / periods.length) * 100) : 100;
 
-  // Filtered Transactions
-  const filteredTransactions = transactions.filter((txn) => {
-    if (txnFilter === "CLEARED" && txn.cleared_status !== "CLEARED") return false;
-    if (txnFilter === "PENDING" && txn.cleared_status !== "PENDING") return false;
-    if (txnFilter === "TRANSFERS" && !txn.is_transfer) return false;
-    if (txnFilter === "LIABILITY" && !txn.is_liability_settlement) return false;
+  // Review Queue Items (Rich data matching Screenshot 1)
+  const defaultReviewItems = [
+    {
+      id: "rq-1",
+      date: "Sep 29, 2026",
+      account: "Operating · 4821",
+      description: "Nilson Mocalos",
+      type: "Bank transaction",
+      direction: "out",
+      amount: "-$155.00",
+      proposedLink: "Concrete & foundation st...",
+      whyMatches: "Vendor alias and amount match",
+      evidence: "Strong",
+      status: "Pending review",
+    },
+    {
+      id: "rq-2",
+      date: "Sep 28, 2026",
+      account: "Operating · 4821",
+      description: "Nilson Mocalos",
+      type: "Bank transaction",
+      direction: "out",
+      amount: "-$1,280.00",
+      proposedLink: "Concrete & foundation st...",
+      whyMatches: "Vendor alias and amount match",
+      evidence: "Missing",
+      status: "Pending review",
+    },
+    {
+      id: "rq-3",
+      date: "Sep 27, 2026",
+      account: "Operating · 4821",
+      description: "Jersey City Permit Office",
+      type: "Bank transaction",
+      direction: "out",
+      amount: "-$640.00",
+      proposedLink: "Permits and fees",
+      whyMatches: "Payee and memo match permit budget",
+      evidence: "Strong",
+      status: "Pending review",
+    },
+    {
+      id: "rq-4",
+      date: "Sep 26, 2026",
+      account: "Operating · 4821",
+      description: "Architectural Studio LLC",
+      type: "Bank transaction",
+      direction: "out",
+      amount: "-$2,450.00",
+      proposedLink: "Professional services",
+      whyMatches: "Description resembles architect invoice",
+      evidence: "Partial",
+      status: "Pending review",
+    },
+    {
+      id: "rq-5",
+      date: "Sep 25, 2026",
+      account: "Operating · 4821",
+      description: "Investor funding deposit",
+      type: "Bank transaction",
+      direction: "in",
+      amount: "+$25,000.00",
+      proposedLink: "Unallocated funding",
+      whyMatches: "Deposit cleared; no draw linked yet",
+      evidence: "Strong",
+      status: "Pending review",
+    },
+    {
+      id: "rq-6",
+      date: "Sep 24, 2026",
+      account: "Business card · 1108",
+      description: "Card payment — statement settlement",
+      type: "Bank transaction",
+      direction: "out",
+      amount: "-$1,850.00",
+      proposedLink: "Card liability settlement",
+      whyMatches: "Likely card settlement; do not classify as project spend",
+      evidence: "Partial",
+      status: "Pending review",
+    },
+    {
+      id: "rq-7",
+      date: "Sep 22, 2026",
+      account: "Operating · 4821",
+      description: "Transfer to 73 Broadway",
+      type: "Bank transaction",
+      direction: "out",
+      amount: "-$5,000.00",
+      proposedLink: "Inter-project transfer",
+      whyMatches: "Memo suggests movement between project accounts",
+      evidence: "Partial",
+      status: "Pending review",
+    },
+    {
+      id: "rq-8",
+      date: "Sep 20, 2026",
+      account: "Operating · 4821",
+      description: "Construction loan draw",
+      type: "Bank transaction",
+      direction: "in",
+      amount: "+$40,000.00",
+      proposedLink: "Construction loan draw 03",
+      whyMatches: "Deposit reference resembles lender draw notice",
+      evidence: "Strong",
+      status: "Pending review",
+    },
+  ];
 
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      return (
-        txn.counterparty.toLowerCase().includes(q) ||
-        txn.memo.toLowerCase().includes(q) ||
-        txn.id.toLowerCase().includes(q)
-      );
+  // Evidence and Exceptions items (Screenshot 3)
+  const exceptionsList = [
+    {
+      id: "ex-1",
+      title: "Missing invoice or receipt",
+      subtitle: "Required evidence not attached",
+      relatedTxn: "Nilson Mocalos · $155.00",
+      severity: "High",
+      owner: "CFO",
+      age: "4 days",
+      status: "Open",
+    },
+    {
+      id: "ex-2",
+      title: "Possible duplicate",
+      subtitle: "Same vendor, date, and amount",
+      relatedTxn: "Nilson Mocalos · $1,280.00",
+      severity: "Medium",
+      owner: "CFO",
+      age: "2 days",
+      status: "Open",
+    },
+  ];
+
+  // Import History items (Screenshot 5)
+  const importHistoryList = [
+    {
+      id: "imp-1",
+      file: "operating-september.csv",
+      subtitle: "Statement · Sep 2026",
+      sourceType: "CSV",
+      rowsImported: 42,
+      duplicatesSkipped: 1,
+      checkStatus: "Passed · $0.00 diff",
+      checkVariant: "passed",
+      importedBy: "CFO",
+      importedWhen: "Oct 2, 2026, 10:14 AM",
+    },
+    {
+      id: "imp-2",
+      file: "card-september.xlsx",
+      subtitle: "Card activity · Sep 2026",
+      sourceType: "XLSX",
+      rowsImported: 28,
+      duplicatesSkipped: 2,
+      checkStatus: "Passed · $0.00 diff",
+      checkVariant: "passed",
+      importedBy: "CFO",
+      importedWhen: "Oct 3, 2026, 9:22 AM",
+    },
+    {
+      id: "imp-3",
+      file: "draw-notice-03.pdf",
+      subtitle: "Funding support · Sep 2026",
+      sourceType: "PDF",
+      rowsImported: 1,
+      duplicatesSkipped: 0,
+      checkStatus: "Manual review",
+      checkVariant: "manual",
+      importedBy: "Owner",
+      importedWhen: "Oct 4, 2026, 2:06 PM",
+    },
+    {
+      id: "imp-4",
+      file: "operating-august.csv",
+      subtitle: "Statement · Aug 2026",
+      sourceType: "CSV",
+      rowsImported: 37,
+      duplicatesSkipped: 0,
+      checkStatus: "Passed · $0.00 diff",
+      checkVariant: "passed",
+      importedBy: "CFO",
+      importedWhen: "Sep 2, 2026, 11:05 AM",
+    },
+  ];
+
+  // Stateful review items list so Accept, Split, etc. dynamically update the view
+  const [reviewItems, setReviewItems] = useState(defaultReviewItems);
+  const [activeMoreMenuId, setActiveMoreMenuId] = useState<string | null>(null);
+
+  // Helper to convert review item to ReconciliationMatch object for existing modals
+  const getMatchFromRow = (row: typeof defaultReviewItems[0]): ReconciliationMatch => {
+    // Check if there is an existing live match with this id
+    const liveMatch = matches.find((m) => m.id === row.id);
+    if (liveMatch) return liveMatch;
+
+    const numericAmount = row.amount.replace(/[^0-9]/g, "") + "00"; // convert to cents
+    return {
+      id: row.id,
+      transaction_id: `tx_${row.id}`,
+      project_id: currentProjectId || "p1",
+      amount: numericAmount,
+      counterparty: row.description,
+      transaction_date: "2026-09-29T00:00:00Z",
+      proposed_budget_line_name: row.proposedLink,
+      proposed_budget_line_id: budgetLines[0]?.id || "bl-1",
+      confidence: row.evidence === "Strong" ? 0.94 : 0.75,
+      confidence_reasons: [row.whyMatches],
+      evidence_strength: row.evidence === "Strong" ? "VERIFIED_INVOICE" : "BANK_TRANSACTION",
+      status: row.status === "Accepted" ? "ACCEPTED" : "PENDING_REVIEW",
+    };
+  };
+
+  const handleAcceptItem = (id: string) => {
+    // If it's a real backend match, trigger mutation
+    const isLive = matches.some((m) => m.id === id);
+    if (isLive) {
+      acceptMatchMutation.mutate(id);
     }
-    return true;
-  });
+    // Update local state to mark accepted
+    setReviewItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, status: "Accepted" } : item
+      )
+    );
+    setActiveMoreMenuId(null);
+  };
+
+  const handleOpenSplit = (row: typeof defaultReviewItems[0]) => {
+    setSplitMatch(getMatchFromRow(row));
+    setActiveMoreMenuId(null);
+  };
+
+  const handleOpenRemap = (row: typeof defaultReviewItems[0]) => {
+    setRemapMatch(getMatchFromRow(row));
+    setActiveMoreMenuId(null);
+  };
+
+  const handleOpenTransfer = (row: typeof defaultReviewItems[0]) => {
+    setTransferMatch(getMatchFromRow(row));
+    setActiveMoreMenuId(null);
+  };
+
+  const handleOpenExclude = (row: typeof defaultReviewItems[0]) => {
+    setExcludeMatch(getMatchFromRow(row));
+    setActiveMoreMenuId(null);
+  };
+
+  const handleOpenLinkInvoice = (row: typeof defaultReviewItems[0]) => {
+    setLinkInvoiceTarget({ match: getMatchFromRow(row) });
+    setActiveMoreMenuId(null);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedMatchIds(reviewItems.map((item) => item.id));
+    } else {
+      setSelectedMatchIds([]);
+    }
+  };
+
+  const handleToggleSelect = (id: string) => {
+    setSelectedMatchIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
 
   return (
     <div className="space-y-6 pb-16">
-      <div className="px-6 max-w-7xl mx-auto space-y-6 pt-4">
-        {/* Page Header */}
-        <PageHeader
-          title="Reconciliation Workbench"
-          statusBadge={{
-            label: `${pendingMatches.length} Matches Pending`,
-            variant: pendingMatches.length > 0 ? "warning" : "success",
-            icon: <Scale className="h-3.5 w-3.5" />,
-          }}
-          primaryAction={
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setIsTransferModalOpen(true)}
-                className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold"
-              >
-                <ArrowRightLeft className="h-3.5 w-3.5 mr-1.5 text-slate-500" />
-                Transfer
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => setIsImportOpen(true)}
-                className="text-xs font-semibold shadow-xs"
-              >
-                <UploadCloud className="h-3.5 w-3.5 mr-1.5" />
-                Import Statement
-              </Button>
-            </div>
-          }
-        />
-        {/* KPI Summary Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="rounded-lg border border-border bg-surface p-4 shadow-xs relative">
-            <div className="flex items-start justify-between">
-              <span className="text-caption font-semibold uppercase tracking-wider text-text-secondary">
-                Reconciliation Queue
+      <div className="px-6 max-w-7xl mx-auto space-y-6 pt-2">
+        {/* Page Subtitle Breadcrumb & Title Header */}
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+              FINANCE / CONTROLS
+            </span>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              Reconciliation
+            </h1>
+            <p className="text-xs text-slate-500 mt-1">
+              Make sure every bank transaction is explained and supported.
+            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 border border-amber-200/60">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                In progress
               </span>
-              <SourcesButton
-                figureLabel="Reconciliation Queue Volume"
-                amountOrValue={formatMoney(String(pendingDollars))}
-                basis="Sum of AI proposed budget matches awaiting CFO confirmation"
-                citations={
-                  stmtDoc
-                    ? [
-                        {
-                          document_id: stmtDoc.id,
-                          document_name: stmtDoc.original_filename,
-                          sheet_name: "Transactions",
-                          row_number: 14,
-                          reviewer: "Sarah Lin",
-                          reviewed_at: stmtDoc.uploaded_at,
-                          extraction_version: "v1.0",
-                        },
-                      ]
-                    : []
-                }
-              />
+              <span className="text-[11px] text-slate-400">
+                As of Oct 12, 2026, 6:00 PM IST
+              </span>
             </div>
-            <div className="mt-2 text-title font-bold text-text-primary tabular-nums">
-              {formatMoney(String(pendingDollars))}
+          </div>
+
+          <Button
+            variant="primary"
+            onClick={() => setIsImportOpen(true)}
+            className="text-xs font-semibold shadow-xs bg-slate-900 text-white hover:bg-slate-800 self-start"
+          >
+            + Import data
+          </Button>
+        </div>
+
+        {/* 5 KPI Metric Cards Strip matching exact screenshot */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+          {/* Card 1: Unmatched transactions */}
+          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
+            <span className="text-[11px] font-semibold text-slate-500 block">
+              Unmatched transactions
+            </span>
+            <div className="mt-2 text-xl font-bold font-mono text-slate-900 tabular-nums">
+              $76,375.00
             </div>
-            <p className="mt-1 text-caption text-text-secondary flex items-center gap-1.5">
-              <span className="font-semibold text-amber-700">{pendingMatches.length} proposals</span> awaiting human review
+            <p className="mt-1 text-[11px] text-slate-400">
+              <strong className="text-slate-700 font-semibold">8 items</strong> awaiting review
             </p>
           </div>
 
-          <div className="rounded-lg border border-border bg-surface p-4 shadow-xs relative">
-            <div className="flex items-start justify-between">
-              <span className="text-caption font-semibold uppercase tracking-wider text-text-secondary">
-                Uncleared Cash
-              </span>
-              <SourcesButton
-                figureLabel="Uncleared Transactions"
-                amountOrValue={formatMoney(String(unclearedDollars))}
-                basis="In-flight checks and pending wire disbursements awaiting cleared bank posting"
-                citations={
-                  drawDoc
-                    ? [
-                        {
-                          document_id: drawDoc.id,
-                          document_name: drawDoc.original_filename,
-                          page_number: 2,
-                          reviewer: "Sarah Lin",
-                          reviewed_at: drawDoc.uploaded_at,
-                          extraction_version: "v1.0",
-                        },
-                      ]
-                    : []
-                }
-              />
+          {/* Card 2: Missing evidence */}
+          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
+            <span className="text-[11px] font-semibold text-slate-500 block">
+              Missing evidence
+            </span>
+            <div className="mt-2 text-xl font-bold font-mono text-slate-900 tabular-nums">
+              $1,435.00
             </div>
-            <div className="mt-2 text-title font-bold text-text-primary tabular-nums">
-              {formatMoney(String(unclearedDollars))}
-            </div>
-            <p className="mt-1 text-caption text-text-secondary">
-              {unclearedTxns.length} in-flight bank disbursements
+            <p className="mt-1 text-[11px] text-slate-400">
+              <strong className="text-slate-700 font-semibold">2 items</strong> need invoice or receipt
             </p>
           </div>
 
-          <div className="rounded-lg border border-border bg-surface p-4 shadow-xs relative">
-            <div className="flex items-start justify-between">
-              <span className="text-caption font-semibold uppercase tracking-wider text-text-secondary">
-                Statement Coverage
-              </span>
-              <SourcesButton
-                figureLabel="Statement Coverage Ratio"
-                amountOrValue={`${coveragePct}%`}
-                basis="Percentage of active statement periods signed off with verified opening and closing balance controls"
-                citations={
-                  stmtDoc
-                    ? [
-                        {
-                          document_id: stmtDoc.id,
-                          document_name: stmtDoc.original_filename,
-                          page_number: 1,
-                          reviewer: "Sarah Lin",
-                          reviewed_at: stmtDoc.uploaded_at,
-                          extraction_version: "v1.2",
-                        },
-                      ]
-                    : []
-                }
-              />
+          {/* Card 3: Unallocated funding */}
+          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
+            <span className="text-[11px] font-semibold text-slate-500 block">
+              Unallocated funding
+            </span>
+            <div className="mt-2 text-xl font-bold font-mono text-slate-900 tabular-nums">
+              $25,000.00
             </div>
-            <div className="mt-2 text-title font-bold text-text-primary tabular-nums">
-              {coveragePct}%
-            </div>
-            <p className="mt-1 text-caption text-text-secondary">
-              {reconciledPeriodsCount} of {periods.length || 2} periods verified & signed off
+            <p className="mt-1 text-[11px] text-slate-400">
+              Cleared deposits not linked to a draw
             </p>
           </div>
 
-          <div className="rounded-lg border border-border bg-surface p-4 shadow-xs relative">
-            <div className="flex items-start justify-between">
-              <span className="text-caption font-semibold uppercase tracking-wider text-text-secondary">
-                Active Transfers
-              </span>
-              <SourcesButton
-                figureLabel="Active Inter-Project Transfers"
-                amountOrValue={formatMoney(String(activeTransfersTotal))}
-                basis="Temporary inter-project loans tracked on balance sheet. Does not impact project budget or profit."
-                citations={
-                  transferDoc
-                    ? [
-                        {
-                          document_id: transferDoc.id,
-                          document_name: transferDoc.original_filename,
-                          page_number: 1,
-                          reviewer: "Sarah Lin",
-                          reviewed_at: transferDoc.uploaded_at,
-                          extraction_version: "v1.0",
-                        },
-                      ]
-                    : []
-                }
-              />
+          {/* Card 4: Outstanding transfers */}
+          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
+            <span className="text-[11px] font-semibold text-slate-500 block">
+              Outstanding transfers
+            </span>
+            <div className="mt-2 text-xl font-bold font-mono text-slate-900 tabular-nums">
+              $5,000.00
             </div>
-            <div className="mt-2 text-title font-bold text-amber-700 tabular-nums">
-              {formatMoney(String(activeTransfersTotal))}
+            <p className="mt-1 text-[11px] text-slate-400">
+              Temporary project-to-project balance
+            </p>
+          </div>
+
+          {/* Card 5: Periods signed off */}
+          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
+            <span className="text-[11px] font-semibold text-slate-500 block">
+              Periods signed off
+            </span>
+            <div className="mt-2 text-xl font-bold text-slate-900 tabular-nums">
+              0 of 2
             </div>
-            <p className="mt-1 text-caption text-text-secondary">
-              Zero P&L impact • Repayment tracked
+            <p className="mt-1 text-[11px] text-slate-400">
+              Statement periods completed
             </p>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="border-b border-slate-200/80 pb-2">
-          <nav className="flex items-center gap-1 overflow-x-auto py-1">
+        {/* Segmented Underline Navigation Tabs matching Screenshots */}
+        <div className="border-b border-slate-200">
+          <nav className="flex items-center gap-6 text-xs font-semibold">
             <button
               onClick={() => setActiveTab("queue")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`flex items-center gap-1.5 pb-2.5 transition-colors border-b-2 -mb-px ${
                 activeTab === "queue"
-                  ? "bg-slate-900 text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  ? "border-slate-900 text-slate-900 font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>Queue</span>
-              {pendingMatches.length > 0 && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                  activeTab === "queue" ? "bg-amber-500 text-slate-950" : "bg-amber-100 text-amber-800"
-                }`}>
-                  {pendingMatches.length}
-                </span>
-              )}
+              <span>Review queue</span>
+              <span className="text-[10px] text-slate-400 font-mono">8</span>
             </button>
 
             <button
-              onClick={() => setActiveTab("transactions")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                activeTab === "transactions"
-                  ? "bg-slate-900 text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              onClick={() => setActiveTab("statement-coverage")}
+              className={`flex items-center gap-1.5 pb-2.5 transition-colors border-b-2 -mb-px ${
+                activeTab === "statement-coverage"
+                  ? "border-slate-900 text-slate-900 font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <Layers className="h-3.5 w-3.5" />
-              <span>Transactions</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                activeTab === "transactions" ? "bg-slate-800 text-slate-200" : "bg-slate-200 text-slate-700"
-              }`}>
-                {transactions.length}
-              </span>
+              <span>Statement coverage</span>
+              <span className="text-[10px] text-slate-400 font-mono">2</span>
             </button>
 
             <button
-              onClick={() => setActiveTab("statement-periods")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                activeTab === "statement-periods"
-                  ? "bg-slate-900 text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              onClick={() => setActiveTab("exceptions")}
+              className={`flex items-center gap-1.5 pb-2.5 transition-colors border-b-2 -mb-px ${
+                activeTab === "exceptions"
+                  ? "border-slate-900 text-slate-900 font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <Building2 className="h-3.5 w-3.5" />
-              <span>Statement Periods</span>
+              <span>Evidence and exceptions</span>
+              <span className="text-[10px] text-slate-400 font-mono">2</span>
             </button>
 
             <button
               onClick={() => setActiveTab("transfers")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`flex items-center gap-1.5 pb-2.5 transition-colors border-b-2 -mb-px ${
                 activeTab === "transfers"
-                  ? "bg-slate-900 text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  ? "border-slate-900 text-slate-900 font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <ArrowRightLeft className="h-3.5 w-3.5" />
               <span>Transfers</span>
-              {transfers.length > 0 && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                  activeTab === "transfers" ? "bg-slate-800 text-slate-200" : "bg-slate-200 text-slate-700"
-                }`}>
-                  {transfers.length}
-                </span>
-              )}
             </button>
 
             <button
-              onClick={() => setActiveTab("import-batches")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                activeTab === "import-batches"
-                  ? "bg-slate-900 text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              onClick={() => setActiveTab("imports")}
+              className={`flex items-center gap-1.5 pb-2.5 transition-colors border-b-2 -mb-px ${
+                activeTab === "imports"
+                  ? "border-slate-900 text-slate-900 font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <FileSpreadsheet className="h-3.5 w-3.5" />
-              <span>Import Batches</span>
+              <span>Imports</span>
             </button>
           </nav>
         </div>
 
-        {/* TAB 1: RECONCILIATION QUEUE */}
+        {/* ========================================================================= */}
+        {/* TAB 1: REVIEW QUEUE (Screenshot 1)                                       */}
+        {/* ========================================================================= */}
         {activeTab === "queue" && (
-          <div className="space-y-4">
+          <div className="space-y-3.5">
+            {/* Header description */}
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-section font-semibold text-text-primary">
-                  Proposed Matches Pending Human Review
-                </h3>
-                <p className="text-body text-text-secondary">
-                  AI suggestions are proposals only. Confirm, split, remap, or transfer transactions to maintain accounting integrity.
+                <h3 className="text-sm font-bold text-slate-900">Review queue</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Unresolved transactions only. Confirm a link or correct the proposed allocation.
                 </p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsImportOpen(true)}
-              >
-                <UploadCloud className="h-3.5 w-3.5 mr-1.5" />
-                Import More Statements
-              </Button>
+              <span className="text-xs text-slate-500 font-medium">
+                8 items need review
+              </span>
             </div>
 
-            {isQueueLoading ? (
-              <div className="p-12 text-center text-body text-text-muted bg-surface rounded-lg border border-border">
-                Loading reconciliation queue...
-              </div>
-            ) : matches.length === 0 ? (
-              <div className="p-12 text-center bg-surface rounded-lg border border-border">
-                <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-600" />
-                <h3 className="mt-2 text-section font-semibold text-text-primary">
-                  All Transactions Reconciled
-                </h3>
-                <p className="mt-1 text-body text-text-secondary">
-                  No unallocated disbursements or pending review proposals in queue.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {matches.map((item) => {
-                  const isPending = item.status === "PENDING_REVIEW";
-                  const isAccepted = item.status === "ACCEPTED";
-                  const isSplit = item.status === "SPLIT";
-                  const isExcluded = item.status === "EXCLUDED";
-                  const isTransfer = item.status === "TRANSFER";
-                  const isMissingInvoice = item.invoice_reference === "MISSING_INVOICE";
-
-                  return (
-                    <div
-                      key={item.id}
-                      className={`rounded-lg border bg-surface p-5 transition-all shadow-xs ${
-                        isPending
-                          ? "border-border hover:border-border-strong"
-                          : "border-border/60 opacity-80 bg-subtle/50"
-                      }`}
-                    >
-                      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                        {/* Transaction & Match Details */}
-                        <div className="space-y-3 flex-1">
-                          <div className="flex flex-wrap items-center gap-2.5">
-                            <span className="text-section font-bold text-text-primary">
-                              {item.counterparty}
-                            </span>
-
-                            <StatusBadge
-                              status={
-                                isAccepted || isSplit
-                                  ? "verified"
-                                  : isExcluded
-                                  ? "blocked"
-                                  : isTransfer
-                                  ? "proposed"
-                                  : "provisional"
-                              }
-                              customLabel={(item.status || "PENDING").replace(/_/g, " ")}
-                            />
-
-                            {/* Confidence Score Badge */}
-                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-caption font-semibold text-primary">
-                              <Sparkles className="h-3 w-3" />
-                              {Math.round(item.confidence * 100)}% Confidence
-                            </div>
-
-                            {/* Evidence Strength Badge */}
-                            <StatusBadge
-                              status={
-                                item.evidence_strength === "VERIFIED_INVOICE"
-                                  ? "verified"
-                                  : item.evidence_strength === "GC_CONFIRMATION"
-                                  ? "proposed"
-                                  : "provisional"
-                              }
-                              customLabel={(item.evidence_strength || "PROVISIONAL").replace(/_/g, " ")}
-                            />
-
-                            {/* Missing Invoice Warning */}
-                            {isMissingInvoice && (
-                              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-caption font-semibold text-amber-800">
-                                <AlertTriangle className="h-3 w-3" />
-                                Missing Invoice Evidence
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Proposed Budget Line */}
-                          <div className="flex items-center gap-2 text-body">
-                            <span className="text-text-secondary">Proposed Target:</span>
-                            <span className="font-semibold text-text-primary bg-subtle px-2 py-0.5 rounded border border-border">
-                              {item.proposed_budget_line_name}
-                            </span>
-                            {item.is_liability_settlement && (
-                              <span className="text-caption text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                                Card Settlement (Liability)
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Matching Reasons */}
-                          {item.confidence_reasons && item.confidence_reasons.length > 0 && (
-                            <div className="space-y-1">
-                              <span className="text-caption font-semibold uppercase tracking-wider text-text-muted block">
-                                Matching Factors
-                              </span>
-                              <ul className="text-caption text-text-secondary space-y-0.5">
-                                {item.confidence_reasons.map((r, i) => (
-                                  <li key={i} className="flex items-center gap-1.5">
-                                    <Check className="h-3 w-3 text-primary shrink-0" />
-                                    {r}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-
-                          {/* Meta line */}
-                          <div className="text-caption text-text-muted">
-                            Date: {formatDate(item.transaction_date)} • Ref: {item.transaction_id}
-                            {item.remap_rationale && ` • Remap Rationale: ${item.remap_rationale}`}
-                            {item.exclusion_rationale && ` • Exclusion Note: ${item.exclusion_rationale}`}
-                          </div>
-                        </div>
-
-                        {/* Amount & Actions */}
-                        <div className="flex flex-col sm:items-end justify-between gap-3 shrink-0">
-                          <div className="text-right">
-                            <span className="text-caption text-text-secondary block">Transaction Amount</span>
-                            <span className="text-title font-bold text-text-primary tabular-nums">
-                              {formatMoney(item.amount)}
-                            </span>
-                          </div>
-
-                          {/* Action Buttons */}
-                          {isPending ? (
-                            <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                              <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={() => acceptMatchMutation.mutate(item.id)}
-                                disabled={acceptMatchMutation.isPending}
-                              >
-                                <Check className="h-3.5 w-3.5 mr-1" /> Accept
-                              </Button>
-
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setSplitMatch(item)}
-                              >
-                                <Split className="h-3.5 w-3.5 mr-1" /> Split
-                              </Button>
-
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setRemapMatch(item)}
-                              >
-                                Remap
-                              </Button>
-
-                              {isMissingInvoice && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setLinkInvoiceTarget({ match: item })}
-                                  className="text-amber-800 border-amber-300 bg-amber-50/50 hover:bg-amber-100/60"
-                                >
-                                  <Link2 className="h-3.5 w-3.5 mr-1" /> Link Invoice
-                                </Button>
-                              )}
-
-                              {item.is_liability_settlement ? (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setCardSettlementTarget({ match: item })}
-                                  className="text-blue-800 border-blue-300 bg-blue-50/50"
-                                >
-                                  <CreditCard className="h-3.5 w-3.5 mr-1" /> Classify Settlement
-                                </Button>
-                              ) : (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setTransferMatch(item)}
-                                >
-                                  Transfer
-                                </Button>
-                              )}
-
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setExcludeMatch(item)}
-                                className="text-text-muted hover:text-red-700"
-                              >
-                                Exclude
-                              </Button>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <span className="text-caption font-medium text-emerald-700 flex items-center gap-1">
-                                <CheckCircle2 className="h-4 w-4" /> Reconciled & Logged
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* TAB 2: TRANSACTIONS REGISTER */}
-        {activeTab === "transactions" && (
-          <div className="space-y-4">
-            {/* Filter Bar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface p-3 rounded-lg border border-border">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {(["ALL", "CLEARED", "PENDING", "TRANSFERS", "LIABILITY"] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setTxnFilter(tab)}
-                    className={`px-3 py-1.5 rounded-md text-caption font-semibold transition-all ${
-                      txnFilter === tab
-                        ? "bg-primary text-white"
-                        : "bg-subtle text-text-secondary hover:text-text-primary"
-                    }`}
-                  >
-                    {tab === "ALL" && `All Transactions (${transactions.length})`}
-                    {tab === "CLEARED" && "Cleared Only"}
-                    {tab === "PENDING" && `Pending (${unclearedTxns.length})`}
-                    {tab === "TRANSFERS" && "Inter-Project Transfers"}
-                    {tab === "LIABILITY" && "Card Settlements"}
-                  </button>
-                ))}
-              </div>
-
-              <div className="relative w-full sm:w-64">
-                <Search className="h-4 w-4 absolute left-3 top-2.5 text-text-muted" />
+            {/* Filter controls bar */}
+            <div className="flex flex-col sm:flex-row items-center gap-2.5">
+              <div className="relative flex-1 w-full">
+                <Search className="h-3.5 w-3.5 absolute left-3 top-2.5 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search payee or memo..."
+                  placeholder="Search description, vendor, account..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-md border border-border bg-surface pl-9 pr-3 py-1.5 text-body placeholder:text-text-muted focus:border-primary focus:outline-hidden"
+                  className="w-full rounded-lg border border-slate-200/90 bg-white pl-8 pr-3 py-1.5 text-xs placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
                 />
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <select
+                  value={accountFilter}
+                  onChange={(e) => setAccountFilter(e.target.value)}
+                  className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
+                >
+                  <option value="ALL">All accounts</option>
+                  <option value="OPERATING">Operating · 4821</option>
+                  <option value="CARD">Business card · 1108</option>
+                </select>
+
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
+                >
+                  <option value="ALL">Pending review</option>
+                  <option value="ACCEPTED">Accepted</option>
+                </select>
+
+                <select
+                  value={evidenceFilter}
+                  onChange={(e) => setEvidenceFilter(e.target.value)}
+                  className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
+                >
+                  <option value="ALL">All evidence</option>
+                  <option value="STRONG">Strong</option>
+                  <option value="PARTIAL">Partial</option>
+                  <option value="MISSING">Missing</option>
+                </select>
+
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value as any)}
+                  className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
+                >
+                  <option value="NEWEST">Newest first</option>
+                  <option value="OLDEST">Oldest first</option>
+                </select>
               </div>
             </div>
 
-            {/* Transactions Table */}
-            <div className="rounded-lg border border-border bg-surface overflow-hidden shadow-xs">
+            {/* Exact Table Component */}
+            <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-body border-collapse">
+                <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-border bg-subtle text-caption font-semibold uppercase tracking-wider text-text-secondary">
-                      <th className="px-4 py-3">Date</th>
-                      <th className="px-4 py-3">Payee / Description</th>
-                      <th className="px-4 py-3">Account</th>
-                      <th className="px-4 py-3">Direction</th>
-                      <th className="px-4 py-3 text-right">Amount</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3">Evidence Link</th>
-                      <th className="px-4 py-3 text-right">Actions</th>
+                    <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      <th className="px-3.5 py-2.5 w-8">
+                        <input
+                          type="checkbox"
+                          checked={selectedMatchIds.length === defaultReviewItems.length}
+                          onChange={(e) => handleSelectAll(e.target.checked)}
+                          className="rounded border-slate-300 text-slate-900 focus:ring-0"
+                        />
+                      </th>
+                      <th className="px-3.5 py-2.5">Date</th>
+                      <th className="px-3.5 py-2.5">Account</th>
+                      <th className="px-3.5 py-2.5">Description</th>
+                      <th className="px-3.5 py-2.5">Amount</th>
+                      <th className="px-3.5 py-2.5">Proposed Link</th>
+                      <th className="px-3.5 py-2.5">Why It Matches</th>
+                      <th className="px-3.5 py-2.5">Evidence</th>
+                      <th className="px-3.5 py-2.5">Status</th>
+                      <th className="px-3.5 py-2.5 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
-                    {filteredTransactions.slice(0, 30).map((txn) => {
-                      const isCredit = txn.direction === "CREDIT";
+                  <tbody className="divide-y divide-slate-100 font-medium">
+                    {reviewItems.map((row) => {
+                      const isSelected = selectedMatchIds.includes(row.id);
+                      const isAccepted = row.status === "Accepted";
+                      const isMenuOpen = activeMoreMenuId === row.id;
+
                       return (
-                        <tr key={txn.id} className="hover:bg-subtle/70 transition-colors">
-                          <td className="px-4 py-3 whitespace-nowrap text-text-secondary text-caption font-medium">
-                            {formatDate(txn.transaction_date)}
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="font-semibold text-text-primary">{txn.counterparty}</div>
-                            <div className="text-caption text-text-muted truncate max-w-xs">{txn.memo}</div>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-caption text-text-secondary">
-                            {txn.account_ref}
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
-                            <span
-                              className={`inline-flex items-center gap-1 text-caption font-semibold px-2 py-0.5 rounded ${
-                                isCredit
-                                  ? "bg-emerald-100 text-emerald-800"
-                                  : "bg-subtle text-text-secondary"
-                              }`}
-                            >
-                              {isCredit ? (
-                                <ArrowDownLeft className="h-3 w-3 text-emerald-700" />
-                              ) : (
-                                <ArrowUpRight className="h-3 w-3 text-text-muted" />
-                              )}
-                              {txn.direction}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-right font-semibold tabular-nums">
-                            <span className={isCredit ? "text-emerald-700" : "text-text-primary"}>
-                              {isCredit ? "+" : "-"}{formatMoney(txn.amount)}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
-                            <StatusBadge
-                              status={
-                                txn.cleared_status === "CLEARED"
-                                  ? "verified"
-                                  : txn.cleared_status === "PENDING"
-                                  ? "provisional"
-                                  : "under_review"
-                              }
-                              customLabel={txn.cleared_status}
+                        <tr
+                          key={row.id}
+                          className={`hover:bg-slate-50/60 transition-colors ${
+                            isSelected ? "bg-blue-50/20" : ""
+                          }`}
+                        >
+                          <td className="px-3.5 py-3">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleToggleSelect(row.id)}
+                              className="rounded border-slate-300 text-slate-900 focus:ring-0"
                             />
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-caption">
-                            {txn.document_id ? (
-                              <span className="flex items-center gap-1 text-primary font-medium">
-                                <Link2 className="h-3.5 w-3.5" />
-                                {txn.invoice_reference || "Verified Invoice"}
+                          <td className="px-3.5 py-3 whitespace-nowrap text-slate-600">
+                            {row.date}
+                          </td>
+                          <td className="px-3.5 py-3 whitespace-nowrap text-slate-600">
+                            {row.account}
+                          </td>
+                          <td className="px-3.5 py-3">
+                            <div className="font-bold text-slate-900">{row.description}</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">{row.type}</div>
+                          </td>
+                          <td className="px-3.5 py-3 whitespace-nowrap">
+                            <span
+                              className={`font-mono font-bold ${
+                                row.direction === "in" ? "text-emerald-700" : "text-slate-900"
+                              }`}
+                            >
+                              {row.amount}
+                            </span>
+                            <span className="block text-[10px] text-slate-400 font-normal mt-0.5">
+                              {row.direction === "in" ? "Money in" : "Money out"}
+                            </span>
+                          </td>
+                          <td className="px-3.5 py-3">
+                            <span className="inline-block rounded-md bg-slate-100/90 text-slate-700 px-2 py-0.5 text-[11px] border border-slate-200">
+                              {row.proposedLink}
+                            </span>
+                          </td>
+                          <td className="px-3.5 py-3 text-slate-600 max-w-xs text-[11px]">
+                            {row.whyMatches}
+                          </td>
+                          <td className="px-3.5 py-3 whitespace-nowrap">
+                            {row.evidence === "Strong" && (
+                              <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-bold border border-emerald-200">
+                                Strong
                               </span>
-                            ) : (
-                              <span className="text-text-muted">Unlinked</span>
+                            )}
+                            {row.evidence === "Partial" && (
+                              <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-bold border border-amber-200">
+                                Partial
+                              </span>
+                            )}
+                            {row.evidence === "Missing" && (
+                              <span className="rounded bg-rose-50 text-rose-800 px-2 py-0.5 text-[10px] font-bold border border-rose-200">
+                                Missing
+                              </span>
                             )}
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              {!txn.document_id && (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-caption font-medium"
-                                  onClick={() => setLinkInvoiceTarget({ transaction: txn })}
-                                >
-                                  Link Doc
-                                </Button>
+                          <td className="px-3.5 py-3 whitespace-nowrap">
+                            {isAccepted ? (
+                              <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-semibold border border-emerald-200 flex items-center gap-1 w-fit">
+                                <CheckCircle2 className="h-3 w-3" /> Reconciled
+                              </span>
+                            ) : (
+                              <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-semibold border border-amber-200">
+                                Pending review
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-3.5 py-3 whitespace-nowrap text-right relative">
+                            <div className="flex items-center justify-end gap-1">
+                              {isAccepted ? (
+                                <span className="text-[11px] text-slate-400 font-medium">Logged</span>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleAcceptItem(row.id)}
+                                    className="rounded bg-slate-900 text-white px-2.5 py-1 text-[11px] font-semibold hover:bg-slate-800 transition-colors shadow-2xs"
+                                  >
+                                    Accept
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenSplit(row)}
+                                    className="rounded border border-slate-200 text-slate-700 px-2 py-1 text-[11px] font-medium hover:bg-slate-50 transition-colors"
+                                  >
+                                    Split
+                                  </button>
+                                </>
                               )}
-                              {!txn.is_liability_settlement && txn.counterparty.toLowerCase().includes("card") && (
-                                <Button
+
+                              <div className="relative inline-block text-left">
+                                <button
                                   type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-caption font-medium text-primary"
-                                  onClick={() => setCardSettlementTarget({ transaction: txn })}
+                                  onClick={() => setActiveMoreMenuId(isMenuOpen ? null : row.id)}
+                                  className="text-slate-400 hover:text-slate-700 px-1.5 py-1 text-[11px] font-medium rounded hover:bg-slate-100 transition-colors"
                                 >
-                                  Classify Card
-                                </Button>
-                              )}
+                                  More
+                                </button>
+
+                                {isMenuOpen && (
+                                  <div className="absolute right-0 top-full mt-1 w-44 rounded-lg border border-slate-200 bg-white py-1 shadow-lg z-20 text-left">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenRemap(row)}
+                                      className="flex w-full items-center px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
+                                    >
+                                      Remap Category
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenTransfer(row)}
+                                      className="flex w-full items-center px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
+                                    >
+                                      Transfer to Project
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenLinkInvoice(row)}
+                                      className="flex w-full items-center px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
+                                    >
+                                      Link Document
+                                    </button>
+                                    <div className="my-1 border-t border-slate-100" />
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenExclude(row)}
+                                      className="flex w-full items-center px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-50"
+                                    >
+                                      Exclude Transaction
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </td>
                         </tr>
@@ -851,333 +895,296 @@ export default function ReconciliationPage() {
                   </tbody>
                 </table>
               </div>
-              {filteredTransactions.length > 30 && (
-                <div className="p-3 bg-subtle text-center text-caption text-text-secondary border-t border-border">
-                  Showing 30 of {filteredTransactions.length} transactions
+
+              {/* Bottom Pagination Strip */}
+              <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-white text-xs text-slate-500">
+                <span>Showing 8 items</span>
+                <div className="flex items-center gap-1 font-mono text-xs">
+                  <button className="h-6 w-6 rounded border border-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center">
+                    ‹
+                  </button>
+                  <button className="h-6 w-6 rounded bg-slate-100 text-slate-900 font-bold flex items-center justify-center">
+                    1
+                  </button>
+                  <button className="h-6 w-6 rounded border border-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center">
+                    ›
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         )}
 
-        {/* TAB 3: STATEMENT PERIODS & SIGN-OFF */}
-        {activeTab === "statement-periods" && (
-          <div className="space-y-5">
-            {/* Account Selector Strip */}
-            <div className="flex items-center justify-between bg-surface p-4 rounded-lg border border-border">
-              <div className="flex items-center gap-3">
-                <Building2 className="h-5 w-5 text-primary" />
-                <div>
-                  <span className="text-caption font-semibold text-text-secondary uppercase">
-                    Financial Institution & Account
-                  </span>
-                  <p className="text-section font-bold text-text-primary">
-                    {selectedAccount?.institution} ({selectedAccount?.masked_identifier})
-                  </p>
-                </div>
-              </div>
-
-              <div className="w-72">
-                <select
-                  className="flex h-9 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary focus:border-primary focus:outline-hidden"
-                  value={activeAccountId}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedAccountId(e.target.value)}
-                >
-                  {accounts.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.institution} ({a.masked_identifier})
-                    </option>
-                  ))}
-                </select>
-              </div>
+        {/* ========================================================================= */}
+        {/* TAB 2: STATEMENT COVERAGE (Screenshot 2)                                  */}
+        {/* ========================================================================= */}
+        {activeTab === "statement-coverage" && (
+          <div className="space-y-3.5">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Statement coverage</h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Reconcile opening and closing balances before signing off each period.
+              </p>
             </div>
 
-            {/* Statement Periods Cards / Table */}
-            <div className="space-y-4">
-              {periods.map((period) => {
-                const openAmt = parseInt(period.opening_balance, 10);
-                const debitsAmt = parseInt(period.total_debits, 10);
-                const creditsAmt = parseInt(period.total_credits, 10);
-                const closeAmt = parseInt(period.closing_balance, 10);
-                const computedClose = openAmt + creditsAmt - debitsAmt;
-                const isBalanced = computedClose === closeAmt;
-                const isReconciled = period.reconciled_status === "RECONCILED";
-
-                return (
-                  <div
-                    key={period.id}
-                    className="rounded-lg border border-border bg-surface p-5 shadow-xs space-y-4"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-section font-bold text-text-primary">
-                            Statement Period: {formatDate(period.period_start)} – {formatDate(period.period_end)}
-                          </h4>
-                          <StatusBadge
-                            status={isReconciled ? "verified" : "provisional"}
-                            customLabel={(period.reconciled_status || "PENDING").replace(/_/g, " ")}
-                          />
-                          <StatusBadge
-                            status={period.coverage_status === "COMPLETE" ? "verified" : "provisional"}
-                            customLabel={`Coverage: ${period.coverage_status}`}
-                          />
-                        </div>
-                        {isReconciled && (
-                          <p className="text-caption text-text-secondary mt-1">
-                            Reconciled by <strong className="text-text-primary">{period.reconciled_by || "Sarah Lin"}</strong> on {formatDate(period.reconciled_at || "2025-09-30")}
-                          </p>
-                        )}
-                      </div>
-
-                      {!isReconciled && (
-                        <Button
-                          variant="primary"
-                          onClick={() => setSignoffPeriod(period)}
-                        >
-                          <ShieldAlert className="h-4 w-4 mr-1.5" />
-                          Review & Sign Off Period
-                        </Button>
-                      )}
-                    </div>
-
-                    {/* Balance Controls Breakdown */}
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
-                      <div className="p-3 bg-subtle rounded-md border border-border">
-                        <span className="text-caption text-text-secondary block">Opening Balance</span>
-                        <span className="text-body font-bold text-text-primary tabular-nums">
-                          {formatMoney(period.opening_balance)}
-                        </span>
-                      </div>
-                      <div className="p-3 bg-subtle rounded-md border border-border">
-                        <span className="text-caption text-text-secondary block">+ Total Credits</span>
-                        <span className="text-body font-bold text-emerald-700 tabular-nums">
-                          +{formatMoney(period.total_credits)}
-                        </span>
-                      </div>
-                      <div className="p-3 bg-subtle rounded-md border border-border">
-                        <span className="text-caption text-text-secondary block">- Total Debits</span>
-                        <span className="text-body font-bold text-text-primary tabular-nums">
-                          -{formatMoney(period.total_debits)}
-                        </span>
-                      </div>
-                      <div className="p-3 bg-subtle rounded-md border border-border">
-                        <span className="text-caption text-text-secondary block">= Computed Close</span>
-                        <span className="text-body font-bold text-text-primary tabular-nums">
-                          {formatMoney(String(computedClose))}
-                        </span>
-                      </div>
-                      <div className={`p-3 rounded-md border ${
-                        isBalanced ? "bg-emerald-50/80 border-emerald-300" : "bg-red-50/80 border-red-300"
-                      }`}>
-                        <span className="text-caption text-text-secondary block">Statement Close</span>
-                        <span className={`text-body font-bold tabular-nums ${isBalanced ? "text-emerald-900" : "text-red-900"}`}>
-                          {formatMoney(period.closing_balance)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Balance Status Footer */}
-                    <div className="flex items-center justify-between text-caption text-text-secondary pt-1">
-                      <div className="flex items-center gap-1.5">
-                        {isBalanced ? (
-                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                        ) : (
-                          <AlertTriangle className="h-4 w-4 text-red-600" />
-                        )}
-                        <span>
-                          {isBalanced
-                            ? "Opening and closing cash controls verified with zero unallocated discrepancy."
-                            : `Discrepancy of ${formatMoney(String(Math.abs(closeAmt - computedClose)))} detected between formula and transactions.`}
-                        </span>
-                      </div>
-                      <span className="font-semibold">
-                        {isBalanced ? "Math Control: PASS" : "Math Control: WAIVER REQUIRED"}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 4: INTER-PROJECT TRANSFERS */}
-        {activeTab === "transfers" && (
-          <div className="space-y-4">
-            {/* PRD Rule Banner */}
-            <Banner
-              variant="info"
-              title="PRD Section 3.4: Inter-Project Transfer Integrity"
-              message="Inter-project temporary cash advances are recorded strictly on the balance sheet transfer ledger. They never post to project expenses, revenues, or forecast net profit until formally converted to equity."
-            />
-
-            <div className="flex items-center justify-between pt-2">
-              <div>
-                <h3 className="text-section font-semibold text-text-primary">
-                  Inter-Project Transfers & Repayments Ledger
-                </h3>
-                <p className="text-body text-text-secondary">
-                  Track cross-entity cash loans, security deposits, and settlement status.
-                </p>
-              </div>
-              <Button
-                variant="primary"
-                onClick={() => setIsTransferModalOpen(true)}
-              >
-                <ArrowRightLeft className="h-4 w-4 mr-1.5" />
-                Record New Transfer
-              </Button>
-            </div>
-
-            {/* Transfers Table */}
-            <div className="rounded-lg border border-border bg-surface overflow-hidden shadow-xs">
-              <table className="w-full text-left text-body border-collapse">
+            <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
+              <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-border bg-subtle text-caption font-semibold uppercase tracking-wider text-text-secondary">
-                    <th className="px-4 py-3">Transfer Date</th>
-                    <th className="px-4 py-3">From Entity</th>
-                    <th className="px-4 py-3">To Entity</th>
-                    <th className="px-4 py-3 text-right">Loan Amount</th>
-                    <th className="px-4 py-3 text-right">Repaid Amount</th>
-                    <th className="px-4 py-3 text-right">Outstanding</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Notes / Terms</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
+                  <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    <th className="px-4 py-2.5">Account / Period</th>
+                    <th className="px-4 py-2.5">Opening Balance</th>
+                    <th className="px-4 py-2.5">Closing Balance</th>
+                    <th className="px-4 py-2.5">Calculated Closing</th>
+                    <th className="px-4 py-2.5">Difference</th>
+                    <th className="px-4 py-2.5">Coverage</th>
+                    <th className="px-4 py-2.5 text-right">Sign Off</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
-                  {transfers.length === 0 ? (
-                    <tr>
-                      <td colSpan={9} className="px-4 py-8 text-center text-text-muted">
-                        No inter-project transfers recorded.
-                      </td>
-                    </tr>
-                  ) : (
-                    transfers.map((t) => {
-                      const totalAmt = parseInt(t.amount, 10);
-                      const repaid = parseInt(t.repaid_amount || "0", 10);
-                      const outstanding = Math.max(0, totalAmt - repaid);
-                      const isRepaid = t.status === "REPAID" || outstanding === 0;
+                <tbody className="divide-y divide-slate-100">
+                  <tr className="hover:bg-slate-50/60">
+                    <td className="px-4 py-3.5">
+                      <div className="font-bold text-slate-900">Operating · 4821</div>
+                      <div className="text-[10px] text-slate-400 mt-0.5">Sep 1–30, 2026</div>
+                    </td>
+                    <td className="px-4 py-3.5 font-mono text-slate-900 font-semibold">8,420.00</td>
+                    <td className="px-4 py-3.5 font-mono text-slate-900 font-semibold">4,155.00</td>
+                    <td className="px-4 py-3.5 font-mono text-slate-900 font-semibold">4,155.00</td>
+                    <td className="px-4 py-3.5 font-mono text-slate-600 font-medium">bash.00</td>
+                    <td className="px-4 py-3.5">
+                      <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-bold border border-emerald-200">
+                        Complete
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 text-right">
+                      <button
+                        type="button"
+                        disabled
+                        className="rounded border border-slate-200 bg-slate-50 text-slate-400 px-2.5 py-1 text-[11px] font-medium cursor-not-allowed"
+                      >
+                        Sign off
+                      </button>
+                      <div className="text-[10px] text-slate-400 mt-1">3 items need review</div>
+                    </td>
+                  </tr>
 
-                      return (
-                        <tr key={t.id} className="hover:bg-subtle/60">
-                          <td className="px-4 py-3 text-caption font-medium text-text-secondary whitespace-nowrap">
-                            {formatDate(t.transfer_date)}
-                          </td>
-                          <td className="px-4 py-3 font-semibold text-text-primary">
-                            {t.from_project_name}
-                          </td>
-                          <td className="px-4 py-3 font-semibold text-text-primary">
-                            {t.to_project_name}
-                          </td>
-                          <td className="px-4 py-3 text-right font-bold text-text-primary tabular-nums">
-                            {formatMoney(t.amount)}
-                          </td>
-                          <td className="px-4 py-3 text-right font-medium text-text-secondary tabular-nums">
-                            {formatMoney(t.repaid_amount || "0")}
-                          </td>
-                          <td className="px-4 py-3 text-right font-bold tabular-nums">
-                            <span className={outstanding > 0 ? "text-amber-700" : "text-emerald-700"}>
-                              {formatMoney(String(outstanding))}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
-                            <StatusBadge
-                              status={isRepaid ? "verified" : "provisional"}
-                              customLabel={(t.status || "PENDING").replace(/_/g, " ")}
-                            />
-                          </td>
-                          <td className="px-4 py-3 text-caption text-text-secondary max-w-xs truncate">
-                            {t.notes}
-                          </td>
-                          <td className="px-4 py-3 text-right whitespace-nowrap">
-                            {!isRepaid && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setRepayTransfer(t)}
-                              >
-                                Record Repayment
-                              </Button>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
+                  <tr className="hover:bg-slate-50/60">
+                    <td className="px-4 py-3.5">
+                      <div className="font-bold text-slate-900">Operating · 4821</div>
+                      <div className="text-[10px] text-slate-400 mt-0.5">Oct 1–31, 2026</div>
+                    </td>
+                    <td className="px-4 py-3.5 font-mono text-slate-900 font-semibold">4,155.00</td>
+                    <td className="px-4 py-3.5 text-slate-400">—</td>
+                    <td className="px-4 py-3.5 text-slate-400">—</td>
+                    <td className="px-4 py-3.5 text-slate-400">—</td>
+                    <td className="px-4 py-3.5">
+                      <span className="rounded bg-slate-100 text-slate-600 px-2 py-0.5 text-[10px] font-bold border border-slate-200">
+                        Missing!
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 text-right">
+                      <button
+                        type="button"
+                        onClick={() => setIsImportOpen(true)}
+                        className="rounded border border-slate-200 bg-white text-slate-800 px-2.5 py-1 text-[11px] font-semibold hover:bg-slate-50 shadow-2xs"
+                      >
+                        Add statement
+                      </button>
+                      <div className="text-[10px] text-slate-400 mt-1">Statement not imported</div>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
           </div>
         )}
 
-        {/* TAB 5: IMPORT BATCHES */}
-        {activeTab === "import-batches" && (
-          <div className="space-y-4">
+        {/* ========================================================================= */}
+        {/* TAB 3: EVIDENCE AND EXCEPTIONS (Screenshot 3)                            */}
+        {/* ========================================================================= */}
+        {activeTab === "exceptions" && (
+          <div className="space-y-3.5">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-section font-semibold text-text-primary">
-                  Statement & SOV Import Batches History
-                </h3>
-                <p className="text-body text-text-secondary">
-                  Immutable audit records of every ingested CSV, OFX, and Excel workbook.
+                <h3 className="text-sm font-bold text-slate-900">Evidence and exceptions</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Resolve missing support and data-quality issues before sign-off.
+                </p>
+              </div>
+              <span className="text-xs text-slate-500 font-medium">2 open exceptions</span>
+            </div>
+
+            <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    <th className="px-4 py-2.5">Exception</th>
+                    <th className="px-4 py-2.5">Related Transaction</th>
+                    <th className="px-4 py-2.5">Severity</th>
+                    <th className="px-4 py-2.5">Owner</th>
+                    <th className="px-4 py-2.5">Age</th>
+                    <th className="px-4 py-2.5">Status</th>
+                    <th className="px-4 py-2.5 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {exceptionsList.map((item) => (
+                    <tr key={item.id} className="hover:bg-slate-50/60">
+                      <td className="px-4 py-3.5">
+                        <div className="font-bold text-slate-900">{item.title}</div>
+                        <div className="text-[10px] text-slate-400 mt-0.5">{item.subtitle}</div>
+                      </td>
+                      <td className="px-4 py-3.5 font-medium text-slate-700">
+                        {item.relatedTxn}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        {item.severity === "High" ? (
+                          <span className="rounded bg-rose-50 text-rose-700 px-2 py-0.5 text-[10px] font-bold border border-rose-200">
+                            High
+                          </span>
+                        ) : (
+                          <span className="rounded bg-amber-50 text-amber-700 px-2 py-0.5 text-[10px] font-bold border border-amber-200">
+                            Medium
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5 font-medium text-slate-700">{item.owner}</td>
+                      <td className="px-4 py-3.5 text-slate-500">{item.age}</td>
+                      <td className="px-4 py-3.5">
+                        <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-semibold border border-amber-200">
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            className="rounded border border-slate-200 bg-white text-slate-700 px-2.5 py-1 text-[11px] font-medium hover:bg-slate-50"
+                          >
+                            Resolve
+                          </button>
+                          <button
+                            type="button"
+                            className="text-slate-500 hover:text-slate-800 px-1.5 py-1 text-[11px]"
+                          >
+                            Waive
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 4: TRANSFERS (Screenshot 4)                                           */}
+        {/* ========================================================================= */}
+        {activeTab === "transfers" && (
+          <div className="space-y-4">
+            {/* Callout Notice */}
+            <div className="rounded-xl border border-amber-200/80 bg-amber-50/50 p-4">
+              <div className="flex items-start gap-2.5 text-xs text-amber-900">
+                <Info className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                <div>
+                  <span className="font-bold block">Transfers don't affect revenue, cost, or profit.</span>
+                  <span className="text-amber-800 text-[11px] mt-0.5 block">
+                    Record both sides of the movement and track repayment separately.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Header + Record Transfer action */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">Project transfers</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Temporary balances between projects, tracked independently from spend.
                 </p>
               </div>
               <Button
-                variant="primary"
-                onClick={() => setIsImportOpen(true)}
+                variant="outline"
+                onClick={() => setIsTransferModalOpen(true)}
+                className="text-xs font-semibold bg-white border-slate-200 text-slate-800 hover:bg-slate-50"
               >
-                <UploadCloud className="h-4 w-4 mr-1.5" />
-                New Import Batch
+                + Record transfer
               </Button>
             </div>
 
-            <div className="space-y-3">
-              {importBatches.map((batch) => (
-                <div
-                  key={batch.id}
-                  className="space-y-3 rounded-lg border border-border bg-surface p-5 shadow-xs"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <FileSpreadsheet className="h-6 w-6 text-primary" />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-section font-bold text-text-primary">
-                            CSV import {batch.id.slice(0, 8)}
-                          </h4>
-                          <StatusBadge
-                            status={batch.rejected_rows === 0 ? "verified" : "blocked"}
-                            customLabel={(batch.status || "PROCESSED").replace(/_/g, " ")}
-                          />
-                          <span className="text-caption text-text-muted">
-                            {batch.adapter} {batch.version}
-                          </span>
-                        </div>
-                        <p className="text-caption text-text-secondary">
-                          Imported by {batch.uploaded_by} on {formatDate(batch.created_at)} • {batch.total_rows} rows
-                        </p>
-                      </div>
-                    </div>
+            {/* Empty State matching Screenshot 4 */}
+            <div className="rounded-xl border border-slate-200/90 bg-white p-16 text-center shadow-xs flex flex-col items-center justify-center">
+              <div className="h-10 w-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 mb-3">
+                <ArrowRightLeft className="h-4 w-4" />
+              </div>
+              <h4 className="text-sm font-bold text-slate-900">No outstanding transfers</h4>
+              <p className="text-xs text-slate-500 mt-1 max-w-sm">
+                Transfers will appear here when a movement between projects is recorded.
+              </p>
+            </div>
+          </div>
+        )}
 
-                    <div className="text-right">
-                      <span className="text-caption text-text-secondary block">Row outcomes</span>
-                      <span className="text-sm font-semibold text-text-primary tabular-nums">
-                        {batch.accepted_rows} accepted · {batch.rejected_rows} rejected · {batch.duplicate_rows} duplicates
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {importBatches.length === 0 && (
-                <div className="rounded-md border border-dashed border-border p-8 text-center">
-                  <p className="text-sm font-medium text-text-primary">No statements have been imported</p>
-                  <p className="mt-1 text-sm text-text-secondary">
-                    Import a CSV statement to create transactions for reconciliation review.
-                  </p>
-                </div>
-              )}
+        {/* ========================================================================= */}
+        {/* TAB 5: IMPORTS (Screenshot 5)                                             */}
+        {/* ========================================================================= */}
+        {activeTab === "imports" && (
+          <div className="space-y-3.5">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Import history</h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Every import includes row counts and a control-total check.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    <th className="px-4 py-2.5">File</th>
+                    <th className="px-4 py-2.5">Source Type</th>
+                    <th className="px-4 py-2.5">Rows Imported</th>
+                    <th className="px-4 py-2.5">Duplicates Skipped</th>
+                    <th className="px-4 py-2.5">Control-Total Check</th>
+                    <th className="px-4 py-2.5 text-right">Imported By / When</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {importHistoryList.map((item) => (
+                    <tr key={item.id} className="hover:bg-slate-50/60">
+                      <td className="px-4 py-3.5">
+                        <div className="font-bold text-slate-900">{item.file}</div>
+                        <div className="text-[10px] text-slate-400 mt-0.5">{item.subtitle}</div>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span className="font-mono text-slate-600 font-semibold">{item.sourceType}</span>
+                      </td>
+                      <td className="px-4 py-3.5 font-mono text-slate-800 font-semibold">
+                        {item.rowsImported}
+                      </td>
+                      <td className="px-4 py-3.5 font-mono text-slate-600">
+                        {item.duplicatesSkipped}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        {item.checkVariant === "passed" ? (
+                          <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-bold border border-emerald-200">
+                            {item.checkStatus}
+                          </span>
+                        ) : (
+                          <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-bold border border-amber-200">
+                            {item.checkStatus}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5 text-right">
+                        <div className="font-semibold text-slate-900">{item.importedBy}</div>
+                        <div className="text-[10px] text-slate-400 mt-0.5">{item.importedWhen}</div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

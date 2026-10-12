@@ -167,10 +167,10 @@ export function Sidebar({
             <div className="mt-3 rounded-xl border border-slate-200/80 bg-white p-3 shadow-2xs">
               <div className="mb-1.5">
                 <span className="text-xs font-bold text-slate-900 block truncate" title={activeProject?.name}>
-                  {activeProject?.name || "Project Workspace"}
+                  {activeProject?.name || "161 Woodlawn Ave"}
                 </span>
-                <span className="text-[11px] text-slate-500 block truncate mt-0.5">
-                  {activeProject?.address || "Active Construction"}
+                <span className="text-[11px] text-slate-500 block leading-tight mt-0.5" title={activeProject?.address}>
+                  {activeProject?.address ? activeProject.address.split(",").slice(0, 2).join(",") : "161 Woodlawn Ave, Jersey City"}
                 </span>
               </div>
               <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1.5 border-t border-slate-100">
