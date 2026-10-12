@@ -111,22 +111,22 @@ export function MoveContingencyModal({
             </span>
             <div>
               <ModalTitle className="text-section font-bold text-text-primary">
-                Move Contingency Reserve
+                Move Buffer Reserve
               </ModalTitle>
               <ModalDescription className="text-caption text-text-secondary">
-                Reallocate hard cost contingency to cover verified scope overruns.
+                Reallocate hard cost buffer reserve to cover verified scope overruns.
               </ModalDescription>
             </div>
           </div>
         </ModalHeader>
 
         <div className="space-y-4 text-body">
-          {/* Contingency Reserve Status Banner */}
+          {/* Buffer Reserve Status Banner */}
           <div className="bg-subtle/40 p-4 rounded-lg border border-border flex items-center justify-between">
             <div>
               <span className="text-caption text-text-muted block">Source Budget Reserve</span>
               <span className="font-bold text-text-primary text-sm">
-                20-000 Hard Cost Contingency
+                20-000 Hard Cost Buffer Reserve
               </span>
             </div>
             <div className="text-right">

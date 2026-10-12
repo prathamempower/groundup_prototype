@@ -1120,6 +1120,7 @@ class Document(Base):
     review_decisions: Mapped[list["ReviewDecision"]] = relationship(
         back_populates="document", cascade="all, delete-orphan"
     )
+    uploader: Mapped["User"] = relationship(foreign_keys=[uploaded_by], lazy="select")
 
 
 class SourceRecord(Base):

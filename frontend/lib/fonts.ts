@@ -1,15 +1,21 @@
-import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Roboto_Mono, Plus_Jakarta_Sans } from "next/font/google";
 
-export const ibmPlexSans = IBM_Plex_Sans({
+// Primary Google Products typography (clean, modern, highly legible)
+export const fontSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-ibm-plex-sans",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
   display: "swap",
 });
 
-export const ibmPlexMono = IBM_Plex_Mono({
+export const fontMono = Roboto_Mono({
   subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-ibm-plex-mono",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-mono",
   display: "swap",
 });
+
+// Backward-compatibility aliases so existing imports work seamlessly
+export const ibmPlexSans = fontSans;
+export const ibmPlexMono = fontMono;
+

@@ -169,7 +169,7 @@ export function ChangeOrderModal({
             </label>
             <div className="grid grid-cols-3 gap-2 text-xs">
               {[
-                { id: "CONTINGENCY", label: "Contingency Reserve", desc: "Draw from line 20-000" },
+                { id: "CONTINGENCY", label: "Buffer Reserve", desc: "Draw from line 20-000" },
                 { id: "SPONSOR_EQUITY", label: "Sponsor Equity", desc: "Additional cash equity" },
                 { id: "LOAN_EXPANSION", label: "Loan Expansion", desc: "Lender credit expansion" },
               ].map((src) => (

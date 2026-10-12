@@ -62,7 +62,13 @@ export default function BudgetPage() {
     queryFn: () => api.projects.list(),
   });
 
-  const currentProjectId = projectsData?.data?.current_project_id || "";
+  // Strict route project isolation
+  const routeProjectId = typeof window !== "undefined"
+    ? (window.location.pathname.match(/^\/projects\/([^\/]+)/)?.[1] || "")
+    : "";
+  const currentProjectId = (routeProjectId && routeProjectId !== "new")
+    ? routeProjectId
+    : projectsData?.data?.current_project_id || "";
   const currentProject = (projectsData?.data?.projects || []).find((p) => p.id === currentProjectId);
 
   // Load Current Budget Lines
@@ -148,45 +154,44 @@ export default function BudgetPage() {
 
   return (
     <div className="space-y-6 pb-16">
-      <PageHeader
-        title="Budget & Change Control"
-        statusBadge={{
-          label: "Approved Baseline (Immutable)",
-          variant: "success",
-          icon: <ShieldCheck className="h-3.5 w-3.5" />,
-        }}
-        description="Immutable baseline master Schedule of Values (SOV), approved change orders, and contingency reallocation ledger"
-        primaryAction={
-          <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setSelectedOverrunLineId(undefined);
-                setSuggestedOverrunAmount(undefined);
-                setIsMoveContingencyOpen(true);
-              }}
-              className="flex items-center gap-1.5"
-            >
-              <ArrowRightLeft className="h-4 w-4" />
-              Move Contingency
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => {
-                setSelectedOverrunLineId(undefined);
-                setSuggestedOverrunAmount(undefined);
-                setIsChangeOrderOpen(true);
-              }}
-              className="flex items-center gap-1.5"
-            >
-              <PlusCircle className="h-4 w-4" />
-              Request Change Order
-            </Button>
-          </div>
-        }
-      />
+      <div className="px-6 max-w-7xl mx-auto space-y-6 pt-4">
+        <PageHeader
+          title="Budget & Change Control"
+          statusBadge={{
+            label: "Approved Baseline (Immutable)",
+            variant: "success",
+            icon: <ShieldCheck className="h-3.5 w-3.5" />,
+          }}
+          primaryAction={
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setSelectedOverrunLineId(undefined);
+                  setSuggestedOverrunAmount(undefined);
+                  setIsMoveContingencyOpen(true);
+                }}
+                className="flex items-center gap-1.5 bg-white border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold"
+              >
+                <ArrowRightLeft className="h-3.5 w-3.5" />
+                Move Contingency
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setSelectedOverrunLineId(undefined);
+                  setSuggestedOverrunAmount(undefined);
+                  setIsChangeOrderOpen(true);
+                }}
+                className="flex items-center gap-1.5 shadow-xs text-xs font-semibold"
+              >
+                <PlusCircle className="h-3.5 w-3.5" />
+                Change Order
+              </Button>
+            </div>
+          }
+        />
 
-      <div className="px-6 max-w-7xl mx-auto space-y-6">
         {/* KPI Figures Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <KeyFigure

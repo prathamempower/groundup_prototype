@@ -20,7 +20,12 @@ export default function AlertsPage() {
 
   const user = meData?.data;
   const userRole = user?.role || "OWNER";
-  const currentProjectId = projectsData?.data?.current_project_id || "";
+  const routeProjectId = typeof window !== "undefined"
+    ? (window.location.pathname.match(/^\/projects\/([^\/]+)/)?.[1] || "")
+    : "";
+  const currentProjectId = (routeProjectId && routeProjectId !== "new")
+    ? routeProjectId
+    : projectsData?.data?.current_project_id || "";
   const currentProject = projectsData?.data?.projects?.find(
     (p) => p.id === currentProjectId
   );
@@ -45,7 +50,10 @@ export default function AlertsPage() {
             : "Project operational alerts, overruns, schedule variances, and data quality issues"
         }
         breadcrumbs={[
-          { label: "Home", href: "/control-center" },
+          {
+            label: "Home",
+            href: currentProjectId ? `/projects/${currentProjectId}/control-center` : "/projects",
+          },
           { label: "Alerts & Exceptions" },
         ]}
         statusBadge={

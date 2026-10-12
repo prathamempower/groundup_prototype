@@ -55,26 +55,7 @@ async def upload_document_multipart(
         project_id=project_id,
     )
     db.commit()
-    return ResponseEnvelope(
-        data=DocumentRead(
-            id=str(doc.id),
-            organization_id=str(doc.organization_id),
-            project_id=str(doc.project_id) if doc.project_id else None,
-            storage_key=doc.storage_key,
-            sha256=doc.sha256,
-            original_filename=doc.original_filename,
-            mime_type=doc.mime_type,
-            document_type=doc.document_type,
-            document_date=doc.document_date.isoformat() if doc.document_date else None,
-            source_system=doc.source_system,
-            ingestion_status=doc.ingestion_status,
-            duplicate_of_document_id=str(doc.duplicate_of_document_id)
-            if doc.duplicate_of_document_id
-            else None,
-            uploaded_by=str(doc.uploaded_by),
-            uploaded_at=doc.uploaded_at.isoformat(),
-        )
-    )
+    return ResponseEnvelope(data=to_document_read(doc))
 
 
 @router.post("/documents/{id}/confirm-upload", status_code=202)
@@ -92,6 +73,33 @@ async def confirm_upload(
     return ResponseEnvelope(data={"status": "confirmed", "document_id": str(doc.id)})
 
 
+def to_document_read(doc) -> DocumentRead:
+    uploader_name = None
+    if getattr(doc, "uploader", None):
+        name = f"{doc.uploader.first_name} {doc.uploader.last_name}".strip()
+        uploader_name = name or doc.uploader.email.split("@")[0]
+
+    return DocumentRead(
+        id=str(doc.id),
+        organization_id=str(doc.organization_id),
+        project_id=str(doc.project_id) if doc.project_id else None,
+        storage_key=doc.storage_key,
+        sha256=doc.sha256,
+        original_filename=doc.original_filename,
+        mime_type=doc.mime_type,
+        document_type=doc.document_type,
+        document_date=doc.document_date.isoformat() if doc.document_date else None,
+        source_system=doc.source_system,
+        ingestion_status=doc.ingestion_status,
+        duplicate_of_document_id=str(doc.duplicate_of_document_id)
+        if doc.duplicate_of_document_id
+        else None,
+        uploaded_by=str(doc.uploaded_by),
+        uploader_name=uploader_name,
+        uploaded_at=doc.uploaded_at.isoformat(),
+    )
+
+
 @router.get("/projects/{pid}/documents", response_model=ResponseEnvelope[list[DocumentRead]])
 async def list_project_documents_endpoint(
     pid: uuid.UUID,
@@ -101,28 +109,7 @@ async def list_project_documents_endpoint(
 ):
     service = DocumentService(db)
     docs = service.list_project_documents(user, project.id)
-    results = [
-        DocumentRead(
-            id=str(d.id),
-            organization_id=str(d.organization_id),
-            project_id=str(d.project_id) if d.project_id else None,
-            storage_key=d.storage_key,
-            sha256=d.sha256,
-            original_filename=d.original_filename,
-            mime_type=d.mime_type,
-            document_type=d.document_type,
-            document_date=d.document_date.isoformat() if d.document_date else None,
-            source_system=d.source_system,
-            ingestion_status=d.ingestion_status,
-            duplicate_of_document_id=str(d.duplicate_of_document_id)
-            if d.duplicate_of_document_id
-            else None,
-            uploaded_by=str(d.uploaded_by),
-            uploaded_at=d.uploaded_at.isoformat(),
-        )
-        for d in docs
-    ]
-    return ResponseEnvelope(data=results)
+    return ResponseEnvelope(data=[to_document_read(d) for d in docs])
 
 
 @router.get("/documents/{id}", response_model=ResponseEnvelope[DocumentRead])
@@ -133,26 +120,7 @@ async def get_document_endpoint(
 ):
     service = DocumentService(db)
     doc = service.get_document(user, id)
-    return ResponseEnvelope(
-        data=DocumentRead(
-            id=str(doc.id),
-            organization_id=str(doc.organization_id),
-            project_id=str(doc.project_id) if doc.project_id else None,
-            storage_key=doc.storage_key,
-            sha256=doc.sha256,
-            original_filename=doc.original_filename,
-            mime_type=doc.mime_type,
-            document_type=doc.document_type,
-            document_date=doc.document_date.isoformat() if doc.document_date else None,
-            source_system=doc.source_system,
-            ingestion_status=doc.ingestion_status,
-            duplicate_of_document_id=str(doc.duplicate_of_document_id)
-            if doc.duplicate_of_document_id
-            else None,
-            uploaded_by=str(doc.uploaded_by),
-            uploaded_at=doc.uploaded_at.isoformat(),
-        )
-    )
+    return ResponseEnvelope(data=to_document_read(doc))
 
 
 @router.get("/documents/{id}/download-url", response_model=ResponseEnvelope[DownloadUrlResponse])
@@ -194,26 +162,7 @@ async def mark_document_endpoint(
     service = DocumentService(db)
     doc = service.mark_document(user, id, data)
     db.commit()
-    return ResponseEnvelope(
-        data=DocumentRead(
-            id=str(doc.id),
-            organization_id=str(doc.organization_id),
-            project_id=str(doc.project_id) if doc.project_id else None,
-            storage_key=doc.storage_key,
-            sha256=doc.sha256,
-            original_filename=doc.original_filename,
-            mime_type=doc.mime_type,
-            document_type=doc.document_type,
-            document_date=doc.document_date.isoformat() if doc.document_date else None,
-            source_system=doc.source_system,
-            ingestion_status=doc.ingestion_status,
-            duplicate_of_document_id=str(doc.duplicate_of_document_id)
-            if doc.duplicate_of_document_id
-            else None,
-            uploaded_by=str(doc.uploaded_by),
-            uploaded_at=doc.uploaded_at.isoformat(),
-        )
-    )
+    return ResponseEnvelope(data=to_document_read(doc))
 
 
 @router.post("/documents/{id}/assign-project", response_model=ResponseEnvelope[DocumentRead])
@@ -226,26 +175,7 @@ async def assign_project_endpoint(
     service = DocumentService(db)
     doc = service.assign_project(user, id, data)
     db.commit()
-    return ResponseEnvelope(
-        data=DocumentRead(
-            id=str(doc.id),
-            organization_id=str(doc.organization_id),
-            project_id=str(doc.project_id) if doc.project_id else None,
-            storage_key=doc.storage_key,
-            sha256=doc.sha256,
-            original_filename=doc.original_filename,
-            mime_type=doc.mime_type,
-            document_type=doc.document_type,
-            document_date=doc.document_date.isoformat() if doc.document_date else None,
-            source_system=doc.source_system,
-            ingestion_status=doc.ingestion_status,
-            duplicate_of_document_id=str(doc.duplicate_of_document_id)
-            if doc.duplicate_of_document_id
-            else None,
-            uploaded_by=str(doc.uploaded_by),
-            uploaded_at=doc.uploaded_at.isoformat(),
-        )
-    )
+    return ResponseEnvelope(data=to_document_read(doc))
 
 
 @router.post("/documents/{id}/manual-entry", response_model=ResponseEnvelope[dict])

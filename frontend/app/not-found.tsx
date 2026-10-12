@@ -13,11 +13,11 @@ export default function NotFound() {
       </p>
       <div className="mt-6">
         <Link
-          href="/control-center"
+          href="/projects"
           className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body font-medium text-white hover:bg-primary-hover focus-visible:outline-primary"
         >
           <ArrowLeft className="h-4 w-4" />
-          Return to Control Center
+          Return to Projects
         </Link>
       </div>
     </div>

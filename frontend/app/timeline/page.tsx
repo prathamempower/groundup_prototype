@@ -51,8 +51,12 @@ export default function TimelinePage() {
     queryFn: () => api.projects.list(),
   });
 
-  const currentProjectId =
-    projectsData?.data?.current_project_id || "";
+  const routeProjectId = typeof window !== "undefined"
+    ? (window.location.pathname.match(/^\/projects\/([^\/]+)/)?.[1] || "")
+    : "";
+  const currentProjectId = (routeProjectId && routeProjectId !== "new")
+    ? routeProjectId
+    : projectsData?.data?.current_project_id || "";
   const currentProject = projectsData?.data?.projects?.find(
     (p) => p.id === currentProjectId
   );

@@ -43,7 +43,12 @@ export default function DrawsPage() {
     queryFn: () => api.projects.list(),
   });
 
-  const currentProjectId = projectsData?.data?.current_project_id || "";
+  const routeProjectId = typeof window !== "undefined"
+    ? (window.location.pathname.match(/^\/projects\/([^\/]+)/)?.[1] || "")
+    : "";
+  const currentProjectId = (routeProjectId && routeProjectId !== "new")
+    ? routeProjectId
+    : projectsData?.data?.current_project_id || "";
 
   const { data: userProfile } = useQuery({
     queryKey: ["identity-me"],
@@ -205,31 +210,30 @@ export default function DrawsPage() {
 
   return (
     <div className="space-y-6 pb-16">
-      <PageHeader
-        title="Draw Workspace & Lender Funding"
-        statusBadge={{
-          label: `${draws.length} Applications Tracked`,
-          variant: "neutral",
-          icon: <Landmark className="h-3.5 w-3.5" />,
-        }}
-        description="Four-value funding truth: Requested, Inspector Recommended, Lender Approved, and Cleared Funded"
-        primaryAction={
-          currentRole !== "GC" && currentRole !== "INVESTOR" ? (
-            <Button
-              variant="primary"
-              onClick={() => setIsCreateOpen(true)}
-              className="flex items-center gap-2 shadow-xs"
-            >
-              <Plus className="h-4 w-4" />
-              Prepare New Draw
-            </Button>
-          ) : undefined
-        }
-      />
+      <div className="px-6 max-w-7xl mx-auto space-y-6 pt-4">
+        <PageHeader
+          title="Draws & Lender Funding"
+          statusBadge={{
+            label: `${draws.length} Applications`,
+            variant: "neutral",
+            icon: <Landmark className="h-3.5 w-3.5" />,
+          }}
+          primaryAction={
+            currentRole !== "GC" && currentRole !== "INVESTOR" ? (
+              <Button
+                variant="primary"
+                onClick={() => setIsCreateOpen(true)}
+                className="flex items-center gap-2 shadow-xs"
+              >
+                <Plus className="h-4 w-4" />
+                Prepare Draw
+              </Button>
+            ) : undefined
+          }
+        />
 
-      <div className="px-6 max-w-7xl mx-auto space-y-6">
         {/* KEY FIGURES METRICS STRIP */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <KeyFigure
             label="Total Draw Volume"
             value={formatMoney(String(totalRequestedCents))}
@@ -261,47 +265,56 @@ export default function DrawsPage() {
 
         {/* WORKSPACE TABS */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-border pb-1">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-2">
+            <div className="flex items-center gap-1">
               <button
                 onClick={() => setActiveTab("applications")}
-                className={`flex items-center gap-2 pb-2 text-body font-semibold border-b-2 transition-colors ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   activeTab === "applications"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-text-secondary hover:text-text-primary"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 }`}
               >
-                <Layers className="h-4 w-4" />
-                Draw Applications Register ({draws.length})
+                <Layers className="h-3.5 w-3.5" />
+                <span>Draw Applications</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                  activeTab === "applications" ? "bg-slate-800 text-slate-200" : "bg-slate-200 text-slate-700"
+                }`}>
+                  {draws.length}
+                </span>
               </button>
 
               <button
                 onClick={() => setActiveTab("unallocated")}
-                className={`flex items-center gap-2 pb-2 text-body font-semibold border-b-2 transition-colors ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   activeTab === "unallocated"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-text-secondary hover:text-text-primary"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 }`}
               >
-                <DollarSign className="h-4 w-4" />
-                Unallocated Bank Deposits ({unallocatedDeposits.length})
+                <DollarSign className="h-3.5 w-3.5" />
+                <span>Unallocated Deposits</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                  activeTab === "unallocated" ? "bg-slate-800 text-slate-200" : "bg-slate-200 text-slate-700"
+                }`}>
+                  {unallocatedDeposits.length}
+                </span>
               </button>
             </div>
 
             {activeTab === "applications" && (
-              <div className="flex items-center gap-1.5 bg-subtle p-1 rounded-md text-caption">
-                <Filter className="h-3.5 w-3.5 text-text-muted ml-1 mr-0.5" />
+              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-xs">
                 {(["ALL", "ACTIVE", "FUNDED", "CLOSED"] as const).map((filter) => (
                   <button
                     key={filter}
                     onClick={() => setStatusFilter(filter)}
-                    className={`px-2.5 py-1 rounded font-medium transition-colors ${
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
                       statusFilter === filter
-                        ? "bg-surface text-text-primary shadow-xs"
-                        : "text-text-secondary hover:text-text-primary"
+                        ? "bg-white text-slate-900 shadow-2xs font-semibold"
+                        : "text-slate-500 hover:text-slate-900"
                     }`}
                   >
-                    {filter === "ALL" ? "All" : filter === "ACTIVE" ? "Active / In Review" : filter === "FUNDED" ? "Funded" : "Closed"}
+                    {filter === "ALL" ? "All" : filter === "ACTIVE" ? "In Review" : filter === "FUNDED" ? "Funded" : "Closed"}
                   </button>
                 ))}
               </div>
@@ -310,18 +323,20 @@ export default function DrawsPage() {
 
           {/* TAB 1: DRAW APPLICATIONS REGISTER */}
           {activeTab === "applications" && (
-            <div className="rounded-lg border border-border bg-surface shadow-xs overflow-hidden">
+            <div className="rounded-xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden">
               {isDrawsLoading ? (
-                <div className="p-8 text-center text-body text-text-muted">
+                <div className="p-12 text-center text-xs text-slate-400">
                   Loading draw register...
                 </div>
               ) : filteredDraws.length === 0 ? (
-                <div className="p-12 text-center">
-                  <Landmark className="mx-auto h-8 w-8 text-text-muted" />
-                  <h3 className="mt-2 text-section font-semibold text-text-primary">
+                <div className="py-16 px-6 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-slate-400 mx-auto border border-slate-100">
+                    <Landmark className="h-5 w-5" />
+                  </div>
+                  <h3 className="mt-3 text-sm font-bold text-slate-900">
                     No matching draw applications
                   </h3>
-                  <p className="mt-1 text-body text-text-secondary">
+                  <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
                     Prepare a new draw application to initiate certified lender submission.
                   </p>
                 </div>

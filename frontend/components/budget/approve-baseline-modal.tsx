@@ -108,7 +108,7 @@ export function ApproveBaselineModal({
                 <strong>Change Order Requirement:</strong> Any adjustments to scope or cost ceiling must be documented via formal Change Orders with Owner signoff.
               </li>
               <li>
-                <strong>Contingency Reserve:</strong> Hard cost contingency line (20-000) can only be reallocated via verified contingency movements within available limits.
+                <strong>Buffer Reserve:</strong> Hard cost buffer reserve line (20-000) can only be reallocated via verified buffer reserve movements within available limits.
               </li>
             </ul>
           </div>

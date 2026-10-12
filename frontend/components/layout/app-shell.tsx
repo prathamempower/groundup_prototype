@@ -63,11 +63,48 @@ export function AppShell({ children }: AppShellProps) {
 
   // Check if inside a workspace /projects/[projectId]/... route
   const workspaceMatch = pathname.match(/^\/projects\/([^\/]+)(?:\/([^\/]+))?/);
-  const workspaceProjectId = workspaceMatch && workspaceMatch[1] !== "new" ? workspaceMatch[1] : null;
+  const rawProjectId = workspaceMatch && workspaceMatch[1] !== "new" ? workspaceMatch[1] : null;
   const workspaceSection = workspaceMatch ? workspaceMatch[2] || "control-center" : null;
 
   // Verify project membership for workspace routes
   const memberships = session?.user.project_memberships || [];
+  
+  // Track last visited workspace project in localStorage
+  React.useEffect(() => {
+    if (rawProjectId && typeof window !== "undefined") {
+      window.localStorage.setItem("groundup_last_project_id", rawProjectId);
+    }
+  }, [rawProjectId]);
+
+  const lastProjectId = typeof window !== "undefined" ? window.localStorage.getItem("groundup_last_project_id") : null;
+  const sessionUser = session?.user as any;
+  const activeProjectId = rawProjectId || lastProjectId || sessionUser?.current_project_id || (memberships[0]?.project_id as string) || null;
+
+  // Legacy route redirect: if user navigates to standalone /budget, /draws, etc., redirect them into the project workspace
+  const standaloneMatch = pathname.match(/^\/([^\/]+)$/);
+  const standaloneSection = standaloneMatch ? standaloneMatch[1] : null;
+  const legacyWorkspaceSections = [
+    "control-center",
+    "documents",
+    "budget",
+    "reconciliation",
+    "draws",
+    "timeline",
+    "economics",
+    "submissions",
+    "alerts",
+  ];
+
+  React.useEffect(() => {
+    if (!session || !activeProjectId) return;
+    if (standaloneSection && legacyWorkspaceSections.includes(standaloneSection)) {
+      router.replace(`/projects/${activeProjectId}/${standaloneSection}`);
+    } else if (pathname === "/investor-update") {
+      router.replace(`/projects/${activeProjectId}/investor-updates`);
+    }
+  }, [pathname, session, activeProjectId, standaloneSection, router]);
+
+  const workspaceProjectId = rawProjectId;
   const projectMembership = workspaceProjectId
     ? memberships.find((m: any) => m.project_id === workspaceProjectId)
     : null;
@@ -138,7 +175,7 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-app">
-      {/* Sidebar - only rendered inside a project workspace */}
+      {/* Sidebar - rendered inside project workspace */}
       {isInsideWorkspace && (
         <Sidebar
           collapsed={collapsed}

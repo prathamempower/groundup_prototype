@@ -52,6 +52,7 @@ export interface Project {
   open_exceptions_count?: number;
   next_milestone?: string | null;
   last_activity?: string | null;
+  progress_pct?: number;
 }
 
 export interface ApiMeta {
@@ -317,6 +318,7 @@ export interface DocumentItem {
   duplicate_of_document_id?: string | null;
   sha256?: string;
   uploaded_by: string;
+  uploader_name?: string | null;
   uploaded_at: string;
   pages_count: number;
   notes?: string;

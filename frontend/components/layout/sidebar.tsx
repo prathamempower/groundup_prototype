@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -111,15 +112,17 @@ export function Sidebar({
             <div className="flex items-center justify-between">
               <Link
                 href="/projects"
-                className="flex items-center gap-2.5 group"
+                className="flex items-center gap-2 group py-0.5"
                 title="Return to Projects"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white shadow-xs group-hover:scale-105 transition-transform">
-                  <Building2 className="h-4 w-4" />
-                </div>
-                <span className="text-sm font-bold tracking-tight text-slate-900">
-                  GroundUp
-                </span>
+                <Image
+                  src="/logo.png"
+                  alt="GroundUp"
+                  width={140}
+                  height={36}
+                  className="h-8 w-auto object-contain group-hover:opacity-90 transition-opacity"
+                  priority
+                />
               </Link>
 
               {/* Collapse toggle (desktop only) */}
@@ -135,10 +138,17 @@ export function Sidebar({
             <div className="flex flex-col items-center gap-2.5">
               <Link
                 href="/projects"
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white shadow-xs hover:scale-105 transition-transform"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white p-1 border border-slate-200/80 shadow-xs hover:scale-105 transition-transform"
                 title="GroundUp — Back to Projects"
               >
-                <Building2 className="h-4 w-4" />
+                <Image
+                  src="/icon.png"
+                  alt="GroundUp"
+                  width={28}
+                  height={28}
+                  className="h-6 w-6 object-contain"
+                  priority
+                />
               </Link>
 
               <button
