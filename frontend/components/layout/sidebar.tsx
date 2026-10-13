@@ -85,7 +85,7 @@ export function Sidebar({
     : [];
 
   // Categorize navigation items cleanly into Operations, Finance & Control, Partners & Funding, and Settings
-  const coreItemIds = ["control-center", "documents", "timeline", "submissions"];
+  const coreItemIds = ["control-center", "documents", "timeline", "submissions", "inbox"];
   const financeItemIds = ["budget", "reconciliation", "draws"];
   const partnerItemIds = ["partners"];
   const alertsItemIds = ["alerts"];
@@ -186,15 +186,6 @@ export function Sidebar({
                     <span className="text-xs font-semibold text-slate-900 block truncate" title={activeProject?.name}>
                       {activeProject?.name || "Workspace"}
                     </span>
-                    <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold tracking-wider bg-slate-100 text-slate-700 border border-slate-200 uppercase">
-                        {effectiveRole}
-                      </span>
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                        {formatStageLabel(activeProject?.lifecycle_stage)}
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>

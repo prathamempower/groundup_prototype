@@ -313,15 +313,7 @@ export function PartnersAndFundingView({ projectId }: PartnersAndFundingViewProp
     }));
   }, [partners]);
 
-  // Funding status breakdown
-  const fundingPieData = useMemo(() => {
-    return [
-      { name: "Cleared Partner Equity", value: 325000, color: "#10B981" },
-      { name: "Oak Tree (Pending Review)", value: 50000, color: "#F59E0B" },
-      { name: "JSQ (Pending Review)", value: 50000, color: "#F97316" },
-      { name: "Remaining to Call", value: remainingToFund, color: "#94A3B8" },
-    ];
-  }, [remainingToFund]);
+
 
   const handleRecordNewContribution = (newEntry: {
     partnerName: string;
@@ -519,10 +511,10 @@ export function PartnersAndFundingView({ projectId }: PartnersAndFundingViewProp
         </div>
       </div>
 
-      {/* Visual Analytics: Ownership Shares & Capital Progress Pie Charts */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        {/* Pie Chart 1: Partner Ownership Split */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs space-y-4">
+      {/* Visual Analytics: Ownership Shares Pie Chart */}
+      <div>
+        {/* Pie Chart: Partner Ownership Split */}
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs space-y-4 max-w-4xl">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-slate-900">Partner Equity Distribution</h3>
@@ -594,77 +586,6 @@ export function PartnersAndFundingView({ projectId }: PartnersAndFundingViewProp
             </div>
           </div>
         </div>
-
-        {/* Pie Chart 2: Capital Deployment & Status */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900">Capital Status Breakdown</h3>
-              <p className="text-[11px] text-slate-500">
-                Cleared capital versus unclassified tranches and remaining calls
-              </p>
-            </div>
-            <span className="inline-flex items-center rounded-md border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
-              {fundedPct}% Funded
-            </span>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="h-52 w-full sm:w-1/2 relative flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsPieChart>
-                  <Pie
-                    data={fundingPieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={46}
-                    outerRadius={78}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {fundingPieData.map((entry, idx) => (
-                      <Cell key={`funding-cell-${idx}`} fill={entry.color} stroke="#ffffff" strokeWidth={2} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip
-                    formatter={(val: number) => [formatCurrency(val), "Amount"]}
-                    contentStyle={{
-                      backgroundColor: "#ffffff",
-                      borderRadius: "8px",
-                      border: "1px solid #e2e8f0",
-                      fontSize: "12px",
-                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                    }}
-                  />
-                </RechartsPieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Target</span>
-                <span className="text-xs font-extrabold text-slate-900">$475K</span>
-              </div>
-            </div>
-
-            <div className="w-full sm:w-1/2 space-y-2 text-xs">
-              {fundingPieData.map((item) => (
-                <div
-                  key={item.name}
-                  className="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-50 transition-colors"
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <span
-                      className="h-2.5 w-2.5 rounded-full shrink-0"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="font-semibold text-slate-800 truncate">{item.name}</span>
-                  </div>
-                  <span className="font-bold text-slate-900 tabular-nums">
-                    {formatCurrency(item.value)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Main Content Area */}
@@ -694,16 +615,14 @@ export function PartnersAndFundingView({ projectId }: PartnersAndFundingViewProp
               <button
                 onClick={() => {
                   const rows = [
-                    ["Partner", "Role", "Ownership %", "Committed", "Funded (Cleared)", "Funded %", "Returned", "Net Position"],
+                    ["Partner", "Role", "Ownership %", "Funded (Cleared)", "Funded %", "Returned"],
                     ...partners.map((p) => [
                       p.name,
                       p.role,
                       `${p.ownershipPct}%`,
-                      p.committed,
                       p.funded,
                       `${Math.round((p.funded / p.committed) * 100)}%`,
                       p.returned,
-                      p.funded - p.returned,
                     ]),
                   ];
                   const csv = rows.map((r) => r.join(",")).join("\n");
@@ -731,20 +650,15 @@ export function PartnersAndFundingView({ projectId }: PartnersAndFundingViewProp
                     <th className="py-3 pl-4 pr-3">Partner</th>
                     <th className="px-3 py-3">Role</th>
                     <th className="px-3 py-3 text-right">Ownership %</th>
-                    <th className="px-3 py-3 text-right">Committed</th>
                     <th className="px-3 py-3 text-right">Funded (Cleared)</th>
                     <th className="px-4 py-3 min-w-[140px]">Funded %</th>
-                    <th className="px-3 py-3 text-right">Returned</th>
-                    <th className="px-3 py-3 text-right">Net position</th>
-                    <th className="px-3 py-3">Status</th>
-                    <th className="py-3 pl-3 pr-4 text-center">Actions</th>
+                    <th className="py-3 pl-3 pr-4 text-right">Returned</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
                   {filteredPartners.map((partner) => {
                     const fundedRatio = Math.round((partner.funded / partner.committed) * 100);
                     const isFullyFunded = fundedRatio >= 90;
-                    const netPosition = partner.funded - partner.returned;
 
                     return (
                       <tr
@@ -771,11 +685,6 @@ export function PartnersAndFundingView({ projectId }: PartnersAndFundingViewProp
                           {partner.ownershipPct}%
                         </td>
 
-                        {/* Committed */}
-                        <td className="px-3 py-3.5 text-right font-medium text-slate-900 tabular-nums">
-                          {formatCurrency(partner.committed)}
-                        </td>
-
                         {/* Funded */}
                         <td className="px-3 py-3.5 text-right font-bold text-slate-900 tabular-nums">
                           {formatCurrency(partner.funded)}
@@ -799,37 +708,8 @@ export function PartnersAndFundingView({ projectId }: PartnersAndFundingViewProp
                         </td>
 
                         {/* Returned */}
-                        <td className="px-3 py-3.5 text-right text-slate-500 tabular-nums">
+                        <td className="py-3.5 pl-3 pr-4 text-right text-slate-500 tabular-nums">
                           {formatCurrency(partner.returned)}
-                        </td>
-
-                        {/* Net Position */}
-                        <td className="px-3 py-3.5 text-right font-bold text-slate-900 tabular-nums">
-                          {formatCurrency(netPosition)}
-                        </td>
-
-                        {/* Status */}
-                        <td className="px-3 py-3.5">
-                          {isFullyFunded ? (
-                            <span className="inline-flex items-center rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
-                              On Track
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
-                              Needs Top-up
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Actions */}
-                        <td className="py-3.5 pl-3 pr-4 text-center">
-                          <button
-                            onClick={() => setSelectedPartnerDetail(partner)}
-                            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
-                            title="Partner details"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </button>
                         </td>
                       </tr>
                     );
@@ -841,9 +721,6 @@ export function PartnersAndFundingView({ projectId }: PartnersAndFundingViewProp
                     <td className="py-3 pl-4 pr-3">Total</td>
                     <td className="px-3 py-3 text-slate-400">—</td>
                     <td className="px-3 py-3 text-right tabular-nums">100%</td>
-                    <td className="px-3 py-3 text-right tabular-nums">
-                      {formatCurrency(totalCommitted)}
-                    </td>
                     <td className="px-3 py-3 text-right tabular-nums">
                       {formatCurrency(totalFunded)}
                     </td>
@@ -860,14 +737,9 @@ export function PartnersAndFundingView({ projectId }: PartnersAndFundingViewProp
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-right tabular-nums">
+                    <td className="py-3 pl-3 pr-4 text-right tabular-nums">
                       {formatCurrency(totalReturned)}
                     </td>
-                    <td className="px-3 py-3 text-right tabular-nums">
-                      {formatCurrency(capitalOutstanding)}
-                    </td>
-                    <td className="px-3 py-3 text-slate-400">—</td>
-                    <td className="py-3 pl-3 pr-4" />
                   </tr>
                 </tfoot>
               </table>

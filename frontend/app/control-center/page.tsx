@@ -105,8 +105,7 @@ export default function ControlCenterPage() {
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
                   {project?.name || "161 Woodlawn Ave"}
                 </h1>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/70 px-2.5 py-0.5 text-xs font-semibold">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+                <span className="inline-flex items-center rounded-full bg-blue-50 text-blue-700 border border-blue-200/70 px-2.5 py-0.5 text-xs font-semibold">
                   {project?.lifecycle_stage
                     ? project.lifecycle_stage.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
                     : "Pre Construction"}
@@ -231,8 +230,7 @@ export default function ControlCenterPage() {
                 <div className="text-2xl lg:text-[26px] font-bold tracking-tight text-emerald-950 font-mono tabular-nums leading-none">
                   $1,086,000
                 </div>
-                <div className="mt-2 text-xs text-emerald-800 font-medium flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <div className="mt-2 text-xs text-emerald-800 font-medium">
                   <span>+$149,400 liquidity cushion</span>
                 </div>
               </div>

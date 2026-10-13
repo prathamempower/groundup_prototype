@@ -374,24 +374,6 @@ export default function DocumentsPage() {
 
               <button
                 type="button"
-                onClick={() => setActiveTab("QUARANTINED")}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
-                  activeTab === "QUARANTINED"
-                    ? "bg-white text-rose-700 shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
-                )}
-              >
-                <span>Quarantined</span>
-                {quarantinedCount > 0 && (
-                  <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold font-mono", activeTab === "QUARANTINED" ? "bg-rose-100 text-rose-900" : "bg-rose-100/60 text-rose-800")}>
-                    {quarantinedCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
                 onClick={() => setActiveTab("DUPLICATES")}
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",

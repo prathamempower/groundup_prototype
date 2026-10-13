@@ -22,6 +22,8 @@ import {
   Search,
   Moon,
   X,
+  MessageSquare,
+  Inbox,
 } from "lucide-react";
 import { authAdapter } from "@/lib/api/adapters/auth-adapter";
 import {
@@ -191,7 +193,6 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
               WORKSPACE
             </Link>
             <span className="text-blue-600 hidden sm:inline font-bold">›</span>
-            <span className="h-2 w-2 rounded-full bg-blue-600 hidden sm:inline" />
             <span className="text-sm font-bold text-slate-900 truncate max-w-[200px] sm:max-w-[320px]">
               {currentProject ? currentProject.name : pathname.startsWith("/projects") ? "Project Portfolio" : "161 Woodlawn Ave"}
             </span>
@@ -230,6 +231,20 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
               </span>
             )}
           </button>
+
+          {/* Inbox Link */}
+          <Link
+            href={currentProjectId ? `/projects/${currentProjectId}/inbox` : "/inbox"}
+            className="relative flex h-8 items-center gap-1.5 px-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+            title="Inbox"
+            aria-label="Inbox"
+          >
+            <Inbox className="h-3.5 w-3.5 text-slate-500" />
+            <span className="hidden sm:inline">Inbox</span>
+            <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-slate-100 border border-slate-200 px-1 text-[10px] font-semibold text-slate-700">
+              4
+            </span>
+          </Link>
 
           {/* Tasks Slide-out Drawer */}
           <Drawer open={isTasksOpen} onOpenChange={setIsTasksOpen}>

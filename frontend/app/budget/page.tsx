@@ -325,57 +325,59 @@ export default function BudgetPage() {
         {/* 3 Top KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Card 1: ORIGINAL BUDGET */}
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs flex flex-col justify-between">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 Original Contract Budget
               </span>
-              <div className="rounded-md bg-slate-50 p-1.5 border border-slate-100" title="Fixed contract baseline">
-                <Lock className="h-4 w-4 text-slate-400" />
+              <div className="rounded-lg bg-slate-100 p-2 border border-slate-200/80" title="Fixed contract baseline">
+                <Lock className="h-4 w-4 text-slate-600" />
               </div>
             </div>
 
-            <div className="my-2.5">
-              <div className="font-mono text-3xl font-bold tracking-tight text-slate-900 tabular-nums">
+            <div className="my-3">
+              <div className="font-mono text-3xl font-extrabold tracking-tight text-slate-900 tabular-nums">
                 {formatMoney(String(totalOriginalCents), { showCents: false })}
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-500 pt-2 border-t border-slate-100">
-              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700 border border-slate-200/60">
-                6 Divisions
+            <div className="flex items-center justify-between text-xs font-medium pt-3 border-t border-slate-100">
+              <span className="inline-flex items-center gap-1.5 text-slate-600">
+                <span className="h-2 w-2 rounded-full bg-slate-400" />
+                6 CSI Divisions
               </span>
-              <span className="text-slate-300">•</span>
-              <span className="text-slate-500">Fixed Contract Baseline</span>
+              <span className="font-semibold text-slate-500 text-[11px]">
+                Immutable Baseline
+              </span>
             </div>
           </div>
 
           {/* Card 2: ACTUAL EXPENSES */}
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs flex flex-col justify-between">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 Actual Spend to Date
               </span>
-              <div className="rounded-md bg-blue-50 p-1.5 border border-blue-100/60">
+              <div className="rounded-lg bg-blue-50 p-2 border border-blue-100">
                 <CreditCard className="h-4 w-4 text-blue-600" />
               </div>
             </div>
 
-            <div className="my-2.5">
-              <div className="font-mono text-3xl font-bold tracking-tight text-slate-900 tabular-nums">
+            <div className="my-3">
+              <div className="font-mono text-3xl font-extrabold tracking-tight text-slate-900 tabular-nums">
                 {formatMoney(String(totalActualSpentCents), { showCents: false })}
               </div>
             </div>
 
-            <div className="space-y-1.5 pt-2 border-t border-slate-100">
-              <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+            <div className="space-y-1.5 pt-3 border-t border-slate-100">
+              <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-blue-600"
+                  className="h-full rounded-full bg-blue-600 transition-all"
                   style={{ width: "41.2%" }}
                 />
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-blue-600">
+                <span className="font-bold text-blue-700 tabular-nums">
                   41.2% Drawn
                 </span>
                 <span className="text-slate-500 font-mono text-[11px]">
@@ -386,34 +388,34 @@ export default function BudgetPage() {
           </div>
 
           {/* Card 3: REMAINING CONTINGENCY */}
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs flex flex-col justify-between">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   Available Contingency Reserve
                 </span>
-                <Info className="h-3.5 w-3.5 text-emerald-500" />
+                <Info className="h-3.5 w-3.5 text-emerald-600" />
               </div>
-              <div className="rounded-md bg-emerald-50 p-1.5 border border-emerald-100/60">
+              <div className="rounded-lg bg-emerald-50 p-2 border border-emerald-100">
                 <Clock className="h-4 w-4 text-emerald-600" />
               </div>
             </div>
 
-            <div className="my-2.5 flex items-center justify-between">
-              <div className="font-mono text-3xl font-bold tracking-tight text-slate-900 tabular-nums">
+            <div className="my-3 flex items-center justify-between">
+              <div className="font-mono text-3xl font-extrabold tracking-tight text-slate-900 tabular-nums">
                 {formatMoney(String(contingencyAvailableCents), { showCents: false })}
               </div>
               <div
-                className="flex items-center justify-center h-8 px-2.5 rounded-full border-2 border-emerald-500 bg-emerald-50 shrink-0 shadow-2xs"
+                className="flex items-center justify-center px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs shrink-0"
                 title="100% of contingency funds are uncommitted"
               >
-                <span className="text-[11px] font-extrabold text-emerald-700 tracking-tight">100%</span>
+                <span className="text-xs font-bold tracking-tight">100% Intact</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
-              <span>Hard: $50,000 · Soft: $32,470</span>
-              <span className="text-emerald-700 font-medium">100% Intact</span>
+            <div className="flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-100">
+              <span className="text-slate-600">Hard: $50,000 · Soft: $32,470</span>
+              <span className="text-emerald-700 font-semibold text-[11px]">Zero Drawdown</span>
             </div>
           </div>
         </div>
@@ -432,15 +434,20 @@ export default function BudgetPage() {
         </div>
 
         {/* Schedule of Values (SOV) Table Card */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
           {/* Header */}
-          <div className="p-5 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white">
+          <div className="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">
-                Schedule of Values (SOV)
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-slate-900">
+                  Schedule of Values (SOV)
+                </h3>
+                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 border border-slate-200">
+                  {displayedLines.length} Line Items
+                </span>
+              </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                CSI division cost line items, approved change order adjustments, and current completion rates
+                CSI division cost line items, approved change order adjustments, disbursements, and completion rates
               </p>
             </div>
 
@@ -449,9 +456,9 @@ export default function BudgetPage() {
                 type="button"
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors shadow-2xs",
+                  "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors shadow-2xs cursor-pointer",
                   isFilterOpen
-                    ? "border-indigo-300 bg-indigo-50 text-indigo-700"
+                    ? "border-blue-300 bg-blue-50 text-blue-700"
                     : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                 )}
               >
@@ -462,7 +469,7 @@ export default function BudgetPage() {
               <button
                 type="button"
                 onClick={handleExportCSV}
-                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
+                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
               >
                 <Download className="h-3.5 w-3.5 text-slate-500" />
                 Export CSV
@@ -472,7 +479,7 @@ export default function BudgetPage() {
 
           {/* Expandable Filter Toolbar */}
           {isFilterOpen && (
-            <div className="p-3 bg-slate-50/70 border-b border-slate-200/80 flex items-center gap-3">
+            <div className="p-3 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
                 <input
@@ -480,16 +487,16 @@ export default function BudgetPage() {
                   placeholder="Search code or division..."
                   value={searchFilter}
                   onChange={(e) => setSearchFilter(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
               {searchFilter && (
                 <button
                   type="button"
                   onClick={() => setSearchFilter("")}
-                  className="text-xs text-slate-500 hover:text-slate-800"
+                  className="text-xs text-slate-500 hover:text-slate-800 cursor-pointer font-medium"
                 >
-                  Clear
+                  Clear filter
                 </button>
               )}
             </div>
@@ -499,89 +506,125 @@ export default function BudgetPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-200 bg-white text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
+                <tr className="border-b border-slate-200 bg-slate-50/70 text-[11px] font-bold text-slate-600 tracking-wider uppercase">
                   <th className="py-3.5 px-5">Code / Item</th>
                   <th className="py-3.5 px-5">Division Name</th>
                   <th className="py-3.5 px-5 text-right">Original Budget</th>
                   <th className="py-3.5 px-5 text-right">Approved COs</th>
                   <th className="py-3.5 px-5 text-right">Revised Budget</th>
                   <th className="py-3.5 px-5 text-right">Actual Spent</th>
+                  <th className="py-3.5 px-5 text-right">Balance</th>
                   <th className="py-3.5 px-5 text-right pr-6">Progress</th>
                   <th className="py-3.5 px-5 text-center">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {displayedLines.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="hover:bg-slate-50/70 transition-colors"
-                  >
-                    {/* Code / Item */}
-                    <td className="py-4 px-5 font-mono font-semibold text-indigo-600 text-xs">
-                      {row.code}
-                    </td>
+                {displayedLines.map((row) => {
+                  const balanceCents = Math.max(0, row.revisedAmountCents - row.actualSpentCents);
 
-                    {/* Division Name */}
-                    <td className="py-4 px-5 font-semibold text-slate-800 text-xs">
-                      {row.name}
-                    </td>
+                  return (
+                    <tr
+                      key={row.id}
+                      className="hover:bg-slate-50/70 transition-colors"
+                    >
+                      {/* Code / Item */}
+                      <td className="py-3.5 px-5 font-mono font-semibold text-blue-700 text-xs">
+                        {row.code}
+                      </td>
 
-                    {/* Original Budget */}
-                    <td className="py-4 px-5 text-right font-mono tabular-nums text-slate-700 text-xs">
-                      {formatMoney(String(row.originalAmountCents))}
-                    </td>
+                      {/* Division Name */}
+                      <td className="py-3.5 px-5 font-semibold text-slate-900 text-xs">
+                        {row.name}
+                      </td>
 
-                    {/* Approved COs */}
-                    <td className="py-4 px-5 text-right font-mono tabular-nums text-xs">
-                      {row.hasPositiveCO ? (
-                        <span className="font-semibold text-emerald-600">
-                          +$0.00
-                        </span>
-                      ) : (
-                        <span className="text-slate-400">$0.00</span>
-                      )}
-                    </td>
+                      {/* Original Budget */}
+                      <td className="py-3.5 px-5 text-right font-mono tabular-nums text-slate-600 text-xs">
+                        {formatMoney(String(row.originalAmountCents))}
+                      </td>
 
-                    {/* Revised Budget */}
-                    <td className="py-4 px-5 text-right font-mono tabular-nums font-bold text-slate-900 text-xs">
-                      {formatMoney(String(row.revisedAmountCents))}
-                    </td>
+                      {/* Approved COs */}
+                      <td className="py-3.5 px-5 text-right font-mono tabular-nums text-xs">
+                        {row.hasPositiveCO ? (
+                          <span className="font-semibold text-emerald-600">
+                            +$0.00
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">$0.00</span>
+                        )}
+                      </td>
 
-                    {/* Actual Spent */}
-                    <td className="py-4 px-5 text-right font-mono tabular-nums text-slate-800 text-xs">
-                      {formatMoney(String(row.actualSpentCents))}
-                    </td>
+                      {/* Revised Budget */}
+                      <td className="py-3.5 px-5 text-right font-mono tabular-nums font-bold text-slate-900 text-xs">
+                        {formatMoney(String(row.revisedAmountCents))}
+                      </td>
 
-                    {/* Progress */}
-                    <td className="py-4 px-5 text-right pr-6">
-                      <div className="flex items-center gap-2.5 justify-end">
-                        <div className="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden flex-shrink-0">
-                          <div
-                            className="h-full rounded-full bg-indigo-600"
-                            style={{ width: `${Math.min(100, row.progressPct)}%` }}
-                          />
+                      {/* Actual Spent */}
+                      <td className="py-3.5 px-5 text-right font-mono tabular-nums font-semibold text-blue-700 text-xs">
+                        {formatMoney(String(row.actualSpentCents))}
+                      </td>
+
+                      {/* Remaining Balance */}
+                      <td className="py-3.5 px-5 text-right font-mono tabular-nums text-slate-600 text-xs">
+                        {formatMoney(String(balanceCents))}
+                      </td>
+
+                      {/* Progress */}
+                      <td className="py-3.5 px-5 text-right pr-6">
+                        <div className="flex items-center gap-2.5 justify-end">
+                          <div className="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden shrink-0">
+                            <div
+                              className="h-full rounded-full bg-blue-600 transition-all"
+                              style={{ width: `${Math.min(100, row.progressPct)}%` }}
+                            />
+                          </div>
+                          <span className="font-mono text-xs tabular-nums font-semibold text-slate-700 w-11 text-right">
+                            {row.progressPct.toFixed(1)}%
+                          </span>
                         </div>
-                        <span className="font-mono text-xs tabular-nums text-slate-600 w-11 text-right">
-                          {row.progressPct.toFixed(1)}%
-                        </span>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Status */}
-                    <td className="py-4 px-5 text-center">
-                      {row.status === "Pending CO" ? (
-                        <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-200/80">
-                          Pending CO
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200/80">
-                          On Track
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                      {/* Status */}
+                      <td className="py-3.5 px-5 text-center">
+                        {row.status === "Pending CO" ? (
+                          <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-200">
+                            Pending CO
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200">
+                            On Track
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
+              {/* Grand Total Row */}
+              <tfoot>
+                <tr className="border-t-2 border-slate-200 bg-slate-50 font-bold text-slate-900">
+                  <td className="py-3.5 px-5">Total</td>
+                  <td className="py-3.5 px-5 text-slate-500 font-medium">All 6 Divisions</td>
+                  <td className="py-3.5 px-5 text-right font-mono tabular-nums">
+                    {formatMoney(String(totalOriginalCents))}
+                  </td>
+                  <td className="py-3.5 px-5 text-right font-mono tabular-nums text-slate-500">
+                    $0.00
+                  </td>
+                  <td className="py-3.5 px-5 text-right font-mono tabular-nums text-slate-900 font-extrabold">
+                    {formatMoney(String(totalOriginalCents))}
+                  </td>
+                  <td className="py-3.5 px-5 text-right font-mono tabular-nums text-blue-700 font-extrabold">
+                    {formatMoney(String(totalActualSpentCents))}
+                  </td>
+                  <td className="py-3.5 px-5 text-right font-mono tabular-nums text-slate-800 font-bold">
+                    {formatMoney(String(totalRemainingCents))}
+                  </td>
+                  <td className="py-3.5 px-5 text-right pr-6 font-mono tabular-nums text-blue-700">
+                    41.2%
+                  </td>
+                  <td className="py-3.5 px-5 text-center text-slate-400">—</td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         </div>

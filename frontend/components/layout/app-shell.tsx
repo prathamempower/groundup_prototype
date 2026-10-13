@@ -31,6 +31,8 @@ const LEGACY_WORKSPACE_SECTIONS = [
   "submissions",
   "alerts",
   "partners",
+  "inbox",
+  "directs",
 ];
 
 export function AppShell({ children }: AppShellProps) {
@@ -106,7 +108,9 @@ export function AppShell({ children }: AppShellProps) {
 
     if (!resolvedProjectId) return;
 
-    if (standaloneSection && LEGACY_WORKSPACE_SECTIONS.includes(standaloneSection)) {
+    if (standaloneSection === "directs") {
+      router.replace(`/projects/${resolvedProjectId}/inbox`);
+    } else if (standaloneSection && LEGACY_WORKSPACE_SECTIONS.includes(standaloneSection)) {
       router.replace(`/projects/${resolvedProjectId}/${standaloneSection}`);
     } else if (pathname === "/investor-update" || pathname.includes("/investor-updates")) {
       router.replace(`/projects/${resolvedProjectId}/control-center`);
