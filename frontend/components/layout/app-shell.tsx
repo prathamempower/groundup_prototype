@@ -199,12 +199,12 @@ export function AppShell({ children }: AppShellProps) {
       )}
 
       {/* Main Column */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         {/* Top Bar */}
         <TopBar onToggleSidebar={() => setMobileOpen(!mobileOpen)} />
 
         {/* Page Content / Route Guard */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 w-full">
           {isUnauthorizedProject ? (
             <div className="flex h-full min-h-[400px] flex-col items-center justify-center p-8 text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-danger-subtle text-danger mb-4">

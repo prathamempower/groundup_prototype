@@ -276,9 +276,9 @@ export default function BudgetPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-24">
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6 space-y-5 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2.5 flex-wrap">
               <h1 className="text-2xl font-bold tracking-tight text-slate-900">
@@ -421,11 +421,11 @@ export default function BudgetPage() {
         </div>
 
         {/* Middle Section: Chart (65%) & Contingency Breakdown (35%) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          <div className="lg:col-span-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 min-w-0">
+          <div className="lg:col-span-8 min-w-0">
             <BudgetDivisionChart data={chartItems} divisionCount={6} />
           </div>
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-4 min-w-0">
             <ContingencyBreakdownCard
               hardCostCents={hardCostContingencyCents}
               softCostCents={softCostContingencyCents}

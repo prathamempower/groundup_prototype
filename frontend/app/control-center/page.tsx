@@ -93,7 +93,7 @@ export default function ControlCenterPage() {
 
   return (
     <div className="min-h-screen bg-slate-50/60 pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
 
         {/* ========================================================================= */}
         {/* EXECUTIVE PROJECT BANNER - POLISHED, BALANCED & MODERN                   */}
@@ -295,10 +295,10 @@ export default function ControlCenterPage() {
         {/* ========================================================================= */}
         {/* TWO COLUMNS: FORECAST TABLE & RIGHT OPERATIONAL PANELS                     */}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-w-0">
 
           {/* Left Column (2 spans): Original vs Current Forecast Table */}
-          <div className="lg:col-span-2 rounded-xl border border-slate-200/90 bg-white shadow-xs overflow-hidden">
+          <div className="lg:col-span-2 rounded-xl border border-slate-200/90 bg-white shadow-xs overflow-hidden min-w-0">
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
               <div>
                 <h2 className="text-sm font-bold text-slate-900">

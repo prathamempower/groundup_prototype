@@ -202,19 +202,19 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
         </div>
 
         {/* Center: Global Search Bar */}
-        <div className="hidden md:flex items-center flex-1 max-w-md mx-6">
+        <div className="hidden lg:flex items-center flex-1 max-w-xs xl:max-w-sm mx-3 xl:mx-6 min-w-0">
           <div className="relative w-full">
             <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
             <input
               type="text"
               placeholder="Search line items, draws, risks..."
-              className="w-full rounded-lg border border-slate-200/80 bg-slate-50/70 pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300 transition-all"
+              className="w-full rounded-lg border border-slate-200/80 bg-slate-50/70 pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300 transition-all text-ellipsis"
             />
           </div>
         </div>
 
         {/* Right: Tasks, Notifications & User Menu */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Tasks Trigger */}
           <button
             onClick={() => {
@@ -554,23 +554,23 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
           </Drawer>
 
           {/* User menu */}
-          <div className="relative ml-1">
+          <div className="relative ml-1 shrink-0">
             <button
               onClick={() => {
                 setIsUserDropdownOpen(!isUserDropdownOpen);
                 setIsProjectDropdownOpen(false);
                 setIsNotificationsOpen(false);
               }}
-              className="flex items-center gap-2 rounded-lg p-1 hover:bg-slate-100 transition-colors"
+              className="flex items-center gap-2 rounded-lg p-1 hover:bg-slate-100 transition-colors shrink-0"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white tracking-wider">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white tracking-wider shrink-0">
                 {currentUser?.avatarInitials || "MV"}
               </div>
-              <div className="hidden sm:flex flex-col text-left">
-                <span className="text-xs font-bold leading-tight text-slate-900">
+              <div className="hidden sm:flex flex-col text-left shrink-0">
+                <span className="text-xs font-bold leading-tight text-slate-900 whitespace-nowrap">
                   {currentUser?.name || "Marcus Vance"}
                 </span>
-                <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">
+                <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider whitespace-nowrap">
                   {currentUser?.role || "OWNER"}
                 </span>
               </div>
