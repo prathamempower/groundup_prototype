@@ -30,7 +30,12 @@ test.describe("Visual Regression & Responsive Inspection", () => {
     await page.screenshot({ path: "screenshots/workspace-owner-820.png" });
 
     // 5. PM Workspace (Timeline) - Desktop (1440px)
-    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.context().clearCookies();
+    await page.goto("/auth/login");
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
     await page.goto("/auth/login");
     await page.getByLabel("Work email").fill("d.ross@vancedev.com");
     await page.getByLabel("Password", { exact: true }).fill("Password123!");
@@ -42,6 +47,12 @@ test.describe("Visual Regression & Responsive Inspection", () => {
     await page.screenshot({ path: "screenshots/workspace-pm-1440.png" });
 
     // 6. GC Workspace (Submissions) - Desktop (1440px)
+    await page.context().clearCookies();
+    await page.goto("/auth/login");
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
     await page.goto("/auth/login");
     await page.getByLabel("Work email").fill("frank@apexconstruction.com");
     await page.getByLabel("Password", { exact: true }).fill("Password123!");

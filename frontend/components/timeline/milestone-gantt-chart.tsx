@@ -38,8 +38,12 @@ export function MilestoneGanttChart({
 
   // Drag-and-drop bar movement state
   const [draggingMilestoneId, setDraggingMilestoneId] = useState<string | null>(null);
-  const [dragStartX, setDragStartX] = useState<number>(0);
+  const [dragType, setDragType] = useState<"MOVE" | "RESIZE">("MOVE");
   const [dragCurrentShiftDays, setDragCurrentShiftDays] = useState<number>(0);
+  const [dragStartShiftDays, setDragStartShiftDays] = useState<number>(0);
+
+  // Ref to the timeline track element to calculate exact pixel-to-day conversion
+  const timelineTrackRef = React.useRef<HTMLDivElement | null>(null);
 
   // Determine dynamic date envelope based on actual milestone data and selected scaleMode
   const { minDate, maxDate, totalDuration, timelineColumns, yearHeaders, todayPositionPct } = useMemo(() => {
@@ -213,43 +217,55 @@ export function MilestoneGanttChart({
   };
 
   // Direct Mouse Drag Handlers
-  const handleMouseDown = (e: React.MouseEvent, ms: MilestoneItem) => {
+  const handleMouseDown = (
+    e: React.MouseEvent,
+    ms: MilestoneItem,
+    type: "MOVE" | "RESIZE" = "MOVE"
+  ) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Compute actual width of timeline track
+    const trackWidth = timelineTrackRef.current?.getBoundingClientRect().width || 800;
+    const daysPerPixel = (totalDuration / (1000 * 60 * 60 * 24)) / Math.max(100, trackWidth);
+
+    const initialShift = activeShiftMap[ms.id] || 0;
     setDraggingMilestoneId(ms.id);
-    setDragStartX(e.clientX);
-    setDragCurrentShiftDays(activeShiftMap[ms.id] || 0);
+    setDragType(type);
+    setDragStartShiftDays(initialShift);
+    setDragCurrentShiftDays(initialShift);
+
+    const startClientX = e.clientX;
 
     const onMouseMove = (moveEvent: MouseEvent) => {
-      const deltaX = moveEvent.clientX - e.clientX;
-      // Convert pixel delta to approximate day shift
-      // Track width is approx 700px for totalDuration days
-      const daysPerPixel = (totalDuration / (1000 * 60 * 60 * 24)) / 700;
+      const deltaX = moveEvent.clientX - startClientX;
       const dayShift = Math.round(deltaX * daysPerPixel);
-      setDragCurrentShiftDays((activeShiftMap[ms.id] || 0) + dayShift);
+      setDragCurrentShiftDays(initialShift + dayShift);
     };
 
     const onMouseUp = async (upEvent: MouseEvent) => {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
 
-      const deltaX = upEvent.clientX - e.clientX;
-      const daysPerPixel = (totalDuration / (1000 * 60 * 60 * 24)) / 700;
-      const finalShift = (activeShiftMap[ms.id] || 0) + Math.round(deltaX * daysPerPixel);
+      const deltaX = upEvent.clientX - startClientX;
+      const finalShift = initialShift + Math.round(deltaX * daysPerPixel);
 
       setDraggingMilestoneId(null);
 
-      if (finalShift !== (activeShiftMap[ms.id] || 0)) {
+      if (finalShift !== initialShift) {
         setActiveShiftMap((prev) => ({ ...prev, [ms.id]: finalShift }));
         if (onUpdateMilestoneDate) {
           setIsApplyingShift(true);
           try {
             const base = new Date(ms.forecast_end || ms.planned_end);
             const adjusted = new Date(base.getTime() + finalShift * 24 * 60 * 60 * 1000);
+            const dateStr = adjusted.toISOString().split("T")[0];
             await onUpdateMilestoneDate(
               ms,
-              adjusted.toISOString().split("T")[0],
-              `Adjusted ${finalShift >= 0 ? "+" : ""}${finalShift}d via drag-and-drop reschedule`
+              dateStr,
+              type === "RESIZE"
+                ? `Duration adjusted ${finalShift >= 0 ? "+" : ""}${finalShift}d via interactive timeline resize`
+                : `Rescheduled ${finalShift >= 0 ? "+" : ""}${finalShift}d via interactive timeline drag`
             );
           } finally {
             setIsApplyingShift(false);
@@ -383,22 +399,22 @@ export function MilestoneGanttChart({
 
       {/* Main Split Grid Table & Timeline Body */}
       <div className="overflow-x-auto">
-        <div className="min-w-[1280px]">
+        <div className="min-w-fit flex flex-col">
           {/* Header Row */}
           <div className="flex border-b border-slate-200 bg-slate-50/70 text-xs font-semibold text-slate-500 select-none">
-            {/* Left Fixed Width Table Columns (580px) */}
-            <div className="w-[580px] flex items-center py-2.5 px-4 border-r border-slate-200 shrink-0">
+            {/* Left Fixed Width Table Columns (600px) */}
+            <div className="w-[600px] flex items-center py-2.5 px-4 border-r border-slate-200 shrink-0">
               <span className="w-8 text-slate-400">#</span>
-              <span className="w-48 text-slate-600 font-medium">Milestone</span>
+              <span className="w-52 text-slate-600 font-medium">Milestone</span>
               <span className="w-20 text-center text-slate-600 font-medium">Status</span>
               <span className="w-24 text-slate-600 font-medium">Start Date</span>
               <span className="w-24 text-slate-600 font-medium">End Date</span>
-              <span className="w-16 text-center text-slate-600 font-medium">Duration</span>
-              <span className="w-16 text-center text-slate-600 font-medium">%</span>
+              <span className="w-14 text-center text-slate-600 font-medium">Days</span>
+              <span className="w-14 text-center text-slate-600 font-medium">%</span>
             </div>
 
-            {/* Right Calendar Ruler (Flex 1) */}
-            <div className="flex-1 flex flex-col justify-end min-w-0">
+            {/* Right Calendar Ruler */}
+            <div className="flex-1 flex flex-col justify-end min-w-[720px]">
               {/* Year Group Headers */}
               <div className="flex border-b border-slate-200/60 py-1 text-[11px] font-semibold text-slate-500">
                 {yearHeaders.map((yh, idx) => (
@@ -418,7 +434,7 @@ export function MilestoneGanttChart({
                   <div
                     key={idx}
                     style={{ width: `${100 / timelineColumns.length}%` }}
-                    className="text-center py-1.5 text-[10px] text-slate-500 font-medium border-r border-slate-100 last:border-r-0 truncate"
+                    className="min-w-[48px] text-center py-1.5 text-[11px] text-slate-600 font-medium border-r border-slate-100 last:border-r-0"
                   >
                     {col.label}
                   </div>
@@ -429,30 +445,25 @@ export function MilestoneGanttChart({
 
           {/* Milestone Rows */}
           <div className="relative divide-y divide-slate-100">
-            {/* Vertical Blue Guideline for "Today" */}
-            <div
-              className="absolute top-0 bottom-0 pointer-events-none z-20 flex flex-col items-center"
-              style={{ left: `calc(580px + (calc(100% - 580px) * ${todayPositionPct / 100}))` }}
-            >
-              <div className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-2xs -mt-2.5">
-                Today
-              </div>
-              <div className="w-px h-full border-l border-dashed border-blue-500" />
-            </div>
-
             {filteredMilestones.map((ms, index) => {
               const activeShift = draggingMilestoneId === ms.id ? dragCurrentShiftDays : (activeShiftMap[ms.id] || 0);
+              const isBeingDragged = draggingMilestoneId === ms.id;
+
+              // Baseline positions
               const plannedLeft = getPercentOffset(ms.planned_start);
               const plannedRight = getPercentOffset(ms.planned_end);
-              const plannedWidth = Math.max(2, plannedRight - plannedLeft);
+              const plannedWidth = Math.max(1.5, plannedRight - plannedLeft);
 
-              const forecastRight = getPercentOffset(ms.forecast_end || ms.planned_end, activeShift);
-              const forecastWidth = Math.max(2, forecastRight - plannedLeft);
+              // Shifted / forecasted positions
+              const effectiveEndTs = new Date(ms.forecast_end || ms.planned_end).getTime() + (isBeingDragged ? activeShift : (activeShiftMap[ms.id] || 0)) * 24 * 60 * 60 * 1000;
+              const effectiveEndDateStr = new Date(effectiveEndTs).toISOString().split("T")[0];
+              const effectiveEndRight = getPercentOffset(effectiveEndDateStr);
+              const effectiveBarWidth = Math.max(2, effectiveEndRight - plannedLeft);
 
               const isCompleted = ms.percent_complete === 100 || ms.status === "COMPLETED";
               const isAtRisk = ms.status === "AT_RISK" || (ms.delay_days || 0) > 0;
               const isSelected = selectedMilestoneId === ms.id;
-              const durationDays = getDurationDays(ms.planned_start, ms.forecast_end || ms.planned_end);
+              const durationDays = getDurationDays(ms.planned_start, effectiveEndDateStr);
 
               // Status badge
               const statusBadge = ms.critical_path ? (
@@ -477,24 +488,24 @@ export function MilestoneGanttChart({
                     isSelected ? "bg-blue-50/40" : "bg-white"
                   }`}
                 >
-                  {/* Left Fixed Width Table Columns (580px) */}
-                  <div className="w-[580px] flex items-center py-3.5 px-4 border-r border-slate-200 shrink-0">
+                  {/* Left Fixed Width Table Columns (600px) */}
+                  <div className="w-[600px] flex items-center py-3 px-4 border-r border-slate-200 shrink-0">
                     <span className="w-8 text-slate-400 font-medium tabular-nums">{index + 1}</span>
-                    <span className="w-48 font-semibold text-slate-900 truncate pr-2 group-hover:text-blue-600 transition-colors">
+                    <span className="w-52 font-semibold text-slate-900 truncate pr-2 group-hover:text-blue-600 transition-colors" title={ms.name}>
                       {ms.name}
                     </span>
                     <div className="w-20 text-center">{statusBadge}</div>
-                    <span className="w-24 text-slate-500 tabular-nums text-[11px]">
+                    <span className="w-24 text-slate-600 tabular-nums text-[11px]">
                       {formatDate(ms.planned_start)}
                     </span>
-                    <span className="w-24 text-slate-500 tabular-nums text-[11px]">
-                      {formatDate(ms.forecast_end || ms.planned_end)}
+                    <span className={`w-24 tabular-nums text-[11px] font-medium ${activeShift !== 0 ? "text-blue-600" : "text-slate-600"}`}>
+                      {formatDate(effectiveEndDateStr)}
                     </span>
-                    <span className="w-16 text-center text-slate-500 tabular-nums text-[11px]">
+                    <span className="w-14 text-center text-slate-600 tabular-nums text-[11px]">
                       {durationDays}d
                     </span>
                     {/* Progress Indicator Column */}
-                    <div className="w-16 flex flex-col items-center justify-center">
+                    <div className="w-14 flex flex-col items-center justify-center">
                       <span className="font-bold text-slate-800 text-[11px] tabular-nums leading-tight">
                         {ms.percent_complete}%
                       </span>
@@ -509,70 +520,99 @@ export function MilestoneGanttChart({
                     </div>
                   </div>
 
-                  {/* Right Calendar Area (Flex 1) */}
-                  <div className="flex-1 relative h-13 flex items-center shrink-0 min-w-0">
+                  {/* Right Calendar Area */}
+                  <div
+                    ref={index === 0 ? timelineTrackRef : undefined}
+                    className="flex-1 relative h-13 flex items-center shrink-0 min-w-[720px]"
+                  >
                     {/* Background Column Subtle Grid Lines */}
                     <div className="absolute inset-0 flex pointer-events-none opacity-40">
                       {timelineColumns.map((_, i) => (
                         <div
                           key={i}
                           style={{ width: `${100 / timelineColumns.length}%` }}
-                          className="border-r border-slate-100 h-full"
+                          className="min-w-[48px] border-r border-slate-100 h-full"
                         />
                       ))}
                     </div>
 
-                    {/* Timeline Bar Track Area (100% matched with calendar ruler) */}
+                    {/* Timeline Bar Track Area */}
                     <div className="relative w-full h-full flex items-center">
                       {/* Baseline Target Pill */}
                       <div
-                        className="absolute h-5 rounded-full bg-blue-100/70 border border-blue-200/60 transition-all cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-blue-400"
-                        onMouseDown={(e) => handleMouseDown(e, ms)}
-                        title="Click and drag to reschedule milestone"
+                        className="absolute h-5 rounded-md bg-blue-100/70 border border-blue-200/70 transition-all opacity-80"
                         style={{
                           left: `${plannedLeft}%`,
                           width: `${plannedWidth}%`,
                         }}
                       />
 
-                      {/* Actual Progress Pill */}
-                      {ms.percent_complete > 0 && (
+                      {/* Forecast / Interactive Draggable Bar */}
+                      <div
+                        className={`absolute h-6 rounded-md flex items-center justify-between px-1.5 shadow-xs transition-all z-10 cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-blue-400 select-none group/bar ${
+                          isCompleted
+                            ? "bg-emerald-500 border border-emerald-600 text-white"
+                            : isAtRisk
+                            ? "bg-amber-500 border border-amber-600 text-white"
+                            : "bg-blue-600 border border-blue-700 text-white"
+                        } ${isBeingDragged ? "ring-2 ring-blue-500 shadow-md scale-y-105" : ""}`}
+                        onMouseDown={(e) => handleMouseDown(e, ms, "MOVE")}
+                        title="Click and drag to reschedule milestone"
+                        style={{
+                          left: `${plannedLeft}%`,
+                          width: `${effectiveBarWidth}%`,
+                        }}
+                      >
+                        {/* Progress Fill inside bar if partial */}
                         <div
-                          className={`absolute h-5 rounded-full flex items-center justify-end px-1 shadow-2xs transition-all z-10 cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-blue-500 ${
-                            isCompleted
-                              ? "bg-emerald-500 border border-emerald-600"
-                              : "bg-blue-600 border border-blue-700"
-                          }`}
-                          onMouseDown={(e) => handleMouseDown(e, ms)}
-                          title="Click and drag to reschedule milestone"
-                          style={{
-                            left: `${plannedLeft}%`,
-                            width: `${Math.max(2.5, forecastWidth * (ms.percent_complete / 100))}%`,
-                          }}
+                          className="absolute inset-y-0 left-0 bg-white/20 rounded-l-md pointer-events-none"
+                          style={{ width: `${ms.percent_complete}%` }}
+                        />
+
+                        {/* Title text on bar if wide enough */}
+                        <span className="relative z-10 text-[10px] font-semibold truncate leading-none px-0.5 max-w-[120px] pointer-events-none">
+                          {ms.percent_complete}%
+                        </span>
+
+                        {/* Right edge drag resize handle */}
+                        <div
+                          className="relative z-20 h-4 w-2 rounded-xs bg-white/50 hover:bg-white hover:scale-125 cursor-ew-resize ml-auto transition-transform flex items-center justify-center shrink-0"
+                          title="Drag right edge to change duration"
+                          onMouseDown={(e) => handleMouseDown(e, ms, "RESIZE")}
                         >
-                          {/* Round circular handle dot */}
-                          <div className="h-3 w-3 rounded-full bg-white shadow-xs border border-slate-300 shrink-0" />
+                          <div className="w-0.5 h-2 bg-slate-700/60 rounded-full" />
                         </div>
-                      )}
+                      </div>
 
                       {/* Live Dragging Tooltip & Date Indicator */}
-                      {draggingMilestoneId === ms.id && (
+                      {isBeingDragged && (
                         <div
-                          className="absolute -top-7 z-30 px-2 py-0.5 rounded bg-slate-900 text-white text-[10px] font-semibold shadow-md whitespace-nowrap pointer-events-none transform -translate-x-1/2 flex items-center gap-1.5"
+                          className="absolute -top-9 z-30 px-2.5 py-1 rounded-md bg-slate-900 text-white text-[10px] font-semibold shadow-lg whitespace-nowrap pointer-events-none transform -translate-x-1/2 flex items-center gap-2 border border-slate-700"
                           style={{
-                            left: `${Math.max(5, Math.min(95, forecastRight))}%`,
+                            left: `${Math.max(5, Math.min(95, effectiveEndRight))}%`,
                           }}
                         >
-                          <span>{formatDate(new Date(new Date(ms.forecast_end || ms.planned_end).getTime() + activeShift * 24 * 60 * 60 * 1000).toISOString().split("T")[0])}</span>
-                          <span className={`px-1 rounded text-[9px] ${activeShift >= 0 ? "bg-amber-500/80" : "bg-emerald-500/80"}`}>
-                            {activeShift >= 0 ? `+${activeShift}d` : `${activeShift}d`}
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-slate-400">Target End:</span>
+                            <span className="font-bold text-white">{formatDate(effectiveEndDateStr)}</span>
+                          </div>
+                          <span
+                            className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
+                              activeShift > 0
+                                ? "bg-amber-500 text-slate-950"
+                                : activeShift < 0
+                                ? "bg-emerald-500 text-white"
+                                : "bg-slate-700 text-slate-200"
+                            }`}
+                          >
+                            {activeShift > 0 ? `+${activeShift}d` : activeShift < 0 ? `${activeShift}d` : "No change"}
                           </span>
                         </div>
                       )}
 
-                      {/* Interactive date nudge controls (hoverable on right) */}
+                      {/* Quick Nudge Buttons (+/- 7d) on hover */}
                       <div
-                        className="absolute right-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-white border border-slate-200 rounded-md shadow-xs p-0.5 z-20"
+                        className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-white border border-slate-200 rounded-md shadow-xs p-0.5 z-20"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button

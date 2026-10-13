@@ -54,7 +54,7 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     label: "Control Center",
     path: "control-center",
     icon: LayoutDashboard,
-    allowedRoles: ["OWNER", "CFO", "PM"],
+    allowedRoles: ["OWNER", "CFO", "PM", "INVESTOR"],
   },
   {
     id: "documents",
@@ -94,13 +94,6 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     icon: CalendarDays,
     allowedRoles: ["OWNER", "CFO", "PM"],
     badgeKey: "timeline",
-  },
-  {
-    id: "economics",
-    label: "Economics",
-    path: "economics",
-    icon: TrendingUp,
-    allowedRoles: ["OWNER", "CFO"],
   },
   {
     id: "submissions",
@@ -147,16 +140,15 @@ export function getProjectNavItems(projectId: string, role: UserRole): NavItemCo
 }
 
 export const WORKSPACE_ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
-  "control-center": ["OWNER", "CFO", "PM"],
+  "control-center": ["OWNER", "CFO", "PM", "INVESTOR"],
   "documents": ["OWNER", "CFO", "PM"],
   "budget": ["OWNER", "CFO", "PM"],
   "reconciliation": ["OWNER", "CFO"],
   "draws": ["OWNER", "CFO", "PM"],
   "timeline": ["OWNER", "CFO", "PM"],
-  "economics": ["OWNER", "CFO"],
   "submissions": ["OWNER", "CFO", "PM", "GC"],
   "alerts": ["OWNER", "CFO", "PM"],
-  "partners": ["OWNER", "CFO"],
+  "partners": ["OWNER", "CFO", "INVESTOR"],
   // "investor-updates": ["OWNER", "INVESTOR"],
   "settings": ["OWNER"],
 };

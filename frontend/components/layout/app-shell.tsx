@@ -28,9 +28,9 @@ const LEGACY_WORKSPACE_SECTIONS = [
   "reconciliation",
   "draws",
   "timeline",
-  "economics",
   "submissions",
   "alerts",
+  "partners",
 ];
 
 export function AppShell({ children }: AppShellProps) {

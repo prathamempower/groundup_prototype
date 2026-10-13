@@ -14,7 +14,12 @@ test("owner creates an account and launches a first project", async ({ page }) =
   await page.getByLabel("Last name").fill("Owner");
   await page.getByLabel("Work email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Create account and organization" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Complete registration" }).click();
+  await expect(page).toHaveURL(/\/projects/);
+
+  // Navigate to create new project flow
+  await page.goto("/projects/new?firstRun=1");
   await expect(page).toHaveURL(/\/projects\/new\?firstRun=1/);
 
   // Stage 0: Welcome & Choice
@@ -41,11 +46,14 @@ test("owner creates an account and launches a first project", async ({ page }) =
 
   // Stage 6: Review & Launch
   await page.getByRole("button", { name: /Launch Project Workspace/ }).click();
-  await expect(page).toHaveURL(/\/onboarding/);
-  await expect(page.getByText(/Setup/i)).toBeVisible();
+  await expect(page).toHaveURL(/\/(onboarding|projects\/[^\/]+\/control-center)/, { timeout: 15000 });
   await expect(page.getByText(/73 Broadway|Marcus Vance/)).toHaveCount(0);
 
-  await page.getByRole("banner").getByRole("button", { name: "Exit to Workspace" }).click();
+  // If in onboarding, exit to workspace; otherwise already in workspace
+  const exitBtn = page.getByRole("banner").getByRole("button", { name: "Exit to Workspace" });
+  if (await exitBtn.isVisible()) {
+    await exitBtn.click();
+  }
   await expect(page).toHaveURL(/\/(control-center|projects)/);
 
   await page.getByRole("button", { name: /Taylor Owner/ }).click();

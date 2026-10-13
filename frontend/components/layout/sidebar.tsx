@@ -86,7 +86,7 @@ export function Sidebar({
 
   // Categorize navigation items cleanly into Operations, Finance & Control, Partners & Funding, and Settings
   const coreItemIds = ["control-center", "documents", "timeline", "submissions"];
-  const financeItemIds = ["budget", "reconciliation", "draws", "economics"];
+  const financeItemIds = ["budget", "reconciliation", "draws"];
   const partnerItemIds = ["partners"];
   const alertsItemIds = ["alerts"];
 

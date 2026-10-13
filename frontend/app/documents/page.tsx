@@ -345,6 +345,34 @@ export default function DocumentsPage() {
           </div>
         </div>
 
+        {/* Pre-existing Project Documents Quick Load Bar */}
+        <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <span className="h-6 w-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                <Sparkles className="h-3.5 w-3.5" />
+              </span>
+              <span className="text-xs font-bold text-slate-900">Pre-existing Project Documents</span>
+            </div>
+            <span className="text-[11px] text-slate-500">1-click ingest test files &amp; verify OCR review</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-3">
+            {PRE_EXISTING_DOCUMENTS.slice(0, 6).map((docDef) => (
+              <button
+                key={docDef.id}
+                type="button"
+                onClick={() => handleQuickIngestSample(docDef)}
+                disabled={loadingSampleDoc === docDef.id}
+                className="flex items-center gap-2 p-2 rounded-lg border border-slate-200/80 bg-slate-50/50 hover:bg-white hover:border-blue-400 hover:shadow-xs transition-all text-left text-xs font-semibold text-slate-800 disabled:opacity-50 cursor-pointer"
+              >
+                <FileText className="h-4 w-4 text-blue-600 shrink-0" />
+                <span className="truncate">{docDef.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Quarantined documents alert banner */}
         {misfiledQuarantinedDoc && (
           <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-4 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

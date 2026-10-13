@@ -61,7 +61,7 @@ test.describe("Full Navigation & Workspace Page Audit", () => {
       "reconciliation",
       "draws",
       "timeline",
-      "economics",
+      "partners",
       "alerts",
       "settings",
     ];
@@ -89,7 +89,7 @@ test.describe("Full Navigation & Workspace Page Audit", () => {
       ["/reconciliation", `/projects/${projectId}/reconciliation`],
       ["/draws", `/projects/${projectId}/draws`],
       ["/timeline", `/projects/${projectId}/timeline`],
-      ["/economics", `/projects/${projectId}/economics`],
+      ["/partners", `/projects/${projectId}/partners`],
       ["/submissions", `/projects/${projectId}/submissions`],
       ["/alerts", `/projects/${projectId}/alerts`],
       ["/investor-update", `/projects/${projectId}/control-center`],

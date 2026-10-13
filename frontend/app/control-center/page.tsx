@@ -482,48 +482,7 @@ export default function ControlCenterPage() {
               </div>
             </div>
 
-            {/* Critical Path Milestone Risk Panel with Semantic Amber Alert Token */}
-            <div className="rounded-xl border border-amber-200/80 bg-gradient-to-b from-white to-amber-50/30 p-5 shadow-xs space-y-3">
-              <div className="flex items-center justify-between border-b border-amber-100 pb-3">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                  <AlertTriangle className="h-4 w-4 text-amber-600" />
-                  Critical Path Milestone
-                </div>
-                <span className="rounded-full bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 text-[10px] font-bold">
-                  Schedule Slip
-                </span>
-              </div>
 
-              <div>
-                <h4 className="text-xs font-bold text-slate-900">
-                  Structural Steel Fabrication
-                </h4>
-                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  Fabricator lead time extended by 5 weeks. Downstream rough-in trade access deferred.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-white p-2.5 rounded-lg border border-amber-200/70 shadow-2xs">
-                  <span className="text-[10px] font-semibold text-amber-800 uppercase block">Variance</span>
-                  <span className="font-bold font-mono text-amber-700 block mt-0.5">+35 Days</span>
-                </div>
-                <div className="bg-white p-2.5 rounded-lg border border-amber-200/70 shadow-2xs">
-                  <span className="text-[10px] font-semibold text-amber-800 uppercase block">Carry Impact</span>
-                  <span className="font-bold font-mono text-slate-900 block mt-0.5">+$28,500</span>
-                </div>
-              </div>
-
-              <Link href={currentProjectId ? `/projects/${currentProjectId}/timeline` : "/projects"}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs h-8 border-amber-300 bg-white hover:bg-amber-50 text-amber-900 font-semibold"
-                >
-                  View Milestone Schedule →
-                </Button>
-              </Link>
-            </div>
 
           </div>
 
