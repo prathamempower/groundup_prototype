@@ -84,26 +84,15 @@ export function Sidebar({
     ? getProjectNavItems(workspaceProjectId, effectiveRole)
     : [];
 
-  // Categorize navigation items cleanly into Operations, Finance & Control, Partners & Funding, and Settings
-  const coreItemIds = ["control-center", "documents", "timeline", "submissions", "inbox"];
+  // Categorize navigation items into 3 clean, logical sections
+  const coreItemIds = ["control-center", "inbox", "documents", "timeline", "submissions"];
   const financeItemIds = ["budget", "reconciliation", "draws"];
-  const partnerItemIds = ["partners"];
-  const alertsItemIds = ["alerts"];
+  const governanceItemIds = ["partners", "alerts"];
 
   const coreNavItems = visibleNavItems.filter((i) => coreItemIds.includes(i.id));
   const financeNavItems = visibleNavItems.filter((i) => financeItemIds.includes(i.id));
-  const partnerNavItems = visibleNavItems.filter((i) => partnerItemIds.includes(i.id));
-  const alertsNavItems = visibleNavItems.filter((i) => alertsItemIds.includes(i.id));
+  const governanceNavItems = visibleNavItems.filter((i) => governanceItemIds.includes(i.id));
   const bottomNavItems = visibleNavItems.filter((i) => i.id === "settings");
-
-  const formatStageLabel = (stage?: string) => {
-    if (!stage) return "In Progress";
-    return stage
-      .toLowerCase()
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
 
   return (
     <>
@@ -162,13 +151,13 @@ export function Sidebar({
         </div>
 
         {/* Project Card & Back to Portfolio Navigation */}
-        <div className="p-3 border-b border-slate-100 bg-slate-50/50">
+        <div className="p-3 border-b border-slate-100 bg-slate-50/40">
           {!collapsed ? (
-            <div className="space-y-2.5">
-              {/* Back to Projects breadcrumb-style link */}
+            <div className="space-y-2">
+              {/* Back to Projects link */}
               <Link
                 href="/projects"
-                aria-label="Switch"
+                aria-label="Back to all projects"
                 className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-500 hover:text-primary transition-colors group"
                 title="Return to all projects"
               >
@@ -177,8 +166,8 @@ export function Sidebar({
               </Link>
 
               {/* Active Project Card */}
-              <div className="rounded-xl border border-slate-200/90 bg-white p-3 shadow-xs hover:border-slate-300 transition-colors">
-                <div className="flex items-start gap-2.5">
+              <div className="rounded-xl border border-slate-200/80 bg-white p-2.5 shadow-xs hover:border-slate-300 transition-colors">
+                <div className="flex items-center gap-2.5">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-xs border border-primary/20">
                     <Building2 className="h-4 w-4" />
                   </div>
@@ -210,11 +199,11 @@ export function Sidebar({
           }`}
           aria-label="Project Workspace Navigation"
         >
-          {/* Section: Core Navigation */}
+          {/* Section 1: Operations */}
           {coreNavItems.length > 0 && (
             <div>
               {!collapsed && (
-                <div className="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                   Operations
                 </div>
               )}
@@ -230,7 +219,7 @@ export function Sidebar({
                       href={item.href}
                       onClick={onCloseMobile}
                       title={collapsed ? item.label : undefined}
-                      className={`group flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
+                      className={`group relative flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
                         collapsed
                           ? "h-9 w-9 mx-auto justify-center"
                           : "gap-3 px-3 py-2"
@@ -250,7 +239,7 @@ export function Sidebar({
                         <div className="flex flex-1 items-center justify-between overflow-hidden">
                           <span className="truncate">{item.label}</span>
                           {badgeCount > 0 && (
-                            <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-2xs">
+                            <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-slate-100 border border-slate-200 px-1 text-[10px] font-semibold text-slate-700">
                               {badgeCount}
                             </span>
                           )}
@@ -259,7 +248,7 @@ export function Sidebar({
 
                       {/* Collapsed view indicator badge dot */}
                       {collapsed && badgeCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-slate-400 ring-2 ring-white" />
                       )}
                     </Link>
                   );
@@ -268,11 +257,11 @@ export function Sidebar({
             </div>
           )}
 
-          {/* Section: Financials & Tracking */}
+          {/* Section 2: Finance & Control */}
           {financeNavItems.length > 0 && (
             <div>
               {!collapsed && (
-                <div className="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                   Finance & Control
                 </div>
               )}
@@ -288,7 +277,7 @@ export function Sidebar({
                       href={item.href}
                       onClick={onCloseMobile}
                       title={collapsed ? item.label : undefined}
-                      className={`group flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
+                      className={`group relative flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
                         collapsed
                           ? "h-9 w-9 mx-auto justify-center"
                           : "gap-3 px-3 py-2"
@@ -308,7 +297,7 @@ export function Sidebar({
                         <div className="flex flex-1 items-center justify-between overflow-hidden">
                           <span className="truncate">{item.label}</span>
                           {badgeCount > 0 && (
-                            <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-2xs">
+                            <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-slate-100 border border-slate-200 px-1.5 text-[10px] font-semibold text-slate-700">
                               {badgeCount}
                             </span>
                           )}
@@ -317,7 +306,7 @@ export function Sidebar({
 
                       {/* Collapsed view indicator badge dot */}
                       {collapsed && badgeCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-slate-400 ring-2 ring-white" />
                       )}
                     </Link>
                   );
@@ -326,58 +315,16 @@ export function Sidebar({
             </div>
           )}
 
-          {/* Section: Partners & Funding */}
-          {partnerNavItems.length > 0 && (
+          {/* Section 3: Partners & Risk */}
+          {governanceNavItems.length > 0 && (
             <div>
               {!collapsed && (
-                <div className="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Partners & Funding
+                <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Partners & Risk
                 </div>
               )}
               <div className="space-y-0.5">
-                {partnerNavItems.map((item) => {
-                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-                  const Icon = item.icon;
-
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      onClick={onCloseMobile}
-                      title={collapsed ? item.label : undefined}
-                      className={`group flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
-                        collapsed
-                          ? "h-9 w-9 mx-auto justify-center"
-                          : "gap-3 px-3 py-2"
-                      } ${
-                        isActive
-                          ? "bg-primary/10 text-primary font-semibold border border-primary/20 shadow-2xs"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
-                      }`}
-                    >
-                      <Icon
-                        className={`h-4 w-4 shrink-0 transition-colors ${
-                          isActive ? "text-primary" : "text-slate-400 group-hover:text-slate-600"
-                        }`}
-                      />
-
-                      {!collapsed && (
-                        <div className="flex flex-1 items-center justify-between overflow-hidden">
-                          <span className="truncate">{item.label}</span>
-                        </div>
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Section: Alerts & Exceptions */}
-          {alertsNavItems.length > 0 && (
-            <div>
-              <div className="space-y-0.5">
-                {alertsNavItems.map((item) => {
+                {governanceNavItems.map((item) => {
                   const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
                   const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
                   const Icon = item.icon;
@@ -388,7 +335,7 @@ export function Sidebar({
                       href={item.href}
                       onClick={onCloseMobile}
                       title={collapsed ? item.label : undefined}
-                      className={`group flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
+                      className={`group relative flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
                         collapsed
                           ? "h-9 w-9 mx-auto justify-center"
                           : "gap-3 px-3 py-2"
@@ -408,7 +355,7 @@ export function Sidebar({
                         <div className="flex flex-1 items-center justify-between overflow-hidden">
                           <span className="truncate">{item.label}</span>
                           {badgeCount > 0 && (
-                            <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-2xs">
+                            <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-50 border border-rose-200 px-1.5 text-[10px] font-semibold text-rose-700">
                               {badgeCount}
                             </span>
                           )}
