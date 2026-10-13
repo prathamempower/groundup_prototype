@@ -6,7 +6,6 @@ import {
   Search,
   Paperclip,
   Send,
-  Sparkles,
   CheckCheck,
   FileText,
   X,
@@ -327,7 +326,6 @@ export function InboxView({
   // Modals & Drawers
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const [isAttachOpen, setIsAttachOpen] = useState<boolean>(false);
-  const [isGeminiOpen, setIsGeminiOpen] = useState<boolean>(false);
   const [previewDoc, setPreviewDoc] = useState<InboxAttachment | null>(null);
 
   // Mobile navigation state
@@ -994,63 +992,6 @@ export function InboxView({
                 </button>
               </div>
             </div>
-          </div>
-        </ModalContent>
-      </Modal>
-
-      {/* ─────────────────────────────────────────────────────────────
-          MODAL: "ASK GEMINI" SMART AI ASSISTANT
-      ───────────────────────────────────────────────────────────── */}
-      <Modal open={isGeminiOpen} onOpenChange={setIsGeminiOpen}>
-        <ModalContent maxWidth="md">
-          <ModalHeader>
-            <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                <Sparkles className="h-4 w-4" />
-              </div>
-              <div>
-                <ModalTitle className="text-sm font-semibold text-slate-900">
-                  Gemini Assistant
-                </ModalTitle>
-                <ModalDescription className="text-xs text-slate-500">
-                  Quick suggestions for thread with {activeContact.name} ({activeContact.role})
-                </ModalDescription>
-              </div>
-            </div>
-          </ModalHeader>
-
-          <div className="space-y-2 py-2">
-            {[
-              {
-                title: "Confirm Draw #4 Framing Release",
-                prompt: `Dave, confirming that Draw #4 framing funds are authorized based on the passed city plumbing inspection. Sarah has released the $85,000 line item.`,
-              },
-              {
-                title: "Request Updated Lien Waivers",
-                prompt: `Please confirm that the framing subcontractor has submitted unconditional lien waivers through Draw #3 prior to this mobilization.`,
-              },
-              {
-                title: "Inquire about City Sign-Off Stamp",
-                prompt: `Could you send over the physical permit placard photo with the inspector's stamp for our lender package?`,
-              },
-            ].map((item, i) => (
-              <div
-                key={i}
-                onClick={() => {
-                  setMessageInput(item.prompt);
-                  setIsGeminiOpen(false);
-                }}
-                className="p-2.5 rounded-lg border border-slate-200 hover:border-indigo-400 bg-white hover:bg-indigo-50/40 cursor-pointer transition-colors"
-              >
-                <div className="font-medium text-xs text-slate-900 flex items-center justify-between">
-                  <span>{item.title}</span>
-                  <span className="text-[11px] text-indigo-600">Use &rarr;</span>
-                </div>
-                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
-                  &ldquo;{item.prompt}&rdquo;
-                </p>
-              </div>
-            ))}
           </div>
         </ModalContent>
       </Modal>

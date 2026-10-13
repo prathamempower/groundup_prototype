@@ -203,7 +203,7 @@ export function Sidebar({
           {coreNavItems.length > 0 && (
             <div>
               {!collapsed && (
-                <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                   Operations
                 </div>
               )}
@@ -225,13 +225,13 @@ export function Sidebar({
                           : "gap-3 px-3 py-2"
                       } ${
                         isActive
-                          ? "bg-primary/10 text-primary font-semibold border border-primary/20 shadow-2xs"
+                          ? "bg-slate-900 text-white font-medium shadow-xs"
                           : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
                       }`}
                     >
                       <Icon
                         className={`h-4 w-4 shrink-0 transition-colors ${
-                          isActive ? "text-primary" : "text-slate-400 group-hover:text-slate-600"
+                          isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600"
                         }`}
                       />
 
@@ -239,16 +239,20 @@ export function Sidebar({
                         <div className="flex flex-1 items-center justify-between overflow-hidden">
                           <span className="truncate">{item.label}</span>
                           {badgeCount > 0 && (
-                            <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-slate-100 border border-slate-200 px-1 text-[10px] font-semibold text-slate-700">
+                            <span className={`ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-medium tabular-nums ${
+                              isActive
+                                ? "bg-white/20 text-white"
+                                : "bg-slate-100 text-slate-600"
+                            }`}>
                               {badgeCount}
                             </span>
                           )}
                         </div>
                       )}
 
-                      {/* Collapsed view indicator badge dot */}
+                      {/* Collapsed view indicator dot */}
                       {collapsed && badgeCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-slate-400 ring-2 ring-white" />
+                        <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-slate-400 ring-2 ring-white" />
                       )}
                     </Link>
                   );
@@ -261,7 +265,7 @@ export function Sidebar({
           {financeNavItems.length > 0 && (
             <div>
               {!collapsed && (
-                <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                   Finance & Control
                 </div>
               )}
@@ -283,13 +287,13 @@ export function Sidebar({
                           : "gap-3 px-3 py-2"
                       } ${
                         isActive
-                          ? "bg-primary/10 text-primary font-semibold border border-primary/20 shadow-2xs"
+                          ? "bg-slate-900 text-white font-medium shadow-xs"
                           : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
                       }`}
                     >
                       <Icon
                         className={`h-4 w-4 shrink-0 transition-colors ${
-                          isActive ? "text-primary" : "text-slate-400 group-hover:text-slate-600"
+                          isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600"
                         }`}
                       />
 
@@ -297,16 +301,20 @@ export function Sidebar({
                         <div className="flex flex-1 items-center justify-between overflow-hidden">
                           <span className="truncate">{item.label}</span>
                           {badgeCount > 0 && (
-                            <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-slate-100 border border-slate-200 px-1.5 text-[10px] font-semibold text-slate-700">
+                            <span className={`ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1.5 text-[10px] font-medium tabular-nums ${
+                              isActive
+                                ? "bg-white/20 text-white"
+                                : "bg-slate-100 text-slate-600"
+                            }`}>
                               {badgeCount}
                             </span>
                           )}
                         </div>
                       )}
 
-                      {/* Collapsed view indicator badge dot */}
+                      {/* Collapsed view indicator dot */}
                       {collapsed && badgeCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-slate-400 ring-2 ring-white" />
+                        <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-slate-400 ring-2 ring-white" />
                       )}
                     </Link>
                   );
@@ -319,7 +327,7 @@ export function Sidebar({
           {governanceNavItems.length > 0 && (
             <div>
               {!collapsed && (
-                <div className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                   Partners & Risk
                 </div>
               )}
@@ -341,13 +349,13 @@ export function Sidebar({
                           : "gap-3 px-3 py-2"
                       } ${
                         isActive
-                          ? "bg-primary/10 text-primary font-semibold border border-primary/20 shadow-2xs"
+                          ? "bg-slate-900 text-white font-medium shadow-xs"
                           : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
                       }`}
                     >
                       <Icon
                         className={`h-4 w-4 shrink-0 transition-colors ${
-                          isActive ? "text-primary" : "text-slate-400 group-hover:text-slate-600"
+                          isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600"
                         }`}
                       />
 
@@ -355,16 +363,20 @@ export function Sidebar({
                         <div className="flex flex-1 items-center justify-between overflow-hidden">
                           <span className="truncate">{item.label}</span>
                           {badgeCount > 0 && (
-                            <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-50 border border-rose-200 px-1.5 text-[10px] font-semibold text-rose-700">
+                            <span className={`ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1.5 text-[10px] font-medium tabular-nums ${
+                              isActive
+                                ? "bg-white/20 text-white"
+                                : "bg-slate-100 text-slate-600"
+                            }`}>
                               {badgeCount}
                             </span>
                           )}
                         </div>
                       )}
 
-                      {/* Collapsed view indicator badge dot */}
+                      {/* Collapsed view indicator dot */}
                       {collapsed && badgeCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                        <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-slate-400 ring-2 ring-white" />
                       )}
                     </Link>
                   );
@@ -393,11 +405,11 @@ export function Sidebar({
                       : "gap-3 px-3 py-2"
                   } ${
                     isActive
-                      ? "bg-primary/10 text-primary font-semibold border border-primary/20 shadow-2xs"
+                      ? "bg-slate-900 text-white font-medium shadow-xs"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   }`}
                 >
-                  <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-slate-400 group-hover:text-slate-600"}`} />
+                  <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600"}`} />
                   {!collapsed && <span className="truncate">{item.label}</span>}
                 </Link>
               );
