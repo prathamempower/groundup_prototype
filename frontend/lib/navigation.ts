@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   Users,
   MessageSquare,
+  Send,
   LucideIcon,
 } from "lucide-react";
 
@@ -58,34 +59,12 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     allowedRoles: ["OWNER", "CFO", "PM", "INVESTOR"],
   },
   {
-    id: "inbox",
-    label: "Inbox",
-    path: "inbox",
-    icon: MessageSquare,
-    allowedRoles: ["OWNER", "CFO", "PM", "GC", "INVESTOR"],
-  },
-  {
     id: "documents",
     label: "Documents",
     path: "documents",
     icon: FileText,
     allowedRoles: ["OWNER", "CFO", "PM"],
     badgeKey: "documents",
-  },
-  {
-    id: "timeline",
-    label: "Timeline",
-    path: "timeline",
-    icon: CalendarDays,
-    allowedRoles: ["OWNER", "CFO", "PM"],
-    badgeKey: "timeline",
-  },
-  {
-    id: "submissions",
-    label: "Submissions",
-    path: "submissions",
-    icon: Inbox,
-    allowedRoles: ["CFO", "PM", "GC"],
   },
   {
     id: "budget",
@@ -111,11 +90,19 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     badgeKey: "draws",
   },
   {
-    id: "partners",
-    label: "Partners & Funding",
-    path: "partners",
-    icon: Users,
-    allowedRoles: ["OWNER", "CFO"],
+    id: "timeline",
+    label: "Timeline",
+    path: "timeline",
+    icon: CalendarDays,
+    allowedRoles: ["OWNER", "CFO", "PM"],
+    badgeKey: "timeline",
+  },
+  {
+    id: "submissions",
+    label: "Submissions",
+    path: "submissions",
+    icon: Send,
+    allowedRoles: ["CFO", "PM", "GC"],
   },
   {
     id: "alerts",
@@ -124,6 +111,20 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     icon: AlertTriangle,
     allowedRoles: ["OWNER", "CFO", "PM"],
     badgeKey: "alerts",
+  },
+  {
+    id: "partners",
+    label: "Partners & Funding",
+    path: "partners",
+    icon: Users,
+    allowedRoles: ["OWNER", "CFO"],
+  },
+  {
+    id: "inbox",
+    label: "Inbox",
+    path: "inbox",
+    icon: MessageSquare,
+    allowedRoles: ["OWNER", "CFO", "PM", "GC", "INVESTOR"],
   },
   {
     id: "settings",
