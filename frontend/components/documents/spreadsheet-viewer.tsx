@@ -77,7 +77,7 @@ export function SpreadsheetViewer({
           }
 
           if (targetSheetName) {
-            const found = workbook.SheetNames.find((s) => s.toLowerCase() === targetSheetName.toLowerCase());
+            const found = workbook.SheetNames.find((s: string) => s.toLowerCase() === targetSheetName.toLowerCase());
             if (found) initialSheet = found;
           }
         }

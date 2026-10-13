@@ -216,6 +216,9 @@ export function MilestoneGanttChart({
     }
   };
 
+  // Track whether dragging actually occurred to prevent opening drawer on mouse release
+  const hasDraggedRef = React.useRef(false);
+
   // Direct Mouse Drag Handlers
   const handleMouseDown = (
     e: React.MouseEvent,
@@ -224,6 +227,8 @@ export function MilestoneGanttChart({
   ) => {
     e.preventDefault();
     e.stopPropagation();
+
+    hasDraggedRef.current = false;
 
     // Compute actual width of timeline track
     const trackWidth = timelineTrackRef.current?.getBoundingClientRect().width || 800;
@@ -239,6 +244,9 @@ export function MilestoneGanttChart({
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startClientX;
+      if (Math.abs(deltaX) > 3) {
+        hasDraggedRef.current = true;
+      }
       const dayShift = Math.round(deltaX * daysPerPixel);
       setDragCurrentShiftDays(initialShift + dayShift);
     };
@@ -248,9 +256,15 @@ export function MilestoneGanttChart({
       window.removeEventListener("mouseup", onMouseUp);
 
       const deltaX = upEvent.clientX - startClientX;
-      const finalShift = initialShift + Math.round(deltaX * daysPerPixel);
+      const dayShift = Math.round(deltaX * daysPerPixel);
+      const finalShift = initialShift + dayShift;
 
       setDraggingMilestoneId(null);
+
+      // Short delay before resetting hasDraggedRef so any immediate click event is suppressed
+      setTimeout(() => {
+        hasDraggedRef.current = false;
+      }, 100);
 
       if (finalShift !== initialShift) {
         setActiveShiftMap((prev) => ({ ...prev, [ms.id]: finalShift }));
@@ -483,13 +497,19 @@ export function MilestoneGanttChart({
               return (
                 <div
                   key={ms.id}
-                  onClick={() => onSelectMilestone(ms)}
-                  className={`flex text-xs transition-colors cursor-pointer group hover:bg-slate-50/70 items-center ${
+                  className={`flex text-xs transition-colors group hover:bg-slate-50/70 items-center ${
                     isSelected ? "bg-blue-50/40" : "bg-white"
                   }`}
                 >
-                  {/* Left Fixed Width Table Columns (600px) */}
-                  <div className="w-[600px] flex items-center py-3 px-4 border-r border-slate-200 shrink-0">
+                  {/* Left Fixed Width Table Columns (600px) - clicking here opens details drawer */}
+                  <div
+                    onClick={() => {
+                      if (!hasDraggedRef.current) {
+                        onSelectMilestone(ms);
+                      }
+                    }}
+                    className="w-[600px] flex items-center py-3 px-4 border-r border-slate-200 shrink-0 cursor-pointer"
+                  >
                     <span className="w-8 text-slate-400 font-medium tabular-nums">{index + 1}</span>
                     <span className="w-52 font-semibold text-slate-900 truncate pr-2 group-hover:text-blue-600 transition-colors" title={ms.name}>
                       {ms.name}
@@ -609,29 +629,6 @@ export function MilestoneGanttChart({
                           </span>
                         </div>
                       )}
-
-                      {/* Quick Nudge Buttons (+/- 7d) on hover */}
-                      <div
-                        className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-white border border-slate-200 rounded-md shadow-xs p-0.5 z-20"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => handleNudge(ms, -7)}
-                          title="Move 7 days earlier"
-                          className="px-1.5 py-0.5 rounded text-[10px] font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 cursor-pointer active:scale-95"
-                        >
-                          -7d
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleNudge(ms, 7)}
-                          title="Move 7 days later"
-                          className="px-1.5 py-0.5 rounded text-[10px] font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 cursor-pointer active:scale-95"
-                        >
-                          +7d
-                        </button>
-                      </div>
                     </div>
                   </div>
                 </div>

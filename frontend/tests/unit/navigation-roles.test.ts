@@ -37,16 +37,18 @@ describe("Role Permissions & Navigation Matrix", () => {
     expect(gcNav).not.toContain(`/projects/${testProjectId}/control-center`);
   });
 
-  it("strictly enforces INVESTOR project workspace boundaries (Investor only sees investor updates)", () => {
+  it("strictly enforces INVESTOR project workspace boundaries (Investor only sees control center)", () => {
     const testProjectId = "proj_test_123";
     const investorNav = getProjectNavItems(testProjectId, "INVESTOR").map((item) => item.href);
 
-    expect(investorNav).not.toContain(`/projects/${testProjectId}/investor-updates`);
+    expect(investorNav).toContain(`/projects/${testProjectId}/control-center`);
     expect(investorNav).not.toContain(`/projects/${testProjectId}/documents`);
     expect(investorNav).not.toContain(`/projects/${testProjectId}/budget`);
     expect(investorNav).not.toContain(`/projects/${testProjectId}/reconciliation`);
+    expect(investorNav).not.toContain(`/projects/${testProjectId}/draws`);
+    expect(investorNav).not.toContain(`/projects/${testProjectId}/timeline`);
+    expect(investorNav).not.toContain(`/projects/${testProjectId}/submissions`);
     expect(investorNav).not.toContain(`/projects/${testProjectId}/settings`);
-    expect(investorNav).not.toContain(`/projects/${testProjectId}/control-center`);
   });
 
   it("grants OWNER full project workspace access", () => {
@@ -59,14 +61,14 @@ describe("Role Permissions & Navigation Matrix", () => {
     expect(ownerNav).toContain(`/projects/${testProjectId}/reconciliation`);
     expect(ownerNav).toContain(`/projects/${testProjectId}/draws`);
     expect(ownerNav).toContain(`/projects/${testProjectId}/timeline`);
-    expect(ownerNav).toContain(`/projects/${testProjectId}/economics`);
+    expect(ownerNav).toContain(`/projects/${testProjectId}/partners`);
     expect(ownerNav).not.toContain(`/projects/${testProjectId}/submissions`);
     expect(ownerNav).toContain(`/projects/${testProjectId}/alerts`);
     expect(ownerNav).not.toContain(`/projects/${testProjectId}/investor-updates`);
     expect(ownerNav).toContain(`/projects/${testProjectId}/settings`);
   });
 
-  it("strictly scopes PM role (no reconciliation, economics, investor-updates, or project settings)", () => {
+  it("strictly scopes PM role (no reconciliation, partners, investor-updates, or project settings)", () => {
     const testProjectId = "proj_test_123";
     const pmNav = getProjectNavItems(testProjectId, "PM").map((item) => item.href);
 
@@ -75,7 +77,7 @@ describe("Role Permissions & Navigation Matrix", () => {
     expect(pmNav).toContain(`/projects/${testProjectId}/draws`);
     expect(pmNav).toContain(`/projects/${testProjectId}/documents`);
     expect(pmNav).not.toContain(`/projects/${testProjectId}/reconciliation`);
-    expect(pmNav).not.toContain(`/projects/${testProjectId}/economics`);
+    expect(pmNav).not.toContain(`/projects/${testProjectId}/partners`);
     expect(pmNav).not.toContain(`/projects/${testProjectId}/investor-updates`);
     expect(pmNav).not.toContain(`/projects/${testProjectId}/settings`);
   });
@@ -86,7 +88,7 @@ describe("Role Permissions & Navigation Matrix", () => {
 
     expect(cfoNav).toContain(`/projects/${testProjectId}/control-center`);
     expect(cfoNav).toContain(`/projects/${testProjectId}/reconciliation`);
-    expect(cfoNav).toContain(`/projects/${testProjectId}/economics`);
+    expect(cfoNav).toContain(`/projects/${testProjectId}/partners`);
     expect(cfoNav).not.toContain(`/projects/${testProjectId}/settings`);
     expect(cfoNav).not.toContain(`/projects/${testProjectId}/investor-updates`);
   });

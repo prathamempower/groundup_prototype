@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, ExternalLink, Eye } from "lucide-react";
 import { api } from "@/lib/api";
 import { DocumentItem, ExtractionField } from "@/lib/types";
 import { SpreadsheetViewer } from "./spreadsheet-viewer";
@@ -20,11 +20,18 @@ export function DocumentViewer({ document, extractions, selectedFieldId }: Docum
     retry: false,
   });
   const rawUrl = download.data?.data.download_url;
-  const url = rawUrl
+  const baseUrl = rawUrl
     ? rawUrl.startsWith("http")
       ? rawUrl
       : `${process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1"}${rawUrl.replace(/^\/api\/v1/, "")}`
     : undefined;
+  
+  // For viewing inline in iframe / new tab without triggering automatic download:
+  const viewUrl = baseUrl ? `${baseUrl}?inline=true` : undefined;
+  const downloadUrl = baseUrl ? `${baseUrl}?inline=false` : undefined;
+  // Fallback direct static URL if it's one of the known sample documents
+  const sampleUrl = `/sample-docs/${encodeURIComponent(document.original_filename)}`;
+  const url = viewUrl || sampleUrl;
   const isPdf = document.mime_type.toLowerCase().includes("pdf") || document.original_filename.toLowerCase().endsWith(".pdf");
   const isImage = document.mime_type.toLowerCase().startsWith("image/") || /\.(png|jpe?g|webp)$/i.test(document.original_filename);
   const isSpreadsheet =
@@ -47,17 +54,30 @@ export function DocumentViewer({ document, extractions, selectedFieldId }: Docum
             ({document.document_type})
           </span>
         </div>
-        {url && (
-          <a
-            href={url}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-text-secondary hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <Download className="h-3.5 w-3.5" aria-hidden="true" />
-            Open original
-          </a>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          {url && (
+            <a
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary shadow-2xs"
+            >
+              <ExternalLink className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
+              <span>Open in tab</span>
+            </a>
+          )}
+          {downloadUrl && (
+            <a
+              href={downloadUrl}
+              download={document.original_filename}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary"
+              title="Download backup copy"
+            >
+              <Download className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+              <span className="hidden sm:inline">Save</span>
+            </a>
+          )}
+        </div>
       </header>
 
       <div className="flex min-h-0 flex-1 overflow-hidden bg-slate-950">
