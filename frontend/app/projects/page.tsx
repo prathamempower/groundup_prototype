@@ -127,7 +127,7 @@ export default function ProjectsPortfolioPage() {
       return "/projects/first-street-new.jpg";
     }
     if (nameLower.includes("broadway") || addressLower.includes("broadway")) {
-      return "/projects/gable-residence.jpg";
+      return "/projects/broadway-new.jpg";
     }
     return "/projects/broadway-new.jpg";
   };
@@ -429,6 +429,7 @@ export default function ProjectsPortfolioPage() {
                         src={heroImage}
                         alt={project.name}
                         fill
+                        unoptimized
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover transition-transform duration-300 group-hover:scale-102"
                       />

@@ -403,8 +403,11 @@ export default function BudgetPage() {
               <div className="font-mono text-3xl font-bold tracking-tight text-slate-900 tabular-nums">
                 {formatMoney(String(contingencyAvailableCents), { showCents: false })}
               </div>
-              <div className="flex items-center justify-center h-8 w-8 rounded-full border-2 border-emerald-500 bg-emerald-50 shrink-0" title="100% of contingency funds are uncommitted">
-                <span className="text-[11px] font-bold text-emerald-700">100%</span>
+              <div
+                className="flex items-center justify-center h-8 px-2.5 rounded-full border-2 border-emerald-500 bg-emerald-50 shrink-0 shadow-2xs"
+                title="100% of contingency funds are uncommitted"
+              >
+                <span className="text-[11px] font-extrabold text-emerald-700 tracking-tight">100%</span>
               </div>
             </div>
 

@@ -127,27 +127,6 @@ export default function ControlCenterPage() {
           </div>
         </div>
 
-        {isSetupIncomplete && (
-          <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 flex items-start gap-3.5 shadow-xs">
-            <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <h3 className="text-xs font-bold text-slate-900">
-                Project Setup Incomplete
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                A verified financial baseline and mapped bank account have not yet been approved for {project?.name}.
-                Financial KPIs are withheld until baseline sign-off.
-              </p>
-              <div className="pt-1">
-                <Link href={`/projects/${project?.id || ""}/budget`}>
-                  <span className="text-xs font-semibold text-amber-900 hover:underline inline-flex items-center gap-1">
-                    Review Budget Baseline <ArrowRight className="h-3 w-3" />
-                  </span>
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ========================================================================= */}
         {/* 4 CORE EXECUTIVE METRIC CARDS - RICH VISUAL TOKENS, COLORS & CLEAR HIERARCHY */}
