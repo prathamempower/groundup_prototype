@@ -221,11 +221,22 @@ export default function ReconciliationPage() {
   const reconciledPeriodsCount = periods.filter((p) => p.reconciled_status === "RECONCILED").length;
   const coveragePct = periods.length > 0 ? Math.round((reconciledPeriodsCount / periods.length) * 100) : 100;
 
+  // Dynamic realistic dates relative to the active business day
+  const getRealDate = (daysAgo: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() - daysAgo);
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
   // Review Queue Items (Rich data matching Screenshot 1)
   const defaultReviewItems = [
     {
       id: "rq-1",
-      date: "Sep 29, 2026",
+      date: getRealDate(0),
       account: "Operating · 4821",
       description: "Nilson Mocalos",
       type: "Bank transaction",
@@ -238,7 +249,7 @@ export default function ReconciliationPage() {
     },
     {
       id: "rq-2",
-      date: "Sep 28, 2026",
+      date: getRealDate(1),
       account: "Operating · 4821",
       description: "Nilson Mocalos",
       type: "Bank transaction",
@@ -251,7 +262,7 @@ export default function ReconciliationPage() {
     },
     {
       id: "rq-3",
-      date: "Sep 27, 2026",
+      date: getRealDate(2),
       account: "Operating · 4821",
       description: "Jersey City Permit Office",
       type: "Bank transaction",
@@ -264,7 +275,7 @@ export default function ReconciliationPage() {
     },
     {
       id: "rq-4",
-      date: "Sep 26, 2026",
+      date: getRealDate(3),
       account: "Operating · 4821",
       description: "Architectural Studio LLC",
       type: "Bank transaction",
@@ -277,7 +288,7 @@ export default function ReconciliationPage() {
     },
     {
       id: "rq-5",
-      date: "Sep 25, 2026",
+      date: getRealDate(4),
       account: "Operating · 4821",
       description: "Investor funding deposit",
       type: "Bank transaction",
@@ -290,7 +301,7 @@ export default function ReconciliationPage() {
     },
     {
       id: "rq-6",
-      date: "Sep 24, 2026",
+      date: getRealDate(5),
       account: "Business card · 1108",
       description: "Card payment — statement settlement",
       type: "Bank transaction",
@@ -303,7 +314,7 @@ export default function ReconciliationPage() {
     },
     {
       id: "rq-7",
-      date: "Sep 22, 2026",
+      date: getRealDate(7),
       account: "Operating · 4821",
       description: "Jersey City Lumber Co.",
       type: "Bank transaction",
@@ -316,7 +327,7 @@ export default function ReconciliationPage() {
     },
     {
       id: "rq-8",
-      date: "Sep 20, 2026",
+      date: getRealDate(9),
       account: "Operating · 4821",
       description: "Construction loan draw",
       type: "Bank transaction",
@@ -470,7 +481,7 @@ export default function ReconciliationPage() {
       project_id: currentProjectId || "p1",
       amount: numericAmount,
       counterparty: row.description,
-      transaction_date: "2026-09-29T00:00:00Z",
+      transaction_date: new Date().toISOString(),
       proposed_budget_line_name: row.proposedLink,
       proposed_budget_line_id: budgetLines[0]?.id || "bl-1",
       confidence: row.evidence === "Strong" ? 0.94 : 0.75,
@@ -606,7 +617,7 @@ export default function ReconciliationPage() {
                 In progress
               </span>
               <span className="text-[11px] text-slate-400">
-                As of Oct 12, 2026, 6:00 PM IST
+                As of {getRealDate(0)}, 6:00 PM
               </span>
             </div>
           </div>

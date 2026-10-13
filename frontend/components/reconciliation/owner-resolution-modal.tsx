@@ -148,16 +148,16 @@ export function OwnerResolutionModal({
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent maxWidth="md" className="p-5">
-        <ModalHeader className="pb-2 border-b border-slate-100">
-          <div className="flex items-center justify-between">
-            <ModalTitle className="text-sm font-bold text-slate-900">
+        <ModalHeader className="pb-3 border-b border-slate-100 pr-10">
+          <div className="flex items-center gap-3">
+            <ModalTitle className="text-base font-bold text-slate-900">
               Resolve Transaction
             </ModalTitle>
             <span
-              className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${
+              className={`font-mono text-xs font-bold px-2.5 py-0.5 rounded-full border ${
                 item.direction === "in"
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-slate-100 text-slate-800"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  : "bg-slate-100 text-slate-800 border-slate-200"
               }`}
             >
               {item.amount}
@@ -166,13 +166,15 @@ export function OwnerResolutionModal({
         </ModalHeader>
 
         {/* Clean, compact 1-line transaction info */}
-        <div className="flex items-center justify-between py-2 text-xs border-b border-slate-100 text-slate-600">
+        <div className="flex items-center justify-between py-2.5 text-xs border-b border-slate-100 text-slate-600">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-slate-900">{item.description}</span>
             <span className="text-slate-400">·</span>
             <span>{item.account}</span>
           </div>
-          <span className="text-slate-400 font-mono text-[11px]">{item.date}</span>
+          <span className="text-slate-500 font-medium font-mono text-[11px] bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+            {item.date}
+          </span>
         </div>
 
         {/* Action Grid: 6 clean, compact buttons without wordy paragraphs */}
