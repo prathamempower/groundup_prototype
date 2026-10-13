@@ -26,7 +26,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
-import { PRE_EXISTING_DOCUMENTS, PreExistingDocDef } from "@/lib/sample-documents";
 
 interface UploadModalProps {
   open: boolean;
@@ -54,7 +53,6 @@ export function UploadModal({
   const [createdDocument, setCreatedDocument] = useState<DocumentItem | null>(null);
   const [stageMessage, setStageMessage] = useState("");
   const [subStageDetails, setSubStageDetails] = useState<string[]>([]);
-  const [loadingSample, setLoadingSample] = useState(false);
 
   // Reset modal state when opened/closed
   React.useEffect(() => {
@@ -65,7 +63,6 @@ export function UploadModal({
       setCreatedDocument(null);
       setStageMessage("");
       setSubStageDetails([]);
-      setLoadingSample(false);
     }
   }, [open]);
 
@@ -79,39 +76,6 @@ export function UploadModal({
 
   const handleFileSelected = (file: File) => {
     setSelectedFile(file);
-  };
-
-  const handleLoadPreExistingDoc = async (docDef: PreExistingDocDef, autoUpload = false) => {
-    try {
-      setLoadingSample(true);
-      const res = await fetch(`/sample-docs/${encodeURIComponent(docDef.filename)}`);
-      if (!res.ok) {
-        throw new Error(`Failed to load pre-existing file: ${res.statusText}`);
-      }
-      const blob = await res.blob();
-      const mimeType = docDef.filename.endsWith(".xlsx")
-        ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        : "application/pdf";
-      const file = new File([blob], docDef.filename, { type: mimeType });
-      setSelectedFile(file);
-      toast({
-        title: "Document Loaded",
-        description: `Loaded ${docDef.filename} (${(file.size / 1024).toFixed(1)} KB) ready for ingestion.`,
-      });
-
-      if (autoUpload) {
-        // Trigger upload directly with this file
-        await executeUploadWithFile(file);
-      }
-    } catch (err: unknown) {
-      toast({
-        title: "Could Not Load Sample",
-        description: (err as Error).message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingSample(false);
-    }
   };
 
   const executeUploadWithFile = async (fileToUpload: File) => {
@@ -261,72 +225,6 @@ export function UploadModal({
                 )}
               </div>
 
-              {/* Pre-existing Project Documents Quick Selector */}
-              <div className="rounded-xl border border-slate-200/90 bg-slate-50/60 p-3.5 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-blue-600" />
-                    <span className="text-xs font-bold text-slate-800">
-                      Pre-existing Project Documents
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-slate-500 font-medium">
-                    Click to load real file &amp; test OCR
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {PRE_EXISTING_DOCUMENTS.slice(0, 6).map((docDef) => {
-                    const isSelected = selectedFile?.name === docDef.filename;
-                    const isXlsx = docDef.filename.endsWith(".xlsx");
-
-                    return (
-                      <button
-                        key={docDef.id}
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleLoadPreExistingDoc(docDef, false);
-                        }}
-                        className={cn(
-                          "flex items-start gap-2.5 p-2 rounded-lg border text-left transition-all relative group",
-                          isSelected
-                            ? "border-blue-500 bg-blue-50/80 shadow-xs ring-1 ring-blue-500/20"
-                            : "border-slate-200/80 bg-white hover:border-blue-300 hover:bg-slate-50/80"
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            "h-7 w-7 rounded-md flex items-center justify-center shrink-0 border mt-0.5",
-                            isXlsx
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200/60"
-                              : "bg-blue-50 text-blue-700 border-blue-200/60"
-                          )}
-                        >
-                          {isXlsx ? (
-                            <FileSpreadsheet className="h-3.5 w-3.5" />
-                          ) : (
-                            <FileText className="h-3.5 w-3.5" />
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-1">
-                            <span className="text-xs font-bold text-slate-900 truncate">
-                              {docDef.label}
-                            </span>
-                            <span className="text-[10px] font-mono text-slate-500 shrink-0">
-                              {docDef.sizeText}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                            {docDef.description}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
             </>
           )}
 
