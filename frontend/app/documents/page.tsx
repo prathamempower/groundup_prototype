@@ -23,6 +23,7 @@ import {
   ArrowUpDown,
   FolderSync,
   Download,
+  Eye,
   Sparkles,
   AlertCircle,
   FileCheck,
@@ -33,6 +34,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 import { UploadModal } from "@/components/documents/upload-modal";
 import { DocumentReviewDrawer } from "@/components/documents/document-review-drawer";
+import { DocumentQuickPreviewModal } from "@/components/documents/document-quick-preview-modal";
 import { QuarantineResolverModal } from "@/components/documents/quarantine-resolver-modal";
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton";
 import userNamesData from "@/lib/user-names.json";
@@ -71,6 +73,7 @@ export default function DocumentsPage() {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [reviewingDocId, setReviewingDocId] = useState<string | null>(null);
   const [quarantinedDoc, setQuarantinedDoc] = useState<DocumentItem | null>(null);
+  const [quickPreviewDoc, setQuickPreviewDoc] = useState<DocumentItem | null>(null);
 
   // Strict route project isolation
   const routeProjectId = typeof window !== "undefined"
@@ -693,6 +696,16 @@ export default function DocumentsPage() {
                         {/* Actions */}
                         <td className="py-3.5 px-5 text-right">
                           <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setQuickPreviewDoc(doc)}
+                              className="h-7 px-2 text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-blue-50/70 gap-1 border border-slate-200/80"
+                              title="Show PDF / Preview Document without downloading"
+                            >
+                              <Eye className="h-3.5 w-3.5 text-blue-600" />
+                              <span>Show</span>
+                            </Button>
                             {doc.ingestion_status === "QUARANTINED" ? (
                               <Button
                                 variant="destructive"
@@ -714,7 +727,7 @@ export default function DocumentsPage() {
                                     router.push(`/documents/${doc.id}`);
                                   }
                                 }}
-                                className="h-7 px-3 text-xs font-semibold text-blue-700 border-slate-200 hover:border-blue-300 hover:bg-blue-50/60"
+                                className="h-7 px-2.5 text-xs font-semibold text-blue-700 border-slate-200 hover:border-blue-300 hover:bg-blue-50/60"
                               >
                                 Review
                               </Button>
@@ -775,6 +788,16 @@ export default function DocumentsPage() {
         onResolved={() => {
           queryClient.invalidateQueries({ queryKey: ["documents"] });
         }}
+      />
+
+      {/* Direct Quick PDF & Document Viewer Modal */}
+      <DocumentQuickPreviewModal
+        document={quickPreviewDoc}
+        open={Boolean(quickPreviewDoc)}
+        onOpenChange={(open) => {
+          if (!open) setQuickPreviewDoc(null);
+        }}
+        currentProjectId={currentProjectId}
       />
     </div>
   );
