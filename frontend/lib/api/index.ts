@@ -238,8 +238,28 @@ export const api = {
         `/documents/${documentId}/confirm-upload`,
         { method: "POST" }
       ),
-    getExtractions: (documentId: string) =>
-      request<ExtractionField[]>(`/documents/${documentId}/extractions`),
+    getExtractions: async (documentId: string) => {
+      const res = await request<any[]>(`/documents/${documentId}/extractions`);
+      const mapped = (res.data || []).map((f: any) => ({
+        id: f.id,
+        document_id: documentId,
+        field_name: f.field_name,
+        raw_value: f.raw_value || f.proposed_value || "",
+        normalized_value: f.accepted_value || f.normalized_value || f.proposed_value || "",
+        proposed_value: f.proposed_value || f.raw_value || "",
+        confidence: typeof f.confidence === "number" ? f.confidence : 0.95,
+        citation: typeof f.citation === "object" && f.citation !== null
+          ? f.citation
+          : {
+              page_number: f.page_number || 1,
+              row_number: undefined,
+              sheet_name: typeof f.citation === "string" ? f.citation : undefined,
+            },
+        status: f.status || "PROPOSED",
+        decision_rationale: f.decision_rationale || undefined,
+      }));
+      return { ...res, data: mapped as ExtractionField[] };
+    },
     decideExtractionField: (
       fieldId: string,
       decision: "ACCEPT" | "EDIT" | "REJECT",
@@ -626,12 +646,29 @@ export const api = {
       }),
     updateMilestone: (
       milestoneId: string,
-      data: Partial<MilestoneItem> & { update_rationale?: string }
-    ) =>
-      request<MilestoneItem>(`/milestones/${milestoneId}`, {
+      data: any
+    ) => {
+      const payload: any = { ...data };
+      if (data.forecast_end && !data.forecast_completion_date) {
+        payload.forecast_completion_date = data.forecast_end;
+      }
+      if (data.actual_start && !data.actual_start_date) {
+        payload.actual_start_date = data.actual_start;
+      }
+      if (data.actual_end && !data.actual_completion_date) {
+        payload.actual_completion_date = data.actual_end;
+      }
+      if (typeof data.percent_complete === "number" && typeof data.progress_percentage !== "number") {
+        payload.progress_percentage = data.percent_complete;
+      }
+      if (data.update_rationale && !data.forecast_change_reason) {
+        payload.forecast_change_reason = data.update_rationale;
+      }
+      return request<MilestoneItem>(`/milestones/${milestoneId}`, {
         method: "PATCH",
-        body: JSON.stringify(data),
-      }),
+        body: JSON.stringify(payload),
+      });
+    },
     attachEvidence: (milestoneId: string, data: Partial<MilestoneEvidence>) =>
       request<MilestoneEvidence>(`/milestones/${milestoneId}/evidence`, {
         method: "POST",

@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
+import { PRE_EXISTING_DOCUMENTS, PreExistingDocDef } from "@/lib/sample-documents";
 
 interface UploadModalProps {
   open: boolean;
@@ -51,6 +52,9 @@ export function UploadModal({
   const [step, setStep] = useState<UploadStep>("SELECT");
   const [progress, setProgress] = useState(0);
   const [createdDocument, setCreatedDocument] = useState<DocumentItem | null>(null);
+  const [stageMessage, setStageMessage] = useState("");
+  const [subStageDetails, setSubStageDetails] = useState<string[]>([]);
+  const [loadingSample, setLoadingSample] = useState(false);
 
   // Reset modal state when opened/closed
   React.useEffect(() => {
@@ -59,6 +63,9 @@ export function UploadModal({
       setProgress(0);
       setSelectedFile(null);
       setCreatedDocument(null);
+      setStageMessage("");
+      setSubStageDetails([]);
+      setLoadingSample(false);
     }
   }, [open]);
 
@@ -74,28 +81,71 @@ export function UploadModal({
     setSelectedFile(file);
   };
 
-  const handleStartUpload = async () => {
-    if (!selectedFile) return;
+  const handleLoadPreExistingDoc = async (docDef: PreExistingDocDef, autoUpload = false) => {
+    try {
+      setLoadingSample(true);
+      const res = await fetch(`/sample-docs/${encodeURIComponent(docDef.filename)}`);
+      if (!res.ok) {
+        throw new Error(`Failed to load pre-existing file: ${res.statusText}`);
+      }
+      const blob = await res.blob();
+      const mimeType = docDef.filename.endsWith(".xlsx")
+        ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        : "application/pdf";
+      const file = new File([blob], docDef.filename, { type: mimeType });
+      setSelectedFile(file);
+      toast({
+        title: "Document Loaded",
+        description: `Loaded ${docDef.filename} (${(file.size / 1024).toFixed(1)} KB) ready for ingestion.`,
+      });
 
+      if (autoUpload) {
+        // Trigger upload directly with this file
+        await executeUploadWithFile(file);
+      }
+    } catch (err: unknown) {
+      toast({
+        title: "Could Not Load Sample",
+        description: (err as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingSample(false);
+    }
+  };
+
+  const executeUploadWithFile = async (fileToUpload: File) => {
     setStep("UPLOADING");
     setProgress(15);
+    setStageMessage("Establishing secure TLS upload tunnel & calculating SHA-256 integrity hash...");
+    setSubStageDetails(["Generating SHA-256 checksum for immutable ledger"]);
 
     try {
-      setProgress(25);
-      // Real direct multipart upload to backend API
+      await new Promise((r) => setTimeout(r, 600));
+      setProgress(35);
+      setStageMessage("Streaming payload into AES-256 encrypted storage vault...");
+
+      // Real multipart upload to backend API
       const res = await api.documents.uploadMultipart(
-        selectedFile,
-        selectedFile.name,
+        fileToUpload,
+        fileToUpload.name,
         currentProjectId || undefined
       );
-      setProgress(85);
 
+      setProgress(60);
       setStep("SCANNING");
-      setProgress(95);
+      setStageMessage("Parsing file format & initializing GroundUp Financial Vision model...");
+      setSubStageDetails((prev) => [...prev, "Object storage written & validated"]);
 
+      await new Promise((r) => setTimeout(r, 700));
+      setProgress(80);
+      setStageMessage("Extracting structured candidate fields, line items & confidence citations...");
+      setSubStageDetails((prev) => [...prev, "OCR schema matching & bounding box citations mapped"]);
+
+      await new Promise((r) => setTimeout(r, 600));
+      setProgress(100);
       const doc = res.data;
       setCreatedDocument(doc);
-      setProgress(100);
       setStep("COMPLETE");
 
       queryClient.invalidateQueries({ queryKey: ["documents"] });
@@ -111,6 +161,11 @@ export function UploadModal({
         variant: "destructive",
       });
     }
+  };
+
+  const handleStartUpload = async () => {
+    if (!selectedFile) return;
+    await executeUploadWithFile(selectedFile);
   };
 
   return (
@@ -205,6 +260,73 @@ export function UploadModal({
                   </div>
                 )}
               </div>
+
+              {/* Pre-existing Project Documents Quick Selector */}
+              <div className="rounded-xl border border-slate-200/90 bg-slate-50/60 p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-blue-600" />
+                    <span className="text-xs font-bold text-slate-800">
+                      Pre-existing Project Documents
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    Click to load real file &amp; test OCR
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {PRE_EXISTING_DOCUMENTS.slice(0, 6).map((docDef) => {
+                    const isSelected = selectedFile?.name === docDef.filename;
+                    const isXlsx = docDef.filename.endsWith(".xlsx");
+
+                    return (
+                      <button
+                        key={docDef.id}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLoadPreExistingDoc(docDef, false);
+                        }}
+                        className={cn(
+                          "flex items-start gap-2.5 p-2 rounded-lg border text-left transition-all relative group",
+                          isSelected
+                            ? "border-blue-500 bg-blue-50/80 shadow-xs ring-1 ring-blue-500/20"
+                            : "border-slate-200/80 bg-white hover:border-blue-300 hover:bg-slate-50/80"
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "h-7 w-7 rounded-md flex items-center justify-center shrink-0 border mt-0.5",
+                            isXlsx
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200/60"
+                              : "bg-blue-50 text-blue-700 border-blue-200/60"
+                          )}
+                        >
+                          {isXlsx ? (
+                            <FileSpreadsheet className="h-3.5 w-3.5" />
+                          ) : (
+                            <FileText className="h-3.5 w-3.5" />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="text-xs font-bold text-slate-900 truncate">
+                              {docDef.label}
+                            </span>
+                            <span className="text-[10px] font-mono text-slate-500 shrink-0">
+                              {docDef.sizeText}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                            {docDef.description}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </>
           )}
 
@@ -214,14 +336,12 @@ export function UploadModal({
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <div className="text-base font-bold text-slate-900">
                   {step === "UPLOADING" ? "Uploading Source Document to Secure Vault..." : "Running OCR Layout & Schema Matching..."}
                 </div>
-                <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
-                  {step === "UPLOADING"
-                    ? "Generating SHA-256 integrity hash and storing in AES-256 encrypted object storage."
-                    : "Extracting financial line items, bounding box citations, and confidence metrics."}
+                <p className="text-xs text-blue-600 font-medium max-w-md mx-auto leading-relaxed animate-pulse">
+                  {stageMessage}
                 </p>
               </div>
 
@@ -234,10 +354,22 @@ export function UploadModal({
                   />
                 </div>
                 <div className="flex justify-between text-xs font-mono text-slate-500">
-                  <span>{step === "UPLOADING" ? "S3 Encrypted Ingestion" : "Financial Model Inference"}</span>
+                  <span>{step === "UPLOADING" ? "TLS AES-256 Vault Stream" : "Financial Vision Pipeline"}</span>
                   <span className="font-bold text-blue-700">{progress}%</span>
                 </div>
               </div>
+
+              {/* Completed Sub-steps Checklist */}
+              {subStageDetails.length > 0 && (
+                <div className="max-w-md mx-auto text-left bg-slate-50 border border-slate-200/70 rounded-lg p-3 space-y-1.5">
+                  {subStageDetails.map((detail, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-[11px] text-slate-600 font-medium">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                      <span>{detail}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

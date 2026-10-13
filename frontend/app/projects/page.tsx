@@ -447,12 +447,12 @@ export default function ProjectsPortfolioPage() {
                     </div>
 
                     {/* Bottom Title & Address Overlaid */}
-                    <div className="absolute bottom-2.5 left-3.5 right-3.5 z-10 text-white">
-                      <h3 className="text-base font-bold leading-tight truncate">
+                    <div className="absolute bottom-2.5 left-3.5 right-3.5 z-10">
+                      <h3 className="text-base font-bold leading-tight !text-white truncate drop-shadow-md">
                         {project.name}
                       </h3>
-                      <p className="mt-0.5 flex items-center gap-1 text-[11px] text-slate-200/90 truncate">
-                        <MapPin className="h-3 w-3 shrink-0 text-slate-300" />
+                      <p className="mt-0.5 flex items-center gap-1 text-[11px] !text-slate-100 truncate drop-shadow-sm">
+                        <MapPin className="h-3 w-3 shrink-0 text-slate-200" />
                         <span className="truncate">{project.address}</span>
                       </p>
                     </div>

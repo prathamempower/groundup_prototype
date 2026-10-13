@@ -28,7 +28,7 @@ ModalOverlay.displayName = DialogPrimitive.Overlay.displayName;
 const ModalContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
-    maxWidth?: "sm" | "md" | "lg" | "xl";
+    maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "full";
   }
 >(({ className, children, maxWidth = "md", ...props }, ref) => {
   const maxWidthClass =
@@ -38,6 +38,12 @@ const ModalContent = React.forwardRef<
       ? "max-w-2xl"
       : maxWidth === "xl"
       ? "max-w-4xl"
+      : maxWidth === "2xl"
+      ? "max-w-5xl"
+      : maxWidth === "3xl"
+      ? "max-w-6xl"
+      : maxWidth === "full"
+      ? "max-w-[95vw] w-[95vw] h-[90vh]"
       : "max-w-[560px]"; // 560px default per design system
 
   return (

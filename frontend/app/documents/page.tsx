@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useQueries, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { DocumentItem, Project } from "@/lib/types";
@@ -26,6 +27,7 @@ import {
   AlertCircle,
   FileCheck,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
@@ -34,6 +36,7 @@ import { DocumentReviewDrawer } from "@/components/documents/document-review-dra
 import { QuarantineResolverModal } from "@/components/documents/quarantine-resolver-modal";
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton";
 import userNamesData from "@/lib/user-names.json";
+import { PRE_EXISTING_DOCUMENTS, PreExistingDocDef } from "@/lib/sample-documents";
 
 const userNamesMap = userNamesData as Record<string, string>;
 
@@ -55,6 +58,7 @@ function getUploaderName(doc: DocumentItem): string {
 type FilterTab = "ALL" | "NEEDS_REVIEW" | "REVIEWED" | "QUARANTINED" | "DUPLICATES";
 
 export default function DocumentsPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -151,6 +155,71 @@ export default function DocumentsPage() {
 
   // Find any misfiled quarantine document for the prominent alert banner
   const misfiledQuarantinedDoc = allDocuments.find((d) => d.ingestion_status === "QUARANTINED");
+
+  const [loadingSampleDoc, setLoadingSampleDoc] = useState<string | null>(null);
+
+  const handleQuickIngestSample = async (docDef: PreExistingDocDef) => {
+    try {
+      setLoadingSampleDoc(docDef.id);
+      toast({
+        title: "Fetching Document",
+        description: `Preparing ${docDef.filename} for ingestion...`,
+      });
+
+      const res = await fetch(`/sample-docs/${encodeURIComponent(docDef.filename)}`);
+      if (!res.ok) {
+        throw new Error(`Failed to load file from storage: ${res.statusText}`);
+      }
+      const blob = await res.blob();
+      const mimeType = docDef.filename.endsWith(".xlsx")
+        ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        : "application/pdf";
+      const file = new File([blob], docDef.filename, { type: mimeType });
+
+      // Find matching project id if possible
+      let targetProjId = currentProjectId;
+      if (!targetProjId && docDef.recommendedProjectName) {
+        const found = projects.find((p) =>
+          p.name.toLowerCase().includes(docDef.recommendedProjectName!.toLowerCase())
+        );
+        if (found) targetProjId = found.id;
+      }
+
+      toast({
+        title: "Uploading & Extracting",
+        description: `Running OCR layout analysis on ${docDef.filename}...`,
+      });
+
+      const uploadRes = await api.documents.uploadMultipart(
+        file,
+        file.name,
+        targetProjId || undefined
+      );
+
+      const createdDoc = uploadRes.data;
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+
+      toast({
+        title: "Document Ready",
+        description: `${createdDoc.original_filename} successfully processed with OCR proposals.`,
+      });
+
+      // Directly open review workbench!
+      if (targetProjId) {
+        router.push(`/projects/${targetProjId}/documents/${createdDoc.id}`);
+      } else {
+        router.push(`/documents/${createdDoc.id}`);
+      }
+    } catch (err: unknown) {
+      toast({
+        title: "Ingestion Failed",
+        description: (err as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingSampleDoc(null);
+    }
+  };
 
   const handleDownload = async (docId: string, filename: string) => {
     try {
@@ -501,7 +570,13 @@ export default function DocumentsPage() {
                               <div className="flex items-center gap-2">
                                 <span
                                   className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors cursor-pointer truncate max-w-[280px]"
-                                  onClick={() => setReviewingDocId(doc.id)}
+                                  onClick={() => {
+                                    if (currentProjectId) {
+                                      router.push(`/projects/${currentProjectId}/documents/${doc.id}`);
+                                    } else {
+                                      router.push(`/documents/${doc.id}`);
+                                    }
+                                  }}
                                   title={doc.original_filename}
                                 >
                                   {doc.original_filename}
@@ -604,7 +679,13 @@ export default function DocumentsPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setReviewingDocId(doc.id)}
+                                onClick={() => {
+                                  if (currentProjectId) {
+                                    router.push(`/projects/${currentProjectId}/documents/${doc.id}`);
+                                  } else {
+                                    router.push(`/documents/${doc.id}`);
+                                  }
+                                }}
                                 className="h-7 px-3 text-xs font-semibold text-blue-700 border-slate-200 hover:border-blue-300 hover:bg-blue-50/60"
                               >
                                 Review
@@ -637,7 +718,11 @@ export default function DocumentsPage() {
         projects={projects}
         currentProjectId={currentProjectId}
         onUploadSuccess={(newDoc) => {
-          setReviewingDocId(newDoc.id);
+          if (currentProjectId) {
+            router.push(`/projects/${currentProjectId}/documents/${newDoc.id}`);
+          } else {
+            router.push(`/documents/${newDoc.id}`);
+          }
         }}
       />
 

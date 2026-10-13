@@ -45,14 +45,10 @@ export default function AlertsPage() {
       <div className="px-6 max-w-7xl mx-auto space-y-6 pt-4">
         <PageHeader
           title="Alerts & Exceptions"
-          subtitle={
-            currentProject
-              ? `Active integrity monitors & exception workflows for ${currentProject.name}`
-              : "Project operational alerts, overruns, schedule variances, and data quality issues"
-          }
+          subtitle="Track and resolve project risks, variances, and data issues to keep the project on schedule and within budget."
           breadcrumbs={[
             {
-              label: "Home",
+              label: currentProject?.name || "Project",
               href: currentProjectId ? `/projects/${currentProjectId}/control-center` : "/projects",
             },
             { label: "Alerts & Exceptions" },
@@ -60,15 +56,23 @@ export default function AlertsPage() {
           statusBadge={
             openAlertsCount > 0
               ? {
-                  label: `${openAlertsCount} Open Exceptions`,
+                  label: `${openAlertsCount} Open`,
                   variant: "danger",
-                  icon: <AlertTriangle className="h-3.5 w-3.5" />,
                 }
               : {
                   label: "All Clear",
                   variant: "success",
                   icon: <ShieldCheck className="h-3.5 w-3.5" />,
                 }
+          }
+          primaryAction={
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-blue-700 transition-colors cursor-pointer"
+            >
+              <span className="text-base leading-none font-normal">+</span>
+              <span>Add Exception</span>
+            </button>
           }
         />
 

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Download, FileText } from "lucide-react";
 import { api } from "@/lib/api";
 import { DocumentItem, ExtractionField } from "@/lib/types";
+import { SpreadsheetViewer } from "./spreadsheet-viewer";
 
 interface DocumentViewerProps {
   document: DocumentItem;
@@ -12,23 +13,38 @@ interface DocumentViewerProps {
   onSelectField?: (fieldId: string) => void;
 }
 
-export function DocumentViewer({ document }: DocumentViewerProps) {
+export function DocumentViewer({ document, extractions, selectedFieldId }: DocumentViewerProps) {
   const download = useQuery({
     queryKey: ["document-download", document.id],
     queryFn: () => api.documents.getDownloadUrl(document.id),
     retry: false,
   });
-  const url = download.data?.data.download_url;
-  const isPdf = document.mime_type.toLowerCase().includes("pdf");
-  const isImage = document.mime_type.toLowerCase().startsWith("image/");
+  const rawUrl = download.data?.data.download_url;
+  const url = rawUrl
+    ? rawUrl.startsWith("http")
+      ? rawUrl
+      : `${process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1"}${rawUrl.replace(/^\/api\/v1/, "")}`
+    : undefined;
+  const isPdf = document.mime_type.toLowerCase().includes("pdf") || document.original_filename.toLowerCase().endsWith(".pdf");
+  const isImage = document.mime_type.toLowerCase().startsWith("image/") || /\.(png|jpe?g|webp)$/i.test(document.original_filename);
+  const isSpreadsheet =
+    document.mime_type.includes("spreadsheet") ||
+    document.mime_type.includes("excel") ||
+    document.mime_type.includes("csv") ||
+    /\.(xlsx|xls|csv)$/i.test(document.original_filename);
+
+  const selectedField = extractions?.find((e) => e.id === selectedFieldId);
 
   return (
     <section className="flex h-full min-h-[480px] flex-col overflow-hidden rounded-lg border border-border bg-surface">
-      <header className="flex min-h-12 items-center justify-between gap-3 border-b border-border px-4 py-2">
+      <header className="flex min-h-12 items-center justify-between gap-3 border-b border-border px-4 py-2 bg-white">
         <div className="flex min-w-0 items-center gap-2 text-sm text-text-primary">
           <FileText className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
           <span className="truncate font-medium" title={document.original_filename}>
             {document.original_filename}
+          </span>
+          <span className="text-xs text-slate-400 font-mono">
+            ({document.document_type})
           </span>
         </div>
         {url && (
@@ -44,20 +60,29 @@ export function DocumentViewer({ document }: DocumentViewerProps) {
         )}
       </header>
 
-      <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-subtle p-4">
+      <div className="flex min-h-0 flex-1 overflow-hidden bg-slate-950">
         {download.isLoading ? (
           <div className="h-full min-h-64 w-full animate-pulse rounded-md bg-border/50" aria-label="Loading document preview" />
         ) : download.error ? (
-          <p role="alert" className="max-w-md text-center text-sm text-danger">
+          <div role="alert" className="m-auto max-w-md text-center text-sm text-danger p-6">
             The original document could not be loaded. Try again or contact your organization administrator.
-          </p>
+          </div>
+        ) : url && isSpreadsheet ? (
+          <div className="w-full h-full">
+            <SpreadsheetViewer
+              url={url}
+              filename={document.original_filename}
+              highlightText={selectedField?.raw_value || selectedField?.normalized_value}
+              selectedFieldCitation={selectedField?.citation}
+            />
+          </div>
         ) : url && isPdf ? (
-          <iframe title={`Preview of ${document.original_filename}`} src={url} className="h-full min-h-[560px] w-full rounded-md bg-white" />
+          <iframe title={`Preview of ${document.original_filename}`} src={url} className="h-full min-h-[560px] w-full rounded-md bg-white border-0" />
         ) : url && isImage ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={url} alt={document.original_filename} className="max-h-full max-w-full object-contain" />
+          <img src={url} alt={document.original_filename} className="m-auto max-h-full max-w-full object-contain p-4" />
         ) : (
-          <div className="max-w-md text-center">
+          <div className="m-auto max-w-md text-center p-6 bg-white rounded-xl border border-slate-200">
             <FileText className="mx-auto h-8 w-8 text-text-muted" aria-hidden="true" />
             <p className="mt-3 text-sm font-medium text-text-primary">Preview is not available for this file type.</p>
             <p className="mt-1 text-sm text-text-secondary">

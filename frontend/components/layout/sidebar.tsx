@@ -84,12 +84,16 @@ export function Sidebar({
     ? getProjectNavItems(workspaceProjectId, effectiveRole)
     : [];
 
-  // Categorize navigation items cleanly into Core Operations, Finance & Control, and Settings
+  // Categorize navigation items cleanly into Operations, Finance & Control, Partners & Funding, and Settings
   const coreItemIds = ["control-center", "documents", "timeline", "submissions"];
-  const financeItemIds = ["budget", "reconciliation", "draws", "economics", "alerts"];
+  const financeItemIds = ["budget", "reconciliation", "draws", "economics"];
+  const partnerItemIds = ["partners"];
+  const alertsItemIds = ["alerts"];
 
   const coreNavItems = visibleNavItems.filter((i) => coreItemIds.includes(i.id));
   const financeNavItems = visibleNavItems.filter((i) => financeItemIds.includes(i.id));
+  const partnerNavItems = visibleNavItems.filter((i) => partnerItemIds.includes(i.id));
+  const alertsNavItems = visibleNavItems.filter((i) => alertsItemIds.includes(i.id));
   const bottomNavItems = visibleNavItems.filter((i) => i.id === "settings");
 
   const formatStageLabel = (stage?: string) => {
@@ -283,6 +287,106 @@ export function Sidebar({
               )}
               <div className="space-y-0.5">
                 {financeNavItems.map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
+                  const Icon = item.icon;
+
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      onClick={onCloseMobile}
+                      title={collapsed ? item.label : undefined}
+                      className={`group flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
+                        collapsed
+                          ? "h-9 w-9 mx-auto justify-center"
+                          : "gap-3 px-3 py-2"
+                      } ${
+                        isActive
+                          ? "bg-primary/10 text-primary font-semibold border border-primary/20 shadow-2xs"
+                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+                      }`}
+                    >
+                      <Icon
+                        className={`h-4 w-4 shrink-0 transition-colors ${
+                          isActive ? "text-primary" : "text-slate-400 group-hover:text-slate-600"
+                        }`}
+                      />
+
+                      {!collapsed && (
+                        <div className="flex flex-1 items-center justify-between overflow-hidden">
+                          <span className="truncate">{item.label}</span>
+                          {badgeCount > 0 && (
+                            <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-2xs">
+                              {badgeCount}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Collapsed view indicator badge dot */}
+                      {collapsed && badgeCount > 0 && (
+                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Section: Partners & Funding */}
+          {partnerNavItems.length > 0 && (
+            <div>
+              {!collapsed && (
+                <div className="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Partners & Funding
+                </div>
+              )}
+              <div className="space-y-0.5">
+                {partnerNavItems.map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  const Icon = item.icon;
+
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      onClick={onCloseMobile}
+                      title={collapsed ? item.label : undefined}
+                      className={`group flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
+                        collapsed
+                          ? "h-9 w-9 mx-auto justify-center"
+                          : "gap-3 px-3 py-2"
+                      } ${
+                        isActive
+                          ? "bg-primary/10 text-primary font-semibold border border-primary/20 shadow-2xs"
+                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+                      }`}
+                    >
+                      <Icon
+                        className={`h-4 w-4 shrink-0 transition-colors ${
+                          isActive ? "text-primary" : "text-slate-400 group-hover:text-slate-600"
+                        }`}
+                      />
+
+                      {!collapsed && (
+                        <div className="flex flex-1 items-center justify-between overflow-hidden">
+                          <span className="truncate">{item.label}</span>
+                        </div>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Section: Alerts & Exceptions */}
+          {alertsNavItems.length > 0 && (
+            <div>
+              <div className="space-y-0.5">
+                {alertsNavItems.map((item) => {
                   const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
                   const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
                   const Icon = item.icon;

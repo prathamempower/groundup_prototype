@@ -5,14 +5,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { DocumentItem, ExtractionField } from "@/lib/types";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerBody,
-  DrawerFooter,
-} from "@/components/ui/drawer";
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  ModalDescription,
+  ModalFooter,
+} from "@/components/ui/modal";
 import { DocumentViewer } from "./document-viewer";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
@@ -170,14 +169,14 @@ export function DocumentReviewDrawer({
     : 95;
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent width="split-view" className="flex flex-col h-full bg-surface">
-        {/* Drawer Header */}
-        <DrawerHeader className="border-b border-border bg-subtle/40 px-6 py-4 flex-shrink-0">
+    <Modal open={open} onOpenChange={onOpenChange}>
+      <ModalContent maxWidth="full" className="p-0 overflow-hidden flex flex-col h-[90vh] max-h-[92vh] rounded-2xl bg-white border border-slate-200/90 shadow-2xl">
+        {/* Modal Header */}
+        <ModalHeader className="border-b border-slate-200/80 bg-slate-50/70 px-6 py-3.5 flex-shrink-0">
           <div className="flex items-center justify-between pr-8">
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <span className="rounded bg-primary-subtle text-primary font-mono px-2 py-0.5 text-caption font-semibold">
+                <span className="rounded bg-blue-50 text-blue-700 border border-blue-200/70 font-mono px-2 py-0.5 text-[10px] font-bold tracking-tight">
                   OCR REVIEW WORKBENCH
                 </span>
                 {document && (
@@ -192,44 +191,44 @@ export function DocumentReviewDrawer({
                   />
                 )}
               </div>
-              <DrawerTitle className="text-section font-bold text-text-primary">
+              <ModalTitle className="text-base font-bold text-slate-900 tracking-tight">
                 {document?.original_filename || "Review Document"}
-              </DrawerTitle>
-              <DrawerDescription className="text-caption text-text-secondary">
+              </ModalTitle>
+              <ModalDescription className="text-xs text-slate-500 font-normal">
                 Verify AI candidate extractions against the source document. Accepted values become immutable evidence.
-              </DrawerDescription>
+              </ModalDescription>
             </div>
 
             {/* Quick stats summary */}
-            <div className="hidden sm:flex items-center gap-4 bg-surface p-2.5 rounded-md border border-border">
-              <div className="text-center px-2">
-                <div className="text-caption text-text-muted">OCR Confidence</div>
-                <div className="text-sm font-bold text-emerald-600 font-mono">{avgConfidence}%</div>
+            <div className="hidden sm:flex items-center gap-4 bg-white px-3.5 py-1.5 rounded-xl border border-slate-200/80 shadow-2xs">
+              <div className="text-center px-1.5">
+                <div className="text-[10px] uppercase font-bold text-slate-400">OCR Confidence</div>
+                <div className="text-xs font-bold text-emerald-600 font-mono">{avgConfidence}%</div>
               </div>
-              <div className="h-6 w-px bg-border" />
-              <div className="text-center px-2">
-                <div className="text-caption text-text-muted">Pending Review</div>
-                <div className="text-sm font-bold text-amber-600 font-mono">{proposedCount}</div>
+              <div className="h-6 w-px bg-slate-200" />
+              <div className="text-center px-1.5">
+                <div className="text-[10px] uppercase font-bold text-slate-400">Pending Review</div>
+                <div className="text-xs font-bold text-amber-600 font-mono">{proposedCount}</div>
               </div>
-              <div className="h-6 w-px bg-border" />
-              <div className="text-center px-2">
-                <div className="text-caption text-text-muted">Accepted</div>
-                <div className="text-sm font-bold text-primary font-mono">{acceptedCount} / {totalFields}</div>
+              <div className="h-6 w-px bg-slate-200" />
+              <div className="text-center px-1.5">
+                <div className="text-[10px] uppercase font-bold text-slate-400">Accepted</div>
+                <div className="text-xs font-bold text-blue-600 font-mono">{acceptedCount} / {totalFields}</div>
               </div>
             </div>
           </div>
-        </DrawerHeader>
+        </ModalHeader>
 
-        {/* Drawer Body - Split View Grid */}
-        <DrawerBody className="flex-1 p-0 overflow-hidden flex flex-col md:flex-row bg-background">
+        {/* Modal Body - Split View Grid */}
+        <div className="flex-1 p-0 overflow-hidden flex flex-col md:flex-row bg-slate-100/50">
           {isLoadingDoc || isLoadingExtractions || !document ? (
-            <div className="flex-1 flex items-center justify-center p-12 text-body text-text-muted">
+            <div className="flex-1 flex items-center justify-center p-12 text-sm text-slate-400">
               Loading document and extraction models...
             </div>
           ) : (
             <>
-              {/* Left Side: Document Viewer (60% width) */}
-              <div className="flex-1 h-full p-4 overflow-hidden border-r border-border bg-slate-950 flex flex-col">
+              {/* Left Side: Document Viewer */}
+              <div className="flex-1 h-full p-4 overflow-hidden border-r border-slate-200/80 bg-slate-900 flex flex-col">
                 <DocumentViewer
                   document={document}
                   extractions={extractions}
@@ -505,10 +504,10 @@ export function DocumentReviewDrawer({
               </div>
             </>
           )}
-        </DrawerBody>
+        </div>
 
-        {/* Drawer Footer */}
-        <DrawerFooter className="flex items-center justify-between border-t border-border px-6 py-3.5 bg-subtle/30 flex-shrink-0">
+        {/* Modal Footer */}
+        <ModalFooter className="flex items-center justify-between border-t border-slate-200/80 px-6 py-3.5 bg-slate-50/70 flex-shrink-0">
           <div className="flex items-center gap-2">
             <Button
               variant="secondary"
@@ -516,17 +515,19 @@ export function DocumentReviewDrawer({
               onClick={() => acceptAllMutation.mutate()}
               isLoading={acceptAllMutation.isPending}
               disabled={proposedCount === 0}
+              className="rounded-lg h-8.5 px-3 text-xs font-semibold shadow-2xs"
             >
-              <CheckCheck className="h-4 w-4 mr-1.5" />
+              <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
               Accept All Proposed ({proposedCount})
             </Button>
           </div>
 
           <div className="flex items-center gap-2">
             <Button
-              variant="secondary"
+              variant="outline"
               size="sm"
               onClick={() => onOpenChange(false)}
+              className="rounded-lg h-8.5 px-3 text-xs font-semibold text-slate-700 shadow-2xs"
             >
               Close
             </Button>
@@ -535,13 +536,14 @@ export function DocumentReviewDrawer({
               size="sm"
               onClick={() => completeReviewMutation.mutate()}
               isLoading={completeReviewMutation.isPending}
+              className="rounded-lg h-8.5 px-3.5 text-xs font-semibold shadow-xs"
             >
-              <FileCheck className="h-4 w-4 mr-1.5" />
+              <FileCheck className="h-3.5 w-3.5 mr-1.5" />
               Complete Human Review & Publish
             </Button>
           </div>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 }

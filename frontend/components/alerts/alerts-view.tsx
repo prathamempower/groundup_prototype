@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { AlertItem, DataQualityIssue, UserRole } from "@/lib/types";
 import { formatDate } from "@/lib/format";
@@ -13,29 +12,23 @@ import { ResolveDqiModal } from "@/components/settings/resolve-dqi-modal";
 import {
   AlertTriangle,
   AlertOctagon,
-  Info,
   CheckCircle2,
   ShieldAlert,
-  ArrowUpRight,
-  ShieldCheck,
-  FileCheck,
-  Calendar,
-  Layers,
-  Wrench,
   Search,
-  Filter,
-  Check,
-  Clock,
-  Sparkles,
-  ExternalLink,
   ChevronRight,
-  XCircle,
   FileText,
+  Calendar,
+  Building,
   DollarSign,
-  TrendingDown,
-  RefreshCw,
+  FileQuestion,
+  Landmark,
+  ShieldCheck,
+  Plus,
+  BarChart3,
+  HelpCircle,
 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface AlertsViewProps {
   projectId: string;
@@ -43,702 +36,586 @@ interface AlertsViewProps {
   userRole: UserRole;
 }
 
+interface NormalizedException {
+  id: string;
+  title: string;
+  description: string;
+  category: "Budget" | "Schedule" | "Finance" | "Draws" | "Compliance" | "Reconciliation" | "Documentation" | "Data Quality" | "Reporting";
+  severity: "CRITICAL" | "WARNING" | "INFO";
+  status: "Open" | "Resolved" | "Waived";
+  detectedAt: string;
+  ownerName: string;
+  ownerRole: string;
+  ownerInitials: string;
+  ownerAvatarColor: string;
+  originalAlert?: AlertItem;
+  originalDqi?: DataQualityIssue;
+}
+
 export function AlertsView({ projectId, projectName, userRole }: AlertsViewProps) {
   const queryClient = useQueryClient();
 
-  // Active Tab
-  const [activeTab, setActiveTab] = useState<"ACTIVE" | "DATA_QUALITY" | "ARCHIVE">("ACTIVE");
+  // Tab Filter
+  const [activeTab, setActiveTab] = useState<"ALL" | "CRITICAL" | "WARNINGS" | "INTEGRITY" | "RESOLVED">("ALL");
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState("");
-  const [severityFilter, setSeverityFilter] = useState<"ALL" | "CRITICAL" | "HIGH" | "WARNING" | "MEDIUM" | "LOW" | "INFO">("ALL");
-  const [typeFilter, setTypeFilter] = useState<string>("ALL");
+  const [severityFilter, setSeverityFilter] = useState<string>("ALL");
+  const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
 
-  // Selected modals state
+  // Modals state
   const [resolvingAlert, setResolvingAlert] = useState<AlertItem | null>(null);
   const [waivingAlert, setWaivingAlert] = useState<AlertItem | null>(null);
   const [escalatingAlert, setEscalatingAlert] = useState<AlertItem | null>(null);
   const [resolvingDqi, setResolvingDqi] = useState<DataQualityIssue | null>(null);
 
   // Queries
-  const {
-    data: alertsData,
-    isLoading: isLoadingAlerts,
-    refetch: refetchAlerts,
-    isRefetching: isRefetchingAlerts,
-  } = useQuery({
+  const { data: alertsData, isLoading: isLoadingAlerts } = useQuery({
     queryKey: ["alerts", projectId],
     queryFn: () => api.alerts.list(projectId),
     enabled: Boolean(projectId),
   });
 
-  const {
-    data: dqiData,
-    isLoading: isLoadingDqi,
-    refetch: refetchDqi,
-    isRefetching: isRefetchingDqi,
-  } = useQuery({
+  const { data: dqiData, isLoading: isLoadingDqi } = useQuery({
     queryKey: ["data-quality-issues", projectId],
     queryFn: () => api.alerts.getDataQualityIssues(projectId),
-    enabled: Boolean(projectId) && ["OWNER", "CFO", "PM"].includes(userRole),
+    enabled: Boolean(projectId),
   });
-
-  // Filtered Alert buckets
-  const openAlerts = useMemo(() => {
-    const list = alertsData?.data || [];
-    return list.filter((a) => a.status === "OPEN" || a.status === ("ESCALATED" as unknown));
-  }, [alertsData?.data]);
-
-  const closedAlerts = useMemo(() => {
-    const list = alertsData?.data || [];
-    return list.filter((a) => a.status === "RESOLVED" || a.status === "WAIVED");
-  }, [alertsData?.data]);
-
-  const openDqi = useMemo(() => {
-    const list = dqiData?.data || [];
-    return list.filter((d) => d.status === "OPEN");
-  }, [dqiData?.data]);
 
   // Role permissions
   const canWaive = ["OWNER", "CFO"].includes(userRole);
   const canEscalate = ["OWNER", "CFO", "PM"].includes(userRole);
   const canResolve = ["OWNER", "CFO", "PM", "GC"].includes(userRole);
-  const canAccessDqi = ["OWNER", "CFO", "PM"].includes(userRole);
 
-  // Unique alert types for filter dropdown
-  const uniqueAlertTypes = useMemo(() => {
-    const list = alertsData?.data || [];
-    const types = new Set<string>();
-    list.forEach((a) => {
-      // alert_type or title breakdown
-      const typeKey = (a as unknown as { alert_type?: string }).alert_type;
-      if (typeKey) types.add(typeKey);
+  // Normalize all alerts & DQIs into unified table exceptions
+  const allExceptions: NormalizedException[] = useMemo(() => {
+    const alerts = alertsData?.data || [];
+    const dqis = dqiData?.data || [];
+
+    const ownerColorMap: Record<string, { initials: string; role: string; color: string }> = {
+      "Marcus Vance": { initials: "MV", role: "Owner", color: "bg-slate-900 text-white" },
+      "Sarah Lin": { initials: "SL", role: "CFO", color: "bg-blue-100 text-blue-700" },
+      "David Ross": { initials: "DR", role: "PM", color: "bg-emerald-100 text-emerald-700" },
+      "Frank Miller": { initials: "FM", role: "GC", color: "bg-amber-100 text-amber-700" },
+      "Elena Rostova": { initials: "ER", role: "Investor", color: "bg-purple-100 text-purple-700" },
+    };
+
+    const getOwnerMeta = (nameStr?: string) => {
+      const defaultName = nameStr || "Marcus Vance";
+      for (const [key, val] of Object.entries(ownerColorMap)) {
+        if (defaultName.toLowerCase().includes(key.toLowerCase())) {
+          return { name: key, ...val };
+        }
+      }
+      return {
+        name: defaultName,
+        initials: defaultName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase(),
+        role: "Project Member",
+        color: "bg-slate-800 text-white",
+      };
+    };
+
+    const list: NormalizedException[] = [];
+
+    // Map Alerts
+    alerts.forEach((alert) => {
+      let category: NormalizedException["category"] = "Budget";
+      const titleLower = alert.title.toLowerCase();
+      if (titleLower.includes("milestone") || titleLower.includes("schedule")) category = "Schedule";
+      else if (titleLower.includes("cash") || titleLower.includes("deposit")) category = "Finance";
+      else if (titleLower.includes("draw")) category = "Draws";
+      else if (titleLower.includes("lien") || titleLower.includes("compliance")) category = "Compliance";
+      else if (titleLower.includes("reconciliation") || titleLower.includes("transfer")) category = "Reconciliation";
+      else if (titleLower.includes("document") || titleLower.includes("occupancy")) category = "Documentation";
+      else if (titleLower.includes("report") || titleLower.includes("investor")) category = "Reporting";
+
+      let sev: "CRITICAL" | "WARNING" | "INFO" = "INFO";
+      if (alert.severity === "DANGER" || (alert.severity as string) === "CRITICAL") sev = "CRITICAL";
+      else if (alert.severity === "WARNING" || (alert.severity as string) === "HIGH") sev = "WARNING";
+
+      const ownerMeta = getOwnerMeta(alert.owner);
+
+      list.push({
+        id: `alert-${alert.id}`,
+        title: alert.title,
+        description: alert.description,
+        category,
+        severity: sev,
+        status: alert.status === "RESOLVED" ? "Resolved" : alert.status === "WAIVED" ? "Waived" : "Open",
+        detectedAt: alert.created_at,
+        ownerName: ownerMeta.name,
+        ownerRole: ownerMeta.role,
+        ownerInitials: ownerMeta.initials,
+        ownerAvatarColor: ownerMeta.color,
+        originalAlert: alert,
+      });
     });
-    return Array.from(types);
-  }, [alertsData?.data]);
 
-  // Filtered lists based on search & severity
-  const filteredActiveAlerts = useMemo(() => {
-    return openAlerts.filter((a) => {
-      const matchesSearch =
-        searchQuery === "" ||
-        a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.owner.toLowerCase().includes(searchQuery.toLowerCase());
-
-      const normalizedSeverity = a.severity.toUpperCase();
-      const matchesSeverity =
-        severityFilter === "ALL" ||
-        normalizedSeverity === severityFilter ||
-        (severityFilter === "HIGH" && normalizedSeverity === "DANGER") ||
-        (severityFilter === "CRITICAL" && normalizedSeverity === "DANGER");
-
-      const alertType = (a as unknown as { alert_type?: string }).alert_type;
-      const matchesType = typeFilter === "ALL" || alertType === typeFilter;
-
-      return matchesSearch && matchesSeverity && matchesType;
+    // Map DQIs
+    dqis.forEach((dqi) => {
+      const ownerMeta = getOwnerMeta(dqi.owner);
+      list.push({
+        id: `dqi-${dqi.id}`,
+        title: dqi.issue_type.replace(/_/g, " "),
+        description: dqi.description || `Integrity flag detected on ${dqi.affected_entity_type}`,
+        category: "Data Quality",
+        severity: dqi.severity === "HIGH" ? "CRITICAL" : dqi.severity === "MEDIUM" ? "WARNING" : "INFO",
+        status: dqi.status === "RESOLVED" ? "Resolved" : dqi.status === "WAIVED" ? "Waived" : "Open",
+        detectedAt: dqi.detected_at,
+        ownerName: ownerMeta.name,
+        ownerRole: ownerMeta.role,
+        ownerInitials: ownerMeta.initials,
+        ownerAvatarColor: ownerMeta.color,
+        originalDqi: dqi,
+      });
     });
-  }, [openAlerts, searchQuery, severityFilter, typeFilter]);
 
-  const filteredDqiList = useMemo(() => {
-    return openDqi.filter((d) => {
-      const matchesSearch =
-        searchQuery === "" ||
-        d.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        d.issue_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        d.affected_entity_type.toLowerCase().includes(searchQuery.toLowerCase());
+    return list;
+  }, [alertsData?.data, dqiData?.data]);
 
-      const matchesSeverity =
-        severityFilter === "ALL" || d.severity.toUpperCase() === severityFilter;
+  // Counts
+  const criticalCount = allExceptions.filter((e) => e.severity === "CRITICAL" && e.status === "Open").length;
+  const warningCount = allExceptions.filter((e) => e.severity === "WARNING" && e.status === "Open").length;
+  const integrityCount = allExceptions.filter((e) => e.category === "Data Quality" && e.status === "Open").length;
+  const resolvedCount = allExceptions.filter((e) => e.status === "Resolved" || e.status === "Waived").length;
 
-      return matchesSearch && matchesSeverity;
+  // Filtered list
+  const filteredExceptions = useMemo(() => {
+    return allExceptions.filter((item) => {
+      // Tab filter
+      if (activeTab === "CRITICAL" && (item.severity !== "CRITICAL" || item.status !== "Open")) return false;
+      if (activeTab === "WARNINGS" && (item.severity !== "WARNING" || item.status !== "Open")) return false;
+      if (activeTab === "INTEGRITY" && (item.category !== "Data Quality" || item.status !== "Open")) return false;
+      if (activeTab === "RESOLVED" && item.status !== "Resolved" && item.status !== "Waived") return false;
+
+      // Search query
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matches =
+          item.title.toLowerCase().includes(q) ||
+          item.description.toLowerCase().includes(q) ||
+          item.category.toLowerCase().includes(q) ||
+          item.ownerName.toLowerCase().includes(q);
+        if (!matches) return false;
+      }
+
+      // Severity dropdown
+      if (severityFilter !== "ALL" && item.severity !== severityFilter) return false;
+
+      // Category dropdown
+      if (categoryFilter !== "ALL" && item.category !== categoryFilter) return false;
+
+      return true;
     });
-  }, [openDqi, searchQuery, severityFilter]);
+  }, [allExceptions, activeTab, searchQuery, severityFilter, categoryFilter]);
 
-  const filteredArchiveAlerts = useMemo(() => {
-    return closedAlerts.filter((a) => {
-      const matchesSearch =
-        searchQuery === "" ||
-        a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (a.resolution_note && a.resolution_note.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (a.waived_reason && a.waived_reason.toLowerCase().includes(searchQuery.toLowerCase()));
+  // Unique categories for filter
+  const uniqueCategories = useMemo(() => {
+    const set = new Set<string>();
+    allExceptions.forEach((e) => set.add(e.category));
+    return Array.from(set);
+  }, [allExceptions]);
 
-      const matchesSeverity =
-        severityFilter === "ALL" || a.severity.toUpperCase() === severityFilter;
-
-      return matchesSearch && matchesSeverity;
-    });
-  }, [closedAlerts, searchQuery, severityFilter]);
-
-  // Refresh handler
-  const handleRefresh = () => {
-    refetchAlerts();
-    if (canAccessDqi) refetchDqi();
+  const getExceptionIcon = (item: NormalizedException) => {
+    switch (item.category) {
+      case "Budget":
+        return <FileText className="h-4 w-4 text-rose-500" />;
+      case "Schedule":
+        return <Calendar className="h-4 w-4 text-blue-500" />;
+      case "Finance":
+        return <Landmark className="h-4 w-4 text-blue-500" />;
+      case "Draws":
+        return <DollarSign className="h-4 w-4 text-amber-500" />;
+      case "Compliance":
+        return <FileText className="h-4 w-4 text-rose-500" />;
+      case "Reconciliation":
+        return <Landmark className="h-4 w-4 text-amber-500" />;
+      case "Documentation":
+        return <FileText className="h-4 w-4 text-rose-500" />;
+      case "Data Quality":
+        return <FileQuestion className="h-4 w-4 text-amber-500" />;
+      case "Reporting":
+        return <BarChart3 className="h-4 w-4 text-blue-500" />;
+      default:
+        return <AlertTriangle className="h-4 w-4 text-slate-400" />;
+    }
   };
-
-  const isRefreshing = isRefetchingAlerts || isRefetchingDqi;
 
   return (
     <div className="space-y-6">
-      {/* Overview Metric Cards */}
+      {/* 4 Top KPI Summary Cards matching Screenshot */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1: Critical & Active Exceptions */}
-        <div className="rounded-xl border border-border bg-surface p-5 shadow-xs hover:border-danger/40 transition-colors">
-          <div className="flex items-center justify-between">
-            <span className="text-caption font-semibold tracking-wide uppercase text-text-muted">
-              Active Exceptions
-            </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-danger-subtle text-danger shadow-xs">
-              <AlertOctagon className="h-4 w-4" />
-            </span>
+        {/* Critical Exceptions */}
+        <div
+          onClick={() => setActiveTab("CRITICAL")}
+          className={cn(
+            "rounded-2xl border bg-white p-5 shadow-xs transition-all cursor-pointer flex items-center justify-between group hover:shadow-md",
+            activeTab === "CRITICAL" ? "border-rose-300 ring-2 ring-rose-100" : "border-slate-200/90 hover:border-rose-200"
+          )}
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-600 border border-rose-100/80 shadow-2xs shrink-0">
+              <AlertOctagon className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-2xl font-extrabold text-slate-900 tabular-nums">
+                {criticalCount}
+              </div>
+              <div className="text-xs font-bold text-slate-800">
+                Critical Exceptions
+              </div>
+              <div className="text-[11px] text-slate-400 font-medium">
+                Require immediate action
+              </div>
+            </div>
           </div>
-          <div className="flex items-baseline gap-2 mt-3">
-            <span className="text-3xl font-extrabold text-danger tabular-nums">
-              {openAlerts.length}
-            </span>
-            <span className="text-caption text-text-muted font-medium">unresolved</span>
-          </div>
-          <div className="mt-2 flex items-center gap-1.5 text-caption text-text-secondary">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-danger animate-pulse" />
-            <span>Blocks draw approvals and certification</span>
-          </div>
+          <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition-all" />
         </div>
 
-        {/* Metric 2: High Severity */}
-        <div className="rounded-xl border border-border bg-surface p-5 shadow-xs hover:border-warning/40 transition-colors">
-          <div className="flex items-center justify-between">
-            <span className="text-caption font-semibold tracking-wide uppercase text-text-muted">
-              High / Warning
-            </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-warning-subtle text-warning shadow-xs">
-              <AlertTriangle className="h-4 w-4" />
-            </span>
+        {/* Elevated Warnings */}
+        <div
+          onClick={() => setActiveTab("WARNINGS")}
+          className={cn(
+            "rounded-2xl border bg-white p-5 shadow-xs transition-all cursor-pointer flex items-center justify-between group hover:shadow-md",
+            activeTab === "WARNINGS" ? "border-amber-300 ring-2 ring-amber-100" : "border-slate-200/90 hover:border-amber-200"
+          )}
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600 border border-amber-100/80 shadow-2xs shrink-0">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-2xl font-extrabold text-slate-900 tabular-nums">
+                {warningCount}
+              </div>
+              <div className="text-xs font-bold text-slate-800">
+                Elevated Warnings
+              </div>
+              <div className="text-[11px] text-slate-400 font-medium">
+                Need review
+              </div>
+            </div>
           </div>
-          <div className="flex items-baseline gap-2 mt-3">
-            <span className="text-3xl font-extrabold text-warning tabular-nums">
-              {openAlerts.filter((a) => a.severity === "WARNING" || (a.severity as string) === "HIGH").length}
-            </span>
-            <span className="text-caption text-text-muted font-medium">elevated risk</span>
-          </div>
-          <div className="mt-2 text-caption text-text-secondary">
-            Requires engineering or cost review
-          </div>
+          <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition-all" />
         </div>
 
-        {/* Metric 3: Data Quality Issues */}
-        <div className="rounded-xl border border-border bg-surface p-5 shadow-xs hover:border-primary/40 transition-colors">
-          <div className="flex items-center justify-between">
-            <span className="text-caption font-semibold tracking-wide uppercase text-text-muted">
-              Data Quality Issues
-            </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-subtle text-primary shadow-xs">
-              <ShieldAlert className="h-4 w-4" />
-            </span>
+        {/* Integrity Flags */}
+        <div
+          onClick={() => setActiveTab("INTEGRITY")}
+          className={cn(
+            "rounded-2xl border bg-white p-5 shadow-xs transition-all cursor-pointer flex items-center justify-between group hover:shadow-md",
+            activeTab === "INTEGRITY" ? "border-blue-300 ring-2 ring-blue-100" : "border-slate-200/90 hover:border-blue-200"
+          )}
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100/80 shadow-2xs shrink-0">
+              <ShieldAlert className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-2xl font-extrabold text-slate-900 tabular-nums">
+                {integrityCount}
+              </div>
+              <div className="text-xs font-bold text-slate-800">
+                Integrity Flags
+              </div>
+              <div className="text-[11px] text-slate-400 font-medium">
+                Data or documentation gaps
+              </div>
+            </div>
           </div>
-          <div className="flex items-baseline gap-2 mt-3">
-            <span className="text-3xl font-extrabold text-text-primary tabular-nums">
-              {canAccessDqi ? openDqi.length : "—"}
-            </span>
-            <span className="text-caption text-text-muted font-medium">integrity flags</span>
-          </div>
-          <div className="mt-2 text-caption text-text-secondary">
-            Missing receipts or unmapped spend records
-          </div>
+          <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition-all" />
         </div>
 
-        {/* Metric 4: Resolution Archive */}
-        <div className="rounded-xl border border-border bg-surface p-5 shadow-xs hover:border-success/40 transition-colors">
-          <div className="flex items-center justify-between">
-            <span className="text-caption font-semibold tracking-wide uppercase text-text-muted">
-              Audited History
-            </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-success-subtle text-success shadow-xs">
-              <CheckCircle2 className="h-4 w-4" />
-            </span>
+        {/* Resolved */}
+        <div
+          onClick={() => setActiveTab("RESOLVED")}
+          className={cn(
+            "rounded-2xl border bg-white p-5 shadow-xs transition-all cursor-pointer flex items-center justify-between group hover:shadow-md",
+            activeTab === "RESOLVED" ? "border-emerald-300 ring-2 ring-emerald-100" : "border-slate-200/90 hover:border-emerald-200"
+          )}
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100/80 shadow-2xs shrink-0">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-2xl font-extrabold text-slate-900 tabular-nums">
+                {resolvedCount}
+              </div>
+              <div className="text-xs font-bold text-slate-800">
+                Resolved
+              </div>
+              <div className="text-[11px] text-slate-400 font-medium">
+                Closed in this project
+              </div>
+            </div>
           </div>
-          <div className="flex items-baseline gap-2 mt-3">
-            <span className="text-3xl font-extrabold text-success tabular-nums">
-              {closedAlerts.length}
-            </span>
-            <span className="text-caption text-text-muted font-medium">resolved or waived</span>
-          </div>
-          <div className="mt-2 text-caption text-text-secondary">
-            Full compliance audit trail recorded
-          </div>
+          <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition-all" />
         </div>
       </div>
 
-      {/* Main Filter & Tab Bar */}
-      <div className="rounded-xl border border-border bg-surface p-4 shadow-xs space-y-4">
-        {/* Row 1: Tabs + Refresh */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
-          <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-border bg-subtle/50 p-1 text-caption">
+      {/* Main Table Container */}
+      <div className="rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden">
+        {/* Filter & Search Header Row */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 border-b border-slate-200/80">
+          {/* Horizontal Text Tabs */}
+          <div className="flex items-center gap-6 overflow-x-auto text-xs font-semibold">
             <button
-              onClick={() => setActiveTab("ACTIVE")}
-              className={`flex items-center gap-2 rounded-md px-3.5 py-1.5 font-medium transition-all ${
-                activeTab === "ACTIVE"
-                  ? "bg-surface text-text-primary font-semibold shadow-xs"
-                  : "text-text-muted hover:text-text-primary"
-              }`}
+              onClick={() => setActiveTab("ALL")}
+              className={cn(
+                "pb-1 transition-all whitespace-nowrap cursor-pointer border-b-2",
+                activeTab === "ALL"
+                  ? "border-blue-600 text-blue-600 font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-900"
+              )}
             >
-              <AlertOctagon className="h-3.5 w-3.5 text-danger" />
-              <span>Active Exceptions</span>
-              <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
-                activeTab === "ACTIVE" ? "bg-danger text-white" : "bg-danger-subtle text-danger"
-              }`}>
-                {openAlerts.length}
-              </span>
+              All ({allExceptions.length})
             </button>
 
-            {canAccessDqi && (
-              <button
-                onClick={() => setActiveTab("DATA_QUALITY")}
-                className={`flex items-center gap-2 rounded-md px-3.5 py-1.5 font-medium transition-all ${
-                  activeTab === "DATA_QUALITY"
-                    ? "bg-surface text-text-primary font-semibold shadow-xs"
-                    : "text-text-muted hover:text-text-primary"
-                }`}
-              >
-                <ShieldAlert className="h-3.5 w-3.5 text-warning" />
-                <span>Data Quality Issues</span>
-                <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
-                  activeTab === "DATA_QUALITY" ? "bg-warning text-white" : "bg-warning-subtle text-warning"
-                }`}>
-                  {openDqi.length}
-                </span>
-              </button>
-            )}
+            <button
+              onClick={() => setActiveTab("CRITICAL")}
+              className={cn(
+                "pb-1 flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer border-b-2",
+                activeTab === "CRITICAL"
+                  ? "border-rose-600 text-rose-600 font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-900"
+              )}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+              <span>Critical ({criticalCount})</span>
+            </button>
 
             <button
-              onClick={() => setActiveTab("ARCHIVE")}
-              className={`flex items-center gap-2 rounded-md px-3.5 py-1.5 font-medium transition-all ${
-                activeTab === "ARCHIVE"
-                  ? "bg-surface text-text-primary font-semibold shadow-xs"
-                  : "text-text-muted hover:text-text-primary"
-              }`}
+              onClick={() => setActiveTab("WARNINGS")}
+              className={cn(
+                "pb-1 flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer border-b-2",
+                activeTab === "WARNINGS"
+                  ? "border-amber-600 text-amber-600 font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-900"
+              )}
             >
-              <CheckCircle2 className="h-3.5 w-3.5 text-success" />
-              <span>Audit Archive</span>
-              <span className="rounded-full bg-subtle px-1.5 py-0.2 text-[10px] font-bold text-text-muted border border-border">
-                {closedAlerts.length}
-              </span>
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+              <span>Warnings ({warningCount})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("INTEGRITY")}
+              className={cn(
+                "pb-1 flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer border-b-2",
+                activeTab === "INTEGRITY"
+                  ? "border-blue-600 text-blue-600 font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-900"
+              )}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+              <span>Integrity ({integrityCount})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("RESOLVED")}
+              className={cn(
+                "pb-1 flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer border-b-2",
+                activeTab === "RESOLVED"
+                  ? "border-emerald-600 text-emerald-600 font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-900"
+              )}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span>Resolved ({resolvedCount})</span>
             </button>
           </div>
 
-          {/* Refresh action */}
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-caption font-medium text-text-secondary hover:bg-subtle hover:text-text-primary transition-colors disabled:opacity-50 self-end sm:self-auto"
-            title="Refresh alerts from server"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-primary" : ""}`} />
-            <span>{isRefreshing ? "Checking rules..." : "Re-evaluate Rules"}</span>
-          </button>
-        </div>
-
-        {/* Row 2: Search & Severity Filters */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search exceptions by title, category, owner, or vendor..."
-              className="w-full rounded-lg border border-border bg-surface pl-9 pr-3 py-1.5 text-caption text-text-primary placeholder:text-text-muted focus:border-primary focus:outline-hidden focus:ring-1 focus:ring-primary shadow-2xs"
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1 text-caption text-text-muted font-medium">
-              <Filter className="h-3.5 w-3.5" />
-              <span>Severity:</span>
+          {/* Search & Dropdown Filters */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative min-w-[220px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search exceptions..."
+                className="w-full rounded-xl border border-slate-200/90 bg-white pl-9 pr-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-blue-600 focus:outline-hidden shadow-2xs font-normal"
+              />
             </div>
 
             <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="rounded-xl border border-slate-200/90 bg-white px-3 py-1.5 text-xs text-slate-700 font-medium focus:border-blue-600 focus:outline-hidden shadow-2xs cursor-pointer"
+            >
+              <option value="ALL">All Categories</option>
+              {uniqueCategories.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+
+            <select
               value={severityFilter}
-              onChange={(e) => setSeverityFilter(e.target.value as typeof severityFilter)}
-              aria-label="Filter alerts by severity"
-              className="rounded-lg border border-border bg-surface px-2.5 py-1 text-caption text-text-primary focus:border-primary focus:outline-hidden focus:ring-1 focus:ring-primary shadow-2xs font-medium"
+              onChange={(e) => setSeverityFilter(e.target.value)}
+              className="rounded-xl border border-slate-200/90 bg-white px-3 py-1.5 text-xs text-slate-700 font-medium focus:border-blue-600 focus:outline-hidden shadow-2xs cursor-pointer"
             >
               <option value="ALL">All Severities</option>
               <option value="CRITICAL">Critical</option>
-              <option value="HIGH">High</option>
               <option value="WARNING">Warning</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="LOW">Low</option>
               <option value="INFO">Info</option>
             </select>
-
-            {uniqueAlertTypes.length > 0 && activeTab === "ACTIVE" && (
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                aria-label="Filter alerts by exception category"
-                className="rounded-lg border border-border bg-surface px-2.5 py-1 text-caption text-text-primary focus:border-primary focus:outline-hidden focus:ring-1 focus:ring-primary shadow-2xs font-medium"
-              >
-                <option value="ALL">All Exception Categories</option>
-                {uniqueAlertTypes.map((t) => (
-                  <option key={t} value={t}>
-                    {t.replace(/_/g, " ")}
-                  </option>
-                ))}
-              </select>
-            )}
-
-            {(searchQuery || severityFilter !== "ALL" || typeFilter !== "ALL") && (
-              <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setSeverityFilter("ALL");
-                  setTypeFilter("ALL");
-                }}
-                className="text-caption text-primary hover:underline font-medium px-1"
-              >
-                Clear Filters
-              </button>
-            )}
           </div>
+        </div>
+
+        {/* Table View */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[11px] font-bold text-slate-500 tracking-wider">
+                <th className="py-3 px-6 min-w-[320px]">Exception</th>
+                <th className="py-3 px-4 min-w-[110px]">Category</th>
+                <th className="py-3 px-4 min-w-[110px]">Severity</th>
+                <th className="py-3 px-4 min-w-[100px]">Status</th>
+                <th className="py-3 px-4 min-w-[110px]">Detected</th>
+                <th className="py-3 px-5 min-w-[160px]">Owner</th>
+                <th className="py-3 px-6 text-right min-w-[120px]">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-xs">
+              {isLoadingAlerts ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                    Loading exceptions...
+                  </td>
+                </tr>
+              ) : filteredExceptions.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center">
+                    <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500 mb-2" />
+                    <div className="font-bold text-slate-800 text-sm">No exceptions found</div>
+                    <div className="text-slate-400 text-xs mt-0.5">Try adjusting your filters or search term</div>
+                  </td>
+                </tr>
+              ) : (
+                filteredExceptions.map((item) => {
+                  return (
+                    <tr key={item.id} className="hover:bg-slate-50/70 transition-colors group">
+                      {/* Exception Title & Snippet with Icon */}
+                      <td className="py-3.5 px-6">
+                        <div className="flex items-start gap-3">
+                          <div className="mt-0.5 shrink-0">
+                            {getExceptionIcon(item)}
+                          </div>
+                          <div>
+                            <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-snug">
+                              {item.title}
+                            </div>
+                            <div className="text-[11px] text-slate-400 line-clamp-1 mt-0.5 font-normal">
+                              {item.description}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Category Pill */}
+                      <td className="py-3.5 px-4">
+                        <span className="inline-flex items-center rounded-md px-2.5 py-0.5 text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200/60">
+                          {item.category}
+                        </span>
+                      </td>
+
+                      {/* Severity Pill */}
+                      <td className="py-3.5 px-4">
+                        {item.severity === "CRITICAL" ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/60">
+                            <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                            Critical
+                          </span>
+                        ) : item.severity === "WARNING" ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/60">
+                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                            Warning
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/60">
+                            <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                            Info
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Status Pill */}
+                      <td className="py-3.5 px-4">
+                        {item.status === "Open" ? (
+                          <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold bg-rose-50/70 text-rose-700 border border-rose-200/50">
+                            Open
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/50">
+                            {item.status}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Detected Date */}
+                      <td className="py-3.5 px-4 text-slate-500 tabular-nums text-xs">
+                        {formatDate(item.detectedAt)}
+                      </td>
+
+                      {/* Owner Avatar & Name */}
+                      <td className="py-3.5 px-5">
+                        <div className="flex items-center gap-2.5">
+                          <div className={cn(
+                            "h-7 w-7 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 tracking-tight",
+                            item.ownerAvatarColor
+                          )}>
+                            {item.ownerInitials}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-slate-900 text-xs">
+                              {item.ownerName}
+                            </div>
+                            <div className="text-[10px] text-slate-400 font-normal">
+                              {item.ownerRole}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Action Buttons */}
+                      <td className="py-3.5 px-6 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {canResolve && item.status === "Open" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                if (item.originalAlert) setResolvingAlert(item.originalAlert);
+                                else if (item.originalDqi) setResolvingDqi(item.originalDqi);
+                              }}
+                              className="h-7 px-3 text-xs font-semibold text-blue-600 border-blue-200 hover:bg-blue-50/70 hover:border-blue-300 rounded-md"
+                            >
+                              Resolve
+                            </Button>
+                          )}
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              if (item.originalAlert && canWaive) setWaivingAlert(item.originalAlert);
+                              else if (item.originalDqi && canWaive) setResolvingDqi(item.originalDqi);
+                            }}
+                            className="h-7 w-7 p-0 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md"
+                            title="More actions"
+                          >
+                            <span className="font-bold text-sm tracking-widest leading-none select-none">···</span>
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
-
-      {/* CONTENT PANELS */}
-
-      {/* 1. ACTIVE ALERTS TAB */}
-      {activeTab === "ACTIVE" && (
-        <div className="space-y-3">
-          {isLoadingAlerts ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="rounded-xl border border-border bg-surface p-4 shadow-xs space-y-2.5 animate-pulse">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-5 w-20 rounded-full" />
-                      <Skeleton className="h-4 w-32" />
-                    </div>
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              ))}
-            </div>
-          ) : filteredActiveAlerts.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border bg-surface p-12 text-center shadow-xs">
-              <CheckCircle2 className="mx-auto h-10 w-10 text-success mb-3" />
-              <h3 className="text-body font-bold text-text-primary">
-                {openAlerts.length === 0
-                  ? "Zero Open Exceptions"
-                  : "No alerts match your filter criteria"}
-              </h3>
-              <p className="text-caption text-text-muted mt-1 max-w-md mx-auto">
-                {openAlerts.length === 0
-                  ? "All project exceptions have been successfully resolved or waived under compliance policy. Budget lines and draws are verified."
-                  : "Try clearing your search query or selecting a different severity level."}
-              </p>
-            </div>
-          ) : (
-            filteredActiveAlerts.map((alert) => {
-              const isDanger =
-                alert.severity === "DANGER" || (alert.severity as string) === "CRITICAL";
-              const isWarning =
-                alert.severity === "WARNING" || (alert.severity as string) === "HIGH";
-
-              return (
-                <div
-                  key={alert.id}
-                  className={`rounded-xl border p-5 shadow-xs transition-all hover:shadow-md ${
-                    isDanger
-                      ? "border-danger-border bg-danger-subtle/15"
-                      : isWarning
-                      ? "border-warning-border bg-warning-subtle/15"
-                      : "border-border bg-surface"
-                  }`}
-                >
-                  <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                    {/* Left content */}
-                    <div className="space-y-2 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span
-                          className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
-                            isDanger
-                              ? "bg-danger text-white shadow-2xs"
-                              : isWarning
-                              ? "bg-warning text-white shadow-2xs"
-                              : "bg-primary text-white shadow-2xs"
-                          }`}
-                        >
-                          {alert.severity}
-                        </span>
-
-                        {(alert as unknown as { alert_type?: string }).alert_type && (
-                          <span className="rounded-md border border-border bg-surface px-2 py-0.5 text-[11px] font-medium text-text-muted">
-                            {(alert as unknown as { alert_type?: string }).alert_type?.replace(/_/g, " ")}
-                          </span>
-                        )}
-
-                        <h4 className="text-body font-bold text-text-primary">
-                          {alert.title}
-                        </h4>
-                      </div>
-
-                      <p className="text-body text-text-secondary leading-relaxed">
-                        {alert.description}
-                      </p>
-
-                      {/* Metadata row */}
-                      <div className="flex flex-wrap items-center gap-4 text-caption text-text-muted pt-1">
-                        <span>
-                          Owner:{" "}
-                          <strong className="text-text-primary font-medium">
-                            {alert.owner || "Marcus Vance (Owner)"}
-                          </strong>
-                        </span>
-                        <span>
-                          Detected:{" "}
-                          <span className="text-text-primary tabular-nums">
-                            {formatDate(alert.created_at)}
-                          </span>
-                        </span>
-                        {alert.escalated_to && (
-                          <span className="text-danger font-semibold flex items-center gap-1 bg-danger-subtle px-2 py-0.5 rounded-md border border-danger-border">
-                            <ArrowUpRight className="h-3.5 w-3.5" />
-                            Escalated to: {alert.escalated_to}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Right actions */}
-                    <div className="flex items-center gap-2 shrink-0 pt-3 lg:pt-0 border-t border-border/50 lg:border-t-0">
-                      {canResolve && (
-                        <button
-                          onClick={() => setResolvingAlert(alert)}
-                          className="flex items-center gap-1.5 rounded-lg bg-success px-3.5 py-1.5 text-caption font-semibold text-white hover:bg-success/90 transition-colors shadow-xs"
-                        >
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                          <span>Resolve</span>
-                        </button>
-                      )}
-
-                      {canWaive && (
-                        <button
-                          onClick={() => setWaivingAlert(alert)}
-                          className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-caption font-semibold text-text-primary hover:bg-subtle transition-colors shadow-2xs"
-                          title="Temporarily waive exception with documented justification"
-                        >
-                          <ShieldAlert className="h-3.5 w-3.5 text-warning" />
-                          <span>Waive</span>
-                        </button>
-                      )}
-
-                      {canEscalate && (
-                        <button
-                          onClick={() => setEscalatingAlert(alert)}
-                          className="flex items-center gap-1.5 rounded-lg border border-danger-border bg-danger-subtle px-3 py-1.5 text-caption font-semibold text-danger hover:bg-danger/20 transition-colors shadow-2xs"
-                          title="Escalate issue to project leadership"
-                        >
-                          <ArrowUpRight className="h-3.5 w-3.5" />
-                          <span>Escalate</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      )}
-
-      {/* 2. DATA QUALITY ISSUES TAB */}
-      {activeTab === "DATA_QUALITY" && canAccessDqi && (
-        <div className="space-y-4">
-          <div className="rounded-xl border border-primary-border/60 bg-primary-subtle/20 p-4 text-caption text-text-secondary flex items-start gap-3">
-            <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold text-text-primary">
-                GroundUp AI Continuous Integrity Engine
-              </p>
-              <p className="mt-0.5">
-                Data quality issues represent unmapped line items, missing proof of payment, or unverified documents. Resolving them updates project certification status and enables clean lender draw packages.
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {isLoadingDqi ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="rounded-xl border border-border bg-surface p-4 shadow-xs space-y-2.5 animate-pulse">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Skeleton className="h-5 w-20 rounded-full" />
-                        <Skeleton className="h-4 w-32" />
-                      </div>
-                      <Skeleton className="h-4 w-24" />
-                    </div>
-                    <Skeleton className="h-5 w-2/3" />
-                    <Skeleton className="h-4 w-1/3" />
-                  </div>
-                ))}
-              </div>
-            ) : filteredDqiList.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border bg-surface p-12 text-center shadow-xs">
-                <CheckCircle2 className="mx-auto h-10 w-10 text-success mb-3" />
-                <h3 className="text-body font-bold text-text-primary">
-                  {openDqi.length === 0
-                    ? "Zero Data Quality Issues"
-                    : "No data quality issues match your filter"}
-                </h3>
-                <p className="text-caption text-text-muted mt-1 max-w-md mx-auto">
-                  {openDqi.length === 0
-                    ? "All financial records and schedule milestones are mapped to valid supporting evidence."
-                    : "Try adjusting your search query or severity filter."}
-                </p>
-              </div>
-            ) : (
-              filteredDqiList.map((issue) => (
-                <div
-                  key={issue.id}
-                  className="rounded-xl border border-border bg-surface p-5 shadow-xs flex flex-col lg:flex-row lg:items-start justify-between gap-4 hover:border-text-muted/40 transition-colors"
-                >
-                  <div className="space-y-2 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
-                          issue.severity === "HIGH"
-                            ? "bg-danger-subtle text-danger border border-danger-border"
-                            : issue.severity === "MEDIUM"
-                            ? "bg-warning-subtle text-warning border border-warning-border"
-                            : "bg-subtle text-text-muted border border-border"
-                        }`}
-                      >
-                        {issue.severity}
-                      </span>
-
-                      <span className="font-bold text-body text-text-primary">
-                        {issue.issue_type.replace(/_/g, " ")}
-                      </span>
-
-                      <span className="rounded-full bg-subtle px-2 py-0.5 text-caption text-text-muted border border-border">
-                        Entity: {issue.affected_entity_type}
-                      </span>
-                    </div>
-
-                    <p className="text-body text-text-secondary leading-relaxed">
-                      {issue.description || `Integrity flag detected on ${issue.affected_entity_type} ID: ${issue.affected_entity_id}.`}
-                    </p>
-
-                    <div className="flex flex-wrap items-center gap-4 text-caption text-text-muted pt-1">
-                      <span>Affected ID: <code className="text-text-primary text-[11px] font-mono">{issue.affected_entity_id}</code></span>
-                      <span>Owner: <strong className="text-text-primary">{issue.owner || "System Audit"}</strong></span>
-                      <span>Detected: {formatDate(issue.detected_at)}</span>
-                    </div>
-                  </div>
-
-                  {canWaive && (
-                    <button
-                      onClick={() => setResolvingDqi(issue)}
-                      className="flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-caption font-semibold text-white hover:bg-primary-hover shadow-xs shrink-0 self-start lg:self-center transition-colors"
-                    >
-                      <Wrench className="h-3.5 w-3.5" />
-                      <span>Remediate / Waive</span>
-                    </button>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* 3. RESOLUTION ARCHIVE TAB */}
-      {activeTab === "ARCHIVE" && (
-        <div className="space-y-3">
-          {filteredArchiveAlerts.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border bg-surface p-12 text-center shadow-xs">
-              <Clock className="mx-auto h-10 w-10 text-text-muted mb-3" />
-              <h3 className="text-body font-bold text-text-primary">
-                {closedAlerts.length === 0
-                  ? "No Audited History Yet"
-                  : "No archived records match your filter"}
-              </h3>
-              <p className="text-caption text-text-muted mt-1 max-w-md mx-auto">
-                When operational exceptions are resolved or waived, their complete audit log and rationale appear here permanently.
-              </p>
-            </div>
-          ) : (
-            filteredArchiveAlerts.map((alert) => (
-              <div
-                key={alert.id}
-                className="rounded-xl border border-border bg-surface p-5 shadow-xs space-y-3 hover:border-text-muted/40 transition-colors"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
-                        alert.status === "RESOLVED"
-                          ? "bg-success-subtle text-success border border-success-border"
-                          : "bg-warning-subtle text-warning border border-warning-border"
-                      }`}
-                    >
-                      {alert.status}
-                    </span>
-
-                    <h4 className="text-body font-bold text-text-primary">
-                      {alert.title}
-                    </h4>
-                  </div>
-
-                  <span className="text-caption text-text-muted tabular-nums shrink-0">
-                    Archived: {formatDate(alert.resolved_at || alert.created_at)}
-                  </span>
-                </div>
-
-                <p className="text-caption text-text-secondary leading-relaxed">
-                  {alert.description}
-                </p>
-
-                {alert.resolution_note && (
-                  <div className="rounded-lg border border-success-border/40 bg-success-subtle/20 p-3 text-caption text-text-primary">
-                    <div className="flex items-center gap-1.5 font-semibold text-success mb-1">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      <span>Resolution Rationale</span>
-                      {alert.resolved_by && (
-                        <span className="text-text-muted font-normal">({alert.resolved_by})</span>
-                      )}
-                    </div>
-                    <p className="text-text-secondary">{alert.resolution_note}</p>
-                  </div>
-                )}
-
-                {alert.waived_reason && (
-                  <div className="rounded-lg border border-warning-border/40 bg-warning-subtle/20 p-3 text-caption text-text-primary">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <div className="flex items-center gap-1.5 font-semibold text-warning">
-                        <ShieldAlert className="h-3.5 w-3.5" />
-                        <span>Waiver Rationale</span>
-                        {alert.waived_by && (
-                          <span className="text-text-muted font-normal">({alert.waived_by})</span>
-                        )}
-                      </div>
-                      {alert.waived_until && (
-                        <span className="text-text-muted text-[11px]">
-                          Expires: {formatDate(alert.waived_until)}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-text-secondary">{alert.waived_reason}</p>
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-      )}
 
       {/* Action Modals */}
       {resolvingAlert && (
@@ -775,3 +652,5 @@ export function AlertsView({ projectId, projectName, userRole }: AlertsViewProps
     </div>
   );
 }
+
+

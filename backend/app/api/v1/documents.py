@@ -22,6 +22,7 @@ from app.modules.documents.schemas import (
     UploadUrlRequest,
     UploadUrlResponse,
 )
+from app.db.models import Document
 from app.modules.documents.service import DocumentService
 
 router = APIRouter()
@@ -143,6 +144,10 @@ async def download_document_content(
     service = DocumentService(db)
     doc = service.get_document(user, id)
     content = await service.storage.get_file(doc.storage_key)
+    if not content and doc.duplicate_of_document_id:
+        original_doc = db.get(Document, doc.duplicate_of_document_id)
+        if original_doc:
+            content = await service.storage.get_file(original_doc.storage_key)
     if not content:
         content = b""
     return RawResponse(

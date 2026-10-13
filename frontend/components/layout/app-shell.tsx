@@ -96,13 +96,22 @@ export function AppShell({ children }: AppShellProps) {
   const standaloneMatch = pathname.match(/^\/([^\/]+)$/);
   const standaloneSection = standaloneMatch ? standaloneMatch[1] : null;
   React.useEffect(() => {
-    if (!session || !activeProjectId) return;
+    if (!session) return;
+    const resolvedProjectId =
+      rawProjectId ||
+      (typeof window !== "undefined" ? window.localStorage.getItem("groundup_last_project_id") : null) ||
+      sessionUser?.current_project_id ||
+      (memberships[0]?.project_id as string) ||
+      null;
+
+    if (!resolvedProjectId) return;
+
     if (standaloneSection && LEGACY_WORKSPACE_SECTIONS.includes(standaloneSection)) {
-      router.replace(`/projects/${activeProjectId}/${standaloneSection}`);
+      router.replace(`/projects/${resolvedProjectId}/${standaloneSection}`);
     } else if (pathname === "/investor-update" || pathname.includes("/investor-updates")) {
-      router.replace(`/projects/${activeProjectId}/control-center`);
+      router.replace(`/projects/${resolvedProjectId}/control-center`);
     }
-  }, [pathname, session, activeProjectId, standaloneSection, router]);
+  }, [pathname, session, rawProjectId, sessionUser, memberships, standaloneSection, router]);
 
   const workspaceProjectId = rawProjectId;
   const projectMembership = workspaceProjectId

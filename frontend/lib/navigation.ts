@@ -11,6 +11,7 @@ import {
   Eye,
   Settings,
   AlertTriangle,
+  Users,
   LucideIcon,
 } from "lucide-react";
 
@@ -117,6 +118,13 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     badgeKey: "alerts",
   },
   {
+    id: "partners",
+    label: "Partners & Funding",
+    path: "partners",
+    icon: Users,
+    allowedRoles: ["OWNER", "CFO"],
+  },
+  {
     id: "settings",
     label: "Project Settings",
     path: "settings",
@@ -148,6 +156,7 @@ export const WORKSPACE_ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   "economics": ["OWNER", "CFO"],
   "submissions": ["OWNER", "CFO", "PM", "GC"],
   "alerts": ["OWNER", "CFO", "PM"],
+  "partners": ["OWNER", "CFO"],
   // "investor-updates": ["OWNER", "INVESTOR"],
   "settings": ["OWNER"],
 };

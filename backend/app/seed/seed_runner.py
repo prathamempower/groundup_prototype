@@ -1029,18 +1029,24 @@ def seed_database(wipe_first: bool = True):
         # Milestones for 73 Broadway (including at-risk Structural Steel)
         ms_data_73 = [
             ("Demolition & Site Clear", "M-01", date(2025, 4, 1), date(2025, 5, 15), 100, "COMPLETED"),
-            ("Foundation & Concrete Pours", "M-02", date(2025, 5, 16), date(2025, 7, 31), 100, "COMPLETED"),
+            ("Excavation, Shoring & Dewatering", "M-02", date(2025, 5, 1), date(2025, 6, 15), 100, "COMPLETED"),
+            ("Foundation & Concrete Pours", "M-03", date(2025, 5, 16), date(2025, 7, 31), 100, "COMPLETED"),
+            ("Underground Utilities & Sub-Grade Plumbing", "M-04", date(2025, 7, 1), date(2025, 8, 15), 100, "COMPLETED"),
             (
                 "Structural Steel Fabrication & Erection",
-                "M-03",
+                "M-05",
                 date(2025, 8, 1),
                 date(2025, 9, 15),
                 65,
                 "IN_PROGRESS",
             ),
-            ("Wood Framing & Sheathing", "M-04", date(2025, 9, 16), date(2025, 11, 30), 20, "IN_PROGRESS"),
-            ("Rough MEP & Inspections", "M-05", date(2025, 12, 1), date(2026, 3, 31), 0, "PLANNED"),
-            ("Interior Finishes & Punchlist", "M-06", date(2026, 4, 1), date(2026, 11, 15), 0, "PLANNED"),
+            ("Concrete Decking & Shear Stud Placement", "M-06", date(2025, 9, 1), date(2025, 10, 15), 40, "IN_PROGRESS"),
+            ("Exterior Envelope & Cold-Formed Metal Framing", "M-07", date(2025, 9, 16), date(2025, 11, 30), 20, "IN_PROGRESS"),
+            ("Roofing Membrane & Waterproofing", "M-08", date(2025, 11, 1), date(2025, 12, 31), 0, "PLANNED"),
+            ("Rough MEP & Fire Suppression Inspections", "M-09", date(2025, 12, 1), date(2026, 3, 31), 0, "PLANNED"),
+            ("Drywall, Taping & Interior Partitions", "M-10", date(2026, 3, 1), date(2026, 6, 15), 0, "PLANNED"),
+            ("Architectural Finishes, Flooring & Millwork", "M-11", date(2026, 6, 1), date(2026, 9, 30), 0, "PLANNED"),
+            ("Testing, Balancing & Commissioning (TCO)", "M-12", date(2026, 9, 15), date(2026, 11, 15), 0, "PLANNED"),
         ]
         for name, code, p_start, p_comp, pct, m_status in ms_data_73:
             ms = ProjectMilestone(
@@ -1053,10 +1059,10 @@ def seed_database(wipe_first: bool = True):
                 planned_completion_date=p_comp,
                 actual_start_date=p_start if pct > 0 else None,
                 actual_completion_date=p_comp if pct == 100 else None,
-                # Enforce at-risk forecast completion for Structural Steel
-                forecast_completion_date=date(2025, 10, 20) if code == "M-03" else p_comp,
+                # Enforce at-risk forecast completion for Structural Steel (M-05)
+                forecast_completion_date=date(2025, 10, 20) if code == "M-05" else p_comp,
                 forecast_change_reason="Mill test certification review bottleneck delayed erection"
-                if code == "M-03"
+                if code == "M-05"
                 else None,
                 progress_percentage=pct,
                 status=m_status,
@@ -2591,8 +2597,12 @@ def seed_database(wipe_first: bool = True):
             ("Site Excavation & Grading", "W-02", date(2024, 6, 1), date(2024, 12, 1), 100, "COMPLETED"),
             ("Foundation & Concrete Pour", "W-03", date(2024, 12, 2), date(2025, 4, 30), 80, "IN_PROGRESS"),
             ("Superstructure Framing", "W-04", date(2025, 5, 1), date(2025, 8, 30), 35, "IN_PROGRESS"),
-            ("MEP Rough-Ins", "W-05", date(2025, 9, 1), date(2025, 11, 30), 0, "PLANNED"),
-            ("Electrical & Low Voltage", "W-06", date(2025, 12, 1), date(2026, 3, 31), 0, "PLANNED"),
+            ("Exterior Sheathing & Building Envelope", "W-05", date(2025, 8, 1), date(2025, 10, 15), 10, "IN_PROGRESS"),
+            ("Roofing Membrane & Flashing", "W-06", date(2025, 9, 15), date(2025, 11, 15), 0, "PLANNED"),
+            ("MEP Rough-Ins", "W-07", date(2025, 9, 1), date(2025, 11, 30), 0, "PLANNED"),
+            ("Electrical & Low Voltage", "W-08", date(2025, 12, 1), date(2026, 3, 31), 0, "PLANNED"),
+            ("Insulation & Drywall Installation", "W-09", date(2026, 3, 1), date(2026, 5, 30), 0, "PLANNED"),
+            ("Interior Finishes & Fixtures", "W-10", date(2026, 5, 15), date(2026, 8, 31), 0, "PLANNED"),
         ]
         for name, code, p_start, p_comp, pct, m_status in ms_161:
             pm = ProjectMilestone(
@@ -2619,8 +2629,8 @@ def seed_database(wipe_first: bool = True):
         b161_lines_map["02-200"].milestone_id = ms_161_objs[1].id
         b161_lines_map["03-300"].milestone_id = ms_161_objs[2].id
         b161_lines_map["06-100"].milestone_id = ms_161_objs[3].id
-        b161_lines_map["15-100"].milestone_id = ms_161_objs[4].id
-        b161_lines_map["16-100"].milestone_id = ms_161_objs[5].id
+        b161_lines_map["15-100"].milestone_id = ms_161_objs[6].id
+        b161_lines_map["16-100"].milestone_id = ms_161_objs[7].id
 
         # -------------------------------------------------------------------------
         # Underwriting Financial Plan (Pro-Forma) for 161 Woodlawn Ave
@@ -2747,6 +2757,46 @@ def seed_database(wipe_first: bool = True):
                 "Environmental permit filing routed to correct municipal compliance folder.",
             ),
         ]
+        # -------------------------------------------------------------------------
+        # Document Extraction & Structured Fields for 161 Woodlawn Ave.xlsx
+        # -------------------------------------------------------------------------
+        ext161 = DocumentExtraction(
+            id=generate_uuid(),
+            document_id=doc161_map["161 Woodlawn Ave.xlsx"].id,
+            model_version="v2.1-finance-ocr",
+            status="COMPLETED",
+            created_at=utc_now(),
+        )
+        db.add(ext161)
+        db.flush()
+
+        woodlawn_extractions_data = [
+            ("Builder Funding Closing Amount", "$475,000.00", 0.99, 1, 1, "ACCEPTED", "$475,000.00"),
+            ("Partner 1 (Kirit) Equity Share", "25.00% ($118,750.00)", 0.98, 1, 2, "ACCEPTED", "25.00% ($118,750.00)"),
+            ("Partner 2 (Nilesh) Equity Share", "25.00% ($118,750.00)", 0.98, 1, 3, "ACCEPTED", "25.00% ($118,750.00)"),
+            ("Partner 3 (Kunal) Equity Share", "20.00% ($95,000.00)", 0.96, 1, 4, "PROPOSED", None),
+            ("Partner 4 (Swekit) Equity Share", "20.00% ($95,000.00)", 0.96, 1, 5, "PROPOSED", None),
+            ("Partner 5 (Maulik) Equity Share", "10.00% ($47,500.00)", 0.95, 1, 6, "PROPOSED", None),
+            ("Approved Soft Costs Total", "$214,800.00", 0.97, 2, 8, "PROPOSED", None),
+            ("General Contractor Supervisory Line", "$145,000.00", 0.94, 3, 14, "PROPOSED", None),
+            ("Municipal & Utility Permitting Escrow", "$38,500.00", 0.92, 10, 4, "PROPOSED", None),
+        ]
+        for fname, val, conf, pg, rw, stat, acc_val in woodlawn_extractions_data:
+            db.add(
+                ExtractionField(
+                    id=generate_uuid(),
+                    extraction_id=ext161.id,
+                    field_name=fname,
+                    proposed_value=val,
+                    accepted_value=acc_val,
+                    confidence=conf,
+                    page_number=pg,
+                    citation=f"Sheet: Partner Ratios and Funding, Row {rw}",
+                    status=stat,
+                    created_at=utc_now(),
+                )
+            )
+
         for itype, sev, stat, a_type, a_id, o_id, res_at, res_text in dqi_161:
             db.add(
                 DataQualityIssue(
