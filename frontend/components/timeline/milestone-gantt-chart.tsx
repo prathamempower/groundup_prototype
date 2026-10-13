@@ -25,24 +25,15 @@ export function MilestoneGanttChart({
   milestones,
   onSelectMilestone,
   selectedMilestoneId,
-  onUpdateMilestoneDate,
   statusFilter,
   onStatusFilterChange,
   searchQuery,
   onSearchQueryChange,
 }: MilestoneGanttChartProps) {
   const [scaleMode, setScaleMode] = useState<"MONTHS" | "QUARTERS" | "YEARS">("MONTHS");
-  const [activeShiftMap, setActiveShiftMap] = useState<Record<string, number>>({});
   const [rangeOffsetMonths, setRangeOffsetMonths] = useState(0);
-  const [isApplyingShift, setIsApplyingShift] = useState(false);
 
-  // Drag-and-drop bar movement state
-  const [draggingMilestoneId, setDraggingMilestoneId] = useState<string | null>(null);
-  const [dragType, setDragType] = useState<"MOVE" | "RESIZE">("MOVE");
-  const [dragCurrentShiftDays, setDragCurrentShiftDays] = useState<number>(0);
-  const [dragStartShiftDays, setDragStartShiftDays] = useState<number>(0);
-
-  // Ref to the timeline track element to calculate exact pixel-to-day conversion
+  // Ref to the timeline track element
   const timelineTrackRef = React.useRef<HTMLDivElement | null>(null);
 
   // Determine dynamic date envelope based on actual milestone data and selected scaleMode
@@ -194,103 +185,7 @@ export function MilestoneGanttChart({
     });
   }, [milestones, searchQuery, statusFilter]);
 
-  // Nudge adjustment
-  const handleNudge = async (ms: MilestoneItem, delta: number) => {
-    const currentShift = activeShiftMap[ms.id] || 0;
-    const newShift = currentShift + delta;
-    setActiveShiftMap((prev) => ({ ...prev, [ms.id]: newShift }));
 
-    if (onUpdateMilestoneDate) {
-      setIsApplyingShift(true);
-      try {
-        const base = new Date(ms.forecast_end || ms.planned_end);
-        const adjusted = new Date(base.getTime() + newShift * 24 * 60 * 60 * 1000);
-        await onUpdateMilestoneDate(
-          ms,
-          adjusted.toISOString().split("T")[0],
-          delta > 0 ? `Shifted +${delta}d via interactive timeline bar` : `Adjusted ${delta}d via interactive timeline bar`
-        );
-      } finally {
-        setIsApplyingShift(false);
-      }
-    }
-  };
-
-  // Track whether dragging actually occurred to prevent opening drawer on mouse release
-  const hasDraggedRef = React.useRef(false);
-
-  // Direct Mouse Drag Handlers
-  const handleMouseDown = (
-    e: React.MouseEvent,
-    ms: MilestoneItem,
-    type: "MOVE" | "RESIZE" = "MOVE"
-  ) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    hasDraggedRef.current = false;
-
-    // Compute actual width of timeline track
-    const trackWidth = timelineTrackRef.current?.getBoundingClientRect().width || 800;
-    const daysPerPixel = (totalDuration / (1000 * 60 * 60 * 24)) / Math.max(100, trackWidth);
-
-    const initialShift = activeShiftMap[ms.id] || 0;
-    setDraggingMilestoneId(ms.id);
-    setDragType(type);
-    setDragStartShiftDays(initialShift);
-    setDragCurrentShiftDays(initialShift);
-
-    const startClientX = e.clientX;
-
-    const onMouseMove = (moveEvent: MouseEvent) => {
-      const deltaX = moveEvent.clientX - startClientX;
-      if (Math.abs(deltaX) > 3) {
-        hasDraggedRef.current = true;
-      }
-      const dayShift = Math.round(deltaX * daysPerPixel);
-      setDragCurrentShiftDays(initialShift + dayShift);
-    };
-
-    const onMouseUp = async (upEvent: MouseEvent) => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-
-      const deltaX = upEvent.clientX - startClientX;
-      const dayShift = Math.round(deltaX * daysPerPixel);
-      const finalShift = initialShift + dayShift;
-
-      setDraggingMilestoneId(null);
-
-      // Short delay before resetting hasDraggedRef so any immediate click event is suppressed
-      setTimeout(() => {
-        hasDraggedRef.current = false;
-      }, 100);
-
-      if (finalShift !== initialShift) {
-        setActiveShiftMap((prev) => ({ ...prev, [ms.id]: finalShift }));
-        if (onUpdateMilestoneDate) {
-          setIsApplyingShift(true);
-          try {
-            const base = new Date(ms.forecast_end || ms.planned_end);
-            const adjusted = new Date(base.getTime() + finalShift * 24 * 60 * 60 * 1000);
-            const dateStr = adjusted.toISOString().split("T")[0];
-            await onUpdateMilestoneDate(
-              ms,
-              dateStr,
-              type === "RESIZE"
-                ? `Duration adjusted ${finalShift >= 0 ? "+" : ""}${finalShift}d via interactive timeline resize`
-                : `Rescheduled ${finalShift >= 0 ? "+" : ""}${finalShift}d via interactive timeline drag`
-            );
-          } finally {
-            setIsApplyingShift(false);
-          }
-        }
-      }
-    };
-
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-  };
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden select-none">
@@ -460,17 +355,13 @@ export function MilestoneGanttChart({
           {/* Milestone Rows */}
           <div className="relative divide-y divide-slate-100">
             {filteredMilestones.map((ms, index) => {
-              const activeShift = draggingMilestoneId === ms.id ? dragCurrentShiftDays : (activeShiftMap[ms.id] || 0);
-              const isBeingDragged = draggingMilestoneId === ms.id;
-
               // Baseline positions
               const plannedLeft = getPercentOffset(ms.planned_start);
               const plannedRight = getPercentOffset(ms.planned_end);
               const plannedWidth = Math.max(1.5, plannedRight - plannedLeft);
 
-              // Shifted / forecasted positions
-              const effectiveEndTs = new Date(ms.forecast_end || ms.planned_end).getTime() + (isBeingDragged ? activeShift : (activeShiftMap[ms.id] || 0)) * 24 * 60 * 60 * 1000;
-              const effectiveEndDateStr = new Date(effectiveEndTs).toISOString().split("T")[0];
+              // Forecasted positions
+              const effectiveEndDateStr = ms.forecast_end || ms.planned_end;
               const effectiveEndRight = getPercentOffset(effectiveEndDateStr);
               const effectiveBarWidth = Math.max(2, effectiveEndRight - plannedLeft);
 
@@ -503,11 +394,7 @@ export function MilestoneGanttChart({
                 >
                   {/* Left Fixed Width Table Columns (600px) - clicking here opens details drawer */}
                   <div
-                    onClick={() => {
-                      if (!hasDraggedRef.current) {
-                        onSelectMilestone(ms);
-                      }
-                    }}
+                    onClick={() => onSelectMilestone(ms)}
                     className="w-[600px] flex items-center py-3 px-4 border-r border-slate-200 shrink-0 cursor-pointer"
                   >
                     <span className="w-8 text-slate-400 font-medium tabular-nums">{index + 1}</span>
@@ -518,7 +405,7 @@ export function MilestoneGanttChart({
                     <span className="w-24 text-slate-600 tabular-nums text-[11px]">
                       {formatDate(ms.planned_start)}
                     </span>
-                    <span className={`w-24 tabular-nums text-[11px] font-medium ${activeShift !== 0 ? "text-blue-600" : "text-slate-600"}`}>
+                    <span className="w-24 tabular-nums text-[11px] font-medium text-slate-600">
                       {formatDate(effectiveEndDateStr)}
                     </span>
                     <span className="w-14 text-center text-slate-600 tabular-nums text-[11px]">
@@ -567,17 +454,17 @@ export function MilestoneGanttChart({
                         }}
                       />
 
-                      {/* Forecast / Interactive Draggable Bar */}
+                      {/* Forecast / Progress Bar (Static view) */}
                       <div
-                        className={`absolute h-6 rounded-md flex items-center justify-between px-1.5 shadow-xs transition-all z-10 cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-blue-400 select-none group/bar ${
+                        onClick={() => onSelectMilestone(ms)}
+                        className={`absolute h-6 rounded-md flex items-center justify-between px-2 shadow-xs transition-all z-10 cursor-pointer select-none group/bar ${
                           isCompleted
-                            ? "bg-emerald-500 border border-emerald-600 text-white"
+                            ? "bg-emerald-500 border border-emerald-600 text-white hover:brightness-105"
                             : isAtRisk
-                            ? "bg-amber-500 border border-amber-600 text-white"
-                            : "bg-blue-600 border border-blue-700 text-white"
-                        } ${isBeingDragged ? "ring-2 ring-blue-500 shadow-md scale-y-105" : ""}`}
-                        onMouseDown={(e) => handleMouseDown(e, ms, "MOVE")}
-                        title="Click and drag to reschedule milestone"
+                            ? "bg-amber-500 border border-amber-600 text-white hover:brightness-105"
+                            : "bg-blue-600 border border-blue-700 text-white hover:brightness-105"
+                        }`}
+                        title={`${ms.name}: ${ms.percent_complete}% complete (Click to view details)`}
                         style={{
                           left: `${plannedLeft}%`,
                           width: `${effectiveBarWidth}%`,
@@ -593,42 +480,7 @@ export function MilestoneGanttChart({
                         <span className="relative z-10 text-[10px] font-semibold truncate leading-none px-0.5 max-w-[120px] pointer-events-none">
                           {ms.percent_complete}%
                         </span>
-
-                        {/* Right edge drag resize handle */}
-                        <div
-                          className="relative z-20 h-4 w-2 rounded-xs bg-white/50 hover:bg-white hover:scale-125 cursor-ew-resize ml-auto transition-transform flex items-center justify-center shrink-0"
-                          title="Drag right edge to change duration"
-                          onMouseDown={(e) => handleMouseDown(e, ms, "RESIZE")}
-                        >
-                          <div className="w-0.5 h-2 bg-slate-700/60 rounded-full" />
-                        </div>
                       </div>
-
-                      {/* Live Dragging Tooltip & Date Indicator */}
-                      {isBeingDragged && (
-                        <div
-                          className="absolute -top-9 z-30 px-2.5 py-1 rounded-md bg-slate-900 text-white text-[10px] font-semibold shadow-lg whitespace-nowrap pointer-events-none transform -translate-x-1/2 flex items-center gap-2 border border-slate-700"
-                          style={{
-                            left: `${Math.max(5, Math.min(95, effectiveEndRight))}%`,
-                          }}
-                        >
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-slate-400">Target End:</span>
-                            <span className="font-bold text-white">{formatDate(effectiveEndDateStr)}</span>
-                          </div>
-                          <span
-                            className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
-                              activeShift > 0
-                                ? "bg-amber-500 text-slate-950"
-                                : activeShift < 0
-                                ? "bg-emerald-500 text-white"
-                                : "bg-slate-700 text-slate-200"
-                            }`}
-                          >
-                            {activeShift > 0 ? `+${activeShift}d` : activeShift < 0 ? `${activeShift}d` : "No change"}
-                          </span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -667,7 +519,7 @@ export function MilestoneGanttChart({
         </div>
 
         <div className="text-slate-400 text-xs">
-          Drag dates to adjust schedule &bull; Click a milestone to edit
+          Click a milestone to inspect progress, evidence, and update forecast
         </div>
       </div>
     </div>
