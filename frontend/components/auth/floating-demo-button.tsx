@@ -124,22 +124,25 @@ export function FloatingDemoButton({
 
   // Adjust position if expanding pushes it off-screen
   useEffect(() => {
-    if (isOpen && position && containerRef.current) {
-      const elWidth = containerRef.current.offsetWidth || 220;
-      const elHeight = containerRef.current.offsetHeight || 220;
-      const maxX = Math.max(16, window.innerWidth - elWidth - 16);
-      const maxY = Math.max(16, window.innerHeight - elHeight - 16);
+    if (!isOpen || !containerRef.current) return;
+    const elWidth = containerRef.current.offsetWidth || 220;
+    const elHeight = containerRef.current.offsetHeight || 220;
+    const maxX = Math.max(16, window.innerWidth - elWidth - 16);
+    const maxY = Math.max(16, window.innerHeight - elHeight - 16);
 
-      let adjustedX = position.x;
-      let adjustedY = position.y;
+    setPosition((prev) => {
+      if (!prev) return prev;
+      let adjustedX = prev.x;
+      let adjustedY = prev.y;
 
       if (adjustedY > maxY) adjustedY = Math.max(16, maxY);
       if (adjustedX > maxX) adjustedX = Math.max(16, maxX);
 
-      if (adjustedX !== position.x || adjustedY !== position.y) {
-        setPosition({ x: adjustedX, y: adjustedY });
+      if (adjustedX !== prev.x || adjustedY !== prev.y) {
+        return { x: adjustedX, y: adjustedY };
       }
-    }
+      return prev;
+    });
   }, [isOpen]);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {

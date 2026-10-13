@@ -28,6 +28,7 @@ import {
 import { CreateMilestoneModal } from "@/components/timeline/create-milestone-modal";
 import { UpdateMilestoneModal } from "@/components/timeline/update-milestone-modal";
 import { AttachEvidenceModal } from "@/components/timeline/attach-evidence-modal";
+import { Skeleton, SkeletonTable } from "@/components/ui/skeleton";
 import { ResolveDiscrepancyModal } from "@/components/timeline/resolve-discrepancy-modal";
 import { MilestoneGanttChart } from "@/components/timeline/milestone-gantt-chart";
 import { MilestoneDetailDrawer } from "@/components/timeline/milestone-detail-drawer";
@@ -415,8 +416,21 @@ export default function TimelinePage() {
         {viewMode === "GANTT" && (
           <div>
             {isMilestonesLoading ? (
-              <div className="rounded-lg border border-border bg-surface p-12 text-center text-body text-text-muted">
-                Loading visual timeline...
+              <div className="rounded-xl border border-border bg-surface p-6 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-7 w-28 rounded-md" />
+                </div>
+                <div className="space-y-3 pt-2">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="flex items-center gap-4">
+                      <Skeleton className="h-4 w-36" />
+                      <div className="flex-1">
+                        <Skeleton className="h-6 rounded-md" style={{ width: `${30 + i * 12}%`, marginLeft: `${i * 8}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : milestones.length === 0 ? (
               <div className="rounded-lg border border-border bg-surface p-12 text-center">
@@ -440,13 +454,11 @@ export default function TimelinePage() {
 
         {/* View Mode 2: Detailed Milestone Schedule Table */}
         {viewMode === "TABLE" && (
-          <div className="rounded-lg border border-border bg-surface shadow-xs overflow-hidden">
+          <div>
             {isMilestonesLoading ? (
-              <div className="p-8 text-center text-body text-text-muted">
-                Loading milestone schedule...
-              </div>
+              <SkeletonTable rows={5} columns={6} />
             ) : filteredMilestones.length === 0 ? (
-              <div className="p-12 text-center">
+              <div className="rounded-lg border border-border bg-surface shadow-xs overflow-hidden p-12 text-center">
                 <Calendar className="mx-auto h-8 w-8 text-text-muted" />
                 <h3 className="mt-2 text-section font-semibold text-text-primary">
                   No matching milestones

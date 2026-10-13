@@ -43,6 +43,7 @@ import { ExcludeTransactionModal } from "@/components/reconciliation/exclude-tra
 import { TransferModal } from "@/components/reconciliation/transfer-modal";
 import { RepayTransferModal } from "@/components/reconciliation/repay-transfer-modal";
 import { StatementPeriodSignoffModal } from "@/components/reconciliation/statement-period-signoff-modal";
+import { Skeleton } from "@/components/ui/skeleton";
 import { LinkInvoiceModal } from "@/components/reconciliation/link-invoice-modal";
 import { CardSettlementModal } from "@/components/reconciliation/card-settlement-modal";
 import {
@@ -828,7 +829,42 @@ export default function ReconciliationPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
-                    {filteredReviewItems.length === 0 ? (
+                    {isQueueLoading ? (
+                      Array.from({ length: 5 }).map((_, idx) => (
+                        <tr key={`queue-skel-${idx}`} className="animate-pulse">
+                          <td className="px-3.5 py-3">
+                            <Skeleton className="h-4 w-4 rounded" />
+                          </td>
+                          <td className="px-3.5 py-3">
+                            <Skeleton className="h-3.5 w-16" />
+                          </td>
+                          <td className="px-3.5 py-3">
+                            <Skeleton className="h-3.5 w-24" />
+                          </td>
+                          <td className="px-3.5 py-3">
+                            <div className="space-y-1">
+                              <Skeleton className="h-3.5 w-40" />
+                              <Skeleton className="h-2.5 w-20" />
+                            </div>
+                          </td>
+                          <td className="px-3.5 py-3">
+                            <Skeleton className="h-4 w-20" />
+                          </td>
+                          <td className="px-3.5 py-3">
+                            <Skeleton className="h-5 w-24 rounded-full" />
+                          </td>
+                          <td className="px-3.5 py-3">
+                            <Skeleton className="h-5 w-16 rounded-full" />
+                          </td>
+                          <td className="px-3.5 py-3">
+                            <Skeleton className="h-5 w-20 rounded-full" />
+                          </td>
+                          <td className="px-3.5 py-3 text-right">
+                            <Skeleton className="h-7 w-20 ml-auto rounded-md" />
+                          </td>
+                        </tr>
+                      ))
+                    ) : filteredReviewItems.length === 0 ? (
                       <tr>
                         <td
                           colSpan={9}

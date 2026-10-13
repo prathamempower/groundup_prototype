@@ -32,6 +32,7 @@ import { useToast } from "@/components/ui/toast";
 import { UploadModal } from "@/components/documents/upload-modal";
 import { DocumentReviewDrawer } from "@/components/documents/document-review-drawer";
 import { QuarantineResolverModal } from "@/components/documents/quarantine-resolver-modal";
+import { Skeleton, SkeletonTable } from "@/components/ui/skeleton";
 import userNamesData from "@/lib/user-names.json";
 
 const userNamesMap = userNamesData as Record<string, string>;
@@ -437,10 +438,7 @@ export default function DocumentsPage() {
         {/* Documents Table */}
         <div className="rounded-xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden">
           {isLoadingCurrent ? (
-            <div className="p-16 text-center text-xs text-slate-500">
-              <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600 mb-2" />
-              <div>Loading document index and extraction state...</div>
-            </div>
+            <SkeletonTable rows={6} columns={6} />
           ) : filteredDocuments.length === 0 ? (
             <div className="p-16 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 text-slate-400 mb-3">

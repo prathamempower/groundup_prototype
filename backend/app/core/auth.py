@@ -82,7 +82,7 @@ def get_effective_role(
 
 def require_role(allowed_roles: list[str]):
     # Normalize ADMIN to OWNER in allowed_roles
-    normalized_allowed = set(r.upper() for r in allowed_roles)
+    normalized_allowed = {r.upper() for r in allowed_roles}
     if "OWNER" in normalized_allowed:
         normalized_allowed.add("ADMIN")
 

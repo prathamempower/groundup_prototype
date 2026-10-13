@@ -128,8 +128,8 @@ export function DrawDetailDrawer({
     try {
       await api.draws.markSubmitted(draw.id);
       onRefresh();
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // Error is handled via response interceptors
     } finally {
       setIsSubmittingAction(false);
     }
@@ -140,8 +140,8 @@ export function DrawDetailDrawer({
     try {
       await api.draws.resolveCondition(draw.id, condId, "Certified on-site engineering inspection completed.");
       onRefresh();
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // Error is handled via response interceptors
     } finally {
       setIsSubmittingAction(false);
     }

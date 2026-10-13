@@ -41,9 +41,23 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         # Set X-Request-ID on response
         response.headers["X-Request-ID"] = request_id
 
-        logger.info(
-            f"method={request.method} path={request.url.path} status={response.status_code} "
-            f"duration_ms={process_time_ms:.2f} request_id={request_id}"
-        )
+        # Skip logging noisy internal healthchecks or favicon
+        if request.url.path not in ("/health", "/favicon.ico"):
+            # Status code color styling
+            code = response.status_code
+            if code < 300:
+                status_colored = f"\033[92m{code}\033[0m"  # Green
+            elif code < 400:
+                status_colored = f"\033[96m{code}\033[0m"  # Cyan
+            elif code < 500:
+                status_colored = f"\033[93m{code}\033[0m"  # Yellow
+            else:
+                status_colored = f"\033[91m{code}\033[0m"  # Red
+
+            method_colored = f"\033[1;94m{request.method:<6}\033[0m"
+            time_str = f"{process_time_ms:.1f}ms"
+            logger.info(
+                f"{method_colored} {request.url.path:<34} {status_colored} in {time_str:>7} [{request_id}]"
+            )
 
         return response

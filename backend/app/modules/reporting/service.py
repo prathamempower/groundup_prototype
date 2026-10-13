@@ -671,11 +671,11 @@ class ReportingService:
         draw_sum = {
             "latest_draw_number": int(latest_draw.draw_number) if latest_draw and str(latest_draw.draw_number).isdigit() else 1,
             "status": latest_draw.status if latest_draw else "N/A",
-            "requested": str(sum(l.requested_amount for l in latest_draw.lines)) if latest_draw else "0",
-            "recommended": str(sum(l.recommended_amount for l in latest_draw.lines)) if latest_draw else "0",
-            "approved": str(sum(l.approved_amount for l in latest_draw.lines)) if latest_draw else "0",
-            "cleared_funded": str(sum(l.funded_amount for l in latest_draw.lines)) if latest_draw else "0",
-            "shortfall": str(max(0, sum(l.requested_amount for l in latest_draw.lines) - sum(l.approved_amount for l in latest_draw.lines))) if latest_draw else "0",
+            "requested": str(sum(line.requested_amount for line in latest_draw.lines)) if latest_draw else "0",
+            "recommended": str(sum(line.recommended_amount for line in latest_draw.lines)) if latest_draw else "0",
+            "approved": str(sum(line.approved_amount for line in latest_draw.lines)) if latest_draw else "0",
+            "cleared_funded": str(sum(line.funded_amount for line in latest_draw.lines)) if latest_draw else "0",
+            "shortfall": str(max(0, sum(line.requested_amount for line in latest_draw.lines) - sum(line.approved_amount for line in latest_draw.lines))) if latest_draw else "0",
             "unallocated_deposit": "15000000" if project.name == "73 Broadway" else "0",
         }
 

@@ -24,6 +24,7 @@ import {
   Sliders,
   Calendar,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { DrawItem } from "@/lib/types";
 
 // Modals and Drawers
@@ -36,6 +37,55 @@ import { ResubmitRevisionModal } from "@/components/draws/resubmit-revision-moda
 import { DrawDetailDrawer } from "@/components/draws/draw-detail-drawer";
 
 type FilterTab = "ALL" | "ACTIVE" | "FUNDED" | "DISCREPANCY";
+
+const SHOWCASE_ROWS = [
+  {
+    id: "drw-15",
+    badge: "15",
+    badgeType: "PENDING",
+    title: "Draw #15 – Final Trim",
+    drawRefId: "DRW-2023-015",
+    inspectionDate: "Oct 10, 2026",
+    requestedAmt: "$26,250.00",
+    eligibleAmt: "$23,750.00",
+    completionPct: 97,
+    statusLabel: "PENDING LENDER REVIEW",
+    statusType: "PENDING",
+    actionLabel: "Inspect Packet",
+    actionType: "PRIMARY",
+  },
+  {
+    id: "drw-14",
+    badge: "14",
+    badgeType: "FUNDED",
+    title: "Draw #14 – Millwork & Tile",
+    drawRefId: "DRW-2023-014",
+    inspectionDate: "Sep 20, 2026",
+    requestedAmt: "$45,000.00",
+    eligibleAmt: "$45,000.00",
+    completionPct: 92,
+    statusLabel: "APPROVED & CLEARED",
+    statusType: "FUNDED",
+    actionLabel: "View Receipt",
+    actionType: "OUTLINE",
+  },
+  {
+    id: "drw-13",
+    badge: "R3",
+    badgeType: "REJECTED",
+    title: "Draw #13 Revision – Exterior Paving",
+    drawRefId: "DRW-2023-013-REV",
+    inspectionDate: "Sep 02, 2026",
+    requestedAmt: "$12,500.00",
+    eligibleAmt: "$0.00",
+    completionPct: 0,
+    statusLabel: "REJECTED / DISCREPANCY",
+    subtitle: "Missing inspector photo validation",
+    statusType: "REJECTED",
+    actionLabel: "Fix Notes",
+    actionType: "DANGER_OUTLINE",
+  },
+];
 
 export default function DrawsPage() {
   const queryClient = useQueryClient();
@@ -119,55 +169,7 @@ export default function DrawsPage() {
     { code: "D15", title: "Draw #15 (Active)", amount: "$23,750", date: "In Review", status: "PENDING" },
   ];
 
-  // Core Showcase Rows from design (matching Screenshot 1)
-  const SHOWCASE_ROWS = [
-    {
-      id: "drw-15",
-      badge: "15",
-      badgeType: "PENDING",
-      title: "Draw #15 – Final Trim",
-      drawRefId: "DRW-2023-015",
-      inspectionDate: "Oct 10, 2026",
-      requestedAmt: "$26,250.00",
-      eligibleAmt: "$23,750.00",
-      completionPct: 97,
-      statusLabel: "PENDING LENDER REVIEW",
-      statusType: "PENDING",
-      actionLabel: "Inspect Packet",
-      actionType: "PRIMARY",
-    },
-    {
-      id: "drw-14",
-      badge: "14",
-      badgeType: "FUNDED",
-      title: "Draw #14 – Millwork & Tile",
-      drawRefId: "DRW-2023-014",
-      inspectionDate: "Sep 20, 2026",
-      requestedAmt: "$45,000.00",
-      eligibleAmt: "$45,000.00",
-      completionPct: 92,
-      statusLabel: "APPROVED & CLEARED",
-      statusType: "FUNDED",
-      actionLabel: "View Receipt",
-      actionType: "OUTLINE",
-    },
-    {
-      id: "drw-13",
-      badge: "R3",
-      badgeType: "REJECTED",
-      title: "Draw #13 Revision – Exterior Paving",
-      drawRefId: "DRW-2023-013-REV",
-      inspectionDate: "Sep 02, 2026",
-      requestedAmt: "$12,500.00",
-      eligibleAmt: "$0.00",
-      completionPct: 0,
-      statusLabel: "REJECTED / DISCREPANCY",
-      subtitle: "Missing inspector photo validation",
-      statusType: "REJECTED",
-      actionLabel: "Fix Notes",
-      actionType: "DANGER_OUTLINE",
-    },
-  ];
+
 
   // Filter logic
   const filteredShowcaseRows = useMemo(() => {
@@ -472,7 +474,39 @@ export default function DrawsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
-                {filteredShowcaseRows.map((row) => (
+                {isDrawsLoading ? (
+                  Array.from({ length: 5 }).map((_, idx) => (
+                    <tr key={`draw-skel-${idx}`} className="animate-pulse">
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          <Skeleton className="h-7 w-7 rounded-lg shrink-0" />
+                          <div className="space-y-1.5">
+                            <Skeleton className="h-3.5 w-32" />
+                            <Skeleton className="h-3 w-20" />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <Skeleton className="h-3.5 w-24" />
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <Skeleton className="h-4 w-28" />
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <Skeleton className="h-4 w-28" />
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <Skeleton className="h-3.5 w-16" />
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <Skeleton className="h-5 w-24 rounded-full" />
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <Skeleton className="h-7 w-16 ml-auto rounded-md" />
+                      </td>
+                    </tr>
+                  ))
+                ) : filteredShowcaseRows.map((row) => (
                   <tr
                     key={row.id}
                     className="hover:bg-slate-50/70 transition-colors cursor-pointer"

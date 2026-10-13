@@ -29,6 +29,7 @@ Covers:
 5. Idempotent & Production-Grade:
    - Can be run standalone or via `make seed`.
 """
+# ruff: noqa: E402
 
 import hashlib
 import os
@@ -326,18 +327,18 @@ def seed_database(wipe_first: bool = True):
         lender_builders = get_or_create_party("Builders Capital Investments LLC", "LENDER")
         lender_truly = get_or_create_party("Truly Investor Capital", "LENDER")
         lender_fci = get_or_create_party("FCI Lender Services", "LENDER")
-        lender_bsi = get_or_create_party("BSI Finance", "LENDER")
+        get_or_create_party("BSI Finance", "LENDER")
         get_or_create_party("Oaktree Funding Corporation", "LENDER")
 
         # General Contractors & Trade Vendors
         gc_apex = get_or_create_party("Apex Construction Services LLC", "GC")
-        gc_ks = get_or_create_party("KS Builders LLC", "GC")
-        gc_capex = get_or_create_party("Capex Capital Construction", "GC")
-        vendor_concrete = get_or_create_party("Red Hook Concrete Supply LLC", "VENDOR")
-        vendor_steel = get_or_create_party("Atlantic Iron Works Corp", "VENDOR")
-        vendor_ra_design = get_or_create_party("RA Design & Consultants", "VENDOR")
+        get_or_create_party("KS Builders LLC", "GC")
+        get_or_create_party("Capex Capital Construction", "GC")
+        get_or_create_party("Red Hook Concrete Supply LLC", "VENDOR")
+        get_or_create_party("Atlantic Iron Works Corp", "VENDOR")
+        get_or_create_party("RA Design & Consultants", "VENDOR")
         vendor_reuther = get_or_create_party("Reuther Material Co", "VENDOR")
-        vendor_passaic = get_or_create_party("Passaic Valley Sewage", "VENDOR")
+        get_or_create_party("Passaic Valley Sewage", "VENDOR")
         vendor_jc_tax = get_or_create_party("Jersey City Tax Collector", "VENDOR")
         vendor_amex = get_or_create_party("American Express", "VENDOR")
         vendor_cpa = get_or_create_party("Ami Shah CPA", "VENDOR")
@@ -356,8 +357,8 @@ def seed_database(wipe_first: bool = True):
         investor_kirit = get_or_create_party("Kirit Chothani", "INVESTOR")
         investor_nilesh = get_or_create_party("Nilesh Chothani", "INVESTOR")
         investor_vijay = get_or_create_party("Vijay Soni", "INVESTOR")
-        investor_piyush = get_or_create_party("Piyush Patel", "INVESTOR")
-        investor_alpesh = get_or_create_party("Alpesh Vasani", "INVESTOR")
+        get_or_create_party("Piyush Patel", "INVESTOR")
+        get_or_create_party("Alpesh Vasani", "INVESTOR")
 
         # Laborers
         for laborer in [
@@ -1908,7 +1909,7 @@ def seed_database(wipe_first: bool = True):
         )
         if amex_md.exists():
             with open(amex_md, encoding="utf-8", errors="ignore") as fp:
-                lines = [l.strip() for l in fp if l.strip()]
+                lines = [line.strip() for line in fp if line.strip()]
             i = 0
             while i < len(lines):
                 line = lines[i]

@@ -1,7 +1,7 @@
 """initial_clean_schema
 
 Revision ID: a4a4664f0ee1
-Revises: 
+Revises:
 Create Date: 2026-10-11 22:20:51.645969
 
 """

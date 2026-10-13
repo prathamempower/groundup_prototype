@@ -55,16 +55,14 @@ export function EmptyState({
 }
 
 // 2. Skeleton Component
-export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-export function Skeleton({ className, ...props }: SkeletonProps) {
-  return (
-    <div
-      className={cn("animate-pulse rounded-md bg-subtle", className)}
-      {...props}
-    />
-  );
-}
+export {
+  Skeleton,
+  SkeletonText,
+  SkeletonCard,
+  SkeletonTable,
+  SkeletonPageHeader,
+  type SkeletonProps,
+} from "./skeleton";
 
 // 3. Error State
 export interface ErrorStateProps {

@@ -305,7 +305,10 @@ def request_report_export_alias(
     user: User = Depends(require_role(["OWNER", "CFO"])),
     db: Session = Depends(get_db),
 ) -> ResponseEnvelope[ReportExportRead]:
-    return create_report_export(pid, req, user, db)
+    service = ReportingService(db)
+    export_result = service.export_report(user, pid, req)
+    db.commit()
+    return ResponseEnvelope(data=export_result)
 
 
 # -----------------------------------------------------------------------------

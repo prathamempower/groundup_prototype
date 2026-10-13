@@ -35,6 +35,7 @@ import {
   TrendingDown,
   RefreshCw,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface AlertsViewProps {
   projectId: string;
@@ -409,8 +410,20 @@ export function AlertsView({ projectId, projectName, userRole }: AlertsViewProps
       {activeTab === "ACTIVE" && (
         <div className="space-y-3">
           {isLoadingAlerts ? (
-            <div className="rounded-xl border border-border bg-surface p-12 text-center text-caption text-text-muted animate-pulse">
-              Loading active exceptions and running business rule checks...
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="rounded-xl border border-border bg-surface p-4 shadow-xs space-y-2.5 animate-pulse">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-5 w-20 rounded-full" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              ))}
             </div>
           ) : filteredActiveAlerts.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border bg-surface p-12 text-center shadow-xs">
@@ -557,8 +570,20 @@ export function AlertsView({ projectId, projectName, userRole }: AlertsViewProps
 
           <div className="space-y-3">
             {isLoadingDqi ? (
-              <div className="rounded-xl border border-border bg-surface p-12 text-center text-caption text-text-muted animate-pulse">
-                Auditing project source documents and data quality items...
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="rounded-xl border border-border bg-surface p-4 shadow-xs space-y-2.5 animate-pulse">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-5 w-20 rounded-full" />
+                        <Skeleton className="h-4 w-32" />
+                      </div>
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                    <Skeleton className="h-5 w-2/3" />
+                    <Skeleton className="h-4 w-1/3" />
+                  </div>
+                ))}
               </div>
             ) : filteredDqiList.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border bg-surface p-12 text-center shadow-xs">

@@ -343,149 +343,134 @@ export default function ControlCenterPage() {
             {/* ========================================================================= */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Card 1: APPROVED BUDGET */}
-              <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between">
+              <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                       Approved Budget
                     </span>
-                  </div>
-                  <div className="mt-2.5 flex items-baseline justify-between gap-2">
-                    <span className="text-2xl font-bold font-mono tracking-tight text-slate-900">
-                      $1,471,120
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
+                      100% Locked
                     </span>
-                    <div className="relative h-12 w-12 flex items-center justify-center shrink-0">
-                      <svg className="h-12 w-12 -rotate-90 transform" viewBox="0 0 36 36">
-                        <circle cx="18" cy="18" r="14" fill="transparent" stroke="#eff6ff" strokeWidth="3.5" />
-                        <circle
-                          cx="18"
-                          cy="18"
-                          r="14"
-                          fill="transparent"
-                          stroke="#2563eb"
-                          strokeWidth="3.5"
-                          strokeDasharray="88"
-                          strokeDashoffset="0"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <div className="absolute text-center leading-none">
-                        <span className="text-[10px] font-bold text-slate-900 block font-mono">100%</span>
-                        <span className="text-[7px] uppercase font-semibold text-slate-400 block tracking-tight">Committed</span>
-                      </div>
+                  </div>
+                  <div className="mt-3">
+                    <div className="text-2xl font-bold font-mono tracking-tight text-slate-900">
+                      $1,471,120
+                    </div>
+                    <div className="mt-1 text-xs text-slate-500 flex items-center gap-1.5">
+                      <span className="inline-flex items-center text-emerald-600 font-semibold font-mono">
+                        +$16.1k
+                      </span>
+                      <span>over original plan</span>
                     </div>
                   </div>
-                  <div className="mt-2 text-xs font-semibold text-emerald-600 flex items-center gap-1 font-mono">
-                    <TrendingUp className="h-3.5 w-3.5" />
-                    +$16.1k var <span className="text-slate-400 font-normal font-sans">vs Orig</span>
+                </div>
+
+                <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-1.5">
+                  <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                    <div className="h-full bg-slate-900 rounded-full" style={{ width: "100%" }} />
+                  </div>
+                  <div className="flex justify-between text-[11px] text-slate-400 font-medium">
+                    <span>Base: $1.45M</span>
+                    <span>100% Committed</span>
                   </div>
                 </div>
               </div>
 
-              {/* Card 2: ACTUAL SPEND TO DATE */}
-              <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between">
+              {/* Card 2: ACTUAL SPEND */}
+              <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                      Actual Spend to Date
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      Actual Spend
                     </span>
-                    <span className="rounded bg-blue-50 text-blue-700 px-2 py-0.5 text-[11px] font-semibold border border-blue-200/50">
+                    <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700 border border-blue-200/50">
                       63.6% Spent
                     </span>
                   </div>
-                  <div className="mt-2.5">
-                    <span className="text-2xl font-bold font-mono tracking-tight text-slate-900">
+                  <div className="mt-3">
+                    <div className="text-2xl font-bold font-mono tracking-tight text-slate-900">
                       $936,600
-                    </span>
-                  </div>
-                  <div className="mt-1 text-xs text-slate-500">
-                    Hard: $702.5k • Soft: $234.2k
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5">
-                  <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden flex">
-                    <div className="h-full bg-blue-600" style={{ width: "47.7%" }} />
-                    <div className="h-full bg-cyan-400" style={{ width: "15.9%" }} />
-                  </div>
-                  <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-                    <span>$0k</span>
-                    <span>Target: $1.47M</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 3: CASH / FUNDING STATUS */}
-              <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                      Cash / Funding Status
-                    </span>
-                  </div>
-                  <div className="mt-2.5 flex items-baseline justify-between gap-2">
-                    <span className="text-2xl font-bold font-mono tracking-tight text-slate-900">
-                      $1,086,000
-                    </span>
-                    <div className="relative h-12 w-12 flex items-center justify-center shrink-0">
-                      <svg className="h-12 w-12 -rotate-90 transform" viewBox="0 0 36 36">
-                        <circle cx="18" cy="18" r="14" fill="transparent" stroke="#f0fdf4" strokeWidth="3.5" />
-                        <circle
-                          cx="18"
-                          cy="18"
-                          r="14"
-                          fill="transparent"
-                          stroke="#059669"
-                          strokeWidth="3.5"
-                          strokeDasharray="88"
-                          strokeDashoffset="23"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <div className="absolute text-center leading-none">
-                        <span className="text-[10px] font-bold text-slate-900 block font-mono">73.8%</span>
-                        <span className="text-[7px] uppercase font-semibold text-slate-400 block tracking-tight">Funded</span>
-                      </div>
+                    </div>
+                    <div className="mt-1 text-xs text-slate-500">
+                      Hard Costs: $702.5k • Soft: $234.2k
                     </div>
                   </div>
-                  <div className="mt-2 flex items-center gap-4 text-xs font-medium">
-                    <span className="text-emerald-700 flex items-center gap-1 font-semibold">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-                      Active Funds
-                    </span>
-                    <span className="text-slate-500">On Hand</span>
+                </div>
+
+                <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-1.5">
+                  <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden flex">
+                    <div className="h-full bg-blue-600" style={{ width: "47.7%" }} />
+                    <div className="h-full bg-sky-400" style={{ width: "15.9%" }} />
+                  </div>
+                  <div className="flex justify-between text-[11px] text-slate-400 font-medium">
+                    <span>Paid to Date</span>
+                    <span>Budget: $1.47M</span>
                   </div>
                 </div>
               </div>
 
-              {/* Card 4: FORECAST COMPLETION */}
-              <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between">
+              {/* Card 3: CASH RECEIVED */}
+              <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                      Forecast Completion
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      Cash Received
                     </span>
-                    <span className="rounded bg-amber-50 text-amber-700 px-2 py-0.5 text-[11px] font-semibold flex items-center gap-1 border border-amber-200/60">
-                      <Clock className="h-3 w-3" /> +35d Slip
-                    </span>
-                  </div>
-                  <div className="mt-2.5">
-                    <span className="text-2xl font-bold font-mono tracking-tight text-slate-900">
-                      Dec 15, 2025
+                    <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200/50">
+                      73.8% Drawn
                     </span>
                   </div>
-                  <div className="mt-1 text-xs font-semibold text-amber-600 flex items-center gap-1">
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                    +$28.5k Carry Cost Impact
+                  <div className="mt-3">
+                    <div className="text-2xl font-bold font-mono tracking-tight text-slate-900">
+                      $1,086,000
+                    </div>
+                    <div className="mt-1 text-xs text-slate-500 flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      <span>$149.4k buffer available</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5">
-                  <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden flex">
+                <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-1.5">
+                  <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                    <div className="h-full bg-emerald-600 rounded-full" style={{ width: "73.8%" }} />
+                  </div>
+                  <div className="flex justify-between text-[11px] text-slate-400 font-medium">
+                    <span>Loan Cleared</span>
+                    <span>Facility: $1.47M</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 4: ESTIMATED COMPLETION */}
+              <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      Estimated Completion
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-200/60">
+                      <Clock className="h-3 w-3" /> +35d Delay
+                    </span>
+                  </div>
+                  <div className="mt-3">
+                    <div className="text-2xl font-bold font-mono tracking-tight text-slate-900">
+                      Dec 15, 2025
+                    </div>
+                    <div className="mt-1 text-xs text-amber-700 flex items-center gap-1 font-medium">
+                      <AlertTriangle className="h-3 w-3 shrink-0" />
+                      <span>+$28.5k interest impact</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-1.5">
+                  <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden flex">
                     <div className="h-full bg-emerald-500" style={{ width: "70%" }} />
                     <div className="h-full bg-amber-500" style={{ width: "18%" }} />
                   </div>
-                  <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+                  <div className="flex justify-between text-[11px] text-slate-400 font-medium">
                     <span>Target: Nov 10</span>
                     <span>Forecast: Dec 15</span>
                   </div>

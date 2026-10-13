@@ -2,7 +2,7 @@
   "name": "groundup-ai-workspace",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm --prefix frontend run dev\" \"node -e \\\"const { spawn } = require('child_process'); const py = process.platform === 'win32' ? 'backend\\\\.venv\\\\Scripts\\\\python.exe' : 'backend/.venv/bin/python'; spawn(py, ['-m', 'uvicorn', 'app.main:app', '--reload', '--host', '0.0.0.0', '--port', '8000', '--app-dir', 'backend'], { stdio: 'inherit' });\\\"\"",
+    "dev": "concurrently -n \"frontend,backend\" -c \"cyan.bold,magenta.bold\" --pad-prefix \"npm --prefix frontend run dev\" \"node -e \\\"const fs = require('fs'); const { spawn } = require('child_process'); const py = process.platform === 'win32' ? (fs.existsSync('backend/.venv/Scripts/python.exe') ? 'backend\\\\.venv\\\\Scripts\\\\python.exe' : 'backend\\\\venv\\\\Scripts\\\\python.exe') : (fs.existsSync('backend/.venv/bin/python') ? 'backend/.venv/bin/python' : 'backend/venv/bin/python'); spawn(py, ['-m', 'uvicorn', 'app.main:app', '--reload', '--host', '0.0.0.0', '--port', '8000', '--app-dir', 'backend'], { stdio: 'inherit' });\\\"\"",
     "build": "npm --prefix frontend run build",
     "start": "npm --prefix frontend run start",
     "lint": "npm --prefix frontend run lint",

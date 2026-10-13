@@ -18,9 +18,7 @@ class LogMailer(Mailer):
     """
 
     async def send_mail(self, to_email: str, subject: str, body: str) -> bool:
-        logger.info(
-            f"[LOG_MAILER] To: {to_email} | Subject: {subject}\n--- Body ---\n{body}\n-------------"
-        )
+        logger.info(f"Dispatched email to {to_email} with subject: '{subject}'")
         return True
 
 

@@ -235,7 +235,6 @@ class DocumentService:
             pass
         elif effective_role == "CFO":
             # CFO can access financial types
-            evidence_only_types = ["PHOTO", "PERMIT", "INSPECTION", "SCHEDULE", "MILESTONE_EVIDENCE"]
             # If doc is explicitly a pure site photo/permit without financial aspect, allow or restrict:
             # PRD: CFO financial document types
             pass

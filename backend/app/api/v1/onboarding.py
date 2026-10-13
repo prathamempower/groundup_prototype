@@ -83,7 +83,7 @@ async def list_projects(
                 select(ProjectFinancialPlan)
                 .where(
                     ProjectFinancialPlan.project_id == p.id,
-                    ProjectFinancialPlan.is_active == True,
+                    ProjectFinancialPlan.is_active.is_(True),
                 )
                 .order_by(ProjectFinancialPlan.version_number.desc())
             ).first()

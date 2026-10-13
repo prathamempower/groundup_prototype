@@ -44,6 +44,11 @@ export function SubmissionDetailDrawer({
 
   if (!submission) return null;
 
+  const reviews = submission.reviews || [];
+  const evidenceItems = submission.evidence_items || [];
+  const invoiceNumbers = submission.invoice_numbers || [];
+  const createdTaskIds = submission.created_task_ids || [];
+
   const isGC = currentRole === "GC";
   const canReview = !isGC && ["PM", "CFO", "OWNER"].includes(currentRole);
 
@@ -163,7 +168,7 @@ export function SubmissionDetailDrawer({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
-                {submission.reviews.map((rev) => {
+                {reviews.map((rev) => {
                   const isApproved = rev.status === "APPROVED";
                   const isRejected = rev.status === "REJECTED";
                   return (
@@ -276,64 +281,70 @@ export function SubmissionDetailDrawer({
             <div className="rounded-lg border border-border bg-surface p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-body font-semibold text-text-primary">
-                  Supporting Evidence & Submissions ({submission.evidence_items.length})
+                  Supporting Evidence & Submissions ({evidenceItems.length})
                 </h3>
                 <span className="text-caption text-text-muted">
-                  {submission.invoice_numbers.length > 0 &&
-                    `Invoices: ${submission.invoice_numbers.join(", ")}`}
+                  {invoiceNumbers.length > 0 &&
+                    `Invoices: ${invoiceNumbers.join(", ")}`}
                 </span>
               </div>
 
-              <div className="divide-y divide-border border border-border rounded-lg overflow-hidden">
-                {submission.evidence_items.map((ev) => (
-                  <div key={ev.id} className="p-3 flex items-center justify-between text-caption bg-surface hover:bg-surface-hover transition-colors">
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-surface-hover text-text-muted mt-0.5">
-                        {ev.type === "PHOTO" ? (
-                          <Camera className="h-4 w-4 text-primary" />
-                        ) : ev.type === "LIEN_WAIVER" ? (
-                          <FileCheck className="h-4 w-4 text-success" />
-                        ) : (
-                          <FileText className="h-4 w-4 text-primary" />
-                        )}
-                      </div>
-                      <div>
-                        <div className="font-medium text-text-primary flex items-center gap-2">
-                          <span>{ev.filename}</span>
-                          {ev.invoice_number && (
-                            <span className="rounded bg-primary-subtle px-1.5 py-0.2 text-caption text-primary font-mono">
-                              #{ev.invoice_number}
-                            </span>
+              {evidenceItems.length === 0 ? (
+                <div className="p-4 text-center text-text-muted text-caption bg-surface-hover/30 rounded-lg border border-dashed border-border">
+                  No individual file attachments uploaded for this package.
+                </div>
+              ) : (
+                <div className="divide-y divide-border border border-border rounded-lg overflow-hidden">
+                  {evidenceItems.map((ev) => (
+                    <div key={ev.id} className="p-3 flex items-center justify-between text-caption bg-surface hover:bg-surface-hover transition-colors">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-surface-hover text-text-muted mt-0.5">
+                          {ev.type === "PHOTO" ? (
+                            <Camera className="h-4 w-4 text-primary" />
+                          ) : ev.type === "LIEN_WAIVER" ? (
+                            <FileCheck className="h-4 w-4 text-success" />
+                          ) : (
+                            <FileText className="h-4 w-4 text-primary" />
                           )}
                         </div>
-                        <div className="text-text-muted text-caption mt-0.5">
-                          {ev.vendor_name && <span>{ev.vendor_name} • </span>}
-                          {ev.amount && <span>{formatMoney(ev.amount)} • </span>}
-                          <span>{ev.type}</span>
-                          {ev.notes && <span> — {ev.notes}</span>}
+                        <div>
+                          <div className="font-medium text-text-primary flex items-center gap-2">
+                            <span>{ev.filename}</span>
+                            {ev.invoice_number && (
+                              <span className="rounded bg-primary-subtle px-1.5 py-0.2 text-caption text-primary font-mono">
+                                #{ev.invoice_number}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-text-muted text-caption mt-0.5">
+                            {ev.vendor_name && <span>{ev.vendor_name} • </span>}
+                            {ev.amount && <span>{formatMoney(ev.amount)} • </span>}
+                            <span>{ev.type}</span>
+                            {ev.notes && <span> — {ev.notes}</span>}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {ev.type === "PHOTO" && (
-                      <button
-                        type="button"
-                        onClick={() => setSelectedPhoto(ev.filename)}
-                        className="text-primary hover:underline font-medium text-caption flex items-center gap-1"
-                      >
-                        <span>Preview</span>
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
+                      {ev.type === "PHOTO" && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPhoto(ev.filename)}
+                          className="text-primary hover:underline font-medium text-caption flex items-center gap-1"
+                        >
+                          <span>Preview</span>
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Generated Governance Tasks */}
             <div className="rounded-lg border border-border bg-surface p-4 space-y-3">
               <h3 className="text-body font-semibold text-text-primary">
-                Delegated Sponsor Tasks ({submission.created_task_ids.length})
+                Delegated Sponsor Tasks ({createdTaskIds.length})
               </h3>
               <p className="text-caption text-text-muted">
                 Submitting this package automatically populated actionable tasks in the Sponsor/PM/CFO Readiness dashboard.

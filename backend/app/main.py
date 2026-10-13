@@ -21,8 +21,13 @@ from app.core.middleware import RequestContextMiddleware
 # Logging configuration
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    format="\033[2m%(asctime)s\033[0m | %(message)s",
+    datefmt="%H:%M:%S",
 )
+
+# Silence noisy third-party loggers
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
 logger = logging.getLogger("groundup.main")
 

@@ -6,6 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { getDefaultRouteForRole } from "@/lib/navigation";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 export default function HomePage() {
   const router = useRouter();
 
@@ -20,9 +22,9 @@ export default function HomePage() {
 
   return (
     <div className="flex h-[400px] w-full items-center justify-center">
-      <div className="flex flex-col items-center gap-2">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-        <span className="text-body text-text-secondary">Routing to your workspace...</span>
+      <div className="flex flex-col items-center gap-3">
+        <Skeleton className="h-6 w-6 rounded-full" />
+        <Skeleton className="h-4 w-48" />
       </div>
     </div>
   );

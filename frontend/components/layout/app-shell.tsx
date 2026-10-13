@@ -21,6 +21,18 @@ interface AppShellProps {
   children: React.ReactNode;
 }
 
+const LEGACY_WORKSPACE_SECTIONS = [
+  "control-center",
+  "documents",
+  "budget",
+  "reconciliation",
+  "draws",
+  "timeline",
+  "economics",
+  "submissions",
+  "alerts",
+];
+
 export function AppShell({ children }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -83,21 +95,9 @@ export function AppShell({ children }: AppShellProps) {
   // Legacy route redirect: if user navigates to standalone /budget, /draws, etc., redirect them into the project workspace
   const standaloneMatch = pathname.match(/^\/([^\/]+)$/);
   const standaloneSection = standaloneMatch ? standaloneMatch[1] : null;
-  const legacyWorkspaceSections = [
-    "control-center",
-    "documents",
-    "budget",
-    "reconciliation",
-    "draws",
-    "timeline",
-    "economics",
-    "submissions",
-    "alerts",
-  ];
-
   React.useEffect(() => {
     if (!session || !activeProjectId) return;
-    if (standaloneSection && legacyWorkspaceSections.includes(standaloneSection)) {
+    if (standaloneSection && LEGACY_WORKSPACE_SECTIONS.includes(standaloneSection)) {
       router.replace(`/projects/${activeProjectId}/${standaloneSection}`);
     } else if (pathname === "/investor-update" || pathname.includes("/investor-updates")) {
       router.replace(`/projects/${activeProjectId}/control-center`);

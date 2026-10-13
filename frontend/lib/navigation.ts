@@ -99,7 +99,7 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     label: "Economics",
     path: "economics",
     icon: TrendingUp,
-    allowedRoles: ["OWNER", "CFO"],
+    allowedRoles: ["CFO"],
   },
   {
     id: "submissions",
@@ -146,7 +146,7 @@ export const WORKSPACE_ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   "draws": ["OWNER", "CFO", "PM"],
   "timeline": ["OWNER", "CFO", "PM"],
   "economics": ["OWNER", "CFO"],
-  "submissions": ["CFO", "PM", "GC"],
+  "submissions": ["OWNER", "CFO", "PM", "GC"],
   "alerts": ["OWNER", "CFO", "PM"],
   // "investor-updates": ["OWNER", "INVESTOR"],
   "settings": ["OWNER"],

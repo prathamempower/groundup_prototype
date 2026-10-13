@@ -18,6 +18,7 @@ import {
   Layers,
   CheckCircle2,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function AuditLogPanel() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -147,11 +148,31 @@ export function AuditLogPanel() {
             </thead>
             <tbody className="divide-y divide-border bg-surface">
               {isLoading ? (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-text-muted">
-                    Loading audit trail...
-                  </td>
-                </tr>
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <tr key={`audit-skel-${idx}`} className="animate-pulse">
+                    <td className="py-3 px-4">
+                      <Skeleton className="h-3.5 w-28" />
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-5 w-5 rounded-full" />
+                        <Skeleton className="h-3.5 w-24" />
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <Skeleton className="h-5 w-28 rounded-full" />
+                    </td>
+                    <td className="py-3 px-4">
+                      <Skeleton className="h-3.5 w-20" />
+                    </td>
+                    <td className="py-3 px-4">
+                      <Skeleton className="h-3.5 w-48" />
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <Skeleton className="h-7 w-16 ml-auto rounded-md" />
+                    </td>
+                  </tr>
+                ))
               ) : filteredEvents.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-text-muted">

@@ -44,6 +44,8 @@ export interface DataTableProps<T> {
   activeRowId?: string;
   emptyState?: React.ReactNode;
   className?: string;
+  isLoading?: boolean;
+  skeletonRowCount?: number;
 }
 
 export function DataTable<T>({
@@ -58,6 +60,8 @@ export function DataTable<T>({
   onSelectionChange,
   bulkActions,
   pinnedTotals,
+  isLoading = false,
+  skeletonRowCount = 5,
   onRowClick,
   activeRowId,
   emptyState,
@@ -237,7 +241,27 @@ export function DataTable<T>({
           </thead>
 
           <tbody className="divide-y divide-border/70">
-            {paginatedData.length === 0 ? (
+            {isLoading ? (
+              Array.from({ length: skeletonRowCount }).map((_, rIdx) => (
+                <tr key={`skeleton-row-${rIdx}`} className={cn(compact ? "h-9" : "h-11", "animate-pulse")}>
+                  {selectable && (
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-4 rounded bg-slate-200/80" />
+                    </td>
+                  )}
+                  {columns.map((col, cIdx) => (
+                    <td key={`skeleton-col-${cIdx}`} className="px-4 py-3">
+                      <div
+                        className={cn(
+                          "h-4 rounded bg-slate-200/80",
+                          cIdx === 0 ? "w-36" : cIdx === columns.length - 1 ? "w-20 ml-auto" : "w-24"
+                        )}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : paginatedData.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length + (selectable ? 1 : 0)}

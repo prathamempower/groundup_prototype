@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -424,10 +425,12 @@ export default function ProjectsPortfolioPage() {
                   {/* Hero Image Section */}
                   <div className="relative h-44 w-full overflow-hidden bg-slate-900">
                     {heroImage ? (
-                      <img
+                      <Image
                         src={heroImage}
                         alt={project.name}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-102"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-300 group-hover:scale-102"
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-slate-800 text-slate-400">

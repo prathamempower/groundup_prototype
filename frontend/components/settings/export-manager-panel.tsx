@@ -17,6 +17,7 @@ import {
   Sparkles,
   ExternalLink,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ExportManagerPanelProps {
   projectId: string;
@@ -167,11 +168,34 @@ export function ExportManagerPanel({ projectId }: ExportManagerPanelProps) {
             </thead>
             <tbody className="divide-y divide-border bg-surface">
               {isLoading ? (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center text-text-muted">
-                    Loading exports history...
-                  </td>
-                </tr>
+                Array.from({ length: 4 }).map((_, idx) => (
+                  <tr key={`export-skel-${idx}`} className="animate-pulse">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-4 w-4" />
+                        <Skeleton className="h-3.5 w-32" />
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <Skeleton className="h-5 w-16 rounded-full" />
+                    </td>
+                    <td className="py-3 px-4">
+                      <Skeleton className="h-3.5 w-16" />
+                    </td>
+                    <td className="py-3 px-4">
+                      <Skeleton className="h-3.5 w-24" />
+                    </td>
+                    <td className="py-3 px-4">
+                      <Skeleton className="h-3.5 w-28" />
+                    </td>
+                    <td className="py-3 px-4">
+                      <Skeleton className="h-5 w-20 rounded-full" />
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <Skeleton className="h-7 w-20 ml-auto rounded-md" />
+                    </td>
+                  </tr>
+                ))
               ) : exportsList.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-text-muted">

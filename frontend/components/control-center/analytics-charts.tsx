@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -59,6 +59,11 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
   customProfitData,
 }) => {
   const [activeTab, setActiveTab] = useState<AnalyticsTab>("COST_VS_FUNDING");
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // 1. Cost vs Funding Dataset ($M)
   // Step curve for cleared funding, smooth lines for spend and progress, dashed for planned & forecast
@@ -165,11 +170,6 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
             Projected profit
           </button>
         </div>
-
-        {/* Clean Project Sub-label */}
-        <div className="text-xs text-slate-400 font-medium">
-          {projectName} • Actuals through {asOfDate}
-        </div>
       </div>
 
       {/* Main Clean Chart Area (Without distracting side columns) */}
@@ -177,11 +177,11 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
         {/* Title & Units Header */}
         <div className="mb-4">
           <h3 className="text-sm font-semibold text-slate-900">
-            {activeTab === "COST_VS_FUNDING" && "Cumulative cost, progress, and funding against plan"}
-            {activeTab === "CASH_POSITION" && "Cleared funding minus supported spend, by month"}
-            {activeTab === "PROJECTED_PROFIT" && "Projected profit against the underwritten deal"}
+            {activeTab === "COST_VS_FUNDING" && "Total spend, work done, and money received vs budget"}
+            {activeTab === "CASH_POSITION" && "Money on hand each month (Money received minus money spent)"}
+            {activeTab === "PROJECTED_PROFIT" && "Expected profit vs original target"}
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">Millions of dollars</p>
+          <p className="text-xs text-slate-400 mt-0.5">Amounts in millions ($M)</p>
         </div>
 
         {/* ========================================================================= */}
@@ -189,23 +189,40 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
         {/* ========================================================================= */}
         {activeTab === "COST_VS_FUNDING" && (
           <div>
-            <div className="h-80 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={costFundingData} margin={{ top: 20, right: 20, left: -10, bottom: 5 }}>
+            <div className="w-full relative" style={{ width: "100%", height: 350, minHeight: 350 }}>
+              {isMounted ? (
+                <ResponsiveContainer width="100%" height={350}>
+                  <ComposedChart data={costFundingData} margin={{ top: 25, right: 24, left: -4, bottom: 8 }}>
+                  <defs>
+                    <linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#0f172a" stopOpacity={0.08} />
+                      <stop offset="100%" stopColor="#0f172a" stopOpacity={0.00} />
+                    </linearGradient>
+                    <linearGradient id="verifiedGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.12} />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity={0.00} />
+                    </linearGradient>
+                    <linearGradient id="clearedGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.10} />
+                      <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.00} />
+                    </linearGradient>
+                  </defs>
+
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                   <XAxis
                     dataKey="date"
                     stroke="#94a3b8"
                     fontSize={11}
                     tickLine={false}
-                    axisLine={{ stroke: "#f1f5f9" }}
+                    axisLine={{ stroke: "#e2e8f0" }}
+                    dy={6}
                   />
                   <YAxis
                     stroke="#94a3b8"
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(val) => (val === 0 ? "$0M" : `$${val}M`)}
+                    tickFormatter={(val) => (val === 0 ? "$0" : `$${val}M`)}
                     domain={[0, 22]}
                     ticks={[0, 5, 10, 15, 20]}
                   />
@@ -214,26 +231,26 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                       if (active && payload && payload.length) {
                         const p = payload[0].payload as CostFundingPoint;
                         return (
-                          <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-lg text-xs space-y-2 min-w-[160px]">
-                            <div className="font-semibold text-slate-900 border-b border-slate-100 pb-1.5 flex justify-between items-center">
-                              <span>{label}</span>
+                          <div className="rounded-xl border border-slate-200/80 bg-white/95 backdrop-blur-md p-3.5 shadow-xl text-xs space-y-2 min-w-[190px]">
+                            <div className="font-semibold text-slate-900 border-b border-slate-100 pb-2 flex justify-between items-center">
+                              <span className="text-slate-800">{label}</span>
                               {p.isToday && (
-                                <span className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-mono">
-                                  Current
+                                <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200/60 px-2 py-0.5 rounded-full font-medium">
+                                  Current Month
                                 </span>
                               )}
                             </div>
                             <div className="space-y-1.5 font-mono text-[11px]">
                               <div className="flex items-center justify-between text-slate-600">
                                 <span className="flex items-center gap-1.5 font-sans">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> Planned
+                                  <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> Planned Budget
                                 </span>
                                 <span className="font-semibold text-slate-900">${p.planned.toFixed(2)}M</span>
                               </div>
                               {p.spend !== null && (
                                 <div className="flex items-center justify-between text-slate-600">
                                   <span className="flex items-center gap-1.5 font-sans">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-slate-900" /> Spend
+                                    <span className="h-1.5 w-1.5 rounded-full bg-slate-900" /> Total Spent
                                   </span>
                                   <span className="font-semibold text-slate-900">${p.spend.toFixed(2)}M</span>
                                 </div>
@@ -241,7 +258,7 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                               {p.verifiedProgress !== null && (
                                 <div className="flex items-center justify-between text-slate-600">
                                   <span className="flex items-center gap-1.5 font-sans">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" /> Verified
+                                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" /> Verified Work Done
                                   </span>
                                   <span className="font-semibold text-emerald-700">${p.verifiedProgress.toFixed(2)}M</span>
                                 </div>
@@ -249,7 +266,7 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                               {p.clearedFunding !== null && (
                                 <div className="flex items-center justify-between text-slate-600">
                                   <span className="flex items-center gap-1.5 font-sans">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Cleared
+                                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Money Received
                                   </span>
                                   <span className="font-semibold text-amber-700">${p.clearedFunding.toFixed(2)}M</span>
                                 </div>
@@ -257,15 +274,15 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                               {p.spendForecast !== null && (
                                 <div className="flex items-center justify-between text-slate-600">
                                   <span className="flex items-center gap-1.5 font-sans">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-slate-800" /> Spend forecast
+                                    <span className="h-1.5 w-1.5 rounded-full bg-slate-600" /> Expected Spend
                                   </span>
-                                  <span className="font-semibold text-slate-900">${p.spendForecast.toFixed(2)}M</span>
+                                  <span className="font-semibold text-slate-800">${p.spendForecast.toFixed(2)}M</span>
                                 </div>
                               )}
                               {p.fundingForecast !== null && (
                                 <div className="flex items-center justify-between text-slate-600">
                                   <span className="flex items-center gap-1.5 font-sans">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Funding forecast
+                                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> Expected Funding
                                   </span>
                                   <span className="font-semibold text-amber-700">${p.fundingForecast.toFixed(2)}M</span>
                                 </div>
@@ -279,67 +296,74 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                   />
                   <ReferenceLine
                     x="Oct 26"
-                    stroke="#94a3b8"
-                    strokeDasharray="3 3"
-                    label={{ value: "Today", position: "top", fill: "#64748b", fontSize: 11, fontWeight: 500 }}
+                    stroke="#0284c7"
+                    strokeDasharray="4 4"
+                    strokeWidth={1.5}
+                    label={{
+                      value: "Today",
+                      position: "top",
+                      fill: "#0369a1",
+                      fontSize: 11,
+                      fontWeight: 600,
+                    }}
                   />
 
-                  {/* 1. Planned (Dashed Gray) */}
+                  {/* 1. Planned (Dashed Indigo-Gray Baseline) */}
                   <Line
                     type="monotone"
                     dataKey="planned"
                     stroke="#94a3b8"
-                    strokeWidth={1.5}
+                    strokeWidth={1.75}
                     strokeDasharray="4 4"
                     dot={false}
                   />
 
-                  {/* 2. Spend (Solid Dark Line) */}
+                  {/* 2. Spend (Crisp Dark Slate) */}
                   <Line
                     type="monotone"
                     dataKey="spend"
                     stroke="#0f172a"
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     dot={false}
                     connectNulls={false}
                   />
 
-                  {/* 3. Verified Progress (Solid Emerald Line) */}
+                  {/* 3. Verified Progress (Emerald) */}
                   <Line
                     type="monotone"
                     dataKey="verifiedProgress"
-                    stroke="#059669"
-                    strokeWidth={2}
+                    stroke="#10b981"
+                    strokeWidth={2.25}
                     dot={false}
                     connectNulls={false}
                   />
 
-                  {/* 4. Cleared Funding (Orange Stepped Line) */}
+                  {/* 4. Cleared Funding (Amber Stepped Profile) */}
                   <Line
                     type="stepAfter"
                     dataKey="clearedFunding"
-                    stroke="#d97706"
+                    stroke="#f59e0b"
                     strokeWidth={2}
                     dot={false}
                     connectNulls={false}
                   />
 
-                  {/* 5. Spend Forecast (Dashed Dark Line) */}
+                  {/* 5. Spend Forecast (Dashed Slate) */}
                   <Line
                     type="monotone"
                     dataKey="spendForecast"
-                    stroke="#334155"
-                    strokeWidth={1.75}
+                    stroke="#475569"
+                    strokeWidth={2}
                     strokeDasharray="4 4"
                     dot={false}
                     connectNulls={false}
                   />
 
-                  {/* 6. Funding Forecast (Dashed Amber Stepped Line) */}
+                  {/* 6. Funding Forecast (Dashed Amber Stepped Profile) */}
                   <Line
                     type="stepAfter"
                     dataKey="fundingForecast"
-                    stroke="#f59e0b"
+                    stroke="#fbbf24"
                     strokeWidth={1.75}
                     strokeDasharray="4 4"
                     dot={false}
@@ -347,24 +371,29 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                   />
                 </ComposedChart>
               </ResponsiveContainer>
+              ) : (
+                <div className="h-full w-full flex items-center justify-center bg-slate-50/50 rounded-lg animate-pulse text-xs text-slate-400">
+                  Loading chart...
+                </div>
+              )}
             </div>
 
-            {/* Clean Bottom Legend matching Screenshot 1 */}
-            <div className="flex flex-wrap items-center justify-start gap-6 mt-4 pt-3 border-t border-slate-100 text-xs text-slate-600 font-medium">
-              <span className="flex items-center gap-2">
-                <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-400" /> Planned
+            {/* Elevated Modern Legend with Clean Interactive Visual Tokens */}
+            <div className="flex flex-wrap items-center justify-start gap-6 mt-5 pt-3.5 border-t border-slate-100 text-xs font-medium">
+              <span className="flex items-center gap-2 text-slate-600">
+                <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-400" /> Planned Budget
               </span>
-              <span className="flex items-center gap-2 text-slate-900">
-                <span className="h-0.5 w-4 bg-slate-900" /> Spend
+              <span className="flex items-center gap-2 text-slate-900 font-semibold">
+                <span className="h-1 w-4 rounded-full bg-slate-900" /> Total Spent
               </span>
-              <span className="flex items-center gap-2 text-emerald-700">
-                <span className="h-0.5 w-4 bg-emerald-600" /> Verified progress
+              <span className="flex items-center gap-2 text-emerald-700 font-semibold">
+                <span className="h-1 w-4 rounded-full bg-emerald-500" /> Work Done
               </span>
-              <span className="flex items-center gap-2 text-amber-700">
-                <span className="h-0.5 w-4 bg-amber-600" /> Cleared funding
+              <span className="flex items-center gap-2 text-amber-700 font-semibold">
+                <span className="h-1 w-4 rounded-full bg-amber-500" /> Money Received
               </span>
               <span className="flex items-center gap-2 text-slate-500">
-                <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-600" /> Forecast
+                <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-600" /> Future Estimate
               </span>
             </div>
           </div>
@@ -375,23 +404,25 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
         {/* ========================================================================= */}
         {activeTab === "CASH_POSITION" && (
           <div>
-            <div className="h-80 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={cashPositionData} margin={{ top: 20, right: 20, left: -10, bottom: 5 }}>
+            <div className="w-full relative" style={{ width: "100%", height: 350, minHeight: 350 }}>
+              {isMounted ? (
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart data={cashPositionData} margin={{ top: 25, right: 24, left: -4, bottom: 8 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                   <XAxis
                     dataKey="date"
                     stroke="#94a3b8"
                     fontSize={11}
                     tickLine={false}
-                    axisLine={{ stroke: "#f1f5f9" }}
+                    axisLine={{ stroke: "#e2e8f0" }}
+                    dy={6}
                   />
                   <YAxis
                     stroke="#94a3b8"
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(val) => (val === 0 ? "$0M" : val > 0 ? `$${val.toFixed(2)}M` : `-$${Math.abs(val).toFixed(2)}M`)}
+                    tickFormatter={(val) => (val === 0 ? "$0" : val > 0 ? `+$${val.toFixed(2)}M` : `-$${Math.abs(val).toFixed(2)}M`)}
                     domain={[-1.2, 1.2]}
                     ticks={[-1.1, -0.55, 0, 0.55, 1.1]}
                   />
@@ -401,32 +432,32 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                         const p = payload[0].payload as CashPositionPoint;
                         const isSurplus = p.position >= 0;
                         return (
-                          <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-lg text-xs space-y-1 min-w-[140px]">
-                            <div className="font-semibold text-slate-900 border-b border-slate-100 pb-1 flex justify-between items-center">
+                          <div className="rounded-xl border border-slate-200/80 bg-white/95 backdrop-blur-md p-3.5 shadow-xl text-xs space-y-1.5 min-w-[170px]">
+                            <div className="font-semibold text-slate-900 border-b border-slate-100 pb-1.5 flex justify-between items-center">
                               <span>{label}</span>
                               {p.isToday && (
-                                <span className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-mono">
+                                <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200/60 px-2 py-0.5 rounded-full font-medium">
                                   Current
                                 </span>
                               )}
                             </div>
                             <div className="pt-1.5 flex items-center justify-between font-mono text-[11px]">
-                              <span className="flex items-center gap-1.5 font-sans text-slate-500">
+                              <span className="flex items-center gap-1.5 font-sans text-slate-600">
                                 <span
                                   className={`h-2 w-2 rounded-full ${
-                                    isSurplus ? "bg-emerald-600" : "bg-rose-600"
+                                    isSurplus ? "bg-emerald-500" : "bg-rose-500"
                                   }`}
                                 />
-                                Cash position:
+                                Cash in Bank:
                               </span>
                               <span
-                                className={`font-semibold ${
+                                className={`font-bold ${
                                   isSurplus ? "text-emerald-700" : "text-rose-600"
                                 }`}
                               >
                                 {isSurplus
-                                  ? `+$${p.position.toFixed(2)}M`
-                                  : `-$${Math.abs(p.position).toFixed(2)}M`}
+                                  ? `+$${p.position.toFixed(2)}M (Extra Cash)`
+                                  : `-$${Math.abs(p.position).toFixed(2)}M (Cash Needed)`}
                               </span>
                             </div>
                           </div>
@@ -435,38 +466,44 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                       return null;
                     }}
                   />
-                  <ReferenceLine y={0} stroke="#cbd5e1" strokeWidth={1} />
+                  <ReferenceLine y={0} stroke="#94a3b8" strokeWidth={1} strokeDasharray="2 2" />
                   <ReferenceLine
                     x="Oct 26"
-                    stroke="#94a3b8"
-                    strokeDasharray="3 3"
-                    label={{ value: "Today", position: "top", fill: "#64748b", fontSize: 11, fontWeight: 500 }}
+                    stroke="#0284c7"
+                    strokeDasharray="4 4"
+                    strokeWidth={1.5}
+                    label={{ value: "Today", position: "top", fill: "#0369a1", fontSize: 11, fontWeight: 600 }}
                   />
-                  <Bar dataKey="position" maxBarSize={28}>
+                  <Bar dataKey="position" maxBarSize={22} radius={[4, 4, 0, 0]}>
                     {cashPositionData.map((entry, index) => {
-                      let fillColor = "#059669"; // Green (Funded ahead)
+                      let fillColor = "#10b981"; // Emerald
                       if (entry.position < 0) {
-                        fillColor = entry.isForecast ? "#fca5a5" : "#dc2626"; // Pale red for forecast, strong red for actual shortfall
+                        fillColor = entry.isForecast ? "#f87171" : "#e11d48"; // Rose-red
                       } else if (entry.isForecast) {
-                        fillColor = "#86efac";
+                        fillColor = "#6ee7b7";
                       }
                       return <Cell key={`cell-${index}`} fill={fillColor} />;
                     })}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+              ) : (
+                <div className="h-full w-full flex items-center justify-center bg-slate-50/50 rounded-lg animate-pulse text-xs text-slate-400">
+                  Loading chart...
+                </div>
+              )}
             </div>
 
-            {/* Clean Bottom Legend matching Screenshot 3 */}
-            <div className="flex flex-wrap items-center justify-start gap-6 mt-4 pt-3 border-t border-slate-100 text-xs font-medium">
-              <span className="flex items-center gap-2 text-slate-700">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" /> Funded ahead of spend
+            {/* Elevated Modern Legend */}
+            <div className="flex flex-wrap items-center justify-start gap-6 mt-5 pt-3.5 border-t border-slate-100 text-xs font-medium">
+              <span className="flex items-center gap-2 text-emerald-800 font-semibold">
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Extra Cash in Bank
               </span>
-              <span className="flex items-center gap-2 text-slate-700">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-600" /> Shortfall
+              <span className="flex items-center gap-2 text-rose-800 font-semibold">
+                <span className="h-2.5 w-2.5 rounded-full bg-rose-600" /> Cash Shortage
               </span>
-              <span className="flex items-center gap-2 text-slate-700">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-300" /> Forecast
+              <span className="flex items-center gap-2 text-slate-500">
+                <span className="h-2.5 w-2.5 rounded-full bg-rose-300" /> Expected Shortage
               </span>
             </div>
           </div>
@@ -477,16 +514,18 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
         {/* ========================================================================= */}
         {activeTab === "PROJECTED_PROFIT" && (
           <div>
-            <div className="h-80 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={projectedProfitData} margin={{ top: 20, right: 20, left: -10, bottom: 5 }}>
+            <div className="w-full relative" style={{ width: "100%", height: 350, minHeight: 350 }}>
+              {isMounted ? (
+                <ResponsiveContainer width="100%" height={350}>
+                  <LineChart data={projectedProfitData} margin={{ top: 25, right: 24, left: -4, bottom: 8 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                   <XAxis
                     dataKey="date"
                     stroke="#94a3b8"
                     fontSize={11}
                     tickLine={false}
-                    axisLine={{ stroke: "#f1f5f9" }}
+                    axisLine={{ stroke: "#e2e8f0" }}
+                    dy={6}
                   />
                   <YAxis
                     stroke="#94a3b8"
@@ -502,27 +541,27 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                       if (active && payload && payload.length) {
                         const p = payload[0].payload as ProjectedProfitPoint;
                         return (
-                          <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-lg text-xs space-y-1.5 min-w-[150px]">
-                            <div className="font-semibold text-slate-900 border-b border-slate-100 pb-1 flex justify-between items-center">
+                          <div className="rounded-xl border border-slate-200/80 bg-white/95 backdrop-blur-md p-3.5 shadow-xl text-xs space-y-1.5 min-w-[170px]">
+                            <div className="font-semibold text-slate-900 border-b border-slate-100 pb-1.5 flex justify-between items-center">
                               <span>{label}</span>
                               {p.isToday && (
-                                <span className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-mono">
+                                <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200/60 px-2 py-0.5 rounded-full font-medium">
                                   Current
                                 </span>
                               )}
                             </div>
-                            <div className="space-y-1 font-mono text-[11px] pt-1">
+                            <div className="space-y-1.5 font-mono text-[11px] pt-1">
                               <div className="flex justify-between items-center text-slate-600">
                                 <span className="flex items-center gap-1.5 font-sans">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> Underwritten
+                                  <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> Original Target
                                 </span>
                                 <span className="font-semibold text-slate-900">${p.underwritten.toFixed(2)}M</span>
                               </div>
                               <div className="flex justify-between items-center text-slate-600">
                                 <span className="flex items-center gap-1.5 font-sans">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-slate-900" /> Projected profit
+                                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-600" /> Expected Profit
                                 </span>
-                                <span className="font-bold text-slate-900">${p.projectedProfit.toFixed(2)}M</span>
+                                <span className="font-bold text-indigo-950">${p.projectedProfit.toFixed(2)}M</span>
                               </div>
                             </div>
                           </div>
@@ -533,17 +572,18 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                   />
                   <ReferenceLine
                     x="Aug 26"
-                    stroke="#94a3b8"
-                    strokeDasharray="3 3"
-                    label={{ value: "Today", position: "top", fill: "#64748b", fontSize: 11, fontWeight: 500 }}
+                    stroke="#0284c7"
+                    strokeDasharray="4 4"
+                    strokeWidth={1.5}
+                    label={{ value: "Today", position: "top", fill: "#0369a1", fontSize: 11, fontWeight: 600 }}
                   />
                   {/* Underwritten line (dashed) */}
                   <Line
                     type="monotone"
                     dataKey="underwritten"
                     stroke="#94a3b8"
-                    strokeWidth={1.5}
-                    strokeDasharray="3 3"
+                    strokeWidth={1.75}
+                    strokeDasharray="4 4"
                     dot={false}
                   />
                   {/* Projected profit line with markers */}
@@ -551,21 +591,26 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                     type="monotone"
                     dataKey="projectedProfit"
                     stroke="#0f172a"
-                    strokeWidth={2}
-                    dot={{ r: 3, fill: "#0f172a" }}
-                    activeDot={{ r: 5 }}
+                    strokeWidth={2.5}
+                    dot={{ r: 3.5, fill: "#0f172a", stroke: "#ffffff", strokeWidth: 1.5 }}
+                    activeDot={{ r: 5.5, fill: "#0284c7" }}
                   />
                 </LineChart>
               </ResponsiveContainer>
+              ) : (
+                <div className="h-full w-full flex items-center justify-center bg-slate-50/50 rounded-lg animate-pulse text-xs text-slate-400">
+                  Loading chart...
+                </div>
+              )}
             </div>
 
-            {/* Clean Bottom Legend matching Screenshot 2 */}
-            <div className="flex flex-wrap items-center justify-start gap-6 mt-4 pt-3 border-t border-slate-100 text-xs font-medium">
-              <span className="flex items-center gap-2 text-slate-900">
-                <span className="h-0.5 w-4 bg-slate-900" /> Projected profit
+            {/* Elevated Modern Legend */}
+            <div className="flex flex-wrap items-center justify-start gap-6 mt-5 pt-3.5 border-t border-slate-100 text-xs font-medium">
+              <span className="flex items-center gap-2 text-slate-900 font-semibold">
+                <span className="h-1 w-4 rounded-full bg-slate-900" /> Expected Profit
               </span>
               <span className="flex items-center gap-2 text-slate-500">
-                <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-400" /> Underwritten
+                <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-400" /> Original Target
               </span>
             </div>
           </div>
