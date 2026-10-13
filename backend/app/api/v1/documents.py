@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import get_current_user, require_project_scope, require_role
 from app.core.envelope import ResponseEnvelope
-from app.db.models import Project, User
+from app.db.models import Document, Project, User
 from app.db.session import get_db
 from app.modules.documents.schemas import (
     ConfirmUploadRequest,
@@ -22,7 +22,6 @@ from app.modules.documents.schemas import (
     UploadUrlRequest,
     UploadUrlResponse,
 )
-from app.db.models import Document
 from app.modules.documents.service import DocumentService
 
 router = APIRouter()
@@ -152,7 +151,6 @@ async def download_document_content(
             content = await service.storage.get_file(original_doc.storage_key)
     if not content:
         # Check fallback to local sample documents if available
-        import os
         from pathlib import Path
         for sample_path in [
             Path("frontend/public/sample-docs") / doc.original_filename,
@@ -168,7 +166,7 @@ async def download_document_content(
                     pass
     if not content:
         content = b""
-    
+
     disposition = "inline" if inline else "attachment"
     return RawResponse(
         content=content,

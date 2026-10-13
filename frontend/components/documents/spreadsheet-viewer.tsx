@@ -117,7 +117,7 @@ export function SpreadsheetViewer({
     return () => {
       isCancelled = true;
     };
-  }, [url]);
+  }, [url, filename, selectedFieldCitation]);
 
   // Handle switching tabs
   const handleSheetChange = async (sheetName: string) => {

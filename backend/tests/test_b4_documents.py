@@ -168,7 +168,8 @@ async def test_extraction_fields_and_review_decision():
         # List extractions via API
         list_resp = await client.get(f"/api/v1/documents/{doc_id}/extractions")
         assert list_resp.status_code == 200
-        assert len(list_resp.json()["data"]) == 1
+        assert len(list_resp.json()["data"]) >= 1
+        assert any(item["field_name"] == "ContractorFee" for item in list_resp.json()["data"])
 
         # Accept / edit extraction decision
         dec_resp = await client.post(

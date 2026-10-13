@@ -81,7 +81,7 @@ export function AppShell({ children }: AppShellProps) {
   const workspaceSection = workspaceMatch ? workspaceMatch[2] || "control-center" : null;
 
   // Verify project membership for workspace routes
-  const memberships = session?.user.project_memberships || [];
+  const memberships = React.useMemo(() => session?.user.project_memberships || [], [session?.user.project_memberships]);
   
   // Track last visited workspace project in localStorage
   React.useEffect(() => {

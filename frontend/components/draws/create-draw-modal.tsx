@@ -64,23 +64,26 @@ export function CreateDrawModal({
     }));
   }, [budgetData, projectId]);
 
-  const handleApplyPreset = (targetNum: number) => {
-    const preset: Record<string, string> = {};
-    eligibleLines.forEach((line) => {
-      const task = EXCEL_DRAW_TASKS.find((t) => t.number === line.code);
-      if (task && (task.draws[targetNum] || 0) > 0) {
-        preset[line.id] = String(task.draws[targetNum]);
-      }
-    });
-    // For Draw 4, ensure demolition and grading lines are also present if needed
-    if (targetNum === 4) {
+  const handleApplyPreset = React.useCallback(
+    (targetNum: number) => {
+      const preset: Record<string, string> = {};
       eligibleLines.forEach((line) => {
-        if (line.code === "2.04" && !preset[line.id]) preset[line.id] = "500000";
-        if (line.code === "2.05" && !preset[line.id]) preset[line.id] = "550000";
+        const task = EXCEL_DRAW_TASKS.find((t) => t.number === line.code);
+        if (task && (task.draws[targetNum] || 0) > 0) {
+          preset[line.id] = String(task.draws[targetNum]);
+        }
       });
-    }
-    setSelectedLines(preset);
-  };
+      // For Draw 4, ensure demolition and grading lines are also present if needed
+      if (targetNum === 4) {
+        eligibleLines.forEach((line) => {
+          if (line.code === "2.04" && !preset[line.id]) preset[line.id] = "500000";
+          if (line.code === "2.05" && !preset[line.id]) preset[line.id] = "550000";
+        });
+      }
+      setSelectedLines(preset);
+    },
+    [eligibleLines]
+  );
 
   useEffect(() => {
     if (open) {
@@ -89,7 +92,7 @@ export function CreateDrawModal({
       setErrorMsg(null);
       handleApplyPreset(targetNum);
     }
-  }, [open, nextDrawNumber, eligibleLines]);
+  }, [open, nextDrawNumber, handleApplyPreset]);
 
   const handleLineAmountChange = (lineId: string, cents: string) => {
     setSelectedLines((prev) => ({

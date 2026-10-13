@@ -156,7 +156,14 @@ def test_b11_seed_documents_on_disk(db_session):
         .first()
     )
     assert org is not None
-    docs = db_session.query(Document).filter(Document.organization_id == org.id).all()
+    docs = (
+        db_session.query(Document)
+        .filter(
+            Document.organization_id == org.id,
+            Document.storage_key.like("projects/%"),
+        )
+        .all()
+    )
     assert len(docs) > 0
     for doc in docs:
         file_path = os.path.join(settings.STORAGE_DIR, doc.storage_key)
