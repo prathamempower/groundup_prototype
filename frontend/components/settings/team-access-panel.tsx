@@ -7,6 +7,8 @@ import { TeamMember, ProjectInvitation } from "@/lib/types";
 import { formatDate } from "@/lib/format";
 import { InviteMemberModal } from "./invite-member-modal";
 import { EditRoleModal } from "./edit-role-modal";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Users,
   UserPlus,
@@ -20,6 +22,7 @@ import {
   Lock,
   CheckCircle2,
   XCircle,
+  Info,
 } from "lucide-react";
 
 interface TeamAccessPanelProps {
@@ -62,246 +65,355 @@ export function TeamAccessPanel({ projectId }: TeamAccessPanelProps) {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner with Invite Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-lg border border-border bg-surface p-5 shadow-xs">
-        <div>
-          <h3 className="text-section font-bold text-text-primary flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            <span>Team Permissions & Security Boundary Management</span>
-          </h3>
-          <p className="text-caption text-text-secondary mt-0.5">
-            Manage authorized stakeholders, role scopes, and project access boundaries.
-          </p>
+      {/* Project Team Card */}
+      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden transition-all">
+        {/* Header with Title and Invite Button */}
+        <div className="flex items-center justify-between p-5 px-6 bg-slate-50/50 border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <span className="p-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-100/80 shadow-2xs">
+              <Users className="h-4 w-4" />
+            </span>
+            <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+              Project Team
+            </h3>
+            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200/60">
+              {teamMembers.length}
+            </span>
+          </div>
+
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setIsInviteOpen(true)}
+            className="flex items-center gap-1.5 shadow-sm shrink-0 font-medium h-8 px-3 text-xs"
+          >
+            <UserPlus className="h-3.5 w-3.5" />
+            <span>Invite Member</span>
+          </Button>
         </div>
 
-        <button
-          onClick={() => setIsInviteOpen(true)}
-          className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body font-medium text-white hover:bg-primary-hover shadow-xs transition-colors shrink-0"
-        >
-          <UserPlus className="h-4 w-4" />
-          <span>Invite Team Member</span>
-        </button>
-      </div>
+        {/* Team Members Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[11px] font-bold text-slate-500 tracking-wider uppercase">
+                <th className="py-3 px-6 min-w-[240px]">Member</th>
+                <th className="py-3 px-5 min-w-[220px]">Email</th>
+                <th className="py-3 px-5 min-w-[140px]">Status</th>
+                <th className="py-3 px-6 text-right min-w-[80px]">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100/80 text-xs">
+              {teamMembers.map((member) => {
+                const roleConfig: Record<string, { badge: string; avatar: string; roleLabel: string }> = {
+                  OWNER: {
+                    badge: "bg-purple-50 text-purple-700 border-purple-200/60",
+                    avatar: "bg-gradient-to-tr from-purple-600 to-indigo-600 text-white shadow-2xs",
+                    roleLabel: "Owner",
+                  },
+                  CFO: {
+                    badge: "bg-blue-50 text-blue-700 border-blue-200/60",
+                    avatar: "bg-gradient-to-tr from-blue-600 to-cyan-600 text-white shadow-2xs",
+                    roleLabel: "CFO / Finance",
+                  },
+                  PM: {
+                    badge: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
+                    avatar: "bg-gradient-to-tr from-emerald-600 to-teal-600 text-white shadow-2xs",
+                    roleLabel: "Project Manager",
+                  },
+                  GC: {
+                    badge: "bg-amber-50 text-amber-700 border-amber-200/60",
+                    avatar: "bg-gradient-to-tr from-amber-600 to-orange-500 text-white shadow-2xs",
+                    roleLabel: "General Contractor",
+                  },
+                  INVESTOR: {
+                    badge: "bg-purple-50 text-purple-700 border-purple-200/60",
+                    avatar: "bg-gradient-to-tr from-purple-600 to-pink-600 text-white shadow-2xs",
+                    roleLabel: "Investor (LP)",
+                  },
+                };
 
-      {/* Active Team Members Register */}
-      <div className="rounded-lg border border-border bg-surface p-6 shadow-xs space-y-4">
-        <h4 className="text-caption font-semibold uppercase tracking-wider text-text-muted">
-          Active Project Team Members ({teamMembers.length})
-        </h4>
+                const currentRoleConfig = roleConfig[member.role] || {
+                  badge: "bg-slate-50 text-slate-700 border-slate-200",
+                  avatar: "bg-gradient-to-tr from-slate-600 to-slate-700 text-white shadow-2xs",
+                  roleLabel: member.role,
+                };
 
-        <div className="divide-y divide-border">
-          {teamMembers.map((member) => (
-            <div
-              key={member.id}
-              className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4"
-            >
-              <div className="flex items-start gap-3.5">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-subtle font-bold text-caption text-primary border border-primary/20">
-                  {member.avatarInitials}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h5 className="text-body font-bold text-text-primary">{member.name}</h5>
-                    <span
-                      className={`rounded px-2 py-0.5 text-caption font-bold ${
-                        member.role === "OWNER"
-                          ? "bg-purple-100 text-purple-800"
-                          : member.role === "CFO"
-                          ? "bg-blue-100 text-blue-800"
-                          : member.role === "PM"
-                          ? "bg-emerald-100 text-emerald-800"
-                          : member.role === "GC"
-                          ? "bg-amber-100 text-amber-800"
-                          : "bg-indigo-100 text-indigo-800"
-                      }`}
-                    >
-                      {member.role}
-                    </span>
-                    {member.status === "REVOKED" && (
-                      <span className="rounded bg-danger-subtle px-2 py-0.5 text-caption font-semibold text-danger">
-                        Revoked
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-caption text-text-muted mt-0.5">
-                    {member.title} &bull; {member.company} &bull; <span className="font-mono">{member.email}</span>
-                  </div>
-                  {member.scope && (
-                    <div className="text-caption text-text-secondary mt-1 bg-subtle/40 rounded px-2 py-1 inline-block">
-                      <strong className="text-text-primary">Scope:</strong> {member.scope}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2 self-end md:self-center">
-                <button
-                  onClick={() => setEditingMember(member)}
-                  className="flex items-center gap-1 rounded-md border border-border bg-subtle px-2.5 py-1 text-caption font-medium text-text-primary hover:bg-subtle/80"
-                >
-                  <Edit2 className="h-3.5 w-3.5 text-text-muted" />
-                  Edit Role
-                </button>
-                {member.status !== "REVOKED" && member.role !== "OWNER" && (
-                  <button
-                    onClick={() => {
-                      if (confirm(`Revoke access for ${member.name}?`)) {
-                        revokeMutation.mutate(member.id);
-                      }
-                    }}
-                    className="flex items-center gap-1 rounded-md border border-danger-border bg-danger-subtle px-2.5 py-1 text-caption font-medium text-danger hover:bg-danger/20"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Revoke
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Pending Invitations Table */}
-      {invitations.length > 0 && (
-        <div className="rounded-lg border border-border bg-surface p-6 shadow-xs space-y-4">
-          <h4 className="text-caption font-semibold uppercase tracking-wider text-text-muted">
-            Pending Project Invitations ({invitations.length})
-          </h4>
-
-          <div className="rounded-md border border-border overflow-hidden">
-            <table className="w-full text-left text-body">
-              <thead className="bg-subtle border-b border-border text-caption font-semibold text-text-secondary">
-                <tr>
-                  <th className="py-2.5 px-4">Invited Email</th>
-                  <th className="py-2.5 px-4">Target Role</th>
-                  <th className="py-2.5 px-4">Assigned Scope</th>
-                  <th className="py-2.5 px-4">Invited By</th>
-                  <th className="py-2.5 px-4">Status</th>
-                  <th className="py-2.5 px-4 text-right">Invite Token / Link</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border bg-surface">
-                {invitations.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-subtle/30">
-                    <td className="py-2.5 px-4 font-mono font-medium text-text-primary">{inv.email}</td>
-                    <td className="py-2.5 px-4">
-                      <span className="rounded bg-subtle px-2 py-0.5 text-caption font-bold text-text-primary">
-                        {inv.role}
-                      </span>
+                return (
+                  <tr key={member.id} className="hover:bg-slate-50/60 transition-colors group">
+                    {/* Member Name + Role Subtitle */}
+                    <td className="py-3.5 px-6">
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "h-9 w-9 aspect-square rounded-full flex items-center justify-center font-bold text-xs shrink-0 tracking-tight select-none shadow-2xs",
+                          currentRoleConfig.avatar
+                        )}>
+                          {member.avatarInitials}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                            {member.name}
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className={cn(
+                              "inline-flex items-center rounded-md px-1.5 py-0.2 text-[10px] font-semibold border tracking-tight",
+                              currentRoleConfig.badge
+                            )}>
+                              {currentRoleConfig.roleLabel}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </td>
-                    <td className="py-2.5 px-4 text-caption text-text-secondary">{inv.scope || "Standard scope"}</td>
-                    <td className="py-2.5 px-4 text-caption text-text-muted">{inv.invited_by}</td>
-                    <td className="py-2.5 px-4">
-                      <span
-                        className={`rounded px-2 py-0.5 text-caption font-semibold ${
-                          inv.status === "ACCEPTED"
-                            ? "bg-success-subtle text-success border border-success-border"
-                            : "bg-warning-subtle text-warning border border-warning-border"
-                        }`}
-                      >
-                        {inv.status}
-                      </span>
+
+                    {/* Email */}
+                    <td className="py-3.5 px-5 text-slate-600 font-normal">
+                      {member.email}
                     </td>
-                    <td className="py-2.5 px-4 text-right">
+
+                    {/* Status (Clickable to change) */}
+                    <td className="py-3.5 px-5">
                       <button
-                        onClick={() => inv.invitation_url && handleCopyInviteLink(inv.invitation_url)}
-                        disabled={!inv.invitation_url}
-                        title={!inv.invitation_url ? "The invitation link is only available when it is created." : undefined}
-                        className="inline-flex items-center gap-1 rounded bg-subtle border border-border px-2 py-1 text-caption font-medium text-text-primary hover:bg-subtle/80"
+                        type="button"
+                        onClick={() => setEditingMember(member)}
+                        className="inline-flex items-center gap-1.5 text-xs transition-opacity hover:opacity-80 cursor-pointer"
+                        title="Click to change member status"
                       >
-                        {copiedToken === inv.invitation_url ? (
-                          <>
-                            <Check className="h-3 w-3 text-success" />
-                            <span className="text-success">Copied!</span>
-                          </>
+                        {member.status === "REVOKED" ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs text-rose-700 font-medium bg-rose-50/80 px-2 py-0.5 rounded-md border border-rose-200/50">
+                            <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                            Revoked
+                          </span>
                         ) : (
-                          <>
-                            <Copy className="h-3 w-3 text-text-muted" />
-                            <span>Copy Link</span>
-                          </>
+                          <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-medium bg-emerald-50/80 px-2 py-0.5 rounded-md border border-emerald-200/50">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            Active
+                          </span>
                         )}
                       </button>
                     </td>
+
+                    {/* Actions */}
+                    <td className="py-3.5 px-6 text-right">
+                      <div className="flex items-center justify-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingMember(member)}
+                          className="h-8 w-8 p-0 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                          title="Manage Member Access"
+                        >
+                          <span className="font-bold tracking-widest text-sm leading-none select-none">···</span>
+                        </Button>
+                      </div>
+                    </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
 
-      {/* Role Security Permissions Matrix */}
-      <div className="rounded-lg border border-border bg-surface p-6 shadow-xs space-y-4">
-        <h4 className="text-caption font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
-          <ShieldCheck className="h-4 w-4 text-primary" />
-          <span>Role Security Boundaries & Permissions Matrix</span>
-        </h4>
+      {/* Role Permissions Matrix Card */}
+      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden transition-all">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 px-6 bg-slate-50/50 border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <span className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100/80 shadow-2xs">
+              <ShieldCheck className="h-4 w-4" />
+            </span>
+            <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+              Role Permissions Matrix
+            </h3>
+          </div>
 
-        <div className="rounded-md border border-border overflow-hidden">
-          <table className="w-full text-left text-body">
-            <thead className="bg-subtle border-b border-border text-caption font-semibold text-text-secondary">
-              <tr>
-                <th className="py-2.5 px-4">Capability / Operation</th>
-                <th className="py-2.5 px-4 text-center">Owner (GP)</th>
-                <th className="py-2.5 px-4 text-center">CFO (Finance)</th>
-                <th className="py-2.5 px-4 text-center">PM (Field)</th>
-                <th className="py-2.5 px-4 text-center">GC (Contractor)</th>
-                <th className="py-2.5 px-4 text-center">Investor (LP)</th>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1.5 text-xs font-medium text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-blue-600 shadow-2xs shrink-0 rounded-lg h-8 px-3"
+          >
+            <Edit2 className="h-3 w-3 text-slate-400" />
+            <span>Edit Permissions</span>
+          </Button>
+        </div>
+
+        {/* Matrix Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs">
+                <th className="py-3.5 px-6 font-semibold text-slate-600 min-w-[280px]">Feature / Capability</th>
+                <th className="py-3.5 px-4 text-center min-w-[120px] bg-purple-50/30 text-purple-900 border-x border-slate-200/50">
+                  <div className="font-bold text-xs text-purple-950">Owner</div>
+                  <div className="text-[10px] text-purple-600/80 font-medium">GP</div>
+                </th>
+                <th className="py-3.5 px-4 text-center min-w-[120px] bg-blue-50/30 text-blue-900 border-r border-slate-200/50">
+                  <div className="font-bold text-xs text-blue-950">CFO</div>
+                  <div className="text-[10px] text-blue-600/80 font-medium">Finance</div>
+                </th>
+                <th className="py-3.5 px-4 text-center min-w-[120px] bg-emerald-50/30 text-emerald-900 border-r border-slate-200/50">
+                  <div className="font-bold text-xs text-emerald-950">PM</div>
+                  <div className="text-[10px] text-emerald-600/80 font-medium">Field</div>
+                </th>
+                <th className="py-3.5 px-4 text-center min-w-[120px] bg-amber-50/30 text-amber-900 border-r border-slate-200/50">
+                  <div className="font-bold text-xs text-amber-950">GC</div>
+                  <div className="text-[10px] text-amber-600/80 font-medium">Contractor</div>
+                </th>
+                <th className="py-3.5 px-4 text-center min-w-[120px] bg-slate-50/50 text-slate-900">
+                  <div className="font-bold text-xs text-slate-900">Investor</div>
+                  <div className="text-[10px] text-slate-500 font-medium">LP</div>
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border bg-surface text-caption">
-              <tr>
-                <td className="py-2.5 px-4 font-medium text-text-primary">Executive Control Center & Portfolio</td>
-                <td className="py-2.5 px-4 text-center text-success"><CheckCircle2 className="mx-auto h-4 w-4" /></td>
-                <td className="py-2.5 px-4 text-center text-success"><CheckCircle2 className="mx-auto h-4 w-4" /></td>
-                <td className="py-2.5 px-4 text-center text-success"><CheckCircle2 className="mx-auto h-4 w-4" /></td>
-                <td className="py-2.5 px-4 text-center text-text-muted"><XCircle className="mx-auto h-4 w-4 text-text-muted/40" /></td>
-                <td className="py-2.5 px-4 text-center text-text-muted"><XCircle className="mx-auto h-4 w-4 text-text-muted/40" /></td>
+            <tbody className="divide-y divide-slate-100/90 text-xs">
+              <tr className="hover:bg-slate-50/50 transition-colors">
+                <td className="py-3 px-6 font-medium text-slate-800">
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-6 w-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 text-xs font-mono">📊</span>
+                    <span>Executive Control Center & Portfolio</span>
+                  </div>
+                </td>
+                <td className="py-3 px-4 text-center border-x border-slate-100/80 bg-purple-50/5">
+                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-blue-50/5">
+                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-emerald-50/5">
+                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-amber-50/5">
+                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
+                </td>
+                <td className="py-3 px-4 text-center">
+                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
+                </td>
               </tr>
-              <tr>
-                <td className="py-2.5 px-4 font-medium text-text-primary">Budget Baseline & Change Order Approval</td>
-                <td className="py-2.5 px-4 text-center text-success"><CheckCircle2 className="mx-auto h-4 w-4" /></td>
-                <td className="py-2.5 px-4 text-center text-success"><CheckCircle2 className="mx-auto h-4 w-4" /></td>
-                <td className="py-2.5 px-4 text-center text-text-muted">Propose only</td>
-                <td className="py-2.5 px-4 text-center text-text-muted">COR Request only</td>
-                <td className="py-2.5 px-4 text-center text-text-muted"><XCircle className="mx-auto h-4 w-4 text-text-muted/40" /></td>
+
+              <tr className="hover:bg-slate-50/50 transition-colors">
+                <td className="py-3 px-6 font-medium text-slate-800">
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-6 w-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 text-xs font-mono">📄</span>
+                    <span>Budget Baseline & Change Order Approval</span>
+                  </div>
+                </td>
+                <td className="py-3 px-4 text-center border-x border-slate-100/80 bg-purple-50/5">
+                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-blue-50/5">
+                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-emerald-50/5 text-slate-600 font-medium text-[11px]">
+                  <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">Propose only</span>
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-amber-50/5 text-slate-600 font-medium text-[11px]">
+                  <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">COR Request only</span>
+                </td>
+                <td className="py-3 px-4 text-center">
+                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
+                </td>
               </tr>
-              <tr>
-                <td className="py-2.5 px-4 font-medium text-text-primary">Bank Account Reconciliations & Transfers</td>
-                <td className="py-2.5 px-4 text-center text-success"><CheckCircle2 className="mx-auto h-4 w-4" /></td>
-                <td className="py-2.5 px-4 text-center text-success"><CheckCircle2 className="mx-auto h-4 w-4" /></td>
-                <td className="py-2.5 px-4 text-center text-text-muted"><XCircle className="mx-auto h-4 w-4 text-text-muted/40" /></td>
-                <td className="py-2.5 px-4 text-center text-text-muted"><XCircle className="mx-auto h-4 w-4 text-text-muted/40" /></td>
-                <td className="py-2.5 px-4 text-center text-text-muted"><XCircle className="mx-auto h-4 w-4 text-text-muted/40" /></td>
+
+              <tr className="hover:bg-slate-50/50 transition-colors">
+                <td className="py-3 px-6 font-medium text-slate-800">
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-6 w-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 text-xs font-mono">🏛️</span>
+                    <span>Bank Account Reconciliations & Transfers</span>
+                  </div>
+                </td>
+                <td className="py-3 px-4 text-center border-x border-slate-100/80 bg-purple-50/5">
+                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-blue-50/5">
+                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-emerald-50/5">
+                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-amber-50/5">
+                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
+                </td>
+                <td className="py-3 px-4 text-center">
+                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
+                </td>
               </tr>
-              <tr>
-                <td className="py-2.5 px-4 font-medium text-text-primary">Draw Preparation, Decision & Wire Allocation</td>
-                <td className="py-2.5 px-4 text-center text-success"><CheckCircle2 className="mx-auto h-4 w-4" /></td>
-                <td className="py-2.5 px-4 text-center text-success"><CheckCircle2 className="mx-auto h-4 w-4" /></td>
-                <td className="py-2.5 px-4 text-center text-text-muted">Work Verify only</td>
-                <td className="py-2.5 px-4 text-center text-text-muted"><XCircle className="mx-auto h-4 w-4 text-text-muted/40" /></td>
-                <td className="py-2.5 px-4 text-center text-text-muted"><XCircle className="mx-auto h-4 w-4 text-text-muted/40" /></td>
+
+              <tr className="hover:bg-slate-50/50 transition-colors">
+                <td className="py-3 px-6 font-medium text-slate-800">
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-6 w-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 text-xs font-mono">💵</span>
+                    <span>Draw Preparation, Decision & Wire Allocation</span>
+                  </div>
+                </td>
+                <td className="py-3 px-4 text-center border-x border-slate-100/80 bg-purple-50/5">
+                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-blue-50/5">
+                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-emerald-50/5 text-slate-600 font-medium text-[11px]">
+                  <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">Work Verify only</span>
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-amber-50/5">
+                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
+                </td>
+                <td className="py-3 px-4 text-center">
+                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
+                </td>
               </tr>
-              <tr>
-                <td className="py-2.5 px-4 font-medium text-text-primary">Milestone Schedule & Field Inspections</td>
-                <td className="py-2.5 px-4 text-center text-success"><CheckCircle2 className="mx-auto h-4 w-4" /></td>
-                <td className="py-2.5 px-4 text-center text-success"><CheckCircle2 className="mx-auto h-4 w-4" /></td>
-                <td className="py-2.5 px-4 text-center text-success"><CheckCircle2 className="mx-auto h-4 w-4" /></td>
-                <td className="py-2.5 px-4 text-center text-text-muted">Submit claims only</td>
-                <td className="py-2.5 px-4 text-center text-text-muted">Read brief only</td>
+
+              <tr className="hover:bg-slate-50/50 transition-colors">
+                <td className="py-3 px-6 font-medium text-slate-800">
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-6 w-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 text-xs font-mono">📅</span>
+                    <span>Milestone Schedule & Field Inspections</span>
+                  </div>
+                </td>
+                <td className="py-3 px-4 text-center border-x border-slate-100/80 bg-purple-50/5">
+                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-blue-50/5">
+                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-emerald-50/5">
+                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-amber-50/5 text-slate-600 font-medium text-[11px]">
+                  <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">Submit claims only</span>
+                </td>
+                <td className="py-3 px-4 text-center text-slate-600 font-medium text-[11px]">
+                  <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">Read brief only</span>
+                </td>
               </tr>
-              <tr>
-                <td className="py-2.5 px-4 font-medium text-text-primary">Investor Snapshot Publication & Rescission</td>
-                <td className="py-2.5 px-4 text-center text-success"><CheckCircle2 className="mx-auto h-4 w-4" /></td>
-                <td className="py-2.5 px-4 text-center text-success"><CheckCircle2 className="mx-auto h-4 w-4" /></td>
-                <td className="py-2.5 px-4 text-center text-text-muted"><XCircle className="mx-auto h-4 w-4 text-text-muted/40" /></td>
-                <td className="py-2.5 px-4 text-center text-text-muted"><XCircle className="mx-auto h-4 w-4 text-text-muted/40" /></td>
-                <td className="py-2.5 px-4 text-center text-success">Read published</td>
+
+              <tr className="hover:bg-slate-50/50 transition-colors">
+                <td className="py-3 px-6 font-medium text-slate-800">
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-6 w-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 text-xs font-mono">📈</span>
+                    <span>Investor Snapshot Publication & Rescission</span>
+                  </div>
+                </td>
+                <td className="py-3 px-4 text-center border-x border-slate-100/80 bg-purple-50/5">
+                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-blue-50/5">
+                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-emerald-50/5">
+                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
+                </td>
+                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-amber-50/5">
+                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
+                </td>
+                <td className="py-3 px-4 text-center text-slate-600 font-medium text-[11px]">
+                  <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">Read published</span>
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
+
       </div>
 
       {/* Modals */}

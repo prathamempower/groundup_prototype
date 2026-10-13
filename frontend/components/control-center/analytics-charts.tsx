@@ -52,7 +52,7 @@ interface AnalyticsDashboardProps {
 }
 
 export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
-  projectName = "161 Woodlawn Ave · 48-unit mixed-use",
+  projectName = "161 Woodlawn Ave",
   asOfDate = "Oct 26",
   customCostFundingData,
   customCashPositionData,
@@ -66,7 +66,6 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
   }, []);
 
   // 1. Cost vs Funding Dataset ($M)
-  // Step curve for cleared funding, smooth lines for spend and progress, dashed for planned & forecast
   const costFundingData: CostFundingPoint[] = customCostFundingData || [
     { date: "Nov 25", planned: 0.8, spend: 0.6, verifiedProgress: 0.5, clearedFunding: 0.5, spendForecast: null, fundingForecast: null },
     { date: "Jan 26", planned: 2.1, spend: 1.8, verifiedProgress: 1.5, clearedFunding: 1.4, spendForecast: null, fundingForecast: null },
@@ -115,7 +114,7 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
     { date: "Aug 27", position: -0.42, isForecast: true },
   ];
 
-  // 3. Projected Profit Dataset (Millions of dollars)
+  // 3. Projected Profit Dataset (Millions)
   const projectedProfitData: ProjectedProfitPoint[] = customProfitData || [
     { date: "Nov 25", underwritten: 6.10, projectedProfit: 6.10 },
     { date: "Dec 25", underwritten: 6.10, projectedProfit: 6.10 },
@@ -132,486 +131,566 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
 
   return (
     <div className="rounded-xl border border-slate-200/90 bg-white shadow-xs overflow-hidden">
-      {/* Top Header: Navigation Tabs + Context */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 px-6 py-3.5 gap-3 bg-white">
-        {/* Clean Segmented Tab Pills */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-lg self-start">
-          <button
-            type="button"
-            onClick={() => setActiveTab("COST_VS_FUNDING")}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-all ${
-              activeTab === "COST_VS_FUNDING"
-                ? "bg-white text-slate-900 shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            Cost vs. funding
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("CASH_POSITION")}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-all ${
-              activeTab === "CASH_POSITION"
-                ? "bg-white text-slate-900 shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            Cash position
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("PROJECTED_PROFIT")}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-all ${
-              activeTab === "PROJECTED_PROFIT"
-                ? "bg-white text-slate-900 shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            Projected profit
-          </button>
+      {/* Top Header: Segmented Navigation + As Of Timestamp */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200/80 px-6 py-4 gap-4 bg-slate-50/40">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-bold text-slate-900 tracking-tight">
+              Financial Trajectory & Forecast
+            </h2>
+            <span className="text-[10px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200/70">
+              Interactive
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {activeTab === "COST_VS_FUNDING" && "Spend, earned value progress, and draw funding cleared vs. approved plan."}
+            {activeTab === "CASH_POSITION" && "Monthly working capital surplus vs. equity draw outlays."}
+            {activeTab === "PROJECTED_PROFIT" && "Realized development yield tracking against underwriting."}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100/80 p-0.5 text-xs font-medium">
+            <button
+              type="button"
+              onClick={() => setActiveTab("COST_VS_FUNDING")}
+              className={`rounded-md px-3 py-1.5 transition-all ${
+                activeTab === "COST_VS_FUNDING"
+                  ? "bg-white text-blue-700 shadow-xs font-semibold"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Cost vs. Funding
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("CASH_POSITION")}
+              className={`rounded-md px-3 py-1.5 transition-all ${
+                activeTab === "CASH_POSITION"
+                  ? "bg-white text-blue-700 shadow-xs font-semibold"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Cash Position
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("PROJECTED_PROFIT")}
+              className={`rounded-md px-3 py-1.5 transition-all ${
+                activeTab === "PROJECTED_PROFIT"
+                  ? "bg-white text-blue-700 shadow-xs font-semibold"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Projected Profit
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Main Clean Chart Area (Without distracting side columns) */}
-      <div className="p-6">
-        {/* Title & Units Header */}
-        <div className="mb-4">
-          <h3 className="text-sm font-semibold text-slate-900">
-            {activeTab === "COST_VS_FUNDING" && "Total spend, work done, and money received vs budget"}
-            {activeTab === "CASH_POSITION" && "Money on hand each month (Money received minus money spent)"}
-            {activeTab === "PROJECTED_PROFIT" && "Expected profit vs original target"}
-          </h3>
-          <p className="text-xs text-slate-400 mt-0.5">Amounts in millions ($M)</p>
+      {/* KPI Highlight Strip for Instant Executive Clarity */}
+      {activeTab === "COST_VS_FUNDING" && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-6 py-3.5 border-b border-slate-100 bg-white">
+          <div className="rounded-lg border border-blue-100 bg-blue-50/40 px-3.5 py-2">
+            <span className="text-[11px] font-semibold text-blue-800 uppercase tracking-wider block">Spend to Date</span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-base font-bold font-mono text-blue-900">$10.1M</span>
+              <span className="text-[11px] font-medium text-blue-700">68% of baseline</span>
+            </div>
+          </div>
+          <div className="rounded-lg border border-emerald-100 bg-emerald-50/40 px-3.5 py-2">
+            <span className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wider block">Verified Progress</span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-base font-bold font-mono text-emerald-900">$9.2M</span>
+              <span className="text-[11px] font-medium text-emerald-700">Site confirmed</span>
+            </div>
+          </div>
+          <div className="rounded-lg border border-amber-100 bg-amber-50/40 px-3.5 py-2">
+            <span className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider block">Cleared Funding</span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-base font-bold font-mono text-amber-900">$8.8M</span>
+              <span className="text-[11px] font-medium text-amber-700">Bank disbursed</span>
+            </div>
+          </div>
+          <div className="rounded-lg border border-slate-200/80 bg-slate-50/60 px-3.5 py-2">
+            <span className="text-[11px] font-semibold text-slate-700 uppercase tracking-wider block">Target Baseline</span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-base font-bold font-mono text-slate-900">$19.1M</span>
+              <span className="text-[11px] font-medium text-slate-500">At completion</span>
+            </div>
+          </div>
         </div>
+      )}
 
-        {/* ========================================================================= */}
-        {/* TAB 1: COST VS FUNDING                                                    */}
-        {/* ========================================================================= */}
+      {activeTab === "CASH_POSITION" && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-6 py-3.5 border-b border-slate-100 bg-white">
+          <div className="rounded-lg border border-rose-100 bg-rose-50/40 px-3.5 py-2">
+            <span className="text-[11px] font-semibold text-rose-800 uppercase tracking-wider block">Current Gap (Oct 26)</span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-base font-bold font-mono text-rose-900">-$1.02M</span>
+              <span className="text-[11px] font-medium text-rose-700">Pending Draw #8</span>
+            </div>
+          </div>
+          <div className="rounded-lg border border-blue-100 bg-blue-50/40 px-3.5 py-2">
+            <span className="text-[11px] font-semibold text-blue-800 uppercase tracking-wider block">Forecast Recovery</span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-base font-bold font-mono text-blue-900">Nov 26</span>
+              <span className="text-[11px] font-medium text-blue-700">Normalizes to -$320k</span>
+            </div>
+          </div>
+          <div className="rounded-lg border border-emerald-100 bg-emerald-50/40 px-3.5 py-2">
+            <span className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wider block">Max Peak Cushion</span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-base font-bold font-mono text-emerald-900">+$580k</span>
+              <span className="text-[11px] font-medium text-emerald-700">Jan 26 recorded</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "PROJECTED_PROFIT" && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-6 py-3.5 border-b border-slate-100 bg-white">
+          <div className="rounded-lg border border-emerald-100 bg-emerald-50/40 px-3.5 py-2">
+            <span className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wider block">Current Forecast Profit</span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-base font-bold font-mono text-emerald-900">$5.10M</span>
+              <span className="text-[11px] font-medium text-emerald-700">18.4% Net Yield</span>
+            </div>
+          </div>
+          <div className="rounded-lg border border-slate-200/80 bg-slate-50/60 px-3.5 py-2">
+            <span className="text-[11px] font-semibold text-slate-700 uppercase tracking-wider block">Underwritten Target</span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-base font-bold font-mono text-slate-900">$6.10M</span>
+              <span className="text-[11px] font-medium text-slate-500">22.0% Baseline</span>
+            </div>
+          </div>
+          <div className="rounded-lg border border-amber-100 bg-amber-50/40 px-3.5 py-2">
+            <span className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider block">Yield Compression</span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-base font-bold font-mono text-amber-900">-$1.00M</span>
+              <span className="text-[11px] font-medium text-amber-700">Scope additions + carry</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chart Canvas Area */}
+      <div className="p-6">
+        {/* TAB 1: COST VS FUNDING */}
         {activeTab === "COST_VS_FUNDING" && (
           <div>
-            <div className="w-full relative" style={{ width: "100%", height: 350, minHeight: 350 }}>
+            <div className="w-full relative" style={{ width: "100%", height: 360, minHeight: 360 }}>
               {isMounted ? (
-                <ResponsiveContainer width="100%" height={350}>
-                  <ComposedChart data={costFundingData} margin={{ top: 25, right: 24, left: -4, bottom: 8 }}>
-                  <defs>
-                    <linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#0f172a" stopOpacity={0.08} />
-                      <stop offset="100%" stopColor="#0f172a" stopOpacity={0.00} />
-                    </linearGradient>
-                    <linearGradient id="verifiedGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.12} />
-                      <stop offset="100%" stopColor="#10b981" stopOpacity={0.00} />
-                    </linearGradient>
-                    <linearGradient id="clearedGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.10} />
-                      <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.00} />
-                    </linearGradient>
-                  </defs>
+                <ResponsiveContainer width="100%" height={360}>
+                  <ComposedChart data={costFundingData} margin={{ top: 28, right: 24, left: -4, bottom: 4 }}>
+                    <defs>
+                      <linearGradient id="spendGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#2563eb" stopOpacity={0.16} />
+                        <stop offset="100%" stopColor="#2563eb" stopOpacity={0.0} />
+                      </linearGradient>
+                      <linearGradient id="progressGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#059669" stopOpacity={0.12} />
+                        <stop offset="100%" stopColor="#059669" stopOpacity={0.0} />
+                      </linearGradient>
+                    </defs>
 
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis
-                    dataKey="date"
-                    stroke="#94a3b8"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={{ stroke: "#e2e8f0" }}
-                    dy={6}
-                  />
-                  <YAxis
-                    stroke="#94a3b8"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(val) => (val === 0 ? "$0" : `$${val}M`)}
-                    domain={[0, 22]}
-                    ticks={[0, 5, 10, 15, 20]}
-                  />
-                  <Tooltip
-                    content={({ active, payload, label }) => {
-                      if (active && payload && payload.length) {
-                        const p = payload[0].payload as CostFundingPoint;
-                        return (
-                          <div className="rounded-xl border border-slate-200/80 bg-white/95 backdrop-blur-md p-3.5 shadow-xl text-xs space-y-2 min-w-[190px]">
-                            <div className="font-semibold text-slate-900 border-b border-slate-100 pb-2 flex justify-between items-center">
-                              <span className="text-slate-800">{label}</span>
-                              {p.isToday && (
-                                <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200/60 px-2 py-0.5 rounded-full font-medium">
-                                  Current Month
-                                </span>
-                              )}
-                            </div>
-                            <div className="space-y-1.5 font-mono text-[11px]">
-                              <div className="flex items-center justify-between text-slate-600">
-                                <span className="flex items-center gap-1.5 font-sans">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> Planned Budget
-                                </span>
-                                <span className="font-semibold text-slate-900">${p.planned.toFixed(2)}M</span>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.6} vertical={false} />
+                    
+                    <XAxis
+                      dataKey="date"
+                      stroke="#64748b"
+                      fontSize={11}
+                      fontWeight={500}
+                      tickLine={false}
+                      axisLine={{ stroke: "#cbd5e1" }}
+                      dy={6}
+                    />
+                    <YAxis
+                      stroke="#64748b"
+                      fontSize={11}
+                      fontWeight={500}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(val) => (val === 0 ? "$0" : `$${val}M`)}
+                      domain={[0, 22]}
+                      ticks={[0, 5, 10, 15, 20]}
+                      dx={-2}
+                    />
+
+                    <Tooltip
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          const p = payload[0].payload as CostFundingPoint;
+                          return (
+                            <div className="rounded-lg border border-slate-200 bg-white p-3.5 shadow-lg text-xs space-y-2.5 min-w-[220px]">
+                              <div className="border-b border-slate-100 pb-2 flex justify-between items-center">
+                                <span className="font-bold text-slate-900 text-sm">{label}</span>
+                                {p.isToday ? (
+                                  <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                                    Current Baseline
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] text-slate-500 font-medium">
+                                    {p.spend !== null ? "Historical" : "Forecast"}
+                                  </span>
+                                )}
                               </div>
-                              {p.spend !== null && (
+                              <div className="space-y-1.5 font-mono text-[11px]">
                                 <div className="flex items-center justify-between text-slate-600">
-                                  <span className="flex items-center gap-1.5 font-sans">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-slate-900" /> Total Spent
+                                  <span className="font-sans flex items-center gap-1.5 text-slate-600">
+                                    <span className="h-2 w-2 rounded-full bg-slate-400" /> Planned Baseline:
                                   </span>
-                                  <span className="font-semibold text-slate-900">${p.spend.toFixed(2)}M</span>
+                                  <span className="font-semibold text-slate-900">${p.planned.toFixed(2)}M</span>
                                 </div>
-                              )}
-                              {p.verifiedProgress !== null && (
-                                <div className="flex items-center justify-between text-slate-600">
-                                  <span className="flex items-center gap-1.5 font-sans">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" /> Verified Work Done
-                                  </span>
-                                  <span className="font-semibold text-emerald-700">${p.verifiedProgress.toFixed(2)}M</span>
-                                </div>
-                              )}
-                              {p.clearedFunding !== null && (
-                                <div className="flex items-center justify-between text-slate-600">
-                                  <span className="flex items-center gap-1.5 font-sans">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Money Received
-                                  </span>
-                                  <span className="font-semibold text-amber-700">${p.clearedFunding.toFixed(2)}M</span>
-                                </div>
-                              )}
-                              {p.spendForecast !== null && (
-                                <div className="flex items-center justify-between text-slate-600">
-                                  <span className="flex items-center gap-1.5 font-sans">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-slate-600" /> Expected Spend
-                                  </span>
-                                  <span className="font-semibold text-slate-800">${p.spendForecast.toFixed(2)}M</span>
-                                </div>
-                              )}
-                              {p.fundingForecast !== null && (
-                                <div className="flex items-center justify-between text-slate-600">
-                                  <span className="flex items-center gap-1.5 font-sans">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> Expected Funding
-                                  </span>
-                                  <span className="font-semibold text-amber-700">${p.fundingForecast.toFixed(2)}M</span>
-                                </div>
-                              )}
+                                {p.spend !== null && (
+                                  <div className="flex items-center justify-between text-slate-600">
+                                    <span className="font-sans flex items-center gap-1.5 text-blue-700 font-medium">
+                                      <span className="h-2 w-2 rounded-full bg-blue-600" /> Spend to Date:
+                                    </span>
+                                    <span className="font-bold text-blue-700">${p.spend.toFixed(2)}M</span>
+                                  </div>
+                                )}
+                                {p.verifiedProgress !== null && (
+                                  <div className="flex items-center justify-between text-slate-600">
+                                    <span className="font-sans flex items-center gap-1.5 text-emerald-700 font-medium">
+                                      <span className="h-2 w-2 rounded-full bg-emerald-600" /> Verified Progress:
+                                    </span>
+                                    <span className="font-bold text-emerald-700">${p.verifiedProgress.toFixed(2)}M</span>
+                                  </div>
+                                )}
+                                {p.clearedFunding !== null && (
+                                  <div className="flex items-center justify-between text-slate-600">
+                                    <span className="font-sans flex items-center gap-1.5 text-amber-700 font-medium">
+                                      <span className="h-2 w-2 rounded-sm bg-amber-500" /> Cleared Funding:
+                                    </span>
+                                    <span className="font-bold text-amber-700">${p.clearedFunding.toFixed(2)}M</span>
+                                  </div>
+                                )}
+                                {p.spendForecast !== null && (
+                                  <div className="flex items-center justify-between text-slate-500 pt-1 border-t border-slate-100">
+                                    <span className="font-sans flex items-center gap-1.5 text-slate-600">
+                                      <span className="h-1.5 w-3 border-t-2 border-dashed border-slate-500" /> Forecast Spend:
+                                    </span>
+                                    <span className="font-semibold text-slate-800">${p.spendForecast.toFixed(2)}M</span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <ReferenceLine
-                    x="Oct 26"
-                    stroke="#0284c7"
-                    strokeDasharray="4 4"
-                    strokeWidth={1.5}
-                    label={{
-                      value: "Today",
-                      position: "top",
-                      fill: "#0369a1",
-                      fontSize: 11,
-                      fontWeight: 600,
-                    }}
-                  />
+                          );
+                        }
+                        return null;
+                      }}
+                    />
 
-                  {/* 1. Planned (Dashed Indigo-Gray Baseline) */}
-                  <Line
-                    type="monotone"
-                    dataKey="planned"
-                    stroke="#94a3b8"
-                    strokeWidth={1.75}
-                    strokeDasharray="4 4"
-                    dot={false}
-                  />
+                    {/* Today / Current Baseline Vertical Reference */}
+                    <ReferenceLine
+                      x="Oct 26"
+                      stroke="#2563eb"
+                      strokeDasharray="4 4"
+                      strokeWidth={1.75}
+                      label={{
+                        value: "As of Today (Oct 26)",
+                        position: "top",
+                        fill: "#1d4ed8",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        offset: 10,
+                      }}
+                    />
 
-                  {/* 2. Spend (Crisp Dark Slate) */}
-                  <Line
-                    type="monotone"
-                    dataKey="spend"
-                    stroke="#0f172a"
-                    strokeWidth={2.5}
-                    dot={false}
-                    connectNulls={false}
-                  />
+                    {/* Planned Baseline (Neutral dashed background guide) */}
+                    <Line
+                      type="monotone"
+                      dataKey="planned"
+                      stroke="#94a3b8"
+                      strokeWidth={2}
+                      strokeDasharray="5 5"
+                      dot={false}
+                    />
 
-                  {/* 3. Verified Progress (Emerald) */}
-                  <Line
-                    type="monotone"
-                    dataKey="verifiedProgress"
-                    stroke="#10b981"
-                    strokeWidth={2.25}
-                    dot={false}
-                    connectNulls={false}
-                  />
+                    {/* Spend to Date (High-contrast Vibrant Blue with filled focus) */}
+                    <Line
+                      type="monotone"
+                      dataKey="spend"
+                      stroke="#2563eb"
+                      strokeWidth={3}
+                      dot={{ r: 4, fill: "#2563eb", stroke: "#ffffff", strokeWidth: 2 }}
+                      activeDot={{ r: 6, fill: "#1d4ed8", stroke: "#ffffff", strokeWidth: 2 }}
+                      connectNulls={false}
+                    />
 
-                  {/* 4. Cleared Funding (Amber Stepped Profile) */}
-                  <Line
-                    type="stepAfter"
-                    dataKey="clearedFunding"
-                    stroke="#f59e0b"
-                    strokeWidth={2}
-                    dot={false}
-                    connectNulls={false}
-                  />
+                    {/* Verified Progress (Emerald Green Line) */}
+                    <Line
+                      type="monotone"
+                      dataKey="verifiedProgress"
+                      stroke="#059669"
+                      strokeWidth={2.5}
+                      dot={{ r: 3.5, fill: "#059669", stroke: "#ffffff", strokeWidth: 2 }}
+                      activeDot={{ r: 5, fill: "#047857", stroke: "#ffffff", strokeWidth: 2 }}
+                      connectNulls={false}
+                    />
 
-                  {/* 5. Spend Forecast (Dashed Slate) */}
-                  <Line
-                    type="monotone"
-                    dataKey="spendForecast"
-                    stroke="#475569"
-                    strokeWidth={2}
-                    strokeDasharray="4 4"
-                    dot={false}
-                    connectNulls={false}
-                  />
+                    {/* Cleared Funding (Amber Stepped Profile) */}
+                    <Line
+                      type="stepAfter"
+                      dataKey="clearedFunding"
+                      stroke="#d97706"
+                      strokeWidth={2.25}
+                      dot={false}
+                      connectNulls={false}
+                    />
 
-                  {/* 6. Funding Forecast (Dashed Amber Stepped Profile) */}
-                  <Line
-                    type="stepAfter"
-                    dataKey="fundingForecast"
-                    stroke="#fbbf24"
-                    strokeWidth={1.75}
-                    strokeDasharray="4 4"
-                    dot={false}
-                    connectNulls={false}
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
+                    {/* Spend Forecast (Dashed Slate Path into future completion) */}
+                    <Line
+                      type="monotone"
+                      dataKey="spendForecast"
+                      stroke="#64748b"
+                      strokeWidth={2}
+                      strokeDasharray="4 4"
+                      dot={{ r: 3, fill: "#94a3b8", stroke: "#ffffff", strokeWidth: 1.5 }}
+                      connectNulls={false}
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer>
               ) : (
-                <div className="h-full w-full flex items-center justify-center bg-slate-50/50 rounded-lg animate-pulse text-xs text-slate-400">
+                <div className="h-full w-full flex items-center justify-center bg-slate-50 rounded text-xs text-slate-400">
                   Loading chart...
                 </div>
               )}
             </div>
 
-            {/* Elevated Modern Legend with Clean Interactive Visual Tokens */}
-            <div className="flex flex-wrap items-center justify-start gap-6 mt-5 pt-3.5 border-t border-slate-100 text-xs font-medium">
-              <span className="flex items-center gap-2 text-slate-600">
-                <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-400" /> Planned Budget
-              </span>
-              <span className="flex items-center gap-2 text-slate-900 font-semibold">
-                <span className="h-1 w-4 rounded-full bg-slate-900" /> Total Spent
-              </span>
-              <span className="flex items-center gap-2 text-emerald-700 font-semibold">
-                <span className="h-1 w-4 rounded-full bg-emerald-500" /> Work Done
-              </span>
-              <span className="flex items-center gap-2 text-amber-700 font-semibold">
-                <span className="h-1 w-4 rounded-full bg-amber-500" /> Money Received
-              </span>
-              <span className="flex items-center gap-2 text-slate-500">
-                <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-600" /> Future Estimate
-              </span>
+            {/* Clear, Smart, Enterprise Legend */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mt-5 pt-3.5 border-t border-slate-100 text-xs">
+              <div className="flex flex-wrap items-center gap-5 text-slate-600">
+                <span className="flex items-center gap-2 font-semibold text-blue-700">
+                  <span className="h-1 w-4 rounded-full bg-blue-600" /> Spend to Date
+                </span>
+                <span className="flex items-center gap-2 font-semibold text-emerald-700">
+                  <span className="h-1 w-4 rounded-full bg-emerald-600" /> Verified Progress
+                </span>
+                <span className="flex items-center gap-2 font-semibold text-amber-700">
+                  <span className="h-1.5 w-3.5 bg-amber-500 rounded-xs" /> Cleared Funding
+                </span>
+                <span className="flex items-center gap-2 text-slate-500">
+                  <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-400" /> Planned Baseline
+                </span>
+                <span className="flex items-center gap-2 text-slate-500">
+                  <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-500" /> Forecast Path
+                </span>
+              </div>
+
+              <div className="text-[11px] text-slate-500 font-mono">
+                Historical: Nov 25 – Oct 26 · Forecast: Nov 26 – Aug 27
+              </div>
             </div>
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* TAB 2: CASH POSITION                                                      */}
-        {/* ========================================================================= */}
+        {/* TAB 2: CASH POSITION */}
         {activeTab === "CASH_POSITION" && (
           <div>
-            <div className="w-full relative" style={{ width: "100%", height: 350, minHeight: 350 }}>
+            <div className="w-full relative" style={{ width: "100%", height: 360, minHeight: 360 }}>
               {isMounted ? (
-                <ResponsiveContainer width="100%" height={350}>
-                  <BarChart data={cashPositionData} margin={{ top: 25, right: 24, left: -4, bottom: 8 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis
-                    dataKey="date"
-                    stroke="#94a3b8"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={{ stroke: "#e2e8f0" }}
-                    dy={6}
-                  />
-                  <YAxis
-                    stroke="#94a3b8"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(val) => (val === 0 ? "$0" : val > 0 ? `+$${val.toFixed(2)}M` : `-$${Math.abs(val).toFixed(2)}M`)}
-                    domain={[-1.2, 1.2]}
-                    ticks={[-1.1, -0.55, 0, 0.55, 1.1]}
-                  />
-                  <Tooltip
-                    content={({ active, payload, label }) => {
-                      if (active && payload && payload.length) {
-                        const p = payload[0].payload as CashPositionPoint;
-                        const isSurplus = p.position >= 0;
-                        return (
-                          <div className="rounded-xl border border-slate-200/80 bg-white/95 backdrop-blur-md p-3.5 shadow-xl text-xs space-y-1.5 min-w-[170px]">
-                            <div className="font-semibold text-slate-900 border-b border-slate-100 pb-1.5 flex justify-between items-center">
-                              <span>{label}</span>
-                              {p.isToday && (
-                                <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200/60 px-2 py-0.5 rounded-full font-medium">
-                                  Current
+                <ResponsiveContainer width="100%" height={360}>
+                  <BarChart data={cashPositionData} margin={{ top: 28, right: 24, left: -4, bottom: 4 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.6} vertical={false} />
+                    <XAxis
+                      dataKey="date"
+                      stroke="#64748b"
+                      fontSize={11}
+                      fontWeight={500}
+                      tickLine={false}
+                      axisLine={{ stroke: "#cbd5e1" }}
+                      dy={6}
+                    />
+                    <YAxis
+                      stroke="#64748b"
+                      fontSize={11}
+                      fontWeight={500}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(val) => (val === 0 ? "$0" : val > 0 ? `+$${val.toFixed(1)}M` : `-$${Math.abs(val).toFixed(1)}M`)}
+                      domain={[-1.2, 1.2]}
+                      ticks={[-1.0, -0.5, 0, 0.5, 1.0]}
+                      dx={-2}
+                    />
+                    <Tooltip
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          const p = payload[0].payload as CashPositionPoint;
+                          const isPositive = p.position >= 0;
+                          return (
+                            <div className="rounded-lg border border-slate-200 bg-white p-3.5 shadow-lg text-xs space-y-2 min-w-[190px]">
+                              <div className="border-b border-slate-100 pb-1.5 flex justify-between items-center">
+                                <span className="font-bold text-slate-900 text-sm">{label}</span>
+                                {p.isToday && (
+                                  <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                                    Current
+                                  </span>
+                                )}
+                              </div>
+                              <div className="pt-1 flex items-center justify-between font-mono text-xs">
+                                <span className="font-sans text-slate-600 font-medium">Net Working Capital:</span>
+                                <span className={`font-bold ${isPositive ? "text-emerald-700" : "text-rose-600"}`}>
+                                  {isPositive ? `+$${p.position.toFixed(2)}M` : `-$${Math.abs(p.position).toFixed(2)}M`}
                                 </span>
-                              )}
+                              </div>
+                              <div className="text-[11px] text-slate-500 pt-0.5">
+                                {isPositive ? "Surplus liquidity buffer" : "Outlay ahead of bank draw clearance"}
+                              </div>
                             </div>
-                            <div className="pt-1.5 flex items-center justify-between font-mono text-[11px]">
-                              <span className="flex items-center gap-1.5 font-sans text-slate-600">
-                                <span
-                                  className={`h-2 w-2 rounded-full ${
-                                    isSurplus ? "bg-emerald-500" : "bg-rose-500"
-                                  }`}
-                                />
-                                Cash in Bank:
-                              </span>
-                              <span
-                                className={`font-bold ${
-                                  isSurplus ? "text-emerald-700" : "text-rose-600"
-                                }`}
-                              >
-                                {isSurplus
-                                  ? `+$${p.position.toFixed(2)}M (Extra Cash)`
-                                  : `-$${Math.abs(p.position).toFixed(2)}M (Cash Needed)`}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <ReferenceLine y={0} stroke="#94a3b8" strokeWidth={1} strokeDasharray="2 2" />
-                  <ReferenceLine
-                    x="Oct 26"
-                    stroke="#0284c7"
-                    strokeDasharray="4 4"
-                    strokeWidth={1.5}
-                    label={{ value: "Today", position: "top", fill: "#0369a1", fontSize: 11, fontWeight: 600 }}
-                  />
-                  <Bar dataKey="position" maxBarSize={22} radius={[4, 4, 0, 0]}>
-                    {cashPositionData.map((entry, index) => {
-                      let fillColor = "#10b981"; // Emerald
-                      if (entry.position < 0) {
-                        fillColor = entry.isForecast ? "#f87171" : "#e11d48"; // Rose-red
-                      } else if (entry.isForecast) {
-                        fillColor = "#6ee7b7";
-                      }
-                      return <Cell key={`cell-${index}`} fill={fillColor} />;
-                    })}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <ReferenceLine y={0} stroke="#64748b" strokeWidth={1.25} />
+                    <ReferenceLine
+                      x="Oct 26"
+                      stroke="#2563eb"
+                      strokeDasharray="4 4"
+                      strokeWidth={1.75}
+                      label={{ value: "Current (Oct 26)", position: "top", fill: "#1d4ed8", fontSize: 11, fontWeight: 700, offset: 10 }}
+                    />
+                    <Bar dataKey="position" maxBarSize={22} radius={[3, 3, 0, 0]}>
+                      {cashPositionData.map((entry, index) => {
+                        let fillColor = entry.position >= 0 ? "#10b981" : "#e11d48";
+                        if (entry.isForecast) {
+                          fillColor = entry.position >= 0 ? "#6ee7b7" : "#fca5a5";
+                        }
+                        return <Cell key={`cell-${index}`} fill={fillColor} />;
+                      })}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               ) : (
-                <div className="h-full w-full flex items-center justify-center bg-slate-50/50 rounded-lg animate-pulse text-xs text-slate-400">
+                <div className="h-full w-full flex items-center justify-center bg-slate-50 rounded text-xs text-slate-400">
                   Loading chart...
                 </div>
               )}
             </div>
 
-            {/* Elevated Modern Legend */}
-            <div className="flex flex-wrap items-center justify-start gap-6 mt-5 pt-3.5 border-t border-slate-100 text-xs font-medium">
-              <span className="flex items-center gap-2 text-emerald-800 font-semibold">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Extra Cash in Bank
-              </span>
-              <span className="flex items-center gap-2 text-rose-800 font-semibold">
-                <span className="h-2.5 w-2.5 rounded-full bg-rose-600" /> Cash Shortage
-              </span>
-              <span className="flex items-center gap-2 text-slate-500">
-                <span className="h-2.5 w-2.5 rounded-full bg-rose-300" /> Expected Shortage
-              </span>
+            <div className="flex flex-wrap items-center justify-between gap-4 mt-5 pt-3.5 border-t border-slate-100 text-xs text-slate-600">
+              <div className="flex flex-wrap items-center gap-5">
+                <span className="flex items-center gap-2 font-semibold text-emerald-800">
+                  <span className="h-2.5 w-2.5 rounded-sm bg-emerald-500" /> Cash Positive Buffer
+                </span>
+                <span className="flex items-center gap-2 font-semibold text-rose-800">
+                  <span className="h-2.5 w-2.5 rounded-sm bg-rose-600" /> Outlay Exceeds Cleared Funding
+                </span>
+                <span className="flex items-center gap-2 text-slate-500">
+                  <span className="h-2.5 w-2.5 rounded-sm bg-slate-300" /> Lighter Shading = Forecast
+                </span>
+              </div>
+              <div className="text-[11px] text-slate-500 font-mono">
+                Monthly Net Cash Flow
+              </div>
             </div>
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* TAB 3: PROJECTED PROFIT                                                   */}
-        {/* ========================================================================= */}
+        {/* TAB 3: PROJECTED PROFIT */}
         {activeTab === "PROJECTED_PROFIT" && (
           <div>
-            <div className="w-full relative" style={{ width: "100%", height: 350, minHeight: 350 }}>
+            <div className="w-full relative" style={{ width: "100%", height: 360, minHeight: 360 }}>
               {isMounted ? (
-                <ResponsiveContainer width="100%" height={350}>
-                  <LineChart data={projectedProfitData} margin={{ top: 25, right: 24, left: -4, bottom: 8 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis
-                    dataKey="date"
-                    stroke="#94a3b8"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={{ stroke: "#e2e8f0" }}
-                    dy={6}
-                  />
-                  <YAxis
-                    stroke="#94a3b8"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(val) => `$${val.toFixed(1)}M`}
-                    domain={[4.8, 6.5]}
-                    ticks={[5.0, 5.3, 5.7, 6.0, 6.4]}
-                  />
-                  <Tooltip
-                    content={({ active, payload, label }) => {
-                      if (active && payload && payload.length) {
-                        const p = payload[0].payload as ProjectedProfitPoint;
-                        return (
-                          <div className="rounded-xl border border-slate-200/80 bg-white/95 backdrop-blur-md p-3.5 shadow-xl text-xs space-y-1.5 min-w-[170px]">
-                            <div className="font-semibold text-slate-900 border-b border-slate-100 pb-1.5 flex justify-between items-center">
-                              <span>{label}</span>
-                              {p.isToday && (
-                                <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200/60 px-2 py-0.5 rounded-full font-medium">
-                                  Current
-                                </span>
-                              )}
-                            </div>
-                            <div className="space-y-1.5 font-mono text-[11px] pt-1">
-                              <div className="flex justify-between items-center text-slate-600">
-                                <span className="flex items-center gap-1.5 font-sans">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> Original Target
-                                </span>
-                                <span className="font-semibold text-slate-900">${p.underwritten.toFixed(2)}M</span>
+                <ResponsiveContainer width="100%" height={360}>
+                  <LineChart data={projectedProfitData} margin={{ top: 28, right: 24, left: -4, bottom: 4 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.6} vertical={false} />
+                    <XAxis
+                      dataKey="date"
+                      stroke="#64748b"
+                      fontSize={11}
+                      fontWeight={500}
+                      tickLine={false}
+                      axisLine={{ stroke: "#cbd5e1" }}
+                      dy={6}
+                    />
+                    <YAxis
+                      stroke="#64748b"
+                      fontSize={11}
+                      fontWeight={500}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(val) => `$${val.toFixed(1)}M`}
+                      domain={[4.8, 6.5]}
+                      ticks={[5.0, 5.5, 6.0, 6.5]}
+                      dx={-2}
+                    />
+                    <Tooltip
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          const p = payload[0].payload as ProjectedProfitPoint;
+                          return (
+                            <div className="rounded-lg border border-slate-200 bg-white p-3.5 shadow-lg text-xs space-y-2 min-w-[190px]">
+                              <div className="border-b border-slate-100 pb-1.5 flex justify-between items-center">
+                                <span className="font-bold text-slate-900 text-sm">{label}</span>
+                                {p.isToday && (
+                                  <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                                    Current
+                                  </span>
+                                )}
                               </div>
-                              <div className="flex justify-between items-center text-slate-600">
-                                <span className="flex items-center gap-1.5 font-sans">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-600" /> Expected Profit
-                                </span>
-                                <span className="font-bold text-indigo-950">${p.projectedProfit.toFixed(2)}M</span>
+                              <div className="space-y-1.5 font-mono text-xs pt-1">
+                                <div className="flex justify-between items-center text-slate-600">
+                                  <span className="font-sans text-slate-600 font-medium">Underwritten Target:</span>
+                                  <span className="font-bold text-slate-900">${p.underwritten.toFixed(2)}M</span>
+                                </div>
+                                <div className="flex justify-between items-center text-slate-600">
+                                  <span className="font-sans text-emerald-700 font-medium">Projected Net Profit:</span>
+                                  <span className="font-bold text-emerald-700">${p.projectedProfit.toFixed(2)}M</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <ReferenceLine
-                    x="Aug 26"
-                    stroke="#0284c7"
-                    strokeDasharray="4 4"
-                    strokeWidth={1.5}
-                    label={{ value: "Today", position: "top", fill: "#0369a1", fontSize: 11, fontWeight: 600 }}
-                  />
-                  {/* Underwritten line (dashed) */}
-                  <Line
-                    type="monotone"
-                    dataKey="underwritten"
-                    stroke="#94a3b8"
-                    strokeWidth={1.75}
-                    strokeDasharray="4 4"
-                    dot={false}
-                  />
-                  {/* Projected profit line with markers */}
-                  <Line
-                    type="monotone"
-                    dataKey="projectedProfit"
-                    stroke="#0f172a"
-                    strokeWidth={2.5}
-                    dot={{ r: 3.5, fill: "#0f172a", stroke: "#ffffff", strokeWidth: 1.5 }}
-                    activeDot={{ r: 5.5, fill: "#0284c7" }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <ReferenceLine
+                      x="Aug 26"
+                      stroke="#2563eb"
+                      strokeDasharray="4 4"
+                      strokeWidth={1.75}
+                      label={{ value: "Current (Aug 26)", position: "top", fill: "#1d4ed8", fontSize: 11, fontWeight: 700, offset: 10 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="underwritten"
+                      stroke="#94a3b8"
+                      strokeWidth={2}
+                      strokeDasharray="4 4"
+                      dot={false}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="projectedProfit"
+                      stroke="#059669"
+                      strokeWidth={2.75}
+                      dot={{ r: 4, fill: "#059669", stroke: "#ffffff", strokeWidth: 2 }}
+                      activeDot={{ r: 6, fill: "#047857", stroke: "#ffffff", strokeWidth: 2 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               ) : (
-                <div className="h-full w-full flex items-center justify-center bg-slate-50/50 rounded-lg animate-pulse text-xs text-slate-400">
+                <div className="h-full w-full flex items-center justify-center bg-slate-50 rounded text-xs text-slate-400">
                   Loading chart...
                 </div>
               )}
             </div>
 
-            {/* Elevated Modern Legend */}
-            <div className="flex flex-wrap items-center justify-start gap-6 mt-5 pt-3.5 border-t border-slate-100 text-xs font-medium">
-              <span className="flex items-center gap-2 text-slate-900 font-semibold">
-                <span className="h-1 w-4 rounded-full bg-slate-900" /> Expected Profit
-              </span>
-              <span className="flex items-center gap-2 text-slate-500">
-                <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-400" /> Original Target
-              </span>
+            <div className="flex flex-wrap items-center justify-between gap-4 mt-5 pt-3.5 border-t border-slate-100 text-xs text-slate-600">
+              <div className="flex flex-wrap items-center gap-5">
+                <span className="flex items-center gap-2 font-semibold text-emerald-700">
+                  <span className="h-1 w-4 rounded-full bg-emerald-600" /> Projected Profit ($5.10M)
+                </span>
+                <span className="flex items-center gap-2 text-slate-500">
+                  <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-400" /> Underwritten Target ($6.10M)
+                </span>
+              </div>
+              <div className="text-[11px] text-slate-500 font-mono">
+                Variance: -$1.00M (-16.4%)
+              </div>
             </div>
           </div>
         )}
@@ -619,4 +698,3 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
     </div>
   );
 };
-

@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fontSans.variable} ${fontMono.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} font-sans`}
+      className={`${fontSans.variable} ${fontMono.variable} font-sans`}
     >
       <body className="font-sans antialiased bg-app text-text-primary selection:bg-primary-subtle selection:text-primary">
         <AppProviders>

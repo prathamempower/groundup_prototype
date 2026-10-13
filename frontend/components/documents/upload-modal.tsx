@@ -115,18 +115,18 @@ export function UploadModal({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent maxWidth="lg" className="p-0 overflow-hidden">
+      <ModalContent maxWidth="lg" className="p-0 overflow-hidden rounded-xl border border-slate-200/90 shadow-2xl bg-white">
         {/* Header */}
-        <ModalHeader className="px-6 pt-6 pb-4 border-b border-border bg-subtle/30">
-          <div className="flex items-center gap-2">
-            <span className="rounded bg-primary-subtle p-1.5 text-primary">
+        <ModalHeader className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+          <div className="flex items-start gap-3.5">
+            <span className="rounded-lg bg-blue-50 border border-blue-200/60 p-2 text-blue-700 shrink-0">
               <UploadCloud className="h-5 w-5" />
             </span>
-            <div>
-              <ModalTitle className="text-section font-bold text-text-primary">
+            <div className="space-y-0.5">
+              <ModalTitle className="text-base font-bold text-slate-900 tracking-tight">
                 Upload Source Document
               </ModalTitle>
-              <ModalDescription className="text-caption text-text-secondary">
+              <ModalDescription className="text-xs text-slate-500 leading-relaxed">
                 Secure OCR ingestion for contractor invoices, certified draw packets, budgets, and bank statements.
               </ModalDescription>
             </div>
@@ -142,10 +142,10 @@ export function UploadModal({
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleFileDrop}
                 className={cn(
-                  "border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",
+                  "border-2 border-dashed rounded-xl p-8 sm:p-10 text-center transition-all cursor-pointer relative",
                   selectedFile
-                    ? "border-primary bg-primary-subtle/20"
-                    : "border-border hover:border-primary/60 hover:bg-subtle/30"
+                    ? "border-blue-500 bg-blue-50/30 ring-4 ring-blue-500/5"
+                    : "border-slate-200 hover:border-blue-400 hover:bg-slate-50/60 bg-white"
                 )}
                 onClick={() => {
                   const input = document.createElement("input");
@@ -159,48 +159,66 @@ export function UploadModal({
                 }}
               >
                 {selectedFile ? (
-                  <div className="space-y-2">
-                    <div className="mx-auto h-12 w-12 rounded-full bg-primary-subtle flex items-center justify-center text-primary">
+                  <div className="space-y-3">
+                    <div className="mx-auto h-12 w-12 rounded-xl bg-blue-50 border border-blue-200/60 flex items-center justify-center text-blue-600 shadow-xs">
                       {selectedFile.name.endsWith(".xlsx") || selectedFile.name.endsWith(".csv") ? (
-                        <FileSpreadsheet className="h-6 w-6" />
+                        <FileSpreadsheet className="h-6 w-6 text-emerald-600" />
                       ) : (
-                        <FileText className="h-6 w-6" />
+                        <FileText className="h-6 w-6 text-blue-600" />
                       )}
                     </div>
-                    <div className="text-body font-bold text-text-primary">{selectedFile.name}</div>
-                    <div className="text-caption text-text-muted font-mono">
-                      {(selectedFile.size / 1024).toFixed(1)} KB • Click or drop a different file to replace
+                    <div>
+                      <div className="text-sm font-bold text-slate-900">{selectedFile.name}</div>
+                      <div className="text-xs text-slate-500 font-mono mt-0.5">
+                        {(selectedFile.size / 1024).toFixed(1)} KB · Ready to ingest
+                      </div>
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 text-xs text-blue-700 font-semibold bg-white border border-slate-200 rounded-md px-2.5 py-1 shadow-2xs">
+                      Change File
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    <div className="mx-auto h-12 w-12 rounded-full bg-subtle flex items-center justify-center text-text-muted">
-                      <UploadCloud className="h-6 w-6" />
+                  <div className="space-y-3">
+                    <div className="mx-auto h-12 w-12 rounded-full bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-500 group-hover:scale-105 transition-transform">
+                      <UploadCloud className="h-6 w-6 text-slate-600" />
                     </div>
-                    <div className="text-body font-medium text-text-primary">
-                      Drop document here, or <span className="text-primary font-semibold">browse files</span>
+                    <div>
+                      <div className="text-sm font-semibold text-slate-800">
+                        Drop document here, or <span className="text-blue-600 font-bold hover:underline">browse files</span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Supports PDF, Excel (.xlsx, .csv), and high-resolution scanned images
+                      </p>
                     </div>
-                    <p className="text-caption text-text-muted">
-                      Supports PDF, Excel (.xlsx, .csv), and high-resolution scanned images
-                    </p>
+
+                    <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                      <span className="rounded bg-slate-100 text-slate-600 px-2 py-0.5 text-[10px] font-mono font-medium border border-slate-200/60">
+                        Max 50MB
+                      </span>
+                      <span className="rounded bg-slate-100 text-slate-600 px-2 py-0.5 text-[10px] font-mono font-medium border border-slate-200/60">
+                        SHA-256 Verified
+                      </span>
+                      <span className="rounded bg-slate-100 text-slate-600 px-2 py-0.5 text-[10px] font-mono font-medium border border-slate-200/60">
+                        Automatic OCR
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
-
             </>
           )}
 
           {(step === "UPLOADING" || step === "SCANNING") && (
             <div className="py-8 space-y-6 text-center">
-              <div className="mx-auto h-16 w-16 rounded-full bg-primary-subtle flex items-center justify-center text-primary animate-pulse">
+              <div className="mx-auto h-16 w-16 rounded-full bg-blue-50 border border-blue-200/70 flex items-center justify-center text-blue-600 animate-pulse">
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
 
               <div className="space-y-1">
-                <div className="text-section font-bold text-text-primary">
+                <div className="text-base font-bold text-slate-900">
                   {step === "UPLOADING" ? "Uploading Source Document to Secure Vault..." : "Running OCR Layout & Schema Matching..."}
                 </div>
-                <p className="text-body text-text-secondary max-w-md mx-auto">
+                <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
                   {step === "UPLOADING"
                     ? "Generating SHA-256 integrity hash and storing in AES-256 encrypted object storage."
                     : "Extracting financial line items, bounding box citations, and confidence metrics."}
@@ -209,15 +227,15 @@ export function UploadModal({
 
               {/* Progress Bar */}
               <div className="max-w-md mx-auto space-y-2">
-                <div className="w-full bg-border rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200/60">
                   <div
-                    className="bg-primary h-full transition-all duration-300 ease-out"
+                    className="bg-blue-600 h-full transition-all duration-300 ease-out"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <div className="flex justify-between text-caption font-mono text-text-muted">
+                <div className="flex justify-between text-xs font-mono text-slate-500">
                   <span>{step === "UPLOADING" ? "S3 Encrypted Ingestion" : "Financial Model Inference"}</span>
-                  <span>{progress}%</span>
+                  <span className="font-bold text-blue-700">{progress}%</span>
                 </div>
               </div>
             </div>
@@ -225,31 +243,33 @@ export function UploadModal({
 
           {step === "COMPLETE" && createdDocument && (
             <div className="py-6 space-y-5 text-center">
-              <div className="mx-auto h-14 w-14 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
-                <CheckCircle2 className="h-8 w-8" />
+              <div className="mx-auto h-14 w-14 rounded-full bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600">
+                <CheckCircle2 className="h-7 w-7" />
               </div>
 
               <div className="space-y-1">
-                <div className="text-section font-bold text-text-primary">
+                <div className="text-base font-bold text-slate-900">
                   Ingestion & Candidate Extraction Complete
                 </div>
-                <p className="text-body text-text-secondary">
-                  <span className="font-semibold text-text-primary">{createdDocument.original_filename}</span> is now
+                <p className="text-xs text-slate-500">
+                  <span className="font-semibold text-slate-900">{createdDocument.original_filename}</span> is now
                   ready for human review.
                 </p>
               </div>
 
-              <div className="bg-subtle/50 p-4 rounded-lg border border-border text-left space-y-2 text-xs">
+              <div className="bg-slate-50/80 p-4 rounded-xl border border-slate-200/90 text-left space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-text-muted">Document Type:</span>
-                  <span className="font-semibold text-text-primary">{createdDocument.document_type}</span>
+                  <span className="text-slate-500">Document Type:</span>
+                  <span className="font-semibold text-slate-800 uppercase tracking-tight">{createdDocument.document_type}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-text-muted">Status:</span>
-                  <span className="font-semibold text-amber-700 font-mono">READY_FOR_REVIEW</span>
+                  <span className="text-slate-500">Status:</span>
+                  <span className="font-semibold text-amber-700 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded-full font-mono text-[11px]">
+                    READY_FOR_REVIEW
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-text-muted">Candidate Fields Extracted:</span>
+                  <span className="text-slate-500">Candidate Fields Extracted:</span>
                   <span className="font-semibold text-emerald-700 flex items-center gap-1 font-mono">
                     <Sparkles className="h-3 w-3" /> Proposals Generated
                   </span>
@@ -260,16 +280,21 @@ export function UploadModal({
         </div>
 
         {/* Footer */}
-        <ModalFooter className="px-6 py-4 border-t border-border bg-subtle/30 flex items-center justify-between">
+        <ModalFooter className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
           {step === "SELECT" && (
             <>
-              <Button variant="secondary" onClick={() => onOpenChange(false)}>
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="text-xs font-semibold text-slate-700 border-slate-200 hover:bg-slate-100"
+              >
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 onClick={handleStartUpload}
                 disabled={!selectedFile}
+                className="text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs"
               >
                 Start Ingestion & OCR
               </Button>
@@ -277,14 +302,18 @@ export function UploadModal({
           )}
 
           {(step === "UPLOADING" || step === "SCANNING") && (
-            <div className="w-full text-center text-caption text-text-muted">
+            <div className="w-full text-center text-xs text-slate-500">
               Processing asynchronous worker job...
             </div>
           )}
 
           {step === "COMPLETE" && createdDocument && (
             <>
-              <Button variant="secondary" onClick={() => onOpenChange(false)}>
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="text-xs font-semibold text-slate-700 border-slate-200"
+              >
                 Return to Inbox
               </Button>
               <Button
@@ -293,6 +322,7 @@ export function UploadModal({
                   onOpenChange(false);
                   onUploadSuccess?.(createdDocument);
                 }}
+                className="text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs"
               >
                 Open Review Workbench <ArrowRight className="h-4 w-4 ml-1.5" />
               </Button>

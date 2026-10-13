@@ -99,7 +99,7 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     label: "Economics",
     path: "economics",
     icon: TrendingUp,
-    allowedRoles: ["CFO"],
+    allowedRoles: ["OWNER", "CFO"],
   },
   {
     id: "submissions",

@@ -88,48 +88,48 @@ export default function SubmissionsPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Page Header */}
-      <PageHeader
-        title={currentRole === "GC" ? "Contractor Claims & Evidence Intake" : "General Contractor Submissions"}
-        statusBadge={{
-          label: currentProject?.name || "Active Project",
-          variant: "success",
-          icon: <ShieldCheck className="h-3.5 w-3.5" />,
-        }}
-        description="Review milestone claims, itemized receipts, and change order packages for sponsor certification and draw inclusion."
-        primaryAction={
-          currentRole === "GC" ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsCorModalOpen(true)}
-              >
-                <FileText className="h-4 w-4 mr-1.5" />
-                Change Order
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsCostModalOpen(true)}
-              >
-                <Receipt className="h-4 w-4 mr-1.5" />
-                Cost Evidence
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setIsClaimModalOpen(true)}
-              >
-                <Plus className="h-4 w-4 mr-1.5" />
-                New Progress Claim
-              </Button>
-            </div>
-          ) : undefined
-        }
-      />
+      <div className="px-6 max-w-7xl mx-auto space-y-6 pt-4">
+        {/* Page Header */}
+        <PageHeader
+          title={currentRole === "GC" ? "Contractor Claims & Evidence Intake" : "General Contractor Submissions"}
+          statusBadge={{
+            label: currentProject?.name || "Active Project",
+            variant: "success",
+            icon: <ShieldCheck className="h-3.5 w-3.5" />,
+          }}
+          description="Review milestone claims, itemized receipts, and change order packages for sponsor certification and draw inclusion."
+          primaryAction={
+            currentRole === "GC" ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setIsCorModalOpen(true)}
+                >
+                  <FileText className="h-4 w-4 mr-1.5" />
+                  Change Order
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setIsCostModalOpen(true)}
+                >
+                  <Receipt className="h-4 w-4 mr-1.5" />
+                  Cost Evidence
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setIsClaimModalOpen(true)}
+                >
+                  <Plus className="h-4 w-4 mr-1.5" />
+                  New Progress Claim
+                </Button>
+              </div>
+            ) : undefined
+          }
+        />
 
-      <div className="px-6 max-w-7xl mx-auto space-y-6">
         {/* Context Banner */}
         <GcRoleBoundaryBanner
           currentRole={currentRole}

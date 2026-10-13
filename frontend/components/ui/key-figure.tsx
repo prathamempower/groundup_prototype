@@ -47,7 +47,7 @@ export function KeyFigure({
     >
       {/* Label and Sources link */}
       <div className="flex items-center justify-between gap-2">
-        <span className="font-semibold text-slate-500 uppercase tracking-wider text-[11px] truncate">{label}</span>
+        <span className="font-semibold text-slate-500 uppercase tracking-wide text-xs truncate">{label}</span>
         <SourcesButton
           figureLabel={label}
           amountOrValue={value}
@@ -57,7 +57,7 @@ export function KeyFigure({
       </div>
 
       {/* Main KPI Value */}
-      <div className="mt-2.5 text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 tabular-nums leading-none">
+      <div className="mt-2 text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 tabular-nums leading-tight">
         {value}
       </div>
 

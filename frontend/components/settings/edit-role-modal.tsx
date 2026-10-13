@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { TeamMember, UserRole } from "@/lib/types";
-import { Shield, X, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Shield, X, AlertTriangle, CheckCircle2, UserCheck, UserX } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface EditRoleModalProps {
   projectId: string;
@@ -23,17 +24,22 @@ export function EditRoleModal({
 }: EditRoleModalProps) {
   const queryClient = useQueryClient();
   const [role, setRole] = useState<UserRole>(member.role);
-  const [title, setTitle] = useState(member.title);
-  const [scope, setScope] = useState(member.scope || "");
+  const [status, setStatus] = useState<"ACTIVE" | "REVOKED">(
+    member.status === "REVOKED" ? "REVOKED" : "ACTIVE"
+  );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const updateMutation = useMutation({
-    mutationFn: () =>
-      api.team.updateRole(projectId, member.id, {
-        role,
-        title: title.trim() || undefined,
-        scope: scope.trim() || undefined,
-      }),
+    mutationFn: async () => {
+      // If status changed to revoked or back
+      if (status === "REVOKED" && member.status !== "REVOKED") {
+        await api.team.revoke(projectId, member.id);
+      } else {
+        await api.team.updateRole(projectId, member.id, {
+          role,
+        });
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["team", projectId] });
       queryClient.invalidateQueries({ queryKey: ["audit-events"] });
@@ -41,7 +47,7 @@ export function EditRoleModal({
       onClose();
     },
     onError: (err: unknown) => {
-      const msg = err instanceof Error ? err.message : "Failed to update role";
+      const msg = err instanceof Error ? err.message : "Failed to update member access";
       setErrorMsg(msg);
     },
   });
@@ -49,97 +55,116 @@ export function EditRoleModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-      <div className="w-full max-w-md rounded-lg border border-border bg-surface p-6 shadow-xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-start justify-between border-b border-border pb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary-subtle text-primary">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xl space-y-5 animate-in zoom-in-95 duration-150">
+        {/* Header */}
+        <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100/80 shadow-2xs">
               <Shield className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-section font-semibold text-text-primary">
-                Update Member Role & Scope
+              <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                Manage Member Access
               </h3>
-              <p className="text-caption text-text-secondary">
-                {member.name} ({member.email})
+              <p className="text-xs text-slate-500">
+                {member.name} • <span className="font-mono text-slate-400">{member.email}</span>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded p-1 text-text-muted hover:bg-subtle hover:text-text-primary"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
         {errorMsg && (
-          <div className="rounded-md border border-danger-border bg-danger-subtle p-3 text-caption font-medium text-danger flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 shrink-0" />
+          <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs font-medium text-rose-700 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-rose-500" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         <div className="space-y-4">
+          {/* Assigned Role */}
           <div className="space-y-1.5">
-            <label className="block text-caption font-semibold text-text-primary">
+            <label className="block text-xs font-semibold text-slate-800">
               Assigned Role
             </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as UserRole)}
-              className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body font-semibold text-text-primary focus:border-primary focus:outline-hidden"
-            >
-              <option value="OWNER">OWNER — Principal Developer</option>
-              <option value="CFO">CFO — Head of Project Finance & Treasury</option>
-              <option value="PM">PM — Senior Project Manager</option>
-              <option value="GC">GC — General Contractor / Submissions</option>
-              <option value="INVESTOR">INVESTOR — LP Syndicate Lead</option>
-            </select>
+            <div className="relative">
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value as UserRole)}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-800 shadow-2xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer"
+              >
+                <option value="OWNER">Owner — Principal Developer</option>
+                <option value="CFO">CFO — Head of Project Finance</option>
+                <option value="PM">PM — Senior Project Manager</option>
+                <option value="GC">GC — General Contractor / Submissions</option>
+                <option value="INVESTOR">Investor — LP Syndicate Lead</option>
+              </select>
+            </div>
           </div>
 
+          {/* Membership Status */}
           <div className="space-y-1.5">
-            <label className="block text-caption font-semibold text-text-primary">
-              Job Title
+            <label className="block text-xs font-semibold text-slate-800">
+              Account Status
             </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary focus:border-primary focus:outline-hidden"
-            />
-          </div>
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => setStatus("ACTIVE")}
+                className={`flex items-center justify-center gap-2 rounded-xl p-2.5 text-xs font-semibold border transition-all ${
+                  status === "ACTIVE"
+                    ? "bg-emerald-50/80 border-emerald-300 text-emerald-800 shadow-2xs"
+                    : "bg-slate-50/50 border-slate-200 text-slate-600 hover:bg-slate-100/70"
+                }`}
+              >
+                <UserCheck className="h-3.5 w-3.5 text-emerald-600" />
+                <span>Active</span>
+              </button>
 
-          <div className="space-y-1.5">
-            <label className="block text-caption font-semibold text-text-primary">
-              Authority Scope
-            </label>
-            <textarea
-              rows={2}
-              value={scope}
-              onChange={(e) => setScope(e.target.value)}
-              className="w-full rounded-md border border-border bg-surface p-2.5 text-body text-text-primary focus:border-primary focus:outline-hidden"
-            />
+              <button
+                type="button"
+                onClick={() => setStatus("REVOKED")}
+                className={`flex items-center justify-center gap-2 rounded-xl p-2.5 text-xs font-semibold border transition-all ${
+                  status === "REVOKED"
+                    ? "bg-rose-50/80 border-rose-300 text-rose-800 shadow-2xs"
+                    : "bg-slate-50/50 border-slate-200 text-slate-600 hover:bg-slate-100/70"
+                }`}
+              >
+                <UserX className="h-3.5 w-3.5 text-rose-600" />
+                <span>Revoked / Suspended</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t border-border pt-4">
-          <button
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-2.5 border-t border-slate-100 pt-4">
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={onClose}
-            className="rounded-md border border-border bg-surface px-4 py-2 text-body font-medium text-text-secondary hover:bg-subtle"
+            className="h-9 px-4 text-xs font-semibold text-slate-600 rounded-lg"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            disabled={updateMutation.isPending}
+            variant="primary"
+            size="sm"
+            isLoading={updateMutation.isPending}
             onClick={() => updateMutation.mutate()}
-            className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body font-medium text-white hover:bg-primary-hover shadow-xs"
+            className="h-9 px-4 text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-xs"
           >
-            <CheckCircle2 className="h-4 w-4" />
-            {updateMutation.isPending ? "Saving..." : "Save Role Changes"}
-          </button>
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            <span>Save Changes</span>
+          </Button>
         </div>
       </div>
     </div>

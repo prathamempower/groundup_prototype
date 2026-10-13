@@ -194,80 +194,84 @@ export default function DocumentsPage() {
           }
         />
 
-        {/* Modern KPI Cards */}
+        {/* Modern Enterprise KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs hover:shadow-xs transition-shadow">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs hover:border-slate-300 transition-all">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">Total Tracked</span>
-              <span className="h-7 w-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <span className="text-[11px] font-semibold tracking-wider uppercase text-slate-500">Total Tracked</span>
+              <span className="h-7 w-7 rounded-lg bg-blue-50 text-blue-600 border border-blue-200/60 flex items-center justify-center">
                 <FileText className="h-4 w-4" />
               </span>
             </div>
             <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 tabular-nums">
+              <span className="text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
                 {totalCount}
               </span>
               <span className="text-xs font-medium text-slate-500">Files</span>
             </div>
-            <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-emerald-600 font-medium">
-              <Sparkles className="h-3 w-3" />
-              <span>Parsed & indexed</span>
+            <div className="mt-2.5 flex items-center gap-1.5 text-xs text-blue-700 font-medium">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Parsed & indexed in vault</span>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs hover:shadow-xs transition-shadow">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs hover:border-slate-300 transition-all">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">Needs Review</span>
-              <span className="h-7 w-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+              <span className="text-[11px] font-semibold tracking-wider uppercase text-slate-500">Needs Review</span>
+              <span className="h-7 w-7 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center justify-center">
                 <Clock className="h-4 w-4" />
               </span>
             </div>
             <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 tabular-nums">
+              <span className="text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
                 {needsReviewCount}
               </span>
               <span className="text-xs font-medium text-slate-500">Files</span>
             </div>
-            <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+            <div className="mt-2.5 flex items-center gap-1.5 text-xs font-medium">
               <span className={cn("h-1.5 w-1.5 rounded-full", needsReviewCount > 0 ? "bg-amber-500" : "bg-emerald-500")} />
-              <span>{needsReviewCount > 0 ? "Action required" : "All reviewed"}</span>
+              <span className={needsReviewCount > 0 ? "text-amber-700" : "text-emerald-700"}>
+                {needsReviewCount > 0 ? "Pending line validation" : "All reviewed"}
+              </span>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs hover:shadow-xs transition-shadow">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs hover:border-slate-300 transition-all">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">Exceptions</span>
-              <span className="h-7 w-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+              <span className="text-[11px] font-semibold tracking-wider uppercase text-slate-500">Exceptions</span>
+              <span className="h-7 w-7 rounded-lg bg-rose-50 text-rose-700 border border-rose-200/60 flex items-center justify-center">
                 <ShieldAlert className="h-4 w-4" />
               </span>
             </div>
             <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 tabular-nums">
+              <span className="text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
                 {quarantinedCount}
               </span>
               <span className="text-xs font-medium text-slate-500">Flagged</span>
             </div>
-            <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+            <div className="mt-2.5 flex items-center gap-1.5 text-xs font-medium">
               <span className={cn("h-1.5 w-1.5 rounded-full", quarantinedCount > 0 ? "bg-rose-500" : "bg-slate-300")} />
-              <span>{quarantinedCount > 0 ? "Attention required" : "Zero exceptions"}</span>
+              <span className={quarantinedCount > 0 ? "text-rose-700" : "text-slate-500"}>
+                {quarantinedCount > 0 ? "Requires re-classification" : "Zero exceptions"}
+              </span>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs hover:shadow-xs transition-shadow">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs hover:border-slate-300 transition-all">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">Verified Rate</span>
-              <span className="h-7 w-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <span className="text-[11px] font-semibold tracking-wider uppercase text-slate-500">Verified Rate</span>
+              <span className="h-7 w-7 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center">
                 <CheckCircle2 className="h-4 w-4" />
               </span>
             </div>
             <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 tabular-nums">
+              <span className="text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
                 {reviewedRate}%
               </span>
             </div>
-            <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-emerald-600 font-medium">
-              <CheckCircle2 className="h-3 w-3" />
-              <span>Verified & published</span>
+            <div className="mt-2.5 flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              <span>Verified & baseline mapped</span>
             </div>
           </div>
         </div>
@@ -309,19 +313,19 @@ export default function DocumentsPage() {
         <div className="space-y-3 pt-2">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             {/* Filter Tabs */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+            <div className="inline-flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/80 overflow-x-auto">
               <button
                 type="button"
                 onClick={() => setActiveTab("ALL")}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
                   activeTab === "ALL"
-                    ? "bg-blue-600 text-white shadow-xs"
-                    : "text-slate-600 bg-slate-100/80 hover:bg-slate-200/70 hover:text-slate-900"
+                    ? "bg-white text-blue-700 shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
                 )}
               >
                 <span>All Documents</span>
-                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold", activeTab === "ALL" ? "bg-blue-700 text-blue-100" : "bg-slate-200 text-slate-700")}>
+                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold font-mono", activeTab === "ALL" ? "bg-blue-100 text-blue-800" : "bg-slate-200/80 text-slate-700")}>
                   {totalCount}
                 </span>
               </button>
@@ -330,14 +334,14 @@ export default function DocumentsPage() {
                 type="button"
                 onClick={() => setActiveTab("NEEDS_REVIEW")}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
                   activeTab === "NEEDS_REVIEW"
-                    ? "bg-amber-600 text-white shadow-xs"
-                    : "text-slate-600 bg-slate-100/80 hover:bg-slate-200/70 hover:text-slate-900"
+                    ? "bg-white text-amber-700 shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
                 )}
               >
                 <span>Needs Review</span>
-                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold", activeTab === "NEEDS_REVIEW" ? "bg-amber-700 text-white" : "bg-amber-100 text-amber-800")}>
+                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold font-mono", activeTab === "NEEDS_REVIEW" ? "bg-amber-100 text-amber-900" : "bg-amber-100/60 text-amber-800")}>
                   {needsReviewCount}
                 </span>
               </button>
@@ -346,14 +350,14 @@ export default function DocumentsPage() {
                 type="button"
                 onClick={() => setActiveTab("REVIEWED")}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
                   activeTab === "REVIEWED"
-                    ? "bg-emerald-600 text-white shadow-xs"
-                    : "text-slate-600 bg-slate-100/80 hover:bg-slate-200/70 hover:text-slate-900"
+                    ? "bg-white text-emerald-700 shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
                 )}
               >
                 <span>Reviewed & Published</span>
-                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold", activeTab === "REVIEWED" ? "bg-emerald-700 text-white" : "bg-emerald-100 text-emerald-800")}>
+                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold font-mono", activeTab === "REVIEWED" ? "bg-emerald-100 text-emerald-900" : "bg-emerald-100/60 text-emerald-800")}>
                   {reviewedCount}
                 </span>
               </button>
@@ -362,15 +366,15 @@ export default function DocumentsPage() {
                 type="button"
                 onClick={() => setActiveTab("QUARANTINED")}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
                   activeTab === "QUARANTINED"
-                    ? "bg-rose-700 text-white shadow-xs"
-                    : "text-slate-600 bg-slate-100/80 hover:bg-slate-200/70 hover:text-slate-900"
+                    ? "bg-white text-rose-700 shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
                 )}
               >
                 <span>Quarantined</span>
                 {quarantinedCount > 0 && (
-                  <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold", activeTab === "QUARANTINED" ? "bg-white/20 text-white" : "bg-rose-100 text-rose-900")}>
+                  <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold font-mono", activeTab === "QUARANTINED" ? "bg-rose-100 text-rose-900" : "bg-rose-100/60 text-rose-800")}>
                     {quarantinedCount}
                   </span>
                 )}
@@ -380,10 +384,10 @@ export default function DocumentsPage() {
                 type="button"
                 onClick={() => setActiveTab("DUPLICATES")}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
                   activeTab === "DUPLICATES"
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 bg-slate-100/80 hover:bg-slate-200/70 hover:text-slate-900"
+                    ? "bg-white text-slate-900 shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
                 )}
               >
                 <span>Duplicates</span>
@@ -391,22 +395,22 @@ export default function DocumentsPage() {
             </div>
 
             {/* Filters and Search Bar */}
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="relative min-w-[220px]">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <div className="relative min-w-[240px]">
                 <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search filename, vendor..."
-                  className="w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+                  className="w-full rounded-lg border border-slate-200/90 bg-white pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 shadow-2xs"
                 />
               </div>
 
               <select
                 value={selectedTypeFilter}
                 onChange={(e) => setSelectedTypeFilter(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-blue-500"
+                className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-blue-500 shadow-2xs"
               >
                 <option value="ALL">All File Types</option>
                 <option value="INVOICE">Invoices</option>
@@ -421,7 +425,7 @@ export default function DocumentsPage() {
                 <select
                   value={selectedProjectFilter}
                   onChange={(e) => setSelectedProjectFilter(e.target.value)}
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-blue-500"
+                  className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-blue-500 shadow-2xs"
                 >
                   <option value="ALL">All Projects</option>
                   {projects.map((p) => (
@@ -456,14 +460,11 @@ export default function DocumentsPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200/80 bg-slate-50/75 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                    <th className="py-3 px-4 min-w-[240px]">Source Document</th>
-                    <th className="py-3 px-4 min-w-[130px]">Classification</th>
-                    <th className="py-3 px-4 min-w-[120px]">AI Confidence</th>
-                    <th className="py-3 px-4 min-w-[130px]">Status</th>
-                    <th className="py-3 px-4 min-w-[140px]">Project Scope</th>
-                    <th className="py-3 px-4 min-w-[150px]">Uploaded By</th>
+                    <th className="py-3 px-5 min-w-[320px]">Document & Classification</th>
+                    <th className="py-3 px-4 min-w-[180px]">Verification Status</th>
+                    <th className="py-3 px-4 min-w-[160px]">Uploaded By</th>
                     <th className="py-3 px-4 text-right whitespace-nowrap min-w-[110px]">Date</th>
-                    <th className="py-3 px-4 text-right min-w-[110px]">Actions</th>
+                    <th className="py-3 px-5 text-right min-w-[110px]">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
@@ -481,25 +482,25 @@ export default function DocumentsPage() {
                           doc.id === reviewingDocId && "bg-blue-50/30"
                         )}
                       >
-                        {/* Name & Note */}
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-3">
+                        {/* Unified: Source Document + Classification Badge + Duplicates */}
+                        <td className="py-3.5 px-5">
+                          <div className="flex items-start gap-3">
                             <div className={cn(
-                              "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border",
+                              "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 border mt-0.5",
                               isSheet 
                                 ? "bg-emerald-50 text-emerald-700 border-emerald-200/60" 
                                 : "bg-blue-50 text-blue-700 border-blue-200/60"
                             )}>
                               {isSheet ? (
-                                <FileSpreadsheet className="h-4 w-4" />
+                                <FileSpreadsheet className="h-4.5 w-4.5" />
                               ) : (
-                                <FileText className="h-4 w-4" />
+                                <FileText className="h-4.5 w-4.5" />
                               )}
                             </div>
-                            <div className="min-w-0">
+                            <div className="min-w-0 space-y-1">
                               <div className="flex items-center gap-2">
                                 <span
-                                  className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors cursor-pointer truncate max-w-[280px]"
+                                  className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors cursor-pointer truncate max-w-[280px]"
                                   onClick={() => setReviewingDocId(doc.id)}
                                   title={doc.original_filename}
                                 >
@@ -511,68 +512,54 @@ export default function DocumentsPage() {
                                   </span>
                                 )}
                               </div>
-                              {doc.notes && (
-                                <div className="text-[11px] text-slate-400 mt-0.5 truncate max-w-[240px]" title={doc.notes}>
-                                  {doc.notes}
-                                </div>
+                              <div className="flex items-center gap-2">
+                                <span className="inline-flex items-center rounded bg-slate-100 border border-slate-200/80 px-2 py-0.5 text-[10px] font-semibold text-slate-700 uppercase tracking-tight font-mono">
+                                  {doc.document_type.replace(/_/g, " ")}
+                                </span>
+                                {doc.notes && (
+                                  <span className="text-[11px] text-slate-400 truncate max-w-[220px]" title={doc.notes}>
+                                    · {doc.notes}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Unified: Verification Status + AI Confidence Indicator */}
+                        <td className="py-3.5 px-4">
+                          <div className="space-y-1">
+                            <div>
+                              {doc.ingestion_status === "REVIEWED" && (
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/70 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
+                                  <CheckCircle2 className="h-3 w-3" /> Reviewed & Verified
+                                </span>
+                              )}
+                              {doc.ingestion_status === "READY_FOR_REVIEW" && (
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200/70 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700">
+                                  <Clock className="h-3 w-3" /> Ready for Review
+                                </span>
+                              )}
+                              {doc.ingestion_status === "QUARANTINED" && (
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-200/70 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700">
+                                  <ShieldAlert className="h-3 w-3" /> Quarantined
+                                </span>
                               )}
                             </div>
-                          </div>
-                        </td>
-
-                        {/* Classification Badge */}
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center rounded-md bg-blue-50/70 border border-blue-200/60 px-2 py-0.5 text-[11px] font-semibold text-blue-700 uppercase tracking-tight">
-                            {doc.document_type.replace(/_/g, " ")}
-                          </span>
-                        </td>
-
-                        {/* AI Confidence */}
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2 max-w-[120px]">
-                            <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                              <div
-                                className={cn(
-                                  "h-full rounded-full transition-all",
-                                  confidenceScore >= 98 ? "bg-emerald-500" : "bg-blue-500"
-                                )}
-                                style={{ width: `${confidenceScore}%` }}
-                              />
+                            <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-mono">
+                              <span className="text-slate-400">OCR Confidence:</span>
+                              <span className={cn(
+                                "font-semibold",
+                                confidenceScore >= 98 ? "text-emerald-700" : "text-blue-700"
+                              )}>
+                                {confidenceScore}%
+                              </span>
                             </div>
-                            <span className="text-[11px] font-bold text-slate-700 tabular-nums">
-                              {confidenceScore}%
-                            </span>
                           </div>
-                        </td>
-
-                        {/* Status */}
-                        <td className="py-3 px-4">
-                          {doc.ingestion_status === "REVIEWED" && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
-                              <CheckCircle2 className="h-3 w-3" /> Reviewed
-                            </span>
-                          )}
-                          {doc.ingestion_status === "READY_FOR_REVIEW" && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200/60 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700">
-                              <Clock className="h-3 w-3" /> Ready for Review
-                            </span>
-                          )}
-                          {doc.ingestion_status === "QUARANTINED" && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 border border-rose-200/60 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700">
-                              <ShieldAlert className="h-3 w-3" /> Quarantined
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Project Scope */}
-                        <td className="py-3 px-4">
-                          <span className="text-xs text-slate-700 font-medium truncate block max-w-[140px]" title={projectObj?.name || "Unassigned"}>
-                            {projectObj?.name || "Unassigned"}
-                          </span>
                         </td>
 
                         {/* Uploader */}
-                        <td className="py-3 px-4 text-xs">
+                        <td className="py-3.5 px-4 text-xs">
                           {(() => {
                             const uploaderName = getUploaderName(doc);
                             const initials = uploaderName
@@ -596,36 +583,38 @@ export default function DocumentsPage() {
                         </td>
 
                         {/* Date */}
-                        <td className="py-3 px-4 text-right whitespace-nowrap tabular-nums text-slate-600 text-xs font-medium">
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap tabular-nums text-slate-600 text-xs font-medium font-mono">
                           {formatDate(doc.document_date)}
                         </td>
 
                         {/* Actions */}
-                        <td className="py-3 px-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
+                        <td className="py-3.5 px-5 text-right">
+                          <div className="flex items-center justify-end gap-2">
                             {doc.ingestion_status === "QUARANTINED" ? (
-                              <button
-                                type="button"
+                              <Button
+                                variant="destructive"
+                                size="sm"
                                 onClick={() => setQuarantinedDoc(doc)}
-                                className="rounded-lg bg-rose-50 border border-rose-200/70 px-2.5 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition-colors flex items-center gap-1"
+                                className="h-7 px-2.5 text-xs font-semibold gap-1"
                               >
                                 <FolderSync className="h-3.5 w-3.5" />
                                 Resolve
-                              </button>
+                              </Button>
                             ) : (
-                              <button
-                                type="button"
+                              <Button
+                                variant="outline"
+                                size="sm"
                                 onClick={() => setReviewingDocId(doc.id)}
-                                className="rounded-lg bg-blue-50 border border-blue-200/70 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors flex items-center gap-1"
+                                className="h-7 px-3 text-xs font-semibold text-blue-700 border-slate-200 hover:border-blue-300 hover:bg-blue-50/60"
                               >
                                 Review
-                              </button>
+                              </Button>
                             )}
                             <button
                               type="button"
                               title="Download Source Document"
                               onClick={() => handleDownload(doc.id, doc.original_filename)}
-                              className="rounded-lg p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                              className="rounded-lg p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
                             >
                               <Download className="h-3.5 w-3.5" />
                             </button>

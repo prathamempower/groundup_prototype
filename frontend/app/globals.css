@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -39,27 +39,109 @@
 
   html {
     color-scheme: light;
-    font-family: var(--font-sans), "Plus Jakarta Sans", "Google Sans", Roboto, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 
   body {
     background-color: var(--bg-app);
     color: var(--text-primary);
-    font-family: var(--font-sans), "Plus Jakarta Sans", "Google Sans", Roboto, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: -0.011em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Stabilized global typography hierarchy */
+  h1, .h1 {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.75rem; /* 28px */
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  h2, .h2 {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.625rem; /* 26px */
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: var(--text-primary);
+  }
+
+  h3, .h3 {
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.375rem; /* 22px */
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+
+  /* Micro-typography stabilization: Normalize microscopic fonts & uppercase tracking */
+  .text-\[10px\],
+  .text-\[11px\] {
+    font-size: 0.75rem !important; /* 12px min comfortable reading size */
+    line-height: 1rem !important; /* 16px */
+  }
+
+  .text-\[12px\] {
+    font-size: 0.75rem !important;
+    line-height: 1.125rem !important;
+  }
+
+  .text-\[13px\] {
+    font-size: 0.8125rem !important; /* 13px */
+    line-height: 1.25rem !important;
+  }
+
+  /* Harmonize tracking-wider to calm, legible tracking */
+  .tracking-wider,
+  .tracking-widest {
+    letter-spacing: 0.035em !important;
   }
 
   /* Accessible focus ring: 2px primary, 2px offset */
   :focus-visible {
-    outline: 2px solid var(--primary);
+    outline: 2px solid var(--primary-accent);
     outline-offset: 2px;
+  }
+
+  /* Enterprise Modern Button Micro-interactions Across Entire App */
+  button:not([disabled]) {
+    cursor: pointer;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  button:not([disabled]):active {
+    transform: scale(0.985);
   }
 }
 
 @layer utilities {
   .tabular-nums {
     font-variant-numeric: tabular-nums;
+  }
+
+  .shimmer-wave {
+    background: linear-gradient(
+      90deg,
+      rgba(241, 245, 249, 0.8) 0%,
+      rgba(255, 255, 255, 0.9) 50%,
+      rgba(241, 245, 249, 0.8) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmerWave 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+@keyframes shimmerWave {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
 

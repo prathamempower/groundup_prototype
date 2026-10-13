@@ -1,21 +1,22 @@
-import { Roboto_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 
-// Primary Google Products typography (clean, modern, highly legible)
-export const fontSans = Plus_Jakarta_Sans({
+// Modern, high-clarity enterprise typography
+export const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-sans",
+  variable: "--font-inter",
   display: "swap",
 });
 
-export const fontMono = Roboto_Mono({
+export const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-mono",
+  variable: "--font-jetbrains-mono",
   display: "swap",
 });
 
-// Backward-compatibility aliases so existing imports work seamlessly
-export const ibmPlexSans = fontSans;
-export const ibmPlexMono = fontMono;
-
+// Backward-compatibility aliases
+export const fontSans = inter;
+export const fontMono = jetbrainsMono;
+export const ibmPlexSans = inter;
+export const ibmPlexMono = jetbrainsMono;

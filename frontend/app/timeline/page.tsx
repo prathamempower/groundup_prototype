@@ -12,18 +12,19 @@ import {
   Calendar,
   Clock,
   AlertTriangle,
-  CheckCircle,
+  CheckCircle2,
   Plus,
   Layers,
   Table as TableIcon,
   Flame,
   Scale,
-  FileCheck,
+  FileCheck2,
   Search,
   ArrowRight,
+  TrendingUp,
+  AlertCircle,
   FileText,
-  Camera,
-  ExternalLink,
+  Filter,
 } from "lucide-react";
 import { CreateMilestoneModal } from "@/components/timeline/create-milestone-modal";
 import { UpdateMilestoneModal } from "@/components/timeline/update-milestone-modal";
@@ -58,9 +59,6 @@ export default function TimelinePage() {
   const currentProjectId = (routeProjectId && routeProjectId !== "new")
     ? routeProjectId
     : projectsData?.data?.current_project_id || "";
-  const currentProject = projectsData?.data?.projects?.find(
-    (p) => p.id === currentProjectId
-  );
 
   // Milestones Query
   const { data: milestonesData, isLoading: isMilestonesLoading } = useQuery({
@@ -193,33 +191,33 @@ export default function TimelinePage() {
 
   return (
     <div className="space-y-6 pb-16">
-      {/* Page Header */}
-      <PageHeader
-        title="Timeline & Progress"
-        statusBadge={{
-          label: hasScheduleBaseline
-            ? `${milestones.length} Schedule Milestones (${forecast?.overall_progress_percent ?? 0}% Complete)`
-            : "Baseline Incomplete",
-          variant: !hasScheduleBaseline
-            ? "warning"
-            : (forecast?.delay_days || 0) > 0
-            ? "danger"
-            : "success",
-          icon: <Calendar className="h-3.5 w-3.5" />,
-        }}
-        description="Critical path schedule milestones, evidence-backed inspection verification, and financing carry-cost exposure"
-        primaryAction={
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body font-medium text-white hover:bg-primary-hover focus-visible:outline-primary shadow-xs"
-          >
-            <Plus className="h-4 w-4" />
-            Create Milestone Plan Item
-          </button>
-        }
-      />
+      <div className="px-6 max-w-7xl mx-auto space-y-6 pt-4">
+        {/* Page Header */}
+        <PageHeader
+          title="Timeline & Progress"
+          statusBadge={{
+            label: hasScheduleBaseline
+              ? `${milestones.length} Schedule Milestones (${forecast?.overall_progress_percent ?? 0}% Complete)`
+              : "Baseline Incomplete",
+            variant: !hasScheduleBaseline
+              ? "warning"
+              : (forecast?.delay_days || 0) > 0
+              ? "danger"
+              : "success",
+            icon: <Calendar className="h-3.5 w-3.5" />,
+          }}
+          description="Critical path schedule milestones, evidence-backed inspection verification, and financing carry-cost exposure"
+          primaryAction={
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="gap-2 shadow-xs cursor-pointer"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Create Milestone Plan Item</span>
+            </Button>
+          }
+        />
 
-      <div className="px-6 max-w-7xl mx-auto space-y-6">
         {/* 4 Core Schedule KPI Figures */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <KeyFigure
@@ -247,7 +245,7 @@ export default function TimelinePage() {
           />
 
           <KeyFigure
-            label="Critical Path Schedule Delay"
+            label="Critical Path Delay"
             value={
               !hasScheduleBaseline
                 ? "Unknown"
@@ -272,7 +270,7 @@ export default function TimelinePage() {
                 ? formatMoney(forecast.total_carry_cost_exposure)
                 : "$0.00"
             }
-            basis="Monthly interest carry of $18,500/month on drawn senior construction loan principal during 45-day delay window."
+            basis="Monthly interest carry of $18,500/month on drawn senior construction loan principal during delay window."
             variance={
               hasScheduleBaseline && forecast?.delay_days
                 ? {
@@ -301,114 +299,99 @@ export default function TimelinePage() {
           />
         </div>
 
-        {/* Progress Dispute Conflict Banner */}
+        {/* Verification Conflict Alert Banner */}
         {disputedMilestone && disputedMilestone.progress_conflict && (
-          <div className="rounded-lg border border-danger/40 bg-danger-subtle/60 p-4 shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-4 shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-danger text-white flex-shrink-0 mt-0.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-600 text-white shrink-0 mt-0.5 shadow-2xs">
                   <Scale className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-body font-bold text-danger">
-                    Progress Verification Conflict Detected: {disputedMilestone.name}
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-rose-800">
+                    Verification Conflict Detected &bull; {disputedMilestone.name}
                   </h3>
-                  <p className="text-caption text-text-secondary mt-0.5">
-                    PM reports <strong className="text-text-primary">{disputedMilestone.progress_conflict.pm_percent}%</strong> completion, but third-party certified inspector report ({disputedMilestone.progress_conflict.inspector_report_name}) certifies <strong className="text-danger">{disputedMilestone.progress_conflict.inspector_percent}%</strong> ({disputedMilestone.progress_conflict.discrepancy_percent}% variance &bull; <strong className="text-danger">{formatMoney(disputedMilestone.progress_conflict.estimated_value_at_risk)}</strong> at risk on Draw #3 advance).
+                  <p className="text-xs text-rose-900/80 mt-1 leading-relaxed">
+                    PM reports <strong className="font-semibold text-slate-900">{disputedMilestone.progress_conflict.pm_percent}%</strong> completion, but certified inspector report ({disputedMilestone.progress_conflict.inspector_report_name}) certifies <strong className="font-semibold text-rose-700">{disputedMilestone.progress_conflict.inspector_percent}%</strong> ({disputedMilestone.progress_conflict.discrepancy_percent}% variance &bull; <strong className="font-semibold text-rose-700">{formatMoney(disputedMilestone.progress_conflict.estimated_value_at_risk)}</strong> at risk on Draw advance).
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
                   type="button"
+                  variant="destructive"
+                  size="sm"
                   onClick={() => handleOpenResolve(disputedMilestone)}
-                  className="flex items-center gap-1.5 rounded-md bg-danger px-4 py-2 text-caption font-semibold text-white hover:bg-danger/90 shadow-xs"
+                  className="gap-1.5 cursor-pointer shadow-xs"
                 >
-                  <Scale className="h-4 w-4" />
-                  Resolve Verification Dispute
-                </button>
+                  <Scale className="h-3.5 w-3.5" />
+                  <span>Resolve Conflict</span>
+                </Button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Unknown Schedule Warning (if project has no baseline) */}
-        {!hasScheduleBaseline && (
-          <div className="rounded-lg border border-warning/40 bg-warning-subtle/50 p-6 text-center space-y-3">
-            <Calendar className="mx-auto h-8 w-8 text-warning" />
-            <div>
-              <h3 className="text-section font-semibold text-text-primary">
-                Schedule Baseline Incomplete
-              </h3>
-              <p className="text-body text-text-secondary max-w-lg mx-auto mt-1">
-                This project does not yet have an approved milestone schedule baseline. Create milestone items to track physical completion, critical path delays, and financing carry exposure.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body font-medium text-white hover:bg-primary-hover shadow-xs"
-            >
-              <Plus className="h-4 w-4" />
-              Initialize Milestone Plan
-            </button>
-          </div>
-        )}
-
         {/* View Controls & Filter Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2 bg-subtle p-1 rounded-lg border border-border">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* Segmented View Switcher */}
+          <div className="flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/80 shadow-2xs">
             <button
               type="button"
               onClick={() => setViewMode("GANTT")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-caption font-medium transition-colors ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 viewMode === "GANTT"
-                  ? "bg-surface text-text-primary shadow-xs font-semibold"
-                  : "text-text-secondary hover:text-text-primary"
+                  ? "bg-white text-slate-900 shadow-xs font-semibold"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
               }`}
             >
-              <Layers className="h-4 w-4" />
-              Visual Timeline (Gantt)
+              <Layers className="h-3.5 w-3.5" />
+              <span>Gantt Schedule</span>
             </button>
             <button
               type="button"
               onClick={() => setViewMode("TABLE")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-caption font-medium transition-colors ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 viewMode === "TABLE"
-                  ? "bg-surface text-text-primary shadow-xs font-semibold"
-                  : "text-text-secondary hover:text-text-primary"
+                  ? "bg-white text-slate-900 shadow-xs font-semibold"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
               }`}
             >
-              <TableIcon className="h-4 w-4" />
-              Milestone Schedule Table
+              <TableIcon className="h-3.5 w-3.5" />
+              <span>Milestone Table</span>
             </button>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
+          {/* Search & Filter */}
+          <div className="flex items-center gap-2.5 flex-wrap">
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-text-muted" />
+              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search milestones, CSI code, trade..."
+                placeholder="Search milestones, trade, CSI..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="rounded-md border border-border bg-surface pl-9 pr-3 py-1.5 text-body text-text-primary placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary w-64"
+                className="h-9 rounded-lg border border-slate-200/90 bg-white pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary w-64 shadow-2xs transition-all"
               />
             </div>
 
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="ALL">All Statuses</option>
-              <option value="CRITICAL">Critical Path Only</option>
-              <option value="DELAYED">Delayed / At Risk</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="NOT_STARTED">Not Started</option>
-            </select>
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                aria-label="Filter milestones by status"
+                className="h-9 rounded-lg border border-slate-200/90 bg-white px-3 pr-8 text-xs font-medium text-slate-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs transition-all appearance-none cursor-pointer"
+              >
+                <option value="ALL">All Statuses</option>
+                <option value="CRITICAL">Critical Path Only</option>
+                <option value="DELAYED">Delayed / At Risk</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="NOT_STARTED">Not Started</option>
+              </select>
+              <Filter className="absolute right-2.5 top-2.5 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+            </div>
           </div>
         </div>
 
@@ -416,7 +399,7 @@ export default function TimelinePage() {
         {viewMode === "GANTT" && (
           <div>
             {isMilestonesLoading ? (
-              <div className="rounded-xl border border-border bg-surface p-6 shadow-xs space-y-4">
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-2xs space-y-4">
                 <div className="flex items-center justify-between">
                   <Skeleton className="h-4 w-40" />
                   <Skeleton className="h-7 w-28 rounded-md" />
@@ -433,12 +416,12 @@ export default function TimelinePage() {
                 </div>
               </div>
             ) : milestones.length === 0 ? (
-              <div className="rounded-lg border border-border bg-surface p-12 text-center">
-                <Calendar className="mx-auto h-8 w-8 text-text-muted" />
-                <h3 className="mt-2 text-section font-semibold text-text-primary">
+              <div className="rounded-xl border border-slate-200 bg-white p-12 text-center">
+                <Calendar className="mx-auto h-8 w-8 text-slate-400" />
+                <h3 className="mt-2 text-sm font-semibold text-slate-800">
                   No milestones found
                 </h3>
-                <p className="mt-1 text-body text-text-secondary">
+                <p className="mt-1 text-xs text-slate-500">
                   Create milestone plan items to generate the schedule Gantt chart.
                 </p>
               </div>
@@ -454,34 +437,36 @@ export default function TimelinePage() {
 
         {/* View Mode 2: Detailed Milestone Schedule Table */}
         {viewMode === "TABLE" && (
-          <div>
+          <div className="rounded-xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden">
             {isMilestonesLoading ? (
-              <SkeletonTable rows={5} columns={6} />
+              <div className="p-4">
+                <SkeletonTable rows={5} columns={6} />
+              </div>
             ) : filteredMilestones.length === 0 ? (
-              <div className="rounded-lg border border-border bg-surface shadow-xs overflow-hidden p-12 text-center">
-                <Calendar className="mx-auto h-8 w-8 text-text-muted" />
-                <h3 className="mt-2 text-section font-semibold text-text-primary">
+              <div className="p-12 text-center">
+                <Calendar className="mx-auto h-8 w-8 text-slate-400" />
+                <h3 className="mt-2 text-sm font-semibold text-slate-800">
                   No matching milestones
                 </h3>
-                <p className="mt-1 text-body text-text-secondary">
+                <p className="mt-1 text-xs text-slate-500">
                   Try adjusting your search query or filter criteria.
                 </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-body">
+                <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-border bg-subtle/50 text-caption font-semibold text-text-secondary">
-                      <th className="py-3 px-4">Milestone & Scope</th>
+                    <tr className="border-b border-slate-100 bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <th className="py-3 px-5">Milestone & Scope</th>
                       <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4">Progress %</th>
-                      <th className="py-3 px-4">Planned Baseline</th>
+                      <th className="py-3 px-4">Progress</th>
+                      <th className="py-3 px-4">Baseline Target</th>
                       <th className="py-3 px-4">Forecast Finish</th>
                       <th className="py-3 px-4">Evidence</th>
-                      <th className="py-3 px-4 text-right">Actions</th>
+                      <th className="py-3 px-5 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody className="divide-y divide-slate-100">
                     {filteredMilestones.map((ms) => {
                       const isDelayed = (ms.delay_days || 0) > 0;
                       const hasConflict =
@@ -491,39 +476,39 @@ export default function TimelinePage() {
                       return (
                         <tr
                           key={ms.id}
-                          className="hover:bg-subtle/30 transition-colors group cursor-pointer"
+                          className="hover:bg-slate-50/60 transition-colors group cursor-pointer"
                           onClick={() => handleOpenMilestoneDrawer(ms)}
                         >
-                          <td className="py-3.5 px-4">
+                          <td className="py-3.5 px-5">
                             <div className="flex items-center gap-2">
-                              <span className="font-semibold text-text-primary">
+                              <span className="font-semibold text-slate-900 group-hover:text-primary transition-colors">
                                 {ms.name}
                               </span>
                               {ms.critical_path && (
-                                <span className="inline-flex items-center gap-1 rounded bg-danger-subtle px-1.5 py-0.5 text-[10px] font-bold text-danger">
-                                  <Flame className="h-3 w-3" /> Critical
+                                <span className="inline-flex items-center gap-1 rounded bg-rose-50 px-1.5 py-0.5 text-[11px] font-semibold text-rose-700 border border-rose-100">
+                                  <Flame className="h-3 w-3 text-rose-500" /> Critical
                                 </span>
                               )}
                               {hasConflict && (
-                                <span className="inline-flex items-center gap-1 rounded bg-danger-subtle px-1.5 py-0.5 text-[10px] font-bold text-danger">
-                                  <Scale className="h-3 w-3" /> Disputed
+                                <span className="inline-flex items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-200">
+                                  <Scale className="h-3 w-3 text-amber-600" /> Disputed
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-2 mt-0.5 text-caption text-text-secondary">
+                            <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500">
                               {ms.budget_line_code && (
-                                <span className="font-mono">{ms.budget_line_code}</span>
+                                <span className="font-mono text-slate-600 font-medium">{ms.budget_line_code}</span>
                               )}
                               {ms.budget_line_name && (
                                 <span>&bull; {ms.budget_line_name}</span>
                               )}
                               {ms.responsible_party && (
-                                <span className="text-text-muted">&bull; {ms.responsible_party}</span>
+                                <span className="text-slate-400">&bull; {ms.responsible_party}</span>
                               )}
                             </div>
                             {ms.delay_cause && (
-                              <div className="text-caption text-danger flex items-center gap-1 mt-1 font-medium">
-                                <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
+                              <div className="text-[11px] text-rose-600 flex items-center gap-1 mt-1 font-medium">
+                                <AlertTriangle className="h-3 w-3 shrink-0" />
                                 <span>{ms.delay_cause}</span>
                               </div>
                             )}
@@ -531,62 +516,62 @@ export default function TimelinePage() {
 
                           <td className="py-3.5 px-4">
                             {ms.status === "COMPLETED" && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-success-subtle px-2.5 py-0.5 text-[11px] font-semibold text-success">
-                                <CheckCircle className="h-3 w-3" /> Completed
+                              <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-100">
+                                <CheckCircle2 className="h-3 w-3 text-emerald-600" /> Complete
                               </span>
                             )}
                             {ms.status === "AT_RISK" && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-danger-subtle px-2.5 py-0.5 text-[11px] font-semibold text-danger">
-                                <AlertTriangle className="h-3 w-3" /> At Risk
+                              <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700 border border-rose-100">
+                                <AlertTriangle className="h-3 w-3 text-rose-500" /> At Risk
                               </span>
                             )}
                             {ms.status === "IN_PROGRESS" && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-primary-subtle px-2.5 py-0.5 text-[11px] font-semibold text-primary">
-                                <Clock className="h-3 w-3" /> In Progress
+                              <span className="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700 border border-indigo-100">
+                                <Clock className="h-3 w-3 text-indigo-600" /> In Progress
                               </span>
                             )}
                             {ms.status === "NOT_STARTED" && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-subtle px-2.5 py-0.5 text-[11px] font-semibold text-text-muted">
+                              <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
                                 Not Started
                               </span>
                             )}
                           </td>
 
                           <td className="py-3.5 px-4">
-                            <div className="flex items-center gap-2">
-                              <div className="w-20 bg-subtle rounded-full h-2 overflow-hidden">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-20 bg-slate-100 rounded-full h-1.5 overflow-hidden">
                                 <div
                                   className={`h-full ${
                                     ms.status === "COMPLETED"
-                                      ? "bg-success"
+                                      ? "bg-emerald-500"
                                       : isDelayed
-                                      ? "bg-danger"
-                                      : "bg-primary"
+                                      ? "bg-rose-500"
+                                      : "bg-indigo-600"
                                   }`}
                                   style={{ width: `${ms.percent_complete}%` }}
                                 />
                               </div>
-                              <span className="text-caption tabular-nums font-bold text-text-primary">
+                              <span className="tabular-nums font-semibold text-slate-800">
                                 {ms.percent_complete}%
                               </span>
                             </div>
                           </td>
 
-                          <td className="py-3.5 px-4 tabular-nums text-text-secondary text-caption">
+                          <td className="py-3.5 px-4 tabular-nums text-slate-500">
                             <div>{formatDate(ms.planned_start)}</div>
-                            <div className="text-text-muted">to {formatDate(ms.planned_end)}</div>
+                            <div className="text-[11px] text-slate-400">to {formatDate(ms.planned_end)}</div>
                           </td>
 
                           <td className="py-3.5 px-4 tabular-nums">
                             <div
                               className={`font-semibold ${
-                                isDelayed ? "text-danger" : "text-text-primary"
+                                isDelayed ? "text-rose-600" : "text-slate-800"
                               }`}
                             >
                               {formatDate(ms.forecast_end || ms.planned_end)}
                             </div>
                             {isDelayed && (
-                              <div className="text-[11px] font-bold text-danger">
+                              <div className="text-[11px] font-semibold text-rose-600">
                                 +{ms.delay_days}d delay
                               </div>
                             )}
@@ -597,24 +582,24 @@ export default function TimelinePage() {
                               type="button"
                               variant="secondary"
                               size="sm"
-                              className="px-2 py-1 text-[11px] gap-1"
+                              className="px-2 py-1 gap-1 text-xs cursor-pointer"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleOpenAttach(ms);
                               }}
                             >
-                              <FileCheck className="h-3 w-3 text-primary" />
+                              <FileCheck2 className="h-3.5 w-3.5 text-indigo-600" />
                               <span>{ms.evidence_count || 0} Files</span>
                             </Button>
                           </td>
 
-                          <td className="py-3.5 px-4 text-right">
+                          <td className="py-3.5 px-5 text-right">
                             <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
                               <Button
                                 type="button"
                                 variant="tertiary"
                                 size="sm"
-                                className="px-2.5 py-1"
+                                className="px-2.5 py-1 text-xs cursor-pointer"
                                 onClick={() => handleOpenUpdate(ms)}
                               >
                                 Update
@@ -625,8 +610,9 @@ export default function TimelinePage() {
                                 size="icon"
                                 onClick={() => handleOpenMilestoneDrawer(ms)}
                                 title="View Milestone Details"
+                                className="cursor-pointer"
                               >
-                                <ArrowRight className="h-4 w-4" />
+                                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-700" />
                               </Button>
                             </div>
                           </td>

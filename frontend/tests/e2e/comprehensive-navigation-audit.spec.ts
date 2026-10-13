@@ -63,7 +63,6 @@ test.describe("Full Navigation & Workspace Page Audit", () => {
       "timeline",
       "economics",
       "alerts",
-      "investor-updates",
       "settings",
     ];
 

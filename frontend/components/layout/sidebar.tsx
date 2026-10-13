@@ -7,7 +7,15 @@ import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { getProjectNavItems } from "@/lib/navigation";
-import { ChevronLeft, ChevronRight, ShieldCheck, Sparkles, Building2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Building2,
+  ArrowLeft,
+  Briefcase,
+  Layers,
+  Sliders,
+} from "lucide-react";
 import { UserRole } from "@/lib/types";
 
 interface SidebarProps {
@@ -76,12 +84,16 @@ export function Sidebar({
     ? getProjectNavItems(workspaceProjectId, effectiveRole)
     : [];
 
-  // Split into main workspace items and secondary management items (Settings)
-  const mainNavItems = visibleNavItems.filter((i) => i.id !== "settings");
+  // Categorize navigation items cleanly into Core Operations, Finance & Control, and Settings
+  const coreItemIds = ["control-center", "documents", "timeline", "submissions"];
+  const financeItemIds = ["budget", "reconciliation", "draws", "economics", "alerts"];
+
+  const coreNavItems = visibleNavItems.filter((i) => coreItemIds.includes(i.id));
+  const financeNavItems = visibleNavItems.filter((i) => financeItemIds.includes(i.id));
   const bottomNavItems = visibleNavItems.filter((i) => i.id === "settings");
 
   const formatStageLabel = (stage?: string) => {
-    if (!stage) return "Active";
+    if (!stage) return "In Progress";
     return stage
       .toLowerCase()
       .split("_")
@@ -95,104 +107,102 @@ export function Sidebar({
       {mobileOpen && (
         <div
           onClick={onCloseMobile}
-          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs md:hidden"
+          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs md:hidden"
         />
       )}
 
       {/* Sidebar container */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-slate-50/50 border-r border-slate-200/80 transition-all duration-200 ease-in-out md:static ${
-          collapsed ? "w-[68px]" : "w-[240px]"
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-white border-r border-slate-200/90 transition-all duration-200 ease-in-out md:static ${
+          collapsed ? "w-[70px]" : "w-[256px]"
         } ${mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0"}`}
       >
-        {/* Brand & Project Workspace Header */}
-        <div className={`pt-4 pb-3 ${collapsed ? "px-2.5 flex flex-col items-center" : "px-4"}`}>
-          {/* Logo / Brand & Toggle */}
+        {/* Top Header: Brand Logo & Collapse Toggle */}
+        <div className="flex h-16 items-center justify-between px-4 border-b border-slate-100">
           {!collapsed ? (
-            <div className="flex items-center justify-between">
+            <>
               <Link
                 href="/projects"
-                className="flex items-center gap-2 group py-0.5"
-                title="Return to Projects"
+                className="flex items-center gap-2 group transition-opacity"
+                title="GroundUp — Project Portfolio"
               >
                 <Image
                   src="/logo.png"
                   alt="GroundUp"
-                  width={140}
-                  height={36}
-                  className="h-8 w-auto object-contain group-hover:opacity-90 transition-opacity"
+                  width={132}
+                  height={32}
+                  className="h-7 w-auto object-contain"
                   priority
                 />
               </Link>
-
-              {/* Collapse toggle (desktop only) */}
               <button
                 onClick={onToggleCollapse}
-                className="hidden md:flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
+                className="hidden md:flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                 aria-label="Collapse sidebar"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
-            </div>
+            </>
           ) : (
-            <div className="flex flex-col items-center gap-2.5">
-              <Link
-                href="/projects"
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white p-1 border border-slate-200/80 shadow-xs hover:scale-105 transition-transform"
-                title="GroundUp — Back to Projects"
-              >
-                <Image
-                  src="/icon.png"
-                  alt="GroundUp"
-                  width={28}
-                  height={28}
-                  className="h-6 w-6 object-contain"
-                  priority
-                />
-              </Link>
-
+            <div className="w-full flex items-center justify-center">
               <button
                 onClick={onToggleCollapse}
-                className="hidden md:flex h-6 w-6 items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
+                className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                 aria-label="Expand sidebar"
                 title="Expand sidebar"
               >
-                <ChevronRight className="h-3.5 w-3.5" />
+                <ChevronRight className="h-4 w-4" />
               </button>
             </div>
           )}
+        </div>
 
-          {/* Active Project Switcher Pill */}
+        {/* Project Card & Back to Portfolio Navigation */}
+        <div className="p-3 border-b border-slate-100 bg-slate-50/50">
           {!collapsed ? (
-            <div className="mt-3 rounded-xl border border-slate-200/80 bg-white p-3 shadow-2xs">
-              <div className="mb-1.5">
-                <span className="text-xs font-bold text-slate-900 block truncate" title={activeProject?.name}>
-                  {activeProject?.name || "161 Woodlawn Ave"}
-                </span>
-                <span className="text-[11px] text-slate-500 block leading-tight mt-0.5" title={activeProject?.address}>
-                  {activeProject?.address ? activeProject.address.split(",").slice(0, 2).join(",") : "161 Woodlawn Ave, Jersey City"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1.5 border-t border-slate-100">
-                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700 border border-slate-200/80">
-                  {formatStageLabel(activeProject?.lifecycle_stage)}
-                </span>
-                <Link
-                  href="/projects"
-                  className="font-semibold text-primary hover:text-primary/80 transition-colors text-[11px]"
-                >
-                  Switch
-                </Link>
+            <div className="space-y-2.5">
+              {/* Back to Projects breadcrumb-style link */}
+              <Link
+                href="/projects"
+                aria-label="Switch"
+                className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-500 hover:text-primary transition-colors group"
+                title="Return to all projects"
+              >
+                <ArrowLeft className="h-3 w-3 text-slate-400 group-hover:text-primary transition-transform group-hover:-translate-x-0.5" />
+                <span>Back to all projects</span>
+              </Link>
+
+              {/* Active Project Card */}
+              <div className="rounded-xl border border-slate-200/90 bg-white p-3 shadow-xs hover:border-slate-300 transition-colors">
+                <div className="flex items-start gap-2.5">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-xs border border-primary/20">
+                    <Building2 className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs font-semibold text-slate-900 block truncate" title={activeProject?.name}>
+                      {activeProject?.name || "Workspace"}
+                    </span>
+                    <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold tracking-wider bg-slate-100 text-slate-700 border border-slate-200 uppercase">
+                        {effectiveRole}
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        {formatStageLabel(activeProject?.lifecycle_stage)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           ) : (
-            <div className="mt-2 w-full pt-2 border-t border-slate-200/60 flex justify-center">
+            <div className="flex flex-col items-center gap-2">
               <Link
                 href="/projects"
-                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white border border-slate-200/80 text-slate-800 text-xs font-bold shadow-2xs hover:border-slate-300 hover:text-primary transition-all"
-                title={`${activeProject?.name || "Project Workspace"} (${formatStageLabel(activeProject?.lifecycle_stage)}) - Click to switch`}
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-700 shadow-2xs hover:border-primary hover:text-primary transition-all"
+                title={`${activeProject?.name || "Projects"} — Back to all projects`}
               >
-                {activeProject?.name?.[0] || "P"}
+                <Building2 className="h-4 w-4" />
               </Link>
             </div>
           )}
@@ -200,88 +210,158 @@ export function Sidebar({
 
         {/* Navigation list */}
         <nav
-          className={`flex-1 overflow-y-auto space-y-1 py-2 ${
+          className={`flex-1 overflow-y-auto py-3 space-y-4 ${
             collapsed ? "px-2" : "px-3"
           }`}
           aria-label="Project Workspace Navigation"
         >
-          {mainNavItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
-            const Icon = item.icon;
+          {/* Section: Core Navigation */}
+          {coreNavItems.length > 0 && (
+            <div>
+              {!collapsed && (
+                <div className="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Operations
+                </div>
+              )}
+              <div className="space-y-0.5">
+                {coreNavItems.map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
+                  const Icon = item.icon;
 
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                onClick={onCloseMobile}
-                title={collapsed ? item.label : undefined}
-                className={`group flex items-center rounded-xl text-xs font-medium transition-all duration-150 relative ${
-                  collapsed
-                    ? "h-10 w-10 mx-auto justify-center"
-                    : "gap-3 px-3 py-2.5"
-                } ${
-                  isActive
-                    ? "bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/80"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
-                }`}
-              >
-                <Icon
-                  className={`h-4 w-4 shrink-0 transition-colors ${
-                    isActive ? "text-primary" : "text-slate-500 group-hover:text-slate-700"
-                  }`}
-                />
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      onClick={onCloseMobile}
+                      title={collapsed ? item.label : undefined}
+                      className={`group flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
+                        collapsed
+                          ? "h-9 w-9 mx-auto justify-center"
+                          : "gap-3 px-3 py-2"
+                      } ${
+                        isActive
+                          ? "bg-primary/10 text-primary font-semibold border border-primary/20 shadow-2xs"
+                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+                      }`}
+                    >
+                      <Icon
+                        className={`h-4 w-4 shrink-0 transition-colors ${
+                          isActive ? "text-primary" : "text-slate-400 group-hover:text-slate-600"
+                        }`}
+                      />
 
-                {!collapsed && (
-                  <div className="flex flex-1 items-center justify-between overflow-hidden">
-                    <span className="truncate">{item.label}</span>
-                    {badgeCount > 0 && (
-                      <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-2xs">
-                        {badgeCount}
-                      </span>
-                    )}
-                  </div>
-                )}
+                      {!collapsed && (
+                        <div className="flex flex-1 items-center justify-between overflow-hidden">
+                          <span className="truncate">{item.label}</span>
+                          {badgeCount > 0 && (
+                            <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-2xs">
+                              {badgeCount}
+                            </span>
+                          )}
+                        </div>
+                      )}
 
-                {/* Collapsed view indicator dot */}
-                {collapsed && badgeCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
-                )}
-              </Link>
-            );
-          })}
+                      {/* Collapsed view indicator badge dot */}
+                      {collapsed && badgeCount > 0 && (
+                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
-          {/* Secondary / Settings Items */}
-          {bottomNavItems.length > 0 && (
-            <div className="pt-2 mt-2 border-t border-slate-200/60">
-              {bottomNavItems.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-                const Icon = item.icon;
+          {/* Section: Financials & Tracking */}
+          {financeNavItems.length > 0 && (
+            <div>
+              {!collapsed && (
+                <div className="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Finance & Control
+                </div>
+              )}
+              <div className="space-y-0.5">
+                {financeNavItems.map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
+                  const Icon = item.icon;
 
-                return (
-                  <Link
-                    key={item.id}
-                    href={item.href}
-                    onClick={onCloseMobile}
-                    title={collapsed ? item.label : undefined}
-                    className={`group flex items-center rounded-xl text-xs font-medium transition-all duration-150 ${
-                      collapsed
-                        ? "h-10 w-10 mx-auto justify-center"
-                        : "gap-3 px-3 py-2.5"
-                    } ${
-                      isActive
-                        ? "bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/80"
-                        : "text-slate-500 hover:text-slate-900 hover:bg-white/60"
-                    }`}
-                  >
-                    <Icon className="h-4 w-4 shrink-0 text-slate-500 group-hover:text-slate-700" />
-                    {!collapsed && <span className="truncate">{item.label}</span>}
-                  </Link>
-                );
-              })}
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      onClick={onCloseMobile}
+                      title={collapsed ? item.label : undefined}
+                      className={`group flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
+                        collapsed
+                          ? "h-9 w-9 mx-auto justify-center"
+                          : "gap-3 px-3 py-2"
+                      } ${
+                        isActive
+                          ? "bg-primary/10 text-primary font-semibold border border-primary/20 shadow-2xs"
+                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+                      }`}
+                    >
+                      <Icon
+                        className={`h-4 w-4 shrink-0 transition-colors ${
+                          isActive ? "text-primary" : "text-slate-400 group-hover:text-slate-600"
+                        }`}
+                      />
+
+                      {!collapsed && (
+                        <div className="flex flex-1 items-center justify-between overflow-hidden">
+                          <span className="truncate">{item.label}</span>
+                          {badgeCount > 0 && (
+                            <span className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-2xs">
+                              {badgeCount}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Collapsed view indicator badge dot */}
+                      {collapsed && badgeCount > 0 && (
+                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           )}
         </nav>
+
+        {/* Sidebar Footer: Settings & Workspace Configuration */}
+        {bottomNavItems.length > 0 && (
+          <div className="p-3 border-t border-slate-100 bg-slate-50/30">
+            {bottomNavItems.map((item) => {
+              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  onClick={onCloseMobile}
+                  title={collapsed ? item.label : undefined}
+                  className={`group flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
+                    collapsed
+                      ? "h-9 w-9 mx-auto justify-center"
+                      : "gap-3 px-3 py-2"
+                  } ${
+                    isActive
+                      ? "bg-primary/10 text-primary font-semibold border border-primary/20 shadow-2xs"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  }`}
+                >
+                  <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-slate-400 group-hover:text-slate-600"}`} />
+                  {!collapsed && <span className="truncate">{item.label}</span>}
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </aside>
     </>
   );

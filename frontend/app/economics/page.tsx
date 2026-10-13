@@ -253,37 +253,37 @@ export default function EconomicsPage() {
 
   return (
     <div className="space-y-6 pb-16">
-      {/* Page Header */}
-      <PageHeader
-        title="Economics & Pro Forma"
-        statusBadge={{
-          label: isClosedProject ? "Audited Closeout & Final Returns" : "Active Construction Forecast",
-          variant: isClosedProject ? "success" : "warning",
-          icon: <ShieldCheck className="h-3.5 w-3.5" />,
-        }}
-        description="Original plan vs current forecast, investor waterfall distributions, unit disposition, and final closeout audit"
-        primaryAction={
-          isClosedProject ? (
-            <button
-              onClick={() => setIsPostCloseoutModalOpen(true)}
-              className="flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2 text-body font-medium text-text-primary hover:bg-subtle shadow-xs"
-            >
-              <Plus className="h-4 w-4" />
-              Record Post-Closeout Adjustment
-            </button>
-          ) : (
-            <button
-              onClick={() => setIsContributionModalOpen(true)}
-              className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body font-medium text-white hover:bg-primary-hover focus-visible:outline-primary shadow-xs"
-            >
-              <Plus className="h-4 w-4" />
-              Record Equity Contribution
-            </button>
-          )
-        }
-      />
+      <div className="px-6 max-w-7xl mx-auto space-y-6 pt-4">
+        {/* Page Header */}
+        <PageHeader
+          title="Economics & Pro Forma"
+          statusBadge={{
+            label: isClosedProject ? "Audited Closeout & Final Returns" : "Active Construction Forecast",
+            variant: isClosedProject ? "success" : "warning",
+            icon: <ShieldCheck className="h-3.5 w-3.5" />,
+          }}
+          description="Original plan vs current forecast, investor waterfall distributions, unit disposition, and final closeout audit"
+          primaryAction={
+            isClosedProject ? (
+              <button
+                onClick={() => setIsPostCloseoutModalOpen(true)}
+                className="flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2 text-body font-medium text-text-primary hover:bg-subtle shadow-xs"
+              >
+                <Plus className="h-4 w-4" />
+                Record Post-Closeout Adjustment
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsContributionModalOpen(true)}
+                className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body font-medium text-white hover:bg-primary-hover focus-visible:outline-primary shadow-xs"
+              >
+                <Plus className="h-4 w-4" />
+                Record Equity Contribution
+              </button>
+            )
+          }
+        />
 
-      <div className="px-6 max-w-7xl mx-auto space-y-6">
         {/* 4 Core Financial KPI Figures */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <KeyFigure

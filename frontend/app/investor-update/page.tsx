@@ -55,57 +55,57 @@ export default function InvestorUpdatePage() {
 
   return (
     <div className="space-y-6 pb-12">
-      <PageHeader
-        title={isInvestorRole ? "Investor Development Brief" : "Investor Updates & Reporting"}
-        statusBadge={{
-          label: isInvestorRole ? "Verified LP Portal" : "Controlled Reporting",
-          variant: "success",
-          icon: <ShieldCheck className="h-3.5 w-3.5" />,
-        }}
-        description={
-          isInvestorRole
-            ? "Official sponsor development snapshot, project economics, and milestone disclosures"
-            : "Compile, customize, and publish immutable financial snapshots for equity partners"
-        }
-        primaryAction={
-          <div className="flex items-center gap-2">
-            {!isInvestorRole && (
-              <div className="flex rounded-md border border-border bg-subtle p-0.5 text-caption print:hidden">
-                <Button
-                  type="button"
-                  variant={viewMode === "MANAGER" ? "secondary" : "ghost"}
-                  size="sm"
-                  className="px-3 py-1"
-                  onClick={() => setViewMode("MANAGER")}
-                >
-                  Publication Manager
-                </Button>
-                <Button
-                  type="button"
-                  variant={viewMode === "INVESTOR_VIEW" ? "secondary" : "ghost"}
-                  size="sm"
-                  className="px-3 py-1"
-                  onClick={() => setViewMode("INVESTOR_VIEW")}
-                >
-                  Investor Portal View
-                </Button>
-              </div>
-            )}
+      <div className="px-6 max-w-7xl mx-auto space-y-6 pt-4">
+        <PageHeader
+          title={isInvestorRole ? "Investor Development Brief" : "Investor Updates & Reporting"}
+          statusBadge={{
+            label: isInvestorRole ? "Verified LP Portal" : "Controlled Reporting",
+            variant: "success",
+            icon: <ShieldCheck className="h-3.5 w-3.5" />,
+          }}
+          description={
+            isInvestorRole
+              ? "Official sponsor development snapshot, project economics, and milestone disclosures"
+              : "Compile, customize, and publish immutable financial snapshots for equity partners"
+          }
+          primaryAction={
+            <div className="flex items-center gap-2">
+              {!isInvestorRole && (
+                <div className="flex rounded-md border border-border bg-subtle p-0.5 text-caption print:hidden">
+                  <Button
+                    type="button"
+                    variant={viewMode === "MANAGER" ? "secondary" : "ghost"}
+                    size="sm"
+                    className="px-3 py-1"
+                    onClick={() => setViewMode("MANAGER")}
+                  >
+                    Publication Manager
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={viewMode === "INVESTOR_VIEW" ? "secondary" : "ghost"}
+                    size="sm"
+                    className="px-3 py-1"
+                    onClick={() => setViewMode("INVESTOR_VIEW")}
+                  >
+                    Investor Portal View
+                  </Button>
+                </div>
+              )}
 
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2 print:hidden"
-              onClick={() => window.print()}
-            >
-              <Printer className="h-4 w-4 text-text-muted" />
-              <span>Print Snapshot</span>
-            </Button>
-          </div>
-        }
-      />
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 print:hidden"
+                onClick={() => window.print()}
+              >
+                <Printer className="h-4 w-4 text-text-muted" />
+                <span>Print Snapshot</span>
+              </Button>
+            </div>
+          }
+        />
 
-      <div className="px-6 max-w-7xl mx-auto space-y-6">
         {/* INVESTOR VIEW (OR INVESTOR ROLE) */}
         {(isInvestorRole || viewMode === "INVESTOR_VIEW") && (
           <div className="space-y-6">

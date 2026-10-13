@@ -90,21 +90,21 @@ export default function AccountPage() {
 
   return (
     <div className="space-y-6 pb-16">
-      <PageHeader
-        title="Account & Security Settings"
-        statusBadge={{
-          label: user?.role || "USER",
-          variant: "neutral",
-          icon: <User className="h-3.5 w-3.5" />,
-        }}
-        description="Personal profile, password management, active login sessions, and alert dispatch preferences."
-        breadcrumbs={[
-          { label: "Portfolio", href: "/projects" },
-          { label: "Account" },
-        ]}
-      />
+      <div className="px-6 max-w-4xl mx-auto space-y-6 pt-4">
+        <PageHeader
+          title="Account & Security Settings"
+          statusBadge={{
+            label: user?.role || "USER",
+            variant: "neutral",
+            icon: <User className="h-3.5 w-3.5" />,
+          }}
+          description="Personal profile, password management, active login sessions, and alert dispatch preferences."
+          breadcrumbs={[
+            { label: "Portfolio", href: "/projects" },
+            { label: "Account" },
+          ]}
+        />
 
-      <div className="px-6 max-w-4xl mx-auto space-y-6">
         {/* Navigation Tabs */}
         <div className="flex flex-wrap items-center gap-1.5 border-b border-border pb-1">
           <button
