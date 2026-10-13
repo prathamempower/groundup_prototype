@@ -50,6 +50,8 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isTasksOpen, setIsTasksOpen] = useState(false);
   const [isAlertBarDismissed, setIsAlertBarDismissed] = useState(false);
+  const isControlCenterPage = pathname.includes("control-center");
+
   const { data: meData } = useQuery({
     queryKey: ["me"],
     queryFn: () => api.identity.getMe(),
@@ -628,8 +630,8 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
         </div>
       </header>
 
-      {/* Global Real-Time Alert Notification Bar */}
-      {!isAlertBarDismissed && (
+      {/* Real-Time Alert Notification Bar - Strictly scoped to Control Center */}
+      {!isAlertBarDismissed && isControlCenterPage && (
         <div className="w-full border-b border-amber-200/90 bg-gradient-to-r from-amber-50 via-amber-50/95 to-amber-100/40 px-5 py-2 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
           <div className="flex items-center gap-2.5 min-w-0">
             <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-amber-200/70 text-amber-800">
