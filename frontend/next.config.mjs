@@ -8,6 +8,9 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  images: {
+    unoptimized: true,
+  },
   async rewrites() {
     return [
       {

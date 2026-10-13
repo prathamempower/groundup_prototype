@@ -19,15 +19,31 @@ import {
   AlertCircle,
   ShieldCheck,
   Image as ImageIcon,
+  Plus,
 } from "lucide-react";
 import type { BudgetLine } from "@/lib/types";
+
+export interface BuildDrawPacketSuccessData {
+  drawNumber: number;
+  totalRequestedCents: number;
+  formattedAmount: string;
+  inspectionDate: string;
+}
 
 interface BuildDrawPacketModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   projectId: string;
   nextDrawNumber: number;
-  onSuccess: () => void;
+  onSuccess: (data?: BuildDrawPacketSuccessData) => void;
+}
+
+interface SovLineItemState {
+  id: string;
+  codeAndDesc: string;
+  budgetCents: number;
+  previouslyDrawnCents: number;
+  claimCents: number;
 }
 
 export function BuildDrawPacketModal({
@@ -40,38 +56,34 @@ export function BuildDrawPacketModal({
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
 
   // Step 1: Header state
-  const [drawAppNumber, setDrawAppNumber] = useState(`Draw #${nextDrawNumber || 15}`);
-  const [inspectionDate, setInspectionDate] = useState("2026-10-10");
+  const [drawAppNumber, setDrawAppNumber] = useState(`Draw #${nextDrawNumber || 4}`);
+  const [inspectionDate, setInspectionDate] = useState("2026-10-18");
   const [timeTakenDays, setTimeTakenDays] = useState("14");
 
   // Step 2: SOV Line Items state
-  const [selectedAmounts, setSelectedAmounts] = useState<Record<string, number>>({
-    "line-1": 1250000, // $12,500
-    "line-2": 875000,  // $8,750
-    "line-3": 500000,  // $5,000
-  });
+  const [sovLines, setSovLines] = useState<SovLineItemState[]>([]);
 
   // Step 3: Photos state
   const [photos, setPhotos] = useState<Array<{ id: string; title: string; url: string }>>([
     {
       id: "photo-1",
-      title: "Shower Glass & Tile",
+      title: "Exterior Glazing Panels",
       url: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=600&q=80",
     },
     {
       id: "photo-2",
-      title: "Kitchen Cabinets",
-      url: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=600&q=80",
+      title: "TPO Roof Deck Seams",
+      url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80",
     },
     {
       id: "photo-3",
-      title: "Water Heater Panel",
+      title: "Weather Barrier Membrane",
       url: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=600&q=80",
     },
     {
       id: "photo-4",
-      title: "Exterior Facade",
-      url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80",
+      title: "Perimeter Parapet Flashings",
+      url: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=600&q=80",
     },
   ]);
 
@@ -98,11 +110,86 @@ export function BuildDrawPacketModal({
   useEffect(() => {
     if (open) {
       setCurrentStep(1);
-      setDrawAppNumber(`Draw #${nextDrawNumber || 15}`);
+      const targetDrawNum = nextDrawNumber || 4;
+      setDrawAppNumber(`Draw #${targetDrawNum}`);
+
+      if (targetDrawNum === 4) {
+        setSovLines([
+          {
+            id: "sov-4-1",
+            codeAndDesc: "08-800 Exterior Window Glazing & Curtain Wall",
+            budgetCents: 4500000,
+            previouslyDrawnCents: 0,
+            claimCents: 3500000, // $35,000
+          },
+          {
+            id: "sov-4-2",
+            codeAndDesc: "07-500 TPO Flat Roofing & Flashing Membrane",
+            budgetCents: 3200000,
+            previouslyDrawnCents: 0,
+            claimCents: 2510000, // $25,100
+          },
+          {
+            id: "sov-4-3",
+            codeAndDesc: "07-210 Exterior Wall Sheathing & Vapor Barrier",
+            budgetCents: 1800000,
+            previouslyDrawnCents: 0,
+            claimCents: 1200000, // $12,000
+          },
+        ]);
+      } else if (targetDrawNum === 5) {
+        setSovLines([
+          {
+            id: "sov-5-1",
+            codeAndDesc: "09-200 Interior Drywall & Acoustic Batt Insulation",
+            budgetCents: 4200000,
+            previouslyDrawnCents: 0,
+            claimCents: 2800000, // $28,000
+          },
+          {
+            id: "sov-5-2",
+            codeAndDesc: "09-300 Taping, Mudding & Prime Coating",
+            budgetCents: 2000000,
+            previouslyDrawnCents: 0,
+            claimCents: 1500000, // $15,000
+          },
+          {
+            id: "sov-5-3",
+            codeAndDesc: "08-200 Interior Doors & Trim Package",
+            budgetCents: 1500000,
+            previouslyDrawnCents: 0,
+            claimCents: 1000000, // $10,000
+          },
+        ]);
+      } else {
+        setSovLines([
+          {
+            id: "sov-gen-1",
+            codeAndDesc: "09-200 Final Interior Trim & Millwork",
+            budgetCents: 6500000,
+            previouslyDrawnCents: 5250000,
+            claimCents: 1250000,
+          },
+          {
+            id: "sov-gen-2",
+            codeAndDesc: "09-300 Custom Cabinetry & Hardware",
+            budgetCents: 4800000,
+            previouslyDrawnCents: 3925000,
+            claimCents: 875000,
+          },
+          {
+            id: "sov-gen-3",
+            codeAndDesc: "15-400 Plumbing Trim & Fixture Sets",
+            budgetCents: 3200000,
+            previouslyDrawnCents: 2700000,
+            claimCents: 500000,
+          },
+        ]);
+      }
     }
   }, [open, nextDrawNumber]);
 
-  const totalRequestedCents = Object.values(selectedAmounts).reduce((a, b) => a + b, 0);
+  const totalRequestedCents = sovLines.reduce((a, b) => a + b.claimCents, 0);
   const retainageCents = Math.round(totalRequestedCents * 0.1);
   const netPayableCents = totalRequestedCents - retainageCents;
 
@@ -120,35 +207,73 @@ export function BuildDrawPacketModal({
     }
   };
 
+  const handleUpdateLineClaim = (lineId: string, dollars: number) => {
+    setSovLines((prev) =>
+      prev.map((line) =>
+        line.id === lineId
+          ? { ...line, claimCents: Math.max(0, Math.round(dollars * 100)) }
+          : line
+      )
+    );
+  };
+
+  const handleAddCustomLine = () => {
+    const newLineId = `sov-custom-${Date.now()}`;
+    setSovLines((prev) => [
+      ...prev,
+      {
+        id: newLineId,
+        codeAndDesc: `0${prev.length + 6}-100 Additional Scope Item ${prev.length + 1}`,
+        budgetCents: 2000000,
+        previouslyDrawnCents: 0,
+        claimCents: 1000000,
+      },
+    ]);
+  };
+
   const handleSubmitPacket = async () => {
     setIsSubmitting(true);
+    const targetDrawNum = nextDrawNumber || 4;
     try {
       // Create draw in backend
-      const linesPayload = Object.entries(selectedAmounts)
-        .filter(([_, cents]) => cents > 0)
-        .map(([lineId, cents]) => ({
-          budget_line_id: lineId.startsWith("line-") ? (eligibleLines[0]?.id || lineId) : lineId,
-          requested_amount: String(cents),
+      const linesPayload = sovLines
+        .filter((l) => l.claimCents > 0)
+        .map((l) => ({
+          budget_line_id: eligibleLines[0]?.id || l.id,
+          requested_amount: String(l.claimCents),
         }));
 
       await api.draws.create(projectId, {
-        draw_number: nextDrawNumber || 15,
+        draw_number: targetDrawNum,
         period_start: "2026-09-25",
         period_end: inspectionDate,
         lender_name: "Capital Reserve Trust",
-        lines: linesPayload.length > 0 ? linesPayload : [
-          {
-            budget_line_id: eligibleLines[0]?.id || "line-default",
-            requested_amount: "2625000",
-          },
-        ],
+        lines:
+          linesPayload.length > 0
+            ? linesPayload
+            : [
+                {
+                  budget_line_id: eligibleLines[0]?.id || "line-default",
+                  requested_amount: String(totalRequestedCents || 7210000),
+                },
+              ],
       });
 
-      onSuccess();
+      onSuccess({
+        drawNumber: targetDrawNum,
+        totalRequestedCents,
+        formattedAmount: formatMoney(totalRequestedCents),
+        inspectionDate,
+      });
       onOpenChange(false);
     } catch {
       // Graceful fallback to success for UX
-      onSuccess();
+      onSuccess({
+        drawNumber: targetDrawNum,
+        totalRequestedCents,
+        formattedAmount: formatMoney(totalRequestedCents),
+        inspectionDate,
+      });
       onOpenChange(false);
     } finally {
       setIsSubmitting(false);
@@ -377,70 +502,48 @@ export function BuildDrawPacketModal({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-slate-700">
-                    <tr className="hover:bg-slate-50/60">
-                      <td className="py-2.5 px-3 font-semibold text-slate-900">
-                        09-200 Final Interior Trim & Millwork
-                      </td>
-                      <td className="py-2.5 px-3 tabular-nums">$65,000.00</td>
-                      <td className="py-2.5 px-3 text-right tabular-nums text-slate-500">$52,500.00</td>
-                      <td className="py-2.5 px-3 text-right">
-                        <input
-                          type="number"
-                          value={selectedAmounts["line-1"] / 100}
-                          onChange={(e) =>
-                            setSelectedAmounts((prev) => ({
-                              ...prev,
-                              "line-1": (Number(e.target.value) || 0) * 100,
-                            }))
-                          }
-                          className="w-28 text-right rounded border border-slate-300 px-2 py-1 text-xs font-bold text-slate-900"
-                        />
-                      </td>
-                    </tr>
-
-                    <tr className="hover:bg-slate-50/60">
-                      <td className="py-2.5 px-3 font-semibold text-slate-900">
-                        09-300 Custom Cabinetry & Hardware
-                      </td>
-                      <td className="py-2.5 px-3 tabular-nums">$48,000.00</td>
-                      <td className="py-2.5 px-3 text-right tabular-nums text-slate-500">$39,250.00</td>
-                      <td className="py-2.5 px-3 text-right">
-                        <input
-                          type="number"
-                          value={selectedAmounts["line-2"] / 100}
-                          onChange={(e) =>
-                            setSelectedAmounts((prev) => ({
-                              ...prev,
-                              "line-2": (Number(e.target.value) || 0) * 100,
-                            }))
-                          }
-                          className="w-28 text-right rounded border border-slate-300 px-2 py-1 text-xs font-bold text-slate-900"
-                        />
-                      </td>
-                    </tr>
-
-                    <tr className="hover:bg-slate-50/60">
-                      <td className="py-2.5 px-3 font-semibold text-slate-900">
-                        15-400 Plumbing Trim & Fixture Sets
-                      </td>
-                      <td className="py-2.5 px-3 tabular-nums">$32,000.00</td>
-                      <td className="py-2.5 px-3 text-right tabular-nums text-slate-500">$27,000.00</td>
-                      <td className="py-2.5 px-3 text-right">
-                        <input
-                          type="number"
-                          value={selectedAmounts["line-3"] / 100}
-                          onChange={(e) =>
-                            setSelectedAmounts((prev) => ({
-                              ...prev,
-                              "line-3": (Number(e.target.value) || 0) * 100,
-                            }))
-                          }
-                          className="w-28 text-right rounded border border-slate-300 px-2 py-1 text-xs font-bold text-slate-900"
-                        />
-                      </td>
-                    </tr>
+                    {sovLines.map((line) => (
+                      <tr key={line.id} className="hover:bg-slate-50/60">
+                        <td className="py-2.5 px-3 font-semibold text-slate-900">
+                          {line.codeAndDesc}
+                        </td>
+                        <td className="py-2.5 px-3 tabular-nums text-slate-600">
+                          {formatMoney(line.budgetCents)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right tabular-nums text-slate-500">
+                          {formatMoney(line.previouslyDrawnCents)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right">
+                          <div className="inline-flex items-center gap-1">
+                            <span className="text-slate-400 font-semibold">$</span>
+                            <input
+                              type="number"
+                              value={line.claimCents / 100}
+                              onChange={(e) =>
+                                handleUpdateLineClaim(line.id, Number(e.target.value) || 0)
+                              }
+                              className="w-28 text-right rounded border border-slate-300 px-2 py-1 text-xs font-bold text-slate-900 focus:border-blue-600 focus:outline-none"
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={handleAddCustomLine}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>+ Add Scope of Work Line Item</span>
+                </button>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  Amounts assigned will constitute the official Draw {drawAppNumber} bank application.
+                </span>
               </div>
 
               {/* Claim Financial Summary */}

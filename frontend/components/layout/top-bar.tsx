@@ -21,6 +21,7 @@ import {
   ArrowRight,
   Search,
   Moon,
+  X,
 } from "lucide-react";
 import { authAdapter } from "@/lib/api/adapters/auth-adapter";
 import {
@@ -46,6 +47,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isTasksOpen, setIsTasksOpen] = useState(false);
+  const [isAlertBarDismissed, setIsAlertBarDismissed] = useState(false);
   const { data: meData } = useQuery({
     queryKey: ["me"],
     queryFn: () => api.identity.getMe(),
@@ -91,6 +93,20 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
 
   const notifications = notificationsData?.data || [];
   const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
+
+  const criticalPathAlert =
+    notifications.find(
+      (n) =>
+        !n.read &&
+        (n.title.toLowerCase().includes("structural steel") ||
+          n.title.toLowerCase().includes("critical path") ||
+          n.type === "MILESTONE")
+    ) ||
+    notifications.find(
+      (n) =>
+        n.title.toLowerCase().includes("structural steel") ||
+        n.title.toLowerCase().includes("critical path")
+    );
 
   const markReadMutation = useMutation({
     mutationFn: (id: string) => api.notifications.markRead(id),
@@ -154,8 +170,8 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
   const pendingTasksCount = tasks.filter((t) => t.status !== "RESOLVED").length;
 
   return (
-    <>
-      <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-5">
+    <div className="sticky top-0 z-30 w-full flex flex-col">
+      <header className="flex h-14 w-full items-center justify-between border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-5">
         {/* Left: Mobile Toggle & Contextual Breadcrumb / Title */}
         <div className="flex items-center gap-3">
           <button
@@ -460,6 +476,18 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
                             {notif.message}
                           </p>
 
+                          {notif.title.toLowerCase().includes("structural steel") && (
+                            <div className="mt-2.5 rounded-lg border border-amber-200 bg-amber-50/70 p-2 text-[11px] space-y-1">
+                              <div className="flex items-center justify-between text-amber-900 font-semibold">
+                                <span>Schedule Slip: <strong className="font-mono text-amber-700">+35 Days</strong></span>
+                                <span>Carry Impact: <strong className="font-mono text-amber-700">+$28,500</strong></span>
+                              </div>
+                              <span className="text-amber-800 font-bold block text-[10px] mt-0.5">
+                                View Milestone Schedule →
+                              </span>
+                            </div>
+                          )}
+
                           <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400">
                             <span className="font-medium text-slate-500 uppercase text-[10px] tracking-wider">
                               {notif.type}
@@ -580,6 +608,55 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
           </div>
         </div>
       </header>
-    </>
+
+      {/* Global Real-Time Alert Notification Bar */}
+      {!isAlertBarDismissed && (
+        <div className="w-full border-b border-amber-200/90 bg-gradient-to-r from-amber-50 via-amber-50/95 to-amber-100/40 px-5 py-2 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-amber-200/70 text-amber-800">
+              <AlertTriangle className="h-3.5 w-3.5 animate-pulse" />
+            </span>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 truncate text-xs">
+              <span className="font-bold text-amber-900 flex items-center gap-1.5">
+                Critical Path Risk
+                <span className="rounded bg-amber-200/90 text-amber-900 px-1.5 py-0.2 text-[10px] font-bold">
+                  Active Warning
+                </span>
+              </span>
+              <span className="text-slate-400 hidden md:inline">·</span>
+              <span className="font-semibold text-slate-800 truncate">
+                {criticalPathAlert ? criticalPathAlert.title : "At-Risk Milestone: Structural Steel Fabrication"}
+              </span>
+              <span className="font-mono text-amber-800 text-[11px] font-semibold hidden lg:inline">
+                (+35 Days Slip · Carry Impact: +$28,500)
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+            <Link
+              href={criticalPathAlert?.link_url || (currentProjectId ? `/projects/${currentProjectId}/timeline` : "/projects")}
+              className="inline-flex items-center gap-1 rounded-md bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 text-[11px] font-bold shadow-2xs transition-colors"
+            >
+              View Milestone Schedule →
+            </Link>
+            <button
+              onClick={() => setIsNotificationsOpen(true)}
+              className="rounded-md border border-amber-300/80 bg-white hover:bg-amber-100/60 text-amber-900 px-2.5 py-1 text-[11px] font-semibold transition-colors"
+            >
+              Notifications ({unreadNotificationsCount > 0 ? unreadNotificationsCount : notifications.length})
+            </button>
+            <button
+              onClick={() => setIsAlertBarDismissed(true)}
+              className="text-amber-700 hover:text-amber-950 p-1 transition-colors"
+              title="Dismiss notification bar"
+              aria-label="Dismiss notification bar"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
