@@ -53,8 +53,22 @@ export default function ControlCenterPage() {
     enabled: Boolean(currentProjectId),
   });
 
+  const { data: notificationsData } = useQuery({
+    queryKey: ["notifications", currentProjectId],
+    queryFn: () => api.notifications.list(currentProjectId || undefined),
+    enabled: Boolean(currentProjectId),
+  });
+
   const [previewDoc, setPreviewDoc] = useState<DocumentItem | null>(null);
   const projectDocs = docsData?.data || [];
+  const notifications = notificationsData?.data || [];
+  const criticalPathAlert =
+    notifications.find(
+      (n) =>
+        n.title.toLowerCase().includes("structural steel") ||
+        n.title.toLowerCase().includes("critical path") ||
+        n.type === "MILESTONE"
+    ) || null;
 
   const isLoading = isProjectsLoading || isDashboardLoading;
 
@@ -140,6 +154,60 @@ export default function ControlCenterPage() {
           </div>
         </div>
 
+        {/* ========================================================================= */}
+        {/* CRITICAL PATH RISK ALERT - NOTIFY USER WITH REASON & SCHEDULE IMPACT      */}
+        {/* ========================================================================= */}
+        <div className="rounded-2xl border border-amber-200/90 bg-white p-5 sm:p-6 shadow-xs space-y-3.5 transition-all">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm sm:text-base font-bold text-slate-900">
+              <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
+              <span>Critical Path Risk</span>
+            </div>
+            <span className="rounded-full bg-amber-100 text-amber-900 border border-amber-200 px-3 py-0.5 text-xs font-semibold">
+              Active Warning
+            </span>
+          </div>
+
+          <div>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900">
+              At-Risk Milestone: Structural Steel Fabrication
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
+              Fabricator lead time extended by 5 weeks. Delays framed assembly and secondary trade access.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-1 text-xs">
+            <div className="bg-white p-3.5 rounded-xl border border-amber-200/80 shadow-2xs">
+              <span className="text-[10px] sm:text-xs font-bold text-amber-800 uppercase tracking-wider block">
+                SCHEDULE SLIP
+              </span>
+              <span className="text-xl sm:text-2xl font-bold font-mono text-amber-600 block mt-1">
+                +35 Days
+              </span>
+            </div>
+            <div className="bg-white p-3.5 rounded-xl border border-amber-200/80 shadow-2xs">
+              <span className="text-[10px] sm:text-xs font-bold text-amber-800 uppercase tracking-wider block">
+                CARRY IMPACT
+              </span>
+              <span className="text-xl sm:text-2xl font-bold font-mono text-amber-600 block mt-1">
+                +$28,500
+              </span>
+            </div>
+          </div>
+
+          <Link
+            href={currentProjectId ? `/projects/${currentProjectId}/timeline` : "/timeline"}
+            className="block pt-1"
+          >
+            <button
+              type="button"
+              className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 py-3 text-xs sm:text-sm font-bold text-white shadow-xs transition-colors cursor-pointer"
+            >
+              View Milestone Schedule →
+            </button>
+          </Link>
+        </div>
 
         {/* ========================================================================= */}
         {/* 4 CORE EXECUTIVE METRIC CARDS - RICH VISUAL TOKENS, COLORS & CLEAR HIERARCHY */}
