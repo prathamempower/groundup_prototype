@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,10 @@ import {
   AlertCircle,
   Copy,
   ExternalLink,
+  FileSpreadsheet,
 } from "lucide-react";
-import type { DrawItem } from "@/lib/types";
+import type { DrawItem, DrawLine } from "@/lib/types";
+import { AllocateDrawTasksModal } from "./allocate-draw-tasks-modal";
 
 interface DrawDetailDrawerProps {
   open: boolean;
@@ -36,6 +38,7 @@ interface DrawDetailDrawerProps {
   onAllocateFunding: () => void;
   onResubmitRevision: () => void;
   onRefresh: () => void;
+  onUpdateDraw?: (updatedDraw: DrawItem) => void;
 }
 
 export function DrawDetailDrawer({
@@ -48,16 +51,33 @@ export function DrawDetailDrawer({
   onAllocateFunding,
   onResubmitRevision,
   onRefresh,
+  onUpdateDraw,
 }: DrawDetailDrawerProps) {
+  const [internalDraw, setInternalDraw] = useState<DrawItem | null>(draw);
+  const [isAllocateTasksModalOpen, setIsAllocateTasksModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"lines" | "packet" | "conditions">("lines");
   const [isSubmittingAction, setIsSubmittingAction] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
+  useEffect(() => {
+    setInternalDraw(draw);
+  }, [draw]);
+
+  const activeDraw = internalDraw || draw;
+
   const { data: documentsData } = useQuery({
-    queryKey: ["documents", draw?.project_id],
-    queryFn: () => api.documents.list(draw!.project_id),
-    enabled: Boolean(draw?.project_id && open),
+    queryKey: ["documents", activeDraw?.project_id],
+    queryFn: () => api.documents.list(activeDraw!.project_id),
+    enabled: Boolean(activeDraw?.project_id && open),
   });
+
+  if (!activeDraw) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="w-full max-w-4xl bg-surface" />
+      </Drawer>
+    );
+  }
 
   const projectDocs = documentsData?.data || [];
   const primaryDoc = projectDocs[0];
@@ -121,12 +141,44 @@ export function DrawDetailDrawer({
       ]
     : [];
 
-  if (!open || !draw) return null;
+  if (!open || !activeDraw) return null;
+
+  const totalRequestedCents =
+    activeDraw.lines && activeDraw.lines.length > 0
+      ? activeDraw.lines.reduce((acc, l) => acc + (parseInt(l.requested_amount || "0", 10) || 0), 0)
+      : parseInt(activeDraw.requested_amount || "0", 10) || 0;
+
+  const totalRecommendedCents =
+    activeDraw.lines && activeDraw.lines.length > 0
+      ? activeDraw.lines.reduce((acc, l) => acc + (parseInt(l.recommended_amount || "0", 10) || 0), 0)
+      : parseInt(activeDraw.recommended_amount || "0", 10) || 0;
+
+  const totalApprovedCents =
+    activeDraw.lines && activeDraw.lines.length > 0
+      ? activeDraw.lines.reduce((acc, l) => acc + (parseInt(l.approved_amount || "0", 10) || 0), 0)
+      : parseInt(activeDraw.approved_amount || "0", 10) || 0;
+
+  const totalFundedCents =
+    activeDraw.lines && activeDraw.lines.length > 0
+      ? activeDraw.lines.reduce((acc, l) => acc + (parseInt(l.funded_amount || "0", 10) || 0), 0)
+      : parseInt(activeDraw.funded_amount || "0", 10) || 0;
+
+  const handleSaveTasks = (newLines: DrawLine[], newTotalCents: number) => {
+    const updated: DrawItem = {
+      ...activeDraw,
+      lines: newLines,
+      requested_amount: String(newTotalCents),
+      recommended_amount: String(newTotalCents),
+      approved_amount: String(newTotalCents),
+    };
+    setInternalDraw(updated);
+    onUpdateDraw?.(updated);
+  };
 
   const handleMarkSubmitted = async () => {
     setIsSubmittingAction(true);
     try {
-      await api.draws.markSubmitted(draw.id);
+      await api.draws.markSubmitted(activeDraw.id);
       onRefresh();
     } catch {
       // Error is handled via response interceptors
@@ -138,7 +190,7 @@ export function DrawDetailDrawer({
   const handleResolveCondition = async (condId: string) => {
     setIsSubmittingAction(true);
     try {
-      await api.draws.resolveCondition(draw.id, condId, "Certified on-site engineering inspection completed.");
+      await api.draws.resolveCondition(activeDraw.id, condId, "Certified on-site engineering inspection completed.");
       onRefresh();
     } catch {
       // Error is handled via response interceptors
@@ -154,11 +206,11 @@ export function DrawDetailDrawer({
   };
 
   const isDualVerified = Boolean(
-    draw.pm_verification?.inspection_passed && draw.cfo_verification?.costs_verified
+    activeDraw.pm_verification?.inspection_passed && activeDraw.cfo_verification?.costs_verified
   );
 
-  const shortfallCents = parseInt(draw.shortfall_amount || "0", 10);
-  const isShortFunded = shortfallCents > 0 || draw.status === "PARTIALLY_APPROVED";
+  const shortfallCents = parseInt(activeDraw.shortfall_amount || "0", 10);
+  const isShortFunded = shortfallCents > 0 || activeDraw.status === "PARTIALLY_APPROVED";
 
   const getStatusBadgeType = (status: DrawItem["status"]) => {
     switch (status) {
@@ -192,28 +244,28 @@ export function DrawDetailDrawer({
               <div>
                 <div className="flex items-center gap-2">
                   <DrawerTitle className="text-section font-bold text-text-primary">
-                    Draw Application #{draw.draw_number}
-                    {draw.revision_label && `-${draw.revision_label}`}
+                    Draw Application #{activeDraw.draw_number}
+                    {activeDraw.revision_label && `-${activeDraw.revision_label}`}
                   </DrawerTitle>
                   <StatusBadge
-                    status={getStatusBadgeType(draw.status)}
-                    customLabel={draw.status.replace("_", " ")}
+                    status={getStatusBadgeType(activeDraw.status)}
+                    customLabel={activeDraw.status.replace("_", " ")}
                   />
-                  {draw.parent_draw_id && (
+                  {activeDraw.parent_draw_id && (
                     <span className="inline-flex items-center gap-1 rounded bg-subtle px-2 py-0.5 text-caption font-mono text-text-secondary">
                       <GitBranch className="h-3 w-3" /> Child Revision
                     </span>
                   )}
                 </div>
                 <p className="text-caption text-text-secondary mt-0.5">
-                  {draw.lender_name} • Period: {draw.period_start} to {draw.period_end}
+                  {activeDraw.lender_name} • Period: {activeDraw.period_start} to {activeDraw.period_end}
                 </p>
               </div>
             </div>
 
             {/* Header Action Buttons based on lifecycle status */}
             <div className="flex items-center gap-2">
-              {draw.status === "DRAFT" && (
+              {activeDraw.status === "DRAFT" && (
                 <>
                   <Button
                     variant="outline"
@@ -222,7 +274,7 @@ export function DrawDetailDrawer({
                     className="flex items-center gap-1.5"
                   >
                     <ClipboardCheck className="h-3.5 w-3.5" />
-                    {draw.pm_verification?.inspection_passed ? "Work Certified" : "Verify Work (PM)"}
+                    {activeDraw.pm_verification?.inspection_passed ? "Work Certified" : "Verify Work (PM)"}
                   </Button>
                   <Button
                     variant="outline"
@@ -231,7 +283,7 @@ export function DrawDetailDrawer({
                     className="flex items-center gap-1.5"
                   >
                     <ShieldCheck className="h-3.5 w-3.5" />
-                    {draw.cfo_verification?.costs_verified ? "Cost Certified" : "Verify Cost (CFO)"}
+                    {activeDraw.cfo_verification?.costs_verified ? "Cost Certified" : "Verify Cost (CFO)"}
                   </Button>
                   <Button
                     variant="primary"
@@ -246,7 +298,7 @@ export function DrawDetailDrawer({
                 </>
               )}
 
-              {(draw.status === "SUBMITTED" || draw.status === "UNDER_REVIEW") && (
+              {(activeDraw.status === "SUBMITTED" || activeDraw.status === "UNDER_REVIEW") && (
                 <Button
                   variant="primary"
                   size="sm"
@@ -258,7 +310,7 @@ export function DrawDetailDrawer({
                 </Button>
               )}
 
-              {(isShortFunded || draw.status === "APPROVED") && (
+              {(isShortFunded || activeDraw.status === "APPROVED") && (
                 <>
                   <Button
                     variant="outline"
@@ -305,15 +357,15 @@ export function DrawDetailDrawer({
                   1. Requested Amount
                 </span>
                 <span className="text-section font-bold tabular-nums text-text-primary mt-1 block">
-                  {formatMoney(draw.requested_amount)}
+                  {formatMoney(String(totalRequestedCents))}
                 </span>
                 <span className="text-[11px] text-text-muted block mt-1">
                   Basis: Certified AIA G702 pay app
                 </span>
                 <div className="mt-2 pt-2 border-t border-border/60">
                   <SourcesButton
-                    figureLabel={`Draw #${draw.draw_number} Requested Amount`}
-                    amountOrValue={formatMoney(draw.requested_amount)}
+                    figureLabel={`Draw #${activeDraw.draw_number} Requested Amount`}
+                    amountOrValue={formatMoney(String(totalRequestedCents))}
                     basis="Developer-certified AIA G702 itemized Schedule of Values"
                     citations={requestedCitations}
                   />
@@ -326,15 +378,15 @@ export function DrawDetailDrawer({
                   2. Inspector Rec.
                 </span>
                 <span className="text-section font-bold tabular-nums text-text-secondary mt-1 block">
-                  {formatMoney(draw.recommended_amount)}
+                  {formatMoney(String(totalRecommendedCents))}
                 </span>
                 <span className="text-[11px] text-text-muted block mt-1">
                   Basis: Third-party ATD inspection
                 </span>
                 <div className="mt-2 pt-2 border-t border-border/60">
                   <SourcesButton
-                    figureLabel={`Draw #${draw.draw_number} Recommended Amount`}
-                    amountOrValue={formatMoney(draw.recommended_amount)}
+                    figureLabel={`Draw #${activeDraw.draw_number} Recommended Amount`}
+                    amountOrValue={formatMoney(String(totalRecommendedCents))}
                     basis="Independent architectural/engineering field inspection report"
                     citations={recommendedCitations}
                   />
@@ -347,15 +399,15 @@ export function DrawDetailDrawer({
                   3. Lender Approved
                 </span>
                 <span className="text-section font-bold tabular-nums text-primary mt-1 block">
-                  {formatMoney(draw.approved_amount)}
+                  {formatMoney(String(totalApprovedCents))}
                 </span>
                 <span className="text-[11px] text-text-muted block mt-1">
                   Basis: Bank credit committee approval
                 </span>
                 <div className="mt-2 pt-2 border-t border-border/60">
                   <SourcesButton
-                    figureLabel={`Draw #${draw.draw_number} Approved Amount`}
-                    amountOrValue={formatMoney(draw.approved_amount)}
+                    figureLabel={`Draw #${activeDraw.draw_number} Approved Amount`}
+                    amountOrValue={formatMoney(String(totalApprovedCents))}
                     basis="Formal loan advance approval letter from construction lender"
                     citations={approvedCitations}
                   />
@@ -368,15 +420,15 @@ export function DrawDetailDrawer({
                   4. Cleared Cash Funded
                 </span>
                 <span className="text-section font-bold tabular-nums text-success mt-1 block">
-                  {formatMoney(draw.funded_amount || "0")}
+                  {formatMoney(String(totalFundedCents))}
                 </span>
                 <span className="text-[11px] text-text-muted block mt-1">
                   Basis: Confirmed bank wire deposit
                 </span>
                 <div className="mt-2 pt-2 border-t border-border/60">
                   <SourcesButton
-                    figureLabel={`Draw #${draw.draw_number} Cleared Cash Funded`}
-                    amountOrValue={formatMoney(draw.funded_amount || "0")}
+                    figureLabel={`Draw #${activeDraw.draw_number} Cleared Cash Funded`}
+                    amountOrValue={formatMoney(String(totalFundedCents))}
                     basis="Bank-confirmed wire deposit with status CLEARED"
                     citations={fundedCitations}
                   />
@@ -396,8 +448,8 @@ export function DrawDetailDrawer({
                       Short-Funded Application: {formatMoney(String(shortfallCents))} Withheld
                     </h4>
                     <p className="text-body-sm text-text-secondary mt-0.5">
-                      {draw.lender_decision_notes ||
-                        `Lender approved ${formatMoney(draw.approved_amount)} against ${formatMoney(draw.requested_amount)} requested. Withheld funds require condition satisfaction or resubmission.`}
+                      {activeDraw.lender_decision_notes ||
+                        `Lender approved ${formatMoney(activeDraw.approved_amount)} against ${formatMoney(activeDraw.requested_amount)} requested. Withheld funds require condition satisfaction or resubmission.`}
                     </p>
                   </div>
                 </div>
@@ -414,13 +466,13 @@ export function DrawDetailDrawer({
               </div>
 
               {/* Conditions List */}
-              {draw.conditions && draw.conditions.length > 0 && (
+              {activeDraw.conditions && activeDraw.conditions.length > 0 && (
                 <div className="pt-2 border-t border-warning/20 space-y-2">
                   <span className="text-caption font-semibold uppercase tracking-wider text-text-secondary block">
                     Outstanding Lender Conditions & Action Items
                   </span>
                   <div className="space-y-2">
-                    {draw.conditions.map((cond) => (
+                    {activeDraw.conditions.map((cond) => (
                       <div
                         key={cond.id}
                         className="flex items-center justify-between p-2.5 bg-surface rounded border border-border text-body-sm"
@@ -477,7 +529,7 @@ export function DrawDetailDrawer({
                     PM Work Verification
                   </span>
                 </div>
-                {draw.pm_verification?.inspection_passed ? (
+                {activeDraw.pm_verification?.inspection_passed ? (
                   <span className="inline-flex items-center gap-1 rounded bg-success-subtle px-2 py-0.5 text-caption font-semibold text-success">
                     <CheckCircle2 className="h-3 w-3" /> Certified
                   </span>
@@ -488,12 +540,12 @@ export function DrawDetailDrawer({
                 )}
               </div>
               <p className="text-caption text-text-secondary">
-                {draw.pm_verification?.notes ||
+                {activeDraw.pm_verification?.notes ||
                   "Independent progress inspection confirmation pending certification."}
               </p>
-              {draw.pm_verification && (
+              {activeDraw.pm_verification && (
                 <div className="text-[11px] text-text-muted pt-1">
-                  Certified by: {draw.pm_verification.verified_by} • {formatDate(draw.pm_verification.verified_at)}
+                  Certified by: {activeDraw.pm_verification.verified_by} • {formatDate(activeDraw.pm_verification.verified_at)}
                 </div>
               )}
             </div>
@@ -507,7 +559,7 @@ export function DrawDetailDrawer({
                     CFO Cost Verification
                   </span>
                 </div>
-                {draw.cfo_verification?.costs_verified ? (
+                {activeDraw.cfo_verification?.costs_verified ? (
                   <span className="inline-flex items-center gap-1 rounded bg-success-subtle px-2 py-0.5 text-caption font-semibold text-success">
                     <CheckCircle2 className="h-3 w-3" /> Certified
                   </span>
@@ -518,13 +570,13 @@ export function DrawDetailDrawer({
                 )}
               </div>
               <p className="text-caption text-text-secondary">
-                {draw.cfo_verification
+                {activeDraw.cfo_verification
                   ? "All subcontractor invoices cross-referenced and prior advance payments cleared."
                   : "Financial audit of invoice attachments and payment clearance pending."}
               </p>
-              {draw.cfo_verification && (
+              {activeDraw.cfo_verification && (
                 <div className="text-[11px] text-text-muted pt-1">
-                  Certified by: {draw.cfo_verification.verified_by} • {formatDate(draw.cfo_verification.verified_at)}
+                  Certified by: {activeDraw.cfo_verification.verified_by} • {formatDate(activeDraw.cfo_verification.verified_at)}
                 </div>
               )}
             </div>
@@ -532,32 +584,46 @@ export function DrawDetailDrawer({
 
           {/* TABS: DRAW LINES TABLE & PACKET CHECKLIST */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2 border-b border-border pb-1">
-              <button
-                onClick={() => setActiveTab("lines")}
-                className={`px-3 py-1.5 text-body-sm font-medium rounded-t border-b-2 transition-colors ${
-                  activeTab === "lines"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-text-secondary hover:text-text-primary"
-                }`}
-              >
-                Line Item Schedule of Values ({draw.lines?.length || 0})
-              </button>
-              <button
-                onClick={() => setActiveTab("packet")}
-                className={`px-3 py-1.5 text-body-sm font-medium rounded-t border-b-2 transition-colors ${
-                  activeTab === "packet"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-text-secondary hover:text-text-primary"
-                }`}
-              >
-                Lender Packet Checklist & Portal Summary
-              </button>
+            <div className="flex items-center justify-between border-b border-border pb-1">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveTab("lines")}
+                  className={`px-3 py-1.5 text-body-sm font-medium rounded-t border-b-2 transition-colors ${
+                    activeTab === "lines"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-text-secondary hover:text-text-primary"
+                  }`}
+                >
+                  Line Item Schedule of Values ({activeDraw.lines?.length || 0})
+                </button>
+                <button
+                  onClick={() => setActiveTab("packet")}
+                  className={`px-3 py-1.5 text-body-sm font-medium rounded-t border-b-2 transition-colors ${
+                    activeTab === "packet"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-text-secondary hover:text-text-primary"
+                  }`}
+                >
+                  Lender Packet Checklist & Portal Summary
+                </button>
+              </div>
+
+              {activeTab === "lines" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAllocateTasksModalOpen(true)}
+                  className="h-8 text-xs font-semibold border-primary/40 text-primary hover:bg-primary-subtle"
+                >
+                  <FileSpreadsheet className="h-3.5 w-3.5 mr-1.5 text-primary" />
+                  Input / Allocate Work Tasks
+                </Button>
+              )}
             </div>
 
             {/* TAB 1: DRAW LINES TABLE */}
             {activeTab === "lines" && (
-              <div className="rounded-lg border border-border overflow-hidden bg-surface">
+              <div className="rounded-lg border border-border overflow-hidden bg-surface shadow-xs">
                 <table className="w-full text-left text-body-sm">
                   <thead className="bg-subtle/50 text-caption font-semibold text-text-secondary border-b border-border">
                     <tr>
@@ -570,8 +636,8 @@ export function DrawDetailDrawer({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {draw.lines && draw.lines.length > 0 ? (
-                      draw.lines.map((line) => (
+                    {activeDraw.lines && activeDraw.lines.length > 0 ? (
+                      activeDraw.lines.map((line) => (
                         <tr key={line.id} className="hover:bg-subtle/20 transition-colors">
                           <td className="py-3 px-3">
                             <span className="font-mono text-caption text-text-muted mr-1.5 font-bold">
@@ -586,7 +652,7 @@ export function DrawDetailDrawer({
                               </p>
                             )}
                           </td>
-                          <td className="py-3 px-3 text-right tabular-nums text-text-secondary">
+                          <td className="py-3 px-3 text-right tabular-nums text-text-secondary font-medium">
                             {formatMoney(line.requested_amount)}
                           </td>
                           <td className="py-3 px-3 text-right tabular-nums text-text-secondary">
@@ -620,6 +686,28 @@ export function DrawDetailDrawer({
                       </tr>
                     )}
                   </tbody>
+                  {activeDraw.lines && activeDraw.lines.length > 0 && (
+                    <tfoot className="bg-subtle/60 font-bold border-t border-border">
+                      <tr>
+                        <td className="py-3 px-3 text-text-primary font-bold">
+                          Total ({activeDraw.lines.length} Tasks Allocated)
+                        </td>
+                        <td className="py-3 px-3 text-right tabular-nums text-text-primary font-bold">
+                          {formatMoney(String(totalRequestedCents))}
+                        </td>
+                        <td className="py-3 px-3 text-right tabular-nums text-text-secondary font-bold">
+                          {formatMoney(String(totalRecommendedCents))}
+                        </td>
+                        <td className="py-3 px-3 text-right tabular-nums text-text-primary font-bold">
+                          {formatMoney(String(totalApprovedCents))}
+                        </td>
+                        <td className="py-3 px-3 text-right tabular-nums text-success font-bold">
+                          {formatMoney(String(totalFundedCents))}
+                        </td>
+                        <td className="py-3 px-3"></td>
+                      </tr>
+                    </tfoot>
+                  )}
                 </table>
               </div>
             )}
@@ -639,8 +727,8 @@ export function DrawDetailDrawer({
                   </div>
 
                   <div className="space-y-2">
-                    {draw.packet_checklist && draw.packet_checklist.length > 0 ? (
-                      draw.packet_checklist.map((item) => (
+                    {activeDraw.packet_checklist && activeDraw.packet_checklist.length > 0 ? (
+                      activeDraw.packet_checklist.map((item) => (
                         <div
                           key={item.id}
                           className="flex items-center justify-between p-2.5 rounded border border-border bg-subtle/30 text-body-sm"
@@ -702,7 +790,7 @@ export function DrawDetailDrawer({
                       <div>
                         <span className="text-caption text-text-muted block">Loan Commitment ID</span>
                         <span className="font-mono font-bold text-text-primary">
-                          {draw.portal_summary?.commitment_id || "COL-2025-73B"}
+                          {activeDraw.portal_summary?.commitment_id || "COL-2025-73B"}
                         </span>
                       </div>
                       <Button
@@ -710,7 +798,7 @@ export function DrawDetailDrawer({
                         size="sm"
                         onClick={() =>
                           copyToClipboard(
-                            draw.portal_summary?.commitment_id || "COL-2025-73B",
+                            activeDraw.portal_summary?.commitment_id || "COL-2025-73B",
                             "commitment"
                           )
                         }
@@ -723,14 +811,14 @@ export function DrawDetailDrawer({
                       <div>
                         <span className="text-caption text-text-muted block">Gross Application Requested</span>
                         <span className="font-bold tabular-nums text-text-primary">
-                          {formatMoney(draw.requested_amount)}
+                          {formatMoney(String(totalRequestedCents))}
                         </span>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() =>
-                          copyToClipboard(draw.requested_amount, "requested")
+                          copyToClipboard(String(totalRequestedCents), "requested")
                         }
                       >
                         {copiedField === "requested" ? "Copied!" : <Copy className="h-3.5 w-3.5" />}
@@ -742,8 +830,8 @@ export function DrawDetailDrawer({
                         <span className="text-caption text-text-muted block">Retainage Withheld (10%)</span>
                         <span className="font-bold tabular-nums text-text-muted">
                           {formatMoney(
-                            draw.portal_summary?.retainage_withheld ||
-                              String(Math.round(parseInt(draw.requested_amount, 10) * 0.1))
+                            activeDraw.portal_summary?.retainage_withheld ||
+                              String(Math.round(totalRequestedCents * 0.1))
                           )}
                         </span>
                       </div>
@@ -752,8 +840,8 @@ export function DrawDetailDrawer({
                         size="sm"
                         onClick={() =>
                           copyToClipboard(
-                            draw.portal_summary?.retainage_withheld ||
-                              String(Math.round(parseInt(draw.requested_amount, 10) * 0.1)),
+                            activeDraw.portal_summary?.retainage_withheld ||
+                              String(Math.round(totalRequestedCents * 0.1)),
                             "retainage"
                           )
                         }
@@ -767,11 +855,8 @@ export function DrawDetailDrawer({
                         <span className="text-caption text-text-muted block">Net Disbursement Payable</span>
                         <span className="font-bold tabular-nums text-primary">
                           {formatMoney(
-                            draw.portal_summary?.net_payable ||
-                              String(
-                                parseInt(draw.requested_amount, 10) -
-                                  Math.round(parseInt(draw.requested_amount, 10) * 0.1)
-                              )
+                            activeDraw.portal_summary?.net_payable ||
+                              String(totalRequestedCents - Math.round(totalRequestedCents * 0.1))
                           )}
                         </span>
                       </div>
@@ -780,11 +865,8 @@ export function DrawDetailDrawer({
                         size="sm"
                         onClick={() =>
                           copyToClipboard(
-                            draw.portal_summary?.net_payable ||
-                              String(
-                                parseInt(draw.requested_amount, 10) -
-                                  Math.round(parseInt(draw.requested_amount, 10) * 0.1)
-                              ),
+                            activeDraw.portal_summary?.net_payable ||
+                              String(totalRequestedCents - Math.round(totalRequestedCents * 0.1)),
                             "net"
                           )
                         }
@@ -801,12 +883,20 @@ export function DrawDetailDrawer({
 
         <DrawerFooter className="border-t border-border bg-subtle/20 px-6 py-3 flex items-center justify-between">
           <span className="text-caption text-text-muted font-mono">
-            Draw Record ID: {draw.id} • Loan Ref: {draw.loan_id}
+            Draw Record ID: {activeDraw.id} • Loan Ref: {activeDraw.loan_id}
           </span>
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
             Close Workbench
           </Button>
         </DrawerFooter>
+
+        <AllocateDrawTasksModal
+          open={isAllocateTasksModalOpen}
+          onOpenChange={setIsAllocateTasksModalOpen}
+          drawNumber={activeDraw.draw_number}
+          initialLines={activeDraw.lines}
+          onSave={handleSaveTasks}
+        />
       </DrawerContent>
     </Drawer>
   );

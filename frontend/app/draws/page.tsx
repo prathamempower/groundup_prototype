@@ -27,13 +27,15 @@ import {
   ArrowUpRight,
   RefreshCw,
   CreditCard,
-  Receipt,
-  Lock,
   ChevronRight,
   TrendingUp,
+  FileSpreadsheet,
+  Lock,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { DrawItem } from "@/lib/types";
+import { getExcelDrawLines } from "@/lib/data/excel-draw-schedule";
+import { ExcelSovMatrix } from "@/components/draws/excel-sov-matrix";
 
 // Modals and Drawers
 import {
@@ -500,6 +502,8 @@ export default function DrawsPage() {
   const [showcaseRows, setShowcaseRows] = useState(SHOWCASE_ROWS);
   const [packetDrawNumber, setPacketDrawNumber] = useState<number>(4);
   const [filterTab, setFilterTab] = useState<FilterTab>("ALL");
+  const [mainView, setMainView] = useState<"REGISTER" | "EXCEL_MATRIX">("REGISTER");
+  const [drawOverrides, setDrawOverrides] = useState<Record<number, DrawItem>>({});
   const [selectedDraw, setSelectedDraw] = useState<DrawItem | null>(null);
   const [selectedTimelineDrawNumber, setSelectedTimelineDrawNumber] = useState<number>(3);
 
@@ -526,6 +530,37 @@ export default function DrawsPage() {
   const handleBuildPacketSuccess = (data?: BuildDrawPacketSuccessData) => {
     refreshAll();
     if (data) {
+      if (data.lines && data.lines.length > 0) {
+        const itemizedDraw: DrawItem = {
+          id: `draw-fallback-${data.drawNumber}`,
+          project_id: currentProjectId || "6b96d4aa-0ca1-4d8a-9909-cf7b5232c666",
+          loan_id: "loan-crt-001",
+          draw_number: data.drawNumber,
+          status: "UNDER_REVIEW",
+          period_start: "2026-09-25",
+          period_end: data.inspectionDate,
+          lender_name: "Capital Reserve Trust",
+          requested_amount: String(data.totalRequestedCents),
+          recommended_amount: String(data.totalRequestedCents),
+          approved_amount: String(data.totalRequestedCents),
+          funded_amount: "0",
+          shortfall_amount: "0",
+          lines: data.lines,
+          conditions: [
+            { id: "c1", title: "Lender Title Date-Down Endorsement", status: "SATISFIED", required_for: "Wire Clearance" },
+            { id: "c2", title: "Subcontractor Lien Waivers Reconciled", status: "SATISFIED", required_for: "Disbursement" },
+            { id: "c3", title: "Dual Bank Statement Spend Reconciliation", status: "OPEN", required_for: "Draw Release" },
+          ],
+          packet_checklist: [
+            { id: "p1", requirement: "AIA G702 / G703 Application for Payment", status: "COMPLETE", document_name: "G702_Signed.pdf" },
+            { id: "p2", requirement: "Transaction Bank Statement Cleared Expenses", status: "COMPLETE", document_name: "BCB_Operating_Stmt.pdf" },
+            { id: "p3", requirement: "Draw Bank Loan Wire Confirmation", status: "COMPLETE", document_name: "CRT_Wire_Receipt.pdf" },
+          ],
+        };
+        setDrawOverrides((prev) => ({ ...prev, [data.drawNumber]: itemizedDraw }));
+        setSelectedDraw(itemizedDraw);
+      }
+
       setPipelineData((prev) =>
         prev.map((node) =>
           node.drawNumber === data.drawNumber
@@ -581,8 +616,25 @@ export default function DrawsPage() {
   const nextDrawNumber = Math.max(0, ...draws.map((d) => d.draw_number)) + 1;
 
   const buildDrawFallback = (drawNumber: number, title: string, amount: string): DrawItem => {
+    if (drawOverrides[drawNumber]) {
+      return drawOverrides[drawNumber];
+    }
     const cleanAmt = parseFloat(amount.replace(/[^0-9.]/g, "")) || 50000;
     const cents = Math.round(cleanAmt * 100);
+    const itemizedLines = getExcelDrawLines(drawNumber, cents);
+    const computedRequestedCents = itemizedLines.reduce(
+      (sum, l) => sum + (parseInt(l.requested_amount || "0", 10) || 0),
+      0
+    );
+    const computedApprovedCents = itemizedLines.reduce(
+      (sum, l) => sum + (parseInt(l.approved_amount || "0", 10) || 0),
+      0
+    );
+    const computedFundedCents = itemizedLines.reduce(
+      (sum, l) => sum + (parseInt(l.funded_amount || "0", 10) || 0),
+      0
+    );
+
     return {
       id: `draw-fallback-${drawNumber}`,
       project_id: currentProjectId || "6b96d4aa-0ca1-4d8a-9909-cf7b5232c666",
@@ -592,26 +644,12 @@ export default function DrawsPage() {
       period_start: "2026-01-01",
       period_end: "2026-10-15",
       lender_name: "Capital Reserve Trust",
-      requested_amount: String(cents),
-      recommended_amount: String(cents),
-      approved_amount: String(cents),
-      funded_amount: drawNumber <= 3 ? String(cents) : "0",
+      requested_amount: String(computedRequestedCents),
+      recommended_amount: String(computedRequestedCents),
+      approved_amount: String(computedApprovedCents),
+      funded_amount: String(computedFundedCents),
       shortfall_amount: "0",
-      lines: [
-        {
-          id: `line-${drawNumber}-1`,
-          draw_id: `draw-fallback-${drawNumber}`,
-          budget_line_id: `b-line-${drawNumber}`,
-          budget_line_name: title,
-          budget_line_code: `0${drawNumber}.00`,
-          requested_amount: String(cents),
-          recommended_amount: String(cents),
-          approved_amount: String(cents),
-          funded_amount: drawNumber <= 3 ? String(cents) : "0",
-          evidence_status: "VERIFIED",
-          lender_notes: `${title} inspection verified`,
-        },
-      ],
+      lines: itemizedLines,
       conditions: [
         { id: "c1", title: "Lender Title Date-Down Endorsement", status: "SATISFIED", required_for: "Wire Clearance" },
         { id: "c2", title: "Subcontractor Lien Waivers Reconciled", status: "SATISFIED", required_for: "Disbursement" },
@@ -623,6 +661,22 @@ export default function DrawsPage() {
         { id: "p3", requirement: "Draw Bank Loan Wire Confirmation", status: "COMPLETE", document_name: "CRT_Wire_Receipt.pdf" },
       ],
     };
+  };
+
+  const handleUpdateSelectedDraw = (updated: DrawItem) => {
+    setSelectedDraw(updated);
+    setDrawOverrides((prev) => ({ ...prev, [updated.draw_number]: updated }));
+    setShowcaseRows((prev) =>
+      prev.map((r) =>
+        r.drawNumber === updated.draw_number
+          ? {
+              ...r,
+              requestedAmt: formatMoney(updated.requested_amount),
+              eligibleAmt: formatMoney(updated.approved_amount),
+            }
+          : r
+      )
+    );
   };
 
   const handleOpenDetail = (draw: DrawItem) => {
@@ -974,19 +1028,75 @@ export default function DrawsPage() {
       </div>
 
         {/* ========================================================================= */}
-        {/* 4. DRAW APPLICATIONS REGISTER TABLE (Exact Match to Screenshot 1)         */}
+        {/* 4. VIEW TOGGLE: REGISTER vs EXCEL SCHEDULE MATRIX                         */}
         {/* ========================================================================= */}
-        <div className="rounded-xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden space-y-0">
-          {/* Header & Filter Pills */}
-          <div className="px-5 py-4 border-b border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-sm font-bold text-slate-900">
-                Draw Applications Register
-              </h2>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                Official ledger of requests, lender approvals, and wire clearance status.
-              </p>
-            </div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-200/80 rounded-xl w-fit">
+            <button
+              type="button"
+              onClick={() => setMainView("REGISTER")}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                mainView === "REGISTER"
+                  ? "bg-white text-slate-900 shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <Layers className="h-3.5 w-3.5" />
+              <span>Draw Applications Register</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMainView("EXCEL_MATRIX")}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                mainView === "EXCEL_MATRIX"
+                  ? "bg-emerald-600 text-white shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5" />
+              <span>Excel Schedule of Values Matrix</span>
+              <span
+                className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                  mainView === "EXCEL_MATRIX"
+                    ? "bg-white/20 text-white"
+                    : "bg-emerald-100 text-emerald-800"
+                }`}
+              >
+                Draws 1–9 Tasks
+              </span>
+            </button>
+          </div>
+
+          <div className="text-[11px] text-slate-500 font-medium">
+            {mainView === "REGISTER"
+              ? "Click any draw row to view itemized tasks & allocate work claim"
+              : "Task-by-task breakdown reflecting exact contractor construction ledger"}
+          </div>
+        </div>
+
+        {mainView === "EXCEL_MATRIX" ? (
+          <ExcelSovMatrix
+            onSelectDraw={(num) => {
+              setSelectedTimelineDrawNumber(num);
+              const matchingDraw =
+                drawOverrides[num] ||
+                draws.find((d) => d.draw_number === num) ||
+                buildDrawFallback(num, `Draw #${num}`, "$50,000");
+              handleOpenDetail(matchingDraw);
+            }}
+          />
+        ) : (
+          <div className="rounded-xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden space-y-0">
+            {/* Header & Filter Pills */}
+            <div className="px-5 py-4 border-b border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">
+                  Draw Applications Register
+                </h2>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Official ledger of requests, lender approvals, and wire clearance status.
+                </p>
+              </div>
 
             {/* Filter Pills */}
             <div className="flex items-center gap-1.5 text-xs font-medium bg-slate-100 p-1 rounded-lg">
@@ -1255,6 +1365,7 @@ export default function DrawsPage() {
             </table>
           </div>
         </div>
+      )}
       </div>
 
       {/* ========================================================================= */}
@@ -1314,6 +1425,7 @@ export default function DrawsPage() {
         onAllocateFunding={() => setIsAllocateFundingOpen(true)}
         onResubmitRevision={() => setIsResubmitRevisionOpen(true)}
         onRefresh={refreshAll}
+        onUpdateDraw={handleUpdateSelectedDraw}
       />
     </div>
   );

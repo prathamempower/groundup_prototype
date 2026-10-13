@@ -20,14 +20,17 @@ import {
   ShieldCheck,
   Image as ImageIcon,
   Plus,
+  Trash2,
 } from "lucide-react";
-import type { BudgetLine } from "@/lib/types";
+import type { BudgetLine, DrawLine } from "@/lib/types";
+import { EXCEL_DRAW_TASKS } from "@/lib/data/excel-draw-schedule";
 
 export interface BuildDrawPacketSuccessData {
   drawNumber: number;
   totalRequestedCents: number;
   formattedAmount: string;
   inspectionDate: string;
+  lines?: DrawLine[];
 }
 
 interface BuildDrawPacketModalProps {
@@ -114,77 +117,105 @@ export function BuildDrawPacketModal({
       setDrawAppNumber(`Draw #${targetDrawNum}`);
 
       if (targetDrawNum === 4) {
+        // Draw 4 exact tasks matching the spreadsheet allocations
         setSovLines([
           {
-            id: "sov-4-1",
-            codeAndDesc: "08-800 Exterior Window Glazing & Curtain Wall",
-            budgetCents: 4500000,
-            previouslyDrawnCents: 0,
-            claimCents: 3500000, // $35,000
-          },
-          {
-            id: "sov-4-2",
-            codeAndDesc: "07-500 TPO Flat Roofing & Flashing Membrane",
-            budgetCents: 3200000,
-            previouslyDrawnCents: 0,
-            claimCents: 2510000, // $25,100
-          },
-          {
-            id: "sov-4-3",
-            codeAndDesc: "07-210 Exterior Wall Sheathing & Vapor Barrier",
+            id: "sov-2.06",
+            codeAndDesc: "2.06 Site Prep: Dumpsters",
             budgetCents: 1800000,
-            previouslyDrawnCents: 0,
-            claimCents: 1200000, // $12,000
-          },
-        ]);
-      } else if (targetDrawNum === 5) {
-        setSovLines([
-          {
-            id: "sov-5-1",
-            codeAndDesc: "09-200 Interior Drywall & Acoustic Batt Insulation",
-            budgetCents: 4200000,
-            previouslyDrawnCents: 0,
-            claimCents: 2800000, // $28,000
+            previouslyDrawnCents: 1300000,
+            claimCents: 250000, // $2,500.00
           },
           {
-            id: "sov-5-2",
-            codeAndDesc: "09-300 Taping, Mudding & Prime Coating",
-            budgetCents: 2000000,
-            previouslyDrawnCents: 0,
-            claimCents: 1500000, // $15,000
+            id: "sov-2.07",
+            codeAndDesc: "2.07 Site Prep: Security Fencing",
+            budgetCents: 900000,
+            previouslyDrawnCents: 400000,
+            claimCents: 250000, // $2,500.00
           },
           {
-            id: "sov-5-3",
-            codeAndDesc: "08-200 Interior Doors & Trim Package",
-            budgetCents: 1500000,
+            id: "sov-2.09",
+            codeAndDesc: "2.09 Foundation/Structural: Concrete, Walls",
+            budgetCents: 5000000,
+            previouslyDrawnCents: 2500000,
+            claimCents: 1250000, // $12,500.00
+          },
+          {
+            id: "sov-2.12",
+            codeAndDesc: "2.12 Concrete Slabs/Foundation",
+            budgetCents: 700000,
             previouslyDrawnCents: 0,
-            claimCents: 1000000, // $10,000
+            claimCents: 350000, // $3,500.00
+          },
+          {
+            id: "sov-2.17",
+            codeAndDesc: "2.17 Water/Sewer (includes well, septic and city)",
+            budgetCents: 1800000,
+            previouslyDrawnCents: 1000000,
+            claimCents: 800000, // $8,000.00
+          },
+          {
+            id: "sov-2.27",
+            codeAndDesc: "2.27 Sewer/Septic",
+            budgetCents: 600000,
+            previouslyDrawnCents: 0,
+            claimCents: 600000, // $6,000.00
+          },
+          {
+            id: "sov-2.29",
+            codeAndDesc: "2.29 Equipment Rental",
+            budgetCents: 1300000,
+            previouslyDrawnCents: 850000,
+            claimCents: 450000, // $4,500.00
+          },
+          {
+            id: "sov-2.04",
+            codeAndDesc: "2.04 Site Prep: Demolition",
+            budgetCents: 3000000,
+            previouslyDrawnCents: 3000000,
+            claimCents: 500000, // $5,000.00
+          },
+          {
+            id: "sov-2.05",
+            codeAndDesc: "2.05 Site Prep: Grading/Excavation",
+            budgetCents: 2500000,
+            previouslyDrawnCents: 2500000,
+            claimCents: 550000, // $5,500.00
           },
         ]);
       } else {
-        setSovLines([
-          {
-            id: "sov-gen-1",
-            codeAndDesc: "09-200 Final Interior Trim & Millwork",
-            budgetCents: 6500000,
-            previouslyDrawnCents: 5250000,
-            claimCents: 1250000,
-          },
-          {
-            id: "sov-gen-2",
-            codeAndDesc: "09-300 Custom Cabinetry & Hardware",
-            budgetCents: 4800000,
-            previouslyDrawnCents: 3925000,
-            claimCents: 875000,
-          },
-          {
-            id: "sov-gen-3",
-            codeAndDesc: "15-400 Plumbing Trim & Fixture Sets",
-            budgetCents: 3200000,
-            previouslyDrawnCents: 2700000,
-            claimCents: 500000,
-          },
-        ]);
+        const matchingTasks = EXCEL_DRAW_TASKS.filter(
+          (t) => (t.draws[targetDrawNum] || 0) > 0
+        );
+        if (matchingTasks.length > 0) {
+          setSovLines(
+            matchingTasks.map((t) => {
+              // Calculate previous draws
+              let prevCents = 0;
+              for (let d = 1; d < targetDrawNum; d++) {
+                prevCents += t.draws[d] || 0;
+              }
+              return {
+                id: `sov-${t.number}`,
+                codeAndDesc: `${t.number} ${t.description}`,
+                budgetCents: t.scheduledValueCents,
+                previouslyDrawnCents: prevCents,
+                claimCents: t.draws[targetDrawNum] || 0,
+              };
+            })
+          );
+        } else {
+          // Fallback to top tasks
+          setSovLines(
+            EXCEL_DRAW_TASKS.slice(0, 4).map((t) => ({
+              id: `sov-${t.number}`,
+              codeAndDesc: `${t.number} ${t.description}`,
+              budgetCents: t.scheduledValueCents,
+              previouslyDrawnCents: 0,
+              claimCents: 1000000,
+            }))
+          );
+        }
       }
     }
   }, [open, nextDrawNumber]);
@@ -218,17 +249,25 @@ export function BuildDrawPacketModal({
   };
 
   const handleAddCustomLine = () => {
-    const newLineId = `sov-custom-${Date.now()}`;
+    const existingCodes = new Set(sovLines.map((l) => l.codeAndDesc.split(" ")[0]));
+    const nextTask =
+      EXCEL_DRAW_TASKS.find((t) => !existingCodes.has(t.number)) ||
+      EXCEL_DRAW_TASKS[sovLines.length % EXCEL_DRAW_TASKS.length];
+    const newLineId = `sov-${nextTask.number}-${Date.now()}`;
     setSovLines((prev) => [
       ...prev,
       {
         id: newLineId,
-        codeAndDesc: `0${prev.length + 6}-100 Additional Scope Item ${prev.length + 1}`,
-        budgetCents: 2000000,
+        codeAndDesc: `${nextTask.number} ${nextTask.description}`,
+        budgetCents: nextTask.scheduledValueCents,
         previouslyDrawnCents: 0,
-        claimCents: 1000000,
+        claimCents: 100000,
       },
     ]);
+  };
+
+  const handleRemoveLine = (lineId: string) => {
+    setSovLines((prev) => prev.filter((l) => l.id !== lineId));
   };
 
   const handleSubmitPacket = async () => {
@@ -254,25 +293,59 @@ export function BuildDrawPacketModal({
             : [
                 {
                   budget_line_id: eligibleLines[0]?.id || "line-default",
-                  requested_amount: String(totalRequestedCents || 7210000),
+                  requested_amount: String(totalRequestedCents || 5000000),
                 },
               ],
       });
+
+      const createdLines: DrawLine[] = sovLines
+        .filter((l) => l.claimCents > 0)
+        .map((l, idx) => ({
+          id: `line-${targetDrawNum}-${idx + 1}-${Date.now()}`,
+          draw_id: `draw-fallback-${targetDrawNum}`,
+          budget_line_id: l.id,
+          budget_line_name: l.codeAndDesc.replace(/^[0-9.]+\s*/, ""),
+          budget_line_code: l.codeAndDesc.split(" ")[0] || `0${idx + 1}.00`,
+          requested_amount: String(l.claimCents),
+          recommended_amount: String(l.claimCents),
+          approved_amount: String(l.claimCents),
+          funded_amount: "0",
+          evidence_status: "VERIFIED",
+          lender_notes: `${l.codeAndDesc} work verified`,
+        }));
 
       onSuccess({
         drawNumber: targetDrawNum,
         totalRequestedCents,
         formattedAmount: formatMoney(totalRequestedCents),
         inspectionDate,
+        lines: createdLines,
       });
       onOpenChange(false);
     } catch {
       // Graceful fallback to success for UX
+      const createdLines: DrawLine[] = sovLines
+        .filter((l) => l.claimCents > 0)
+        .map((l, idx) => ({
+          id: `line-${targetDrawNum}-${idx + 1}-${Date.now()}`,
+          draw_id: `draw-fallback-${targetDrawNum}`,
+          budget_line_id: l.id,
+          budget_line_name: l.codeAndDesc.replace(/^[0-9.]+\s*/, ""),
+          budget_line_code: l.codeAndDesc.split(" ")[0] || `0${idx + 1}.00`,
+          requested_amount: String(l.claimCents),
+          recommended_amount: String(l.claimCents),
+          approved_amount: String(l.claimCents),
+          funded_amount: "0",
+          evidence_status: "VERIFIED",
+          lender_notes: `${l.codeAndDesc} work verified`,
+        }));
+
       onSuccess({
         drawNumber: targetDrawNum,
         totalRequestedCents,
         formattedAmount: formatMoney(totalRequestedCents),
         inspectionDate,
+        lines: createdLines,
       });
       onOpenChange(false);
     } finally {
@@ -514,7 +587,7 @@ export function BuildDrawPacketModal({
                           {formatMoney(line.previouslyDrawnCents)}
                         </td>
                         <td className="py-2.5 px-3 text-right">
-                          <div className="inline-flex items-center gap-1">
+                          <div className="inline-flex items-center gap-1.5 justify-end">
                             <span className="text-slate-400 font-semibold">$</span>
                             <input
                               type="number"
@@ -524,6 +597,16 @@ export function BuildDrawPacketModal({
                               }
                               className="w-28 text-right rounded border border-slate-300 px-2 py-1 text-xs font-bold text-slate-900 focus:border-blue-600 focus:outline-none"
                             />
+                            {sovLines.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveLine(line.id)}
+                                className="text-slate-300 hover:text-rose-500 p-0.5 rounded transition-colors"
+                                title="Remove task"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

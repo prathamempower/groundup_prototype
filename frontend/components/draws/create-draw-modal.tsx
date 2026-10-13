@@ -8,8 +8,9 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { formatMoney } from "@/lib/format";
-import { Landmark, AlertCircle, FileText, CheckCircle2 } from "lucide-react";
+import { Landmark, AlertCircle, FileText, CheckCircle2, Sparkles } from "lucide-react";
 import type { BudgetLine } from "@/lib/types";
+import { EXCEL_DRAW_TASKS } from "@/lib/data/excel-draw-schedule";
 
 interface CreateDrawModalProps {
   open: boolean;
@@ -40,24 +41,53 @@ export function CreateDrawModal({
     enabled: open,
   });
 
-  const eligibleLines: BudgetLine[] = React.useMemo(
-    () =>
-      (budgetData?.data?.lines || []).filter(
+  const eligibleLines: BudgetLine[] = React.useMemo(() => {
+    if (budgetData?.data?.lines && budgetData.data.lines.length > 0) {
+      return budgetData.data.lines.filter(
         (l) => l.is_draw_eligible !== false && l.category !== "Contingency"
-      ),
-    [budgetData]
-  );
+      );
+    }
+    // Fallback to construction tasks from Excel schedule
+    return EXCEL_DRAW_TASKS.map((t) => ({
+      id: `b-line-${t.number}`,
+      budget_id: "budget-default",
+      project_id: projectId,
+      code: t.number,
+      name: t.description,
+      category: t.number.startsWith("1") ? "Consultant & Permits" : t.number.startsWith("4") ? "MEP" : "Site Work & Structure",
+      original_amount: String(t.scheduledValueCents),
+      current_approved_amount: String(t.scheduledValueCents),
+      actual_spend: "0",
+      committed_amount: "0",
+      is_draw_eligible: true,
+      sort_order: parseFloat(t.number) * 100,
+    }));
+  }, [budgetData, projectId]);
+
+  const handleApplyPreset = (targetNum: number) => {
+    const preset: Record<string, string> = {};
+    eligibleLines.forEach((line) => {
+      const task = EXCEL_DRAW_TASKS.find((t) => t.number === line.code);
+      if (task && (task.draws[targetNum] || 0) > 0) {
+        preset[line.id] = String(task.draws[targetNum]);
+      }
+    });
+    // For Draw 4, ensure demolition and grading lines are also present if needed
+    if (targetNum === 4) {
+      eligibleLines.forEach((line) => {
+        if (line.code === "2.04" && !preset[line.id]) preset[line.id] = "500000";
+        if (line.code === "2.05" && !preset[line.id]) preset[line.id] = "550000";
+      });
+    }
+    setSelectedLines(preset);
+  };
 
   useEffect(() => {
     if (open) {
-      setDrawNumber(nextDrawNumber);
+      const targetNum = nextDrawNumber || 4;
+      setDrawNumber(targetNum);
       setErrorMsg(null);
-      // Pre-fill some default amounts from available lines if empty
-      const initial: Record<string, string> = {};
-      eligibleLines.slice(0, 3).forEach((line, idx) => {
-        initial[line.id] = idx === 0 ? "4500000" : idx === 1 ? "6000000" : "2500000"; // $45k, $60k, $25k
-      });
-      setSelectedLines(initial);
+      handleApplyPreset(targetNum);
     }
   }, [open, nextDrawNumber, eligibleLines]);
 
@@ -181,9 +211,19 @@ export function CreateDrawModal({
               <label className="text-caption font-semibold uppercase tracking-wider text-text-secondary">
                 Eligible Budget Lines (Schedule of Values)
               </label>
-              <span className="text-caption text-text-muted">
-                {eligibleLines.length} eligible line items
-              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleApplyPreset(drawNumber)}
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline"
+                >
+                  <Sparkles className="h-3 w-3" />
+                  <span>Load Draw #{drawNumber} Schedule</span>
+                </button>
+                <span className="text-caption text-text-muted">
+                  • {eligibleLines.length} items
+                </span>
+              </div>
             </div>
 
             <div className="space-y-2.5 max-h-56 overflow-y-auto border border-border rounded-md p-3 bg-subtle/30">
