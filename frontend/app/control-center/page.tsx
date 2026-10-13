@@ -155,58 +155,66 @@ export default function ControlCenterPage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* CRITICAL PATH RISK ALERT - NOTIFY USER WITH REASON & SCHEDULE IMPACT      */}
+        {/* CRITICAL PATH RISK ALERT - COMPACT & BALANCED DASHBOARD BANNER            */}
         {/* ========================================================================= */}
-        <div className="rounded-2xl border border-amber-200/90 bg-white p-5 sm:p-6 shadow-xs space-y-3.5 transition-all">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm sm:text-base font-bold text-slate-900">
-              <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
-              <span>Critical Path Risk</span>
-            </div>
-            <span className="rounded-full bg-amber-100 text-amber-900 border border-amber-200 px-3 py-0.5 text-xs font-semibold">
-              Active Warning
-            </span>
-          </div>
+        <div className="rounded-xl border border-amber-200/90 bg-white p-4 sm:p-5 shadow-xs transition-all hover:shadow-sm">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            {/* Left: Warning Badge, Title & Context Description */}
+            <div className="space-y-1.5 flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                  <span>Critical Path Risk</span>
+                </div>
+                <span className="rounded-full bg-amber-100 text-amber-900 border border-amber-200/80 px-2 py-0.5 text-[10px] font-bold">
+                  Active Warning
+                </span>
+              </div>
 
-          <div>
-            <h3 className="text-sm sm:text-base font-bold text-slate-900">
-              At-Risk Milestone: Structural Steel Fabrication
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
-              Fabricator lead time extended by 5 weeks. Delays framed assembly and secondary trade access.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-1 text-xs">
-            <div className="bg-white p-3.5 rounded-xl border border-amber-200/80 shadow-2xs">
-              <span className="text-[10px] sm:text-xs font-bold text-amber-800 uppercase tracking-wider block">
-                SCHEDULE SLIP
-              </span>
-              <span className="text-xl sm:text-2xl font-bold font-mono text-amber-600 block mt-1">
-                +35 Days
-              </span>
+              <div>
+                <h3 className="text-xs sm:text-sm font-bold text-slate-900">
+                  At-Risk Milestone: Structural Steel Fabrication
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                  Fabricator lead time extended by 5 weeks. Delays framed assembly and secondary trade access.
+                </p>
+              </div>
             </div>
-            <div className="bg-white p-3.5 rounded-xl border border-amber-200/80 shadow-2xs">
-              <span className="text-[10px] sm:text-xs font-bold text-amber-800 uppercase tracking-wider block">
-                CARRY IMPACT
-              </span>
-              <span className="text-xl sm:text-2xl font-bold font-mono text-amber-600 block mt-1">
-                +$28,500
-              </span>
+
+            {/* Right: Compact Metrics & Direct Action Button */}
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 sm:gap-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+              <div className="bg-slate-50/80 border border-amber-200/80 rounded-lg px-3 py-1.5 text-left sm:text-center min-w-[110px] shadow-2xs">
+                <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider block">
+                  SCHEDULE SLIP
+                </span>
+                <span className="text-sm sm:text-base font-bold font-mono text-amber-600 block mt-0.5">
+                  +35 Days
+                </span>
+              </div>
+
+              <div className="bg-slate-50/80 border border-amber-200/80 rounded-lg px-3 py-1.5 text-left sm:text-center min-w-[110px] shadow-2xs">
+                <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider block">
+                  CARRY IMPACT
+                </span>
+                <span className="text-sm sm:text-base font-bold font-mono text-amber-600 block mt-0.5">
+                  +$28,500
+                </span>
+              </div>
+
+              <Link
+                href={currentProjectId ? `/projects/${currentProjectId}/timeline` : "/timeline"}
+                className="w-full sm:w-auto"
+              >
+                <button
+                  type="button"
+                  className="w-full sm:w-auto h-[46px] px-4 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-xs whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>View Milestone Schedule</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </Link>
             </div>
           </div>
-
-          <Link
-            href={currentProjectId ? `/projects/${currentProjectId}/timeline` : "/timeline"}
-            className="block pt-1"
-          >
-            <button
-              type="button"
-              className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 py-3 text-xs sm:text-sm font-bold text-white shadow-xs transition-colors cursor-pointer"
-            >
-              View Milestone Schedule →
-            </button>
-          </Link>
         </div>
 
         {/* ========================================================================= */}
