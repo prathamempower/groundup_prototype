@@ -105,23 +105,10 @@ export function Sidebar({
     ? getProjectNavItems(workspaceProjectId, effectiveRole)
     : [];
 
-  // Business-minded enterprise categorization:
-  // 1. Executive & Control: Control Center, Documents (vital contracts/draw docs/plans), Project Economics, Changes & Approvals, Alerts & Exceptions
-  // 2. Financial Management: Draws, Reconciliation, Partners & Funding
-  // 3. Project Execution: Timeline, Inbox
-  const executiveItemIds = ["control-center", "documents", "budget", "changes", "alerts"];
-  const financialItemIds = ["draws", "reconciliation", "partners"];
-  const executionItemIds = ["timeline", "inbox"];
+  // Visible workspace items: Control Center, Reconciliation, Draws, Documents, Alerts
+  const mainWorkspaceItemIds = ["control-center", "reconciliation", "draws", "documents", "alerts"];
 
-  const executiveNavItems = executiveItemIds
-    .map((id) => visibleNavItems.find((i) => i.id === id))
-    .filter((item): item is NonNullable<typeof item> => Boolean(item));
-
-  const financialNavItems = financialItemIds
-    .map((id) => visibleNavItems.find((i) => i.id === id))
-    .filter((item): item is NonNullable<typeof item> => Boolean(item));
-
-  const executionNavItems = executionItemIds
+  const mainNavItems = mainWorkspaceItemIds
     .map((id) => visibleNavItems.find((i) => i.id === id))
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
 
@@ -283,19 +270,11 @@ export function Sidebar({
           }`}
           aria-label="Project Workspace Navigation"
         >
-          {/* Helper Section Renderer for consistent enterprise navigation */}
+          {/* Workspace Navigation Items */}
           {[
             {
-              title: "Executive & Overview",
-              items: executiveNavItems,
-            },
-            {
-              title: "Financial Management",
-              items: financialNavItems,
-            },
-            {
-              title: "Project Execution",
-              items: executionNavItems,
+              title: "Workspace",
+              items: mainNavItems,
             },
           ].map((section) => {
             if (section.items.length === 0) return null;

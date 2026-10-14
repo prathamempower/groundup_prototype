@@ -52,54 +52,12 @@ export interface WorkspaceNavItem {
  * 10. Project settings (Owner only)
  */
 export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
-  // 1. Executive & Overview
   {
     id: "control-center",
     label: "Control Center",
     path: "control-center",
     icon: LayoutDashboard,
     allowedRoles: ["OWNER", "CFO", "PM", "INVESTOR"],
-  },
-  {
-    id: "documents",
-    label: "Documents",
-    path: "documents",
-    icon: FileText,
-    allowedRoles: ["OWNER", "CFO", "PM"],
-    badgeKey: "documents",
-  },
-  {
-    id: "budget",
-    label: "Project Economics",
-    path: "budget",
-    icon: PieChart,
-    allowedRoles: ["OWNER", "CFO", "PM"],
-  },
-  {
-    id: "changes",
-    label: "Changes & Approvals",
-    path: "changes",
-    icon: CheckSquare,
-    allowedRoles: ["OWNER", "CFO", "PM"],
-    badgeKey: "changes",
-  },
-  {
-    id: "alerts",
-    label: "Alerts",
-    path: "alerts",
-    icon: Bell,
-    allowedRoles: ["OWNER", "CFO", "PM"],
-    badgeKey: "alerts",
-  },
-
-  // 2. Financial Management
-  {
-    id: "draws",
-    label: "Draws",
-    path: "draws",
-    icon: Landmark,
-    allowedRoles: ["OWNER", "CFO", "PM"],
-    badgeKey: "draws",
   },
   {
     id: "reconciliation",
@@ -110,31 +68,29 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     badgeKey: "reconciliation",
   },
   {
-    id: "partners",
-    label: "Partners & Funding",
-    path: "partners",
-    icon: Users,
-    allowedRoles: ["OWNER", "CFO"],
-  },
-
-  // 3. Project Execution
-  {
-    id: "timeline",
-    label: "Timeline",
-    path: "timeline",
-    icon: CalendarDays,
+    id: "draws",
+    label: "Draws",
+    path: "draws",
+    icon: Landmark,
     allowedRoles: ["OWNER", "CFO", "PM"],
-    badgeKey: "timeline",
+    badgeKey: "draws",
   },
   {
-    id: "inbox",
-    label: "Inbox",
-    path: "inbox",
-    icon: MessageSquare,
-    allowedRoles: ["OWNER", "CFO", "PM", "GC", "INVESTOR"],
+    id: "documents",
+    label: "Documents",
+    path: "documents",
+    icon: FileText,
+    allowedRoles: ["OWNER", "CFO", "PM"],
+    badgeKey: "documents",
   },
-
-  // 4. Project Settings
+  {
+    id: "alerts",
+    label: "Alerts",
+    path: "alerts",
+    icon: Bell,
+    allowedRoles: ["OWNER", "CFO", "PM"],
+    badgeKey: "alerts",
+  },
   {
     id: "settings",
     label: "Project Settings",
@@ -179,13 +135,9 @@ export function getDefaultWorkspaceRoute(role: UserRole, projectId: string): str
   switch (role) {
     case "OWNER":
     case "CFO":
-      return `/projects/${projectId}/control-center`;
     case "PM":
-      return `/projects/${projectId}/timeline`;
     case "GC":
-      return `/projects/${projectId}/inbox`;
     case "INVESTOR":
-      return `/projects/${projectId}/control-center`;
     default:
       return `/projects/${projectId}/control-center`;
   }
