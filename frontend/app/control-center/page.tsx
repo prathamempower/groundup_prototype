@@ -91,8 +91,8 @@ export default function ControlCenterPage() {
   const isSetupIncomplete = project?.status === "SETUP_INCOMPLETE" || !kpis?.forecast_profit?.amount;
 
   return (
-    <div className="min-h-screen bg-slate-50/60 pb-16">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+    <div className="min-h-full w-full bg-slate-50/60 pb-16 min-w-0">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-6 space-y-5 sm:space-y-6 min-w-0">
 
         {/* ========================================================================= */}
         {/* EXECUTIVE PROJECT BANNER - POLISHED, BALANCED & MODERN                   */}

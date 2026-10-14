@@ -746,7 +746,7 @@ export default function DrawsPage() {
         </div>
       </div>
 
-      <div className="px-6 max-w-7xl mx-auto space-y-6">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5 sm:space-y-6 min-w-0">
         {/* ========================================================================= */}
         {/* 2. FOUR HERO KPI CARDS (Exact Match to Screenshot 1)                      */}
         {/* ========================================================================= */}

@@ -662,12 +662,12 @@ export default function ProjectEconomicsAndBudgetPage() {
   }, [sovLines]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-16">
+    <div className="min-h-full w-full bg-[#F8FAFC] pb-16 min-w-0">
       {/* ------------------------------------------------------------- */}
       {/* PAGE HEADER & BREADCRUMBS                                     */}
       {/* ------------------------------------------------------------- */}
       <div className="border-b border-slate-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 min-w-0">
           {/* Breadcrumbs */}
           <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-2">
             <span className="hover:text-slate-700 cursor-pointer" onClick={() => router.push("/projects")}>
@@ -766,7 +766,7 @@ export default function ProjectEconomicsAndBudgetPage() {
       {/* TAB 1: OVERVIEW                                               */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "overview" && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5 sm:space-y-6 min-w-0">
           {/* Row 1: 4 KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Approved Budget */}
@@ -1464,7 +1464,7 @@ export default function ProjectEconomicsAndBudgetPage() {
       {/* TAB 2: BUDGET BREAKDOWN                                       */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "breakdown" && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5 sm:space-y-6 min-w-0">
           {/* Quick Division Chart & Contingency breakdown */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
@@ -1625,7 +1625,7 @@ export default function ProjectEconomicsAndBudgetPage() {
       {/* TAB 3: FORECAST & RETURNS                                     */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "forecast" && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5 sm:space-y-6 min-w-0">
           {/* Executive Summary Card */}
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
@@ -1759,7 +1759,7 @@ export default function ProjectEconomicsAndBudgetPage() {
       {/* TAB 4: CHANGES & APPROVALS                                    */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "changes" && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5 sm:space-y-6 min-w-0">
           {/* Header & Actions */}
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
