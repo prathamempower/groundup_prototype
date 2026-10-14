@@ -504,12 +504,12 @@ export default function ProjectEconomicsAndBudgetPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-16">
+    <div className="min-h-full w-full bg-[#F8FAFC] pb-16 min-w-0">
       {/* ------------------------------------------------------------- */}
       {/* TOP HEADER & TITLE AREA                                       */}
       {/* ------------------------------------------------------------- */}
       <div className="border-b border-slate-200/90 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-0">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-0 min-w-0">
           {/* Breadcrumbs */}
           <nav className="flex items-center gap-1.5 text-xs text-slate-500 mb-2">
             <span
@@ -604,7 +604,7 @@ export default function ProjectEconomicsAndBudgetPage() {
       {/* TAB 1: OVERVIEW                                               */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "overview" && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5 sm:space-y-6 min-w-0">
           {/* Row 1: 5 Specialized KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Card 1: Construction Budget */}
@@ -1279,7 +1279,7 @@ export default function ProjectEconomicsAndBudgetPage() {
       {/* TAB 2: BUDGET BREAKDOWN                                       */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "breakdown" && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5 sm:space-y-6 min-w-0">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Left Card: Construction Budget Summary */}
             <div className="lg:col-span-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
@@ -1552,7 +1552,7 @@ export default function ProjectEconomicsAndBudgetPage() {
       {/* TAB 3: FORECAST & RETURNS                                     */}
       {/* ------------------------------------------------------------- */}
       {activeTab === "forecast" && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5 sm:space-y-6 min-w-0">
           {/* Top 3 Cards Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Card 1: Project Return Summary (4 Cols) */}

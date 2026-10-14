@@ -15,6 +15,7 @@ import { getDefaultRouteForRole } from "@/lib/navigation";
 import { Button } from "@/components/ui/button";
 
 import { FloatingDemoButton, DemoAccount } from "@/components/auth/floating-demo-button";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -86,15 +87,8 @@ export default function LoginPage() {
       <div className="w-full space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-3">
-          <div className="flex justify-center mb-1">
-            <Image
-              src="/logo.png"
-              alt="GroundUp"
-              width={200}
-              height={52}
-              className="h-10 w-auto object-contain"
-              priority
-            />
+          <div className="flex justify-center mb-2">
+            <BrandLogo size="lg" showSubtitle={true} />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             Welcome back

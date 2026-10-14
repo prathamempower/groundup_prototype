@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { DrawItem } from "@/lib/types";
 import { getExcelDrawLines } from "@/lib/data/excel-draw-schedule";
+import { DRAW_REQUEST_FORM_ITEMS } from "@/lib/data/draw-request-form-items";
 import { ExcelSovMatrix } from "@/components/draws/excel-sov-matrix";
 import { cn } from "@/lib/utils";
 
@@ -325,7 +326,7 @@ export default function DrawsPage() {
     }
     const cleanAmt = parseFloat(amount.replace(/[^0-9.]/g, "")) || 50000;
     const cents = Math.round(cleanAmt * 100);
-    const itemizedLines = getExcelDrawLines(drawNumber, cents);
+    const itemizedLines = drawNumber === 4 ? DRAW_REQUEST_FORM_ITEMS : getExcelDrawLines(drawNumber, cents);
     const computedRequestedCents = itemizedLines.reduce(
       (sum, l) => sum + (parseInt(l.requested_amount || "0", 10) || 0),
       0
@@ -427,7 +428,7 @@ export default function DrawsPage() {
         </div>
       </div>
 
-      <div className="px-6 max-w-7xl mx-auto space-y-6">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5 sm:space-y-6 min-w-0">
         {/* 2. Compact 4 KPI Metric Row with Easy Plain English */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
           <div className="rounded-xl border border-border bg-white p-4 shadow-2xs">

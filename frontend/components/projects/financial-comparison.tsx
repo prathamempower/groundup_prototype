@@ -56,7 +56,7 @@ const getProjectThumbnail = (proj: Project) => {
   const addressLower = (proj.address || "").toLowerCase();
 
   if (nameLower.includes("woodlawn") || addressLower.includes("woodlawn")) {
-    return "/projects/woodlawn-card.jpg";
+    return "/projects/woodlawn-new.jpg";
   }
   if (nameLower.includes("first") || addressLower.includes("first")) {
     return "/projects/first-street-new.jpg";
@@ -64,7 +64,10 @@ const getProjectThumbnail = (proj: Project) => {
   if (nameLower.includes("broadway") || addressLower.includes("broadway")) {
     return "/projects/broadway-new.jpg";
   }
-  return "/projects/woodlawn-card.jpg";
+  if (nameLower.includes("gable") || addressLower.includes("gable")) {
+    return "/projects/gable-residence.jpg";
+  }
+  return "/projects/woodlawn-new.jpg";
 };
 
 export function ProjectFinancialComparison({

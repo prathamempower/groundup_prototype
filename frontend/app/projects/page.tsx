@@ -207,7 +207,7 @@ export default function ProjectsPortfolioPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
+      <div className="w-full max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-6 min-w-0">
         <div className="h-16 w-full animate-pulse rounded-xl bg-slate-100" />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
@@ -219,7 +219,7 @@ export default function ProjectsPortfolioPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+    <div className="w-full max-w-7xl mx-auto px-4 py-5 sm:py-6 sm:px-6 lg:px-8 space-y-5 sm:space-y-6 min-w-0">
       {/* Clean Page Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
