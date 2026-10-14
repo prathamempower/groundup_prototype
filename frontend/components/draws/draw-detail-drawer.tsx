@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { SourcesButton } from "@/components/ui/source-panel";
 import { formatMoney, formatDate } from "@/lib/format";
 import { api } from "@/lib/api";
 import {
@@ -26,6 +25,10 @@ import {
   FileSpreadsheet,
 } from "lucide-react";
 import type { DrawItem, DrawLine } from "@/lib/types";
+import {
+  DRAW_REQUEST_FORM_ITEMS,
+  DRAW_REQUEST_TOTALS,
+} from "@/lib/data/draw-request-form-items";
 import { AllocateDrawTasksModal } from "./allocate-draw-tasks-modal";
 
 interface DrawDetailDrawerProps {
@@ -143,25 +146,27 @@ export function DrawDetailDrawer({
 
   if (!open || !activeDraw) return null;
 
-  const totalRequestedCents =
-    activeDraw.lines && activeDraw.lines.length > 0
-      ? activeDraw.lines.reduce((acc, l) => acc + (parseInt(l.requested_amount || "0", 10) || 0), 0)
-      : parseInt(activeDraw.requested_amount || "0", 10) || 0;
+  const lines = activeDraw.lines && activeDraw.lines.length > 0 ? activeDraw.lines : DRAW_REQUEST_FORM_ITEMS;
 
-  const totalRecommendedCents =
-    activeDraw.lines && activeDraw.lines.length > 0
-      ? activeDraw.lines.reduce((acc, l) => acc + (parseInt(l.recommended_amount || "0", 10) || 0), 0)
-      : parseInt(activeDraw.recommended_amount || "0", 10) || 0;
+  const totalRequestedCents = lines.reduce(
+    (acc, l) => acc + (parseInt(l.requested_amount || "0", 10) || 0),
+    0
+  );
 
-  const totalApprovedCents =
-    activeDraw.lines && activeDraw.lines.length > 0
-      ? activeDraw.lines.reduce((acc, l) => acc + (parseInt(l.approved_amount || "0", 10) || 0), 0)
-      : parseInt(activeDraw.approved_amount || "0", 10) || 0;
+  const totalRecommendedCents = lines.reduce(
+    (acc, l) => acc + (parseInt(l.recommended_amount || "0", 10) || 0),
+    0
+  );
 
-  const totalFundedCents =
-    activeDraw.lines && activeDraw.lines.length > 0
-      ? activeDraw.lines.reduce((acc, l) => acc + (parseInt(l.funded_amount || "0", 10) || 0), 0)
-      : parseInt(activeDraw.funded_amount || "0", 10) || 0;
+  const totalApprovedCents = lines.reduce(
+    (acc, l) => acc + (parseInt(l.approved_amount || "0", 10) || 0),
+    0
+  );
+
+  const totalFundedCents = lines.reduce(
+    (acc, l) => acc + (parseInt(l.funded_amount || "0", 10) || 0),
+    0
+  );
 
   const handleSaveTasks = (newLines: DrawLine[], newTotalCents: number) => {
     const updated: DrawItem = {
@@ -199,17 +204,11 @@ export function DrawDetailDrawer({
     }
   };
 
-  const copyToClipboard = (text: string, fieldName: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedField(fieldName);
-    setTimeout(() => setCopiedField(null), 2000);
-  };
-
   const isDualVerified = Boolean(
     activeDraw.pm_verification?.inspection_passed && activeDraw.cfo_verification?.costs_verified
   );
 
-  const shortfallCents = parseInt(activeDraw.shortfall_amount || "0", 10);
+  const shortfallCents = Math.max(0, totalRequestedCents - totalApprovedCents);
   const isShortFunded = shortfallCents > 0 || activeDraw.status === "PARTIALLY_APPROVED";
 
   const getStatusBadgeType = (status: DrawItem["status"]) => {
@@ -339,103 +338,6 @@ export function DrawDetailDrawer({
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* THE FOUR-VALUE FUNDING TRUTH STRIP */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-caption font-semibold uppercase tracking-wider text-text-secondary">
-                The Four-Value Funding Truth
-              </span>
-              <span className="text-caption text-text-muted">
-                Cleared cash, not draw approval, is funding truth
-              </span>
-            </div>
-
-            <div className="grid grid-cols-4 gap-3">
-              {/* 1. REQUESTED */}
-              <div className="rounded-lg border border-border bg-surface p-3 shadow-xs">
-                <span className="text-caption text-text-muted uppercase tracking-wider block">
-                  1. Requested Amount
-                </span>
-                <span className="text-section font-bold tabular-nums text-text-primary mt-1 block">
-                  {formatMoney(String(totalRequestedCents))}
-                </span>
-                <span className="text-[11px] text-text-muted block mt-1">
-                  Basis: Certified AIA G702 pay app
-                </span>
-                <div className="mt-2 pt-2 border-t border-border/60">
-                  <SourcesButton
-                    figureLabel={`Draw #${activeDraw.draw_number} Requested Amount`}
-                    amountOrValue={formatMoney(String(totalRequestedCents))}
-                    basis="Developer-certified AIA G702 itemized Schedule of Values"
-                    citations={requestedCitations}
-                  />
-                </div>
-              </div>
-
-              {/* 2. RECOMMENDED */}
-              <div className="rounded-lg border border-border bg-surface p-3 shadow-xs">
-                <span className="text-caption text-text-muted uppercase tracking-wider block">
-                  2. Inspector Rec.
-                </span>
-                <span className="text-section font-bold tabular-nums text-text-secondary mt-1 block">
-                  {formatMoney(String(totalRecommendedCents))}
-                </span>
-                <span className="text-[11px] text-text-muted block mt-1">
-                  Basis: Third-party ATD inspection
-                </span>
-                <div className="mt-2 pt-2 border-t border-border/60">
-                  <SourcesButton
-                    figureLabel={`Draw #${activeDraw.draw_number} Recommended Amount`}
-                    amountOrValue={formatMoney(String(totalRecommendedCents))}
-                    basis="Independent architectural/engineering field inspection report"
-                    citations={recommendedCitations}
-                  />
-                </div>
-              </div>
-
-              {/* 3. APPROVED */}
-              <div className="rounded-lg border border-border bg-surface p-3 shadow-xs">
-                <span className="text-caption text-text-muted uppercase tracking-wider block">
-                  3. Lender Approved
-                </span>
-                <span className="text-section font-bold tabular-nums text-primary mt-1 block">
-                  {formatMoney(String(totalApprovedCents))}
-                </span>
-                <span className="text-[11px] text-text-muted block mt-1">
-                  Basis: Bank credit committee approval
-                </span>
-                <div className="mt-2 pt-2 border-t border-border/60">
-                  <SourcesButton
-                    figureLabel={`Draw #${activeDraw.draw_number} Approved Amount`}
-                    amountOrValue={formatMoney(String(totalApprovedCents))}
-                    basis="Formal loan advance approval letter from construction lender"
-                    citations={approvedCitations}
-                  />
-                </div>
-              </div>
-
-              {/* 4. CLEARED CASH FUNDED */}
-              <div className="rounded-lg border-2 border-success/30 bg-success-subtle/10 p-3 shadow-xs">
-                <span className="text-caption font-bold text-success uppercase tracking-wider block">
-                  4. Cleared Cash Funded
-                </span>
-                <span className="text-section font-bold tabular-nums text-success mt-1 block">
-                  {formatMoney(String(totalFundedCents))}
-                </span>
-                <span className="text-[11px] text-text-muted block mt-1">
-                  Basis: Confirmed bank wire deposit
-                </span>
-                <div className="mt-2 pt-2 border-t border-border/60">
-                  <SourcesButton
-                    figureLabel={`Draw #${activeDraw.draw_number} Cleared Cash Funded`}
-                    amountOrValue={formatMoney(String(totalFundedCents))}
-                    basis="Bank-confirmed wire deposit with status CLEARED"
-                    citations={fundedCitations}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* SHORT-FUNDED ALERT BANNER & CONDITIONS */}
           {isShortFunded && (
@@ -449,7 +351,7 @@ export function DrawDetailDrawer({
                     </h4>
                     <p className="text-body-sm text-text-secondary mt-0.5">
                       {activeDraw.lender_decision_notes ||
-                        `Lender approved ${formatMoney(activeDraw.approved_amount)} against ${formatMoney(activeDraw.requested_amount)} requested. Withheld funds require condition satisfaction or resubmission.`}
+                        `Lender approved ${formatMoney(String(totalApprovedCents))} against ${formatMoney(String(totalRequestedCents))} requested. Withheld funds holdback on Final Clean-up pending inspection.`}
                     </p>
                   </div>
                 </div>
@@ -518,15 +420,15 @@ export function DrawDetailDrawer({
             </div>
           )}
 
-          {/* DRAW LINES TABLE WORKBENCH */}
+          {/* DRAW REQUEST FORM TABLE WORKBENCH */}
           <div className="space-y-3">
             <div className="flex items-center justify-between border-b border-border pb-2">
               <div className="flex items-center gap-2">
                 <span className="text-body font-bold text-text-primary">
-                  Line Item Schedule of Values
+                  Draw Request Form
                 </span>
-                <span className="rounded-full bg-primary-subtle text-primary text-caption font-bold px-2 py-0.5">
-                  {activeDraw.lines?.length || 0}
+                <span className="rounded-full bg-orange-100 border border-orange-200 text-[#C85A17] text-caption font-bold px-2 py-0.5">
+                  {lines.length} Tasks Requested
                 </span>
               </div>
 
@@ -534,99 +436,91 @@ export function DrawDetailDrawer({
                 variant="outline"
                 size="sm"
                 onClick={() => setIsAllocateTasksModalOpen(true)}
-                className="h-8 text-xs font-semibold border-primary/40 text-primary hover:bg-primary-subtle cursor-pointer"
+                className="h-8 text-xs font-semibold border-slate-300 text-[#C85A17] hover:bg-orange-50 cursor-pointer"
               >
-                <FileSpreadsheet className="h-3.5 w-3.5 mr-1.5 text-primary" />
+                <FileSpreadsheet className="h-3.5 w-3.5 mr-1.5 text-[#C85A17]" />
                 Input / Allocate Work Tasks
               </Button>
             </div>
 
-            {/* DRAW LINES TABLE */}
-            <div className="rounded-lg border border-border overflow-hidden bg-surface shadow-xs">
-              <table className="w-full text-left text-body-sm">
-                <thead className="bg-subtle/50 text-caption font-semibold text-text-secondary border-b border-border">
-                  <tr>
-                    <th className="py-2.5 px-3">CSI Code & Scope</th>
-                    <th className="py-2.5 px-3 text-right">Requested</th>
-                    <th className="py-2.5 px-3 text-right">Recommended</th>
-                    <th className="py-2.5 px-3 text-right">Approved</th>
-                    <th className="py-2.5 px-3 text-right font-bold text-success">Cleared Funded</th>
-                    <th className="py-2.5 px-3">Evidence Status</th>
+            {/* AUTHENTIC DRAW REQUEST FORM TABLE */}
+            <div className="rounded-lg border border-slate-200 overflow-hidden bg-white shadow-xs">
+              <table className="w-full text-left text-xs border-collapse">
+                {/* Terracotta / Burnt Orange Header matching user specification */}
+                <thead>
+                  <tr className="bg-[#C85A17] text-white font-bold text-xs">
+                    <th className="py-3 px-4 text-left font-bold tracking-wide border-r border-[#B34F14] w-[46%]">
+                      Item Description
+                    </th>
+                    <th className="py-3 px-4 text-right font-bold tracking-wide border-r border-[#B34F14] w-[18%]">
+                      Budgeted Amount
+                    </th>
+                    <th className="py-3 px-4 text-right font-bold tracking-wide border-r border-[#B34F14] w-[18%]">
+                      Requested
+                    </th>
+                    <th className="py-3 px-4 text-right font-bold tracking-wide w-[18%]">
+                      Approved Amount
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
-                  {activeDraw.lines && activeDraw.lines.length > 0 ? (
-                    activeDraw.lines.map((line) => (
-                      <tr key={line.id} className="hover:bg-subtle/20 transition-colors">
-                        <td className="py-3 px-3">
-                          <span className="font-mono text-caption text-text-muted mr-1.5 font-bold">
-                            {line.budget_line_code}
-                          </span>
-                          <span className="font-medium text-text-primary">
+                <tbody className="divide-y divide-slate-200 bg-white text-slate-800">
+                  {lines.map((line) => {
+                    const budgetedVal = line.budgeted_amount
+                      ? formatMoney(line.budgeted_amount)
+                      : formatMoney(line.requested_amount);
+                    const requestedVal = formatMoney(line.requested_amount);
+                    const approvedVal = formatMoney(line.approved_amount);
+                    const isZeroApproved = parseInt(line.approved_amount || "0", 10) === 0;
+
+                    return (
+                      <tr key={line.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3 px-4 border-r border-slate-100">
+                          <span className="font-semibold text-slate-900 text-xs sm:text-[13px] block">
                             {line.budget_line_name}
                           </span>
-                          {line.lender_notes && (
-                            <p className="text-caption text-warning mt-0.5">
+                          {line.lender_notes && isZeroApproved && (
+                            <span className="text-[11px] text-amber-700 mt-0.5 block font-normal">
                               Note: {line.lender_notes}
-                            </p>
+                            </span>
                           )}
                         </td>
-                        <td className="py-3 px-3 text-right tabular-nums text-text-secondary font-medium">
-                          {formatMoney(line.requested_amount)}
+                        <td className="py-3 px-4 text-right tabular-nums text-slate-700 font-medium text-xs sm:text-[13px] border-r border-slate-100">
+                          {budgetedVal}
                         </td>
-                        <td className="py-3 px-3 text-right tabular-nums text-text-secondary">
-                          {formatMoney(line.recommended_amount)}
+                        <td className="py-3 px-4 text-right tabular-nums text-slate-900 font-semibold text-xs sm:text-[13px] border-r border-slate-100">
+                          {requestedVal}
                         </td>
-                        <td className="py-3 px-3 text-right tabular-nums font-medium text-text-primary">
-                          {formatMoney(line.approved_amount)}
-                        </td>
-                        <td className="py-3 px-3 text-right tabular-nums font-bold text-success">
-                          {formatMoney(line.funded_amount)}
-                        </td>
-                        <td className="py-3 px-3">
-                          <StatusBadge
-                            status={
-                              line.evidence_status === "VERIFIED"
-                                ? "verified"
-                                : line.evidence_status === "PENDING_INSPECTION"
-                                ? "under_review"
-                                : "missing_evidence"
-                            }
-                            customLabel={line.evidence_status.replace("_", " ")}
-                          />
+                        <td className="py-3 px-4 text-right tabular-nums text-xs sm:text-[13px]">
+                          {isZeroApproved ? (
+                            <span className="font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                              {approvedVal}
+                            </span>
+                          ) : (
+                            <span className="font-semibold text-slate-900">
+                              {approvedVal}
+                            </span>
+                          )}
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={6} className="p-4 text-center text-caption text-text-muted italic">
-                        No line items attached to this draw application.
-                      </td>
-                    </tr>
-                  )}
+                    );
+                  })}
                 </tbody>
-                {activeDraw.lines && activeDraw.lines.length > 0 && (
-                  <tfoot className="bg-subtle/60 font-bold border-t border-border">
-                    <tr>
-                      <td className="py-3 px-3 text-text-primary font-bold">
-                        Total ({activeDraw.lines.length} Tasks Allocated)
-                      </td>
-                      <td className="py-3 px-3 text-right tabular-nums text-text-primary font-bold">
-                        {formatMoney(String(totalRequestedCents))}
-                      </td>
-                      <td className="py-3 px-3 text-right tabular-nums text-text-secondary font-bold">
-                        {formatMoney(String(totalRecommendedCents))}
-                      </td>
-                      <td className="py-3 px-3 text-right tabular-nums text-text-primary font-bold">
-                        {formatMoney(String(totalApprovedCents))}
-                      </td>
-                      <td className="py-3 px-3 text-right tabular-nums text-success font-bold">
-                        {formatMoney(String(totalFundedCents))}
-                      </td>
-                      <td className="py-3 px-3"></td>
-                    </tr>
-                  </tfoot>
-                )}
+                <tfoot>
+                  <tr className="border-t-2 border-slate-300 bg-slate-50/90 font-bold text-slate-900">
+                    <td className="py-3.5 px-4 text-left font-bold text-xs sm:text-[13px] border-r border-slate-200">
+                      Totals:
+                    </td>
+                    <td className="py-3.5 px-4 text-right border-r border-slate-200">
+                      {/* Blank to match user form */}
+                    </td>
+                    <td className="py-3.5 px-4 text-right tabular-nums font-bold text-xs sm:text-[13px] text-slate-900 border-r border-slate-200">
+                      {formatMoney(String(totalRequestedCents))}
+                    </td>
+                    <td className="py-3.5 px-4 text-right tabular-nums font-bold text-xs sm:text-[13px] text-emerald-700">
+                      {formatMoney(String(totalApprovedCents))}
+                    </td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
           </div>

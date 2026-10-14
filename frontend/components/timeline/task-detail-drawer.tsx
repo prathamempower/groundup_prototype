@@ -6,20 +6,10 @@ import {
   CheckCircle2,
   AlertTriangle,
   Clock,
-  User,
-  Building2,
   Calendar,
   Save,
   Trash2,
   Plus,
-  Camera,
-  FileCheck2,
-  ShieldCheck,
-  Check,
-  Flame,
-  AlertCircle,
-  FileText,
-  Sparkles,
 } from "lucide-react";
 import { ConstructionTask } from "@/lib/data/construction-calendar-data";
 
@@ -56,8 +46,6 @@ export function TaskDetailDrawer({
 
   // Local editable draft state
   const [draft, setDraft] = useState<ConstructionTask | null>(activeTask);
-  const [newChecklistText, setNewChecklistText] = useState("");
-  const [newPhotoText, setNewPhotoText] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
 
@@ -96,37 +84,6 @@ export function TaskDetailDrawer({
     onUpdateTask(updated);
   };
 
-  const handleToggleChecklist = (itemIndex: number) => {
-    if (!draft) return;
-    const updatedChecklist = draft.checklist.map((item, idx) =>
-      idx === itemIndex ? { ...item, checked: !item.checked } : item
-    );
-    handleFieldChange("checklist", updatedChecklist);
-  };
-
-  const handleRemoveChecklistItem = (itemIndex: number) => {
-    if (!draft) return;
-    const updatedChecklist = draft.checklist.filter((_, idx) => idx !== itemIndex);
-    handleFieldChange("checklist", updatedChecklist);
-  };
-
-  const handleAddChecklist = () => {
-    if (!draft || !newChecklistText.trim()) return;
-    const newItem = {
-      id: `check-${Date.now()}`,
-      label: newChecklistText.trim(),
-      checked: false,
-    };
-    handleFieldChange("checklist", [...draft.checklist, newItem]);
-    setNewChecklistText("");
-  };
-
-  const handleAddPhotoLog = () => {
-    if (!draft || !newPhotoText.trim()) return;
-    handleFieldChange("photo_logs", [...draft.photo_logs, newPhotoText.trim()]);
-    setNewPhotoText("");
-  };
-
   const handleApproveWorkLog = () => {
     if (!draft) return;
     const updated: ConstructionTask = {
@@ -148,11 +105,6 @@ export function TaskDetailDrawer({
     onUpdateTask(draft);
     setSaveSuccessMessage("All changes saved successfully.");
     setTimeout(() => setSaveSuccessMessage(null), 2500);
-  };
-
-  // Clean representation of quality verification without redundant "Passed Passed"
-  const cleanQualityText = (text: string) => {
-    return text.replace(/^Passed\s+Passed\s*/i, "Passed ").replace(/^Passed\s+/i, "");
   };
 
   return (
@@ -340,149 +292,40 @@ export function TaskDetailDrawer({
                 />
               </div>
 
-              {/* Phase Milestone & Completion Slider */}
-              <div className="rounded-xl border border-slate-200/90 bg-white p-4 space-y-3.5 shadow-2xs">
-                <div className="flex items-center justify-between text-xs font-semibold gap-2">
-                  <span className="text-slate-500 font-medium">Phase Milestone</span>
-                  <select
-                    value={draft.phase_name}
-                    onChange={(e) => {
-                      const name = e.target.value;
-                      const phaseId = name.includes("Excavation")
-                        ? "excavation"
-                        : name.includes("Foundation")
-                        ? "foundation"
-                        : name.includes("Framing")
-                        ? "framing"
-                        : name.includes("MEP")
-                        ? "mep"
-                        : "critical";
-                      handleFieldChange("phase_name", name);
-                      handleFieldChange("phase_id", phaseId as any);
-                    }}
-                    className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-800 shadow-2xs focus:border-blue-500 focus:outline-none cursor-pointer"
-                  >
-                    <option value="Site Excavation & Grading">Site Excavation & Grading</option>
-                    <option value="Foundation & Concrete Pour">Foundation & Concrete Pour</option>
-                    <option value="Superstructure Framing">Superstructure Framing</option>
-                    <option value="MEP Rough-Ins & Utilities">MEP Rough-Ins & Utilities</option>
-                    <option value="Critical Path & Delays">Critical Path & Delays</option>
-                  </select>
+              {/* Task Title (Editable by Owner) */}
+              <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                    Task Title (Editable by Owner)
+                  </label>
+                  <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded">
+                    Field Work Item
+                  </span>
                 </div>
-
-                <div className="pt-1">
-                  <div className="flex items-center justify-between text-xs font-medium text-slate-600 mb-2">
-                    <span className="font-semibold text-slate-700">Completion Stage</span>
-                    <span className="font-bold text-blue-700 bg-blue-50 border border-blue-100 px-2.5 py-0.5 rounded-full text-xs">
-                      {draft.completion_stage_percent}%
-                    </span>
-                  </div>
-
-                  {/* Clean interactive progress slider */}
-                  <div className="px-1">
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      step="5"
-                      value={draft.completion_stage_percent}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        handleFieldChange("completion_stage_percent", val);
-                        if (val === 100) {
-                          handleFieldChange("status", "COMPLETED");
-                        } else if (val > 0 && draft.status === "SCHEDULED") {
-                          handleFieldChange("status", "IN_PROGRESS");
-                        }
-                      }}
-                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                    />
-                  </div>
-
-                  <div className="flex justify-between text-[10px] text-slate-400 font-medium mt-1.5 px-1">
-                    <span>0% (Scheduled)</span>
-                    <span>50% (In Progress)</span>
-                    <span>100% (Completed)</span>
-                  </div>
-                </div>
+                <input
+                  type="text"
+                  value={draft.title}
+                  onChange={(e) => handleFieldChange("title", e.target.value)}
+                  className="w-full text-lg font-bold tracking-tight text-slate-900 border-b border-slate-200 hover:border-slate-300 focus:border-blue-600 focus:outline-none bg-transparent py-1 transition-colors"
+                  placeholder="Enter task title"
+                />
               </div>
 
-              {/* 4 Detail Boxes Matching Proper Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Box 1: Trade Subcontractor */}
-                <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-2xs">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                    Trade Subcontractor
-                  </span>
-                  <input
-                    type="text"
-                    value={draft.trade_subcontractor}
-                    onChange={(e) => handleFieldChange("trade_subcontractor", e.target.value)}
-                    className="w-full text-xs font-bold text-slate-900 bg-transparent border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:outline-none py-0.5"
-                    placeholder="Subcontractor"
-                  />
-                </div>
-
-                {/* Box 2: Assigned Time Shift */}
-                <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-2xs">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                    Assigned Time Shift
-                  </span>
-                  <input
-                    type="text"
-                    value={draft.assigned_time_shift}
-                    onChange={(e) => {
-                      handleFieldChange("assigned_time_shift", e.target.value);
-                      handleFieldChange("time", e.target.value);
-                    }}
-                    className="w-full text-xs font-bold text-slate-900 bg-transparent border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:outline-none py-0.5"
-                    placeholder="e.g. 10:30 AM"
-                  />
-                </div>
-
-                {/* Box 3: Site Supervisor */}
-                <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-2xs">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                    Site Supervisor
-                  </span>
-                  <input
-                    type="text"
-                    value={draft.site_supervisor}
-                    onChange={(e) => handleFieldChange("site_supervisor", e.target.value)}
-                    className="w-full text-xs font-bold text-slate-900 bg-transparent border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:outline-none py-0.5"
-                    placeholder="Supervisor"
-                  />
-                </div>
-
-                {/* Box 4: Quality Verification (Fixed duplicate 'Passed') */}
-                <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-2xs">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                    Quality Verification
-                  </span>
-                  <div className="flex items-center gap-1.5 text-xs font-semibold">
-                    {draft.is_delayed ? (
-                      <span className="text-red-600 flex items-center gap-1 font-bold shrink-0">
-                        <AlertTriangle className="h-3.5 w-3.5" />
-                        Delayed
-                      </span>
-                    ) : (
-                      <span className="text-emerald-700 flex items-center gap-1 font-bold shrink-0">
-                        <Check className="h-3.5 w-3.5 text-emerald-600" />
-                        Passed
-                      </span>
-                    )}
-                    <input
-                      type="text"
-                      value={cleanQualityText(draft.quality_verification)}
-                      onChange={(e) => handleFieldChange("quality_verification", e.target.value)}
-                      className="flex-1 min-w-0 text-[11px] font-medium text-slate-700 bg-transparent border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:outline-none py-0.5 truncate"
-                      placeholder="Verification notes..."
-                    />
-                  </div>
-                </div>
+              {/* Daily Field Work Scope */}
+              <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs space-y-2">
+                <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                  Daily Field Work Scope & Operations
+                </label>
+                <textarea
+                  rows={4}
+                  value={draft.daily_field_work_scope}
+                  onChange={(e) => handleFieldChange("daily_field_work_scope", e.target.value)}
+                  className="w-full rounded-xl border border-slate-200/90 bg-slate-50/50 p-3 text-xs text-slate-800 focus:border-blue-600 focus:bg-white focus:outline-none shadow-2xs transition-colors"
+                  placeholder="Describe field operations, trade coordination, and equipment requirements..."
+                />
               </div>
 
-              {/* Creator Card: "TASK CREATED & ALLOCATED BY" - Clean unclipped layout */}
+              {/* Creator Card: "TASK CREATED & ALLOCATED BY" */}
               <div className="rounded-xl border border-blue-200/80 bg-blue-50/50 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                 <div className="flex items-center gap-3">
                   <div className="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-2xs shrink-0">
@@ -514,7 +357,7 @@ export function TaskDetailDrawer({
                 </div>
               </div>
 
-              {/* Delays & Red Dot Control */}
+              {/* Schedule Delay Status */}
               <div
                 className={`rounded-xl border p-4 transition-all shadow-2xs ${
                   draft.is_delayed
@@ -552,7 +395,7 @@ export function TaskDetailDrawer({
                         : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs"
                     }`}
                   >
-                    {draft.is_delayed ? "Clear Delay (On Track)" : "Mark as Delayed"}
+                    {draft.is_delayed ? "Clear Delay" : "Mark as Delayed"}
                   </button>
                 </div>
 
@@ -589,146 +432,6 @@ export function TaskDetailDrawer({
                     </div>
                   </div>
                 )}
-              </div>
-
-              {/* Daily Field Work Scope */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
-                  Daily Field Work Scope
-                </label>
-                <textarea
-                  rows={3}
-                  value={draft.daily_field_work_scope}
-                  onChange={(e) => handleFieldChange("daily_field_work_scope", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200/90 bg-white p-3 text-xs text-slate-800 focus:border-blue-600 focus:outline-none shadow-2xs transition-colors"
-                  placeholder="Describe field operations, trade coordination, and equipment requirements..."
-                />
-              </div>
-
-              {/* Site Quality & Safety Checklist */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                    Site Quality & Safety Checklist
-                  </label>
-                  <span className="text-[11px] font-semibold text-slate-500">
-                    {draft.checklist.filter((c) => c.checked).length} of {draft.checklist.length} verified
-                  </span>
-                </div>
-
-                <div className="space-y-1.5 rounded-xl border border-slate-200/90 bg-white p-3 shadow-2xs">
-                  {draft.checklist.map((item, idx) => (
-                    <div
-                      key={item.id}
-                      className="group flex items-center justify-between gap-2.5 py-1 px-1 rounded-md hover:bg-slate-50 transition-colors"
-                    >
-                      <label className="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0">
-                        <input
-                          type="checkbox"
-                          checked={item.checked}
-                          onChange={() => handleToggleChecklist(idx)}
-                          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0"
-                        />
-                        <span
-                          className={`text-xs ${
-                            item.checked
-                              ? "line-through text-slate-400"
-                              : "text-slate-800 font-medium"
-                          } truncate`}
-                        >
-                          {item.label}
-                        </span>
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveChecklistItem(idx)}
-                        className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-600 transition-opacity p-0.5"
-                        title="Remove checklist item"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  ))}
-
-                  {/* Add Checklist Item */}
-                  <div className="flex items-center gap-2 pt-2 border-t border-slate-100 mt-2">
-                    <input
-                      type="text"
-                      placeholder="Add compliance check item..."
-                      value={newChecklistText}
-                      onChange={(e) => setNewChecklistText(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddChecklist();
-                        }
-                      }}
-                      className="flex-1 rounded-lg border border-slate-200 bg-slate-50/50 px-2.5 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddChecklist}
-                      className="rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer shrink-0"
-                    >
-                      Add
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* On-Site Photo Evidence */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                    On-Site Photo Evidence
-                  </label>
-                  <span className="text-xs font-semibold text-slate-500">
-                    {draft.photo_logs.length} attached
-                  </span>
-                </div>
-
-                {draft.photo_logs.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-slate-200 p-4 text-center bg-white shadow-2xs">
-                    <p className="text-xs text-slate-400 italic">No photo logs attached.</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {draft.photo_logs.map((log, i) => (
-                      <div
-                        key={i}
-                        className="rounded-lg border border-slate-200 bg-white p-2.5 flex items-center gap-2 text-xs font-medium text-slate-700 shadow-2xs"
-                      >
-                        <Camera className="h-4 w-4 text-blue-600 shrink-0" />
-                        <span className="truncate">{log}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Add Photo Log Row */}
-                <div className="flex items-center gap-2 pt-1">
-                  <input
-                    type="text"
-                    placeholder="Attach photo tag / file name..."
-                    value={newPhotoText}
-                    onChange={(e) => setNewPhotoText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleAddPhotoLog();
-                      }
-                    }}
-                    className="flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none shadow-2xs"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddPhotoLog}
-                    className="inline-flex items-center gap-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer shrink-0"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    <span>Attach</span>
-                  </button>
-                </div>
               </div>
             </>
           )}

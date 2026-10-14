@@ -396,6 +396,7 @@ export interface DrawLine {
   budget_line_id: string;
   budget_line_name: string;
   budget_line_code: string;
+  budgeted_amount?: string; // cents
   requested_amount: string; // cents
   recommended_amount: string;
   approved_amount: string;

@@ -36,6 +36,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import type { DrawItem } from "@/lib/types";
 import { getExcelDrawLines } from "@/lib/data/excel-draw-schedule";
+import { DRAW_REQUEST_FORM_ITEMS } from "@/lib/data/draw-request-form-items";
 import { ExcelSovMatrix } from "@/components/draws/excel-sov-matrix";
 
 // Modals and Drawers
@@ -623,7 +624,7 @@ export default function DrawsPage() {
     }
     const cleanAmt = parseFloat(amount.replace(/[^0-9.]/g, "")) || 50000;
     const cents = Math.round(cleanAmt * 100);
-    const itemizedLines = getExcelDrawLines(drawNumber, cents);
+    const itemizedLines = drawNumber === 4 ? DRAW_REQUEST_FORM_ITEMS : getExcelDrawLines(drawNumber, cents);
     const computedRequestedCents = itemizedLines.reduce(
       (sum, l) => sum + (parseInt(l.requested_amount || "0", 10) || 0),
       0
