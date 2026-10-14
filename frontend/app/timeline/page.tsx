@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import {
@@ -21,6 +22,7 @@ import { TaskDetailDrawer } from "@/components/timeline/task-detail-drawer";
 import { CreateFieldTaskModal } from "@/components/timeline/create-field-task-modal";
 
 export default function TimelinePage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTradeFilter, setActiveTradeFilter] = useState("");
   const [activePhaseFilters, setActivePhaseFilters] = useState<Record<string, boolean>>({
@@ -116,7 +118,10 @@ export default function TimelinePage() {
     });
     setSelectedDate(newTask.date);
     setActiveTaskId(newTask.id);
-    setIsTaskDrawerOpen(true);
+    const targetUrl = currentProjectId
+      ? `/projects/${currentProjectId}/timeline/${newTask.date}?taskId=${newTask.id}`
+      : `/timeline/${newTask.date}?taskId=${newTask.id}`;
+    router.push(targetUrl);
   };
 
   const handleDeleteTask = (taskId: string) => {
@@ -147,7 +152,7 @@ export default function TimelinePage() {
     setIsTaskDrawerOpen(false);
   };
 
-  // Click on any date opens the task allocated on that date
+  // Click on any date opens a new page in the platform
   const handleSelectDate = (dateStr: string) => {
     setSelectedDate(dateStr);
     const tasksForDate = constructionTasks.filter((t) => t.date === dateStr);
@@ -156,16 +161,21 @@ export default function TimelinePage() {
     } else {
       setActiveTaskId(null);
     }
-    setIsTaskDrawerOpen(true);
+    const targetUrl = currentProjectId
+      ? `/projects/${currentProjectId}/timeline/${dateStr}`
+      : `/timeline/${dateStr}`;
+    router.push(targetUrl);
   };
 
+  // Click on any task pill opens the new page in the platform with that task focused
   const handleSelectTask = (taskId: string) => {
     setActiveTaskId(taskId);
     const task = constructionTasks.find((t) => t.id === taskId);
-    if (task) {
-      setSelectedDate(task.date);
-    }
-    setIsTaskDrawerOpen(true);
+    const targetDate = task ? task.date : selectedDate;
+    const targetUrl = currentProjectId
+      ? `/projects/${currentProjectId}/timeline/${targetDate}?taskId=${taskId}`
+      : `/timeline/${targetDate}?taskId=${taskId}`;
+    router.push(targetUrl);
   };
 
   // Phase filter toggles
