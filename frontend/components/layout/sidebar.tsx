@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowUpRight,
+  Building2,
 } from "lucide-react";
 import { UserRole, Project } from "@/lib/types";
 
@@ -28,10 +29,15 @@ export function Sidebar({
   onCloseMobile,
 }: SidebarProps) {
   const pathname = usePathname();
+  const [thumbnailError, setThumbnailError] = React.useState(false);
 
   // Extract projectId if in /projects/[projectId]/... workspace route
   const projectRouteMatch = pathname.match(/^\/projects\/([^\/]+)/);
   const workspaceProjectId = projectRouteMatch && projectRouteMatch[1] !== "new" ? projectRouteMatch[1] : "";
+
+  React.useEffect(() => {
+    setThumbnailError(false);
+  }, [workspaceProjectId]);
 
   const { data: meData } = useQuery({
     queryKey: ["me"],
@@ -104,12 +110,12 @@ export function Sidebar({
   const bottomNavItems = visibleNavItems.filter((i) => i.id === "settings");
 
   const getProjectThumbnail = (proj?: Project | null) => {
-    if (!proj) return "/projects/woodlawn-card.jpg";
+    if (!proj) return "/projects/woodlawn-new.jpg";
     const nameLower = (proj.name || "").toLowerCase();
     const addressLower = (proj.address || "").toLowerCase();
 
     if (nameLower.includes("woodlawn") || addressLower.includes("woodlawn")) {
-      return "/projects/woodlawn-card.jpg";
+      return "/projects/woodlawn-new.jpg";
     }
     if (nameLower.includes("first") || addressLower.includes("first")) {
       return "/projects/first-street-new.jpg";
@@ -117,7 +123,10 @@ export function Sidebar({
     if (nameLower.includes("broadway") || addressLower.includes("broadway")) {
       return "/projects/broadway-new.jpg";
     }
-    return "/projects/woodlawn-card.jpg";
+    if (nameLower.includes("gable") || addressLower.includes("gable")) {
+      return "/projects/gable-residence.jpg";
+    }
+    return "/projects/woodlawn-new.jpg";
   };
 
   return (
@@ -137,26 +146,41 @@ export function Sidebar({
         } ${mobileOpen ? "translate-x-0 shadow-overlay" : "-translate-x-full md:translate-x-0"}`}
       >
         {/* Top Header: Brand Logo & Collapse Toggle */}
-        <div className="flex h-14 items-center justify-between px-4 border-b border-slate-200/70 bg-white">
+        <div className="flex h-14 items-center justify-between px-3.5 border-b border-slate-200/70 bg-white">
           {!collapsed ? (
             <>
               <Link
                 href="/projects"
-                className="flex items-center gap-2 group transition-opacity"
+                className="flex items-center gap-2.5 group transition-opacity min-w-0"
                 title="GroundUp — Project Portfolio"
               >
-                <Image
-                  src="/logo.png"
-                  alt="GroundUp"
-                  width={132}
-                  height={32}
-                  className="h-6.5 w-auto object-contain"
-                  priority
-                />
+                <div className="relative h-8 w-8 shrink-0 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center p-1.5 shadow-2xs group-hover:bg-slate-800 transition-colors">
+                  <Image
+                    src="/icon.svg"
+                    alt="GroundUp Logo"
+                    width={20}
+                    height={20}
+                    className="h-5 w-5 object-contain"
+                    priority
+                  />
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-extrabold tracking-tight text-slate-900 leading-none">
+                      GroundUp
+                    </span>
+                    <span className="rounded bg-blue-50 px-1 py-0.5 text-[9px] font-bold text-blue-700 border border-blue-200/60 leading-none">
+                      AI
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-medium leading-none mt-1 truncate">
+                    Enterprise Capital
+                  </span>
+                </div>
               </Link>
               <button
                 onClick={onToggleCollapse}
-                className="hidden md:flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="hidden md:flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200/70 transition-colors cursor-pointer shrink-0"
                 aria-label="Collapse sidebar"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -166,11 +190,18 @@ export function Sidebar({
             <div className="w-full flex items-center justify-center">
               <button
                 onClick={onToggleCollapse}
-                className="hidden md:flex h-8 w-8 items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="h-8 w-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center p-1.5 shadow-2xs hover:bg-slate-800 transition-colors cursor-pointer group"
                 aria-label="Expand sidebar"
                 title="Expand sidebar"
               >
-                <ChevronRight className="h-4 w-4" />
+                <Image
+                  src="/icon.svg"
+                  alt="GroundUp Logo"
+                  width={20}
+                  height={20}
+                  className="h-5 w-5 object-contain"
+                  priority
+                />
               </button>
             </div>
           )}
@@ -182,15 +213,22 @@ export function Sidebar({
             <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-2.5 transition-colors">
               <div className="flex items-center gap-3">
                 {/* Building Thumbnail */}
-                <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-slate-200/80 bg-white shadow-2xs">
-                  <Image
-                    src={getProjectThumbnail(activeProject)}
-                    alt={activeProject?.name || "Project"}
-                    fill
-                    className="object-cover"
-                    sizes="44px"
-                    priority
-                  />
+                <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-slate-200/80 bg-slate-100 shadow-2xs flex items-center justify-center">
+                  {!thumbnailError ? (
+                    <Image
+                      src={getProjectThumbnail(activeProject)}
+                      alt={activeProject?.name || "Project"}
+                      fill
+                      className="object-cover"
+                      sizes="44px"
+                      priority
+                      onError={() => setThumbnailError(true)}
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-blue-50 text-blue-600">
+                      <Building2 className="h-5 w-5" />
+                    </div>
+                  )}
                 </div>
 
                 {/* Project Metadata */}
@@ -218,16 +256,23 @@ export function Sidebar({
           ) : (
             <div className="flex flex-col items-center">
               <div
-                className="relative h-10 w-10 overflow-hidden rounded-lg border border-slate-200 shadow-2xs"
+                className="relative h-10 w-10 overflow-hidden rounded-lg border border-slate-200 shadow-2xs flex items-center justify-center bg-slate-100"
                 title={activeProject?.name || "161 Woodlawn Ave"}
               >
-                <Image
-                  src={getProjectThumbnail(activeProject)}
-                  alt={activeProject?.name || "Project"}
-                  fill
-                  className="object-cover"
-                  sizes="40px"
-                />
+                {!thumbnailError ? (
+                  <Image
+                    src={getProjectThumbnail(activeProject)}
+                    alt={activeProject?.name || "Project"}
+                    fill
+                    className="object-cover"
+                    sizes="40px"
+                    onError={() => setThumbnailError(true)}
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-blue-50 text-blue-600">
+                    <Building2 className="h-4 w-4" />
+                  </div>
+                )}
               </div>
             </div>
           )}
