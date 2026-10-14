@@ -1,4 +1,5 @@
-import type { ApiErrorResponse, UserProfile, UserRole } from "@/lib/types";
+import type { UserProfile, UserRole } from "@/lib/types";
+import { mockStore } from "@/lib/mock-data/store";
 
 export interface AuthSession {
   user: UserProfile;
@@ -39,18 +40,6 @@ export interface InvitationDetails {
   status: "PENDING" | "EXPIRED" | "REVOKED" | "ACCEPTED";
 }
 
-interface ApiUser {
-  id: string;
-  organization_id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  role: UserRole;
-  is_active: boolean;
-  project_memberships: Array<{ project_id: string; role: string }>;
-  permissions: string[];
-}
-
 export class AuthApiError extends Error {
   constructor(
     message: string,
@@ -70,160 +59,184 @@ const roleTitles: Record<UserRole, string> = {
   INVESTOR: "Investor",
 };
 
-export function normalizeUserProfile(user: ApiUser): UserProfile {
-  const name = [user.first_name, user.last_name].filter(Boolean).join(" ");
+export function normalizeUserProfile(user: any): UserProfile {
+  const name = user.name || [user.first_name, user.last_name].filter(Boolean).join(" ") || "User";
   return {
     id: user.id,
-    organization_id: user.organization_id,
+    organization_id: user.organization_id || "org-vance-dev",
     name,
     email: user.email,
     role: user.role,
-    title: roleTitles[user.role],
-    company: "",
-    avatarInitials: `${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`,
-    is_active: user.is_active,
+    title: user.title || roleTitles[user.role as UserRole] || "Principal",
+    company: user.company || "",
+    avatarInitials:
+      user.avatarInitials ||
+      `${user.first_name?.[0] || user.name?.[0] || "U"}${user.last_name?.[0] || ""}`.toUpperCase(),
+    is_active: user.is_active ?? true,
     project_memberships: user.project_memberships || [],
-    permissions: user.permissions || [],
+    permissions: user.permissions || ["all"],
   };
 }
 
 const SESSION_DURATION_MS = 60 * 24 * 60 * 60 * 1000; // 60 days
+const ACTIVE_SESSION_STORAGE_KEY = "groundup_active_auth_email";
 
-export class LiveAuthAdapter implements AuthAdapter {
-  private readonly baseUrl: string;
+export class MockAuthAdapter implements AuthAdapter {
+  async signIn(email: string, _password: string, _rememberMe = true): Promise<AuthSession> {
+    const trimmed = email.trim();
+    let user = mockStore.getUserByEmail(trimmed);
 
-  constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1";
-  }
+    if (!user) {
+      // Determine persona role based on email or domain
+      const role: UserRole = trimmed.includes("cfo") || trimmed.includes("s.lin")
+        ? "CFO"
+        : trimmed.includes("pm") || trimmed.includes("d.ross")
+        ? "PM"
+        : trimmed.includes("gc") || trimmed.includes("frank") || trimmed.includes("apex")
+        ? "GC"
+        : trimmed.includes("investor") || trimmed.includes("rostova")
+        ? "INVESTOR"
+        : "OWNER";
 
-  private async call<T>(path: string, options: RequestInit = {}): Promise<T> {
-    let response: Response;
-    try {
-      response = await fetch(`${this.baseUrl}${path}`, {
-        ...options,
-        headers: {
-          Accept: "application/json",
-          ...(options.body ? { "Content-Type": "application/json" } : {}),
-          ...options.headers,
-        },
-        credentials: "include",
+      const nameParts = trimmed.split("@")[0].split(/[._-]/);
+      const firstName = nameParts[0]?.charAt(0).toUpperCase() + nameParts[0]?.slice(1) || "User";
+      const lastName = nameParts[1]?.charAt(0).toUpperCase() + nameParts[1]?.slice(1) || "";
+
+      user = mockStore.createUser({
+        email: trimmed,
+        name: `${firstName} ${lastName}`.trim(),
+        role,
       });
-    } catch {
-      throw new AuthApiError(
-        "We couldn’t reach GroundUp. Check your connection and try again.",
-        0,
-        "NETWORK_ERROR"
-      );
     }
 
-    const payload = (await response.json().catch(() => null)) as
-      | { data?: T; error?: ApiErrorResponse["error"] }
-      | null;
-    if (!response.ok) {
-      throw new AuthApiError(
-        payload?.error?.message || "The request could not be completed.",
-        response.status,
-        payload?.error?.code || "REQUEST_FAILED"
-      );
+    mockStore.setCurrentUser(user.id);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, user.email);
+      window.localStorage.setItem("groundup_session_seen", "1");
     }
-    if (!payload || !("data" in payload)) {
-      throw new AuthApiError("The server returned an invalid response.", response.status, "INVALID_RESPONSE");
-    }
-    return payload.data as T;
-  }
 
-  private async sessionFromResponse(path: string, input?: unknown): Promise<AuthSession> {
-    const user = await this.call<ApiUser>(path, {
-      method: "POST",
-      body: JSON.stringify(input),
-    });
     return {
       user: normalizeUserProfile(user),
       expiresAt: new Date(Date.now() + SESSION_DURATION_MS).toISOString(),
     };
   }
 
-  signIn(email: string, password: string, rememberMe = true): Promise<AuthSession> {
-    return this.sessionFromResponse("/auth/signin", {
-      email,
-      password,
-      remember_me: rememberMe,
-    });
-  }
-
-  signUp(input: {
+  async signUp(input: {
     organization_name: string;
     email: string;
     password: string;
     first_name: string;
     last_name: string;
   }): Promise<AuthSession> {
-    return this.sessionFromResponse("/auth/signup", input);
+    const user = mockStore.createUser({
+      name: `${input.first_name} ${input.last_name}`.trim(),
+      email: input.email.trim(),
+      role: "OWNER",
+      company: input.organization_name,
+    });
+
+    mockStore.setCurrentUser(user.id);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, user.email);
+      window.localStorage.setItem("groundup_session_seen", "1");
+    }
+
+    return {
+      user: normalizeUserProfile(user),
+      expiresAt: new Date(Date.now() + SESSION_DURATION_MS).toISOString(),
+    };
   }
 
   async signOut(): Promise<void> {
-    await this.call<{ status: string }>("/auth/signout", { method: "POST" });
+    mockStore.setCurrentUser(null);
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
+      window.localStorage.removeItem("groundup_session_seen");
+    }
   }
 
   async getSession(): Promise<AuthSession | null> {
-    try {
-      const user = await this.call<ApiUser>("/me");
+    if (typeof window === "undefined") {
+      const user = mockStore.getCurrentUser();
       return {
         user: normalizeUserProfile(user),
         expiresAt: new Date(Date.now() + SESSION_DURATION_MS).toISOString(),
       };
-    } catch (error) {
-      if (!(error instanceof AuthApiError) || error.status !== 401) {
-        throw error;
-      }
     }
 
-    try {
-      await this.call<{ access_token: string }>("/auth/refresh", { method: "POST" });
-      const user = await this.call<ApiUser>("/me");
-      return {
-        user: normalizeUserProfile(user),
-        expiresAt: new Date(Date.now() + SESSION_DURATION_MS).toISOString(),
-      };
-    } catch (error) {
-      if (error instanceof AuthApiError && error.status === 401) {
-        return null;
-      }
-      throw error;
+    const activeEmail = window.localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY);
+    if (!activeEmail) {
+      return null;
     }
+
+    let user = mockStore.getUserByEmail(activeEmail);
+    if (!user) {
+      user = mockStore.getCurrentUser();
+    } else {
+      mockStore.setCurrentUser(user.id);
+    }
+
+    return {
+      user: normalizeUserProfile(user),
+      expiresAt: new Date(Date.now() + SESSION_DURATION_MS).toISOString(),
+    };
   }
 
-  async requestPasswordReset(email: string): Promise<void> {
-    await this.call<{ message: string }>("/auth/password-reset/request", {
-      method: "POST",
-      body: JSON.stringify({ email }),
-    });
+  async requestPasswordReset(_email: string): Promise<void> {
+    // Mock successful reset email dispatch
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<void> {
-    await this.call<{ message: string }>("/auth/password-reset/confirm", {
-      method: "POST",
-      body: JSON.stringify({ token, new_password: newPassword }),
-    });
+  async resetPassword(_token: string, _newPassword: string): Promise<void> {
+    // Mock successful password update
   }
 
-  getInvitation(token: string): Promise<InvitationDetails> {
-    return this.call(`/invitations/${encodeURIComponent(token)}`);
+  async getInvitation(token: string): Promise<InvitationDetails> {
+    const inv = mockStore.getInvitationByToken(token);
+    if (!inv) {
+      throw new AuthApiError("This invitation link is invalid or no longer available.", 404, "INVITATION_NOT_FOUND");
+    }
+    return {
+      id: inv.id,
+      organization_id: inv.organization_id,
+      organization_name: inv.organization_name || "Vance Development LLC",
+      project_id: inv.project_id || null,
+      project_name: inv.project_name || "73 Broadway",
+      email: inv.email,
+      role: inv.role,
+      scope: inv.scope,
+      expires_at: inv.expires_at,
+      status: (inv.status as any) || "PENDING",
+    };
   }
 
-  async getMe(): Promise<UserProfile> {
-    return normalizeUserProfile(await this.call<ApiUser>("/me"));
-  }
-
-  acceptInvitation(
+  async acceptInvitation(
     token: string,
     input: { first_name: string; last_name: string; password: string }
   ): Promise<AuthSession> {
-    return this.sessionFromResponse(
-      `/invitations/${encodeURIComponent(token)}/accept`,
-      input
-    );
+    const inv = mockStore.getInvitationByToken(token);
+    if (!inv) {
+      throw new AuthApiError("This invitation link is invalid or no longer available.", 404, "INVITATION_NOT_FOUND");
+    }
+    const user = mockStore.createUser({
+      name: `${input.first_name} ${input.last_name}`.trim(),
+      email: inv.email,
+      role: inv.role,
+    });
+    mockStore.setCurrentUser(user.id);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, user.email);
+      window.localStorage.setItem("groundup_session_seen", "1");
+    }
+    return {
+      user: normalizeUserProfile(user),
+      expiresAt: new Date(Date.now() + SESSION_DURATION_MS).toISOString(),
+    };
+  }
+
+  async getMe(): Promise<UserProfile> {
+    return normalizeUserProfile(mockStore.getCurrentUser());
   }
 }
 
-export const authAdapter: AuthAdapter = new LiveAuthAdapter();
+export const authAdapter: AuthAdapter = new MockAuthAdapter();
+export const LiveAuthAdapter = MockAuthAdapter;

@@ -1,0 +1,1184 @@
+SIGNATURE PAGES FOR HARWOOD LLOYD, LLP:
+
+1.  Promissory Note
+
+2.  Construction Mortgage
+
+3.  Assignment of Leases and Rents
+
+4.  Construction Loan Agreement
+
+5.  Interest Reserve Statement
+
+6.  Assignment of Plans, Contracts and Approvals
+
+7.  Guaranty of Completion and Performance
+
+8.  Guaranty -- Kunal Shah
+
+9.  Guaranty -- Swekit Patel
+
+10. Guaranty -- Parika Vasani
+
+11. Guaranty -- Riddhi Patel
+
+12. Guaranty -- Richa Patel
+
+13. Guaranty -- KS NJ Management LLC
+
+14. Guaranty -- Ripa Realty LLC
+
+15. Errors and Omissions Agreement
+
+16. Agreement to Provide Insurance
+
+17. Notice of Insurance Requirements
+
+18. Judgment Affidavit -- Kunal Shah
+
+19. Judgment Affidavit -- Riddhi Patel
+
+20. Judgment Affidavit -- Richa Patel
+
+21. Post-Closing Compliance Agreement (if required)
+
+22. Disbursement Request and Authorization
+
+23. Resolution to Borrow -- JC Realty Ventures LLC (2 pages)
+
+24. Resolution to Guaranty -- KS NJ Management LLC (2 pages)
+
+25. Resolution to Guaranty -- Ripa Realty LLC (2 pages)
+
+26. Resolution of LLC Member -- KS NJ Management LLC (2 pages)
+
+27. Resolution of LLC Member -- Ripa Realty LLC (2 pages)
+
+28. Tax Authorization Notice
+
+29. Certification of Beneficial Owners -- JC Realty Ventures LLC
+
+30. Certification of Beneficial Owners -- KS NJ Management LLC
+
+31. Certification of Beneficial Owners -- Ripa Realty LLC
+
+                    SEND TWO (2) SETS OF SIGNED ORIGINALS TO:
+                             Dawn Beaudine, Paralegal
+                                 Harwood Lloyd, LLP
+                                   130 Main Street
+                               Hackensack, NJ 07601
+                                   (201) 487-1080
+                           dbeaudine@harwoodlloyd.com
+
+    PRIOR TO SIGNING THIS NOTE, BORROWER READ AND UNDERSTOOD ALL THE
+    PROVISIONS OF THIS NOTE, INCLUDING THE VARIABLE INTEREST RATE
+    PROVISIONS. BORROWER AGREES TO THE TERMS OF THE NOTE.
+
+BORROWER ACKNOWLEDGES RECEIPT OF A COMPLETED COPY OF THIS PROMISSORY
+NOTE.
+
+BORROWER: JC REALTY VENTURES LLC, a New Jersey limited liability company
+
+By: KUNAL SHAH, Authorized Signatory of JC Realty Ventures LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                                  [Signature page to Promissory Note]
+
+GRANTOR ACKNOWLEDGES HAVING READ ALL THE PROVISIONS OF THIS MORTGAGE,
+AND GRANTOR AGREES TO ITS TERMS. GRANTOR ACKNOWLEDGES RECEIPT, WITHOUT
+CHARGE, OF A TRUE AND CORRECT COPY OF THIS MORTGAGE.
+
+GRANTOR: JC REALTY VENTURES LLC, a New Jersey limited liability company
+
+By: KUNAL SHAH, Authorized Signatory of JC Realty Ventures LLC
+
+                        LIMITED LIABILITY COMPANY ACKNOWLEDGMENT
+
+STATE OF NEW JERSEY ) ) ss.: COUNTY OF
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ )
+
+          BE IT REMEMBERED that on this _____ day of ____________________, 2026, before me, the
+
+subscriber, personally appeared KUNAL SHAH, the Authorized Signatory of
+JC REALTY VENTURES LLC, the New Jersey limited liability company named
+in the within instrument who, I am satisfied, is the person who signed
+the within instrument, and he acknowledged that he was authorized to and
+signed the within instrument, and that the within instrument is the
+voluntary act and deed of such limited liability company.
+
+                                                Notary Public
+
+
+
+
+                               [Signature page to Construction Mortgage]
+
+THE UNDERSIGNED ACKNOWLEDGES HAVING READ ALL THE PROVISIONS OF THIS
+ASSIGNMENT, AND NOT PERSONALLY BUT AS AN AUTHORIZED SIGNER, HAS CAUSED
+THIS ASSIGNMENT TO BE SIGNED AND EXECUTED ON BEHALF OF GRANTOR AS OF THE
+DAY AND YEAR FIRST WRITTEN ABOVE.
+
+GRANTOR: JC REALTY VENTURES LLC, a New Jersey limited liability company
+
+By: KUNAL SHAH, Authorized Signatory of JC Realty Ventures LLC
+
+                        LIMITED LIABILITY COMPANY ACKNOWLEDGMENT
+
+STATE OF NEW JERSEY ) ) ss.: COUNTY OF
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ )
+
+          BE IT REMEMBERED that on this _____ day of ____________________, 2026, before me, the
+
+subscriber, personally appeared KUNAL SHAH, the Authorized Signatory of
+JC REALTY VENTURES LLC, the New Jersey limited liability company named
+in the within instrument who, I am satisfied, is the person who signed
+the within instrument, and he acknowledged that he was authorized to and
+signed the within instrument, and that the within instrument is the
+voluntary act and deed of such limited liability company.
+
+                                                Notary Public
+
+
+
+
+                          [Signature page to Assignment of Leases and Rents]
+
+BORROWER ACKNOWLEDGES HAVING READ ALL THE PROVISIONS OF THIS
+CONSTRUCTION LOAN AGREEMENT AND BORROWER AGREES TO ITS TERMS. THIS
+CONSTRUCTION LOAN AGREEMENT IS DATED AS OF THE DAY AND YEAR FIRST
+WRITTEN ABOVE.
+
+BORROWER: JC REALTY VENTURES LLC, a New Jersey limited liability company
+
+By: KUNAL SHAH, Authorized Signatory of JC Realty Ventures LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+LENDER: COLUMBIA BANK
+
+By: JAY CORDARO, Vice President
+
+                           [Signature page to Construction Loan Agreement]
+
+THIS INTEREST RESERVE STATEMENT IS DATED AS OF THE LOAN DATE FIRST
+WRITTEN ABOVE.
+
+BORROWER: JC REALTY VENTURES LLC, a New Jersey limited liability company
+
+By: KUNAL SHAH, Authorized Signatory of JC Realty Ventures LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                                 [Signature Interest Reserve Statement]
+
+IN WITNESS WHEREOF, the Assignor has duly executed this Assignment as of
+the day and year first above written.
+
+ASSIGNOR: JC REALTY VENTURES LLC, a New Jersey limited liability company
+
+By: KUNAL SHAH, Authorized Signatory of JC Realty Ventures LLC
+
+                         LIMITED LIABILITY COMPANY ACKNOWLEDGMENT
+
+STATE OF NEW JERSEY ) ) ss.: COUNTY OF
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ )
+
+         BE IT REMEMBERED that on this _____ day of ____________________, 2026, before me, the
+
+subscriber, personally appeared KUNAL SHAH, the Authorized Signatory of
+JC REALTY VENTURES LLC, the New Jersey limited liability company named
+in the within instrument who, I am satisfied, is the person who signed
+the within instrument, and he acknowledged that he was authorized to and
+signed the within instrument, and that the within instrument is the
+voluntary act and deed of such limited liability company.
+
+                                                 Notary Public
+
+
+
+
+                    [Signature page to Assignment of Plans, Contracts and Approvals]
+
+EACH UNDERSIGNED GUARANTOR ACKNOWLEDGES HAVING READ ALL THE PROVISIONS
+OF THIS GUARANTY AND AGREES TO ITS TERMS. IN ADDITION, EACH GUARANTOR
+UNDERSTANDS THAT THIS GUARANTY IS EFFECTIVE UPON GUARANTOR'S EXECUTION
+AND DELIVERY OF THIS GUARANTY TO LENDER. NO FORMAL ACCEPTANCE BY LENDER
+IS NECESSARY TO MAKE THIS GUARANTY EFFECTIVE.
+
+GUARANTOR:
+
+X KUNAL SHAH, Individually
+
+X SWEKIT PATEL, Individually
+
+X PARIKA VASANI, Individually
+
+X RIDDHI PATEL, Individually
+
+X RICHA PATEL, Individually
+
+KS NJ MANAGEMENT LLC, a New Jersey limited liability company
+
+By: KUNAL SHAH, Chief Executive Manager of KS NJ Management LLC
+
+RIPA REALTY LLC, a New Jersey limited liability company
+
+By: PIYUSH PATEL, Manager of Ripa Realty LLC
+
+LENDER: COLUMBIA BANK
+
+By: JAY CORDARO, Vice President
+
+                      [Signature page to Guaranty of Completion and Performance]
+
+EACH UNDERSIGNED GUARANTOR ACKNOWLEDGES HAVING READ ALL THE PROVISIONS
+OF THIS GUARANTY AND AGREES TO ITS TERMS. IN ADDITION, EACH GUARANTOR
+UNDERSTANDS THAT THIS GUARANTY IS EFFECTIVE UPON GUARANTOR'S EXECUTION
+AND DELIVERY OF THIS GUARANTY TO LENDER AND THAT THE GUARANTY WILL
+CONTINUE UNTIL TERMINATED IN THE MANNER SET FORTH IN THE SECTION TITLED
+"DURATION OF GUARANTY". NO FORMAL ACCEPTANCE BY LENDER IS NECESSARY TO
+MAKE THIS GUARANTY EFFECTIVE.
+
+GUARANTOR:
+
+X KUNAL SHAH
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                            [Signature page to Commercial Guaranty]
+
+EACH UNDERSIGNED GUARANTOR ACKNOWLEDGES HAVING READ ALL THE PROVISIONS
+OF THIS GUARANTY AND AGREES TO ITS TERMS. IN ADDITION, EACH GUARANTOR
+UNDERSTANDS THAT THIS GUARANTY IS EFFECTIVE UPON GUARANTOR'S EXECUTION
+AND DELIVERY OF THIS GUARANTY TO LENDER AND THAT THE GUARANTY WILL
+CONTINUE UNTIL TERMINATED IN THE MANNER SET FORTH IN THE SECTION TITLED
+"DURATION OF GUARANTY". NO FORMAL ACCEPTANCE BY LENDER IS NECESSARY TO
+MAKE THIS GUARANTY EFFECTIVE.
+
+GUARANTOR:
+
+X SWEKIT PATEL
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                            [Signature page to Commercial Guaranty]
+
+EACH UNDERSIGNED GUARANTOR ACKNOWLEDGES HAVING READ ALL THE PROVISIONS
+OF THIS GUARANTY AND AGREES TO ITS TERMS. IN ADDITION, EACH GUARANTOR
+UNDERSTANDS THAT THIS GUARANTY IS EFFECTIVE UPON GUARANTOR'S EXECUTION
+AND DELIVERY OF THIS GUARANTY TO LENDER AND THAT THE GUARANTY WILL
+CONTINUE UNTIL TERMINATED IN THE MANNER SET FORTH IN THE SECTION TITLED
+"DURATION OF GUARANTY". NO FORMAL ACCEPTANCE BY LENDER IS NECESSARY TO
+MAKE THIS GUARANTY EFFECTIVE.
+
+GUARANTOR:
+
+X PARIKA VASANI
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                            [Signature page to Commercial Guaranty]
+
+EACH UNDERSIGNED GUARANTOR ACKNOWLEDGES HAVING READ ALL THE PROVISIONS
+OF THIS GUARANTY AND AGREES TO ITS TERMS. IN ADDITION, EACH GUARANTOR
+UNDERSTANDS THAT THIS GUARANTY IS EFFECTIVE UPON GUARANTOR'S EXECUTION
+AND DELIVERY OF THIS GUARANTY TO LENDER AND THAT THE GUARANTY WILL
+CONTINUE UNTIL TERMINATED IN THE MANNER SET FORTH IN THE SECTION TITLED
+"DURATION OF GUARANTY". NO FORMAL ACCEPTANCE BY LENDER IS NECESSARY TO
+MAKE THIS GUARANTY EFFECTIVE.
+
+GUARANTOR:
+
+X RIDDHI PATEL
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                            [Signature page to Commercial Guaranty]
+
+EACH UNDERSIGNED GUARANTOR ACKNOWLEDGES HAVING READ ALL THE PROVISIONS
+OF THIS GUARANTY AND AGREES TO ITS TERMS. IN ADDITION, EACH GUARANTOR
+UNDERSTANDS THAT THIS GUARANTY IS EFFECTIVE UPON GUARANTOR'S EXECUTION
+AND DELIVERY OF THIS GUARANTY TO LENDER AND THAT THE GUARANTY WILL
+CONTINUE UNTIL TERMINATED IN THE MANNER SET FORTH IN THE SECTION TITLED
+"DURATION OF GUARANTY". NO FORMAL ACCEPTANCE BY LENDER IS NECESSARY TO
+MAKE THIS GUARANTY EFFECTIVE.
+
+GUARANTOR:
+
+X RICHA PATEL
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                            [Signature page to Commercial Guaranty]
+
+EACH UNDERSIGNED GUARANTOR ACKNOWLEDGES HAVING READ ALL THE PROVISIONS
+OF THIS GUARANTY AND AGREES TO ITS TERMS. IN ADDITION, EACH GUARANTOR
+UNDERSTANDS THAT THIS GUARANTY IS EFFECTIVE UPON GUARANTOR'S EXECUTION
+AND DELIVERY OF THIS GUARANTY TO LENDER AND THAT THE GUARANTY WILL
+CONTINUE UNTIL TERMINATED IN THE MANNER SET FORTH IN THE SECTION TITLED
+"DURATION OF GUARANTY". NO FORMAL ACCEPTANCE BY LENDER IS NECESSARY TO
+MAKE THIS GUARANTY EFFECTIVE.
+
+GUARANTOR: KS NJ MANAGEMENT LLC, a New Jersey limited liability company
+
+By: KUNAL SHAH, Chief Executive Manager of KS NJ Management LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                                [Signature page to Commercial Guaranty]
+
+EACH UNDERSIGNED GUARANTOR ACKNOWLEDGES HAVING READ ALL THE PROVISIONS
+OF THIS GUARANTY AND AGREES TO ITS TERMS. IN ADDITION, EACH GUARANTOR
+UNDERSTANDS THAT THIS GUARANTY IS EFFECTIVE UPON GUARANTOR'S EXECUTION
+AND DELIVERY OF THIS GUARANTY TO LENDER AND THAT THE GUARANTY WILL
+CONTINUE UNTIL TERMINATED IN THE MANNER SET FORTH IN THE SECTION TITLED
+"DURATION OF GUARANTY". NO FORMAL ACCEPTANCE BY LENDER IS NECESSARY TO
+MAKE THIS GUARANTY EFFECTIVE.
+
+GUARANTOR: RIPA REALTY LLC, a New Jersey limited liability company
+
+By: PIYUSH PATEL, Manager of Ripa Realty LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                                [Signature page to Commercial Guaranty]
+
+THIS ERRORS AND OMISSIONS AGREEMENT IS DATED AND EFFECTIVE AS OF THE
+LOAN DATE FIRST WRITTEN ABOVE.
+
+BORROWER: JC REALTY VENTURES LLC, a New Jersey limited liability company
+
+By: KUNAL SHAH, Authorized Signatory of JC Realty Ventures LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                          [Signature page to Errors and Omissions Agreement]
+
+GRANTOR ACKNOWLEDGES HAVING READ ALL THE PROVISIONS OF THIS AGREEMENT TO
+PROVIDE INSURANCE AND AGREES TO ITS TERMS. THIS AGREEMENT IS DATED AS OF
+THE LOAN DATE FIRST WRITTEN ABOVE.
+
+GRANTOR: JC REALTY VENTURES LLC, a New Jersey limited liability company
+
+By: KUNAL SHAH, Authorized Signatory of JC Realty Ventures LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                            [Signature page to Agreement to Provide Insurance]
+
+
+
+
+                                             FOR LENDER USE ONLY
+                                           INSURANCE VERIFICATION
+
+DATE: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+PHONE \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+AGENT'S NAME:
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+AGENCY:
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+ADDRESS:
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+INSURANCE COMPANY:
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+POLICY NUMBER:
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+EFFECTIVE DATES:
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+COMMENTS:
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+GRANTOR ACKNOWLEDGES HAVING READ ALL THE PROVISIONS OF THIS NOTICE OF
+INSURANCE REQUIREMENTS AND AGREES TO ITS TERMS. THIS AGREEMENT IS DATED
+AS OF THE LOAN DATE FIRST WRITTEN ABOVE.
+
+GRANTOR: JC REALTY VENTURES LLC, a New Jersey limited liability company
+
+By: KUNAL SHAH, Authorized Signatory of JC Realty Ventures LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+RETURN TO:
+
+Columbia Bank PO Box 1926 Carmel, IN 46082
+
+                         [Signature page to Notice of Insurance Requirements]
+
+JUDGMENT AFFIDAVIT
+
+KUNAL SHAH, says under oath:
+
+        1.      I make this Affidavit in order to induce COLUMBIA BANK (“Lender”) to make a Commercial
+
+Mortgage Loan in the principal amount of \$1,200,000.00 (the "Loan") to
+JC REALTY VENTURES LLC, a New Jersey limited liability company (the
+"Borrower"), which Loan is guaranteed by me, individually, among others.
+
+         2.      Attached are upper court searches performed by Charles Jones LLC for the benefit of
+
+Coastal Title Agency, Inc. completed on December 12, 2025, which
+indicate judgments and/or liens against variations of my name. I have
+reviewed the searches and attest that these judgments/liens are not
+against me but rather against individuals with similar names .
+
+        3.      I understand and acknowledge that the Lender will rely upon the truth of the statements
+
+herein contained and would not enter into the Loan in the absence of
+this Affidavit.
+
+        IN WITNESS WHEREOF, the undersigned has caused this Judgment Affidavit to be duly executed
+
+and delivered as of the day and year first written above.
+
+Sworn to before me this \_\_\_\_\_ day of
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_, 2026.
+
+Notary Public KUNAL SHAH  JUDGMENT AFFIDAVIT
+
+RIDDHI PATEL, says under oath:
+
+        1.      I make this Affidavit in order to induce COLUMBIA BANK (“Lender”) to make a Commercial
+
+Mortgage Loan in the principal amount of \$1,200,000.00 (the "Loan") to
+JC REALTY VENTURES LLC, a New Jersey limited liability company (the
+"Borrower"), which Loan is guaranteed by me, individually, among others.
+
+         2.      Attached are upper court searches performed by Charles Jones LLC for the benefit of
+
+Coastal Title Agency, Inc. completed on December 12, 2025, which
+indicate judgments and/or liens against variations of my name. I have
+reviewed the searches and attest that these judgments/liens are not
+against me but rather against individuals with similar names .
+
+        3.      I understand and acknowledge that the Lender will rely upon the truth of the statements
+
+herein contained and would not enter into the Loan in the absence of
+this Affidavit.
+
+        IN WITNESS WHEREOF, the undersigned has caused this Judgment Affidavit to be duly executed
+
+and delivered as of the day and year first written above.
+
+Sworn to before me this \_\_\_\_\_ day of
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_, 2026.
+
+Notary Public RIDDHI PATEL  JUDGMENT AFFIDAVIT
+
+RICHA PATEL, says under oath:
+
+        1.      I make this Affidavit in order to induce COLUMBIA BANK (“Lender”) to make a Commercial
+
+Mortgage Loan in the principal amount of \$1,200,000.00 (the "Loan") to
+JC REALTY VENTURES LLC, a New Jersey limited liability company (the
+"Borrower"), which Loan is guaranteed by me, individually, among others.
+
+         2.      Attached are upper court searches performed by Charles Jones LLC for the benefit of
+
+Coastal Title Agency, Inc. completed on December 12, 2025, which
+indicate judgments and/or liens against variations of my name. I have
+reviewed the searches and attest that these judgments/liens are not
+against me but rather against individuals with similar names .
+
+        3.      I understand and acknowledge that the Lender will rely upon the truth of the statements
+
+herein contained and would not enter into the Loan in the absence of
+this Affidavit.
+
+        IN WITNESS WHEREOF, the undersigned has caused this Judgment Affidavit to be duly executed
+
+and delivered as of the day and year first written above.
+
+Sworn to before me this \_\_\_\_\_ day of
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_, 2026.
+
+Notary Public RICHA PATEL THIS POST-CLOSING COMPLIANCE AGREEMENT IS
+DATED AS OF THE LOAN DATE FIRST WRITTEN ABOVE.
+
+BORROWER: JC REALTY VENTURES LLC, a New Jersey limited liability company
+
+By: KUNAL SHAH, Authorized Signatory of JC Realty Ventures LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                        [Signature page to Post-Closing Compliance Agreement]
+
+THIS DISBURSEMENT REQUEST AND AUTHORIZATION IS DATED AS OF THE LOAN DATE
+FIRST WRITTEN ABOVE.
+
+BORROWER: JC REALTY VENTURES LLC, a New Jersey limited liability company
+
+By: KUNAL SHAH, Authorized Signatory of JC Realty Ventures LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                      [Signature page to Disbursement Request and Authorization]
+
+NEW JERSEY DEPARTMENT OF COMMUNITY AFFAIRS DIVISION INITIAL TAX
+AUTHORIZATION OF LOCAL GOVERNMENT SERVICES NOTICE  PROPERTY
+INFORMATION: Municipality: Jersey City County: Hudson Block: 9206 Lot: 5
+Qualification: Account# C Property Location: 73 Broadway Jersey City, NJ
+07306 Owner Name: JC Realty Ventures LLC Owner Mailing Address: 881
+Allwood Road, Clifton, NJ 07012  MORTGAGEE INFORMATION  SERVICING
+ORGANIZATION INFORMATION Name: Columbia Bank Name: Columbia Bank
+Address: 19-01 Route 208 North Address: 19-01 Route 208 North Fair Lawn,
+NJ 07410 Fair Lawn, NJ 07410 Contact: Anna Moskal Phone Number:
+201-794-4345 Contact: Anna Moskal Phone Number: 201-794-4345
+
+Bank Code# 1589 Loan# Bank Code# 1589 Loan#
+
+        Send Duplicate Bill?     Yes              Fee Enclosed       $                         -
+
+TAX BILL INSTRUCTIONS  OWNER AUTHORIZATION (Do not use for mortgage 
+SELECTION OF ALTERNATE TAX BILL RECIPIENT purchase) (Tax bill will be
+sent to the mortgagee unless this section is completed)
+
+    This form is to serve as authorization to indicate on the       Until further written notice from the undersigned, the mortgagee
+    municipality's tax collection records that all current and      hereby authorizes the tax collector to send all current and future
+    future tax bills on the property described above are to be      tax bills for the property described above to the following
+    forwarded to the mortgagee or its designee noted herein         organization:
+    unless otherwise indicated. This authorization is
+    assignable in the event the mortgagee or servicing            Servicing Organization (#3 above):
+    organization sells, assigns or transfers the servicing of the Tax Processor:
+    mortgage loan to another mortgagee or servicing                     Name:        CoreLogic Tax Service
+    organization, pursuant to P.L. 1990, c. 69 and N.J.A.C.             Address: 1 CoreLogic Drive, Mail Code DFW 4-3
+    5:33-4.1 et seq.                                                                 Westlake, TX 76262
+                                                                        Contact: Escrow Reporting Phone #: 1-800-229-8426
+    Borrower:       JC Realty Ventures LLC                              Bank Code#:       00660 Loan#                                  C
+    Authorized Signature:                                              Lender#: 0040008
+    Type Name       Kunal Shah                Date:
+                                                                              Mortgagee's Authorization:
+     Authorized Signature:                                                      Signature:
+    Type Name                                 Date:                             Name:       Columbia Bank
+                                                                                Title:
+     Authorized Signature:
+    Type Name                                 Date:
+
+ FORECLOSURE NOTICE REQUEST  ACKNOWLEDGEMENT BY COLLECTOR: (pursuant
+to N.J.S. 54:5-104.48) This form is to serve as notice that the
+undersigned Date: mortgagee requests notice of foreclosure in the event
+of Rem tax foreclosure proceedings on the above listed Tax Collector:
+property. Municipality: Signature of Mortgagee Representative Date Loan#
+Typed Name and Title: C Customer #Columbia Bank 0 0 4 0 0 0 8
+
+This form prepared on by Alessia Terantino, Closing Supervisor for
+Columbia Bank at (phone) 201-599-7079 .
+
+Distribution: Original, Tax Collector; copy 1, servicing organization;
+copy 2, Owner; copy 3, mortgagee ME-1-10/92  LIMITED LIABILITY COMPANY
+RESOLUTION TO BORROW / GRANT COLLATERAL Principal Loan Date Maturity
+Loan No Call / Coll Account Officer Initials \$1,200,000.00
+***References in the boxes above are for Lender's use only and do not
+limit the applicability of this document to any particular loan or item.
+Any item above containing "***" has been omitted due to text length
+limitations. Company: JC Realty Ventures LLC Lender: Columbia Bank (TIN:
+33-3931500) 19-01 Route 208 881 Allwood Road Fair Lawn, NJ 07410
+Clifton, NJ 07012
+
+I, THE UNDERSIGNED, DO HEREBY CERTIFY THAT:
+
+THE COMPANY'S EXISTENCE. The complete and correct name of the Company is
+JC Realty Ventures LLC ("Company"). The Company is a limited liability
+company which is, and at all times shall be, duly organized, validly
+existing, and in good standing under and by virtue of the laws of the
+State of New Jersey. The Company is duly authorized to transact business
+in all other states in which the Company is doing business, having
+obtained all necessary filings, governmental licenses and approvals for
+each state in which the Company is doing business. Specifically, the
+Company is, and at all times shall be, duly qualified as a foreign
+limited liability company in all states in which the failure to so
+qualify would have a material adverse effect on its business or
+financial condition. The Company has the full power and authority to own
+its properties and to transact the business in which it is presently
+engaged or presently proposes to engage. The Company maintains an office
+at 881 Allwood Road, Clifton, NJ 07012. Unless the Company has
+designated otherwise in writing, the principal office is the office at
+which the Company keeps its books and records. The Company will notify
+Lender prior to any change in the location of the Company's state of
+organization or any change in the Company's name. The Company shall do
+all things necessary to preserve and to keep in full force and effect
+its existence, rights and privileges, and shall comply with all
+regulations, rules, ordinances, statutes, orders and decrees of any
+governmental or quasi-governmental authority or court applicable to the
+Company and the Company's business activities.
+
+RESOLUTIONS ADOPTED. At a meeting of the members of the Company, duly
+called and held on February \_\_\_\_\_, 2026, at which a quorum was
+present and voting, or by other duly authorized action in lieu of a
+meeting, the resolutions set forth in this Resolution were adopted.
+
+AUTHORIZED SIGNATORY. The following named person is the Authorized
+Signatory of JC Realty Ventures LLC:
+
+        NAMES                              TITLES                      AUTHORIZED              ACTUAL SIGNATURES
+
+
+        Kunal Shah                         Authorized                  Y                       X __________________________________
+                                           Signatory
+
+ACTIONS AUTHORIZED. The authorized person listed above, acting alone,
+may enter into any agreements of any nature with Lender, and those
+agreements will bind the Company. Specifically, but without limitation,
+the authorized person listed above, acting alone, is authorized,
+empowered, and directed to do the following for and on behalf of the
+Company:
+
+Borrow Money. To borrow, as a cosigner or otherwise, from time to time
+from Lender, on such terms as may be agreed upon between the Company and
+Lender, such sum or sums of money as in his or her judgment should be
+borrowed, without limitation.
+
+Execute Notes. To execute and deliver to Lender the promissory note or
+notes, or other evidence of the Company's credit accommodations, on
+Lender's forms, at such rates of interest and on such terms as may be
+agreed upon, evidencing the sums of money so borrowed or any of the
+Company's indebtedness to Lender, and also to execute and IN TESTIMONY
+WHEREOF, I have hereunto set my hand and attest that the signature set
+opposite the name listed above is his or her genuine signature.
+
+I have read all the provisions of this Resolution, and I personally and
+on behalf of the Company certify that all statements and representations
+made in this Resolution are true and correct. This Limited Liability
+Company Resolution to Borrow / Grant Collateral is dated as of the Loan
+Date first written above.
+
+CERTIFIED TO AND ATTESTED BY:
+
+X KUNAL SHAH, Authorized Signatory of JC Realty Ventures LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+KS NJ MANAGEMENT LLC, a New Jersey limited liability company, Member of
+JC Realty Ventures LLC
+
+By: KUNAL SHAH, Chief Executive Manager of KS NJ Management LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+RIPA REALTY LLC, a New Jersey limited liability company, Member of JC
+Realty Ventures LLC
+
+By: PIYUSH PATEL, Manager of Ripa Realty LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+X PARIKA VASANI, Member of JC Realty Ventures LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                 [Signature page to Limited Liability Company Resolution to Borrow / Grant Collateral]
+
+LIMITED LIABILITY COMPANY RESOLUTION TO GRANT COLLATERAL / GUARANTEE
+Principal Loan Date Maturity Loan No Call / Coll Account Officer
+Initials \$1,200,000.00 ***References in the boxes above are for
+Lender's use only and do not limit the applicability of this document to
+any particular loan or item. Any item above containing "***" has been
+omitted due to text length limitations. Borrower: JC Realty Ventures LLC
+Lender: Columbia Bank (TIN: 33-3931500) 19-01 Route 208 881 Allwood Road
+Fair Lawn, NJ 07410 Clifton, NJ 07012
+
+Company: KS NJ Management LLC (TIN: 99-2716707) 17 Jones Court Clifton,
+NJ 07013
+
+I, THE UNDERSIGNED, DO HEREBY CERTIFY THAT:
+
+THE COMPANY'S EXISTENCE. The complete and correct name of the Company is
+KS NJ Management LLC ("Company"). The Company is a limited liability
+company which is, and at all times shall be, duly organized, validly
+existing, and in good standing under and by virtue of the laws of the
+State of New Jersey. The Company is duly authorized to transact business
+in all other states in which the Company is doing business, having
+obtained all necessary filings, governmental licenses and approvals for
+each state in which the Company is doing business. Specifically, the
+Company is, and at all times shall be, duly qualified as a foreign
+limited liability company in all states in which the failure to so
+qualify would have a material adverse effect on its business or
+financial condition. The Company has the full power and authority to own
+its properties and to transact the business in which it is presently
+engaged or presently proposes to engage. The Company maintains an office
+at 17 Jones Court, Clifton, NJ 07013. Unless the Company has designated
+otherwise in writing, the principal office is the office at which the
+Company keeps its books and records. The Company will notify Lender
+prior to any change in the location of the Company's state of
+organization or any change in the Company's name. The Company shall do
+all things necessary to preserve and to keep in full force and effect
+its existence, rights and privileges, and shall comply with all
+regulations, rules, ordinances, statutes, orders and decrees of any
+governmental or quasi-governmental authority or court applicable to the
+Company and the Company's business activities.
+
+RESOLUTIONS ADOPTED. At a meeting of the members of the Company, duly
+called and held on February \_\_\_\_, 2026, at which a quorum was
+present and voting, or by other duly authorized action in lieu of a
+meeting, the resolutions set forth in this Resolution were adopted.
+
+MANAGER. The following named person is the Chief Executive Manager of KS
+NJ Management LLC:
+
+        NAMES                              TITLES                      AUTHORIZED              ACTUAL SIGNATURES
+
+
+        Kunal Shah                         Chief Executive             Y                       X __________________________________
+                                           Manager
+
+ACTIONS AUTHORIZED. The authorized person listed above, acting alone,
+may enter into any agreements of any nature with Lender, and those
+agreements will bind the Company. Specifically, but without limitation,
+the authorized person listed above, acting alone, is authorized,
+empowered, and directed to do the following for and on behalf of the
+Company:
+
+        Guaranty. To guarantee or act as surety for loans or other financial accommodations to Borrower from Lender
+        on such guarantee or surety terms as may be agreed upon between the manager of the Company and Lender
+        and in such sum or sums of money as in his or her judgment should be guaranteed or assured, (the "Guaranty").
+
+IN TESTIMONY WHEREOF, I have hereunto set my hand and attest that the
+signature set opposite the name listed above is his or her genuine
+signature.
+
+I have read all the provisions of this Resolution, and I personally and
+on behalf of the Company certify that all statements and representations
+made in this Resolution are true and correct. This Limited Liability
+Company Resolution to Grant Collateral / Guarantee is dated as of the
+Loan Date first written above.
+
+CERTIFIED TO AND ATTESTED BY:
+
+X KUNAL SHAH, Chief Executive Manager of KS NJ Management LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+X SWEKIT PATEL, Member of KS NJ Management LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                 [Signature page to Limited Liability Company Resolution to Grant Collateral / Guarantee]
+
+LIMITED LIABILITY COMPANY RESOLUTION TO GRANT COLLATERAL / GUARANTEE
+Principal Loan Date Maturity Loan No Call / Coll Account Officer
+Initials \$1,200,000.00 ***References in the boxes above are for
+Lender's use only and do not limit the applicability of this document to
+any particular loan or item. Any item above containing "***" has been
+omitted due to text length limitations. Borrower: JC Realty Ventures LLC
+Lender: Columbia Bank (TIN: 33-3931500) 19-01 Route 208 881 Allwood Road
+Fair Lawn, NJ 07410 Clifton, NJ 07012
+
+Company: Ripa Realty LLC (TIN: 99-5142995) 43 Summit Drive East
+Brunswick, NJ 08816
+
+I, THE UNDERSIGNED, DO HEREBY CERTIFY THAT:
+
+THE COMPANY'S EXISTENCE. The complete and correct name of the Company is
+Ripa Realty LLC ("Company"). The Company is a limited liability company
+which is, and at all times shall be, duly organized, validly existing,
+and in good standing under and by virtue of the laws of the State of New
+Jersey. The Company is duly authorized to transact business in all other
+states in which the Company is doing business, having obtained all
+necessary filings, governmental licenses and approvals for each state in
+which the Company is doing business. Specifically, the Company is, and
+at all times shall be, duly qualified as a foreign limited liability
+company in all states in which the failure to so qualify would have a
+material adverse effect on its business or financial condition. The
+Company has the full power and authority to own its properties and to
+transact the business in which it is presently engaged or presently
+proposes to engage. The Company maintains an office at 43 Summit Drive,
+East Brunswick, NJ 08816. Unless the Company has designated otherwise in
+writing, the principal office is the office at which the Company keeps
+its books and records. The Company will notify Lender prior to any
+change in the location of the Company's state of organization or any
+change in the Company's name. The Company shall do all things necessary
+to preserve and to keep in full force and effect its existence, rights
+and privileges, and shall comply with all regulations, rules,
+ordinances, statutes, orders and decrees of any governmental or
+quasi-governmental authority or court applicable to the Company and the
+Company's business activities.
+
+RESOLUTIONS ADOPTED. At a meeting of the members of the Company, duly
+called and held on February \_\_\_\_\_, 2026, at which a quorum was
+present and voting, or by other duly authorized action in lieu of a
+meeting, the resolutions set forth in this Resolution were adopted.
+
+MANAGER. The following named person is the Manager of Ripa Realty LLC:
+
+        NAMES                              TITLES                      AUTHORIZED              ACTUAL SIGNATURES
+
+
+        Piyush Patel                       Manager                     Y                       X __________________________________
+
+ACTIONS AUTHORIZED. The authorized person listed above, acting alone,
+may enter into any agreements of any nature with Lender, and those
+agreements will bind the Company. Specifically, but without limitation,
+the authorized person listed above, acting alone, is authorized,
+empowered, and directed to do the following for and on behalf of the
+Company:
+
+        Guaranty. To guarantee or act as surety for loans or other financial accommodations to Borrower from Lender
+        on such guarantee or surety terms as may be agreed upon between the manager of the Company and Lender
+        and in such sum or sums of money as in his or her judgment should be guaranteed or assured, (the "Guaranty").
+
+IN TESTIMONY WHEREOF, I have hereunto set my hand and attest that the
+signature set opposite the name listed above is his or her genuine
+signature.
+
+I have read all the provisions of this Resolution, and I personally and
+on behalf of the Company certify that all statements and representations
+made in this Resolution are true and correct. This Limited Liability
+Company Resolution to Grant Collateral / Guarantee is dated as of the
+Loan Date first written above.
+
+CERTIFIED TO AND ATTESTED BY:
+
+X PIYUSH PATEL, Manager of Ripa Realty LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+X RIDDHI PATEL, Member of Ripa Realty LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+X RICHA PATEL, Member of Ripa Realty LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                 [Signature page to Limited Liability Company Resolution to Grant Collateral / Guarantee]
+
+RESOLUTION OF LIMITED LIABILITY COMPANY MEMBER Principal Loan Date
+Maturity Loan No Call / Coll Account Officer Initials \$1,200,000.00
+***References in the boxes above are for Lender's use only and do not
+limit the applicability of this document to any particular loan or item.
+Any item above containing "***" has been omitted due to text length
+limitations. Borrower: JC Realty Ventures LLC Lender: Columbia Bank
+(TIN: 33-3931500) Commercial Lend - North 881 Allwood Road 19-01 Route
+208 North Clifton, NJ 07012 Fair Lawn, NJ 07410
+
+Company: KS NJ Management LLC (TIN: 99-2716707) 17 Jones Court Clifton,
+NJ 07013
+
+WE, THE UNDERSIGNED, DO HEREBY CERTIFY THAT:
+
+ORGANIZATION. The Company is a limited liability company which is, and
+at all times shall be, duly organized, validly existing, and in good
+standing under and by virtue of the laws of the State of New Jersey. The
+Company is duly authorized to transact business in all other states in
+which the Company is doing business, having obtained all necessary
+filings, governmental licenses and approvals for each state in which the
+Company is doing business. Specifically, the Company is, and at all
+times shall be, duly qualified as a foreign limited liability company in
+all states in which the failure to so qualify would have a material
+adverse effect on its business or financial condition. The Company has
+the full power and authority to own its properties and to transact the
+business in which it is presently engaged or presently proposes to
+engage. The Company maintains an office at 17 Jones Court, Clifton, NJ
+07013. Unless the Company has designated otherwise in writing, the
+principal office is the office at which the Company keeps its books and
+records including its records concerning the Collateral. The Company
+will notify Lender prior to any change in the location of the Company's
+state of organization or any change in the Company's name. The Company
+shall do all things necessary to preserve and to keep in full force and
+effect its existence, rights and privileges, and shall comply with all
+regulations, rules, ordinances, statutes, orders and decrees of any
+governmental or quasi-governmental authority or court applicable to the
+Company and the Company's business activities.
+
+RELATIONSHIP TO BORROWER AND GRANTOR. The Company is a Member in JC
+Realty Ventures LLC. JC Realty Ventures LLC has applied or will be
+applying to Columbia Bank ("Lender") for a loan or loans and other
+financial accommodations from Lender and has agreed to grant collateral
+for a loan or loans and other financial accommodations from Lender to JC
+Realty Ventures LLC, including those which may be described on any
+exhibit or schedule attached to this Resolution. The Company has
+considered the value of JC Realty Ventures LLC obtaining the financial
+accommodations described above and granting the collateral.
+
+AUTHORIZATION TO BE A MEMBER. The Company is authorized to be and become
+a Member in the Limited Liability Company named JC Realty Ventures LLC,
+whose office is at 881 Allwood Road, Clifton, NJ 07012.
+
+RESOLUTIONS ADOPTED. At a meeting of the members of the Company, duly
+called and held on February \_\_\_\_\_, 2026, at which a quorum was
+present and voting, or by other duly authorized action in lieu of a
+meeting, the resolutions set forth in this Resolution were adopted.
+
+MANAGER. The following named person is the Chief Executive Manager of KS
+NJ Management LLC:
+
+        NAMES                              TITLES                      AUTHORIZED              ACTUAL SIGNATURES
+
+
+        Kunal Shah                         Chief Executive             Y                       X __________________________________
+                                           Manager
+
+IN TESTIMONY WHEREOF, we have hereunto set our hand and attest that the
+signatures set opposite the names listed above are their genuine
+signatures.
+
+We each have read all the provisions of this Resolution, and we each
+personally and on behalf of the Company certify that all statements and
+representations made in this Resolution are true and correct. This
+Resolution of Limited Liability Company Member is dated as of the Loan
+Date first written above.
+
+CERTIFIED TO AND ATTESTED BY:
+
+X KUNAL SHAH, Chief Executive Manager of KS NJ Management LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+X SWEKIT PATEL, Member of KS NJ Management LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                        [Signature page to Resolution of Limited Liability Company Member]
+
+RESOLUTION OF LIMITED LIABILITY COMPANY MEMBER Principal Loan Date
+Maturity Loan No Call / Coll Account Officer Initials \$1,200,000.00
+***References in the boxes above are for Lender's use only and do not
+limit the applicability of this document to any particular loan or item.
+Any item above containing "***" has been omitted due to text length
+limitations. Borrower: JC Realty Ventures LLC Lender: Columbia Bank
+(TIN: 33-3931500) Commercial Lend - North 881 Allwood Road 19-01 Route
+208 North Clifton, NJ 07012 Fair Lawn, NJ 07410
+
+Company: Ripa Realty LLC (TIN: 99-5142995) 43 Summit Drive East
+Brunswick, NJ 08816
+
+WE, THE UNDERSIGNED, DO HEREBY CERTIFY THAT:
+
+ORGANIZATION. The Company is a limited liability company which is, and
+at all times shall be, duly organized, validly existing, and in good
+standing under and by virtue of the laws of the State of New Jersey. The
+Company is duly authorized to transact business in all other states in
+which the Company is doing business, having obtained all necessary
+filings, governmental licenses and approvals for each state in which the
+Company is doing business. Specifically, the Company is, and at all
+times shall be, duly qualified as a foreign limited liability company in
+all states in which the failure to so qualify would have a material
+adverse effect on its business or financial condition. The Company has
+the full power and authority to own its properties and to transact the
+business in which it is presently engaged or presently proposes to
+engage. The Company maintains an office at 43 Summit Drive, East
+Brunswick, NJ 08816. Unless the Company has designated otherwise in
+writing, the principal office is the office at which the Company keeps
+its books and records including its records concerning the Collateral.
+The Company will notify Lender prior to any change in the location of
+the Company's state of organization or any change in the Company's name.
+The Company shall do all things necessary to preserve and to keep in
+full force and effect its existence, rights and privileges, and shall
+comply with all regulations, rules, ordinances, statutes, orders and
+decrees of any governmental or quasi-governmental authority or court
+applicable to the Company and the Company's business activities.
+
+RELATIONSHIP TO BORROWER AND GRANTOR. The Company is a Member in JC
+Realty Ventures LLC. JC Realty Ventures LLC has applied or will be
+applying to Columbia Bank ("Lender") for a loan or loans and other
+financial accommodations from Lender and has agreed to grant collateral
+for a loan or loans and other financial accommodations from Lender to JC
+Realty Ventures LLC, including those which may be described on any
+exhibit or schedule attached to this Resolution. The Company has
+considered the value of JC Realty Ventures LLC obtaining the financial
+accommodations described above and granting the collateral.
+
+AUTHORIZATION TO BE A MEMBER. The Company is authorized to be and become
+a Member in the Limited Liability Company named JC Realty Ventures LLC,
+whose office is at 881 Allwood Road, Clifton, NJ 07012.
+
+RESOLUTIONS ADOPTED. At a meeting of the members of the Company, duly
+called and held on February \_\_\_\_\_, 2026, at which a quorum was
+present and voting, or by other duly authorized action in lieu of a
+meeting, the resolutions set forth in this Resolution were adopted.
+
+MANAGER. The following named person is the Manager of Ripa Realty LLC:
+
+        NAMES                              TITLES                      AUTHORIZED              ACTUAL SIGNATURES
+
+
+        Piyush Patel                       Manager                     Y                       X __________________________________
+
+ACTIONS AUTHORIZED. The authorized persons listed above, acting alone,
+may enter into any agreements of any nature with Lender, and those
+agreements will bind the Company. Specifically, but without limitation,
+the authorized IN TESTIMONY WHEREOF, we have hereunto set our hand and
+attest that the signatures set opposite the names listed above are their
+genuine signatures.
+
+We each have read all the provisions of this Resolution, and we each
+personally and on behalf of the Company certify that all statements and
+representations made in this Resolution are true and correct. This
+Resolution of Limited Liability Company Member is dated as of the Loan
+Date first written above.
+
+CERTIFIED TO AND ATTESTED BY:
+
+X PIYUSH PATEL, Manager of Ripa Realty LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+X RIDDHI PATEL, Member of Ripa Realty LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+X RICHA PATEL, Member of Ripa Realty LLC
+
+Signed, acknowledged and delivered in the presence of:
+
+X Witness
+
+                        [Signature page to Resolution of Limited Liability Company Member]
+
+Control/Account Manager: D. Complete the following information for one
+individual with significant responsibility for managing the legal entity
+listed above, such as: An executive officer or senior manager
+(e.g. Chief Executive Officer, Chief Financial Officer, Chief Operating
+Officer, Managing Member, general Partner, President, Vice President,
+Treasurer); or Any other individual who regularly performs similar
+functions.
+
+If appropriate, an individual listed under the section (C) (Beneficial
+Owners) above may also be listed in this section (D).
+
+                                                                                                                           Occupation
+
+Legal Name (Print) Date of SSN or Physical Address Legal Identification
+(w/dates of & Birth ITIN issuance and expiration) Title
+
+I, (printed name of natural person opening account), hereby certify, to
+the best of my knowledge, that the information provided in sections B,
+C, and D is complete and correct. In addition, I agree to notify
+Columbia Bank of any change in the following: Beneficial Ownership,
+individual with responsibility to control or manage this legal entity,
+or with any change in information provided on this document.
+
+Signature: Date:
+
+Notes:
+
+For Internal Purposes Only:
+
+Forms Received
+By:\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Date
+Received: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Was OFAC Checked OFAC
+Performed By:\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Date
+Checked: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_  Control/Account Manager: D.
+Complete the following information for one individual with significant
+responsibility for managing the legal entity listed above, such as: An
+executive officer or senior manager (e.g. Chief Executive Officer, Chief
+Financial Officer, Chief Operating Officer, Managing Member, general
+Partner, President, Vice President, Treasurer); or Any other individual
+who regularly performs similar functions.
+
+If appropriate, an individual listed under the section (C) (Beneficial
+Owners) above may also be listed in this section (D).
+
+                                                                                                                           Occupation
+
+Legal Name (Print) Date of SSN or Physical Address Legal Identification
+(w/dates of & Birth ITIN issuance and expiration) Title
+
+I, (printed name of natural person opening account), hereby certify, to
+the best of my knowledge, that the information provided in sections B,
+C, and D is complete and correct. In addition, I agree to notify
+Columbia Bank of any change in the following: Beneficial Ownership,
+individual with responsibility to control or manage this legal entity,
+or with any change in information provided on this document.
+
+Signature: Date:
+
+Notes:
+
+For Internal Purposes Only:
+
+Forms Received
+By:\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Date
+Received: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Was OFAC Checked OFAC
+Performed By:\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Date
+Checked: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_  Control/Account Manager: D.
+Complete the following information for one individual with significant
+responsibility for managing the legal entity listed above, such as: An
+executive officer or senior manager (e.g. Chief Executive Officer, Chief
+Financial Officer, Chief Operating Officer, Managing Member, general
+Partner, President, Vice President, Treasurer); or Any other individual
+who regularly performs similar functions.
+
+If appropriate, an individual listed under the section (C) (Beneficial
+Owners) above may also be listed in this section (D).
+
+                                                                                                                           Occupation
+
+Legal Name (Print) Date of SSN or Physical Address Legal Identification
+(w/dates of & Birth ITIN issuance and expiration) Title
+
+I, (printed name of natural person opening account), hereby certify, to
+the best of my knowledge, that the information provided in sections B,
+C, and D is complete and correct. In addition, I agree to notify
+Columbia Bank of any change in the following: Beneficial Ownership,
+individual with responsibility to control or manage this legal entity,
+or with any change in information provided on this document.
+
+Signature: Date:
+
+Notes:
+
+For Internal Purposes Only:
+
+Forms Received
+By:\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Date
+Received: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Was OFAC Checked OFAC
+Performed By:\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Date
+Checked: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ 

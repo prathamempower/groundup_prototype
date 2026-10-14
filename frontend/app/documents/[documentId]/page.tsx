@@ -70,16 +70,13 @@ export default function DocumentReviewPage() {
     document?.original_filename?.match(/\.(xlsx|xls|csv)$/i)
   );
 
-  const [showSideReview, setShowSideReview] = useState<boolean>(false);
+  const [showSideReview, setShowSideReview] = useState<boolean>(true);
 
   React.useEffect(() => {
-    // Spreadsheets and documents without extracted fields have side review removed/hidden by default
-    if (isSpreadsheet || extractions.length === 0) {
-      setShowSideReview(false);
-    } else {
+    if (extractions.length > 0) {
       setShowSideReview(true);
     }
-  }, [isSpreadsheet, extractions.length]);
+  }, [extractions.length]);
 
   const decideMutation = useMutation({
     mutationFn: ({
@@ -205,6 +202,9 @@ export default function DocumentReviewPage() {
           <div className="h-4 w-px bg-slate-200" />
 
           <div className="flex items-center gap-2.5 truncate">
+            <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-700 border border-blue-200/70">
+              OCR REVIEW WORKBENCH
+            </span>
             <span className="text-sm font-semibold text-slate-900 truncate">
               {document.original_filename}
             </span>

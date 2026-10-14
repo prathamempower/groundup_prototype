@@ -43,7 +43,7 @@ test.describe("Control Center Amount Source Origin Provenance", () => {
 
     // Verify Actual Spend details
     await expect(page.getByRole("heading", { name: /Actual Spend/i })).toBeVisible();
-    await expect(page.getByText("73 Broadway.xlsx", { exact: true })).toBeVisible();
+    await expect(modal.getByText("73 Broadway.xlsx")).toBeVisible();
     await expect(modal.getByRole("cell", { name: "Direct Construction / Hard Costs" })).toBeVisible();
 
     await page.screenshot({ path: path.join(artifactDir, "control_center_actual_spend_origin.png") });

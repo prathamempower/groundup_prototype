@@ -132,6 +132,9 @@ export function SpreadsheetViewer({
     match: CellMatch | null;
   } | null>(null);
 
+  // Cached workbook ref for offline sheet switching
+  const workbookRef = useRef<any>(null);
+
   // Hover details popover state
   const [hoveredCell, setHoveredCell] = useState<{
     rowIdx: number;
@@ -198,6 +201,7 @@ export function SpreadsheetViewer({
         }
 
         const workbook = XLSX.read(arrayBuffer, { type: "array" });
+        workbookRef.current = workbook;
 
         if (isCancelled) return;
 
@@ -271,9 +275,20 @@ export function SpreadsheetViewer({
     setHoveredCell(null);
     try {
       setLoading(true);
-      const response = await fetch(url, { credentials: "include" });
-      const arrayBuffer = await response.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+      let workbook = workbookRef.current;
+      if (!workbook) {
+        let arrayBuffer: ArrayBuffer;
+        try {
+          const response = await fetch(url, { credentials: "include" });
+          arrayBuffer = await response.arrayBuffer();
+        } catch {
+          const sampleUrl = `/sample-docs/${encodeURIComponent(filename)}`;
+          const fallbackRes = await fetch(sampleUrl);
+          arrayBuffer = await fallbackRes.arrayBuffer();
+        }
+        workbook = XLSX.read(arrayBuffer, { type: "array" });
+        workbookRef.current = workbook;
+      }
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" }) as any[][];
       setSheetData(jsonData);
@@ -613,7 +628,7 @@ export function SpreadsheetViewer({
             <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400" />
             <input
               type="text"
-              placeholder="Search sheet..."
+              placeholder="Search in sheet..."
               value={filterQuery}
               onChange={(e) => setFilterQuery(e.target.value)}
               className="h-7.5 w-36 sm:w-44 rounded-md border border-slate-200 bg-slate-50/50 pl-8 pr-7 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-colors"

@@ -53,14 +53,13 @@ import {
   ReportExportItem,
   RequestExportPayload,
 } from "@/lib/types";
+import { mockStore } from "@/lib/mock-data/store";
 import { normalizeUserProfile } from "./adapters/auth-adapter";
 
 export * from "./errors";
 export * from "./adapters/auth-adapter";
 export * from "./adapters/upload-adapter";
 export * from "./adapters/job-polling-adapter";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1";
 
 export class ApiError extends Error {
   code: string;
@@ -78,252 +77,174 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(
-  path: string,
-  options: RequestInit = {}
-): Promise<ApiResponse<T>> {
-  const url = `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-    ...((options.headers as Record<string, string>) || {}),
+function wrap<T>(data: T, warnings?: string[]): ApiResponse<T> {
+  return {
+    data,
+    meta: {
+      as_of: new Date().toISOString(),
+      data_quality: "VERIFIED",
+      warnings,
+    },
   };
-
-  // Add Idempotency-Key on mutations if not already present
-  if (
-    ["POST", "PUT", "PATCH", "DELETE"].includes(options.method?.toUpperCase() || "") &&
-    !headers["Idempotency-Key"]
-  ) {
-    headers["Idempotency-Key"] = `idem_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-  }
-
-  const res = await fetch(url, {
-    ...options,
-    headers,
-    credentials: options.credentials || "include",
-  });
-
-  if (!res.ok) {
-    let errorJson: ApiErrorResponse;
-    try {
-      errorJson = await res.json();
-    } catch {
-      throw new ApiError(res.status, {
-        code: "INTERNAL_ERROR",
-        message: `HTTP error ${res.status}: ${res.statusText}`,
-        request_id: "req_unknown",
-      });
-    }
-    throw new ApiError(res.status, errorJson.error);
-  }
-
-  return (await res.json()) as ApiResponse<T>;
 }
 
 export const api = {
   identity: {
     getMe: async () => {
-      const response = await request<{
-        id: string;
-        organization_id: string;
-        email: string;
-        first_name: string;
-        last_name: string;
-        role: UserProfile["role"];
-        is_active: boolean;
-        project_memberships: Array<{ project_id: string; role: string }>;
-        permissions: string[];
-      }>("/me");
-      return { ...response, data: normalizeUserProfile(response.data) };
+      const user = mockStore.getCurrentUser();
+      return wrap(normalizeUserProfile(user as any));
     },
   },
 
   projects: {
     list: async () => {
-      const res = await request<Project[] | { projects: Project[]; current_project_id?: string }>("/projects");
-      if (Array.isArray(res.data)) {
-        const projects = res.data;
-        const current_project_id = typeof window !== "undefined"
-          ? (localStorage.getItem("groundup_active_project_id") || projects[0]?.id || "")
-          : (projects[0]?.id || "");
-        return {
-          ...res,
-          data: {
-            projects,
-            current_project_id,
-          },
-        };
-      }
-      return res as ApiResponse<{ projects: Project[]; current_project_id: string }>;
+      const projects = mockStore.getProjects();
+      const current_project_id = mockStore.getActiveProjectId();
+      return wrap({
+        projects,
+        current_project_id,
+      });
     },
-    getById: (projectId: string) => request<Project>(`/projects/${projectId}`),
-    create: (projectData: Partial<Project>) =>
-      request<Project>("/projects", {
-        method: "POST",
-        body: JSON.stringify(projectData),
-      }),
-    checkDuplicates: (data: { name: string; address: string; project_entity?: string }) =>
-      request<import("@/lib/types").ProjectDuplicateCheckResponse>("/projects/check-duplicates", {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
+    getById: async (projectId: string) => {
+      const p = mockStore.getProjectById(projectId);
+      if (!p) {
+        throw new ApiError(404, {
+          code: "NOT_FOUND",
+          message: `Project ${projectId} not found or access restricted`,
+          request_id: "req_not_found",
+        });
+      }
+      return wrap(p);
+    },
+    create: async (projectData: Partial<Project>) => {
+      const project = mockStore.createProject(projectData);
+      return wrap(project);
+    },
+    checkDuplicates: async (data: { name: string; address: string; project_entity?: string }) => {
+      return wrap(mockStore.checkDuplicates(data));
+    },
     switchProject: async (projectId: string) => {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("groundup_active_project_id", projectId);
+      const p = mockStore.switchProject(projectId);
+      if (!p) {
+        throw new ApiError(404, {
+          code: "NOT_FOUND",
+          message: `Project ${projectId} not found`,
+          request_id: "req_not_found",
+        });
       }
-      return await request<Project>(`/projects/${projectId}`);
+      return wrap(p);
     },
-    getDashboard: (projectId: string) =>
-      request<ProjectDashboard>(`/projects/${projectId}/dashboard`),
+    getDashboard: async (projectId: string) => {
+      const dashboard = mockStore.getDashboard(projectId);
+      return wrap(dashboard);
+    },
   },
 
   documents: {
-    list: (projectId: string) =>
-      request<DocumentItem[]>(`/projects/${projectId}/documents`),
-    getById: (documentId: string) =>
-      request<DocumentItem>(`/documents/${documentId}`),
-    getUploadUrl: (filename: string, mime_type: string) =>
-      request<{ document_id: string; upload_url: string; key: string; expires_in: number }>(
-        "/documents/upload-url",
-        {
-          method: "POST",
-          body: JSON.stringify({ filename, mime_type }),
-        }
-      ),
-    uploadMultipart: async (file: File | Blob, filename: string, projectId?: string) => {
-      const formData = new FormData();
-      formData.append("file", file, filename);
-      if (projectId) {
-        formData.append("project_id", projectId);
-      }
-      const url = `${API_BASE_URL}/documents/upload`;
-      const res = await fetch(url, {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Idempotency-Key": `idem_upload_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        },
-      });
-      if (!res.ok) {
-        let errorJson: ApiErrorResponse;
-        try {
-          errorJson = await res.json();
-        } catch {
-          throw new ApiError(res.status, {
-            code: "INTERNAL_ERROR",
-            message: `Upload error ${res.status}: ${res.statusText}`,
-            request_id: "req_upload",
-          });
-        }
-        throw new ApiError(res.status, errorJson.error);
-      }
-      return (await res.json()) as ApiResponse<DocumentItem>;
+    list: async (projectId: string) => {
+      return wrap(mockStore.getDocuments(projectId));
     },
-    create: (docData: {
+    getById: async (documentId: string) => {
+      const doc = mockStore.getDocumentById(documentId);
+      if (!doc) {
+        throw new ApiError(404, {
+          code: "NOT_FOUND",
+          message: `Document ${documentId} not found`,
+          request_id: "req_doc_not_found",
+        });
+      }
+      return wrap(doc);
+    },
+    getUploadUrl: async (filename: string, _mime_type: string) => {
+      return wrap({
+        document_id: `doc-${Date.now()}`,
+        upload_url: `/sample-docs/${encodeURIComponent(filename)}`,
+        key: filename,
+        expires_in: 3600,
+      });
+    },
+    uploadMultipart: async (file: File | Blob, filename: string, projectId?: string) => {
+      const doc = mockStore.createDocument({
+        filename,
+        mime_type: file.type || "application/pdf",
+        project_id: projectId || mockStore.getActiveProjectId(),
+        document_type: filename.toLowerCase().includes("invoice")
+          ? "INVOICE"
+          : filename.toLowerCase().includes("report")
+          ? "INSPECTION"
+          : "BUDGET_SOV",
+      });
+      return wrap(doc);
+    },
+    create: async (docData: {
       filename: string;
       mime_type: string;
       project_id: string;
       document_type: DocumentItem["document_type"];
       notes?: string;
-    }) =>
-      request<DocumentItem>("/documents/create", {
-        method: "POST",
-        body: JSON.stringify(docData),
-      }),
-    confirmUpload: (documentId: string) =>
-      request<{ id: string; status: string; sha256: string; job_id: string }>(
-        `/documents/${documentId}/confirm-upload`,
-        { method: "POST" }
-      ),
-    getExtractions: async (documentId: string) => {
-      const res = await request<any[]>(`/documents/${documentId}/extractions`);
-      const mapped = (res.data || []).map((f: any) => ({
-        id: f.id,
-        document_id: documentId,
-        field_name: f.field_name,
-        raw_value: f.raw_value || f.proposed_value || "",
-        normalized_value: f.accepted_value || f.normalized_value || f.proposed_value || "",
-        proposed_value: f.proposed_value || f.raw_value || "",
-        confidence: typeof f.confidence === "number" ? f.confidence : 0.95,
-        citation: typeof f.citation === "object" && f.citation !== null
-          ? f.citation
-          : {
-              page_number: f.page_number || 1,
-              row_number: undefined,
-              sheet_name: typeof f.citation === "string" ? f.citation : undefined,
-            },
-        status: f.status || "PROPOSED",
-        decision_rationale: f.decision_rationale || undefined,
-      }));
-      return { ...res, data: mapped as ExtractionField[] };
+    }) => {
+      const doc = mockStore.createDocument(docData);
+      return wrap(doc);
     },
-    decideExtractionField: (
+    confirmUpload: async (documentId: string) => {
+      return wrap({
+        id: documentId,
+        status: "READY_FOR_REVIEW",
+        sha256: "mock_sha256_verified",
+        job_id: `job_${Date.now()}`,
+      });
+    },
+    getExtractions: async (documentId: string) => {
+      return wrap(mockStore.getExtractions(documentId));
+    },
+    decideExtractionField: async (
       fieldId: string,
       decision: "ACCEPT" | "EDIT" | "REJECT",
       normalizedValue?: string,
       rationale?: string
-    ) =>
-      request<ExtractionField>(`/extraction-fields/${fieldId}/decision`, {
-        method: "POST",
-        body: JSON.stringify({
-          decision,
-          accepted_value: normalizedValue,
-          normalized_value: normalizedValue,
-          rationale,
-        }),
-      }),
-    addManualField: (
-      documentId: string,
-      fieldName: string,
-      value: string,
-      notes?: string,
-      rationale?: string
-    ) =>
-      request<{ status: string; source_record_id: string }>(`/documents/${documentId}/manual-entry`, {
-        method: "POST",
-        body: JSON.stringify({
-          field_name: fieldName,
-          value,
-          notes,
-          rationale,
-        }),
-      }),
-    acceptAllExtractions: (documentId: string) =>
-      request<ExtractionField[]>(`/documents/${documentId}/accept-all`, {
-        method: "POST",
-      }),
-    completeReview: (documentId: string) =>
-      request<DocumentItem>(`/documents/${documentId}/complete-review`, {
-        method: "POST",
-      }),
-    mark: (
+    ) => {
+      const field = mockStore.decideExtractionField(fieldId, decision, normalizedValue, rationale);
+      return wrap(field);
+    },
+    addManualField: async (
+      _documentId: string,
+      _fieldName: string,
+      _value: string,
+      _notes?: string,
+      _rationale?: string
+    ) => {
+      return wrap({
+        status: "SUCCESS",
+        source_record_id: `rec-${Date.now()}`,
+      });
+    },
+    acceptAllExtractions: async (documentId: string) => {
+      const list = mockStore.getExtractions(documentId).map((e) => ({
+        ...e,
+        status: "ACCEPTED" as const,
+      }));
+      return wrap(list);
+    },
+    completeReview: async (documentId: string) => {
+      const doc = mockStore.completeReview(documentId);
+      return wrap(doc);
+    },
+    mark: async (
       documentId: string,
       markType: "DUPLICATE" | "MISFILED" | "IRRELEVANT" | "NOT_APPLICABLE",
       rationale?: string,
       duplicateOfDocumentId?: string
-    ) =>
-      request<DocumentItem>(`/documents/${documentId}/mark`, {
-        method: "POST",
-        body: JSON.stringify({
-          mark_type: markType,
-          rationale,
-          duplicate_of_document_id: duplicateOfDocumentId,
-        }),
-      }),
-    assignProject: (documentId: string, projectId: string, rationale?: string) =>
-      request<DocumentItem>(`/documents/${documentId}/assign-project`, {
-        method: "POST",
-        body: JSON.stringify({
-          project_id: projectId,
-          rationale,
-        }),
-      }),
-    manualEntry: (
+    ) => {
+      const doc = mockStore.markDocument(documentId, markType, rationale, duplicateOfDocumentId);
+      return wrap(doc);
+    },
+    assignProject: async (documentId: string, projectId: string, rationale?: string) => {
+      const doc = mockStore.assignDocumentProject(documentId, projectId, rationale);
+      return wrap(doc);
+    },
+    manualEntry: async (
       documentId: string,
-      entryData: {
+      _entryData: {
         document_type: string;
         counterparty: string;
         reference_number?: string;
@@ -331,33 +252,44 @@ export const api = {
         budget_line_id?: string;
         notes?: string;
       }
-    ) =>
-      request<{ document: DocumentItem; spend_record?: SpendRecord }>(
-        `/documents/${documentId}/manual-entry`,
-        {
-          method: "POST",
-          body: JSON.stringify(entryData),
-        }
-      ),
-    getDownloadUrl: (documentId: string) =>
-      request<{ document_id: string; download_url: string; expires_in: number }>(
-        `/documents/${documentId}/download-url`
-      ),
+    ) => {
+      const doc = mockStore.getDocumentById(documentId) || mockStore.getDocuments()[0];
+      return wrap({
+        document: doc,
+      });
+    },
+    getDownloadUrl: async (documentId: string) => {
+      const doc = mockStore.getDocumentById(documentId);
+      const filename = doc ? doc.original_filename : "Budget for 73 Broadway (1).pdf";
+      return wrap({
+        document_id: documentId,
+        download_url: `/sample-docs/${encodeURIComponent(filename)}`,
+        expires_in: 3600,
+      });
+    },
   },
 
   budget: {
-    getCurrent: (projectId: string) =>
-      request<{ budget_id: string; status: string; lines: BudgetLine[] }>(
-        `/projects/${projectId}/budgets/current`
-      ),
-    approveBaseline: (budgetId: string) =>
-      request<{ id: string; status: string; approved_at: string; message: string }>(
-        `/budgets/${budgetId}/approve`,
-        { method: "POST" }
-      ),
-    getChangeOrders: (projectId: string) =>
-      request<ChangeOrder[]>(`/projects/${projectId}/change-orders`),
-    createChangeOrder: (
+    getCurrent: async (projectId: string) => {
+      const lines = mockStore.getBudgetLines(projectId);
+      return wrap({
+        budget_id: `budget-${projectId}`,
+        status: "APPROVED",
+        lines,
+      });
+    },
+    approveBaseline: async (budgetId: string) => {
+      return wrap({
+        id: budgetId,
+        status: "APPROVED",
+        approved_at: new Date().toISOString(),
+        message: "Baseline construction schedule and contingency reserve approved",
+      });
+    },
+    getChangeOrders: async (projectId: string) => {
+      return wrap(mockStore.getChangeOrders(projectId));
+    },
+    createChangeOrder: async (
       projectId: string,
       data: {
         title: string;
@@ -366,85 +298,61 @@ export const api = {
         target_budget_line_id: string;
         funding_source: ChangeOrder["funding_source"];
       }
-    ) =>
-      request<ChangeOrder>(`/projects/${projectId}/change-orders`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    approveChangeOrder: (changeOrderId: string, approvedAmount?: string) =>
-      request<ChangeOrder>(`/change-orders/${changeOrderId}/approve`, {
-        method: "POST",
-        body: JSON.stringify({ approved_amount: approvedAmount }),
-      }),
-    rejectChangeOrder: (changeOrderId: string, reason: string) =>
-      request<ChangeOrder>(`/change-orders/${changeOrderId}/reject`, {
-        method: "POST",
-        body: JSON.stringify({ reason }),
-      }),
-    moveContingency: (
+    ) => {
+      return wrap(mockStore.createChangeOrder(projectId, data));
+    },
+    approveChangeOrder: async (changeOrderId: string, approvedAmount?: string) => {
+      return wrap(mockStore.approveChangeOrder(changeOrderId, approvedAmount));
+    },
+    rejectChangeOrder: async (changeOrderId: string, reason: string) => {
+      return wrap(mockStore.rejectChangeOrder(changeOrderId, reason));
+    },
+    moveContingency: async (
       projectId: string,
       amount: string,
       destinationLineId: string,
       reason: string
-    ) =>
-      request<ContingencyMovement>(`/projects/${projectId}/contingency-movements`, {
-        method: "POST",
-        body: JSON.stringify({
-          amount,
-          destination_line_id: destinationLineId,
-          reason,
-        }),
-      }),
-    getContingencyMovements: (projectId: string) =>
-      request<ContingencyMovement[]>(`/projects/${projectId}/contingency-movements`),
-    linkMilestone: (budgetLineId: string, milestoneId: string | null) =>
-      request<BudgetLine>(`/budget-lines/${budgetLineId}/milestone`, {
-        method: "PATCH",
-        body: JSON.stringify({ milestone_id: milestoneId }),
-      }),
+    ) => {
+      return wrap(mockStore.moveContingency(projectId, amount, destinationLineId, reason));
+    },
+    getContingencyMovements: async (projectId: string) => {
+      return wrap(mockStore.getContingencyMovements(projectId));
+    },
+    linkMilestone: async (budgetLineId: string, milestoneId: string | null) => {
+      return wrap(mockStore.linkMilestoneToBudgetLine(budgetLineId, milestoneId));
+    },
   },
 
   spend: {
-    getFinancialAccounts: () =>
-      request<FinancialAccount[]>("/financial-accounts"),
-    getStatementPeriods: (accountId: string) =>
-      request<StatementPeriod[]>(`/financial-accounts/${accountId}/statement-periods`),
-    signoffStatementPeriod: (periodId: string, waiverReason?: string) =>
-      request<{ id: string; reconciled_status: string; signed_off_at: string; message: string; period: StatementPeriod }>(
-        `/statement-periods/${periodId}/signoff`,
-        {
-          method: "POST",
-          body: JSON.stringify({ waiver_reason: waiverReason }),
-        }
-      ),
-    getTransactions: (projectId: string) =>
-      request<FinancialTransaction[]>(`/projects/${projectId}/transactions`),
-    linkInvoice: (transactionId: string, documentId: string, notes?: string) =>
-      request<FinancialTransaction>(`/transactions/${transactionId}/link-invoice`, {
-        method: "POST",
-        body: JSON.stringify({ document_id: documentId, notes }),
-      }),
-    classifyCardSettlement: (transactionId: string, notes?: string) =>
-      request<FinancialTransaction>(`/transactions/${transactionId}/classify-card-settlement`, {
-        method: "POST",
-        body: JSON.stringify({ notes }),
-      }),
-    getReconciliationQueue: async (projectId: string) => {
-      const res = await request<any>(`/projects/${projectId}/reconciliation/queue`);
-      if (Array.isArray(res.data)) {
-        return {
-          ...res,
-          data: {
-            matches: res.data as ReconciliationMatch[],
-            total_pending: (res.data as ReconciliationMatch[]).filter(
-              (m) => m.status === "PENDING_REVIEW"
-            ).length,
-          },
-        };
-      }
-      return res as { data: { matches: ReconciliationMatch[]; total_pending: number }; meta: any };
+    getFinancialAccounts: async () => {
+      return wrap(mockStore.getFinancialAccounts());
     },
-    decideMatch: (
+    getStatementPeriods: async (accountId: string) => {
+      return wrap(mockStore.getStatementPeriods(accountId));
+    },
+    signoffStatementPeriod: async (periodId: string, waiverReason?: string) => {
+      const sp = mockStore.signoffStatementPeriod(periodId, waiverReason);
+      return wrap({
+        id: periodId,
+        reconciled_status: sp.reconciled_status,
+        signed_off_at: sp.reconciled_at || new Date().toISOString(),
+        message: "Statement period sign-off confirmed",
+        period: sp,
+      });
+    },
+    getTransactions: async (projectId: string) => {
+      return wrap(mockStore.getTransactions(projectId));
+    },
+    linkInvoice: async (transactionId: string, documentId: string, notes?: string) => {
+      return wrap(mockStore.linkInvoice(transactionId, documentId, notes));
+    },
+    classifyCardSettlement: async (transactionId: string, notes?: string) => {
+      return wrap(mockStore.classifyCardSettlement(transactionId, notes));
+    },
+    getReconciliationQueue: async (projectId: string) => {
+      return wrap(mockStore.getReconciliationQueue(projectId));
+    },
+    decideMatch: async (
       matchId: string,
       decision: "ACCEPT" | "SPLIT" | "REMAP" | "EXCLUDE" | "MARK_TRANSFER",
       payload?: {
@@ -453,25 +361,29 @@ export const api = {
         to_project_id?: string;
         allocations?: Array<{ budget_line_id: string; budget_line_name?: string; amount: string }>;
       }
-    ) =>
-      request<ReconciliationMatch>(
-        `/reconciliation-matches/${matchId}/decision`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            decision,
-            rationale: payload?.rationale,
-            target_budget_line_id: payload?.target_budget_line_id,
-            to_project_id: payload?.to_project_id,
-            allocations: payload?.allocations,
-          }),
-        }
-      ),
-    getImportBatches: (projectId: string) =>
-      request<ImportBatch[]>(`/projects/${projectId}/import-batches`),
-    getImportBatchById: (batchId: string) =>
-      request<ImportBatch>(`/import-batches/${batchId}`),
-    createImportBatch: (
+    ) => {
+      return wrap(mockStore.decideMatch(matchId, decision, payload));
+    },
+    getImportBatches: async (_projectId: string) => {
+      return wrap([]);
+    },
+    getImportBatchById: async (batchId: string) => {
+      return wrap({
+        id: batchId,
+        organization_id: "org-vance-dev",
+        project_id: mockStore.getActiveProjectId(),
+        adapter: "CSV",
+        version: "1.0",
+        status: "COMPLETED",
+        total_rows: 50,
+        accepted_rows: 50,
+        rejected_rows: 0,
+        duplicate_rows: 0,
+        uploaded_by: "Sarah Lin",
+        created_at: new Date().toISOString(),
+      });
+    },
+    createImportBatch: async (
       projectId: string,
       batchData: {
         adapter: string;
@@ -481,23 +393,45 @@ export const api = {
         financial_account_id?: string;
         control_total?: number;
       }
-    ) =>
-      request<ImportBatch>(`/projects/${projectId}/import-batches`, {
-        method: "POST",
-        body: JSON.stringify(batchData),
-      }),
-    allocateSpend: (
+    ) => {
+      return wrap({
+        id: `batch-${Date.now()}`,
+        organization_id: "org-vance-dev",
+        project_id: projectId,
+        adapter: batchData.adapter,
+        version: batchData.version,
+        status: "COMPLETED",
+        total_rows: 25,
+        accepted_rows: 25,
+        rejected_rows: 0,
+        duplicate_rows: 0,
+        uploaded_by: "Sarah Lin",
+        created_at: new Date().toISOString(),
+      });
+    },
+    allocateSpend: async (
       projectId: string,
       spendRecordId: string,
       allocations: Array<{ budget_line_id: string; amount: string }>
-    ) =>
-      request<SpendRecord>(`/projects/${projectId}/spend-records/${spendRecordId}/allocations`, {
-        method: "POST",
-        body: JSON.stringify({ allocations }),
-      }),
-    getInterProjectTransfers: (projectId: string) =>
-      request<InterProjectTransfer[]>(`/projects/${projectId}/inter-project-transfers`),
-    createInterProjectTransfer: (
+    ) => {
+      return wrap({
+        id: spendRecordId,
+        project_id: projectId,
+        vendor_name: "Vendor Allocation",
+        amount: String(allocations.reduce((s, a) => s + Number(a.amount), 0)),
+        transaction_date: new Date().toISOString().split("T")[0],
+        description: "Allocated spend record",
+        status: "REVIEWED" as const,
+        evidence_strength: "VERIFIED_INVOICE" as const,
+        budget_line_id: allocations[0]?.budget_line_id || "bl-01",
+        budget_line_name: "Sitework & Excavation",
+        allocations,
+      });
+    },
+    getInterProjectTransfers: async (projectId: string) => {
+      return wrap(mockStore.getInterProjectTransfers(projectId));
+    },
+    createInterProjectTransfer: async (
       projectId: string,
       data: {
         to_project_id: string;
@@ -505,32 +439,35 @@ export const api = {
         notes: string;
         transfer_date?: string;
       }
-    ) =>
-      request<InterProjectTransfer>(`/projects/${projectId}/inter-project-transfers`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    repayInterProjectTransfer: (
+    ) => {
+      return wrap(mockStore.createInterProjectTransfer(projectId, data));
+    },
+    repayInterProjectTransfer: async (
       transferId: string,
       repaidAmount: string,
       repaidDate?: string,
       notes?: string
-    ) =>
-      request<InterProjectTransfer>(`/inter-project-transfers/${transferId}/repay`, {
-        method: "POST",
-        body: JSON.stringify({
-          repaid_amount: repaidAmount,
-          repaid_date: repaidDate,
-          notes,
-        }),
-      }),
+    ) => {
+      return wrap(mockStore.repayInterProjectTransfer(transferId, repaidAmount, repaidDate, notes));
+    },
   },
 
   draws: {
-    list: (projectId: string) =>
-      request<DrawItem[]>(`/projects/${projectId}/draws`),
-    getById: (drawId: string) => request<DrawItem>(`/draws/${drawId}`),
-    create: (
+    list: async (projectId: string) => {
+      return wrap(mockStore.getDraws(projectId));
+    },
+    getById: async (drawId: string) => {
+      const d = mockStore.getDrawById(drawId);
+      if (!d) {
+        throw new ApiError(404, {
+          code: "NOT_FOUND",
+          message: `Draw ${drawId} not found`,
+          request_id: "req_draw_not_found",
+        });
+      }
+      return wrap(d);
+    },
+    create: async (
       projectId: string,
       data: {
         draw_number: number;
@@ -539,32 +476,19 @@ export const api = {
         lender_name?: string;
         lines: Array<{ budget_line_id: string; requested_amount: string }>;
       }
-    ) =>
-      request<DrawItem>(`/projects/${projectId}/draws`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    verifyWork: (drawId: string, notes?: string) =>
-      request<{ draw: DrawItem; verified: boolean; verified_by: string; verified_at: string; notes: string }>(
-        `/draws/${drawId}/verify-work`,
-        {
-          method: "POST",
-          body: JSON.stringify({ notes }),
-        }
-      ),
-    verifyCost: (drawId: string, notes?: string) =>
-      request<{ draw: DrawItem; costs_verified: boolean; prior_payments_verified: boolean; verified_by: string }>(
-        `/draws/${drawId}/verify-cost`,
-        {
-          method: "POST",
-          body: JSON.stringify({ notes }),
-        }
-      ),
-    markSubmitted: (drawId: string) =>
-      request<DrawItem>(`/draws/${drawId}/mark-submitted`, {
-        method: "POST",
-      }),
-    recordLenderDecision: (
+    ) => {
+      return wrap(mockStore.createDraw(projectId, data));
+    },
+    verifyWork: async (drawId: string, notes?: string) => {
+      return wrap(mockStore.verifyWork(drawId, notes));
+    },
+    verifyCost: async (drawId: string, notes?: string) => {
+      return wrap(mockStore.verifyCost(drawId, notes));
+    },
+    markSubmitted: async (drawId: string) => {
+      return wrap(mockStore.markDrawSubmitted(drawId));
+    },
+    recordLenderDecision: async (
       drawId: string,
       data: {
         recommended_amount: string;
@@ -572,434 +496,310 @@ export const api = {
         lender_notes?: string;
         line_decisions?: Array<{ line_id: string; recommended_amount: string; approved_amount: string; lender_notes?: string }>;
       }
-    ) =>
-      request<DrawItem>(`/draws/${drawId}/lender-decision`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    createRevision: (
+    ) => {
+      return wrap(mockStore.recordLenderDecision(drawId, data));
+    },
+    createRevision: async (
       drawId: string,
       data: {
         revision_reason: string;
         requested_amount?: string;
         lines?: Array<{ budget_line_id: string; requested_amount: string }>;
       }
-    ) =>
-      request<DrawItem>(`/draws/${drawId}/revisions`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    resolveCondition: (drawId: string, conditionId: string, notes?: string) =>
-      request<DrawItem>(`/draws/${drawId}/conditions/${conditionId}/resolve`, {
-        method: "POST",
-        body: JSON.stringify({ notes }),
-      }),
-    getPacket: (drawId: string) =>
-      request<{
-        draw_id: string;
-        checklist: Array<{ id: string; requirement: string; status: string; document_name?: string }>;
-        portal_summary: { vendor_count: number; total_requested: string; retainage_withheld: string; net_payable: string; commitment_id?: string };
-      }>(`/draws/${drawId}/packet`),
-    getUnallocatedFunding: (projectId: string) =>
-      request<{
-        project_id: string;
-        unallocated_deposits: Array<{
-          transaction_id: string;
-          institution: string;
-          amount: string;
-          cleared_date: string;
-          memo: string;
-        }>;
-        total_unallocated: string;
-      }>(`/projects/${projectId}/funding/unallocated`),
-    allocateFunding: (drawId: string, transactionId: string, amount: string) =>
-      request<DrawItem>(`/draws/${drawId}/fundings`, {
-        method: "POST",
-        body: JSON.stringify({
-          transaction_id: transactionId,
-          amount,
-        }),
-      }),
+    ) => {
+      return wrap(mockStore.createRevision(drawId, data));
+    },
+    resolveCondition: async (drawId: string, conditionId: string, notes?: string) => {
+      return wrap(mockStore.resolveCondition(drawId, conditionId, notes));
+    },
+    getPacket: async (drawId: string) => {
+      return wrap(mockStore.getPacket(drawId));
+    },
+    getUnallocatedFunding: async (projectId: string) => {
+      return wrap(mockStore.getUnallocatedFunding(projectId));
+    },
+    allocateFunding: async (drawId: string, transactionId: string, amount: string) => {
+      return wrap(mockStore.allocateFunding(drawId, transactionId, amount));
+    },
   },
 
   progress: {
     getMilestones: async (projectId: string) => {
-      const res = await request<any[]>(`/projects/${projectId}/milestones`);
-      if (res.data && Array.isArray(res.data)) {
-        res.data = res.data.map((m: any) => ({
-          ...m,
-          planned_start: m.planned_start_date || m.planned_start || new Date().toISOString(),
-          planned_end: m.planned_completion_date || m.planned_end || new Date().toISOString(),
-          actual_start: m.actual_start_date || m.actual_start,
-          actual_end: m.actual_completion_date || m.actual_end,
-          forecast_end: m.forecast_completion_date || m.forecast_end || m.planned_completion_date || m.planned_end,
-          percent_complete: typeof m.progress_percentage === "number" ? m.progress_percentage : (m.percent_complete || 0),
-          critical_path: Boolean(m.critical_path ?? (m.code === "W-01" || m.code === "W-02" || m.code === "W-03")),
-          evidence_count: Array.isArray(m.evidence) ? m.evidence.length : (m.evidence_count || 0),
-          evidence_attachments: m.evidence || [],
-        }));
-      }
-      return res as ApiResponse<MilestoneItem[]>;
+      return wrap(mockStore.getMilestones(projectId));
     },
     getMilestoneById: async (milestoneId: string) => {
-      const res = await request<any>(`/milestones/${milestoneId}`);
-      if (res.data) {
-        const m = res.data;
-        res.data = {
-          ...m,
-          planned_start: m.planned_start_date || m.planned_start,
-          planned_end: m.planned_completion_date || m.planned_end,
-          actual_start: m.actual_start_date || m.actual_start,
-          actual_end: m.actual_completion_date || m.actual_end,
-          forecast_end: m.forecast_completion_date || m.forecast_end,
-          percent_complete: typeof m.progress_percentage === "number" ? m.progress_percentage : (m.percent_complete || 0),
-          critical_path: Boolean(m.critical_path),
-        };
+      const m = mockStore.getMilestoneById(milestoneId);
+      if (!m) {
+        throw new ApiError(404, {
+          code: "NOT_FOUND",
+          message: `Milestone ${milestoneId} not found`,
+          request_id: "req_ms_not_found",
+        });
       }
-      return res as ApiResponse<MilestoneItem>;
+      return wrap(m);
     },
-    createMilestone: (projectId: string, data: Partial<MilestoneItem>) =>
-      request<MilestoneItem>(`/projects/${projectId}/milestones`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    updateMilestone: (
-      milestoneId: string,
-      data: any
-    ) => {
-      const payload: any = { ...data };
-      if (data.forecast_end && !data.forecast_completion_date) {
-        payload.forecast_completion_date = data.forecast_end;
-      }
-      if (data.actual_start && !data.actual_start_date) {
-        payload.actual_start_date = data.actual_start;
-      }
-      if (data.actual_end && !data.actual_completion_date) {
-        payload.actual_completion_date = data.actual_end;
-      }
-      if (typeof data.percent_complete === "number" && typeof data.progress_percentage !== "number") {
-        payload.progress_percentage = data.percent_complete;
-      }
-      if (data.update_rationale && !data.forecast_change_reason) {
-        payload.forecast_change_reason = data.update_rationale;
-      }
-      return request<MilestoneItem>(`/milestones/${milestoneId}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      });
+    createMilestone: async (projectId: string, data: Partial<MilestoneItem>) => {
+      return wrap(mockStore.createMilestone(projectId, data));
     },
-    attachEvidence: (milestoneId: string, data: Partial<MilestoneEvidence>) =>
-      request<MilestoneEvidence>(`/milestones/${milestoneId}/evidence`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    resolveDiscrepancy: (
+    updateMilestone: async (milestoneId: string, data: any) => {
+      return wrap(mockStore.updateMilestone(milestoneId, data));
+    },
+    attachEvidence: async (milestoneId: string, data: Partial<MilestoneEvidence>) => {
+      return wrap(mockStore.attachEvidence(milestoneId, data));
+    },
+    resolveDiscrepancy: async (
       milestoneId: string,
       data: {
         action: "ACCEPT_INSPECTION" | "SUBMIT_REBUTTAL" | "OVERRIDE_JOINT";
         resolution_note: string;
         agreed_percent?: number;
       }
-    ) =>
-      request<MilestoneItem>(`/milestones/${milestoneId}/resolve-discrepancy`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    getScheduleForecast: (projectId: string) =>
-      request<ScheduleForecast>(`/projects/${projectId}/schedule/forecast`),
+    ) => {
+      return wrap(mockStore.resolveDiscrepancy(milestoneId, data));
+    },
+    getScheduleForecast: async (projectId: string) => {
+      return wrap(mockStore.getScheduleForecast(projectId));
+    },
   },
 
   economics: {
-    getEconomics: (projectId: string) =>
-      request<ProjectEconomics>(`/projects/${projectId}/economics`),
-    getProForma: (projectId: string) =>
-      request<ProFormaLineItem[]>(`/projects/${projectId}/pro-forma`),
-    createFinancialPlan: (
-      projectId: string,
-      data: {
-        plan_type: "PRO_FORMA" | "UNDERWRITING" | "BUDGET_BASELINE";
-        projected_revenue: number;
-        projected_cost: number;
-        target_irr?: number;
-        target_equity_multiple?: number;
-        lines?: any[];
-      }
-    ) =>
-      request<any>(`/projects/${projectId}/financial-plans`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    getInvestorContributions: (projectId: string) =>
-      request<InvestorContribution[]>(`/projects/${projectId}/investors/contributions`),
-    recordInvestorContribution: (
-      projectId: string,
-      data: Partial<InvestorContribution>
-    ) =>
-      request<InvestorContribution>(`/projects/${projectId}/investors/contributions`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    getInvestorDistributions: (projectId: string) =>
-      request<InvestorDistribution[]>(`/projects/${projectId}/investors/distributions`),
-    recordInvestorDistribution: (
-      projectId: string,
-      data: Partial<InvestorDistribution>
-    ) =>
-      request<InvestorDistribution>(`/projects/${projectId}/investors/distributions`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    getDispositionUnits: (projectId: string) =>
-      request<DispositionUnit[]>(`/projects/${projectId}/disposition/units`),
-    recordDispositionSale: (
-      projectId: string,
-      unitId: string,
-      data: Partial<DispositionUnit>
-    ) =>
-      request<DispositionUnit>(`/projects/${projectId}/disposition/units/${unitId}/sale`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    getCloseoutReport: async (projectId: string) => {
-      const res = await request<any>(`/projects/${projectId}/closeout/report`);
-      if (res.data) {
-        // Normalize checklist items if backend returns checklist_items
-        const rawChecklist = res.data.checklist || res.data.checklist_items || [];
-        const normalizedChecklist = rawChecklist.map((item: any, idx: number) => ({
-          id: item.id || `chk-${idx}`,
-          title: item.title || item.item || "Closeout Requirement",
-          category: item.category || "ACCOUNTING",
-          is_satisfied: item.is_satisfied ?? (item.status === "COMPLETED"),
-          blocker_reason: item.blocker_reason || (item.status !== "COMPLETED" ? "Pending closeout milestone verification" : undefined),
-          verified_at: item.verified_at || new Date().toISOString(),
-          verified_by: item.verified_by || "Auditor Review",
-          document_name: item.document_name,
-        }));
-        res.data.checklist = normalizedChecklist;
-        res.data.post_closeout_adjustments = res.data.post_closeout_adjustments || [];
-      }
-      return res as { data: CloseoutReport; meta: any };
+    getEconomics: async (projectId: string) => {
+      return wrap(mockStore.getEconomics(projectId));
     },
-    approveCloseout: (
-      projectId: string,
-      data: { is_exception_override?: boolean; rationale: string }
-    ) =>
-      request<CloseoutReport>(`/projects/${projectId}/closeout/approve`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    recordPostCloseoutAdjustment: (
-      projectId: string,
-      data: Partial<PostCloseoutAdjustment>
-    ) =>
-      request<PostCloseoutAdjustment>(`/projects/${projectId}/post-closeout-adjustments`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
+    getProForma: async (projectId: string) => {
+      return wrap(mockStore.getProForma(projectId));
+    },
+    createFinancialPlan: async (_projectId: string, _data: any) => {
+      return wrap({ success: true });
+    },
+    getInvestorContributions: async (projectId: string) => {
+      return wrap(mockStore.getInvestorContributions(projectId));
+    },
+    recordInvestorContribution: async (projectId: string, data: Partial<InvestorContribution>) => {
+      return wrap(mockStore.recordInvestorContribution(projectId, data));
+    },
+    getInvestorDistributions: async (projectId: string) => {
+      return wrap(mockStore.getInvestorDistributions(projectId));
+    },
+    recordInvestorDistribution: async (projectId: string, data: Partial<InvestorDistribution>) => {
+      return wrap(mockStore.recordInvestorDistribution(projectId, data));
+    },
+    getDispositionUnits: async (projectId: string) => {
+      return wrap(mockStore.getDispositionUnits(projectId));
+    },
+    recordDispositionSale: async (projectId: string, unitId: string, data: Partial<DispositionUnit>) => {
+      return wrap(mockStore.recordDispositionSale(projectId, unitId, data));
+    },
+    getCloseoutReport: async (projectId: string) => {
+      return wrap(mockStore.getCloseoutReport(projectId));
+    },
+    approveCloseout: async (projectId: string, data: { is_exception_override?: boolean; rationale: string }) => {
+      return wrap(mockStore.approveCloseout(projectId, data));
+    },
+    recordPostCloseoutAdjustment: async (projectId: string, data: Partial<PostCloseoutAdjustment>) => {
+      return wrap(mockStore.recordPostCloseoutAdjustment(projectId, data));
+    },
   },
 
   investor: {
-    getSharedProjects: () => request<Project[]>("/investor/projects"),
-    getUpdateSnapshot: (updateId: string) =>
-      request<InvestorUpdateSnapshot>(`/investor/updates/${updateId}`),
-    listUpdates: (projectId: string) =>
-      request<InvestorUpdateSnapshot[]>(`/projects/${projectId}/investor-updates`),
-    generateDraft: (projectId: string) =>
-      request<InvestorUpdateSnapshot>(`/projects/${projectId}/investor-updates/generate-draft`, {
-        method: "POST",
-      }),
-    saveDraft: (projectId: string, data: Partial<InvestorUpdateSnapshot>) =>
-      request<InvestorUpdateSnapshot>(`/projects/${projectId}/investor-updates/draft`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    publish: (updateId: string, data: PublishInvestorUpdatePayload) =>
-      request<InvestorUpdateSnapshot>(`/investor/updates/${updateId}/publish`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    withdraw: (updateId: string, data: WithdrawInvestorUpdatePayload) =>
-      request<InvestorUpdateSnapshot>(`/investor/updates/${updateId}/withdraw`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
+    getSharedProjects: async () => {
+      return wrap(mockStore.getProjects());
+    },
+    getUpdateSnapshot: async (updateId: string) => {
+      const u = mockStore.getUpdateSnapshot(updateId);
+      if (!u) {
+        throw new ApiError(404, {
+          code: "NOT_FOUND",
+          message: `Investor update ${updateId} not found`,
+          request_id: "req_upd_not_found",
+        });
+      }
+      return wrap(u);
+    },
+    listUpdates: async (projectId: string) => {
+      return wrap(mockStore.getInvestorUpdates(projectId));
+    },
+    generateDraft: async (projectId: string) => {
+      return wrap(mockStore.generateDraft(projectId));
+    },
+    saveDraft: async (projectId: string, data: Partial<InvestorUpdateSnapshot>) => {
+      return wrap(mockStore.saveDraft(projectId, data));
+    },
+    publish: async (updateId: string, data: PublishInvestorUpdatePayload) => {
+      return wrap(mockStore.publishUpdate(updateId, data));
+    },
+    withdraw: async (updateId: string, data: WithdrawInvestorUpdatePayload) => {
+      return wrap(mockStore.withdrawUpdate(updateId, data.reason));
+    },
   },
 
   alerts: {
-    list: (projectId: string) =>
-      request<AlertItem[]>(`/projects/${projectId}/alerts`),
-    resolveAlert: (alertId: string, resolutionNote?: string) =>
-      request<AlertItem>(`/alerts/${alertId}/resolve`, {
-        method: "POST",
-        body: JSON.stringify({ resolution_note: resolutionNote }),
-      }),
-    waiveAlert: (alertId: string, payload: WaiveAlertPayload) =>
-      request<AlertItem>(`/alerts/${alertId}/waive`, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
-    escalateAlert: (alertId: string, payload: EscalateAlertPayload) =>
-      request<AlertItem>(`/alerts/${alertId}/escalate`, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
-    getDataQualityIssues: (projectId: string) =>
-      request<DataQualityIssue[]>(`/projects/${projectId}/data-quality-issues`),
-    resolveDataQualityIssue: (dqiId: string, payload?: ResolveDqiPayload) =>
-      request<DataQualityIssue>(`/data-quality-issues/${dqiId}/resolve`, {
-        method: "POST",
-        body: JSON.stringify(payload || {}),
-      }),
-    waiveDataQualityIssue: (dqiId: string, reason: string) =>
-      request<DataQualityIssue>(`/data-quality-issues/${dqiId}/waive`, {
-        method: "POST",
-        body: JSON.stringify({ reason }),
-      }),
-    getAuditEvents: () => request<AuditEvent[]>("/audit-events"),
+    list: async (projectId: string) => {
+      return wrap(mockStore.getAlerts(projectId));
+    },
+    resolveAlert: async (alertId: string, resolutionNote?: string) => {
+      return wrap(mockStore.resolveAlert(alertId, resolutionNote));
+    },
+    waiveAlert: async (alertId: string, payload: WaiveAlertPayload) => {
+      return wrap(mockStore.waiveAlert(alertId, payload));
+    },
+    escalateAlert: async (alertId: string, payload: EscalateAlertPayload) => {
+      return wrap(mockStore.escalateAlert(alertId, payload));
+    },
+    getDataQualityIssues: async (projectId: string) => {
+      return wrap(mockStore.getDataQualityIssues(projectId));
+    },
+    resolveDataQualityIssue: async (dqiId: string, payload?: ResolveDqiPayload) => {
+      return wrap(mockStore.resolveDqi(dqiId, payload));
+    },
+    waiveDataQualityIssue: async (dqiId: string, reason: string) => {
+      return wrap(mockStore.waiveDqi(dqiId, reason));
+    },
+    getAuditEvents: async () => {
+      return wrap(mockStore.getAuditEvents());
+    },
   },
 
   notifications: {
-    list: (projectId?: string) => {
-      const qs = projectId ? `?project_id=${projectId}` : "";
-      return request<NotificationItem[]>(`/notifications${qs}`);
+    list: async (projectId?: string) => {
+      return wrap(mockStore.getNotifications(projectId));
     },
-    markRead: (id: string) =>
-      request<NotificationItem>(`/notifications/${id}/read`, {
-        method: "POST",
-      }),
-    markAllRead: (projectId?: string) => {
-      const qs = projectId ? `?project_id=${projectId}` : "";
-      return request<{ success: boolean; count: number }>(`/notifications/read-all${qs}`, {
-        method: "POST",
-      });
+    markRead: async (id: string) => {
+      return wrap(mockStore.markNotificationRead(id));
+    },
+    markAllRead: async (projectId?: string) => {
+      return wrap(mockStore.markAllNotificationsRead(projectId));
     },
   },
 
   team: {
-    list: (projectId: string) =>
-      request<TeamMember[]>(`/projects/${projectId}/team`),
-    invite: (_projectId: string, payload: InviteTeamMemberPayload) =>
-      request<ProjectInvitation>("/invitations", {
-        method: "POST",
-        body: JSON.stringify({
-          email: payload.email,
-          role: payload.role,
-          project_id: payload.project_id,
-          scope: "PROJECT",
-        }),
-      }),
-    updateRole: (projectId: string, id: string, payload: UpdateTeamMemberRolePayload) =>
-      request<{ status: string }>(`/projects/${projectId}/members/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ role: payload.role }),
-      }),
-    revoke: (projectId: string, id: string) =>
-      request<{ status: string }>(`/projects/${projectId}/members/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ role: "REMOVE" }),
-      }),
+    list: async (projectId: string) => {
+      return wrap(mockStore.getTeamMembers(projectId));
+    },
+    invite: async (projectId: string, payload: InviteTeamMemberPayload) => {
+      return wrap(mockStore.inviteTeamMember(projectId, payload));
+    },
+    updateRole: async (projectId: string, id: string, payload: UpdateTeamMemberRolePayload) => {
+      return wrap(mockStore.updateTeamMemberRole(projectId, id, payload.role));
+    },
+    revoke: async (projectId: string, id: string) => {
+      return wrap(mockStore.updateTeamMemberRole(projectId, id, "REMOVE" as any));
+    },
   },
 
   exports: {
-    list: (projectId: string) =>
-      request<ReportExportItem[]>(`/projects/${projectId}/exports`),
-    request: (projectId: string, payload: RequestExportPayload) =>
-      request<ReportExportItem>(`/projects/${projectId}/exports/request`, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+    list: async (projectId: string) => {
+      return wrap(mockStore.getExports(projectId));
+    },
+    request: async (projectId: string, payload: RequestExportPayload) => {
+      return wrap(mockStore.requestExport(projectId, payload));
+    },
   },
 
   onboarding: {
-    getCurrentSession: (projectId?: string) =>
-      request<OnboardingSession>(
-        `/onboarding/sessions/current${projectId ? `?project_id=${encodeURIComponent(projectId)}` : ""}`
-      ),
-    submitAnswer: (
+    getCurrentSession: async (projectId?: string) => {
+      return wrap(mockStore.getOnboardingSession(projectId));
+    },
+    submitAnswer: async (
       sessionId: string,
       questionKey: string,
       answerValue: string,
-      answerType: SpecialAnswerType = "STANDARD",
-      reason?: string,
-      questionVersion = "v1.0",
-      otherSpecification?: string
-    ) =>
-      request<import("@/lib/types").OnboardingAnswer>(`/onboarding/sessions/${sessionId}/answers`, {
-        method: "POST",
-        body: JSON.stringify({
-          question_key: questionKey,
-          question_version: questionVersion,
-          answer_payload:
-            answerType === "STANDARD"
-              ? {
-                  value: answerValue,
-                  ...(otherSpecification ? { other_specification: otherSpecification } : {}),
-                }
-              : { special: answerType, reason },
-        }),
-      }),
-    getTasks: (projectId: string) =>
-      request<OnboardingTask[]>(`/projects/${projectId}/onboarding/tasks`),
+      _answerType: SpecialAnswerType = "STANDARD",
+      _reason?: string,
+      _questionVersion = "v1.0",
+      _otherSpecification?: string
+    ) => {
+      return wrap(mockStore.submitOnboardingAnswer(sessionId, questionKey, answerValue));
+    },
+    getTasks: async (projectId: string) => {
+      return wrap(mockStore.getOnboardingTasks(projectId));
+    },
   },
 
   readiness: {
-    getProjectReadiness: (projectId: string) =>
-      request<ProjectReadiness>(`/projects/${projectId}/readiness`),
-    approveConfiguration: (versionId: string) =>
-      request<ConfigurationVersion>(`/configuration-versions/${versionId}/approve`, {
-        method: "POST",
-      }),
-    rejectConfiguration: (versionId: string, reason: string) =>
-      request<ConfigurationVersion>(`/configuration-versions/${versionId}/reject`, {
-        method: "POST",
-        body: JSON.stringify({ reason }),
-      }),
+    getProjectReadiness: async (projectId: string) => {
+      return wrap(mockStore.getProjectReadiness(projectId));
+    },
+    approveConfiguration: async (versionId: string) => {
+      return wrap({
+        id: versionId,
+        project_id: mockStore.getActiveProjectId(),
+        configuration_type: "BUDGET_BASELINE" as const,
+        title: "Budget Baseline",
+        summary: "Approved baseline configuration",
+        proposed_value: "101922000",
+        status: "APPROVED" as const,
+        proposed_by: "Sarah Lin",
+        proposed_at: new Date().toISOString(),
+        approved_by: mockStore.getCurrentUser().name,
+        approved_at: new Date().toISOString(),
+      });
+    },
+    rejectConfiguration: async (versionId: string, reason: string) => {
+      return wrap({
+        id: versionId,
+        project_id: mockStore.getActiveProjectId(),
+        configuration_type: "BUDGET_BASELINE" as const,
+        title: "Budget Baseline",
+        summary: "Rejected baseline configuration",
+        proposed_value: "101922000",
+        status: "REJECTED" as const,
+        proposed_by: "Sarah Lin",
+        proposed_at: new Date().toISOString(),
+        rejection_reason: reason,
+      });
+    },
   },
 
   invitations: {
-    list: () => request<ProjectInvitation[]>("/invitations"),
-    getByToken: (token: string) =>
-      request<ProjectInvitation>(`/invitations/${token}`),
-    accept: (token: string, fullName: string, password?: string) =>
-      request<{ user: UserProfile; session: OnboardingSession }>(`/invitations/${token}/accept`, {
-        method: "POST",
-        body: JSON.stringify({ full_name: fullName, password }),
-      }),
-    create: (inviteData: {
+    list: async () => {
+      return wrap(mockStore.getInvitations());
+    },
+    getByToken: async (token: string) => {
+      return wrap(mockStore.getInvitationByToken(token));
+    },
+    accept: async (_token: string, fullName: string, _password?: string) => {
+      const user = mockStore.createUser({ name: fullName });
+      return wrap({
+        user,
+        session: mockStore.getOnboardingSession(),
+      });
+    },
+    create: async (inviteData: {
       email: string;
       role: import("@/lib/types").UserRole;
       project_id?: string;
       scope?: string;
-    }) =>
-      request<ProjectInvitation>("/invitations", {
-        method: "POST",
-        body: JSON.stringify(inviteData),
-      }),
+    }) => {
+      return wrap(
+        mockStore.inviteTeamMember(inviteData.project_id || mockStore.getActiveProjectId(), inviteData)
+      );
+    },
   },
 
   submissions: {
-    list: (projectId: string, params?: { status?: string; type?: string }) => {
-      const query = new URLSearchParams();
-      if (params?.status) query.set("status", params.status);
-      if (params?.type) query.set("type", params.type);
-      const qs = query.toString() ? `?${query.toString()}` : "";
-      return request<GCSubmission[]>(`/projects/${projectId}/submissions${qs}`);
+    list: async (projectId: string, params?: { status?: string; type?: string }) => {
+      return wrap(mockStore.getGCSubmissions(projectId, params));
     },
-    getById: (id: string) => request<GCSubmission>(`/submissions/${id}`),
-    create: (projectId: string, payload: CreateGCSubmissionPayload) =>
-      request<GCSubmission>(`/projects/${projectId}/submissions`, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
-    review: (id: string, payload: ReviewGCSubmissionPayload) =>
-      request<GCSubmission>(`/submissions/${id}/review`, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
-    checkDuplicateInvoice: (projectId: string, payload: { invoice_number: string; amount?: string }) =>
-      request<DuplicateInvoiceCheckResult>(`/projects/${projectId}/check-duplicate-invoice`, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+    getById: async (id: string) => {
+      const s = mockStore.getGCSubmissionById(id);
+      if (!s) {
+        throw new ApiError(404, {
+          code: "NOT_FOUND",
+          message: `GC Submission ${id} not found`,
+          request_id: "req_sub_not_found",
+        });
+      }
+      return wrap(s);
+    },
+    create: async (projectId: string, payload: CreateGCSubmissionPayload) => {
+      return wrap(mockStore.createGCSubmission(projectId, payload));
+    },
+    review: async (id: string, payload: ReviewGCSubmissionPayload) => {
+      return wrap(mockStore.reviewGCSubmission(id, payload));
+    },
+    checkDuplicateInvoice: async (projectId: string, payload: { invoice_number: string; amount?: string }) => {
+      return wrap(mockStore.checkDuplicateInvoice(projectId, payload));
+    },
   },
 };

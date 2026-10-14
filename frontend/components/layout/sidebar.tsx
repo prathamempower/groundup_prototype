@@ -223,9 +223,17 @@ export function Sidebar({
 
                 {/* Project Metadata */}
                 <div className="min-w-0 flex-1">
-                  <span className="text-xs font-bold text-slate-900 truncate block leading-tight">
-                    {activeProject?.name || "161 Woodlawn Ave"}
-                  </span>
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-xs font-bold text-slate-900 truncate block leading-tight">
+                      {activeProject?.name || "161 Woodlawn Ave"}
+                    </span>
+                    <Link
+                      href="/projects"
+                      className="text-[10px] font-semibold text-blue-600 hover:text-blue-700 hover:underline shrink-0"
+                    >
+                      Switch
+                    </Link>
+                  </div>
 
                   <span className="mt-0.5 text-[11px] text-slate-500 truncate block leading-snug">
                     {activeProject?.address || "Jersey City, NJ"}

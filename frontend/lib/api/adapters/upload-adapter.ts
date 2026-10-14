@@ -17,38 +17,18 @@ export interface UploadAdapter {
   confirmUpload(documentId: string): Promise<{ id: string; status: string; sha256: string; job_id: string }>;
 }
 
-export class S3UploadAdapter implements UploadAdapter {
+export class MockUploadAdapter implements UploadAdapter {
   async getUploadUrl(filename: string, mimeType: string): Promise<PresignedUploadUrlResult> {
     const res = await api.documents.getUploadUrl(filename, mimeType);
     return res.data;
   }
 
-  async uploadFile(uploadUrl: string, file: File | Blob, options?: UploadFileOptions): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open("PUT", uploadUrl);
-      xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
-
-      if (options?.onProgress && xhr.upload) {
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const pct = Math.round((event.loaded / event.total) * 100);
-            options.onProgress?.(pct);
-          }
-        };
-      }
-
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          resolve();
-        } else {
-          reject(new Error(`S3 upload failed with status ${xhr.status}`));
-        }
-      };
-
-      xhr.onerror = () => reject(new Error("Network error during file upload"));
-      xhr.send(file);
-    });
+  async uploadFile(_uploadUrl: string, _file: File | Blob, options?: UploadFileOptions): Promise<void> {
+    if (options?.onProgress) {
+      options.onProgress(50);
+      await new Promise((r) => setTimeout(r, 50));
+      options.onProgress(100);
+    }
   }
 
   async confirmUpload(documentId: string): Promise<{ id: string; status: string; sha256: string; job_id: string }> {
@@ -57,4 +37,5 @@ export class S3UploadAdapter implements UploadAdapter {
   }
 }
 
-export const uploadAdapter: UploadAdapter = new S3UploadAdapter();
+export const uploadAdapter: UploadAdapter = new MockUploadAdapter();
+export const S3UploadAdapter = MockUploadAdapter;

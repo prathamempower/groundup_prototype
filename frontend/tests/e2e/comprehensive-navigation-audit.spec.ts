@@ -50,7 +50,7 @@ test.describe("Full Navigation & Workspace Page Audit", () => {
     console.log("Detected Project ID:", projectId);
 
     // Sidebar MUST be visible inside workspace!
-    const sidebar = page.locator("aside");
+    const sidebar = page.locator("aside").first();
     await expect(sidebar).toBeVisible();
 
     // Workspace pages to test

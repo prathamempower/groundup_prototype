@@ -8,16 +8,14 @@ GroundUp AI bridges the trust gap between Developers, General Contractors (GCs),
 
 ## Architecture Overview
 
+GroundUp AI is designed as a high-performance, standalone Next.js application running completely in the browser without any backend or Docker dependencies. It features a reactive, in-memory stateful data store with localStorage persistence, providing complete domain capabilities, instant mutations, and rich realistic real-estate development data.
+
 ```mermaid
 graph TD
     Client["Next.js 14 Frontend<br/>(TailwindCSS, Radix UI, TanStack Query)"]
-    API["FastAPI Backend<br/>(REST API, JWT Auth, RBAC)"]
-    DB[("PostgreSQL 16<br/>(Async SQLAlchemy, Alembic)")]
-    Storage["Local / S3 Storage<br/>(Draws, Invoices, Lien Waivers)"]
+    Store["Stateful Client Mock Store<br/>(Local Storage & Reactive Domain Engine)"]
 
-    Client -->|HTTP / REST| API
-    API -->|asyncpg / SQLAlchemy| DB
-    API -->|Document Processing| Storage
+    Client -->|In-Memory API Client| Store
 
     subgraph "Core Functional Modules"
         ONB["Adaptive Onboarding Graph"]
@@ -28,18 +26,17 @@ graph TD
         AUD["Append-Only Audit Log"]
     end
 
-    API --- ONB
-    API --- BUD
-    API --- DRW
-    API --- REC
-    API --- ECO
-    API --- AUD
+    Store --- ONB
+    Store --- BUD
+    Store --- DRW
+    Store --- REC
+    Store --- ECO
+    Store --- AUD
 ```
 
 ### Tech Stack
 - **Frontend**: Next.js 14 (App Router), React 18, TypeScript, TailwindCSS, Radix UI primitives, Lucide Icons, Recharts, Vitest & Playwright.
-- **Backend**: Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.0 (Async), Alembic, Asyncpg, Argon2-cffi, Python-Jose (JWT).
-- **Database & Services**: PostgreSQL 16 Alpine via Docker Compose.
+- **Data Engine**: Reactive client-side mock repository with complete entity schemas and offline data persistence. Zero backend or Docker required.
 
 ---
 
@@ -52,7 +49,7 @@ graph TD
 
 2. **Clean B2B SaaS Project Setup (Stage 3 Contract Models)**
    - Contract models supported: **Cost-Plus (Standard)**, **Guaranteed Maximum Price (GMP)**, **Fixed Price (Stipulated Sum)**, **Milestone-Based**, **Open-Book / Target Price**, and **Hybrid / Custom**.
-   - Bank Account architecture selection (Dedicated Project Account vs. Shared Operating Account with Virtual Sub-Ledger).
+   - Dedicated Project Account vs. Shared Operating Account with Virtual Sub-Ledger.
 
 3. **Budget & Contingency Management**
    - Baseline budget locking with audit-logged Change Order Requests (COR).
@@ -72,216 +69,53 @@ graph TD
 
 ---
 
-## Getting Started
+## Quick Start (Zero Dependencies)
 
 ### Prerequisites
-- **Docker & Docker Compose** (for PostgreSQL)
-- **Node.js 18+ & npm** (for Frontend)
-- **Python 3.12+** (for Backend)
-- **Make** (optional, recommended for convenient CLI targets)
+- **Node.js 18+ & npm**
 
----
-
-### Step-by-Step Complete Setup
-
-#### 1. Clone the Repository
+### Run Development Server
 ```bash
-git clone -b dev https://github.com/prathamempower/groundup_prototype.git
-cd groundup_prototype
-```
-
-#### 2. Start PostgreSQL Database
-```bash
-# Using Make
-make db-up
-
-# Or using Docker Compose directly
-docker compose up -d db
-```
-*PostgreSQL is exposed on localhost port `5436` (User: `groundup`, Password: `groundup_password`, Database: `groundup_db`).*
-
-#### 3. Backend Setup
-Create a Python virtual environment and install the required dependencies:
-```bash
-cd backend
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-cd ..
-```
-
-Run Alembic database migrations:
-```bash
-# Using Make
-make migrate
-
-# Or manually
-cd backend
-PYTHONPATH=. ../backend/.venv/bin/alembic upgrade head
-cd ..
-```
-
-Seed initial fixtures and demo projects:
-```bash
-# Using Make
-make seed
-
-# Or manually
-PYTHONPATH=backend backend/.venv/bin/python -m app.seed.seed_runner
-```
-
-#### 4. Frontend Setup
-Install frontend dependencies:
-```bash
-cd frontend
+# Install dependencies
 npm install
-cd ..
-```
 
----
-
-## Running the Development Servers
-
-You can run both backend and frontend concurrently, or start each service in separate terminals.
-
-### Option A: Run Both Services Concurrently
-From the root directory:
-```bash
+# Start the dev server
 npm run dev
 ```
 
-### Option B: Run Services Individually
-- **Backend API Server (Port 8000)**:
-  ```bash
-  make dev
-  # Or:
-  source backend/.venv/bin/activate
-  uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --app-dir backend
-  ```
-  API Documentation (Swagger UI) is available at: [http://localhost:8000/docs](http://localhost:8000/docs)
-
-- **Frontend App (Port 3000)**:
-  ```bash
-  cd frontend
-  npm run dev
-  ```
-  Application UI is available at: [http://localhost:3000](http://localhost:3000)
+Visit [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## Demo Credentials & Seed Data
+## Seeded Persona Accounts
 
-All seed accounts belong to the organization **Vance Development LLC**.
+All demo accounts use the standard password `Password123!`, or you can use the interactive **Floating Demo Button** on the login screen to sign in with one click:
 
-Default Password for all seed accounts:
-```text
-Password123!
-```
-
-| Role | User Name | Email Address | Description / Project Scope |
+| Role | Persona | Email | Purpose / View |
 | :--- | :--- | :--- | :--- |
-| **Owner** | Marcus Vance | `m.vance@vancedev.com` | Account executive with full budget, draw, and project creation authority |
-| **CFO** | Sarah Lin | `s.lin@vancedev.com` | Financial officer overseeing budgets, draws, escrow recons, and waterwalls |
-| **PM** | David Ross | `d.ross@vancedev.com` | Project Manager tracking milestones, jobsite verification, and GC progress |
-| **GC** | Frank Miller | `frank@apexconstruction.com` | General Contractor submitting draw applications, line items, and lien waivers |
-| **Investor** | Elena Rostova | `e.rostova@meridiancap.com` | Equity partner viewing pro formas, investment returns, and distribution notices |
-
-### Pre-configured Seed Projects
-1. **73 Broadway (Active Construction / Cost-Plus)**
-   - Baseline budget with change orders and contingency reallocations.
-   - Commercial checking and escrow accounts with 150+ transactions.
-   - Active draw cycle (Draw #1 funded, Draw #3 submitted with $50k lender shortfall).
-   - Anomaly alerts: missing invoice voucher #5050 and milestone delay risk.
-
-2. **392 First Street (Completed / Disposition Closed)**
-   - 15 closed draw applications fully funded through construction loan.
-   - 12 condominium units sold with settlement statements imported.
-   - Loan full payoff recorded, investor distributions executed, and closeout audited.
-
-3. **161 Woodlawn Ave (Pre-construction)**
-   - Blank canvas project initialized for adaptive onboarding and setup validation.
+| **OWNER** | Marcus Vance | `m.vance@vancedev.com` | Complete executive oversight, contingency moves, draws & investor updates |
+| **CFO** | Sarah Lin | `s.lin@vancedev.com` | Bank reconciliations, invoice matching, capital stack & draws |
+| **PM** | David Ross | `d.ross@vancedev.com` | Schedule milestones, field progress inspection, discrepancy resolution |
+| **GC** | Frank Miller | `frank@apexconstruction.com` | Pay applications, cost evidence, change order requests (COR) |
+| **INVESTOR** | Elena Rostova | `e.rostova@meridiancap.com` | High-level KPI dashboards, published investor updates & returns |
+| **OWNER / MULTI** | Kunal Shah | `kunal@builderscapital.com` | Project isolation test persona (Owner on 73 Broadway, CFO on 392 First St) |
 
 ---
 
 ## Testing & Quality Assurance
 
-### Backend Tests
+### Run Unit Tests
 ```bash
-# Run pytest test suite
-make test
-
-# Or directly:
-PYTHONPATH=backend backend/.venv/bin/pytest backend/tests -v
+npm run test
 ```
 
-### Frontend Tests & Type Checking
+### Run Playwright End-to-End Tests
 ```bash
-cd frontend
-
-# Run unit & component tests (Vitest)
-npm run test
-
-# Run TypeScript typecheck
-npm run type-check
-
-# Run ESLint
-npm run lint
-
-# Run End-to-End browser tests (Playwright)
 npm run test:e2e
 ```
 
----
-
-## Project Structure
-
-```text
-groundup-ai/
-├── Makefile                 # Top-level commands for dev, migrations, testing, and seed
-├── docker-compose.yml       # PostgreSQL 16 service definition
-├── package.json             # Root monorepo script runner
-├── docs/                    # Architectural documents, schema designs, and prompt specs
-├── backend/
-│   ├── alembic.ini          # Database migration configuration
-│   ├── pyproject.toml       # Linter, formatter, and typecheck configuration
-│   ├── requirements.txt     # Python backend dependencies
-│   ├── migrations/          # Alembic version migrations
-│   ├── tests/               # Pytest integration and unit test suite
-│   └── app/
-│       ├── main.py          # FastAPI application entrypoint & middleware
-│       ├── config.py        # Pydantic environment configuration
-│       ├── database.py      # Async SQLAlchemy session management
-│       ├── seed/            # Comprehensive multi-role database seed fixtures
-│       └── modules/
-│           ├── identity/    # Auth, users, organizations, RBAC policies
-│           ├── onboarding/  # Adaptive question graph & role-based onboarding
-│           ├── projects/    # Project entities, GC contracts, bank structure
-│           ├── budgets/     # Budgets, line items, CORs, contingency movements
-│           ├── draws/       # Draw applications, payments, lender shortfalls
-│           ├── spend/       # Transactions, invoices, escrow accounts, reconciliations
-│           ├── progress/    # Milestones, field verifications, schedule tracking
-│           ├── economics/   # Pro formas, units, waterfalls, closeout
-│           ├── reporting/   # Investor snapshot packages & exports
-│           └── audit/       # Immutable audit logs & event streams
-└── frontend/
-    ├── app/                 # Next.js 14 App Router pages & layouts
-    │   ├── auth/            # Login and authentication views
-    │   ├── onboarding/      # 2-column adaptive onboarding flow
-    │   ├── projects/new/    # Clean B2B SaaS Stage 3 project bootstrap
-    │   ├── budget/          # Budget matrix, contingency reallocation, CORs
-    │   ├── draws/           # Draw application workbench & review
-    │   ├── reconciliation/  # Bank statement matching & quarantine manager
-    │   ├── economics/       # Investor waterfalls & closeout checklist
-    │   ├── timeline/        # Milestones and physical verification
-    │   ├── submissions/     # Contractor portal for claims and invoices
-    │   └── investor-update/ # Stakeholder transparency portal
-    ├── components/          # Reusable UI & domain-specific widgets
-    ├── lib/                 # API client adapters, types, formatters, routes
-    └── tests/               # Vitest unit tests and Playwright E2E tests
+### Run TypeScript & Lint Checks
+```bash
+npm run type-check
+npm run lint
 ```
-
----
-
-## License
-
-Internal proprietary software developed for GroundUp AI. All rights reserved.

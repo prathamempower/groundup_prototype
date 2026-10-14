@@ -208,6 +208,9 @@ export default function TimelinePage() {
           {/* Brand & Project Info */}
           <div className="flex items-center gap-3">
             <BrandLogo size="md" showSubtitle={false} />
+            <h1 className="text-sm font-bold text-slate-900 tracking-tight">
+              Timeline & Progress
+            </h1>
             <span className="rounded bg-blue-50 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-700 border border-blue-200/70">
               CONSTRUCTION APP
             </span>

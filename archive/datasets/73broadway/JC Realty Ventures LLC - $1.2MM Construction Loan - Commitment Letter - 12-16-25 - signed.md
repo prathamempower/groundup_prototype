@@ -1,0 +1,434 @@
+                                19-01 Route 208 North ● Fair Lawn, New Jersey 07410
+                                 Phone (800) 522-4167 ● ColumbiaBankOnline.com
+
+December 16, 2025
+
+JC Realty Ventures LLC 881 Allwood Rd Clifton, NJ 07012
+
+Re: 73 Broadway Jersey City, NJ 07306
+
+Dear Mr. Kunal Shah, Parika Vasani, Richa Patel, Riddhi Patel, & Swekit
+Patel,
+
+We are pleased to inform you that Columbia Bank ("Columbia Bank" or the
+"Bank") has approved your request for a commercial mortgage loan subject
+to the following terms and conditions in this commitment letter
+("Commitment"):
+
+Borrower: JC Realty Ventures LLC ("Borrower")
+
+Amount: \$1,200,000.00. Loan proceeds shall be disbursed as follows:
+\$450,000 disbursed at closing for land acquisition. Reimbursement.
+Financing is subject to a minimum appraised value of the land of
+\$615,000.
+
+                  Site and Hard Cost funding up to $750,000 shall be advanced in accordance with condition
+                  Disbursement Paragraph listed below.
+
+                  In no event shall the total funds advanced exceed $1,200,000.00.
+
+Purpose: To provide construction financing to develop 3 condo units and
+1 ADU unit for sale on property located at 73 Broadway in Jersey City,
+NJ
+
+Interest Rate: A rate of the WSJ Prime index plus 1.00000000 % shall be
+accrued on any outstanding balance. Upon any changes to the WSJ Prime
+index, the rate will adjust immediately and shall be rounded to the
+nearest 1/8%. At no time shall the rate fall below 7.00000000%.
+
+Repayment Program: The term of the construction shall be 24 months from
+the date of Closing. Interest on the outstanding principal balance shall
+be payable monthly on the first day of each month.
+
+Disbursement: Construction funding will be disbursed upon the following:
+
+                      a)Submission of a fully executed AIA form (Application and Certificate for Payment) showing
+                         the amount of work completed.
+                      b)Completion of a construction inspection.
+                      c) Payment of inspection fee.
+                      d)Title Letter submitted to the Bank by the closing attorney before each construction advance
+                         in form approved by Columbia Bank.
+                      e)Submission of a foundation location survey certified to Columbia Bank prior to the first
+                         advance.
+                  NOTE: Monthly interest must be current before funds are disbursed.
+
+Late Charge: Borrower will pay a late charge of 5% of the total monthly
+payment on payments made 15 days or more after the due date.
+
+                                                                                                         1|Page
+
+Default Rate: Upon any default, including failure to pay upon final
+maturity, the total sum due will continue to accrue at an additional 5%
+interest rate above the note rate.
+
+Closing Date: The loan shall be closed by 5:00 p.m. on February 16,
+2025. If the closing does not take place by the aforementioned date,
+this commitment shall become null and void and Columbia Bank shall have
+no obligation to make the loan. The closing date may only be extended
+with Columbia Bank's written consent.
+
+Security: Columbia Bank will hold a valid first mortgage lien on
+commercial property located at 73 Broadway Jersey City, NJ 07306.
+("Mortgaged Property"), legally referred to as Block(s): 9206 Lot(s): 05
+
+                The Loan will be secured by a title insured, 1st mortgage on the Mortgaged Property.
+
+                An assignment of leases and rents for any and all present and future leases at the Mortgaged
+                Property shall be required.
+
+Environmental Report: Subject to receipt and review of an independent
+environmental evaluation of the Mortgaged Property at the Borrower's
+expense. Satisfactory receipt, review and acceptance of a third party
+environmental report indicating No Further Action Required as to the
+Mortgaged Property. Closing shall be contingent on any and all
+recommendations made by the Bank's Environmental Risk Analyst.
+
+Appraisal The Loan shall be subject to receipt and review of an
+independent appraisal and appraisal review of the Mortgage Property at
+the Borrower's expense. The loan to value for the Loan may not exceed
+75.00 % of the As Complete appraised value of the Mortgaged Property
+
+Secondary Financing: Borrower shall not obtain any secondary financing
+without the written consent of Columbia Bank.
+
+Guarantors: JC Realty Ventures LLC ("Borrower"), Kunal Shah
+("Guarantor"), Swekit Patel ("Guarantor"), Parika Vasani ("Guarantor"),
+KS NJ Management LLC ("Guarantor"), Ripa Realty LLC ("Guarantor"),
+Riddhi Patel ("Guarantor"), Richa Patel ("Guarantor"),
+
+                The loan shall have the unlimited, unconditional personal and/or commercial guarantee of
+                Kunal Shah (“Guarantor”), Swekit Patel (“Guarantor”), Parika Vasani (“Guarantor”), KS NJ
+                Management LLC (“Guarantor”), Ripa Realty LLC (“Guarantor”), Riddhi Patel (“Guarantor”),
+                Richa Patel (“Guarantor”), held jointly and severally.
+
+Fees: Upon execution of this Commitment, Borrower shall make payment of
+the following non-refundable fees:
+
+                Application Fee:                        $ 1,000.00 – Due at the time of application.
+                Commitment Fee:                         $10,000.00 - Due at the time of commitment.
+                Attorney Fee:                           $ 6,000.00 - Due at the time of commitment.
+                Third Party Appraisal Fee:              $ 1,155.00 - Due when ordering the report.
+                Third Party Environmental Fee:          $ 1,811.00 - Due when ordering the report.
+                Real Estate Tax Service Fee:            $ 161.00 – Due at the time of commitment.
+
+                Columbia Bank reserves the right to make adjustments to, including, but not limited to, increasing
+                or supplementing the fees listed above.
+
+
+
+
+                                                                                                        2|Page
+
+Real Estate Taxes: During the construction, borrower is obligated to pay
+real estate taxes in a timely fashion and to submit proof of paid taxes
+to Columbia Bank upon request.
+
+Insurance: During construction, proof of builder's risk, hazard &
+liability insurance is required in an amount sufficient to cover the
+construction funding.
+
+               Borrower will submit annually proof of insurance, including fire and extended coverage, in an
+               amount not less than the replacement cost of the Mortgaged Property. Property and liability
+               insurance naming Columbia Bank as first mortgagee and loss payee to be maintained for the life
+               of the Loan.
+
+               Borrower’s attorney shall see that hazard insurance policies protect the Bank as to the amount of
+               insurance, location of property, ownership in stated assured, and mortgagee clause;
+               endorsements, if necessary, covering same shall be obtained by the Borrower’s attorney.
+
+               Flood Insurance Policy Requirements (when applicable):
+               • Evidence of application for flood insurance and paid receipt for the first year.
+               • MUST be in an amount that equals the replacement value of the mortgaged premises, or the
+                   maximum amount available, whichever is less.
+               • MUST name the borrowers and Columbia Bank in the same manner as the hazard insurance
+                   policy.
+
+Title Insurance: Borrower will provide title insurance for the term of
+the Loan from a title company acceptable to the Bank. The title company
+and Borrower's attorney assume responsibility to see that insurance
+premiums have been paid. The Loan will be secured by a title insured,
+1st mortgage on the Mortgaged Property. If the Borrower elects First
+Jersey Title Services ("FJTS") for title insurance services, Columbia
+Bank will offer \$2,500.00 towards the cost of title. The borrower is
+not required to use FJTS and the interest rate/APR and other terms of
+the loan will be the same regardless and the selection of a title
+company other than FJTS will not affect the availability or approval of
+the loan.
+
+Depository Covenant: Borrower shall maintain its operating account and
+tenant security accounts with the Bank, including, but not limited to,
+non-interest-bearing account containing an aggregate average daily
+balance of not less than \$100,000.00. If Borrower's does not comply
+with this Covenant, the interest rate shall be increased by 5.00% per
+annum and shall remain so increased until such time as compliance is
+demonstrated at a subsequent assessment period.
+
+Automatic Charge: The Bank will be authorized and directed without
+demand or notice to charge and withdraw amounts that shall become due to
+the Bank.
+
+Conditions Prior to Closing:
+
+A. Assignment of all building plans, specs, engineering data,
+governmental approvals, permits, contracts, etc. B. Based up a CB
+approved appraisal, the loan to value shall not exceed 75% of the "As
+Completed and Stabilized Value." C. Throughout the life of this
+transaction, Borrower and Guarantors further agree to supply any and all
+financial information, documentation, correspondence and so forth as may
+be requested by the Bank. • Liquidity statements annually upon request.
+
+                                                                                                          3|Page
+
+D. Site & Hard costs are to be disbursed upon request & shall be subject
+to: Satisfactory inspection confirming work in place in accordance with
+plans, clear title rundown, proof of paid taxes, all CB loan & deposit
+accounts are to be in good standing. E. At all times during the term of
+the loan, the Borrower shall maintain a non-interest bearing checking
+account from which monthly loan payments shall be auto-debited. Failure
+to comply with this requirement represents an event of default. F.
+Satisfactory receipt and review of any and all appropriate permits,
+plans, approvals, etc. G. The Borrower will pre-fund an account in the
+amount of \$75,000 for the loan payments to be auto-debited from during
+Construction. The Construction Loan Debt Service Account shall be
+replenished to \$25,000 should the balance fall below \$10,000. H.
+Individual guarantors to fully complete their respective PFSs prior to
+Closing. I. Loan will be secured by a title insured, 1st mortgage on
+subject collateral property. J. Satisfactory receipt and review of any
+and all documentation as may be required by the Bank's Environmental
+Risk Analyst. Closing shall be contingent upon any recommendations as
+made by the Environmental Risk Analyst. K. All searches to be received,
+reviewed, and cleared prior to closing. • Guarantors Kunal Shah, Parika
+Vasani, Riddhi Patel, and Richa Patel to review their respective
+CourtLink reports and provide comments and/or explanations for items
+pertaining to them, as well as proof of satisfaction, prior to closing.
+L. Borrower to provide a detail of all soft costs paid to date. M.
+Partial release based upon 75% of sales price per unit received by bank.
+N. Based upon a CB approved appraisal, the loan to value shall not
+exceed 65% of the "As Is" value. O. Absolute assignment of all present
+and future rents and leases.
+
+Other Conditions: All searches to be received, reviewed, and cleared
+prior to closing. This includes all Lexis Nexis reports, COG standing,
+all judgments and general liens, credit report, property and flood
+search.
+
+Cross-Default: Borrower shall be deemed in default if Borrower fails to
+pay when due any amount payable to the Bank under any loan or other
+obligation.
+
+Change in Control: Borrower's sale, transfer, conveyance, assignment,
+pledge or hypothecation of 20.00% or more of the ownership of Borrower,
+without the Bank's written consent, shall be deemed an event of default
+under the loan.
+
+Closing: The Bank shall be represented by counsel, the cost of which
+shall be borne by the Borrower. The Borrower is advised to retain an
+attorney licensed to practice within the State of NJ to represent their
+interests. Closing documents and instructions will be mailed to your
+attorney upon receipt of this signed Commitment and all fees. A closing
+date will not be scheduled until Bank's counsel, has reviewed the
+documents. All closings must be held at Columbia Bank's office located
+at 19-01 Route 208 North, Fair Lawn, New Jersey 07410. (An option should
+be created for Central and South Jersey)
+
+Miscellaneous Terms
+
+    A. This Commitment is a summary of the terms and conditions of the Loan, which will be consummated
+       with formal financing documentation in form and substance acceptable to Columbia Bank. If such
+       documentation is not executed and delivered for any reason whatsoever, including the failure to reach
+       agreement on any provision thereof, then Columbia Bank, at its option and in its sole discretion, may
+       terminate this Commitment and have no obligation to make the Loan.
+    B. This Commitment may not be altered or amended without the written consent of Columbia Bank. Any
+       such alterations or amendments made without the Bank’s written consent shall render this Commitment
+       null and void.
+    C. Columbia Bank reserves the right to terminate or amend this Commitment at any time prior to closing if
+       the Bank shall determine, in its sole discretion, that the Borrower or Guarantors failed to comply with the
+       terms and conditions hereof or that there has been: any adverse change in the financial position of the
+
+
+
+
+                                                                                                           4|Page
+
+Borrower or Guarantor(s); any misrepresentations by the Borrower,
+Guarantor(s), or any tenant including without limitation to the
+submission of inaccurate or incorrect information or documentation; any
+damage or alteration to the Mortgaged Property, or any part thereof,
+including without limitation to fire, flood or any other casualty; any
+material changes in the occupancy status or tenant base of the Mortgage
+Property or any such changes which may adversely affect the ability of
+any tenant to satisfy the respective contractual lease obligations; any
+material change to the ownership or management structure of the
+Borrower; or any other similar occurrences, events or findings that may
+adversely affect the Bank's credit risk including, without limitation
+to, evidence of any actions, suits, proceedings, or governmental
+investigations pending against the Borrower, Guarantor(s), or any
+tenant. D. Borrower agrees to indemnify and hold Columbia Bank, its
+officers, directors, employees and representatives harmless for any
+claim, in whole or in part, made by any person caused by, resulting
+from, arising out of, attributable to, or in connection with Columbia
+Bank's termination of this Commitment. E. It is understood and agreed
+that Columbia Bank shall not be obligated to disburse or advance any or
+all of the funds referable to this loan if said disbursement or advance
+contravenes, is inconsistent with, or is prohibited by 12 CFR 32.1 et.
+seq., including, but not limited to, the "direct benefit" or the "common
+enterprise" tests, as defined in 12 CFR 32.2(b). F. This Commitment
+shall survive the loan closing.
+
+If the terms and conditions stated herein are satisfactory, please sign
+and return the original Commitment Letter and any requested fees to the
+undersigned by 12/29/2025. In the event that this Commitment is not
+returned by the aforementioned date, it shall become null and void. If
+you should have any questions, please do not hesitate to contact the
+undersigned at 201-599-7094.
+
+We look forward to providing you this financial arrangement.
+
+Very truly yours, COLUMBIA BANK
+
+Jay Cordaro Vice President Commercial Lender, CRE
+
+cc: Michael Brady, Esq. Closing Department
+
+                                                                                                              5|Page
+
+Accepted this \_\_\_\_\_ day of \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_,
+2025.
+
+By: Kunal Shah
+
+             swekit patel (Dec 19, 2025 11:28:57 EST)
+
+By: Swekit Patel
+
+By: Parika Vasani
+
+By: KS NJ Management LLC
+
+          Piyush Patel (Dec 19, 2025 11:30:56 EST)
+
+By: Ripa Realty LLC
+
+By: Riddhi Patel
+
+By: Richa Patel
+
+                                                        6|Page
+
+First Jersey Title Services, Inc. 25-00 Broadway, Fair Lawn, NJ 07410
+phone: 201-791-4200 fax: 201-791-9050 www.FirstJerseyTitle.com
+Orders@FirstJerseyTitle.com
+
+                                       APPLICATION FOR TITLE SERVICES
+
+Office of: Date:
+
+Attention: Email:
+
+Address:
+
+Phone: Fax:
+
+       Refinance           Purchase (Attach contract and/or loan commitment)
+
+Present Owner:
+
+Property Address:
+
+Municipality: County:
+
+Tax Lot No: Tax Block No:
+
+Condo Name: Unit No: Bldg. No:
+
+Purchaser:
+
+                                                                  Maiden Name:
+
+Purchase Price: Loan Amount:
+
+           Mortgagee: Columbia Bank, its successors and/or assigns
+
+
+
+
+           First Jersey to act as Settlement Agent:     YES        NO        Estimated closing date:
+
+           Back Title:    Attached         To Follow     FJTS Back Title           None Available
+
+           Order Flood:       Yes       No
+
+
+
+
+                                                                                                                7|Page
+
+Survey: Yes To Be Furnished Use Existing Waived TBA "No Survey"
+Endorsement
+
+Send copy to:
+
+          Address:
+
+          Email:
+
+Special Notes / Requirements:
+
+                                                                                            8|Page
+
+JC Realty Ventures LLC - \$1.2MM Construction Loan - Commitment Letter -
+12-16-25 Final Audit Report 2025-12-19
+
+Created: 2025-12-19
+
+By: Kunal Shah (kunalshah0323@gmail.com)
+
+Status: Signed
+
+Transaction ID: CBJCHBCAABAA2YVzDzI3nU-Sb0GMmWF6Jh84Rd9_ZeII
+
+"JC Realty Ventures LLC - \$1.2MM Construction Loan - Commit ment
+Letter - 12-16-25" History Document created by Kunal Shah
+(kunalshah0323@gmail.com) 2025-12-19 - 4:27:20 PM GMT- IP address:
+152.59.5.205
+
+    Document emailed to Kunal Shah (kunalshah0323@gmail.com) for signature
+    2025-12-19 - 4:27:31 PM GMT
+
+
+    Email viewed by Kunal Shah (kunalshah0323@gmail.com)
+    2025-12-19 - 4:27:43 PM GMT- IP address: 66.249.84.228
+
+
+    Document e-signed by Kunal Shah (kunalshah0323@gmail.com)
+    Signature Date: 2025-12-19 - 4:28:07 PM GMT - Time Source: server- IP address: 152.59.5.205
+
+
+    Document emailed to swekit patel (rxsnpatel@gmail.com) for signature
+    2025-12-19 - 4:28:09 PM GMT
+
+
+    Email viewed by swekit patel (rxsnpatel@gmail.com)
+    2025-12-19 - 4:28:13 PM GMT- IP address: 66.102.8.99
+
+
+    Document e-signed by swekit patel (rxsnpatel@gmail.com)
+    Signature Date: 2025-12-19 - 4:28:57 PM GMT - Time Source: server- IP address: 146.75.237.35
+
+
+    Document emailed to peterpatel1969@gmail.com for signature
+    2025-12-19 - 4:28:58 PM GMT
+
+
+    Email viewed by peterpatel1969@gmail.com
+    2025-12-19 - 4:29:53 PM GMT- IP address: 146.75.222.0
+
+
+    Signer peterpatel1969@gmail.com entered name at signing as Piyush Patel
+    2025-12-19 - 4:30:54 PM GMT- IP address: 164.18.166.240
+
+Document e-signed by Piyush Patel (peterpatel1969@gmail.com) Signature
+Date: 2025-12-19 - 4:30:56 PM GMT - Time Source: server- IP address:
+164.18.166.240
+
+Agreement completed. 2025-12-19 - 4:30:56 PM GMT 

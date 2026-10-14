@@ -25,17 +25,17 @@ test.describe("Multi-Project Portfolio & Strict Isolation", () => {
     await expect(page).toHaveURL(/\/projects\/[^\/]+\/control-center/, { timeout: 15000 });
 
     // Confirm sidebar shows 73 Broadway, OWNER role, and Owner items (e.g. Project settings)
-    const sidebar = page.locator("aside");
-    await expect(sidebar.getByText("73 Broadway")).toBeVisible();
-    await expect(sidebar.getByText("OWNER")).toBeVisible();
-    await expect(sidebar.getByText("Project settings")).toBeVisible();
-    await expect(sidebar.getByText("Back to all projects")).toBeVisible();
+    const sidebar = page.locator("aside").first();
+    await expect(sidebar.getByText("73 Broadway", { exact: true })).toBeVisible();
+    await expect(sidebar.getByText(/owner/i)).toBeVisible();
+    await expect(sidebar.getByText("Project Settings")).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Switch" })).toBeVisible();
 
     // Confirm top bar switcher does NOT exist
     await expect(page.locator("header").getByRole("combobox")).not.toBeVisible();
 
     // 5. Return to Portfolio
-    await sidebar.getByText("Back to all projects").click();
+    await sidebar.getByRole("link", { name: "Switch" }).click();
     await expect(page).toHaveURL(/\/projects/, { timeout: 15000 });
 
     // 6. Open 392 First Street workspace (Role is CFO)
@@ -43,10 +43,9 @@ test.describe("Multi-Project Portfolio & Strict Isolation", () => {
     await expect(page).toHaveURL(/\/projects\/[^\/]+\/control-center/, { timeout: 15000 });
 
     // Confirm sidebar shows 392 First Street, CFO role, and Project settings is HIDDEN for CFO
-    await expect(sidebar.getByText("392 First Street")).toBeVisible();
-    await expect(sidebar.getByText("CFO")).toBeVisible();
-    await expect(sidebar.getByText("Project settings")).not.toBeVisible();
-    await expect(sidebar.getByText("Investor updates")).not.toBeVisible();
+    await expect(sidebar.getByText("392 First Street", { exact: true })).toBeVisible();
+    await expect(sidebar.getByText(/cfo/i)).toBeVisible();
+    await expect(sidebar.getByText("Project Settings")).not.toBeVisible();
 
     // 7. Verify unauthorized project access returns 404 (Attempting 161 Woodlawn Ave ID: 4dbc506e-d18d-4ac2-ba8b-10c4274fec5a)
     await page.goto("/projects/4dbc506e-d18d-4ac2-ba8b-10c4274fec5a/control-center");

@@ -1,0 +1,215 @@
+Kunal Shah \$0.25 Piyush Patel \$0.25 Alpesh Vasani \$0.25 Swekti Patel
+\$0.25
+
+                       $1.00
+
+
+
+
+                         Amount Deposite
+    Date        Kunal Shah  Piyush Patel Alpesh Vasani
+
+03/13/2025 \$1,00,000.00 03/26/2025 \$7,00,000.00 04/21/2025 \$50,000.00
+04/23/2025 \$1,50,000.00 05/14/2025 \$1,50,000.00 05/14/2025 \###
+05/14/2025 \$1,784.00 04/14/2026 -\$15,000.00 06/25/2026 Total
+-\$15,000.00 \$8,00,000.00 \$0.00  Amount Total Date 210 Fulton Capex KS
+Builders 203 Danforth SV FUTURE 05/14/2025 \$50,000.00 05/21/2025
+-\$50,000.00 10/21/2025 -\$1,500.00 11/05/2025 -\$5,000.00 11/20/2025
+-\$6,000.00 12/17/2025 -\$10,000.00 01/15/2026 -\$4,000.00 01/20/2026
+-\$8,000.00 01/21/2026 -\$5,000.00 02/09/2026 -\$15,000.00 03/02/2026
+-\$2,000.00 03/04/2026 -\$10,000.00 03/04/2026 -\$17,000.00 03/04/2026
+\$10,000.00 03/05/2026 \$17,000.00 03/06/2026 03/13/2026 03/24/2026
+\$10,000.00 04/02/2026 \$5,000.00 04/10/2026 \$2,000.00 04/11/2026
+\$10,000.00 04/14/2026 \$15,000.00 04/29/2026 05/05/2026 05/08/2026
+\$15,000.00 05/11/2026 \$5,000.00 05/19/2026 \$7,000.00 06/02/2026
+-\$10,000.00 06/03/2026 -\$10,000.00 06/18/2026 -\$10,000.00 06/26/2026
+06/29/2026 -\$5,000.00 07/02/2026 \$10,000.00 07/08/2026 07/09/2026
+\$10,000.00 07/14/2026 \$5,000.00 07/20/2026 \$40,000.00 \$10,000.00
+\$12,000.00 \$5,000.00 08/05/2026 08/17/2026 -\$4,195.03 08/19/2026
+08/20/2026 \$25,000.00 08/20/2026 \$68,000.00  08/24/2026 08/25/2026
+08/28/2026 \$10,000.00 09/04/2026 09/09/2026 09/10/2026 09/18/2026
+-\$25,000.00 Total \$53,500.00 -\$8,195.03 \$7,000.00 \$23,000.00
+\$68,000.00 Amount Total Builders Capita317 Summit K S Investmen96 Clerk
+Shiv Dhruv CliForked&River
+
+                                    -$1,61,989.52
+                                                                   $1,000.00
+
+
+
+
+         -$5,000.00
+         -$5,000.00
+
+
+
+
+        $10,000.00
+
+                       $5,000.00
+                      $20,000.00
+
+                        $1,500.00
+                      -$26,500.00
+                                                    $1,000.00      $1,000.00    $1,000.00
+
+\$1,000.00 \$5,000.00
+
+-\$3,000.00 -\$5,000.00 -\$15,000.00
+
+-\$23,000.00 \$5,000.00 -\$1,61,989.52 \$1,000.00 \$3,000.00 \$1,000.00
+Date Mode Description Amount Total 05/06/2020 Credit Columbia Bank
+-\$1,00,000.00 06/26/2026 Credit Columbia Bank -\$2,00,000.00 08/20/2026
+Credit Columbia Bank -\$1,00,000.00 -\$4,00,000.00 SR. NO Type Amount 1
+Construction Cost \$6,56,154.06 2 Bank fees \$581.51 3 Muncipality
+\$378.00 4 Land Acquisition \$7,25,399.82 5 Loan payments 6
+Miscellaneous -\$1,50,735.16 7 Labour \$73,406.50 8 Accounting & Legal
+fee \$1,750.00
+
+          Total Cost of Project              ###
+
+Date Mode Description Amount 07/07/2025 Debit 4255 To 4321 \$2,150.00
+07/21/2025 Debit 4255 To 3448 \$1,950.00 08/21/2025 Debit 4255 To 3448
+\$350.00 08/29/2025 Check 1277 Capex Capital \$130.63 09/22/2025 Debit
+4255 To 3448 \$58,808.89 10/08/2025 Check 1276 Diamond Agency \$700.00
+10/21/2025 Debit 4255 To 3448 \$3,982.21 11/04/2025 Check 1042 Edwar
+Construction Corp \$1,050.00 11/20/2025 Debit 4255 to 3448 \$9,611.47
+11/24/2025 Check 1043 Vulcan Innovation \$221.00 12/16/2025 Check 1044
+Vulcan Innovation \$1,750.00 12/19/2025 Debit 4255 to 3448 \$1,498.74
+01/05/2026 Check 1045 Vulcan Innovation \$350.00 01/12/2026 Check 1046
+Richard Wadsworth \$350.00 01/14/2026 Check 1047 Studio A&M Architects
+\$10,260.00 01/21/2026 Debit 4255 to 3448 \$7,183.13 01/26/2026 Check
+1050 Vulcan Innovation \$500.00 01/26/2026 Check 1049 Frank Verbout
+\$4,000.00 02/03/2026 Check 1048 Jose A Rimachu \$1,200.00 02/06/2026
+Check 1052 CFC General Contractor \$5,521.70 02/06/2026 Check 1053 CFC
+General Contractor \$8,000.00 02/23/2026 Amex Kunal Amex \$1,82,747.12
+02/27/2026 Check 1056 Frank Verbout \$1,850.00 03/04/2026 Debit 4255 to
+3448 \$17,633.81 03/05/2026 Credit 3448 to 4255 -\$17,633.81 03/06/2026
+Check 1057 Richard Wadsworth \$500.00 03/21/2026 Debit 4255 to 3448
+\$14,016.43 03/24/2026 Check 1004 Frank Verbout \$4,500.00 03/26/2026
+Debit 4255 to 4164 \$500.00 04/09/2026 Check 1058 Mr Concrete \$1,500.00
+04/10/2026 Debit 4255 to 2424 \$10,000.00 04/20/2026 Check 1087 Richard
+Wadsworth \$245.00 04/20/2026 Check 1076 CFC General Contractor \$750.00
+04/20/2026 Check 1077 CFC General Contractor \$19,000.00 04/21/2026
+Debit 4255 to 3448 \$3,359.48 04/28/2026 Check 1088 Etv Dirt Work
+\$5,395.00 05/01/2026 Debit Checking Withdrawal \$250.00 05/05/2026
+Check 1089 CFC General Contractor \$8,000.00 05/06/2026 Amex Kunal Amex
+\$35,366.04 05/18/2026 Debit 4255 to 3448 \$60,000.00 03/13/2026 Debit
+INT Wire Out \$40,000.00 06/01/2026 Debit Richard Wadsworth \$258.00
+06/02/2026 Debit Frank Verbout \$8,500.00 06/03/2026 Check 1118 Jose A
+Rimachu \$600.00 06/22/2026 Amex Kunal Amex \$32,799.42 06/23/2026 Check
+1122 CFC General Contractor \$3,000.00 06/23/2026 Check 1123 CFC General
+Contractor \$4,000.00 06/29/2026 Check 1134 Frank Verbout \$6,500.00
+06/30/2026 Check 1143 M D Wiring \$1,500.00 07/09/2026 Check 1146
+Dynasty Fire Protection \$8,000.00 07/20/2026 Debit Kunal Amex
+\$21,657.46 07/24/2026 Check 1148 Perfect Weather \$10,000.00 08/24/2026
+Check 1166 Dynasty Fire Protection \$8,500.00 09/03/2026 Check 1179
+Frank Verbout \$6,000.00 09/09/2026 Check 1191 Suyapa Lopez \$6,000.00
+09/09/2026 Check 1192 Suyapa Lopez \$6,000.00 09/18/2026 Debit 4255 to
+3448 \$27,119.66 09/21/2026 Amex 4255 to 3448 \$322.68 Total
+\$6,56,154.06 Date Mode Description Amount 07/08/2025 Check 1275
+Akanksha Shah \$202.00 10/20/2025 Check 1041 Richard Wadsworth \$750.00
+02/09/2026 Check 1054 Javier Alejandro Ormaza \$103.75 02/09/2026 Check
+1055 Richard Wadsworth \$450.00 03/23/2026 Check 1001 Luis Angle
+\$435.00 03/23/2026 Check 1002 Camillo Tocachi \$620.00 03/23/2026 Check
+1003 Clinton Cutzal \$300.00 04/06/2026 Check 1059 Javier Alejandro
+Ormaza \$390.00 04/06/2026 Check 1061 Juan Minin \$493.00 04/06/2026
+Check 1069 Richard Wadsworth \$660.00 04/07/2026 Check 1067 Victor
+Cutzal \$450.00 04/07/2026 Check 1060 Crisanto Cum Plato \$495.00
+04/07/2026 Check 1062 Jose Espana \$580.00 04/07/2026 Check 1065
+Christian Holbuin \$600.00 04/07/2026 Check 1066 Clinton Cutzal \$600.00
+04/07/2026 Check 1070 Jose Ramicoz \$600.00 04/09/2026 Check 1072 Daniel
+Angle \$290.00 04/10/2026 Check 1073 Milton Son \$450.00 04/13/2026
+Check 1064 Luis Angle \$943.00 04/14/2026 Check 1074 Daniel Angle
+\$300.00 04/14/2026 Check 1075 Victor Cutzal \$450.00 04/20/2026 Check
+1086 Richard Wadsworth \$412.00 04/20/2026 Check 1083 Juan Minin
+\$750.00 04/20/2026 Check 1081 Javier Alejandro Ormaza \$825.00
+04/21/2026 Check 1082 Crisanto Cum Plato \$925.00 04/22/2026 Check 1085
+Christian Holbuin \$750.00 04/06/2026 Check 1005 Jose Ramiroz \$350.00
+05/04/2026 Check 1102 Gumersindo Estapan \$150.00 05/04/2026 Check 1100
+Ludwin Con \$300.00 05/04/2026 Check 1097 Jherson Pastor \$330.00
+05/04/2026 Check 1093 Juan Minin \$333.00 05/04/2026 Check 1095 Luis
+Angle \$350.00 05/04/2026 Check 1101 Jose Camirez \$400.00 05/04/2026
+Check 1091 Javier Alejandro Ormaza \$660.00 05/04/2026 Check 1084 Luis
+Angle \$870.00 05/05/2026 Check 1098 Clinton Cutzal \$150.00 05/05/2026
+Check 1099 Jose Espana \$300.00 05/05/2026 Check 1092 Crisanto Cum Plato
+\$370.00 05/06/2026 Check 1094 Christian Holbuin \$300.00 05/06/2026
+Check 1103 Richard Wadsworth \$495.00 05/18/2026 Check 1104 Javier
+Alejandro Ormaza \$660.00 05/18/2026 Check 1107 Luis Angle \$725.00
+05/18/2026 Check 1108 Jherson Pastor \$825.00 05/18/2026 Check 1105 Juan
+Minin \$1,000.00 05/19/2026 Check 1110 Jose Camirez \$400.00 05/22/2026
+Check 1109 Richard Wadsworth \$660.00 06/01/2026 Check 1113 Richard
+Wadsworth \$165.00 06/01/2026 Check 1111 Javier Alejandro Ormaza
+\$330.00 06/01/2026 Check 1116 Luis Angle \$1,305.00 06/01/2026 Check
+1117 Jherson Pastor \$1,476.72 06/01/2026 Check 1112 Juan Minin
+\$1,693.03 06/02/2026 Check 1112 Clinton Cutzal \$90.00 06/02/2026 Check
+1106 Christian Holbuin \$300.00 06/02/2026 Check 1120 Crisanto Cum Plato
+\$400.00 06/02/2026 Check 1115 Christian Holbuin \$1,433.00 06/15/2026
+Check 1124 Javier Alejandro Ormaza \$330.00 06/15/2026 Check 1129
+Jherson Pastor \$660.00 06/15/2026 Check 1128 Luis Angle \$1,015.00
+06/15/2026 Check 1126 Juan Minin \$1,800.00 06/16/2026 Check 1125
+Crisanto Cum Plato \$370.00 06/17/2026 Check 1133 Richard Wadsworth
+\$330.00 06/17/2026 Check 1127 Christian Holbuin \$600.00 06/17/2026
+Check 1132 Jose Famirez \$800.00 06/29/2026 Check 1142 Clinton Cutzal
+\$450.00 06/29/2026 Check 1135 Javier Alejandro Ormaza \$495.00
+06/29/2026 Check 1138 Juan Minin \$1,350.00 06/30/2026 Check 1140
+Christian Holbuin \$1,350.00 06/30/2026 Check 1137 Crisanto Cum Plato
+\$2,035.00 06/30/2026 Check 1144 Tomich Siding \$10,000.00 07/02/2026
+Check 1139 Jose Espana \$290.00 07/02/2026 Check 1147 Richard Wadsworth
+\$495.00 07/06/2026 Check 1141 Luis Angle \$725.00 07/14/2026 Check 1150
+Richard Wadsworth \$495.00 07/27/2026 Check 1156 Richard Wadsworth
+\$330.00 07/27/2026 Check 1155 Luis Angle \$435.00 07/27/2026 Check 1153
+Juan Minin \$1,350.00 07/28/2026 Check 1152 Crisanto Cum Plato \$740.00
+08/03/2026 Check 1154 Christian Holbuin \$600.00 08/10/2026 Check 1163
+Clinton Cutzal \$450.00 08/10/2026 Check 1159 Juan Minin \$1,350.00
+08/10/2026 Check 1157 Javier Alejandro Ormaza \$330.00 08/10/2026 Check
+1162 Luis Angle \$290.00 08/11/2026 Check 1161 Christian Holbuin
+\$450.00 08/11/2026 Check 1158 Crisanto Cum Plato \$555.00 08/11/2026
+Check 1164 Jose Gonzales \$450.00 08/11/2026 Check 1160 Jose Espana
+\$300.00 08/12/2026 Check 1165 Gumersindo Estapan \$600.00 08/17/2026
+Check 1168 Richard Wadsworth \$495.00 08/24/2026 Check 1173 Clinton
+Cutzal \$150.00 08/24/2026 Check 1175 Camilo Tocachi \$945.00 08/24/2026
+Check 1169 Javier Alejandro Ormaza \$495.00 08/24/2026 Check 1170 Juan
+Minin \$1,177.00 08/24/2026 Check 1172 Luis Angle \$290.00 08/25/2026
+Check 1176 Gumersindo Estapan \$620.00 08/25/2026 Check 1174 Jose
+Gonzales \$300.00 08/25/2026 Check 1171 Christian Holbuin \$225.00
+08/25/2026 Check 1177 Honly Bruno \$640.00 08/28/2026 Check 1178 Richard
+Wadsworth \$660.00 09/08/2026 Check 1185 Luis Angle \$290.00 09/08/2026
+Check 1186 Clinton Cutzal \$300.00 09/08/2026 Check 1180 Javier
+Alejandro Ormaza \$330.00 09/08/2026 Check 1182 Crisanto Cum Plato
+\$370.00 09/08/2026 Check 1188 Camilo Tocachi \$555.00 09/08/2026 Check
+1181 Juan Minin \$925.00 09/09/2026 Check 1184 Christian Holbuin
+\$150.00 09/09/2026 Check 1190 Jose Espana \$300.00 09/09/2026 Check
+1187 Jose Gonzales \$450.00 09/09/2026 Check 1189 Gumersindo Estapan
+\$450.00 09/10/2026 Check 1193 Richard Wadsworth \$330.00 09/21/2026
+Check 1194 Javier Alejandro Ormaza \$495.00 09/22/2026 Check 1195
+Gumersindo Estapan750 Total \$73,406.50 Date Mode Description Amount
+Total 03/11/2026 Debit Ami Shah CPA \$750.00 07/01/2026 Debit Ami Shah
+CPA \$1,000.00 \$1,750.00 Date Mode Description Amount Total 04/04/2025
+Debit Wire Transfer Fee \$20.00 04/21/2025 Debit Wire Transfer Fee
+\$10.00 04/23/2025 Debit Wire Transfer Fee \$10.00 05/14/2025 Debit Wire
+Transfer Fee \$20.00 09/04/2025 Debit Wire Transfer Fee \$20.00
+11/04/2025 Debit Overdraft Fee \$20.00 12/16/2025 Debit Overdraft Fee
+\$20.00 01/14/2026 Debit Overdraft Fee \$20.00 02/06/2026 Debit
+Overdraft Fee \$20.00 02/06/2026 Debit Overdraft Fee \$20.00 02/27/2026
+Debit Overdraft Fee \$20.00 03/05/2026 Check 1278 Check Book \$66.51
+03/13/2026 Debit Outgoing Int Wire \$35.00 04/28/2026 Debit Overdraft
+Fee \$20.00 05/04/2026 Debit Overdraft Fee \$20.00 05/04/2026 Debit
+Overdraft Fee \$20.00 05/04/2026 Debit Overdraft Fee \$20.00 05/05/2026
+Debit Overdraft Fee \$20.00 06/01/2026 Debit Overdraft Fee \$20.00
+06/01/2026 Debit Overdraft Fee \$20.00 06/02/2026 Debit Overdraft Fee
+\$20.00 06/17/2026 Debit Overdraft Fee \$20.00 09/03/2026 Debit
+Overdraft Fee \$20.00 09/08/2026 Debit Overdraft Fee \$20.00 09/08/2026
+Debit Overdraft Fee \$20.00 09/09/2026 Debit Overdraft Fee \$20.00
+09/09/2026 Debit Overdraft Fee \$20.00 \$581.51 Date Mode Description
+Amount 07/03/2025 Debit Nj Gov Servew \$126.00 02/18/2026 Debit Nj Gov
+Servew \$126.00 02/24/2026 Debit Nj Gov Servew \$126.00 Total \$378.00
+Date Mode Description Amount 02/06/2026 Credit Deposit -\$1.00
+02/10/2026 Credit Deposit -\$4.00 02/26/2026 Debit Jc venture \$5,431.36
+03/06/2026 Credit 3448 to 4255 -\$1,61,989.52 03/21/2025 Debit
+Withdrawal \$300.00 MISC 05/23/2025 Debit Jc Vent To 96 Clerk \$100.00
+09/04/2025 Debit Kunal Shah \$4,303.00 02/27/2025 Credit 96 Clerk to Jc
+venture -\$100.00 04/17/2026 Check 1279 1000 Clifton Associates LLC
+\$1,225.00 Total -\$1,50,735.16 Date Mode Description Amount Total
+03/14/2025 Debit Withdrawal \$90,000.00 DEPOSIT 04/04/2025 Debit Law
+Office Of Michael Sc \$6,35,399.82 \$7,25,399.82 
