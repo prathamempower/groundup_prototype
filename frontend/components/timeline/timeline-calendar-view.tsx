@@ -12,7 +12,6 @@ import {
   AlertTriangle,
   Flame,
   User,
-  Sparkles,
   RotateCcw,
 } from "lucide-react";
 import { ConstructionTask } from "@/lib/data/construction-calendar-data";
@@ -511,20 +510,6 @@ export function TimelineCalendarView({
             );
           })}
         </div>
-      </div>
-
-      {/* Floating Ask Gemini button matching screenshot */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-20">
-        <button
-          type="button"
-          onClick={() => {
-            alert("GroundUp AI Assistant: Analyzing site schedule, critical path variance, and labor allocation.");
-          }}
-          className="rounded-full bg-slate-900/90 hover:bg-slate-900 text-white px-5 py-2.5 text-xs font-semibold shadow-lg backdrop-blur-md flex items-center gap-2 border border-slate-700/50 hover:scale-105 transition-all cursor-pointer"
-        >
-          <Sparkles className="h-4 w-4 text-blue-400" />
-          <span>Ask Gemini</span>
-        </button>
       </div>
     </div>
   );
