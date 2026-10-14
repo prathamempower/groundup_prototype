@@ -157,16 +157,6 @@ export function OverrunDecisionPanel({
                   <ShieldX className="h-3.5 w-3.5 mr-1" />
                   4. Dispute Claim
                 </Button>
-
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleAcceptExposure(line.id, line.name)}
-                  className="text-text-muted hover:text-text-primary text-xs"
-                >
-                  <FileCheck className="h-3.5 w-3.5 mr-1" />
-                  5. Accept Exposure Waiver
-                </Button>
               </div>
             </div>
           ))}

@@ -11,9 +11,11 @@ import {
   Eye,
   Settings,
   AlertTriangle,
+  Bell,
   Users,
   MessageSquare,
   Send,
+  CheckSquare,
   LucideIcon,
 } from "lucide-react";
 
@@ -23,7 +25,7 @@ export interface NavItemConfig {
   href: string;
   icon: LucideIcon;
   allowedRoles: UserRole[];
-  badgeKey?: "documents" | "draws" | "reconciliation" | "timeline" | "alerts";
+  badgeKey?: "documents" | "draws" | "reconciliation" | "timeline" | "alerts" | "changes";
 }
 
 export interface WorkspaceNavItem {
@@ -32,7 +34,7 @@ export interface WorkspaceNavItem {
   path: string; // e.g. "control-center"
   icon: LucideIcon;
   allowedRoles: UserRole[];
-  badgeKey?: "documents" | "draws" | "reconciliation" | "timeline" | "alerts";
+  badgeKey?: "documents" | "draws" | "reconciliation" | "timeline" | "alerts" | "changes";
 }
 
 /**
@@ -50,6 +52,7 @@ export interface WorkspaceNavItem {
  * 10. Project settings (Owner only)
  */
 export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
+  // 1. Executive & Overview
   {
     id: "control-center",
     label: "Control Center",
@@ -73,13 +76,23 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     allowedRoles: ["OWNER", "CFO", "PM"],
   },
   {
-    id: "reconciliation",
-    label: "Reconciliation",
-    path: "reconciliation",
-    icon: Scale,
-    allowedRoles: ["OWNER", "CFO"],
-    badgeKey: "reconciliation",
+    id: "changes",
+    label: "Changes & Approvals",
+    path: "changes",
+    icon: CheckSquare,
+    allowedRoles: ["OWNER", "CFO", "PM"],
+    badgeKey: "changes",
   },
+  {
+    id: "alerts",
+    label: "Alerts",
+    path: "alerts",
+    icon: Bell,
+    allowedRoles: ["OWNER", "CFO", "PM"],
+    badgeKey: "alerts",
+  },
+
+  // 2. Financial Management
   {
     id: "draws",
     label: "Draws",
@@ -89,20 +102,12 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     badgeKey: "draws",
   },
   {
-    id: "timeline",
-    label: "Timeline",
-    path: "timeline",
-    icon: CalendarDays,
-    allowedRoles: ["OWNER", "CFO", "PM"],
-    badgeKey: "timeline",
-  },
-  {
-    id: "alerts",
-    label: "Alerts & Exceptions",
-    path: "alerts",
-    icon: AlertTriangle,
-    allowedRoles: ["OWNER", "CFO", "PM"],
-    badgeKey: "alerts",
+    id: "reconciliation",
+    label: "Reconciliation",
+    path: "reconciliation",
+    icon: Scale,
+    allowedRoles: ["OWNER", "CFO"],
+    badgeKey: "reconciliation",
   },
   {
     id: "partners",
@@ -111,6 +116,16 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     icon: Users,
     allowedRoles: ["OWNER", "CFO"],
   },
+
+  // 3. Project Execution
+  {
+    id: "timeline",
+    label: "Timeline",
+    path: "timeline",
+    icon: CalendarDays,
+    allowedRoles: ["OWNER", "CFO", "PM"],
+    badgeKey: "timeline",
+  },
   {
     id: "inbox",
     label: "Inbox",
@@ -118,6 +133,8 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     icon: MessageSquare,
     allowedRoles: ["OWNER", "CFO", "PM", "GC", "INVESTOR"],
   },
+
+  // 4. Project Settings
   {
     id: "settings",
     label: "Project Settings",
@@ -145,6 +162,7 @@ export const WORKSPACE_ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   "documents": ["OWNER", "CFO", "PM"],
   "budget": ["OWNER", "CFO", "PM"],
   "economics": ["OWNER", "CFO", "PM"],
+  "changes": ["OWNER", "CFO", "PM"],
   "reconciliation": ["OWNER", "CFO"],
   "draws": ["OWNER", "CFO", "PM"],
   "timeline": ["OWNER", "CFO", "PM"],

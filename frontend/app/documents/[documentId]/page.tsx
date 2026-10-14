@@ -22,6 +22,9 @@ import {
   Check,
   X,
   FileText,
+  Download,
+  PanelRight,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
@@ -55,7 +58,28 @@ export default function DocumentReviewPage() {
   });
 
   const document: DocumentItem | undefined = docData?.data;
-  const extractions: ExtractionField[] = extractionsData?.data || [];
+  const extractions: ExtractionField[] = React.useMemo(
+    () => extractionsData?.data || [],
+    [extractionsData?.data]
+  );
+
+  const isSpreadsheet = Boolean(
+    document?.mime_type?.toLowerCase().includes("spreadsheet") ||
+    document?.mime_type?.toLowerCase().includes("excel") ||
+    document?.mime_type?.toLowerCase().includes("csv") ||
+    document?.original_filename?.match(/\.(xlsx|xls|csv)$/i)
+  );
+
+  const [showSideReview, setShowSideReview] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    // Spreadsheets and documents without extracted fields have side review removed/hidden by default
+    if (isSpreadsheet || extractions.length === 0) {
+      setShowSideReview(false);
+    } else {
+      setShowSideReview(true);
+    }
+  }, [isSpreadsheet, extractions.length]);
 
   const decideMutation = useMutation({
     mutationFn: ({
@@ -138,9 +162,19 @@ export default function DocumentReviewPage() {
   const totalFields = extractions.length;
   const acceptedCount = extractions.filter((e) => e.status === "ACCEPTED" || e.status === "EDITED").length;
   const proposedCount = extractions.filter((e) => e.status === "PROPOSED").length;
-  const avgConfidence = totalFields > 0
-    ? Math.round((extractions.reduce((acc, e) => acc + e.confidence, 0) / totalFields) * 100)
-    : 95;
+
+  const confidenceStats = React.useMemo(() => {
+    let high = 0;
+    let med = 0;
+    let low = 0;
+    extractions.forEach((field) => {
+      const score = field.confidence > 1 ? field.confidence : field.confidence * 100;
+      if (score >= 85) high++;
+      else if (score >= 70) med++;
+      else low++;
+    });
+    return { high, med, low };
+  }, [extractions]);
 
   if (isLoadingDoc || !document) {
     return (
@@ -156,25 +190,22 @@ export default function DocumentReviewPage() {
   return (
     <div className="flex flex-col h-screen w-full bg-slate-50 overflow-hidden">
       {/* Top Navbar */}
-      <header className="h-14 border-b border-slate-200/90 bg-white px-6 flex items-center justify-between shrink-0 shadow-2xs z-10">
+      <header className="h-14 border-b border-slate-200/80 bg-white px-5 flex items-center justify-between shrink-0 shadow-2xs z-10">
         <div className="flex items-center gap-3 min-w-0">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleBack}
-            className="h-8 px-2.5 text-xs text-slate-600 hover:text-slate-900 gap-1.5"
+            className="h-8 px-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 gap-1.5 rounded-lg"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span>Back to Documents</span>
+            <span>Documents</span>
           </Button>
 
           <div className="h-4 w-px bg-slate-200" />
 
-          <div className="flex items-center gap-2 truncate">
-            <span className="rounded bg-blue-50 text-blue-700 border border-blue-200/70 font-mono px-2 py-0.5 text-[10px] font-bold tracking-tight shrink-0">
-              OCR REVIEW WORKBENCH
-            </span>
-            <span className="text-sm font-bold text-slate-900 truncate">
+          <div className="flex items-center gap-2.5 truncate">
+            <span className="text-sm font-semibold text-slate-900 truncate">
               {document.original_filename}
             </span>
             <StatusBadge
@@ -191,52 +222,73 @@ export default function DocumentReviewPage() {
 
         {/* Stats & Actions */}
         <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-4 bg-slate-50 px-3.5 py-1.5 rounded-xl border border-slate-200/80 text-xs">
-            <div className="text-center">
-              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-tight block">Confidence</span>
-              <span className="font-bold text-emerald-600 font-mono text-xs">{avgConfidence}%</span>
+          {totalFields > 0 && (
+            <div className="hidden lg:flex items-center gap-3 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+              <div className="flex items-center gap-1.5" title="High confidence extractions (≥85%)">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="font-semibold text-slate-800">{confidenceStats.high} Verified</span>
+              </div>
+              {confidenceStats.med > 0 && (
+                <div className="flex items-center gap-1.5" title="Medium confidence extractions (70-84%)">
+                  <span className="h-2 w-2 rounded-full bg-amber-500" />
+                  <span className="font-semibold text-slate-800">{confidenceStats.med} Review</span>
+                </div>
+              )}
+              {confidenceStats.low > 0 && (
+                <div className="flex items-center gap-1.5" title="Low confidence extractions (<70%)">
+                  <span className="h-2 w-2 rounded-full bg-rose-500" />
+                  <span className="font-semibold text-rose-700">{confidenceStats.low} Attention</span>
+                </div>
+              )}
             </div>
-            <div className="h-5 w-px bg-slate-200" />
-            <div className="text-center">
-              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-tight block">Pending</span>
-              <span className="font-bold text-amber-600 font-mono text-xs">{proposedCount}</span>
-            </div>
-            <div className="h-5 w-px bg-slate-200" />
-            <div className="text-center">
-              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-tight block">Verified</span>
-              <span className="font-bold text-blue-600 font-mono text-xs">{acceptedCount} / {totalFields}</span>
-            </div>
-          </div>
+          )}
 
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => acceptAllMutation.mutate()}
-            isLoading={acceptAllMutation.isPending}
-            disabled={proposedCount === 0}
-            className="h-8.5 px-3 text-xs font-semibold shadow-2xs"
-          >
-            <CheckCheck className="h-3.5 w-3.5 mr-1" />
-            Accept All ({proposedCount})
-          </Button>
+          {extractions.length > 0 && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowSideReview((prev) => !prev)}
+              className={cn(
+                "h-8 px-3 text-xs font-semibold rounded-lg shadow-2xs gap-1.5",
+                showSideReview ? "bg-slate-900 text-white hover:bg-slate-800 border-transparent" : "bg-white text-slate-700 border-slate-200"
+              )}
+              title={showSideReview ? "Hide review panel" : "Open review panel"}
+            >
+              <PanelRight className="h-3.5 w-3.5" />
+              <span>{showSideReview ? "Hide Review" : `Review Extractions (${extractions.length})`}</span>
+            </Button>
+          )}
+
+          {proposedCount > 0 && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => acceptAllMutation.mutate()}
+              isLoading={acceptAllMutation.isPending}
+              className="h-8 px-3 text-xs font-semibold rounded-lg shadow-2xs"
+            >
+              <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
+              Accept All ({proposedCount})
+            </Button>
+          )}
 
           <Button
             variant="primary"
             size="sm"
             onClick={() => completeReviewMutation.mutate()}
             isLoading={completeReviewMutation.isPending}
-            className="h-8.5 px-3.5 text-xs font-semibold shadow-xs"
+            className="h-8 px-3.5 text-xs font-semibold rounded-lg shadow-xs bg-emerald-600 hover:bg-emerald-700 text-white"
           >
-            <FileCheck className="h-3.5 w-3.5 mr-1" />
+            <FileCheck className="h-3.5 w-3.5 mr-1.5" />
             Complete & Publish
           </Button>
         </div>
       </header>
 
-      {/* Main Workspace Body - 2 Columns */}
+      {/* Main Workspace Body */}
       <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
-        {/* Left: Document Viewer (65% width) */}
-        <div className="flex-1 h-full p-4 overflow-hidden border-r border-slate-200/80 bg-slate-900 flex flex-col">
+        {/* Document Viewer (full width if side review is hidden/removed) */}
+        <div className={`flex-1 h-full p-4 overflow-hidden bg-slate-100/60 flex flex-col ${showSideReview ? "border-r border-slate-200/80" : ""}`}>
           <DocumentViewer
             document={document}
             extractions={extractions}
@@ -245,8 +297,9 @@ export default function DocumentReviewPage() {
           />
         </div>
 
-        {/* Right: Extractions Inspector (35% width, max 480px) */}
-        <div className="w-full md:w-[460px] h-full flex flex-col bg-white overflow-hidden shrink-0">
+        {/* Right: Extractions Inspector (conditional) */}
+        {showSideReview && (
+          <div className="w-full md:w-[460px] h-full flex flex-col bg-white overflow-hidden shrink-0 border-l border-slate-200/80">
           {/* Header Bar */}
           <div className="p-4 border-b border-slate-200/80 bg-slate-50/50 space-y-2 shrink-0">
             <div className="flex items-center justify-between text-xs">
@@ -282,6 +335,16 @@ export default function DocumentReviewPage() {
                 const isEditing = editingFieldId === field.id;
                 const isRejecting = rejectingFieldId === field.id;
 
+                const score = field.confidence > 1 ? field.confidence : field.confidence * 100;
+                const level = score >= 85 ? "high" : score >= 70 ? "medium" : "low";
+
+                let citationLabel = "Page 1";
+                if (typeof field.citation === "string") {
+                  citationLabel = field.citation;
+                } else if (field.citation?.page_number) {
+                  citationLabel = `Page ${field.citation.page_number}${field.citation.row_number ? `, Row ${field.citation.row_number}` : ""}`;
+                }
+
                 return (
                   <div
                     key={field.id}
@@ -298,24 +361,24 @@ export default function DocumentReviewPage() {
                     {/* Field Header */}
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <span className="text-xs font-bold text-slate-900 block">
-                          {field.field_name}
+                        <span className="text-xs font-bold text-slate-900 block capitalize">
+                          {field.field_name.replace(/_/g, " ")}
                         </span>
-                        <div className="flex items-center gap-2 mt-0.5">
+                        <div className="flex items-center gap-2 mt-1">
                           <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-mono text-slate-600 font-semibold">
-                            Page {field.citation?.page_number || 1}, Row {field.citation?.row_number || "N/A"}
+                            {citationLabel}
                           </span>
                           <span
                             className={cn(
-                              "text-[10px] font-bold font-mono",
-                              field.confidence >= 0.95
-                                ? "text-emerald-700"
-                                : field.confidence >= 0.8
-                                ? "text-blue-700"
-                                : "text-amber-700"
+                              "px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shrink-0 border",
+                              level === "high"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                : level === "medium"
+                                ? "bg-amber-50 text-amber-700 border-amber-200"
+                                : "bg-rose-50 text-rose-700 border-rose-200"
                             )}
                           >
-                            {Math.round(field.confidence * 100)}% OCR
+                            {Math.round(score)}% {level === "high" ? "Verified" : level === "medium" ? "Review" : "Attention"}
                           </span>
                         </div>
                       </div>
@@ -345,9 +408,20 @@ export default function DocumentReviewPage() {
                       </div>
                     </div>
 
-                    {/* Value Display */}
-                    <div className="mt-2.5 p-2 rounded-lg bg-slate-50 border border-slate-200/60 font-mono text-xs font-semibold text-slate-800">
-                      {field.normalized_value || field.raw_value}
+                    {/* Value Display with Double-Click Support */}
+                    <div
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        setEditingFieldId(field.id);
+                        setEditedValue(field.normalized_value || field.raw_value);
+                      }}
+                      title="Double-click to edit value"
+                      className="mt-2.5 p-2 rounded-lg bg-slate-50 border border-slate-200/80 font-mono text-xs font-semibold text-slate-800 cursor-pointer hover:bg-slate-100/70 hover:border-slate-300 transition-colors flex items-center justify-between group"
+                    >
+                      <span className="truncate">{field.normalized_value || field.raw_value}</span>
+                      <span className="text-[10px] font-sans font-normal text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Double-click to edit
+                      </span>
                     </div>
 
                     {/* Review Actions */}
@@ -477,7 +551,8 @@ export default function DocumentReviewPage() {
             )}
           </div>
         </div>
-      </div>
+      )}
+    </div>
     </div>
   );
 }

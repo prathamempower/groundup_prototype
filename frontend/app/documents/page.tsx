@@ -29,6 +29,7 @@ import {
   FileCheck,
   ChevronRight,
   Loader2,
+  SlidersHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
@@ -153,6 +154,7 @@ export default function DocumentsPage() {
   const needsReviewCount = allDocuments.filter((d) => d.ingestion_status === "READY_FOR_REVIEW").length;
   const reviewedCount = allDocuments.filter((d) => d.ingestion_status === "REVIEWED").length;
   const quarantinedCount = allDocuments.filter((d) => d.ingestion_status === "QUARANTINED").length;
+  const duplicatesCount = allDocuments.filter((d) => Boolean(d.duplicate_of_document_id)).length;
   const reviewedRate = totalCount > 0 ? Math.round((reviewedCount / totalCount) * 100) : 0;
 
   // Find any misfiled quarantine document for the prominent alert banner
@@ -383,6 +385,9 @@ export default function DocumentsPage() {
                 )}
               >
                 <span>Duplicates</span>
+                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold font-mono", activeTab === "DUPLICATES" ? "bg-slate-200 text-slate-800" : "bg-slate-200/80 text-slate-700")}>
+                  {duplicatesCount}
+                </span>
               </button>
             </div>
 
@@ -610,7 +615,7 @@ export default function DocumentsPage() {
                               </Button>
                             ) : (
                               <Button
-                                variant="outline"
+                                variant="secondary"
                                 size="sm"
                                 onClick={() => {
                                   if (currentProjectId) {
@@ -619,9 +624,11 @@ export default function DocumentsPage() {
                                     router.push(`/documents/${doc.id}`);
                                   }
                                 }}
-                                className="h-7 px-2.5 text-xs font-semibold text-blue-700 border-slate-200 hover:border-blue-300 hover:bg-blue-50/60"
+                                className="h-7 px-2.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 hover:bg-emerald-100 shadow-2xs gap-1"
+                                title="Inspect interactive spreadsheet with color-coded confidence and inline editing"
                               >
-                                Review
+                                <SlidersHorizontal className="h-3 w-3 text-emerald-600" />
+                                <span>Review</span>
                               </Button>
                             )}
                             <button

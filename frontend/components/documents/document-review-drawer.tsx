@@ -28,6 +28,7 @@ import {
   ExternalLink,
   ChevronRight,
   ShieldCheck,
+  PanelRight,
 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
@@ -68,6 +69,23 @@ export function DocumentReviewDrawer({
 
   const document = docData?.data;
   const extractions = extractionsData?.data || [];
+
+  const isSpreadsheet = Boolean(
+    document?.mime_type?.toLowerCase().includes("spreadsheet") ||
+    document?.mime_type?.toLowerCase().includes("excel") ||
+    document?.mime_type?.toLowerCase().includes("csv") ||
+    document?.original_filename?.match(/\.(xlsx|xls|csv)$/i)
+  );
+
+  const [showSideReview, setShowSideReview] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (isSpreadsheet || extractions.length === 0) {
+      setShowSideReview(false);
+    } else {
+      setShowSideReview(true);
+    }
+  }, [isSpreadsheet, extractions.length]);
 
   // Mutations
   const decideMutation = useMutation({
@@ -172,50 +190,50 @@ export function DocumentReviewDrawer({
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent maxWidth="full" className="p-0 overflow-hidden flex flex-col h-[90vh] max-h-[92vh] rounded-xl bg-white border border-slate-200/90 shadow-overlay">
         {/* Modal Header */}
-        <ModalHeader className="border-b border-slate-200/80 bg-slate-50/70 px-6 py-3.5 flex-shrink-0">
+        <ModalHeader className="border-b border-slate-200/80 bg-white px-6 py-3.5 flex-shrink-0">
           <div className="flex items-center justify-between pr-8">
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <span className="rounded bg-blue-50 text-blue-700 border border-blue-200/70 font-mono px-2 py-0.5 text-[10px] font-bold tracking-tight">
-                  OCR REVIEW WORKBENCH
-                </span>
-                {document && (
-                  <StatusBadge
-                    status={
-                      document.ingestion_status === "REVIEWED"
-                        ? "verified"
-                        : document.ingestion_status === "QUARANTINED"
-                        ? "blocked"
-                        : "under_review"
-                    }
-                  />
-                )}
-              </div>
-              <ModalTitle className="text-base font-bold text-slate-900 tracking-tight">
+            <div className="flex items-center gap-2.5 truncate">
+              <ModalTitle className="text-sm font-semibold text-slate-900 truncate">
                 {document?.original_filename || "Review Document"}
               </ModalTitle>
-              <ModalDescription className="text-xs text-slate-500 font-normal">
-                Verify OCR candidate extractions against the source document. Accepted values become immutable evidence.
-              </ModalDescription>
+              {document && (
+                <StatusBadge
+                  status={
+                    document.ingestion_status === "REVIEWED"
+                      ? "verified"
+                      : document.ingestion_status === "QUARANTINED"
+                      ? "blocked"
+                      : "under_review"
+                  }
+                />
+              )}
             </div>
 
             {/* Quick stats summary */}
-            <div className="hidden sm:flex items-center gap-4 bg-white px-3.5 py-1.5 rounded-xl border border-slate-200/80 shadow-2xs">
-              <div className="text-center px-1.5">
-                <div className="text-[10px] uppercase font-bold text-slate-400">OCR Confidence</div>
-                <div className="text-xs font-bold text-emerald-600 font-mono">{avgConfidence}%</div>
+            {totalFields > 0 && (
+              <div className="hidden sm:flex items-center gap-3 bg-slate-50 px-3 py-1 rounded-lg border border-slate-200/70 text-xs">
+                <span className="text-slate-500 font-medium">
+                  Confidence: <strong className="text-slate-800 font-mono">{avgConfidence}%</strong>
+                </span>
+                <span className="text-slate-300">•</span>
+                <span className="text-slate-500 font-medium">
+                  Verified: <strong className="text-slate-800 font-mono">{acceptedCount}/{totalFields}</strong>
+                </span>
               </div>
-              <div className="h-6 w-px bg-slate-200" />
-              <div className="text-center px-1.5">
-                <div className="text-[10px] uppercase font-bold text-slate-400">Pending Review</div>
-                <div className="text-xs font-bold text-amber-600 font-mono">{proposedCount}</div>
-              </div>
-              <div className="h-6 w-px bg-slate-200" />
-              <div className="text-center px-1.5">
-                <div className="text-[10px] uppercase font-bold text-slate-400">Accepted</div>
-                <div className="text-xs font-bold text-blue-600 font-mono">{acceptedCount} / {totalFields}</div>
-              </div>
-            </div>
+            )}
+
+            {extractions.length > 0 && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowSideReview((prev) => !prev)}
+                className="h-8 px-2.5 text-xs font-semibold rounded-lg shadow-2xs"
+                title={showSideReview ? "Hide review queue" : "Open review queue"}
+              >
+                <PanelRight className="h-3.5 w-3.5 mr-1 text-slate-500" />
+                <span>{showSideReview ? "Hide Side Review" : `Side Review (${extractions.length})`}</span>
+              </Button>
+            )}
           </div>
         </ModalHeader>
 
@@ -228,7 +246,7 @@ export function DocumentReviewDrawer({
           ) : (
             <>
               {/* Left Side: Document Viewer */}
-              <div className="flex-1 h-full p-4 overflow-hidden border-r border-slate-200/80 bg-slate-900 flex flex-col">
+              <div className={`flex-1 h-full p-4 overflow-hidden bg-slate-100/60 flex flex-col ${showSideReview ? "border-r border-slate-200/80" : ""}`}>
                 <DocumentViewer
                   document={document}
                   extractions={extractions}
@@ -237,8 +255,9 @@ export function DocumentReviewDrawer({
                 />
               </div>
 
-              {/* Right Side: Extraction Inspector & Decision Controls (40% width) */}
-              <div className="w-full md:w-[480px] h-full flex flex-col bg-surface overflow-y-auto">
+              {/* Right Side: Extraction Inspector & Decision Controls (conditional) */}
+              {showSideReview && (
+                <div className="w-full md:w-[480px] h-full flex flex-col bg-surface overflow-y-auto border-l border-slate-200/80">
                 {/* Confidence Bar & Review Guidance */}
                 <div className="p-4 border-b border-border bg-subtle/20 space-y-2">
                   <div className="flex items-center justify-between text-xs">
@@ -502,7 +521,8 @@ export function DocumentReviewDrawer({
                   )}
                 </div>
               </div>
-            </>
+            )}
+          </>
           )}
         </div>
 

@@ -27,6 +27,14 @@ router = APIRouter(tags=["Budgets"])
 
 def serialize_change_order(co: ChangeOrder) -> ChangeOrderRead:
     target_bl = str(co.lines[0].budget_line_id) if co.lines else ""
+    requester_name = None
+    requester_role = None
+    if getattr(co, "requester", None):
+        first = co.requester.first_name or ""
+        last = co.requester.last_name or ""
+        requester_name = f"{first} {last}".strip() or co.requester.email
+        requester_role = co.requester.role
+
     return ChangeOrderRead(
         id=str(co.id),
         organization_id=str(co.organization_id),
@@ -41,6 +49,8 @@ def serialize_change_order(co: ChangeOrder) -> ChangeOrderRead:
         requested_amount=co.requested_amount,
         approved_amount=co.approved_amount,
         requested_by=str(co.requested_by),
+        requester_name=requester_name,
+        requester_role=requester_role,
         requested_at=co.created_at.isoformat(),
         approved_by=str(co.approved_by) if co.approved_by else None,
         approved_at=co.approved_at.isoformat() if co.approved_at else None,

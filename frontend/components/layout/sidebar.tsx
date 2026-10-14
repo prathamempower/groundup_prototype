@@ -10,7 +10,6 @@ import { getProjectNavItems } from "@/lib/navigation";
 import {
   ChevronLeft,
   ChevronRight,
-  ArrowUpRight,
 } from "lucide-react";
 import { UserRole, Project } from "@/lib/types";
 
@@ -69,9 +68,19 @@ export function Sidebar({
     enabled: Boolean(workspaceProjectId && ["OWNER", "CFO"].includes(effectiveRole)),
   });
 
+  const { data: changeOrdersData } = useQuery({
+    queryKey: ["change-orders", workspaceProjectId],
+    queryFn: () => api.budget.getChangeOrders(workspaceProjectId),
+    enabled: Boolean(workspaceProjectId && ["OWNER", "CFO", "PM"].includes(effectiveRole)),
+  });
+
   // Calculate material badges
   const openAlertsCount = (alertsData?.data || []).filter(
     (a) => a.status === "OPEN"
+  ).length;
+
+  const pendingChangeOrdersCount = (changeOrdersData?.data || []).filter(
+    (co: any) => co.status === "SUBMITTED" || co.status === "DRAFT"
   ).length;
 
   const badgeCounts: Record<string, number> = {
@@ -80,6 +89,7 @@ export function Sidebar({
     reconciliation: recData?.data?.total_pending || 0,
     timeline: 0,
     alerts: openAlertsCount,
+    changes: pendingChangeOrdersCount,
     inbox: 4,
   };
 
@@ -88,19 +98,25 @@ export function Sidebar({
     : [];
 
   // Business-minded enterprise categorization:
-  // 1. Executive & Overview (Command/Summary & Communication)
-  // 2. Financial Management (Capital & Cost Control)
-  // 3. Project Execution (Field, Timeline & Assets)
-  // 4. Governance & Risk (Exceptions, Compliance & Capital Partners)
-  const executiveItemIds = ["control-center", "inbox"];
-  const financialItemIds = ["budget", "draws", "reconciliation"];
-  const executionItemIds = ["timeline", "documents"];
-  const governanceItemIds = ["alerts", "partners"];
+  // 1. Executive & Control: Control Center, Documents (vital contracts/draw docs/plans), Project Economics, Changes & Approvals, Alerts & Exceptions
+  // 2. Financial Management: Draws, Reconciliation, Partners & Funding
+  // 3. Project Execution: Timeline, Inbox
+  const executiveItemIds = ["control-center", "documents", "budget", "changes", "alerts"];
+  const financialItemIds = ["draws", "reconciliation", "partners"];
+  const executionItemIds = ["timeline", "inbox"];
 
-  const executiveNavItems = visibleNavItems.filter((i) => executiveItemIds.includes(i.id));
-  const financialNavItems = visibleNavItems.filter((i) => financialItemIds.includes(i.id));
-  const executionNavItems = visibleNavItems.filter((i) => executionItemIds.includes(i.id));
-  const governanceNavItems = visibleNavItems.filter((i) => governanceItemIds.includes(i.id));
+  const executiveNavItems = executiveItemIds
+    .map((id) => visibleNavItems.find((i) => i.id === id))
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  const financialNavItems = financialItemIds
+    .map((id) => visibleNavItems.find((i) => i.id === id))
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  const executionNavItems = executionItemIds
+    .map((id) => visibleNavItems.find((i) => i.id === id))
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+
   const bottomNavItems = visibleNavItems.filter((i) => i.id === "settings");
 
   const getProjectThumbnail = (proj?: Project | null) => {
@@ -254,10 +270,6 @@ export function Sidebar({
               title: "Project Execution",
               items: executionNavItems,
             },
-            {
-              title: "Governance & Risk",
-              items: governanceNavItems,
-            },
           ].map((section) => {
             if (section.items.length === 0) return null;
             return (
@@ -371,18 +383,6 @@ export function Sidebar({
               </Link>
             );
           })}
-
-          {/* Clean link to Portfolio */}
-          {!collapsed && (
-            <Link
-              href="/projects"
-              onClick={onCloseMobile}
-              className="flex items-center justify-between rounded-lg px-3 py-1.5 text-[11px] font-medium text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors group"
-            >
-              <span>Projects Portfolio</span>
-              <ArrowUpRight className="h-3 w-3 text-slate-400 group-hover:text-slate-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </Link>
-          )}
         </div>
       </aside>
     </>

@@ -230,9 +230,7 @@ export function StatementPeriodSignoffModal({
           >
             {isSubmitting
               ? "Recording Sign-Off..."
-              : allControlsPassed
-              ? "Sign Off Statement Period"
-              : "Sign Off with CFO Waiver"}
+              : "Sign Off Statement Period"}
           </Button>
         </ModalFooter>
       </ModalContent>

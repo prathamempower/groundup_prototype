@@ -491,6 +491,8 @@ class ChangeOrder(Base):
         DateTime(timezone=True), default=utc_now, nullable=False
     )
 
+    requester: Mapped["User"] = relationship("User", foreign_keys=[requested_by])
+
     lines: Mapped[list["ChangeOrderLine"]] = relationship(
         back_populates="change_order", cascade="all, delete-orphan"
     )

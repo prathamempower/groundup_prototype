@@ -5,7 +5,7 @@ import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription } from "
 import { DocumentItem } from "@/lib/types";
 import { DocumentViewer } from "./document-viewer";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, ArrowRight } from "lucide-react";
+import { ExternalLink, ArrowRight, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 
 interface DocumentQuickPreviewModalProps {
@@ -24,9 +24,10 @@ export function DocumentQuickPreviewModal({
   if (!document) return null;
 
   const targetProjectId = document.project_id || currentProjectId;
-  const reviewHref = targetProjectId
+  const viewerHref = targetProjectId
     ? `/projects/${targetProjectId}/documents/${document.id}`
     : `/documents/${document.id}`;
+  const reviewHref = `${viewerHref}/review`;
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
@@ -51,21 +52,21 @@ export function DocumentQuickPreviewModal({
             </div>
 
             <div className="flex items-center gap-2">
-              <Link href={reviewHref}>
+              <Link href={viewerHref}>
                 <Button
                   variant="primary"
                   size="sm"
-                  className="text-xs font-semibold h-8 gap-1.5 shadow-xs"
+                  className="text-xs font-semibold h-8 gap-1.5 shadow-xs bg-emerald-600 hover:bg-emerald-700 text-white"
                 >
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
                   <span>Open Review Workbench</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
             </div>
           </div>
         </ModalHeader>
 
-        <div className="flex-1 p-3 overflow-hidden bg-slate-900 flex flex-col">
+        <div className="flex-1 p-3 overflow-hidden bg-slate-100/60 flex flex-col">
           <DocumentViewer document={document} />
         </div>
       </ModalContent>

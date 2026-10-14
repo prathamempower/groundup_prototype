@@ -144,9 +144,6 @@ export default function ProjectSettingsPage() {
                     Governing legal structure and site location.
                   </p>
                 </div>
-                <span className="text-[10px] bg-slate-100 text-slate-700 border border-slate-200/80 rounded-md px-2 py-0.5 font-mono font-medium">
-                  ID: #{project.id.slice(0, 6)}
-                </span>
               </div>
 
               {saveSuccess && (

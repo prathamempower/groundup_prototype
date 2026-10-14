@@ -270,7 +270,24 @@ export const api = {
         method: "POST",
         body: JSON.stringify({
           decision,
+          accepted_value: normalizedValue,
           normalized_value: normalizedValue,
+          rationale,
+        }),
+      }),
+    addManualField: (
+      documentId: string,
+      fieldName: string,
+      value: string,
+      notes?: string,
+      rationale?: string
+    ) =>
+      request<{ status: string; source_record_id: string }>(`/documents/${documentId}/manual-entry`, {
+        method: "POST",
+        body: JSON.stringify({
+          field_name: fieldName,
+          value,
+          notes,
           rationale,
         }),
       }),

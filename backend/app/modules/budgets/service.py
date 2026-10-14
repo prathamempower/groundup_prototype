@@ -1,7 +1,7 @@
 import uuid
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.errors import (
     ContingencyExceededException,
@@ -381,6 +381,7 @@ class BudgetService:
         return list(
             self.db.scalars(
                 select(ChangeOrder)
+                .options(joinedload(ChangeOrder.requester))
                 .where(ChangeOrder.project_id == project.id)
                 .order_by(ChangeOrder.created_at.desc())
             ).all()

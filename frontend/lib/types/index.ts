@@ -367,8 +367,10 @@ export interface ChangeOrder {
   approved_amount?: string;
   status: "DRAFT" | "SUBMITTED" | "APPROVED" | "REJECTED";
   target_budget_line_id: string;
-  funding_source: "CONTINGENCY" | "SPONSOR_EQUITY" | "LOAN_EXPANSION";
+  funding_source: "CONTINGENCY" | "SPONSOR_EQUITY" | "LOAN_EXPANSION" | "OTHER";
   requested_by: string;
+  requester_name?: string;
+  requester_role?: string;
   requested_at: string;
   approved_by?: string;
   approved_at?: string;

@@ -20,20 +20,14 @@ export function ResolveDqiModal({
   onSuccess,
 }: ResolveDqiModalProps) {
   const queryClient = useQueryClient();
-  const [actionType, setActionType] = useState<"RESOLVE" | "WAIVE">("RESOLVE");
   const [note, setNote] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const resolveMutation = useMutation({
-    mutationFn: () => {
-      if (actionType === "RESOLVE") {
-        return api.alerts.resolveDataQualityIssue(issue.id, {
-          resolution_note: note.trim() || "Resolved via verified source document linking.",
-        });
-      } else {
-        return api.alerts.waiveDataQualityIssue(issue.id, note.trim() || "Waived by CFO policy.");
-      }
-    },
+    mutationFn: () =>
+      api.alerts.resolveDataQualityIssue(issue.id, {
+        resolution_note: note.trim() || "Resolved via verified source document linking.",
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["data-quality-issues"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -94,36 +88,11 @@ export function ResolveDqiModal({
           <label className="block text-caption font-semibold text-text-primary">
             Remediation Decision
           </label>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setActionType("RESOLVE")}
-              className={`rounded-md border p-3 text-left transition-all ${
-                actionType === "RESOLVE"
-                  ? "border-primary bg-primary-subtle/30 ring-1 ring-primary"
-                  : "border-border bg-surface hover:bg-subtle"
-              }`}
-            >
-              <div className="text-body font-semibold text-text-primary">Mark Resolved</div>
-              <p className="text-caption text-text-secondary mt-0.5">
-                Evidence verified or entity remapped successfully.
-              </p>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActionType("WAIVE")}
-              className={`rounded-md border p-3 text-left transition-all ${
-                actionType === "WAIVE"
-                  ? "border-warning bg-warning-subtle/30 ring-1 ring-warning"
-                  : "border-border bg-surface hover:bg-subtle"
-              }`}
-            >
-              <div className="text-body font-semibold text-text-primary">Waive Issue</div>
-              <p className="text-caption text-text-secondary mt-0.5">
-                Record explicit waiver without blocking gates.
-              </p>
-            </button>
+          <div className="rounded-md border p-3 text-left border-primary bg-primary-subtle/30 ring-1 ring-primary">
+            <div className="text-body font-semibold text-text-primary">Mark Resolved</div>
+            <p className="text-caption text-text-secondary mt-0.5">
+              Evidence verified or entity remapped successfully.
+            </p>
           </div>
         </div>
 

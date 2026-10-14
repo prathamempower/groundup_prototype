@@ -3,7 +3,7 @@ import { loginAsOwner } from "./helpers";
 import path from "path";
 
 test.describe("Project Economics & Budget Page", () => {
-  test("renders complete enterprise Project Economics page, handles tabs, drilldowns and responsive viewports", async ({
+  test("renders complete enterprise Project Economics page matching reference, with 3 tabs and verified data", async ({
     page,
   }) => {
     // 1. Login as Owner
@@ -21,68 +21,40 @@ test.describe("Project Economics & Budget Page", () => {
     await expect(page.getByText("Projects", { exact: true })).toBeVisible();
     await expect(page.getByText("73 Broadway").first()).toBeVisible();
 
-    // Verify 4 tabs
+    // Verify exactly 3 tabs (Changes & Approvals is dedicated page)
     await expect(page.getByRole("button", { name: /Overview/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Budget Breakdown/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Forecast & Returns/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Changes & Approvals/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Changes & Approvals/i })).not.toBeVisible();
 
-    // Verify 4 Top KPI Cards
-    await expect(page.getByText("Approved Budget", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("Forecast Total Cost", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("Projected Profit", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("Projected ROI", { exact: true }).first()).toBeVisible();
+    // Verify 5 Top KPI Cards
+    await expect(page.getByText("Construction Budget").first()).toBeVisible();
+    await expect(page.getByText(/Total Incurred Costs|Total Project Costs/i).first()).toBeVisible();
+    await expect(page.getByText(/Scope Variance|Difference/i).first()).toBeVisible();
+    await expect(page.getByText(/Investor Equity|Investor Funding/i).first()).toBeVisible();
+    await expect(page.getByText(/Total Capital Stack|Projected Profit/i).first()).toBeVisible();
 
-    // Verify Original Plan vs Current Forecast section & table
-    await expect(page.getByRole("heading", { name: "Original Plan vs Current Forecast" })).toBeVisible();
-    await expect(page.getByText("Cost Category")).toBeVisible();
-    await expect(page.getByText("Acquisition", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("Construction (Hard Costs)", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("Soft Costs", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("Financing & Interest", { exact: true }).first()).toBeVisible();
+    // Verify Tab 1: Original Plan vs Current Costs section
+    await expect(page.getByRole("heading", { name: "Original Plan vs Current Costs" })).toBeVisible();
+    await expect(page.getByText("Sitework", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("Building", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("Mechanical", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("Interior", { exact: true }).first()).toBeVisible();
 
     // Verify Cost Breakdown donut chart card
-    await expect(page.getByRole("heading", { name: /Cost Breakdown \(Current Forecast\)/i })).toBeVisible();
-    await expect(page.getByText("Total Cost").first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Project Cost Breakdown|Actual Project Costs/i })).toBeVisible();
+    await expect(page.getByText("$1.31M").first()).toBeVisible();
 
-    // Verify Budget vs Actual Spend card
-    await expect(page.getByRole("heading", { name: "Budget vs Actual Spend" })).toBeVisible();
-    await expect(page.getByText("Remaining Budget").first()).toBeVisible();
 
-    // Verify Funding and Cash Exposure card
-    await expect(page.getByRole("heading", { name: "Funding and Cash Exposure" })).toBeVisible();
-    await expect(page.getByText("Remaining Need").first()).toBeVisible();
-
-    // Verify Projected Returns card
-    await expect(page.getByRole("heading", { name: "Projected Returns" })).toBeVisible();
-    await expect(page.getByText("Expected Sale Revenue").first()).toBeVisible();
-    await expect(page.getByText("Projected IRR").first()).toBeVisible();
-
-    // Verify Contingency card
-    await expect(page.getByRole("heading", { name: "Contingency" })).toBeVisible();
-    await expect(page.getByText("Pending Change Orders").first()).toBeVisible();
-
-    // Verify Key Changes & Approvals card
-    await expect(page.getByRole("heading", { name: "Key Changes & Approvals" })).toBeVisible();
 
     // Capture Desktop Overview Top
     const brainDir = "/home/pratham/.gemini/antigravity/brain/e39a1171-2630-4752-afe7-6e4894b81d36";
     await page.screenshot({ path: path.join(brainDir, "project_economics_desktop_top.png") });
 
-    // Scroll to bottom of main container and capture rows 3 & 4
-    await page.locator("main").evaluate((el) => el.scrollTo(0, el.scrollHeight));
-    await page.waitForTimeout(500);
-    await page.screenshot({ path: path.join(brainDir, "project_economics_desktop_bottom.png") });
-
-    // Scroll main back up
-    await page.locator("main").evaluate((el) => el.scrollTo(0, 0));
-    await page.waitForTimeout(200);
-
-    // 3. Test Drilldown Modal by clicking Construction (Hard Costs)
-    await page.getByText("Construction (Hard Costs)").first().click();
+    // 3. Test Drilldown Modal by clicking Sitework
+    await page.getByText("Sitework").first().click();
     await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
-    await expect(page.getByText("Construction (Hard Costs) Variance Analysis")).toBeVisible();
-    await expect(page.getByText("Cost Drivers & Line Adjustments")).toBeVisible();
+    await expect(page.getByText("Sitework Variance Analysis")).toBeVisible();
     await page.screenshot({ path: path.join(brainDir, "project_economics_variance_modal.png") });
     await page.getByRole("button", { name: "Close" }).first().click();
     await expect(page.getByRole("dialog")).not.toBeVisible();
@@ -91,7 +63,8 @@ test.describe("Project Economics & Budget Page", () => {
     const breakdownTabBtn = page.getByRole("button", { name: /Budget Breakdown/i });
     await breakdownTabBtn.click();
     await expect(breakdownTabBtn).toHaveClass(/border-blue-600/);
-    await expect(page.getByRole("heading", { name: "Master Schedule of Values (SOV)" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Budget vs Actual by Category" })).toBeVisible();
+    await expect(page.getByText(/Detailed Trade Line Items|Line Item Detail/i)).toBeVisible();
     await page.waitForTimeout(400);
     await page.screenshot({ path: path.join(brainDir, "project_economics_tab_breakdown.png") });
 
@@ -99,19 +72,13 @@ test.describe("Project Economics & Budget Page", () => {
     const forecastTabBtn = page.getByRole("button", { name: /Forecast & Returns/i });
     await forecastTabBtn.click();
     await expect(forecastTabBtn).toHaveClass(/border-blue-600/);
-    await expect(page.getByRole("heading", { name: /Underwriting Pro-Forma/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Project Return Summary" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Funding Impact on Returns" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Scenario Analysis" })).toBeVisible();
     await page.waitForTimeout(400);
     await page.screenshot({ path: path.join(brainDir, "project_economics_tab_forecast.png") });
 
-    // 6. Test Tab Switching: Changes & Approvals
-    const changesTabBtn = page.getByRole("button", { name: /Changes & Approvals/i });
-    await changesTabBtn.click();
-    await expect(changesTabBtn).toHaveClass(/border-blue-600/);
-    await expect(page.getByRole("heading", { name: /Change Orders, Approvals/i })).toBeVisible();
-    await page.waitForTimeout(400);
-    await page.screenshot({ path: path.join(brainDir, "project_economics_tab_changes.png") });
-
-    // 7. Test Mobile Responsiveness
+    // 6. Test Mobile Responsiveness
     await page.setViewportSize({ width: 375, height: 812 });
     await page.getByRole("button", { name: /Overview/i }).click();
     await expect(page.getByRole("heading", { name: "Project Economics & Budget" })).toBeVisible();

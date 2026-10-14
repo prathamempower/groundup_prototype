@@ -6,7 +6,6 @@ import { api } from "@/lib/api";
 import { AlertItem, DataQualityIssue } from "@/lib/types";
 import { formatDate } from "@/lib/format";
 import { ResolveAlertModal } from "./resolve-alert-modal";
-import { WaiveAlertModal } from "./waive-alert-modal";
 import { EscalateAlertModal } from "./escalate-alert-modal";
 import { ResolveDqiModal } from "./resolve-dqi-modal";
 import {
@@ -32,7 +31,6 @@ export function AlertsManagerPanel({ projectId }: AlertsManagerPanelProps) {
 
   // Selected modals state
   const [resolvingAlert, setResolvingAlert] = useState<AlertItem | null>(null);
-  const [waivingAlert, setWaivingAlert] = useState<AlertItem | null>(null);
   const [escalatingAlert, setEscalatingAlert] = useState<AlertItem | null>(null);
   const [resolvingDqi, setResolvingDqi] = useState<DataQualityIssue | null>(null);
 
@@ -196,13 +194,6 @@ export function AlertsManagerPanel({ projectId }: AlertsManagerPanelProps) {
                       Resolve
                     </button>
                     <button
-                      onClick={() => setWaivingAlert(alert)}
-                      className="flex items-center gap-1 rounded-md border border-border bg-subtle px-3 py-1.5 text-caption font-medium text-text-primary hover:bg-subtle/80"
-                    >
-                      <ShieldAlert className="h-3.5 w-3.5 text-warning" />
-                      Waive
-                    </button>
-                    <button
                       onClick={() => setEscalatingAlert(alert)}
                       className="flex items-center gap-1 rounded-md border border-danger-border bg-danger-subtle px-3 py-1.5 text-caption font-medium text-danger hover:bg-danger/20"
                     >
@@ -351,14 +342,6 @@ export function AlertsManagerPanel({ projectId }: AlertsManagerPanelProps) {
           alert={resolvingAlert}
           isOpen={Boolean(resolvingAlert)}
           onClose={() => setResolvingAlert(null)}
-        />
-      )}
-
-      {waivingAlert && (
-        <WaiveAlertModal
-          alert={waivingAlert}
-          isOpen={Boolean(waivingAlert)}
-          onClose={() => setWaivingAlert(null)}
         />
       )}
 

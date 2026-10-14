@@ -114,6 +114,8 @@ class ChangeOrderRead(BaseModel):
     requested_amount: int
     approved_amount: int | None = None
     requested_by: str
+    requester_name: str | None = None
+    requester_role: str | None = None
     approved_by: str | None = None
     approved_at: str | None = None
     created_at: str

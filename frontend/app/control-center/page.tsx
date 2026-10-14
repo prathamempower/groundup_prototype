@@ -26,6 +26,47 @@ import {
 import { Button } from "@/components/ui/button";
 import { ControlCenterAnalytics } from "@/components/control-center/analytics-charts";
 import { DocumentQuickPreviewModal } from "@/components/documents/document-quick-preview-modal";
+import {
+  AmountSourceOrigin,
+  getControlCenterAmountOrigin,
+} from "@/lib/data/control-center-origins";
+import { AmountSourceModal } from "@/components/control-center/amount-source-modal";
+import { cn } from "@/lib/utils";
+
+function ClickableAmount({
+  amountText,
+  originKey,
+  label,
+  amountCents,
+  className,
+  onClick,
+  title = "Click to inspect source origin",
+}: {
+  amountText: React.ReactNode;
+  originKey: string;
+  label?: string;
+  amountCents?: number;
+  className?: string;
+  onClick: (key: string, label?: string, amountCents?: number) => void;
+  title?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(originKey, label, amountCents);
+      }}
+      title={title}
+      className={cn(
+        "cursor-pointer hover:text-blue-600 transition-colors text-left focus:outline-hidden",
+        className
+      )}
+    >
+      <span>{amountText}</span>
+    </button>
+  );
+}
 
 export default function ControlCenterPage() {
   const params = useParams();
@@ -54,6 +95,48 @@ export default function ControlCenterPage() {
 
   const [previewDoc, setPreviewDoc] = useState<DocumentItem | null>(null);
   const projectDocs = docsData?.data || [];
+
+  const [selectedOrigin, setSelectedOrigin] = useState<AmountSourceOrigin | null>(null);
+  const [isOriginModalOpen, setIsOriginModalOpen] = useState(false);
+
+  const handleOpenAmountOrigin = (
+    key: string,
+    label?: string,
+    amountCents?: number
+  ) => {
+    const origin = getControlCenterAmountOrigin(key, label, amountCents);
+    setSelectedOrigin(origin);
+    setIsOriginModalOpen(true);
+  };
+
+  const handleInspectDocument = (fileName: string) => {
+    setIsOriginModalOpen(false);
+    const cleanSearch = fileName.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const matchedDoc = projectDocs.find((doc) => {
+      const cleanDoc = doc.original_filename.toLowerCase().replace(/[^a-z0-9]/g, "");
+      return cleanDoc.includes(cleanSearch) || cleanSearch.includes(cleanDoc);
+    });
+
+    if (matchedDoc) {
+      setPreviewDoc(matchedDoc);
+    } else {
+      const isPdf = fileName.toLowerCase().endsWith(".pdf");
+      const virtualDoc: DocumentItem = {
+        id: "doc-" + fileName.toLowerCase().replace(/[^a-z0-9]/g, "-"),
+        organization_id: currentProject?.organization_id || "org_default",
+        project_id: currentProjectId || currentProject?.id || "",
+        original_filename: fileName,
+        mime_type: isPdf ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        document_type: isPdf ? "BUDGET_SOV" : "DRAW_PACKAGE",
+        document_date: "2025-04-01",
+        ingestion_status: "REVIEWED",
+        uploaded_by: "system",
+        uploaded_at: new Date().toISOString(),
+        pages_count: 1,
+      };
+      setPreviewDoc(virtualDoc);
+    }
+  };
 
   const isLoading = isProjectsLoading || isDashboardLoading;
 
@@ -109,9 +192,6 @@ export default function ControlCenterPage() {
                     ? project.lifecycle_stage.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
                     : "Pre Construction"}
                 </span>
-                <span className="rounded-md bg-slate-100 text-slate-600 px-2 py-0.5 text-xs font-mono font-medium border border-slate-200/80">
-                  ID #{project?.id ? project.id.slice(0, 6) : "161-JC"}
-                </span>
               </div>
               <div className="text-xs text-slate-500 flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="flex items-center gap-1 text-slate-600">
@@ -158,11 +238,23 @@ export default function ControlCenterPage() {
               </div>
               <div className="mt-3">
                 <div className="text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
-                  $1,471,120
+                  <ClickableAmount
+                    amountText="$1,471,120"
+                    originKey="approved_budget"
+                    label="Approved Project Budget"
+                    amountCents={147112000}
+                    onClick={handleOpenAmountOrigin}
+                  />
                 </div>
                 <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5">
                   <span className="inline-flex items-center text-slate-700 font-mono font-medium">
-                    +$16,120
+                    <ClickableAmount
+                      amountText="+$16,120"
+                      originKey="budget_variance_over_plan"
+                      label="Budget Variance Over Original Plan"
+                      amountCents={1612000}
+                      onClick={handleOpenAmountOrigin}
+                    />
                   </span>
                   <span>over original plan</span>
                 </div>
@@ -174,7 +266,13 @@ export default function ControlCenterPage() {
                 <div className="h-full bg-slate-800 rounded-full" style={{ width: "100%" }} />
               </div>
               <div className="flex justify-between text-[11px] text-slate-500 font-medium">
-                <span>Base: $1.45M</span>
+                <ClickableAmount
+                  amountText="Base: $1.45M"
+                  originKey="budget_base_plan"
+                  label="Original Base Baseline Budget"
+                  amountCents={145500000}
+                  onClick={handleOpenAmountOrigin}
+                />
                 <span>100% Committed</span>
               </div>
             </div>
@@ -193,23 +291,48 @@ export default function ControlCenterPage() {
               </div>
               <div className="mt-3">
                 <div className="text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
-                  $936,600
+                  <ClickableAmount
+                    amountText="$936,600"
+                    originKey="actual_spend"
+                    label="Total Actual Spend to Date"
+                    amountCents={93660000}
+                    onClick={handleOpenAmountOrigin}
+                  />
                 </div>
                 <div className="mt-2 text-xs text-slate-500 flex items-center gap-1">
-                  <span>Hard: $702.5k</span>
+                  <ClickableAmount
+                    amountText="Hard: $702.5k"
+                    originKey="hard_costs_spend"
+                    label="Direct Construction / Hard Costs Spend"
+                    amountCents={70245000}
+                    onClick={handleOpenAmountOrigin}
+                  />
                   <span className="text-slate-300">·</span>
-                  <span>Soft: $234.1k</span>
+                  <ClickableAmount
+                    amountText="Soft: $234.1k"
+                    originKey="soft_costs_spend"
+                    label="Soft Costs & Professional Fees Spend"
+                    amountCents={23415000}
+                    onClick={handleOpenAmountOrigin}
+                  />
                 </div>
               </div>
             </div>
 
             <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-1.5">
-              <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div className="h-1.5 w-full rounded-full bg-blue-50 overflow-hidden">
                 <div className="h-full bg-blue-600 rounded-full transition-all" style={{ width: "63.6%" }} />
               </div>
               <div className="flex justify-between text-[11px] text-slate-500 font-medium">
                 <span>Paid to Date</span>
-                <span className="font-mono text-slate-700 font-semibold">$534.5k Rem.</span>
+                <ClickableAmount
+                  amountText="$534.5k Rem."
+                  originKey="remaining_budget"
+                  label="Remaining Unspent Budget"
+                  amountCents={53452000}
+                  className="font-mono text-slate-700 font-semibold"
+                  onClick={handleOpenAmountOrigin}
+                />
               </div>
             </div>
           </div>
@@ -227,21 +350,40 @@ export default function ControlCenterPage() {
               </div>
               <div className="mt-3">
                 <div className="text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
-                  $1,086,000
+                  <ClickableAmount
+                    amountText="$1,086,000"
+                    originKey="cash_received"
+                    label="Cash Received & Cleared Draws"
+                    amountCents={108600000}
+                    onClick={handleOpenAmountOrigin}
+                  />
                 </div>
                 <div className="mt-2 text-xs text-emerald-700 font-medium">
-                  <span>+$149,400 liquidity cushion</span>
+                  <ClickableAmount
+                    amountText="+$149,400 liquidity cushion"
+                    originKey="liquidity_cushion"
+                    label="Project Liquidity Cushion"
+                    amountCents={14940000}
+                    className="text-emerald-700 font-medium"
+                    onClick={handleOpenAmountOrigin}
+                  />
                 </div>
               </div>
             </div>
 
             <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-1.5">
-              <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div className="h-1.5 w-full rounded-full bg-emerald-50 overflow-hidden">
                 <div className="h-full bg-emerald-600 rounded-full transition-all" style={{ width: "73.8%" }} />
               </div>
               <div className="flex justify-between text-[11px] text-slate-500 font-medium">
                 <span>Draw Funds Cleared</span>
-                <span>Facility: $1.47M</span>
+                <ClickableAmount
+                  amountText="Facility: $1.47M"
+                  originKey="facility_cap"
+                  label="Senior Construction Loan Facility"
+                  amountCents={147112000}
+                  onClick={handleOpenAmountOrigin}
+                />
               </div>
             </div>
           </div>
@@ -264,7 +406,17 @@ export default function ControlCenterPage() {
                 </div>
                 <div className="mt-2 text-xs text-amber-800 font-medium flex items-center gap-1.5">
                   <AlertTriangle className="h-3 w-3 shrink-0 text-amber-600" />
-                  <span>Carry burn: +$28,500</span>
+                  <span>
+                    Carry burn:{" "}
+                    <ClickableAmount
+                      amountText="+$28,500"
+                      originKey="carry_burn"
+                      label="Carry Burn Due to Schedule Slip"
+                      amountCents={2850000}
+                      className="text-amber-800 font-semibold"
+                      onClick={handleOpenAmountOrigin}
+                    />
+                  </span>
                 </div>
               </div>
             </div>
@@ -389,6 +541,16 @@ export default function ControlCenterPage() {
                     const spendCents = toCentsVal(row.actual_spend);
                     const varianceCents = approvedCents - origCents;
 
+                    // Map category key to detailed source origin
+                    let catKey = "cat_hard_costs";
+                    if (row.category.toLowerCase().includes("soft")) {
+                      catKey = "cat_soft_costs";
+                    } else if (row.category.toLowerCase().includes("contingency")) {
+                      catKey = "cat_contingency";
+                    } else if (isTotal) {
+                      catKey = "approved_budget";
+                    }
+
                     return (
                       <tr
                         key={idx}
@@ -397,29 +559,79 @@ export default function ControlCenterPage() {
                         }`}
                       >
                         <td className="py-3 px-4">
-                          <div className={isTotal ? "font-bold text-slate-900" : "font-semibold text-slate-900"}>
-                            {row.category}
-                          </div>
-                          {!isTotal && row.variance_reason && (
-                            <div className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">
-                              {row.variance_reason}
+                          <button
+                            type="button"
+                            onClick={() => handleOpenAmountOrigin(catKey, row.category, approvedCents)}
+                            className="text-left group cursor-pointer focus:outline-hidden"
+                            title="Click to inspect category source origin"
+                          >
+                            <div className={cn(isTotal ? "font-bold text-slate-900" : "font-semibold text-slate-900", "group-hover:text-blue-600 transition-colors")}>
+                              {row.category}
                             </div>
-                          )}
+                            {!isTotal && row.variance_reason && (
+                              <div className="text-[11px] text-slate-500 mt-0.5 line-clamp-1 group-hover:text-slate-700">
+                                {row.variance_reason}
+                              </div>
+                            )}
+                          </button>
                         </td>
                         <td className="py-3 px-3 text-right font-mono tabular-nums text-slate-500">
-                          {formatMoney(origCents, { showCents: false })}
+                          <ClickableAmount
+                            amountText={formatMoney(origCents, { showCents: false })}
+                            originKey={catKey}
+                            label={`${row.category} (Original Budget)`}
+                            amountCents={origCents}
+                            className="text-slate-500 font-normal"
+                            onClick={handleOpenAmountOrigin}
+                          />
                         </td>
                         <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-slate-900">
-                          {formatMoney(approvedCents, { showCents: false })}
+                          <ClickableAmount
+                            amountText={formatMoney(approvedCents, { showCents: false })}
+                            originKey={catKey}
+                            label={`${row.category} (Approved Budget)`}
+                            amountCents={approvedCents}
+                            className="font-semibold text-slate-900"
+                            onClick={handleOpenAmountOrigin}
+                          />
                         </td>
                         <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-blue-700">
-                          {spendCents === 0 ? "$0" : formatMoney(spendCents, { showCents: false })}
+                          <ClickableAmount
+                            amountText={spendCents === 0 ? "$0" : formatMoney(spendCents, { showCents: false })}
+                            originKey={
+                              catKey === "cat_hard_costs"
+                                ? "hard_costs_spend"
+                                : catKey === "cat_soft_costs"
+                                ? "soft_costs_spend"
+                                : isTotal
+                                ? "actual_spend"
+                                : catKey
+                            }
+                            label={`${row.category} (Actual Spend)`}
+                            amountCents={spendCents}
+                            className="font-semibold text-blue-700"
+                            onClick={handleOpenAmountOrigin}
+                          />
                         </td>
                         <td className="py-3 px-4 text-right font-mono tabular-nums">
                           {varianceCents > 0 ? (
-                            <span className="font-bold text-amber-700">+{formatMoney(varianceCents, { showCents: false })}</span>
+                            <ClickableAmount
+                              amountText={`+${formatMoney(varianceCents, { showCents: false })}`}
+                              originKey={isTotal ? "budget_variance_over_plan" : catKey}
+                              label={`${row.category} (Cost Variance)`}
+                              amountCents={varianceCents}
+                              className="font-bold text-amber-700"
+                              onClick={handleOpenAmountOrigin}
+                            />
                           ) : varianceCents < 0 ? (
-                            <span className="font-bold text-emerald-700">-{formatMoney(Math.abs(varianceCents), { showCents: false })}</span>
+                            <ClickableAmount
+                              amountText={`-${formatMoney(Math.abs(varianceCents), { showCents: false })}`}
+                              originKey={catKey}
+                              label={`${row.category} (Favorable Variance)`}
+                              amountCents={varianceCents}
+                              className="font-bold text-emerald-700"
+                              onClick={handleOpenAmountOrigin}
+                            />
                           ) : (
                             <span className="text-slate-400 font-normal">$0</span>
                           )}
@@ -452,21 +664,36 @@ export default function ControlCenterPage() {
               <div className="mt-3.5 space-y-2.5 text-xs">
                 <div className="flex items-center justify-between text-slate-500">
                   <span>Requested Amount:</span>
-                  <span className="font-mono font-medium text-slate-800 tabular-nums">
-                    $150,000.00
-                  </span>
+                  <ClickableAmount
+                    amountText="$150,000.00"
+                    originKey="draw_request_150k"
+                    label="Draw #1 Requested Amount"
+                    amountCents={15000000}
+                    className="font-mono font-medium text-slate-800 tabular-nums"
+                    onClick={handleOpenAmountOrigin}
+                  />
                 </div>
                 <div className="flex items-center justify-between text-slate-500">
                   <span>Lender Approved:</span>
-                  <span className="font-mono font-medium text-slate-800 tabular-nums">
-                    $150,000.00
-                  </span>
+                  <ClickableAmount
+                    amountText="$150,000.00"
+                    originKey="draw_request_150k"
+                    label="Draw #1 Lender Approved Amount"
+                    amountCents={15000000}
+                    className="font-mono font-medium text-slate-800 tabular-nums"
+                    onClick={handleOpenAmountOrigin}
+                  />
                 </div>
                 <div className="flex items-center justify-between pt-1 border-t border-slate-100 bg-emerald-50/60 -mx-1 px-3 py-1.5 rounded-lg border border-emerald-100">
                   <span className="font-semibold text-emerald-900">Funds Cleared:</span>
-                  <span className="font-mono font-bold text-emerald-800 tabular-nums">
-                    $150,000.00
-                  </span>
+                  <ClickableAmount
+                    amountText="$150,000.00"
+                    originKey="draw_request_150k"
+                    label="Draw #1 Funds Cleared Disbursement"
+                    amountCents={15000000}
+                    className="font-mono font-bold text-emerald-800 tabular-nums"
+                    onClick={handleOpenAmountOrigin}
+                  />
                 </div>
 
                 <div className="pt-1.5">
@@ -565,6 +792,14 @@ export default function ControlCenterPage() {
         </div>
 
       </div>
+
+      {/* Amount Source Origin & Document Provenance Modal */}
+      <AmountSourceModal
+        open={isOriginModalOpen}
+        onOpenChange={setIsOriginModalOpen}
+        origin={selectedOrigin}
+        onInspectDocument={handleInspectDocument}
+      />
 
       {/* Direct Interactive Document Preview Modal */}
       <DocumentQuickPreviewModal

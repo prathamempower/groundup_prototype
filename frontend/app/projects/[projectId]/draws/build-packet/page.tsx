@@ -21,6 +21,11 @@ import {
   ArrowLeft,
   Sparkles,
   Layers,
+  Upload,
+  X,
+  Maximize2,
+  Link as LinkIcon,
+  Image as ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { BudgetLine, DrawLine } from "@/lib/types";
@@ -54,28 +59,79 @@ export default function BuildDrawPacketPage() {
   const [sovLines, setSovLines] = useState<SovLineItemState[]>([]);
 
   // Step 3: Photos state
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [photos, setPhotos] = useState<Array<{ id: string; title: string; url: string }>>([
     {
       id: "photo-1",
-      title: "Exterior Glazing Panels",
-      url: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=600&q=80",
+      title: "Exterior Framing & Envelope",
+      url: "/projects/broadway-new.jpg",
     },
     {
       id: "photo-2",
       title: "TPO Roof Deck Seams",
-      url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80",
+      url: "/projects/woodlawn-new.jpg",
     },
     {
       id: "photo-3",
       title: "Weather Barrier Membrane",
-      url: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=600&q=80",
+      url: "/projects/first-street-new.jpg",
     },
     {
       id: "photo-4",
-      title: "Perimeter Parapet Flashings",
-      url: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=600&q=80",
+      title: "MEP Conduit & Rough-in",
+      url: "/projects/farnsworth.jpg",
     },
   ]);
+  const [isAddUrlOpen, setIsAddUrlOpen] = useState(false);
+  const [urlTitleInput, setUrlTitleInput] = useState("");
+  const [urlLinkInput, setUrlLinkInput] = useState("");
+  const [previewPhoto, setPreviewPhoto] = useState<{ id: string; title: string; url: string } | null>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const newPhotos = Array.from(files).map((file, idx) => {
+      const cleanName = file.name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[-_]/g, " ")
+        .trim();
+      return {
+        id: `upload-${Date.now()}-${idx}`,
+        title: cleanName ? cleanName.charAt(0).toUpperCase() + cleanName.slice(1) : `Site Photo #${photos.length + idx + 1}`,
+        url: URL.createObjectURL(file),
+      };
+    });
+
+    setPhotos((prev) => [...prev, ...newPhotos]);
+    e.target.value = "";
+  };
+
+  const handleAddUrlPhoto = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!urlLinkInput.trim()) return;
+    setPhotos((prev) => [
+      ...prev,
+      {
+        id: `url-${Date.now()}`,
+        title: urlTitleInput.trim() || `Inspection Photo #${prev.length + 1}`,
+        url: urlLinkInput.trim(),
+      },
+    ]);
+    setUrlTitleInput("");
+    setUrlLinkInput("");
+    setIsAddUrlOpen(false);
+  };
+
+  const handleRemovePhoto = (id: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    setPhotos((prev) => prev.filter((p) => p.id !== id));
+    if (previewPhoto?.id === id) {
+      setPreviewPhoto(null);
+    }
+  };
 
   // Step 4: Signature state
   const [signerName, setSignerName] = useState("Marcus Vance");
@@ -383,15 +439,6 @@ export default function BuildDrawPacketPage() {
             </h1>
           </div>
         </div>
-
-        <div className="text-right hidden sm:block">
-          <span className="text-xs text-slate-500 font-medium block">
-            Facility #23-03394
-          </span>
-          <span className="text-xs font-bold text-slate-800">
-            Capital Reserve Trust
-          </span>
-        </div>
       </div>
 
       {/* Main Builder Card */}
@@ -562,14 +609,16 @@ export default function BuildDrawPacketPage() {
               </div>
 
               {/* Project Reference Card */}
-              <div className="rounded-xl border border-blue-200/90 bg-blue-50/50 p-5 space-y-1.5 text-xs">
+              <div className="rounded-xl border border-blue-200/90 bg-blue-50/50 p-4 space-y-1 text-xs">
                 <div className="font-bold text-blue-950 flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-blue-600" />
-                  <span>Project Ref: {projectTitle} / {projectAddress}</span>
+                  <span>Project Reference: {projectTitle}</span>
                 </div>
-                <div className="text-slate-600 text-xs">
-                  Borrower Entity: GroundUp Holdings LLC • Assigned Inspector: AMHAR Inspection Services • Facility #23-03394
-                </div>
+                {projectAddress && (
+                  <div className="text-slate-600 text-xs pl-6">
+                    {projectAddress}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -681,43 +730,152 @@ export default function BuildDrawPacketPage() {
           {/* STEP 3: VISUAL PROOF PHOTOS */}
           {currentStep === 3 && (
             <div className="space-y-6">
-              <div>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">
-                  Visual Inspection Proof Photos
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  High-resolution photo evidence attached for lender inspector verification.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {photos.map((photo) => (
-                  <div
-                    key={photo.id}
-                    className="relative aspect-4/3 rounded-xl border border-slate-200 overflow-hidden shadow-2xs group"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={photo.url}
-                      alt={photo.title}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent pointer-events-none" />
-
-                    <div className="absolute bottom-2.5 left-2.5 right-2.5">
-                      <span className="inline-block rounded-md bg-slate-900/90 px-2 py-1 text-[11px] font-semibold text-white shadow-xs">
-                        {photo.title}
-                      </span>
-                    </div>
-
-                    <div className="absolute top-2.5 right-2.5">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xs">
-                        <Check className="h-3 w-3 stroke-[3]" />
-                      </span>
-                    </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-200">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                      Visual Inspection Proof Photos
+                    </h2>
+                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 border border-slate-200">
+                      {photos.length} {photos.length === 1 ? "photo" : "photos"}
+                    </span>
                   </div>
-                ))}
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    High-resolution photo evidence attached for lender inspector verification.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsAddUrlOpen(true)}
+                    className="text-xs h-8 gap-1.5 border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer"
+                  >
+                    <LinkIcon className="h-3.5 w-3.5 text-slate-500" />
+                    <span>Add from URL</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-8 gap-1.5 shadow-2xs cursor-pointer font-semibold"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>Add Images</span>
+                  </Button>
+                </div>
               </div>
+
+              {photos.length === 0 ? (
+                <div className="rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center space-y-3">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <ImageIcon className="h-6 w-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-semibold text-slate-900">No photos attached yet</h3>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      Attach visual inspection photos from the job site to support claimed SOV line items.
+                    </p>
+                  </div>
+                  <div className="pt-2 flex items-center justify-center gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-8 gap-1.5 cursor-pointer"
+                    >
+                      <Upload className="h-3.5 w-3.5" />
+                      <span>Upload Photos</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsAddUrlOpen(true)}
+                      className="text-xs h-8 border-slate-300 cursor-pointer"
+                    >
+                      <span>Add from URL</span>
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {photos.map((photo) => (
+                    <div
+                      key={photo.id}
+                      onClick={() => setPreviewPhoto(photo)}
+                      className="group relative aspect-4/3 rounded-xl border border-slate-200 overflow-hidden bg-slate-900/5 shadow-2xs hover:shadow-md transition-all cursor-pointer"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={photo.url}
+                        alt={photo.title}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+
+                      {/* Clean bottom gradient for label legibility */}
+                      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent pointer-events-none" />
+
+                      {/* Photo Title */}
+                      <div className="absolute bottom-2.5 left-2.5 right-2.5">
+                        <span className="inline-block truncate max-w-full rounded-md bg-slate-900/80 backdrop-blur-xs px-2 py-0.5 text-[11px] font-semibold text-white shadow-xs">
+                          {photo.title}
+                        </span>
+                      </div>
+
+                      {/* Action buttons (Top Right) */}
+                      <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewPhoto(photo);
+                          }}
+                          className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900/80 hover:bg-slate-900 text-white transition-colors shadow-sm cursor-pointer"
+                          title="Preview full size"
+                        >
+                          <Maximize2 className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleRemovePhoto(photo.id, e)}
+                          className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-600/90 hover:bg-rose-600 text-white transition-colors shadow-sm cursor-pointer"
+                          title="Remove photo"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Add Image Tile in Grid */}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="group relative aspect-4/3 rounded-xl border-2 border-dashed border-slate-300 hover:border-blue-500 bg-slate-50/50 hover:bg-blue-50/40 transition-all flex flex-col items-center justify-center p-4 text-center cursor-pointer shadow-2xs"
+                  >
+                    <div className="h-9 w-9 rounded-full bg-white group-hover:bg-blue-600 text-slate-600 group-hover:text-white border border-slate-200 group-hover:border-blue-600 flex items-center justify-center transition-all mb-2 shadow-2xs">
+                      <Plus className="h-4 w-4" />
+                    </div>
+                    <span className="text-xs font-semibold text-slate-800 group-hover:text-blue-700">
+                      Add Image
+                    </span>
+                    <span className="text-[10px] text-slate-400 mt-0.5">
+                      Upload from computer
+                    </span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -825,6 +983,124 @@ export default function BuildDrawPacketPage() {
           </Button>
         </div>
       </div>
+
+      {/* Lightbox Preview Modal */}
+      {previewPhoto && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-xs p-4 sm:p-6 animate-in fade-in-0 duration-150"
+          onClick={() => setPreviewPhoto(null)}
+        >
+          <div
+            className="relative max-w-4xl w-full bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950">
+              <span className="text-sm font-semibold text-white truncate pr-4">
+                {previewPhoto.title}
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleRemovePhoto(previewPhoto.id)}
+                  className="h-7 text-xs bg-slate-800 border-slate-700 text-rose-400 hover:bg-rose-950 hover:text-rose-300 gap-1 cursor-pointer"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Remove Photo</span>
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewPhoto(null)}
+                  className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            <div className="max-h-[75vh] flex items-center justify-center p-2 bg-black">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previewPhoto.url}
+                alt={previewPhoto.title}
+                className="max-h-[70vh] w-auto max-w-full object-contain rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add from URL Modal */}
+      {isAddUrlOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 backdrop-blur-xs p-4 animate-in fade-in-0 duration-150"
+          onClick={() => setIsAddUrlOpen(false)}
+        >
+          <div
+            className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-bold text-slate-900">Add Image from URL</h3>
+              <button
+                type="button"
+                onClick={() => setIsAddUrlOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddUrlPhoto} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Image Title / Description
+                </label>
+                <input
+                  type="text"
+                  value={urlTitleInput}
+                  onChange={(e) => setUrlTitleInput(e.target.value)}
+                  placeholder="e.g. Foundation Concrete Pour"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Image URL <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="url"
+                  required
+                  value={urlLinkInput}
+                  onChange={(e) => setUrlLinkInput(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAddUrlOpen(false)}
+                  className="text-xs cursor-pointer"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs cursor-pointer"
+                >
+                  Add Photo
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

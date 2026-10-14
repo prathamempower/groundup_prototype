@@ -79,15 +79,10 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
       spend: 10.1,
       verifiedProgress: 9.2,
       clearedFunding: 8.8,
-      spendForecast: 10.1,
-      fundingForecast: 8.8,
+      spendForecast: null,
+      fundingForecast: null,
       isToday: true,
     },
-    { date: "Nov 26", planned: 11.5, spend: null, verifiedProgress: null, clearedFunding: null, spendForecast: 10.9, fundingForecast: 9.8 },
-    { date: "Dec 26", planned: 12.6, spend: null, verifiedProgress: null, clearedFunding: null, spendForecast: 11.6, fundingForecast: 10.9 },
-    { date: "Feb 27", planned: 14.8, spend: null, verifiedProgress: null, clearedFunding: null, spendForecast: 13.9, fundingForecast: 13.0 },
-    { date: "May 27", planned: 17.5, spend: null, verifiedProgress: null, clearedFunding: null, spendForecast: 16.8, fundingForecast: 15.9 },
-    { date: "Aug 27", planned: 19.1, spend: null, verifiedProgress: null, clearedFunding: null, spendForecast: 18.4, fundingForecast: 17.8 },
   ];
 
   // 2. Cash Position Dataset (Monthly net funding delta in Millions)
@@ -136,7 +131,7 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-bold text-slate-900 tracking-tight">
-              Financial Trajectory & Forecast
+              Financial Trajectory
             </h2>
             <span className="text-[10px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200/70">
               Interactive
@@ -145,7 +140,7 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
           <p className="text-xs text-slate-500 mt-0.5">
             {activeTab === "COST_VS_FUNDING" && "Spend, earned value progress, and draw funding cleared vs. approved plan."}
             {activeTab === "CASH_POSITION" && "Monthly working capital surplus vs. equity draw outlays."}
-            {activeTab === "PROJECTED_PROFIT" && "Realized development yield tracking against underwriting."}
+            {activeTab === "PROJECTED_PROFIT" && "Expected project profit compared to original plan."}
           </p>
         </div>
 
@@ -213,10 +208,10 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
             </div>
           </div>
           <div className="rounded-lg border border-slate-200/80 bg-slate-50/60 px-3.5 py-2">
-            <span className="text-[11px] font-semibold text-slate-700 uppercase tracking-wider block">Target Baseline</span>
+            <span className="text-[11px] font-semibold text-slate-700 uppercase tracking-wider block">Planned Target</span>
             <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-mono text-slate-900">$19.1M</span>
-              <span className="text-[11px] font-medium text-slate-500">At completion</span>
+              <span className="text-base font-bold font-mono text-slate-900">$10.4M</span>
+              <span className="text-[11px] font-medium text-slate-500">Baseline to date</span>
             </div>
           </div>
         </div>
@@ -251,24 +246,24 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
       {activeTab === "PROJECTED_PROFIT" && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-6 py-3.5 border-b border-slate-100 bg-white">
           <div className="rounded-lg border border-emerald-100 bg-emerald-50/40 px-3.5 py-2">
-            <span className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wider block">Current Forecast Profit</span>
+            <span className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wider block">Estimated Profit</span>
             <div className="flex items-baseline gap-1.5 mt-0.5">
               <span className="text-base font-bold font-mono text-emerald-900">$5.10M</span>
-              <span className="text-[11px] font-medium text-emerald-700">18.4% Net Yield</span>
+              <span className="text-[11px] font-medium text-emerald-700">18.4% Return</span>
             </div>
           </div>
           <div className="rounded-lg border border-slate-200/80 bg-slate-50/60 px-3.5 py-2">
-            <span className="text-[11px] font-semibold text-slate-700 uppercase tracking-wider block">Underwritten Target</span>
+            <span className="text-[11px] font-semibold text-slate-700 uppercase tracking-wider block">Original Planned Profit</span>
             <div className="flex items-baseline gap-1.5 mt-0.5">
               <span className="text-base font-bold font-mono text-slate-900">$6.10M</span>
-              <span className="text-[11px] font-medium text-slate-500">22.0% Baseline</span>
+              <span className="text-[11px] font-medium text-slate-500">22.0% Initial Target</span>
             </div>
           </div>
           <div className="rounded-lg border border-amber-100 bg-amber-50/40 px-3.5 py-2">
-            <span className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider block">Yield Compression</span>
+            <span className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider block">Profit Variance</span>
             <div className="flex items-baseline gap-1.5 mt-0.5">
               <span className="text-base font-bold font-mono text-amber-900">-$1.00M</span>
-              <span className="text-[11px] font-medium text-amber-700">Scope additions + carry</span>
+              <span className="text-[11px] font-medium text-amber-700">From added scope & time</span>
             </div>
           </div>
         </div>
@@ -312,8 +307,8 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                       tickLine={false}
                       axisLine={false}
                       tickFormatter={(val) => (val === 0 ? "$0" : `$${val}M`)}
-                      domain={[0, 22]}
-                      ticks={[0, 5, 10, 15, 20]}
+                      domain={[0, 12]}
+                      ticks={[0, 3, 6, 9, 12]}
                       dx={-2}
                     />
 
@@ -331,7 +326,7 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                                   </span>
                                 ) : (
                                   <span className="text-[10px] text-slate-500 font-medium">
-                                    {p.spend !== null ? "Historical" : "Forecast"}
+                                    Historical
                                   </span>
                                 )}
                               </div>
@@ -366,35 +361,11 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                                     <span className="font-bold text-amber-700">${p.clearedFunding.toFixed(2)}M</span>
                                   </div>
                                 )}
-                                {p.spendForecast !== null && (
-                                  <div className="flex items-center justify-between text-slate-500 pt-1 border-t border-slate-100">
-                                    <span className="font-sans flex items-center gap-1.5 text-slate-600">
-                                      <span className="h-1.5 w-3 border-t-2 border-dashed border-slate-500" /> Forecast Spend:
-                                    </span>
-                                    <span className="font-semibold text-slate-800">${p.spendForecast.toFixed(2)}M</span>
-                                  </div>
-                                )}
                               </div>
                             </div>
                           );
                         }
                         return null;
-                      }}
-                    />
-
-                    {/* Today / Current Baseline Vertical Reference */}
-                    <ReferenceLine
-                      x="Oct 26"
-                      stroke="#2563eb"
-                      strokeDasharray="4 4"
-                      strokeWidth={1.75}
-                      label={{
-                        value: "As of Today (Oct 26)",
-                        position: "top",
-                        fill: "#1d4ed8",
-                        fontSize: 11,
-                        fontWeight: 700,
-                        offset: 10,
                       }}
                     />
 
@@ -439,17 +410,6 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                       dot={false}
                       connectNulls={false}
                     />
-
-                    {/* Spend Forecast (Dashed Slate Path into future completion) */}
-                    <Line
-                      type="monotone"
-                      dataKey="spendForecast"
-                      stroke="#64748b"
-                      strokeWidth={2}
-                      strokeDasharray="4 4"
-                      dot={{ r: 3, fill: "#94a3b8", stroke: "#ffffff", strokeWidth: 1.5 }}
-                      connectNulls={false}
-                    />
                   </ComposedChart>
                 </ResponsiveContainer>
               ) : (
@@ -474,13 +434,10 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                 <span className="flex items-center gap-2 text-slate-500">
                   <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-400" /> Planned Baseline
                 </span>
-                <span className="flex items-center gap-2 text-slate-500">
-                  <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-500" /> Forecast Path
-                </span>
               </div>
 
               <div className="text-[11px] text-slate-500 font-mono">
-                Historical: Nov 25 – Oct 26 · Forecast: Nov 26 – Aug 27
+                Nov 25 – Oct 26 (Actuals to Date)
               </div>
             </div>
           </div>
@@ -633,11 +590,11 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
                               </div>
                               <div className="space-y-1.5 font-mono text-xs pt-1">
                                 <div className="flex justify-between items-center text-slate-600">
-                                  <span className="font-sans text-slate-600 font-medium">Underwritten Target:</span>
+                                  <span className="font-sans text-slate-600 font-medium">Original Planned Profit:</span>
                                   <span className="font-bold text-slate-900">${p.underwritten.toFixed(2)}M</span>
                                 </div>
                                 <div className="flex justify-between items-center text-slate-600">
-                                  <span className="font-sans text-emerald-700 font-medium">Projected Net Profit:</span>
+                                  <span className="font-sans text-emerald-700 font-medium">Estimated Profit:</span>
                                   <span className="font-bold text-emerald-700">${p.projectedProfit.toFixed(2)}M</span>
                                 </div>
                               </div>
@@ -682,10 +639,10 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
             <div className="flex flex-wrap items-center justify-between gap-4 mt-5 pt-3.5 border-t border-slate-100 text-xs text-slate-600">
               <div className="flex flex-wrap items-center gap-5">
                 <span className="flex items-center gap-2 font-semibold text-emerald-700">
-                  <span className="h-1 w-4 rounded-full bg-emerald-600" /> Projected Profit ($5.10M)
+                  <span className="h-1 w-4 rounded-full bg-emerald-600" /> Estimated Profit ($5.10M)
                 </span>
                 <span className="flex items-center gap-2 text-slate-500">
-                  <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-400" /> Underwritten Target ($6.10M)
+                  <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-400" /> Original Target ($6.10M)
                 </span>
               </div>
               <div className="text-[11px] text-slate-500 font-mono">

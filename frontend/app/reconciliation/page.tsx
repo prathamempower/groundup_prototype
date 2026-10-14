@@ -1142,18 +1142,12 @@ export default function ReconciliationPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1.5">
+                        <div className="flex items-center justify-end">
                           <button
                             type="button"
                             className="rounded border border-slate-200 bg-white text-slate-700 px-2.5 py-1 text-[11px] font-medium hover:bg-slate-50"
                           >
                             Resolve
-                          </button>
-                          <button
-                            type="button"
-                            className="text-slate-500 hover:text-slate-800 px-1.5 py-1 text-[11px]"
-                          >
-                            Waive
                           </button>
                         </div>
                       </td>

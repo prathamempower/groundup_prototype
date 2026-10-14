@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Download, FileText, ExternalLink, Eye } from "lucide-react";
+import { Download, FileText, ExternalLink, FileSpreadsheet, SlidersHorizontal } from "lucide-react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { DocumentItem, ExtractionField } from "@/lib/types";
 import { SpreadsheetViewer } from "./spreadsheet-viewer";
@@ -11,9 +12,10 @@ interface DocumentViewerProps {
   extractions?: ExtractionField[];
   selectedFieldId?: string | null;
   onSelectField?: (fieldId: string) => void;
+  hideHeader?: boolean;
 }
 
-export function DocumentViewer({ document, extractions, selectedFieldId }: DocumentViewerProps) {
+export function DocumentViewer({ document, extractions, selectedFieldId, hideHeader = false }: DocumentViewerProps) {
   const download = useQuery({
     queryKey: ["document-download", document.id],
     queryFn: () => api.documents.getDownloadUrl(document.id),
@@ -44,43 +46,45 @@ export function DocumentViewer({ document, extractions, selectedFieldId }: Docum
 
   return (
     <section className="flex h-full min-h-[480px] flex-col overflow-hidden rounded-lg border border-border bg-surface">
-      <header className="flex min-h-12 items-center justify-between gap-3 border-b border-border px-4 py-2 bg-white">
-        <div className="flex min-w-0 items-center gap-2 text-sm text-text-primary">
-          <FileText className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-          <span className="truncate font-medium" title={document.original_filename}>
-            {document.original_filename}
-          </span>
-          <span className="text-xs text-slate-400 font-mono">
-            ({document.document_type})
-          </span>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {url && (
-            <a
-              href={url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary shadow-2xs"
-            >
-              <ExternalLink className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
-              <span>Open in tab</span>
-            </a>
-          )}
-          {downloadUrl && (
-            <a
-              href={downloadUrl}
-              download={document.original_filename}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary"
-              title="Download backup copy"
-            >
-              <Download className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-              <span className="hidden sm:inline">Save</span>
-            </a>
-          )}
-        </div>
-      </header>
+      {!isSpreadsheet && !hideHeader && (
+        <header className="flex min-h-12 items-center justify-between gap-3 border-b border-border px-4 py-2 bg-white">
+          <div className="flex min-w-0 items-center gap-2 text-sm text-text-primary">
+            <FileText className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+            <span className="truncate font-medium" title={document.original_filename}>
+              {document.original_filename}
+            </span>
+            <span className="text-xs text-slate-400 font-mono">
+              ({document.document_type})
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {url && (
+              <a
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary shadow-2xs"
+              >
+                <ExternalLink className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
+                <span>Open in tab</span>
+              </a>
+            )}
+            {downloadUrl && (
+              <a
+                href={downloadUrl}
+                download={document.original_filename}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary"
+                title="Download backup copy"
+              >
+                <Download className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                <span className="hidden sm:inline">Save</span>
+              </a>
+            )}
+          </div>
+        </header>
+      )}
 
-      <div className="flex min-h-0 flex-1 overflow-hidden bg-slate-950">
+      <div className={`flex min-h-0 flex-1 overflow-hidden ${isSpreadsheet ? "bg-white" : "bg-slate-100"}`}>
         {download.isLoading ? (
           <div className="h-full min-h-64 w-full animate-pulse rounded-md bg-border/50" aria-label="Loading document preview" />
         ) : download.error ? (
@@ -92,8 +96,13 @@ export function DocumentViewer({ document, extractions, selectedFieldId }: Docum
             <SpreadsheetViewer
               url={url}
               filename={document.original_filename}
+              documentType={document.document_type}
+              extractions={extractions}
+              documentId={document.id}
               highlightText={selectedField?.raw_value || selectedField?.normalized_value}
               selectedFieldCitation={selectedField?.citation}
+              viewUrl={viewUrl}
+              downloadUrl={downloadUrl}
             />
           </div>
         ) : url && isPdf ? (

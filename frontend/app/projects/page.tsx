@@ -467,7 +467,7 @@ export default function ProjectsPortfolioPage() {
                     )}
 
                     {/* Gradient overlay for clear title readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent pointer-events-none" />
 
                     {/* Top Right Floating Badge */}
                     <div className="absolute top-2.5 right-2.5 z-10">

@@ -3,9 +3,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { PageHeader } from "@/components/layout/page-header";
 import { AlertsView } from "@/components/alerts/alerts-view";
-import { AlertTriangle, ShieldCheck } from "lucide-react";
 
 export default function AlertsPage() {
   const { data: meData } = useQuery({
@@ -20,76 +18,27 @@ export default function AlertsPage() {
 
   const user = meData?.data;
   const userRole = user?.role || "OWNER";
-  const routeProjectId = typeof window !== "undefined"
-    ? (window.location.pathname.match(/^\/projects\/([^\/]+)/)?.[1] || "")
-    : "";
-  const currentProjectId = (routeProjectId && routeProjectId !== "new")
-    ? routeProjectId
-    : projectsData?.data?.current_project_id || "";
+  const routeProjectId =
+    typeof window !== "undefined"
+      ? window.location.pathname.match(/^\/projects\/([^/]+)/)?.[1] || ""
+      : "";
+  const currentProjectId =
+    routeProjectId && routeProjectId !== "new"
+      ? routeProjectId
+      : projectsData?.data?.current_project_id ||
+        projectsData?.data?.projects?.[0]?.id ||
+        "df16b577-3585-4fb0-a13a-ffadaca73e0f";
   const currentProject = projectsData?.data?.projects?.find(
     (p) => p.id === currentProjectId
   );
 
-  const { data: alertsData } = useQuery({
-    queryKey: ["alerts", currentProjectId],
-    queryFn: () => api.alerts.list(currentProjectId),
-    enabled: Boolean(currentProjectId),
-  });
-
-  const openAlertsCount = (alertsData?.data || []).filter(
-    (a) => a.status === "OPEN"
-  ).length;
-
   return (
-    <div className="flex-1 space-y-6 pb-12">
-      <div className="px-6 max-w-7xl mx-auto space-y-6 pt-4">
-        <PageHeader
-          title="Alerts & Exceptions"
-          subtitle="Track and resolve project risks, variances, and data issues to keep the project on schedule and within budget."
-          breadcrumbs={[
-            {
-              label: currentProject?.name || "Project",
-              href: currentProjectId ? `/projects/${currentProjectId}/control-center` : "/projects",
-            },
-            { label: "Alerts & Exceptions" },
-          ]}
-          statusBadge={
-            openAlertsCount > 0
-              ? {
-                  label: `${openAlertsCount} Open`,
-                  variant: "danger",
-                }
-              : {
-                  label: "All Clear",
-                  variant: "success",
-                  icon: <ShieldCheck className="h-3.5 w-3.5" />,
-                }
-          }
-          primaryAction={
-            <button
-              type="button"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-blue-700 transition-colors cursor-pointer"
-            >
-              <span className="text-base leading-none font-normal">+</span>
-              <span>Add Exception</span>
-            </button>
-          }
-        />
-
-        <div>
-          {currentProjectId ? (
-            <AlertsView
-              projectId={currentProjectId}
-              projectName={currentProject?.name}
-              userRole={userRole}
-            />
-          ) : (
-            <div className="rounded-xl border border-border bg-surface p-12 text-center text-text-muted">
-              Select or create a project to review operational alerts and data quality issues.
-            </div>
-          )}
-        </div>
-      </div>
+    <div className="flex-1 pb-12">
+      <AlertsView
+        projectId={currentProjectId}
+        projectName={currentProject?.name || "73 Broadway"}
+        userRole={userRole}
+      />
     </div>
   );
 }

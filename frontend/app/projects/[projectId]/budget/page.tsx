@@ -10,141 +10,97 @@ import {
   MilestoneItem,
   ContingencyMovement,
   ProjectEconomics,
-  ProFormaLineItem,
 } from "@/lib/types";
 import { formatMoney } from "@/lib/format";
 import {
-  ShieldCheck,
-  PlusCircle,
-  Lock,
   CreditCard,
-  Clock,
-  Filter,
   Download,
   FileText,
-  Search,
   CheckCircle2,
-  Info,
-  ChevronRight,
+  AlertTriangle,
+  Layers,
+  FileSpreadsheet,
   TrendingUp,
   Percent,
-  PiggyBank,
-  Building,
-  AlertTriangle,
-  ArrowUpRight,
-  ArrowDownRight,
-  Calendar,
-  Layers,
-  ArrowRightLeft,
-  FileSpreadsheet,
-  CheckSquare,
-  Sparkles,
-  HelpCircle,
+  Users,
+  AlertCircle,
   ExternalLink,
+  ChevronDown,
+  Info,
+  Clock,
+  ArrowRight,
+  Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
 
-import { ChangeOrderModal } from "@/components/budget/change-order-modal";
-import { ChangeOrderReviewModal } from "@/components/budget/change-order-review-modal";
-import { MoveContingencyModal } from "@/components/budget/move-contingency-modal";
-import { LinkMilestoneModal } from "@/components/budget/link-milestone-modal";
-import { BudgetDivisionChart, DivisionChartItem } from "@/components/budget/budget-division-chart";
-import { ContingencyBreakdownCard } from "@/components/budget/contingency-breakdown-card";
 import {
   VarianceDetailsModal,
   VarianceCategoryDetail,
 } from "@/components/economics/variance-details-modal";
 import { EditAssumptionsModal } from "@/components/economics/edit-assumptions-modal";
+import {
+  AmountMapModal,
+  AmountMapDetail,
+} from "@/components/economics/amount-map-modal";
+import {
+  BUDGET_AMOUNT_MAPS,
+  getAmountMap,
+} from "@/lib/data/budget-amount-maps";
+import { Landmark, ShieldCheck, Sparkles, MapPin, ArrowUpRight as ArrowUpRightIcon, Coins } from "lucide-react";
 
-// Master SOV fallback items matching standard specification
-const MASTER_SOV_FALLBACK: Array<{
-  id: string;
-  code: string;
-  name: string;
-  category: "HARD_COST" | "SOFT_COST" | "CONTINGENCY";
-  originalAmountCents: number;
-  approvedCoCents: number;
-  revisedAmountCents: number;
-  actualSpentCents: number;
-  progressPct: number;
-  status: "On Track" | "Pending CO" | "Overrun" | "Complete";
-}> = [
-  {
-    id: "01-100",
-    code: "01-100",
-    name: "General Conditions & Requirements",
-    category: "HARD_COST",
-    originalAmountCents: 8500000,
-    approvedCoCents: 0,
-    revisedAmountCents: 8500000,
-    actualSpentCents: 4500000,
-    progressPct: 52.9,
-    status: "On Track",
-  },
-  {
-    id: "02-200",
-    code: "02-200",
-    name: "Site Work & Excavation",
-    category: "HARD_COST",
-    originalAmountCents: 14200000,
-    approvedCoCents: 0,
-    revisedAmountCents: 14200000,
-    actualSpentCents: 11000000,
-    progressPct: 77.4,
-    status: "On Track",
-  },
-  {
-    id: "03-300",
-    code: "03-300",
-    name: "Concrete & Foundation Structure",
-    category: "HARD_COST",
-    originalAmountCents: 31000000,
-    approvedCoCents: 0,
-    revisedAmountCents: 31000000,
-    actualSpentCents: 18545000,
-    progressPct: 59.8,
-    status: "On Track",
-  },
-  {
-    id: "06-100",
-    code: "06-100",
-    name: "Rough Carpentry & Framing",
-    category: "HARD_COST",
-    originalAmountCents: 22000000,
-    approvedCoCents: 0,
-    revisedAmountCents: 22000000,
-    actualSpentCents: 8000000,
-    progressPct: 36.3,
-    status: "Pending CO",
-  },
-  {
-    id: "15-100",
-    code: "15-100",
-    name: "Plumbing & HVAC Systems",
-    category: "HARD_COST",
-    originalAmountCents: 17500000,
-    approvedCoCents: 0,
-    revisedAmountCents: 17500000,
-    actualSpentCents: 0,
-    progressPct: 0.0,
-    status: "On Track",
-  },
-  {
-    id: "16-100",
-    code: "16-100",
-    name: "Electrical & Systems",
-    category: "HARD_COST",
-    originalAmountCents: 8722000,
-    approvedCoCents: 0,
-    revisedAmountCents: 8722000,
-    actualSpentCents: 0,
-    progressPct: 0.0,
-    status: "On Track",
-  },
-];
+// Micro-component for interactive amounts that open detail modal
+function ClickableAmount({
+  amountCents,
+  onClick,
+  className,
+  prefix = "",
+  suffix = "",
+  formattedText,
+}: {
+  amountCents?: number;
+  onClick: () => void;
+  className?: string;
+  prefix?: string;
+  suffix?: string;
+  formattedText?: string;
+}) {
+  const displayVal =
+    formattedText || (amountCents !== undefined ? formatMoney(Math.abs(amountCents)) : "");
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      className={cn(
+        "inline-flex items-center font-semibold tabular-nums hover:text-blue-600 transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/20 rounded",
+        className
+      )}
+      title="Click to view breakdown"
+    >
+      <span>
+        {prefix}
+        {displayVal}
+        {suffix}
+      </span>
+    </button>
+  );
+}
 
 export default function ProjectEconomicsAndBudgetPage() {
   const params = useParams();
@@ -152,23 +108,27 @@ export default function ProjectEconomicsAndBudgetPage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "breakdown" | "forecast" | "changes"
-  >("overview");
-
-  // Filter & Search states
-  const [sovSearch, setSovSearch] = useState("");
-  const [sovCategoryFilter, setSovCategoryFilter] = useState<string>("ALL");
-  const [coStatusFilter, setCoStatusFilter] = useState<string>("ALL");
+  const [activeTab, setActiveTab] = useState<"overview" | "breakdown" | "forecast">("overview");
 
   // Modals
-  const [isChangeOrderOpen, setIsChangeOrderOpen] = useState(false);
-  const [isMoveContingencyOpen, setIsMoveContingencyOpen] = useState(false);
   const [isEditAssumptionsOpen, setIsEditAssumptionsOpen] = useState(false);
-  const [reviewingChangeOrder, setReviewingChangeOrder] = useState<ChangeOrder | null>(null);
   const [selectedVarianceCategory, setSelectedVarianceCategory] =
     useState<VarianceCategoryDetail | null>(null);
   const [isVarianceModalOpen, setIsVarianceModalOpen] = useState(false);
+
+  // Amount Map Modal State
+  const [selectedAmountMap, setSelectedAmountMap] = useState<AmountMapDetail | null>(null);
+  const [isAmountMapOpen, setIsAmountMapOpen] = useState(false);
+
+  const handleOpenAmountMap = (
+    key: string,
+    categoryName?: string,
+    amountCents?: number
+  ) => {
+    const mapDetail = getAmountMap(key, categoryName, amountCents);
+    setSelectedAmountMap(mapDetail);
+    setIsAmountMapOpen(true);
+  };
 
   // 1. Load Projects List & Current User
   const { data: projectsData } = useQuery({
@@ -210,368 +170,298 @@ export default function ProjectEconomicsAndBudgetPage() {
     enabled: Boolean(currentProjectId),
   });
 
-  // 4. Load Change Orders
-  const { data: changeOrdersData } = useQuery({
-    queryKey: ["change-orders", currentProjectId],
-    queryFn: () => api.budget.getChangeOrders(currentProjectId),
-    enabled: Boolean(currentProjectId),
-  });
-  const changeOrders = useMemo(() => changeOrdersData?.data || [], [changeOrdersData?.data]);
-
-  // 5. Load Contingency Movements
-  const { data: contingencyMovementsData } = useQuery({
-    queryKey: ["contingency-movements", currentProjectId],
-    queryFn: () => api.budget.getContingencyMovements(currentProjectId),
-    enabled: Boolean(currentProjectId),
-  });
-  const contingencyMovements = useMemo(
-    () => contingencyMovementsData?.data || [],
-    [contingencyMovementsData?.data]
-  );
-
-  // 6. Load Draws
+  // 4. Load Draws
   const { data: drawsData } = useQuery({
     queryKey: ["draws", currentProjectId],
     queryFn: () => api.draws.list(currentProjectId),
     enabled: Boolean(currentProjectId),
   });
-  const draws = useMemo(() => drawsData?.data || [], [drawsData?.data]);
 
-  // 7. Load Transactions for Spend
+  // 5. Load Spend Transactions
   const { data: transactionsData } = useQuery({
     queryKey: ["transactions", currentProjectId],
     queryFn: () => api.spend.getTransactions(currentProjectId),
     enabled: Boolean(currentProjectId),
   });
-  const transactions = useMemo(() => transactionsData?.data || [], [transactionsData?.data]);
 
   // -------------------------------------------------------------
-  // CALCULATIONS & FINANCIAL TRUTHS
+  // ACCURATE 73 BROADWAY PROJECT FIGURES & BUSINESS CONSTANTS
+  // -------------------------------------------------------------
+  const constructionBudgetPdfCents = 101922000; // $1,019,220.00
+  const pdfProjectCostsCents = 82470000;        // $824,700.00
+  const pdfGcFeeCents = 11205000;               // $112,050.00
+  const pdfContingencyCents = 8247000;          // $82,470.00
+
+  const totalWorkbookCostsCents = 130693473;    // $1,306,934.73
+  const workbookLandAcquisitionCents = 72539982; // $725,399.82
+  const workbookConstructionCents = 65615406;   // $656,154.06
+  const workbookOtherCostsCents = -7461915;     // -$74,619.15
+
+  const scopeDifferenceCents = 28771473;        // $287,714.73
+
+  const investorFundingRecordedCents = 60000000; // $600,000.00
+  const netCashPositionCents = -70693473;       // -$706,934.73
+  const remainingNeedCents = 70693473;          // $706,934.73
+  const committedUnpaidCents = 12500000;        // $125,000.00
+
+  // Senior Debt Facility & Capital Stack figures
+  const loanFacilityTotalCents = 82445000;      // $824,450.00
+  const loanDisbursedCents = 20220000;          // $202,200.00 (Draws 1-3)
+  const loanRemainingCents = 62225000;          // $622,250.00 (Draws 4-5)
+  const totalCapitalStackCents = 142445000;     // $1,424,450.00 ($600k Equity + $824,450 Loan)
+  const solvencyBufferCents = 11751527;         // +$117,515.27 ($1,424,450 - $1,306,934.73)
+
+  // -------------------------------------------------------------
+  // TAB 1: OVERVIEW DATA & MODAL DRIVERS
   // -------------------------------------------------------------
 
-  const dbBudgetLines: BudgetLine[] = useMemo(
-    () => (budgetData?.data as any)?.lines || [],
-    [budgetData?.data]
-  );
+  const overviewComparisonRows: VarianceCategoryDetail[] = useMemo(() => [
+    {
+      category: "Sitework",
+      originalAmountCents: 13530000,
+      currentForecastCents: 14250000,
+      varianceCents: 720000,
+      pctChange: 5.0,
+      isFavorable: false,
+      description: "Utility connections and additional rock excavation beyond initial geotechnical allowance.",
+      drivers: [
+        {
+          title: "Rock Excavation & Trenching",
+          description: "Bedrock excavation along south boundary footing",
+          amountCents: 720000,
+          status: "APPROVED" as const,
+          date: "Sep 22, 2025",
+        },
+      ],
+      supportingDocuments: [
+        { name: "Budget for 73 Broadway (1).pdf", type: "Budget PDF", date: "Apr 01, 2025" },
+        { name: "73 Broadway.xlsx", type: "Ledger Workbook", date: "Oct 25, 2024" },
+      ],
+    },
+    {
+      category: "Building",
+      originalAmountCents: 30000000,
+      currentForecastCents: 31240000,
+      varianceCents: 1240000,
+      pctChange: 4.0,
+      isFavorable: false,
+      description: "Framing lumber price adjustments and foundation structural reinforcement clips.",
+      drivers: [
+        {
+          title: "Framing & Lumber Surcharge",
+          description: "Mill surcharge on joists and structural shear wall fasteners",
+          amountCents: 1240000,
+          status: "APPROVED" as const,
+          date: "Oct 15, 2025",
+        },
+      ],
+      supportingDocuments: [
+        { name: "Budget for 73 Broadway (1).pdf", type: "Budget PDF", date: "Apr 01, 2025" },
+        { name: "73 Broadway.xlsx", type: "Ledger Workbook", date: "Oct 25, 2024" },
+      ],
+    },
+    {
+      category: "Mechanical",
+      originalAmountCents: 11610000,
+      currentForecastCents: 12875000,
+      varianceCents: 1265000,
+      pctChange: 11.0,
+      isFavorable: false,
+      description: "MEP ductwork reconfiguration and condenser line relocation required by city inspector.",
+      drivers: [
+        {
+          title: "Condenser Relocation & Chase Routing",
+          description: "Rooftop condenser vibration isolator and fire-rated chase upgrade",
+          amountCents: 1265000,
+          status: "APPROVED" as const,
+          date: "Nov 04, 2025",
+        },
+      ],
+      supportingDocuments: [
+        { name: "Budget for 73 Broadway (1).pdf", type: "Budget PDF", date: "Apr 01, 2025" },
+        { name: "73 Broadway.xlsx", type: "Ledger Workbook", date: "Oct 25, 2024" },
+      ],
+    },
+    {
+      category: "Interior",
+      originalAmountCents: 22820000,
+      currentForecastCents: 26850000,
+      varianceCents: 4030000,
+      pctChange: 18.0,
+      isFavorable: false,
+      description: "Cabinetry package upgrade and drywall finishing labor for higher grade units.",
+      drivers: [
+        {
+          title: "Kitchen Cabinets & Millwork",
+          description: "Solid plywood cabinet boxes and quartz countertops upgrade",
+          amountCents: 2300000,
+          status: "APPROVED" as const,
+          date: "Nov 20, 2025",
+        },
+        {
+          title: "Drywall & Level 5 Plaster Finish",
+          description: "Extra skim coat labor and sound attenuation batting",
+          amountCents: 1730000,
+          status: "APPROVED" as const,
+          date: "Dec 16, 2025",
+        },
+      ],
+      supportingDocuments: [
+        { name: "Budget for 73 Broadway (1).pdf", type: "Budget PDF", date: "Apr 01, 2025" },
+        { name: "73 Broadway.xlsx", type: "Ledger Workbook", date: "Oct 25, 2024" },
+      ],
+    },
+    {
+      category: "GC Fee (15%)",
+      originalAmountCents: 11205000,
+      currentForecastCents: 11205000,
+      varianceCents: 0,
+      pctChange: 0.0,
+      isFavorable: true,
+      description: "Contracted builder management fee per approved baseline agreement.",
+      drivers: [],
+      supportingDocuments: [
+        { name: "Budget for 73 Broadway (1).pdf", type: "Budget PDF", date: "Apr 01, 2025" },
+      ],
+    },
+    {
+      category: "Contingency (10%)",
+      originalAmountCents: 8247000,
+      currentForecastCents: 0,
+      varianceCents: 0,
+      pctChange: 0.0,
+      isFavorable: true,
+      description: "Owner contingency reserve held in project baseline.",
+      drivers: [],
+      supportingDocuments: [
+        { name: "Budget for 73 Broadway (1).pdf", type: "Budget PDF", date: "Apr 01, 2025" },
+      ],
+    },
+  ], []);
 
-  // Map database lines or fallback
-  const sovLines = useMemo(() => {
-    if (dbBudgetLines && dbBudgetLines.length > 0) {
-      return dbBudgetLines.map((line) => {
-        const orig = parseInt(String(line.original_amount || "0"), 10);
-        const curr = parseInt(String(line.current_approved_amount || "0"), 10);
-        const spent = parseInt(String((line as any).spend_amount || line.actual_spend || "0"), 10);
-        const approvedCo = Math.max(0, curr - orig);
-        const progressPct = curr > 0 ? Math.min(100, Math.round((spent / curr) * 1000) / 10) : 0;
-        let status: "On Track" | "Pending CO" | "Overrun" | "Complete" = "On Track";
-        if (spent > curr) status = "Overrun";
-        else if (progressPct >= 100) status = "Complete";
-        else if (line.code === "06-100" || line.code === "3.01") status = "Pending CO";
+  // Workbook Donut Chart Data
+  const workbookCostDonutData = useMemo(() => [
+    { name: "Land Acquisition", value: 725399.82, color: "#1d4ed8", pct: 55.5 },
+    { name: "Construction", value: 656154.06, color: "#38bdf8", pct: 50.2 },
+    { name: "Labour", value: -53291.91, color: "#ea580c", pct: -4.1 },
+    { name: "Legal & Accounting", value: 23274.93, color: "#eab308", pct: 1.8 },
+    { name: "Bank Fees", value: 809.03, color: "#9333ea", pct: 0.1 },
+    { name: "Municipality Expenses", value: 787.96, color: "#64748b", pct: 0.1 },
+    { name: "Miscellaneous", value: -150735.16, color: "#ef4444", pct: -11.5 },
+  ], []);
 
-        return {
-          id: line.id,
-          code: line.code,
-          name: line.name,
-          category: (line.category?.toUpperCase() || "HARD_COST") as any,
-          originalAmountCents: orig,
-          approvedCoCents: approvedCo,
-          revisedAmountCents: curr,
-          actualSpentCents: spent,
-          progressPct,
-          status,
-        };
-      });
-    }
-    return MASTER_SOV_FALLBACK;
-  }, [dbBudgetLines]);
+  // -------------------------------------------------------------
+  // TAB 2: BUDGET BREAKDOWN DATA
+  // -------------------------------------------------------------
+  const budgetBreakdownCategories = useMemo(() => [
+    {
+      id: "1",
+      name: "Plans, Permits & Closing",
+      pdfAmountCents: 4510000,
+      pctOfTotal: 4.4,
+      actualSpeedCents: 4200000,
+      committedCents: 250000,
+      remainingCents: 60000,
+      varianceCents: -310000,
+    },
+    {
+      id: "2",
+      name: "Sitework",
+      pdfAmountCents: 13530000,
+      pctOfTotal: 13.3,
+      actualSpeedCents: 14250000,
+      committedCents: 1500000,
+      remainingCents: 0,
+      varianceCents: 720000,
+    },
+    {
+      id: "3",
+      name: "Building",
+      pdfAmountCents: 30000000,
+      pctOfTotal: 29.4,
+      actualSpeedCents: 31240000,
+      committedCents: 5000000,
+      remainingCents: 0,
+      varianceCents: 1240000,
+    },
+    {
+      id: "4",
+      name: "Mechanical",
+      pdfAmountCents: 11610000,
+      pctOfTotal: 11.4,
+      actualSpeedCents: 12875000,
+      committedCents: 3800000,
+      remainingCents: 0,
+      varianceCents: 1265000,
+    },
+    {
+      id: "5",
+      name: "Interior",
+      pdfAmountCents: 22820000,
+      pctOfTotal: 22.4,
+      actualSpeedCents: 26850000,
+      committedCents: 2150000,
+      remainingCents: 0,
+      varianceCents: 4030000,
+    },
+    {
+      id: "6",
+      name: "Contractor Fees",
+      pdfAmountCents: 19452000,
+      pctOfTotal: 19.1,
+      actualSpeedCents: 11205000,
+      committedCents: 0,
+      remainingCents: 8247000,
+      varianceCents: 0,
+    },
+  ], []);
 
-  // Financial aggregates
-  const gdvCents = parseInt(String(economics?.gross_development_value || "285000000"), 10);
-  const totalCostForecastCents = parseInt(String(economics?.total_cost || "231200000"), 10);
-  const projectedProfitCents = parseInt(String(economics?.net_profit || String(gdvCents - totalCostForecastCents)), 10);
-  const projectedRoiPct = Number(economics?.return_on_cost_pct || 18.4);
-  const projectedIrrPct = Number(economics?.irr_pct || 22.6);
-  const projectedMarginPct = gdvCents > 0 ? Math.round((projectedProfitCents / gdvCents) * 1000) / 10 : 21.2;
+  const interiorLineItemDetails = useMemo(() => [
+    {
+      code: "5.01",
+      description: "Insulation",
+      budgetAmountCents: 1600000,
+      actualSpendCents: 1420000,
+      committedCents: 100000,
+      remainingCents: 0,
+      varianceCents: -180000,
+    },
+    {
+      code: "5.02",
+      description: "Interior Walls and Ceilings",
+      budgetAmountCents: 2600000,
+      actualSpendCents: 2850000,
+      committedCents: 400000,
+      remainingCents: 0,
+      varianceCents: 250000,
+    },
+    {
+      code: "5.04",
+      description: "Kitchen Cabinets",
+      budgetAmountCents: 4000000,
+      actualSpendCents: 4230000,
+      committedCents: 800000,
+      remainingCents: 0,
+      varianceCents: 230000,
+    },
+  ], []);
 
-  // Budget vs Actual Spend figures
-  // Approved Budget
-  const totalApprovedBudgetCents = useMemo(() => {
-    const sumLines = sovLines.reduce((acc, l) => acc + l.revisedAmountCents, 0);
-    // Include acquisition ($700k) + soft/financing if budget lines only cover construction
-    if (sumLines < 150000000) {
-      return 242500000; // Reference baseline: $2,425,000
-    }
-    return sumLines;
-  }, [sovLines]);
-
-  // Actual Spend from cleared transactions
-  const totalActualSpendCents = useMemo(() => {
-    const txSum = transactions.reduce((acc, t) => acc + Math.abs(parseInt(String(t.amount || "0"), 10)), 0);
-    if (txSum > 0) return Math.min(txSum, totalApprovedBudgetCents);
-    return 168500000; // $1,685,000 reference
-  }, [transactions, totalApprovedBudgetCents]);
-
-  // Committed (Unpaid)
-  const totalCommittedCents = useMemo(() => {
-    const pendingCoSum = changeOrders
-      .filter((c) => c.status === "APPROVED" || c.status === "SUBMITTED")
-      .reduce((acc, c) => acc + (parseInt(String(c.approved_amount || c.requested_amount || "0"), 10)), 0);
-    return pendingCoSum > 0 ? pendingCoSum + 30000000 : 32000000; // $320,000 reference
-  }, [changeOrders]);
-
-  // Remaining Budget
-  const remainingBudgetCents = Math.max(
-    0,
-    totalApprovedBudgetCents - totalActualSpendCents - totalCommittedCents
-  );
-
-  // Stacked percentages for Budget vs Spend
-  const spentPct = Math.round((totalActualSpendCents / totalApprovedBudgetCents) * 100);
-  const committedPct = Math.round((totalCommittedCents / totalApprovedBudgetCents) * 100);
-  const remainingPct = Math.max(0, 100 - spentPct - committedPct);
-
-  // Funding figures
-  const totalFundingRequiredCents = totalApprovedBudgetCents;
-  const equityReceivedCents = parseInt(String(economics?.sponsor_equity_invested || "60000000"), 10);
-  const loanDrawsReceivedCents = useMemo(() => {
-    const fundedFromDraws = draws
-      .filter((d) => d.status === "APPROVED" || d.status === "PARTIALLY_APPROVED")
-      .reduce((acc, d) => acc + Number(d.funded_amount || d.requested_amount || 0), 0);
-    return fundedFromDraws > 0 ? fundedFromDraws : 120000000; // $1,200,000 reference
-  }, [draws]);
-
-  const fundingReceivedCents = equityReceivedCents + loanDrawsReceivedCents;
-  const remainingFundingNeedCents = Math.max(0, totalFundingRequiredCents - fundingReceivedCents);
-
-  const equityPct = Math.round((equityReceivedCents / totalFundingRequiredCents) * 100);
-  const loanPct = Math.round((loanDrawsReceivedCents / totalFundingRequiredCents) * 100);
-  const needPct = Math.max(0, 100 - equityPct - loanPct);
-
-  // Contingency
-  const originalContingencyCents = 25000000; // $250,000 baseline
-  const usedContingencyCents = useMemo(() => {
-    const moved = contingencyMovements.reduce(
-      (acc, m) => acc + parseInt(String(m.amount || "0"), 10),
-      0
-    );
-    return moved > 0 ? moved : 12500000; // $125,000 reference
-  }, [contingencyMovements]);
-  const remainingContingencyCents = Math.max(0, originalContingencyCents - usedContingencyCents);
-  const contingencyRemainingPct = Math.round(
-    (remainingContingencyCents / originalContingencyCents) * 100
-  );
-
-  // Original Plan vs Current Forecast breakdown table rows
-  const forecastComparisonRows: VarianceCategoryDetail[] = useMemo(() => {
-    return [
-      {
-        category: "Acquisition",
-        originalAmountCents: 50000000,
-        currentForecastCents: 51000000,
-        varianceCents: 1000000,
-        pctChange: 2.0,
-        isFavorable: false,
-        description: "Initial purchase contract $500,000 with title insurance and closing costs adjusted post-survey.",
-        drivers: [
-          {
-            title: "Title & Transfer Surcharges",
-            description: "Municipal recording and deed transfer tax reconciliation",
-            amountCents: 1000000,
-            status: "APPROVED" as const,
-            date: "Oct 12, 2024",
-          },
-        ],
-        supportingDocuments: [
-          { name: "Closing_Settlement_Statement_HUD1.pdf", type: "HUD-1 / Closing", date: "Oct 12, 2024" },
-          { name: "Title_Policy_Commitment.pdf", type: "Title Policy", date: "Sep 28, 2024" },
-        ],
-      },
-      {
-        category: "Construction (Hard Costs)",
-        originalAmountCents: 120000000,
-        currentForecastCents: 115000000,
-        varianceCents: -5000000,
-        pctChange: -4.0,
-        isFavorable: true,
-        description: "Hard construction savings realized during framing and foundation structural procurement offset by CO-001.",
-        drivers: [
-          {
-            title: "Structural Steel Value Engineering",
-            description: "Direct mill supplier buyout savings on wide-flange beams",
-            amountCents: -6500000,
-            status: "APPROVED" as const,
-            date: "Oct 05, 2024",
-          },
-          {
-            title: "CO-001 Moment Clip Reinforcements",
-            description: "Mandated shear wall clip connections per SE inspection memo",
-            amountCents: 1500000,
-            status: "APPROVED" as const,
-            date: "Oct 13, 2024",
-          },
-        ],
-        supportingDocuments: [
-          { name: "CO-001_Executed_Change_Order.pdf", type: "Change Order", date: "Oct 13, 2024" },
-          { name: "GMP_Construction_Contract_Executed.pdf", type: "Contract", date: "Aug 15, 2024" },
-        ],
-      },
-      {
-        category: "Soft Costs",
-        originalAmountCents: 15000000,
-        currentForecastCents: 16500000,
-        varianceCents: 1500000,
-        pctChange: 10.0,
-        isFavorable: false,
-        description: "Municipal permit expediting and environmental testing required by Jersey City building department.",
-        drivers: [
-          {
-            title: "Municipal Expediting & Special Inspections",
-            description: "Expedited MEP review fees and special third-party testing agency retainers",
-            amountCents: 1500000,
-            status: "APPROVED" as const,
-            date: "Sep 30, 2024",
-          },
-        ],
-        supportingDocuments: [
-          { name: "JC_Building_Dept_Permit_Invoice.pdf", type: "Invoice", date: "Sep 30, 2024" },
-        ],
-      },
-      {
-        category: "Financing & Interest",
-        originalAmountCents: 10000000,
-        currentForecastCents: 12000000,
-        varianceCents: 2000000,
-        pctChange: 20.0,
-        isFavorable: false,
-        description: "SOFR floating index adjustment and loan origination fee extension reserve.",
-        drivers: [
-          {
-            title: "Floating Rate Benchmark Adjustments",
-            description: "Adjustment to 5.75% coupon rate reserve over 14-month construction horizon",
-            amountCents: 2000000,
-            status: "APPROVED" as const,
-            date: "Oct 01, 2024",
-          },
-        ],
-        supportingDocuments: [
-          { name: "Columbia_Bank_Loan_Term_Sheet.pdf", type: "Loan Term Sheet", date: "Aug 01, 2024" },
-        ],
-      },
-      {
-        category: "Taxes, Insurance & Carry",
-        originalAmountCents: 8000000,
-        currentForecastCents: 8500000,
-        varianceCents: 500000,
-        pctChange: 6.0,
-        isFavorable: false,
-        description: "Annual builder's risk property coverage premium adjustment and municipal real estate tax installment.",
-        drivers: [
-          {
-            title: "Builder's Risk Policy Rider",
-            description: "Extension rider for flood and water damage peril coverage",
-            amountCents: 500000,
-            status: "APPROVED" as const,
-            date: "Oct 08, 2024",
-          },
-        ],
-        supportingDocuments: [
-          { name: "Builders_Risk_Policy_Endorsement.pdf", type: "Insurance", date: "Oct 08, 2024" },
-        ],
-      },
-      {
-        category: "Selling Costs",
-        originalAmountCents: 7000000,
-        currentForecastCents: 7500000,
-        varianceCents: 500000,
-        pctChange: 7.0,
-        isFavorable: false,
-        description: "Digital marketing staging and broker listing agreement commissions based on updated GDV projections.",
-        drivers: [
-          {
-            title: "Virtual Staging & Architectural Renderings",
-            description: "Marketing package and showroom collateral for off-plan condo sales",
-            amountCents: 500000,
-            status: "APPROVED" as const,
-            date: "Oct 11, 2024",
-          },
-        ],
-        supportingDocuments: [
-          { name: "Broker_Listing_Agreement_Executed.pdf", type: "Broker Agreement", date: "Oct 11, 2024" },
-        ],
-      },
-    ];
-  }, []);
-
-  const totalForecastOriginalPlanCents = useMemo(() => {
-    return forecastComparisonRows.reduce((acc, r) => acc + r.originalAmountCents, 0);
-  }, [forecastComparisonRows]);
-
-  const totalForecastCurrentForecastCents = useMemo(() => {
-    return forecastComparisonRows.reduce((acc, r) => acc + r.currentForecastCents, 0);
-  }, [forecastComparisonRows]);
-
-  const totalForecastVarianceCents = totalForecastCurrentForecastCents - totalForecastOriginalPlanCents;
-  const totalForecastPctChange = Math.round(
-    (totalForecastVarianceCents / totalForecastOriginalPlanCents) * 1000
-  ) / 10;
-
-  // Donut chart data for Cost Breakdown (Current Forecast)
-  const donutChartData = [
-    { name: "Construction", value: 115000000, color: "#1e3a8a", pct: 49.8 },
-    { name: "Acquisition", value: 51000000, color: "#64748b", pct: 22.1 },
-    { name: "Soft Costs", value: 16500000, color: "#0ea5e9", pct: 7.1 },
-    { name: "Financing & Interest", value: 12000000, color: "#f59e0b", pct: 5.2 },
-    { name: "Taxes, Insurance & Carry", value: 8500000, color: "#f97316", pct: 3.7 },
-    { name: "Selling Costs", value: 7500000, color: "#8b5cf6", pct: 3.2 },
-    { name: "Contingency", value: 20700000, color: "#84cc16", pct: 8.9 },
+  // -------------------------------------------------------------
+  // TAB 3: FORECAST & RETURNS DATA
+  // -------------------------------------------------------------
+  const illustrativeReturnChartData = [
+    { name: "Total Cost", value: 1.31, color: "#1d4ed8" },
+    { name: "Sale Revenue", value: 2.50, color: "#22c55e" },
+    { name: "Loan Payoff", value: 0.85, color: "#93c5fd" },
+    { name: "Selling Costs", value: 0.15, color: "#facc15" },
+    { name: "Projected Profit", value: 1.19, color: "#e0e7ff", isDotted: true },
   ];
 
-  // Key Changes & Approvals recent items
-  const recentChanges = [
-    {
-      id: "co-003",
-      title: "Change Order #003",
-      description: "Additional site work & rock excavation",
-      amountCents: 4800000,
-      status: "Pending",
-      statusClass: "bg-amber-50 text-amber-700 border-amber-200",
-      icon: AlertTriangle,
-      iconColor: "text-amber-500",
-      isClickable: true,
-    },
-    {
-      id: "rev-001",
-      title: "Budget Revision",
-      description: "Soft cost increase for permit expediting",
-      amountCents: 1500000,
-      status: "Approved",
-      statusClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      icon: FileSpreadsheet,
-      iconColor: "text-purple-500",
-      isClickable: false,
-    },
-    {
-      id: "loan-001",
-      title: "Loan Term Update",
-      description: "Interest rate adjustment & carry reserve",
-      amountCents: 2000000,
-      status: "Approved",
-      statusClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      icon: CreditCard,
-      iconColor: "text-emerald-500",
-      isClickable: false,
-    },
-    {
-      id: "cont-001",
-      title: "Contingency Allocation",
-      description: "Unforeseen utility tie-in connection",
-      amountCents: 2500000,
-      status: "Approved",
-      statusClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      icon: ArrowRightLeft,
-      iconColor: "text-emerald-500",
-      isClickable: false,
-    },
+  const fundingImpactOnReturns = [
+    { mapKey: "investor_funding_recorded", partner: "Partner 1 (Equity)", amountCents: 20000000, pct: "14.0%", status: "Recorded", statusColor: "text-emerald-700 bg-emerald-50 border-emerald-200" },
+    { mapKey: "investor_funding_recorded", partner: "Partner 2 (Equity)", amountCents: 20000000, pct: "14.0%", status: "Recorded", statusColor: "text-emerald-700 bg-emerald-50 border-emerald-200" },
+    { mapKey: "investor_funding_recorded", partner: "Partner 3 (Equity)", amountCents: 20000000, pct: "14.0%", status: "Recorded", statusColor: "text-emerald-700 bg-emerald-50 border-emerald-200" },
+    { mapKey: "bank_loan_facility", partner: "Senior Bank Construction Loan (First National Bank)", amountCents: 82445000, pct: "58.0%", status: "Approved ($202.2k Drawn)", statusColor: "text-teal-700 bg-teal-50 border-teal-200" },
   ];
 
   // CSV Export handler
@@ -579,106 +469,66 @@ export default function ProjectEconomicsAndBudgetPage() {
     const rows = [
       ["Project Economics & Budget Export", projectName, new Date().toLocaleString()],
       [],
-      ["1. OVERALL KPI SUMMARY"],
-      ["Metric", "Value"],
-      ["Approved Budget", formatMoney(totalApprovedBudgetCents)],
-      ["Forecast Total Cost", formatMoney(totalCostForecastCents)],
-      ["Projected Profit", formatMoney(projectedProfitCents)],
-      ["Projected ROI", `${projectedRoiPct}%`],
-      ["Projected IRR", `${projectedIrrPct}%`],
-      ["Expected Gross Sales GDV", formatMoney(gdvCents)],
+      ["1. CONSTRUCTION BUDGET (FROM PDF) VS TOTAL PROJECT COSTS (FROM WORKBOOK)"],
+      ["Construction Budget (from PDF)", "$1,019,220.00"],
+      ["Total Project Costs (from Workbook)", "$1,306,934.73"],
+      ["Difference (Not Confirmed)", "$287,714.73"],
+      ["Investor Funding Recorded", "$600,000.00"],
+      ["Projected Profit", "Not available (Requires verified budget, funding and sale assumptions)"],
       [],
-      ["2. ORIGINAL PLAN VS CURRENT FORECAST"],
-      ["Category", "Original Plan", "Current Forecast", "Variance ($)", "% Change"],
-      ...forecastComparisonRows.map((r) => [
+      ["2. ORIGINAL PLAN VS CURRENT COSTS"],
+      ["Category", "Budget (PDF)", "Actual Costs (Workbook)", "Variance", "% Change"],
+      ...overviewComparisonRows.map((r) => [
         r.category,
         formatMoney(r.originalAmountCents),
         formatMoney(r.currentForecastCents),
         formatMoney(r.varianceCents),
-        `${r.pctChange}%`,
+        r.pctChange > 0 ? `+${r.pctChange}%` : `${r.pctChange}%`,
       ]),
-      [
-        "Total Project Cost",
-        formatMoney(totalForecastOriginalPlanCents),
-        formatMoney(totalForecastCurrentForecastCents),
-        formatMoney(totalForecastVarianceCents),
-        `${totalForecastPctChange}%`,
-      ],
-      [],
-      ["3. SCHEDULE OF VALUES (SOV) LINE ITEMS"],
-      ["Code", "Item Name", "Category", "Original Budget", "Approved COs", "Revised Budget", "Actual Spent", "Progress %", "Status"],
-      ...sovLines.map((l) => [
-        l.code,
-        l.name,
-        l.category,
-        formatMoney(l.originalAmountCents),
-        formatMoney(l.approvedCoCents),
-        formatMoney(l.revisedAmountCents),
-        formatMoney(l.actualSpentCents),
-        `${l.progressPct}%`,
-        l.status,
-      ]),
+      ["Construction Total", "$1,019,220.00", "$1,306,934.73", "+$287,714.73", "+28%"],
     ];
 
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      rows.map((e) => e.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const csvContent = "data:text/csv;charset=utf-8," + rows.map((e) => e.join(",")).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${projectName.replace(/\s+/g, "_")}_Economics_Budget.csv`);
+    link.setAttribute("download", `Project_Economics_${projectName.replace(/\s+/g, "_")}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
     toast({
-      title: "Financial Model Exported",
-      description: "CSV report downloaded with pro forma, SOV lines, and budget audit trail.",
+      title: "Export Successful",
+      description: "Project economics and budget data exported to CSV.",
     });
   };
 
-  // Filtered SOV Lines for Tab 2
-  const filteredSovLines = useMemo(() => {
-    return sovLines.filter((l) => {
-      const matchesSearch =
-        !sovSearch.trim() ||
-        l.code.toLowerCase().includes(sovSearch.toLowerCase()) ||
-        l.name.toLowerCase().includes(sovSearch.toLowerCase());
-      const matchesCategory =
-        sovCategoryFilter === "ALL" || l.category === sovCategoryFilter;
-      return matchesSearch && matchesCategory;
-    });
-  }, [sovLines, sovSearch, sovCategoryFilter]);
-
-  // Division Chart Items for Recharts
-  const chartItems: DivisionChartItem[] = useMemo(() => {
-    return sovLines.slice(0, 6).map((l) => ({
-      code: l.code,
-      shortName: l.name.split(" ")[0] || l.code,
-      fullName: l.name,
-      originalBudgetCents: l.originalAmountCents,
-      actualSpentCents: l.actualSpentCents,
-    }));
-  }, [sovLines]);
-
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-16">
+    <div className="min-h-screen bg-slate-50/50 pb-16">
       {/* ------------------------------------------------------------- */}
-      {/* PAGE HEADER & BREADCRUMBS                                     */}
+      {/* TOP HEADER & TITLE AREA                                       */}
       {/* ------------------------------------------------------------- */}
-      <div className="border-b border-slate-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <div className="border-b border-slate-200/90 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-0">
           {/* Breadcrumbs */}
-          <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-2">
-            <span className="hover:text-slate-700 cursor-pointer" onClick={() => router.push("/projects")}>
+          <nav className="flex items-center gap-1.5 text-xs text-slate-500 mb-2">
+            <span
+              onClick={() => router.push("/projects")}
+              className="hover:text-slate-900 cursor-pointer font-medium"
+            >
               Projects
             </span>
-            <ChevronRight className="h-3 w-3 text-slate-400" />
-            <span className="hover:text-slate-700 cursor-pointer font-medium text-slate-600">
+            <span>/</span>
+            <span
+              onClick={() => router.push(`/projects/${currentProjectId}/control-center`)}
+              className="hover:text-slate-900 cursor-pointer font-medium"
+            >
               {projectName}
             </span>
-            <ChevronRight className="h-3 w-3 text-slate-400" />
-            <span className="text-slate-900 font-semibold">Project Economics & Budget</span>
+            <span>/</span>
+            <span className="text-slate-900 font-semibold">
+              Project Economics & Budget
+            </span>
           </nav>
 
           {/* Title Row */}
@@ -687,7 +537,7 @@ export default function ProjectEconomicsAndBudgetPage() {
               <h1 className="text-2xl font-bold tracking-tight text-slate-900">
                 Project Economics & Budget
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
                 Original plan, current forecast, and financial performance for {projectName}.
               </p>
             </div>
@@ -700,7 +550,7 @@ export default function ProjectEconomicsAndBudgetPage() {
                 variant="outline"
                 size="sm"
                 onClick={handleExportCSV}
-                className="flex items-center gap-2 text-xs font-medium bg-white text-slate-700 hover:bg-slate-50 border-slate-200 shadow-sm"
+                className="flex items-center gap-2 text-xs font-medium bg-white text-slate-700 hover:bg-slate-50 border-slate-200 shadow-sm rounded-lg"
               >
                 <Download className="h-3.5 w-3.5" />
                 Export
@@ -708,12 +558,12 @@ export default function ProjectEconomicsAndBudgetPage() {
             </div>
           </div>
 
-          {/* Functional 4 Tabs */}
+          {/* Functional 3 Tabs: Overview, Budget Breakdown, Forecast & Returns */}
           <div className="flex border-b border-slate-200 gap-8 mt-6">
             <button
               onClick={() => setActiveTab("overview")}
               className={cn(
-                "flex items-center gap-2 pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors -mb-px",
+                "flex items-center gap-2 pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors -mb-px cursor-pointer",
                 activeTab === "overview"
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
@@ -725,7 +575,7 @@ export default function ProjectEconomicsAndBudgetPage() {
             <button
               onClick={() => setActiveTab("breakdown")}
               className={cn(
-                "flex items-center gap-2 pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors -mb-px",
+                "flex items-center gap-2 pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors -mb-px cursor-pointer",
                 activeTab === "breakdown"
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
@@ -737,7 +587,7 @@ export default function ProjectEconomicsAndBudgetPage() {
             <button
               onClick={() => setActiveTab("forecast")}
               className={cn(
-                "flex items-center gap-2 pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors -mb-px",
+                "flex items-center gap-2 pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors -mb-px cursor-pointer",
                 activeTab === "forecast"
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
@@ -745,18 +595,6 @@ export default function ProjectEconomicsAndBudgetPage() {
             >
               <TrendingUp className="h-4 w-4" />
               Forecast & Returns
-            </button>
-            <button
-              onClick={() => setActiveTab("changes")}
-              className={cn(
-                "flex items-center gap-2 pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors -mb-px",
-                activeTab === "changes"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
-              )}
-            >
-              <CheckSquare className="h-4 w-4" />
-              Changes & Approvals
             </button>
           </div>
         </div>
@@ -767,183 +605,258 @@ export default function ProjectEconomicsAndBudgetPage() {
       {/* ------------------------------------------------------------- */}
       {activeTab === "overview" && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-          {/* Row 1: 4 KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Card 1: Approved Budget */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Approved Budget
-                  </span>
-                  <p className="text-2xl font-bold text-slate-900 tabular-nums mt-1.5">
-                    {formatMoney(totalApprovedBudgetCents)}
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1">Current approved baseline</p>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <div className="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                    <FileText className="h-5 w-5" />
+          {/* Row 1: 5 Specialized KPI Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {/* Card 1: Construction Budget */}
+            <div
+              onClick={() => handleOpenAmountMap("pdf_construction_budget")}
+              className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col justify-between hover:border-blue-400 hover:shadow-md transition-all cursor-pointer group"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-200/60 flex items-center justify-center shrink-0">
+                      <FileText className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="text-xs font-semibold text-slate-800">
+                      Construction Budget
+                    </span>
                   </div>
-                  <span className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                    - 2% vs. orig
-                  </span>
+                  <ArrowUpRightIcon className="h-3.5 w-3.5 text-slate-300 group-hover:text-blue-600 transition-colors" />
+                </div>
+                <div className="text-xl font-bold text-slate-900 tabular-nums">
+                  <ClickableAmount
+                    amountCents={101922000}
+                    onClick={() => handleOpenAmountMap("pdf_construction_budget")}
+                    className="text-xl font-bold text-slate-900"
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Card 2: Forecast Total Cost */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Forecast Total Cost
-                  </span>
-                  <p className="text-2xl font-bold text-slate-900 tabular-nums mt-1.5">
-                    {formatMoney(totalCostForecastCents)}
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1">Latest expected cost</p>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <div className="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                    <CreditCard className="h-5 w-5" />
+            {/* Card 2: Total Incurred Costs */}
+            <div
+              onClick={() => handleOpenAmountMap("workbook_total_costs")}
+              className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col justify-between hover:border-blue-400 hover:shadow-md transition-all cursor-pointer group"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-md bg-blue-50 text-blue-600 border border-blue-200/60 flex items-center justify-center shrink-0">
+                      <FileSpreadsheet className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="text-xs font-semibold text-slate-800">
+                      Total Incurred Costs
+                    </span>
                   </div>
-                  <span className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    - 5% vs. orig
-                  </span>
+                  <ArrowUpRightIcon className="h-3.5 w-3.5 text-slate-300 group-hover:text-blue-600 transition-colors" />
+                </div>
+                <div className="text-xl font-bold text-slate-900 tabular-nums">
+                  <ClickableAmount
+                    amountCents={130693473}
+                    onClick={() => handleOpenAmountMap("workbook_total_costs")}
+                    className="text-xl font-bold text-slate-900"
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Card 3: Projected Profit */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Projected Profit
-                  </span>
-                  <p className="text-2xl font-bold text-slate-900 tabular-nums mt-1.5">
-                    {formatMoney(projectedProfitCents)}
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1">Expected at completion</p>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <div className="h-9 w-9 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <PiggyBank className="h-5 w-5" />
+            {/* Card 3: Scope Difference */}
+            <div
+              onClick={() => handleOpenAmountMap("scope_difference")}
+              className="rounded-xl border border-amber-200/80 bg-white p-4 shadow-sm flex flex-col justify-between hover:border-amber-400 hover:shadow-md transition-all cursor-pointer group"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-md bg-amber-50 text-amber-600 border border-amber-200/60 flex items-center justify-center shrink-0">
+                      <AlertTriangle className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="text-xs font-semibold text-slate-800">
+                      Scope Variance
+                    </span>
                   </div>
-                  <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <ArrowUpRight className="h-3 w-3" />
-                    12% vs. orig
-                  </span>
+                  <ArrowUpRightIcon className="h-3.5 w-3.5 text-amber-300 group-hover:text-amber-700 transition-colors" />
+                </div>
+                <div className="text-xl font-bold text-rose-600 tabular-nums">
+                  <ClickableAmount
+                    amountCents={28771473}
+                    onClick={() => handleOpenAmountMap("scope_difference")}
+                    className="text-xl font-bold text-rose-600"
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Card 4: Projected ROI */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Projected ROI
-                  </span>
-                  <p className="text-2xl font-bold text-slate-900 tabular-nums mt-1.5">
-                    {projectedRoiPct}%
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1">Based on total investment</p>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <div className="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                    <Percent className="h-5 w-5" />
+            {/* Card 4: Investor Equity */}
+            <div
+              onClick={() => handleOpenAmountMap("investor_funding_recorded")}
+              className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col justify-between hover:border-blue-400 hover:shadow-md transition-all cursor-pointer group"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-md bg-purple-50 text-purple-600 border border-purple-200/60 flex items-center justify-center shrink-0">
+                      <Users className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="text-xs font-semibold text-slate-800">
+                      Investor Equity
+                    </span>
                   </div>
-                  <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <ArrowUpRight className="h-3 w-3" />
-                    2.6% vs. orig
-                  </span>
+                  <ArrowUpRightIcon className="h-3.5 w-3.5 text-slate-300 group-hover:text-blue-600 transition-colors" />
+                </div>
+                <div className="text-xl font-bold text-slate-900 tabular-nums">
+                  <ClickableAmount
+                    amountCents={60000000}
+                    onClick={() => handleOpenAmountMap("investor_funding_recorded")}
+                    className="text-xl font-bold text-slate-900"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Card 5: Total Capital Stack */}
+            <div
+              onClick={() => handleOpenAmountMap("capital_stack_total")}
+              className="rounded-xl border border-indigo-200/70 bg-white p-4 shadow-sm flex flex-col justify-between hover:border-indigo-400 hover:shadow-md transition-all cursor-pointer group"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-md bg-indigo-50 text-indigo-600 border border-indigo-200/60 flex items-center justify-center shrink-0">
+                      <Landmark className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="text-xs font-semibold text-slate-800">
+                      Total Capital Stack
+                    </span>
+                  </div>
+                  <ArrowUpRightIcon className="h-3.5 w-3.5 text-indigo-300 group-hover:text-indigo-700 transition-colors" />
+                </div>
+                <div className="text-xl font-bold text-indigo-900 tabular-nums">
+                  <ClickableAmount
+                    amountCents={142445000}
+                    onClick={() => handleOpenAmountMap("capital_stack_total")}
+                    className="text-xl font-bold text-indigo-900"
+                  />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Row 2: Original Plan vs Current Forecast & Donut Chart */}
+          {/* Row 2: Original Plan vs Current Costs & Actual Project Costs (Workbook) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left: Original Plan vs Current Forecast Table (7 Cols) */}
+            {/* Left: Original Plan vs Current Costs Table (7 Cols) */}
             <div className="lg:col-span-7 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="mb-4">
                 <h3 className="text-base font-bold text-slate-900">
-                  Original Plan vs Current Forecast
+                  Original Plan vs Current Costs
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  How the project financial plan has changed. Click any variance to see details and supporting documents.
-                </p>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-slate-200 text-slate-500 font-semibold">
-                      <th className="text-left pb-2.5 font-medium">Cost Category</th>
-                      <th className="text-right pb-2.5 font-medium">Original Plan</th>
-                      <th className="text-right pb-2.5 font-medium">Current Forecast</th>
-                      <th className="text-right pb-2.5 font-medium">Variance</th>
-                      <th className="text-right pb-2.5 font-medium">% Change</th>
+                    <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50/50">
+                      <th className="text-left py-2 px-3 font-semibold">Category</th>
+                      <th className="text-right py-2 px-3 font-semibold">Approved Budget</th>
+                      <th className="text-right py-2 px-3 font-semibold">Actual Costs</th>
+                      <th className="text-right py-2 px-3 font-semibold">Variance</th>
+                      <th className="text-right py-2 px-3 font-semibold">% Change</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {forecastComparisonRows.map((row, idx) => {
-                      const isFavorable = row.isFavorable;
+                    {overviewComparisonRows.map((row, idx) => {
+                      const isZeroOrDash = row.varianceCents === 0;
+                      const catKey = row.category.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
                       return (
                         <tr
                           key={idx}
-                          onClick={() => {
-                            setSelectedVarianceCategory(row);
-                            setIsVarianceModalOpen(true);
-                          }}
-                          className="hover:bg-blue-50/40 cursor-pointer transition-colors group"
+                          className="hover:bg-blue-50/40 transition-colors group"
                         >
-                          <td className="py-2.5 font-medium text-slate-800 group-hover:text-blue-600 transition-colors">
+                          <td
+                            onClick={() => {
+                              setSelectedVarianceCategory(row);
+                              setIsVarianceModalOpen(true);
+                            }}
+                            className="py-2.5 px-3 font-medium text-slate-800 group-hover:text-blue-600 transition-colors cursor-pointer"
+                          >
                             {row.category}
                           </td>
-                          <td className="py-2.5 text-right tabular-nums text-slate-600">
-                            {formatMoney(row.originalAmountCents)}
+                          <td className="py-2.5 px-3 text-right tabular-nums text-slate-600">
+                            <ClickableAmount
+                              amountCents={row.originalAmountCents}
+                              onClick={() =>
+                                handleOpenAmountMap(catKey, `${row.category} (PDF Baseline)`, row.originalAmountCents)
+                              }
+                              className="text-slate-600 font-medium"
+                            />
                           </td>
-                          <td className="py-2.5 text-right tabular-nums font-semibold text-slate-900">
-                            {formatMoney(row.currentForecastCents)}
-                          </td>
-                          <td
-                            className={cn(
-                              "py-2.5 text-right tabular-nums font-medium",
-                              isFavorable ? "text-emerald-600" : "text-rose-600"
+                          <td className="py-2.5 px-3 text-right tabular-nums font-semibold text-slate-900">
+                            {row.currentForecastCents > 0 ? (
+                              <ClickableAmount
+                                amountCents={row.currentForecastCents}
+                                onClick={() =>
+                                  handleOpenAmountMap(catKey, `${row.category} (Actual Spend)`, row.currentForecastCents)
+                                }
+                                className="text-slate-900 font-bold"
+                              />
+                            ) : (
+                              "—"
                             )}
-                          >
-                            {row.varianceCents > 0 ? "+ " : ""}
-                            {formatMoney(row.varianceCents)}
                           </td>
-                          <td
-                            className={cn(
-                              "py-2.5 text-right tabular-nums font-semibold",
-                              isFavorable ? "text-emerald-600" : "text-rose-600"
+                          <td className="py-2.5 px-3 text-right tabular-nums font-semibold text-rose-600">
+                            {isZeroOrDash ? (
+                              row.category.includes("Contingency") ? "—" : "$0"
+                            ) : (
+                              <ClickableAmount
+                                amountCents={row.varianceCents}
+                                prefix="+"
+                                onClick={() => {
+                                  setSelectedVarianceCategory(row);
+                                  setIsVarianceModalOpen(true);
+                                }}
+                                className="text-rose-600 font-semibold"
+                              />
                             )}
-                          >
-                            {row.pctChange > 0 ? `+${row.pctChange}% ↑` : `${row.pctChange}% ↓`}
+                          </td>
+                          <td className="py-2.5 px-3 text-right tabular-nums font-semibold text-rose-600">
+                            {row.category.includes("Contingency")
+                              ? "—"
+                              : row.pctChange > 0
+                              ? `+${row.pctChange}%`
+                              : "0%"}
                           </td>
                         </tr>
                       );
                     })}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t-2 border-slate-200 font-bold text-slate-900 bg-slate-50/50">
-                      <td className="py-2.5 font-bold">Total Project Cost</td>
-                      <td className="py-2.5 text-right tabular-nums">
-                        {formatMoney(totalForecastOriginalPlanCents)}
+                    <tr className="border-t-2 border-slate-200 font-bold text-slate-900 bg-slate-50/70">
+                      <td className="py-2.5 px-3 font-bold">Construction Total</td>
+                      <td className="py-2.5 px-3 text-right tabular-nums">
+                        <ClickableAmount
+                          amountCents={101922000}
+                          onClick={() => handleOpenAmountMap("pdf_construction_budget")}
+                          className="font-bold text-slate-900"
+                        />
                       </td>
-                      <td className="py-2.5 text-right tabular-nums">
-                        {formatMoney(totalForecastCurrentForecastCents)}
+                      <td className="py-2.5 px-3 text-right tabular-nums">
+                        <ClickableAmount
+                          amountCents={130693473}
+                          onClick={() => handleOpenAmountMap("workbook_total_costs")}
+                          className="font-bold text-slate-900"
+                        />
                       </td>
-                      <td className="py-2.5 text-right tabular-nums text-rose-600">
-                        + {formatMoney(totalForecastVarianceCents)}
+                      <td className="py-2.5 px-3 text-right tabular-nums text-rose-600">
+                        <ClickableAmount
+                          amountCents={28771473}
+                          prefix="+"
+                          onClick={() => handleOpenAmountMap("scope_difference")}
+                          className="font-bold text-rose-600"
+                        />
                       </td>
-                      <td className="py-2.5 text-right tabular-nums text-rose-600">
-                        +{totalForecastPctChange}% ↑
+                      <td className="py-2.5 px-3 text-right tabular-nums text-rose-600">
+                        +28%
                       </td>
                     </tr>
                   </tfoot>
@@ -951,17 +864,17 @@ export default function ProjectEconomicsAndBudgetPage() {
               </div>
             </div>
 
-            {/* Right: Cost Breakdown (Current Forecast) Donut Chart (5 Cols) */}
+            {/* Right: Actual Project Costs (Workbook) Donut Chart (5 Cols) */}
             <div className="lg:col-span-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-base font-bold text-slate-900">
-                  Cost Breakdown (Current Forecast)
+                  Project Cost Breakdown
                 </h3>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setActiveTab("breakdown")}
-                  className="text-xs h-7 px-2.5 text-slate-600 hover:text-slate-900 border-slate-200"
+                  onClick={() => router.push(`/projects/${currentProjectId}/reconciliation`)}
+                  className="text-xs h-7 px-2.5 text-slate-600 hover:text-slate-900 border-slate-200 rounded-lg"
                 >
                   View Details
                 </Button>
@@ -974,7 +887,7 @@ export default function ProjectEconomicsAndBudgetPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={donutChartData}
+                        data={workbookCostDonutData.filter((d) => d.value > 0)}
                         cx="50%"
                         cy="50%"
                         innerRadius={55}
@@ -982,18 +895,39 @@ export default function ProjectEconomicsAndBudgetPage() {
                         paddingAngle={2}
                         dataKey="value"
                       >
-                        {donutChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
+                        {workbookCostDonutData
+                          .filter((d) => d.value > 0)
+                          .map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
                       </Pie>
                       <Tooltip
-                        formatter={(val: number) => formatMoney(val)}
-                        contentStyle={{
-                          backgroundColor: "#0F172A",
-                          borderRadius: "8px",
-                          color: "#fff",
-                          fontSize: "12px",
-                          border: "none",
+                        content={({ active, payload }) => {
+                          if (!active || !payload || !payload.length) return null;
+                          const data = payload[0].payload;
+                          return (
+                            <div className="rounded-lg border border-slate-200 bg-white/95 backdrop-blur-xs px-3 py-2 shadow-lg text-xs pointer-events-none min-w-[160px]">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span
+                                  className="h-2.5 w-2.5 rounded-full shrink-0"
+                                  style={{ backgroundColor: data.color }}
+                                />
+                                <span className="font-semibold text-slate-900 truncate">
+                                  {data.name}
+                                </span>
+                              </div>
+                              <div className="flex items-baseline justify-between gap-3 pt-0.5 border-t border-slate-100 text-[11px]">
+                                <span className="text-slate-500 font-medium">Share of Total</span>
+                                <span className="font-bold text-slate-700 font-mono">{data.pct}%</span>
+                              </div>
+                              <div className="flex items-baseline justify-between gap-3 text-[11px]">
+                                <span className="text-slate-500 font-medium">Cost</span>
+                                <span className="font-bold text-blue-700 font-mono tabular-nums">
+                                  {formatMoney(Math.round(data.value * 100))}
+                                </span>
+                              </div>
+                            </div>
+                          );
                         }}
                       />
                     </PieChart>
@@ -1001,17 +935,17 @@ export default function ProjectEconomicsAndBudgetPage() {
                   {/* Center Text */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <span className="text-base font-bold text-slate-900 tabular-nums">
-                      $2.31M
+                      $1.31M
                     </span>
                     <span className="text-[10px] text-slate-500 uppercase tracking-wider">
-                      Total Cost
+                      Total Costs
                     </span>
                   </div>
                 </div>
 
                 {/* Legend list */}
                 <div className="flex-1 w-full space-y-1.5 text-xs">
-                  {donutChartData.map((item, idx) => (
+                  {workbookCostDonutData.map((item, idx) => (
                     <div key={idx} className="flex items-center justify-between">
                       <div className="flex items-center gap-2 truncate">
                         <span
@@ -1022,7 +956,9 @@ export default function ProjectEconomicsAndBudgetPage() {
                       </div>
                       <div className="flex items-center gap-3 shrink-0 tabular-nums font-medium text-slate-900">
                         <span className="text-slate-400 text-[11px]">{item.pct}%</span>
-                        <span>{formatMoney(item.value)}</span>
+                        <span className={item.value < 0 ? "text-rose-600" : ""}>
+                          {item.value < 0 ? `-${formatMoney(Math.round(Math.abs(item.value) * 100))}` : formatMoney(Math.round(item.value * 100))}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -1031,429 +967,308 @@ export default function ProjectEconomicsAndBudgetPage() {
             </div>
           </div>
 
-          {/* Row 3: Budget vs Actual Spend & Funding/Cash Exposure */}
+          {/* Row 3: Budget vs Actual Spend & Funding and Cash Exposure */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left: Budget vs Actual Spend */}
+            {/* Left: Budget vs Actual Spend (Construction Only) */}
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-bold text-slate-900">
-                  Budget vs Actual Spend
+                  Construction Budget vs Spend
                 </h3>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setActiveTab("breakdown")}
-                  className="text-xs h-7 px-2.5 text-slate-600 hover:text-slate-900 border-slate-200"
-                >
-                  View Full Breakdown
-                </Button>
               </div>
 
-              {/* 4 Stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              {/* 4 Key Figures */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
                 <div>
                   <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
                     Approved Budget
                   </p>
-                  <p className="text-sm sm:text-base font-bold text-slate-900 tabular-nums mt-0.5">
-                    {formatMoney(totalApprovedBudgetCents)}
-                  </p>
+                  <div className="text-sm sm:text-base font-bold text-slate-900 tabular-nums mt-0.5">
+                    <ClickableAmount
+                      amountCents={101922000}
+                      onClick={() => handleOpenAmountMap("pdf_construction_budget")}
+                      className="text-sm sm:text-base font-bold text-slate-900"
+                    />
+                  </div>
                 </div>
                 <div>
                   <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
                     Actual Spend
                   </p>
-                  <p className="text-sm sm:text-base font-bold text-slate-900 tabular-nums mt-0.5">
-                    {formatMoney(totalActualSpendCents)}
-                  </p>
+                  <div className="text-sm sm:text-base font-bold text-slate-900 tabular-nums mt-0.5">
+                    <ClickableAmount
+                      amountCents={130693473}
+                      onClick={() => handleOpenAmountMap("workbook_total_costs")}
+                      className="text-sm sm:text-base font-bold text-slate-900"
+                    />
+                  </div>
                 </div>
                 <div>
                   <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
-                    Committed (Unpaid)
+                    Committed
                   </p>
-                  <p className="text-sm sm:text-base font-bold text-slate-900 tabular-nums mt-0.5">
-                    {formatMoney(totalCommittedCents)}
-                  </p>
+                  <div className="text-sm sm:text-base font-bold text-slate-900 tabular-nums mt-0.5">
+                    <ClickableAmount
+                      amountCents={12500000}
+                      onClick={() => handleOpenAmountMap("committed_unpaid")}
+                      className="text-sm sm:text-base font-bold text-slate-900"
+                    />
+                  </div>
                 </div>
                 <div>
                   <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
-                    Remaining Budget
+                    Remaining
                   </p>
-                  <p className="text-sm sm:text-base font-bold text-slate-900 tabular-nums mt-0.5">
-                    {formatMoney(remainingBudgetCents)}
+                  <p className="text-sm sm:text-base font-bold text-rose-600 tabular-nums mt-0.5">
+                    $0
                   </p>
+                  <span className="text-[10px] text-rose-600 font-semibold block">
+                    Over by{" "}
+                    <ClickableAmount
+                      amountCents={28771473}
+                      onClick={() => handleOpenAmountMap("scope_difference")}
+                      className="text-[10px] font-semibold text-rose-600 p-0"
+                    />
+                  </span>
                 </div>
               </div>
 
               {/* Stacked Multi-Segment Progress Bar */}
               <div className="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden flex shadow-inner">
                 <div
-                  className="bg-blue-900 transition-all duration-500"
-                  style={{ width: `${spentPct}%` }}
-                  title={`Spent: ${spentPct}%`}
-                />
-                <div
-                  className="bg-blue-500 transition-all duration-500"
-                  style={{ width: `${committedPct}%` }}
-                  title={`Committed: ${committedPct}%`}
+                  className="bg-blue-600 transition-all duration-500"
+                  style={{ width: "91%" }}
+                  title="Spent: 99%"
                 />
                 <div
                   className="bg-amber-400 transition-all duration-500"
-                  style={{ width: `${remainingPct}%` }}
-                  title={`Remaining: ${remainingPct}%`}
+                  style={{ width: "9%" }}
+                  title="Committed: 9%"
                 />
               </div>
 
               {/* Legend Row */}
               <div className="flex flex-wrap items-center justify-between text-xs text-slate-600 pt-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-blue-900" />
-                  <span>Spent ({spentPct}%)</span>
-                  <span className="font-semibold text-slate-900 tabular-nums">
-                    {formatMoney(totalActualSpendCents)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-blue-500" />
-                  <span>Committed ({committedPct}%)</span>
-                  <span className="font-semibold text-slate-900 tabular-nums">
-                    {formatMoney(totalCommittedCents)}
-                  </span>
+                  <span className="h-2 w-2 rounded-full bg-blue-600" />
+                  <span className="text-slate-500">Spent:</span>
+                  <ClickableAmount
+                    amountCents={130693473}
+                    onClick={() => handleOpenAmountMap("workbook_total_costs")}
+                    className="font-semibold text-slate-900"
+                  />
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-amber-400" />
-                  <span>Remaining ({remainingPct}%)</span>
-                  <span className="font-semibold text-slate-900 tabular-nums">
-                    {formatMoney(remainingBudgetCents)}
-                  </span>
+                  <span className="text-slate-500">Committed:</span>
+                  <ClickableAmount
+                    amountCents={12500000}
+                    onClick={() => handleOpenAmountMap("committed_unpaid")}
+                    className="font-semibold text-slate-900"
+                  />
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-slate-300" />
+                  <span className="text-slate-500">Remaining:</span>
+                  <span className="font-semibold text-slate-900 tabular-nums">$0</span>
                 </div>
               </div>
             </div>
 
-            {/* Right: Funding and Cash Exposure */}
+            {/* Right: Capital Stack & Project Funding */}
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-slate-900">
-                  Funding and Cash Exposure
-                </h3>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push(`/projects/${currentProjectId}/draws`)}
-                  className="text-xs h-7 px-2.5 text-slate-600 hover:text-slate-900 border-slate-200"
-                >
-                  View Funding Details
-                </Button>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="h-6 w-6 rounded-md bg-indigo-50 text-indigo-600 border border-indigo-200/60 flex items-center justify-center shrink-0">
+                    <Landmark className="h-3.5 w-3.5" />
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Capital Stack & Funding
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    +{formatMoney(solvencyBufferCents)} Cushion
+                  </span>
+                </div>
               </div>
 
-              {/* 3 Stats */}
-              <div className="grid grid-cols-3 gap-2 pt-1">
+              {/* 4 Key Figures */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
                 <div>
                   <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
-                    Total Funding Required
+                    Total Capital Stack
                   </p>
-                  <p className="text-sm sm:text-base font-bold text-slate-900 tabular-nums mt-0.5">
-                    {formatMoney(totalFundingRequiredCents)}
-                  </p>
+                  <div className="text-sm sm:text-base font-bold text-slate-900 tabular-nums mt-0.5">
+                    <ClickableAmount
+                      amountCents={totalCapitalStackCents}
+                      onClick={() => handleOpenAmountMap("capital_stack_total")}
+                      className="text-sm sm:text-base font-bold text-slate-900"
+                    />
+                  </div>
                 </div>
                 <div>
                   <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
-                    Funding Received
+                    Total Costs Incurred
                   </p>
-                  <p className="text-sm sm:text-base font-bold text-slate-900 tabular-nums mt-0.5">
-                    {formatMoney(fundingReceivedCents)}
-                  </p>
+                  <div className="text-sm sm:text-base font-bold text-slate-900 tabular-nums mt-0.5">
+                    <ClickableAmount
+                      amountCents={totalWorkbookCostsCents}
+                      onClick={() => handleOpenAmountMap("workbook_total_costs")}
+                      className="text-sm sm:text-base font-bold text-slate-900"
+                    />
+                  </div>
                 </div>
                 <div>
                   <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
-                    Remaining Need
+                    Bank Loan Disbursed
                   </p>
-                  <p className="text-sm sm:text-base font-bold text-rose-600 tabular-nums mt-0.5">
-                    {formatMoney(remainingFundingNeedCents)}
+                  <div className="text-sm sm:text-base font-bold text-teal-700 tabular-nums mt-0.5">
+                    <ClickableAmount
+                      amountCents={loanDisbursedCents}
+                      onClick={() => handleOpenAmountMap("bank_loan_facility")}
+                      className="text-sm sm:text-base font-bold text-teal-700"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
+                    Available Cushion
                   </p>
+                  <div className="text-sm sm:text-base font-bold text-emerald-700 tabular-nums mt-0.5">
+                    <ClickableAmount
+                      amountCents={solvencyBufferCents}
+                      prefix="+"
+                      onClick={() => handleOpenAmountMap("capital_stack_total")}
+                      className="text-sm sm:text-base font-bold text-emerald-700"
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Stacked Multi-Segment Progress Bar */}
               <div className="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden flex shadow-inner">
                 <div
-                  className="bg-blue-900 transition-all duration-500"
-                  style={{ width: `${equityPct}%` }}
-                  title={`Equity Received: ${equityPct}%`}
+                  className="bg-blue-800 transition-all duration-500"
+                  style={{ width: "42.1%" }}
+                  title="Partner Equity: $600,000 (42.1%)"
                 />
                 <div
-                  className="bg-sky-400 transition-all duration-500"
-                  style={{ width: `${loanPct}%` }}
-                  title={`Loan Draws Received: ${loanPct}%`}
+                  className="bg-teal-500 transition-all duration-500"
+                  style={{ width: "14.2%" }}
+                  title="Bank Loan Disbursed: $202,200 (14.2%)"
                 />
                 <div
-                  className="bg-slate-200 transition-all duration-500"
-                  style={{ width: `${needPct}%` }}
-                  title={`Remaining Need: ${needPct}%`}
+                  className="bg-indigo-300 transition-all duration-500"
+                  style={{ width: "43.7%" }}
+                  title="Available Bank Loan to Draw: $622,250 (43.7%)"
                 />
               </div>
 
-              {/* Legend Row */}
-              <div className="flex flex-wrap items-center justify-between text-xs text-slate-600 pt-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-blue-900" />
-                  <span>Equity Received</span>
-                  <span className="font-semibold text-slate-900 tabular-nums">
-                    {formatMoney(equityReceivedCents)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-sky-400" />
-                  <span>Loan Draws Received</span>
-                  <span className="font-semibold text-slate-900 tabular-nums">
-                    {formatMoney(loanDrawsReceivedCents)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-slate-300" />
-                  <span>Remaining Need</span>
-                  <span className="font-semibold text-rose-600 tabular-nums">
-                    {formatMoney(remainingFundingNeedCents)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Row 4: Projected Returns, Contingency & Key Changes/Approvals */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* 1. Projected Returns */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-base font-bold text-slate-900">Projected Returns</h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsEditAssumptionsOpen(true)}
-                    className="text-xs h-7 px-2.5 text-slate-600 hover:text-slate-900 border-slate-200"
-                  >
-                    Edit Assumptions
-                  </Button>
-                </div>
-
-                <div className="divide-y divide-slate-100 text-xs">
-                  <div className="py-2 flex items-center justify-between">
-                    <span className="text-slate-500">Expected Sale Revenue</span>
-                    <span className="font-semibold text-slate-900 tabular-nums">
-                      {formatMoney(gdvCents)}
-                    </span>
-                  </div>
-                  <div className="py-2 flex items-center justify-between">
-                    <span className="text-slate-500">Total Project Cost (Forecast)</span>
-                    <span className="font-semibold text-slate-900 tabular-nums">
-                      {formatMoney(totalCostForecastCents)}
-                    </span>
-                  </div>
-                  <div className="py-2 flex items-center justify-between font-bold">
-                    <span className="text-slate-700">Projected Profit</span>
-                    <span className="text-emerald-600 tabular-nums">
-                      {formatMoney(projectedProfitCents)}
-                    </span>
-                  </div>
-                  <div className="py-2 flex items-center justify-between">
-                    <span className="text-slate-500">Projected Profit Margin</span>
-                    <span className="font-bold text-emerald-600 tabular-nums">
-                      {projectedMarginPct}%
-                    </span>
-                  </div>
-                  <div className="py-2 flex items-center justify-between">
-                    <span className="text-slate-500">Projected ROI</span>
-                    <span className="font-bold text-emerald-600 tabular-nums">
-                      {projectedRoiPct}%
-                    </span>
-                  </div>
-                  <div className="py-2 flex items-center justify-between">
-                    <span className="text-slate-500">Projected IRR</span>
-                    <span className="font-bold text-emerald-600 tabular-nums">
-                      {projectedIrrPct}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <p className="text-[11px] text-slate-400 mt-3 pt-2 border-t border-slate-100">
-                Based on current forecast and defined investment structure. Not a guarantee.
-              </p>
-            </div>
-
-            {/* 2. Contingency */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-base font-bold text-slate-900">Contingency</h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsMoveContingencyOpen(true)}
-                    className="text-xs h-7 px-2.5 text-slate-600 hover:text-slate-900 border-slate-200"
-                  >
-                    View Contingency
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 text-xs mb-3">
-                  <div>
-                    <span className="text-[10px] uppercase font-semibold text-slate-400">
-                      Original
-                    </span>
-                    <p className="font-bold text-slate-900 tabular-nums mt-0.5">
-                      {formatMoney(originalContingencyCents)}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-semibold text-slate-400">
-                      Used / Allocated
-                    </span>
-                    <p className="font-bold text-slate-900 tabular-nums mt-0.5">
-                      {formatMoney(usedContingencyCents)}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-semibold text-slate-400">
-                      Remaining
-                    </span>
-                    <p className="font-bold text-emerald-600 tabular-nums mt-0.5">
-                      {formatMoney(remainingContingencyCents)}
-                    </p>
-                    <span className="text-[10px] text-slate-400">
-                      {contingencyRemainingPct}% remaining
-                    </span>
-                  </div>
-                </div>
-
-                {/* Progress bar */}
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-4">
-                  <div
-                    className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${contingencyRemainingPct}%` }}
-                  />
-                </div>
-
-                <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">
+              {/* Two Detailed Structured Sub-Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                {/* Sub-Card 1: Partner Equity Contributions */}
+                <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Pending Change Orders</span>
-                    <div className="flex items-center gap-2 font-medium">
-                      <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[11px] font-semibold">
-                        2
-                      </span>
-                      <span className="tabular-nums font-semibold text-slate-900">$48,000</span>
+                    <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <Users className="h-3.5 w-3.5 text-blue-600" />
+                      Partner Equity
+                    </span>
+                    <ClickableAmount
+                      amountCents={investorFundingRecordedCents}
+                      onClick={() => handleOpenAmountMap("investor_funding_recorded")}
+                      className="text-xs font-bold text-blue-700"
+                    />
+                  </div>
+                  <div className="space-y-1 text-[11px] text-slate-600">
+                    <div className="flex items-center justify-between">
+                      <span>Partner 1 (25%)</span>
+                      <ClickableAmount
+                        amountCents={20000000}
+                        onClick={() => handleOpenAmountMap("investor_funding_recorded")}
+                        className="font-medium text-slate-800 text-[11px]"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Partner 2 (25%)</span>
+                      <ClickableAmount
+                        amountCents={20000000}
+                        onClick={() => handleOpenAmountMap("investor_funding_recorded")}
+                        className="font-medium text-slate-800 text-[11px]"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Partner 3 (25%)</span>
+                      <ClickableAmount
+                        amountCents={20000000}
+                        onClick={() => handleOpenAmountMap("investor_funding_recorded")}
+                        className="font-medium text-slate-800 text-[11px]"
+                      />
                     </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Approved Revisions</span>
-                    <div className="flex items-center gap-2 font-medium">
-                      <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[11px] font-semibold">
-                        3
-                      </span>
-                      <span className="tabular-nums font-semibold text-slate-900">$62,000</span>
-                    </div>
+                  <div className="pt-1.5 border-t border-slate-200/80 flex items-center justify-between text-[10px] text-slate-500">
+                    <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                      <ShieldCheck className="h-3 w-3" />
+                      3/3 Wires Reconciled
+                    </span>
+                    <button
+                      onClick={() => handleOpenAmountMap("investor_funding_recorded")}
+                      className="text-blue-600 hover:underline cursor-pointer font-medium"
+                    >
+                      View wires →
+                    </button>
                   </div>
                 </div>
-              </div>
 
-              <div className="mt-3 pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsMoveContingencyOpen(true)}
-                  className="w-full text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
-                >
-                  <ArrowRightLeft className="h-3.5 w-3.5 mr-1.5" />
-                  Reallocate Contingency
-                </Button>
-              </div>
-            </div>
-
-            {/* 3. Key Changes & Approvals */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-base font-bold text-slate-900">Key Changes & Approvals</h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setActiveTab("changes")}
-                    className="text-xs h-7 px-2.5 text-slate-600 hover:text-slate-900 border-slate-200"
-                  >
-                    View All
-                  </Button>
+                {/* Sub-Card 2: Senior Construction Loan Facility */}
+                <div className="rounded-lg border border-teal-200/80 bg-teal-50/30 p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <Landmark className="h-3.5 w-3.5 text-teal-600" />
+                      Bank Senior Loan
+                    </span>
+                    <ClickableAmount
+                      amountCents={loanFacilityTotalCents}
+                      onClick={() => handleOpenAmountMap("bank_loan_facility")}
+                      className="text-xs font-bold text-teal-800"
+                    />
+                  </div>
+                  <div className="space-y-1 text-[11px] text-slate-600">
+                    <div className="flex items-center justify-between">
+                      <span>Disbursed to Date</span>
+                      <ClickableAmount
+                        amountCents={loanDisbursedCents}
+                        onClick={() => handleOpenAmountMap("bank_loan_facility")}
+                        className="font-semibold text-teal-700 text-[11px]"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Available to Draw</span>
+                      <ClickableAmount
+                        amountCents={loanRemainingCents}
+                        onClick={() => handleOpenAmountMap("bank_loan_facility")}
+                        className="font-medium text-slate-800 text-[11px]"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] text-teal-800 font-medium pt-0.5">
+                      <span>Active Cadence</span>
+                      <span className="bg-teal-100 text-teal-800 px-1.5 py-0.5 rounded font-semibold">
+                        Draw #3 Active (94% Spent)
+                      </span>
+                    </div>
+                  </div>
+                  <div className="pt-1.5 border-t border-teal-200/80 flex items-center justify-between text-[10px] text-slate-500">
+                    <span className="text-slate-500">First National Bank</span>
+                    <button
+                      onClick={() => router.push(`/projects/${currentProjectId}/draws`)}
+                      className="text-teal-700 hover:underline cursor-pointer font-semibold flex items-center gap-0.5"
+                    >
+                      <span>Manage Draws</span>
+                      <ArrowRight className="h-3 w-3" />
+                    </button>
+                  </div>
                 </div>
-
-                <div className="space-y-2.5">
-                  {recentChanges.map((item) => {
-                    const IconComponent = item.icon;
-                    return (
-                      <div
-                        key={item.id}
-                        onClick={() => {
-                          if (item.isClickable) {
-                            const foundCo = changeOrders.find(
-                              (c) => c.status === "SUBMITTED" || c.status === "DRAFT"
-                            ) || ({
-                              id: item.id,
-                              project_id: currentProjectId,
-                              change_order_number: "CO-003",
-                              title: "Additional site work & rock excavation",
-                              scope_description: "Excavation encountering unforeseen ledge and boulder removal",
-                              requested_amount: "4800000",
-                              status: "SUBMITTED",
-                              target_budget_line_id: "02-200",
-                              funding_source: "CONTINGENCY",
-                              requested_by: "Frank Miller (General Contractor)",
-                              requested_at: new Date().toISOString(),
-                            } as ChangeOrder);
-                            setReviewingChangeOrder(foundCo);
-                          }
-                        }}
-                        className={cn(
-                          "flex items-center justify-between p-2.5 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-slate-100/70 transition-colors",
-                          item.isClickable && "cursor-pointer"
-                        )}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className={cn("p-1.5 rounded-md bg-white border border-slate-200 shadow-2xs shrink-0")}>
-                            <IconComponent className={cn("h-4 w-4", item.iconColor)} />
-                          </div>
-                          <div className="truncate">
-                            <p className="text-xs font-semibold text-slate-900 truncate">{item.title}</p>
-                            <p className="text-[11px] text-slate-500 truncate">{item.description}</p>
-                          </div>
-                        </div>
-
-                        <div className="text-right shrink-0 ml-2">
-                          <p className="text-xs font-bold text-slate-900 tabular-nums">
-                            {formatMoney(item.amountCents)}
-                          </p>
-                          <span
-                            className={cn(
-                              "text-[10px] font-semibold px-2 py-0.5 rounded-full border mt-0.5 inline-block",
-                              item.statusClass
-                            )}
-                          >
-                            {item.status}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="mt-3 pt-2">
-                <Button
-                  size="sm"
-                  onClick={() => setIsChangeOrderOpen(true)}
-                  className="w-full text-xs bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
-                  New Change Order
-                </Button>
               </div>
             </div>
           </div>
@@ -1465,155 +1280,267 @@ export default function ProjectEconomicsAndBudgetPage() {
       {/* ------------------------------------------------------------- */}
       {activeTab === "breakdown" && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-          {/* Quick Division Chart & Contingency breakdown */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <BudgetDivisionChart data={chartItems} />
-            </div>
-            <div>
-              <ContingencyBreakdownCard
-                hardCostCents={5000000}
-                softCostCents={3247000}
-                onMoveContingency={() => setIsMoveContingencyOpen(true)}
-              />
-            </div>
-          </div>
-
-          {/* Master Schedule of Values (SOV) Lines */}
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h3 className="text-base font-bold text-slate-900">
-                  Master Schedule of Values (SOV)
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  CSI division baseline lines, approved change orders, actual spend, and completion status.
-                </p>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Left Card: Construction Budget Summary */}
+            <div className="lg:col-span-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+              <h3 className="text-base font-bold text-slate-900">
+                Approved Baseline Budget
+              </h3>
+              <div className="pt-2 border-b border-slate-100 pb-3 flex items-baseline justify-between">
+                <span className="text-xs text-slate-500 font-medium">Total</span>
+                <span className="text-2xl font-bold text-slate-900 tabular-nums">
+                  $1,019,220
+                </span>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-2">
+              {/* 6 High-level Categories */}
+              <div className="divide-y divide-slate-100 text-xs">
+                {budgetBreakdownCategories.map((cat, idx) => {
+                  const catKey = cat.name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+                  return (
+                    <div key={cat.id} className="py-2.5 flex items-center justify-between group hover:bg-slate-50/80 px-1 rounded transition-colors">
+                      <button
+                        onClick={() => handleOpenAmountMap(catKey, cat.name, cat.pdfAmountCents)}
+                        className="text-slate-700 font-medium hover:text-blue-600 cursor-pointer text-left"
+                      >
+                        {idx + 1}. {cat.name}
+                      </button>
+                      <div className="flex items-center gap-2">
+                        <ClickableAmount
+                          amountCents={cat.pdfAmountCents}
+                          onClick={() => handleOpenAmountMap(catKey, cat.name, cat.pdfAmountCents)}
+                          className="font-semibold text-slate-900"
+                        />
+                        <span className="text-[11px] text-slate-400 font-medium w-9 text-right">
+                          {cat.pctOfTotal}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right Card: Budget vs Actual by Category */}
+            <div className="lg:col-span-8 rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-slate-900">
+                  Budget vs Actual by Category
+                </h3>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setIsMoveContingencyOpen(true)}
-                  className="text-xs h-8 border-slate-200"
+                  onClick={() => router.push(`/projects/${currentProjectId}/documents`)}
+                  className="text-xs h-7 px-2.5 text-blue-600 border-blue-200 hover:bg-blue-50 rounded-lg"
                 >
-                  <ArrowRightLeft className="h-3.5 w-3.5 mr-1.5" />
-                  Move Contingency
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => setIsChangeOrderOpen(true)}
-                  className="text-xs h-8 bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
-                  New Change Order
+                  View Source PDF
                 </Button>
               </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50/50">
+                      <th className="text-left py-2 px-3 font-semibold">Category</th>
+                      <th className="text-right py-2 px-3 font-semibold">Approved Budget</th>
+                      <th className="text-right py-2 px-3 font-semibold">Actual Spend</th>
+                      <th className="text-right py-2 px-3 font-semibold">Committed</th>
+                      <th className="text-right py-2 px-3 font-semibold">Remaining</th>
+                      <th className="text-right py-2 px-3 font-semibold">Variance</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {budgetBreakdownCategories.map((row, idx) => {
+                      const isFavorable = row.varianceCents < 0;
+                      const isZero = row.varianceCents === 0;
+                      const catKey = row.name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+                      return (
+                        <tr key={row.id} className="hover:bg-slate-50/60 transition-colors group">
+                          <td
+                            onClick={() => handleOpenAmountMap(catKey, row.name, row.pdfAmountCents)}
+                            className="py-2.5 px-3 font-medium text-slate-800 hover:text-blue-600 cursor-pointer"
+                          >
+                            {idx + 1}. {row.name}
+                          </td>
+                          <td className="py-2.5 px-3 text-right tabular-nums text-slate-600">
+                            <ClickableAmount
+                              amountCents={row.pdfAmountCents}
+                              onClick={() => handleOpenAmountMap(catKey, `${row.name} (Budget)`, row.pdfAmountCents)}
+                              className="text-slate-600 font-medium"
+                            />
+                          </td>
+                          <td className="py-2.5 px-3 text-right tabular-nums font-semibold text-slate-900">
+                            <ClickableAmount
+                              amountCents={row.actualSpeedCents}
+                              onClick={() => handleOpenAmountMap(catKey, `${row.name} (Actual Spend)`, row.actualSpeedCents)}
+                              className="text-slate-900 font-bold"
+                            />
+                          </td>
+                          <td className="py-2.5 px-3 text-right tabular-nums text-slate-600">
+                            <ClickableAmount
+                              amountCents={row.committedCents}
+                              onClick={() => handleOpenAmountMap("committed_unpaid")}
+                              className="text-slate-600 font-medium"
+                            />
+                          </td>
+                          <td className="py-2.5 px-3 text-right tabular-nums text-slate-600">
+                            {formatMoney(row.remainingCents)}
+                          </td>
+                          <td
+                            className={cn(
+                              "py-2.5 px-3 text-right tabular-nums font-semibold",
+                              isZero ? "text-slate-500" : isFavorable ? "text-emerald-600" : "text-rose-600"
+                            )}
+                          >
+                            {isZero ? (
+                              "$0"
+                            ) : (
+                              <ClickableAmount
+                                amountCents={row.varianceCents}
+                                prefix={isFavorable ? "-" : "+"}
+                                onClick={() => handleOpenAmountMap(catKey, `${row.name} Variance`, row.varianceCents)}
+                                className={cn(
+                                  "font-semibold",
+                                  isFavorable ? "text-emerald-600" : "text-rose-600"
+                                )}
+                              />
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-slate-200 font-bold text-slate-900 bg-slate-50/70">
+                      <td className="py-2.5 px-3 font-bold">Construction Total</td>
+                      <td className="py-2.5 px-3 text-right tabular-nums">
+                        <ClickableAmount
+                          amountCents={101922000}
+                          onClick={() => handleOpenAmountMap("pdf_construction_budget")}
+                          className="font-bold text-slate-900"
+                        />
+                      </td>
+                      <td className="py-2.5 px-3 text-right tabular-nums">
+                        <ClickableAmount
+                          amountCents={130693473}
+                          onClick={() => handleOpenAmountMap("workbook_total_costs")}
+                          className="font-bold text-slate-900"
+                        />
+                      </td>
+                      <td className="py-2.5 px-3 text-right tabular-nums">
+                        <ClickableAmount
+                          amountCents={12500000}
+                          onClick={() => handleOpenAmountMap("committed_unpaid")}
+                          className="font-bold text-slate-900"
+                        />
+                      </td>
+                      <td className="py-2.5 px-3 text-right tabular-nums">
+                        $0
+                      </td>
+                      <td className="py-2.5 px-3 text-right tabular-nums text-rose-600">
+                        <ClickableAmount
+                          amountCents={28771473}
+                          prefix="+"
+                          onClick={() => handleOpenAmountMap("scope_difference")}
+                          className="font-bold text-rose-600"
+                        />
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Card: Line Item Detail (Example: Interior) */}
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">
+                  Detailed Trade Line Items — Interior
+                </h3>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(`/projects/${currentProjectId}/documents`)}
+                className="text-xs h-7 px-2.5 text-blue-600 border-blue-200 hover:bg-blue-50 rounded-lg"
+              >
+                View All Line Items
+              </Button>
             </div>
 
-            {/* Search & Filter Bar */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-              <div className="relative flex-1 w-full">
-                <Search className="h-4 w-4 absolute left-3 top-2.5 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search code or line item..."
-                  value={sovSearch}
-                  onChange={(e) => setSovSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <Filter className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                <select
-                  value={sovCategoryFilter}
-                  onChange={(e) => setSovCategoryFilter(e.target.value)}
-                  className="text-xs py-1.5 px-2.5 rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="ALL">All Categories</option>
-                  <option value="HARD_COST">Hard Costs</option>
-                  <option value="SOFT_COST">Soft Costs</option>
-                  <option value="CONTINGENCY">Contingency</option>
-                </select>
-              </div>
-            </div>
-
-            {/* SOV Table */}
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50/50">
-                    <th className="text-left py-2.5 px-3">Code / Item</th>
-                    <th className="text-left py-2.5 px-3">Division Name</th>
-                    <th className="text-right py-2.5 px-3">Original Budget</th>
-                    <th className="text-right py-2.5 px-3">Approved COs</th>
-                    <th className="text-right py-2.5 px-3">Revised Budget</th>
-                    <th className="text-right py-2.5 px-3">Actual Spent</th>
-                    <th className="text-center py-2.5 px-3">Progress</th>
-                    <th className="text-center py-2.5 px-3">Status</th>
+                    <th className="text-left py-2 px-3 font-semibold">Code</th>
+                    <th className="text-left py-2 px-3 font-semibold">Description</th>
+                    <th className="text-right py-2 px-3 font-semibold">Budget Amount</th>
+                    <th className="text-right py-2 px-3 font-semibold">Actual Spend</th>
+                    <th className="text-right py-2 px-3 font-semibold">Committed</th>
+                    <th className="text-right py-2 px-3 font-semibold">Remaining</th>
+                    <th className="text-right py-2 px-3 font-semibold">Variance</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredSovLines.map((line) => (
-                    <tr key={line.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-2.5 px-3 font-mono font-semibold text-slate-900">
-                        {line.code}
-                      </td>
-                      <td className="py-2.5 px-3 font-medium text-slate-800">
-                        {line.name}
-                      </td>
-                      <td className="py-2.5 px-3 text-right tabular-nums text-slate-600">
-                        {formatMoney(line.originalAmountCents)}
-                      </td>
-                      <td className="py-2.5 px-3 text-right tabular-nums font-medium text-slate-600">
-                        {line.approvedCoCents > 0 ? (
-                          <span className="text-emerald-600 font-semibold">
-                            +{formatMoney(line.approvedCoCents)}
-                          </span>
-                        ) : (
-                          formatMoney(0)
-                        )}
-                      </td>
-                      <td className="py-2.5 px-3 text-right tabular-nums font-bold text-slate-900">
-                        {formatMoney(line.revisedAmountCents)}
-                      </td>
-                      <td className="py-2.5 px-3 text-right tabular-nums font-medium text-slate-800">
-                        {formatMoney(line.actualSpentCents)}
-                      </td>
-                      <td className="py-2.5 px-3 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="w-16 h-2 bg-slate-100 rounded-full overflow-hidden">
-                            <div
-                              className="bg-blue-600 h-full rounded-full"
-                              style={{ width: `${Math.min(100, line.progressPct)}%` }}
-                            />
-                          </div>
-                          <span className="tabular-nums font-medium text-slate-600 text-[11px] w-9 text-right">
-                            {line.progressPct}%
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-2.5 px-3 text-center">
-                        <span
+                  {interiorLineItemDetails.map((item) => {
+                    const isFavorable = item.varianceCents < 0;
+                    const itemKey = item.description.toLowerCase().replace(/[^a-z0-9]/g, "_");
+                    return (
+                      <tr key={item.code} className="hover:bg-slate-50/60 transition-colors group">
+                        <td className="py-2.5 px-3 font-mono font-semibold text-slate-900">
+                          {item.code}
+                        </td>
+                        <td
+                          onClick={() => handleOpenAmountMap(itemKey, `${item.code} ${item.description}`, item.budgetAmountCents)}
+                          className="py-2.5 px-3 font-medium text-slate-800 hover:text-blue-600 cursor-pointer"
+                        >
+                          {item.description}
+                        </td>
+                        <td className="py-2.5 px-3 text-right tabular-nums text-slate-600">
+                          <ClickableAmount
+                            amountCents={item.budgetAmountCents}
+                            onClick={() => handleOpenAmountMap(itemKey, `${item.code} ${item.description} (Budget)`, item.budgetAmountCents)}
+                            className="text-slate-600 font-medium"
+                          />
+                        </td>
+                        <td className="py-2.5 px-3 text-right tabular-nums font-semibold text-slate-900">
+                          <ClickableAmount
+                            amountCents={item.actualSpendCents}
+                            onClick={() => handleOpenAmountMap(itemKey, `${item.code} ${item.description} (Actual Spend)`, item.actualSpendCents)}
+                            className="text-slate-900 font-bold"
+                          />
+                        </td>
+                        <td className="py-2.5 px-3 text-right tabular-nums text-slate-600">
+                          <ClickableAmount
+                            amountCents={item.committedCents}
+                            onClick={() => handleOpenAmountMap("committed_unpaid")}
+                            className="text-slate-600 font-medium"
+                          />
+                        </td>
+                        <td className="py-2.5 px-3 text-right tabular-nums text-slate-600">
+                          {formatMoney(item.remainingCents)}
+                        </td>
+                        <td
                           className={cn(
-                            "px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider",
-                            line.status === "On Track"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                              : line.status === "Pending CO"
-                              ? "bg-amber-50 text-amber-700 border border-amber-200"
-                              : line.status === "Overrun"
-                              ? "bg-rose-50 text-rose-700 border border-rose-200"
-                              : "bg-blue-50 text-blue-700 border border-blue-200"
+                            "py-2.5 px-3 text-right tabular-nums font-semibold",
+                            isFavorable ? "text-emerald-600" : "text-rose-600"
                           )}
                         >
-                          {line.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                          <ClickableAmount
+                            amountCents={item.varianceCents}
+                            prefix={isFavorable ? "-" : "+"}
+                            onClick={() => handleOpenAmountMap(itemKey, `${item.code} ${item.description} Variance`, item.varianceCents)}
+                            className={cn(
+                              "font-semibold",
+                              isFavorable ? "text-emerald-600" : "text-rose-600"
+                            )}
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -1626,308 +1553,295 @@ export default function ProjectEconomicsAndBudgetPage() {
       {/* ------------------------------------------------------------- */}
       {activeTab === "forecast" && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-          {/* Executive Summary Card */}
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          {/* Top 3 Cards Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Card 1: Project Return Summary (4 Cols) */}
+            <div className="lg:col-span-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
               <div>
-                <h3 className="text-base font-bold text-slate-900">
-                  Underwriting Pro-Forma & Investment Return Hurdles
+                <h3 className="text-base font-bold text-slate-900 mb-3">
+                  Project Return Summary
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Active baseline forecast model calibrated against construction contract commitments and disposition pricing.
-                </p>
+
+                <div className="divide-y divide-slate-100 text-xs">
+                  <div className="py-2 flex items-center justify-between">
+                    <span className="text-slate-500">Expected Sale Revenue</span>
+                    <ClickableAmount
+                      amountCents={250000000}
+                      onClick={() => handleOpenAmountMap("capital_stack_total", "Expected Sale Revenue", 250000000)}
+                      className="font-bold text-slate-900"
+                    />
+                  </div>
+                  <div className="py-2 flex items-center justify-between">
+                    <span className="text-slate-500">Total Project Cost (Forecast)</span>
+                    <ClickableAmount
+                      amountCents={totalWorkbookCostsCents}
+                      onClick={() => handleOpenAmountMap("workbook_total_costs")}
+                      className="font-bold text-slate-900"
+                    />
+                  </div>
+                  <div className="py-2 flex items-center justify-between">
+                    <span className="text-slate-500">Projected Profit</span>
+                    <span className="text-slate-400 font-mono">—</span>
+                  </div>
+                  <div className="py-2 flex items-center justify-between">
+                    <span className="text-slate-500">Projected Profit Margin</span>
+                    <span className="text-slate-400 font-mono">—</span>
+                  </div>
+                  <div className="py-2 flex items-center justify-between">
+                    <span className="text-slate-500">Projected ROI</span>
+                    <span className="text-slate-400 font-mono">—</span>
+                  </div>
+                  <div className="py-2 flex items-center justify-between">
+                    <span className="text-slate-500">Projected IRR</span>
+                    <span className="text-slate-400 font-mono">—</span>
+                  </div>
+                </div>
               </div>
-              <Button
-                size="sm"
-                onClick={() => setIsEditAssumptionsOpen(true)}
-                className="text-xs bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                Edit Assumptions
-              </Button>
+
+              <p className="text-[10px] text-slate-400 mt-3 pt-2 border-t border-slate-100">
+                Requires verified sales price, closing costs, and funding assumptions.
+              </p>
             </div>
 
-            {/* Top Hurdles Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-4">
-              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                <p className="text-[11px] font-medium text-slate-500 uppercase">Gross Sales (GDV)</p>
-                <p className="text-lg font-bold text-slate-900 tabular-nums mt-0.5">
-                  {formatMoney(gdvCents)}
-                </p>
+            {/* Card 2: Key Assumptions (4 Cols) */}
+            <div className="lg:col-span-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-base font-bold text-slate-900">
+                    Key Assumptions
+                  </h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditAssumptionsOpen(true)}
+                    className="text-xs h-7 px-2.5 text-blue-600 border-blue-200 hover:bg-blue-50 rounded-lg"
+                  >
+                    Edit Assumptions
+                  </Button>
+                </div>
+
+                <div className="divide-y divide-slate-100 text-xs">
+                  <div className="py-2 flex items-center justify-between">
+                    <span className="text-slate-500">Forecast Completion Date</span>
+                    <span className="text-slate-400 font-mono">—</span>
+                  </div>
+                  <div className="py-2 flex items-center justify-between">
+                    <span className="text-slate-500">Estimated Sale Price</span>
+                    <span className="text-slate-400 font-mono">—</span>
+                  </div>
+                  <div className="py-2 flex items-center justify-between">
+                    <span className="text-slate-500">Selling Costs (% or amount)</span>
+                    <span className="text-slate-400 font-mono">—</span>
+                  </div>
+                  <div className="py-2 flex items-center justify-between">
+                    <span className="text-slate-500">Loan Payoff (if any)</span>
+                    <span className="text-slate-400 font-mono">—</span>
+                  </div>
+                  <div className="py-2 flex items-center justify-between">
+                    <span className="text-slate-500">Carrying Costs (monthly)</span>
+                    <span className="text-slate-400 font-mono">—</span>
+                  </div>
+                  <div className="py-2 flex items-center justify-between">
+                    <span className="text-slate-500">Exit Timing</span>
+                    <span className="text-slate-400 font-mono">—</span>
+                  </div>
+                </div>
               </div>
-              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                <p className="text-[11px] font-medium text-slate-500 uppercase">Total Project Cost</p>
-                <p className="text-lg font-bold text-slate-900 tabular-nums mt-0.5">
-                  {formatMoney(totalCostForecastCents)}
-                </p>
-              </div>
-              <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
-                <p className="text-[11px] font-medium text-emerald-800 uppercase">Projected Net Profit</p>
-                <p className="text-lg font-bold text-emerald-700 tabular-nums mt-0.5">
-                  {formatMoney(projectedProfitCents)}
-                </p>
-              </div>
-              <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
-                <p className="text-[11px] font-medium text-emerald-800 uppercase">Return on Cost / ROI</p>
-                <p className="text-lg font-bold text-emerald-700 tabular-nums mt-0.5">
-                  {projectedRoiPct}%
-                </p>
-              </div>
-              <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
-                <p className="text-[11px] font-medium text-emerald-800 uppercase">Projected Levered IRR</p>
-                <p className="text-lg font-bold text-emerald-700 tabular-nums mt-0.5">
-                  {projectedIrrPct}%
-                </p>
+            </div>
+
+            {/* Card 3: Return Components (Illustrative Bar Chart) (4 Cols) */}
+            <div className="lg:col-span-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 mb-2">
+                  Return Components (Illustrative)
+                </h3>
+
+                <div className="h-44 w-full pt-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={illustrativeReturnChartData}
+                      margin={{ top: 10, right: 10, left: -20, bottom: 14 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis
+                        dataKey="name"
+                        interval={0}
+                        axisLine={false}
+                        tickLine={false}
+                        tick={(props: { x?: number; y?: number; payload?: { value?: string } }) => {
+                          const { x = 0, y = 0, payload } = props;
+                          const words = String(payload?.value || "").split(" ");
+                          return (
+                            <g transform={`translate(${x},${y})`}>
+                              <text x={0} y={0} dy={10} textAnchor="middle" fill="#64748b" fontSize={9} fontWeight={500}>
+                                {words.map((w: string, i: number) => (
+                                  <tspan x={0} dy={i === 0 ? 0 : 11} key={i}>
+                                    {w}
+                                  </tspan>
+                                ))}
+                              </text>
+                            </g>
+                          );
+                        }}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 9, fill: "#94a3b8" }}
+                        tickFormatter={(val) => `$${val}M`}
+                        domain={[0, 3]}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <Tooltip
+                        formatter={(val: number) => [`$${val.toFixed(2)}M`, "Amount"]}
+                        contentStyle={{
+                          backgroundColor: "#0F172A",
+                          borderRadius: "8px",
+                          color: "#fff",
+                          fontSize: "11px",
+                          border: "none",
+                        }}
+                      />
+                      <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                        {illustrativeReturnChartData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={entry.color}
+                            stroke={entry.isDotted ? "#6366f1" : undefined}
+                            strokeDasharray={entry.isDotted ? "3 3" : undefined}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Detailed Pro Forma Lines Table */}
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
-            <h4 className="text-sm font-bold text-slate-900">
-              Pro-Forma Underwriting Line Items
-            </h4>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50/50">
-                    <th className="text-left py-2.5 px-3">Category</th>
-                    <th className="text-left py-2.5 px-3">Line Item Name</th>
-                    <th className="text-center py-2.5 px-3">Basis</th>
-                    <th className="text-right py-2.5 px-3">Original Plan</th>
-                    <th className="text-right py-2.5 px-3">Current Forecast</th>
-                    <th className="text-right py-2.5 px-3">Variance</th>
-                    <th className="text-left py-2.5 px-3">Underwriting Rationale</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {(economics?.pro_forma_lines || []).map((line, idx) => {
-                    const varianceVal = Number(line.variance_amount || 0);
-                    const isFavorable = varianceVal <= 0;
-                    return (
-                      <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-2.5 px-3 font-semibold text-slate-700">
-                          {line.category}
-                        </td>
-                        <td className="py-2.5 px-3 font-medium text-slate-900">
-                          {line.line_name}
-                        </td>
-                        <td className="py-2.5 px-3 text-center">
-                          <span
-                            className={cn(
-                              "px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider",
-                              line.basis === "APPROVED"
-                                ? "bg-emerald-100 text-emerald-800"
-                                : line.basis === "COMMITTED"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-slate-100 text-slate-700"
-                            )}
-                          >
-                            {line.basis}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3 text-right tabular-nums text-slate-600">
-                          {formatMoney(parseInt(String(line.original_plan_amount || "0"), 10))}
-                        </td>
-                        <td className="py-2.5 px-3 text-right tabular-nums font-bold text-slate-900">
-                          {formatMoney(parseInt(String(line.current_forecast_amount || "0"), 10))}
-                        </td>
-                        <td
-                          className={cn(
-                            "py-2.5 px-3 text-right tabular-nums font-semibold",
-                            isFavorable ? "text-emerald-600" : "text-rose-600"
-                          )}
-                        >
-                          {varianceVal > 0 ? "+" : ""}
-                          {formatMoney(varianceVal)}
-                        </td>
-                        <td className="py-2.5 px-3 text-slate-500 max-w-xs truncate">
-                          {line.variance_rationale || line.notes || "—"}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ------------------------------------------------------------- */}
-      {/* TAB 4: CHANGES & APPROVALS                                    */}
-      {/* ------------------------------------------------------------- */}
-      {activeTab === "changes" && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-          {/* Header & Actions */}
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
+          {/* Bottom 2 Cards Grid: Funding Impact on Returns & Scenario Analysis */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Left: Funding Impact on Returns (5 Cols) */}
+            <div className="lg:col-span-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
                 <h3 className="text-base font-bold text-slate-900">
-                  Change Orders, Approvals & Contingency Logs
+                  Funding Impact on Returns
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Complete audit history of scope modifications, cost revisions, and contingency movements.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
                 <Button
+                  variant="outline"
                   size="sm"
-                  onClick={() => setIsChangeOrderOpen(true)}
-                  className="text-xs bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => handleOpenAmountMap("capital_stack_total")}
+                  className="h-7 text-xs px-2 text-slate-700 hover:bg-slate-50 border-slate-200 rounded-lg flex items-center gap-1"
                 >
-                  <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
-                  Request Change Order
+                  <Coins className="h-3 w-3 text-indigo-600" />
+                  <span>Capital Stack</span>
                 </Button>
               </div>
-            </div>
 
-            {/* Filter Tabs */}
-            <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-              {["ALL", "PENDING", "APPROVED", "REJECTED"].map((st) => (
-                <button
-                  key={st}
-                  onClick={() => setCoStatusFilter(st)}
-                  className={cn(
-                    "px-3 py-1 text-xs rounded-lg font-medium transition-colors",
-                    coStatusFilter === st
-                      ? "bg-blue-600 text-white font-semibold"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                  )}
-                >
-                  {st === "ALL" ? "All Change Orders" : st}
-                </button>
-              ))}
-            </div>
-
-            {/* Change Orders Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50/50">
-                    <th className="text-left py-2.5 px-3">CO #</th>
-                    <th className="text-left py-2.5 px-3">Title & Scope</th>
-                    <th className="text-right py-2.5 px-3">Requested</th>
-                    <th className="text-right py-2.5 px-3">Approved</th>
-                    <th className="text-center py-2.5 px-3">Funding Source</th>
-                    <th className="text-left py-2.5 px-3">Requested By</th>
-                    <th className="text-center py-2.5 px-3">Status</th>
-                    <th className="text-right py-2.5 px-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {changeOrders
-                    .filter((co) => {
-                      if (coStatusFilter === "ALL") return true;
-                      if (coStatusFilter === "PENDING")
-                        return co.status === "SUBMITTED" || co.status === "DRAFT";
-                      return co.status === coStatusFilter;
-                    })
-                    .map((co) => {
-                      const isPending = co.status === "SUBMITTED" || co.status === "DRAFT";
-                      return (
-                        <tr key={co.id} className="hover:bg-slate-50/80 transition-colors">
-                          <td className="py-2.5 px-3 font-mono font-bold text-slate-900">
-                            {co.change_order_number || "CO-002"}
-                          </td>
-                          <td className="py-2.5 px-3">
-                            <p className="font-semibold text-slate-900">{co.title}</p>
-                            <p className="text-[11px] text-slate-500 max-w-sm truncate">
-                              {co.scope_description || (co as any).reason}
-                            </p>
-                          </td>
-                          <td className="py-2.5 px-3 text-right tabular-nums font-semibold text-slate-900">
-                            {formatMoney(parseInt(String(co.requested_amount || "0"), 10))}
-                          </td>
-                          <td className="py-2.5 px-3 text-right tabular-nums text-slate-700">
-                            {co.approved_amount
-                              ? formatMoney(parseInt(String(co.approved_amount), 10))
-                              : "—"}
-                          </td>
-                          <td className="py-2.5 px-3 text-center">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700">
-                              {co.funding_source || "CONTINGENCY"}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3 text-slate-600">
-                            {co.requested_by || "General Contractor"}
-                          </td>
-                          <td className="py-2.5 px-3 text-center">
-                            <span
-                              className={cn(
-                                "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                                co.status === "APPROVED"
-                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                  : isPending
-                                  ? "bg-amber-50 text-amber-700 border border-amber-200"
-                                  : "bg-rose-50 text-rose-700 border border-rose-200"
-                              )}
-                            >
-                              {co.status}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3 text-right">
-                            {isPending && (userRole === "OWNER" || userRole === "CFO") ? (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setReviewingChangeOrder(co)}
-                                className="h-7 text-xs text-blue-600 border-blue-200 hover:bg-blue-50"
-                              >
-                                Review & Decide
-                              </Button>
-                            ) : (
-                              <span className="text-slate-400 text-xs">Logged</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Contingency Movements Section */}
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
-            <h4 className="text-sm font-bold text-slate-900">
-              Contingency Movements & Line Reallocations
-            </h4>
-
-            {contingencyMovements.length === 0 ? (
-              <p className="text-xs text-slate-400 italic py-2">
-                No contingency movements recorded.
-              </p>
-            ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50/50">
-                      <th className="text-left py-2 px-3">Date</th>
-                      <th className="text-right py-2 px-3">Amount</th>
-                      <th className="text-left py-2 px-3">Reason / Rationale</th>
-                      <th className="text-left py-2 px-3">Approved By</th>
+                      <th className="text-left py-2 px-3 font-semibold">Source</th>
+                      <th className="text-right py-2 px-3 font-semibold">Amount</th>
+                      <th className="text-right py-2 px-3 font-semibold">% of Total</th>
+                      <th className="text-center py-2 px-3 font-semibold">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {contingencyMovements.map((cm) => (
-                      <tr key={cm.id} className="hover:bg-slate-50/50">
-                        <td className="py-2.5 px-3 text-slate-500">
-                          {cm.created_at ? new Date(cm.created_at).toLocaleDateString() : "—"}
+                    {fundingImpactOnReturns.map((f, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50/60 transition-colors group">
+                        <td
+                          onClick={() => handleOpenAmountMap(f.mapKey, f.partner, f.amountCents)}
+                          className="py-2.5 px-3 font-medium text-slate-800 hover:text-blue-600 cursor-pointer"
+                        >
+                          {f.partner}
                         </td>
-                        <td className="py-2.5 px-3 text-right font-bold text-slate-900 tabular-nums">
-                          {formatMoney(parseInt(String(cm.amount || "0"), 10))}
+                        <td className="py-2.5 px-3 text-right tabular-nums text-slate-700 font-semibold">
+                          <ClickableAmount
+                            amountCents={f.amountCents}
+                            onClick={() => handleOpenAmountMap(f.mapKey, f.partner, f.amountCents)}
+                            className="font-semibold text-slate-800"
+                          />
                         </td>
-                        <td className="py-2.5 px-3 text-slate-800">{cm.reason}</td>
-                        <td className="py-2.5 px-3 text-slate-500">Project Owner</td>
+                        <td className="py-2.5 px-3 text-right tabular-nums text-slate-500">
+                          {f.pct}
+                        </td>
+                        <td className="py-2.5 px-3 text-center">
+                          <span
+                            className={cn(
+                              "px-2 py-0.5 rounded-full text-[10px] font-semibold border",
+                              f.statusColor
+                            )}
+                          >
+                            {f.status}
+                          </span>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-slate-200 font-bold text-slate-900 bg-slate-50/70">
+                      <td className="py-2.5 px-3 font-bold">Total Capital Stack</td>
+                      <td className="py-2.5 px-3 text-right tabular-nums">
+                        <ClickableAmount
+                          amountCents={totalCapitalStackCents}
+                          onClick={() => handleOpenAmountMap("capital_stack_total")}
+                          className="font-bold text-slate-900"
+                        />
+                      </td>
+                      <td className="py-2.5 px-3 text-right tabular-nums">100%</td>
+                      <td className="py-2.5 px-3 text-center text-emerald-700 font-semibold text-[11px]">
+                        Fully Funded
+                      </td>
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
-            )}
+            </div>
+
+            {/* Right: Scenario Analysis (7 Cols) */}
+            <div className="lg:col-span-7 rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-3 flex flex-col justify-between">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 mb-2">
+                  Scenario Analysis
+                </h3>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50/50">
+                        <th className="text-left py-2 px-3 font-semibold">Scenario</th>
+                        <th className="text-right py-2 px-3 font-semibold">Sale Price</th>
+                        <th className="text-right py-2 px-3 font-semibold">Total Cost</th>
+                        <th className="text-right py-2 px-3 font-semibold">Projected Profit</th>
+                        <th className="text-right py-2 px-3 font-semibold">ROI</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {[
+                        { name: "Base Case" },
+                        { name: "Downside (-10%)" },
+                        { name: "Upside (+10%)" },
+                      ].map((sc, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50/60 transition-colors">
+                          <td className="py-2.5 px-3 font-medium text-slate-800">
+                            {sc.name}
+                          </td>
+                          <td className="py-2.5 px-3 text-right text-slate-400 font-mono">—</td>
+                          <td className="py-2.5 px-3 text-right text-slate-400 font-mono">—</td>
+                          <td className="py-2.5 px-3 text-right text-slate-400 font-mono">—</td>
+                          <td className="py-2.5 px-3 text-right text-slate-400 font-mono">—</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <p className="text-[10px] text-slate-400 pt-2 border-t border-slate-100">
+                Scenario analysis requires completed financial inputs and assumptions.
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -1947,49 +1861,18 @@ export default function ProjectEconomicsAndBudgetPage() {
       <EditAssumptionsModal
         projectId={currentProjectId}
         projectName={projectName}
-        currentGdvCents={gdvCents}
-        currentIrrPct={projectedIrrPct}
+        currentGdvCents={250000000}
+        currentIrrPct={0}
         userRole={userRole}
         open={isEditAssumptionsOpen}
         onOpenChange={setIsEditAssumptionsOpen}
       />
 
-      {/* 3. New Change Order Modal */}
-      <ChangeOrderModal
-        projectId={currentProjectId}
-        budgetLines={dbBudgetLines}
-        open={isChangeOrderOpen}
-        onOpenChange={setIsChangeOrderOpen}
-      />
-
-      {/* 4. Review Change Order Modal */}
-      {reviewingChangeOrder && (
-        <ChangeOrderReviewModal
-          changeOrder={reviewingChangeOrder}
-          budgetLines={dbBudgetLines}
-          open={Boolean(reviewingChangeOrder)}
-          onOpenChange={(op) => {
-            if (!op) setReviewingChangeOrder(null);
-          }}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ["change-orders", currentProjectId] });
-            queryClient.invalidateQueries({ queryKey: ["budget", "current", currentProjectId] });
-            queryClient.invalidateQueries({ queryKey: ["economics", currentProjectId] });
-          }}
-        />
-      )}
-
-      {/* 5. Move Contingency Modal */}
-      <MoveContingencyModal
-        projectId={currentProjectId}
-        budgetLines={dbBudgetLines}
-        open={isMoveContingencyOpen}
-        onOpenChange={setIsMoveContingencyOpen}
-        onSuccess={() => {
-          queryClient.invalidateQueries({ queryKey: ["budget", "current", currentProjectId] });
-          queryClient.invalidateQueries({ queryKey: ["contingency-movements", currentProjectId] });
-          queryClient.invalidateQueries({ queryKey: ["economics", currentProjectId] });
-        }}
+      {/* 3. Amount Detail Map Modal */}
+      <AmountMapModal
+        open={isAmountMapOpen}
+        onOpenChange={setIsAmountMapOpen}
+        detail={selectedAmountMap}
       />
     </div>
   );

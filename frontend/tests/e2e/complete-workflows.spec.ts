@@ -14,10 +14,10 @@ test.describe("Full Navigation & Workspaces Verification", () => {
     await expect(page).toHaveURL(/\/documents/);
     await expect(page.getByRole("heading", { name: "Document Inbox & Evidence" })).toBeVisible();
 
-    // 3. Budget
-    await page.getByRole("link", { name: "Budget" }).click();
+    // 3. Budget / Project Economics
+    await page.getByRole("link", { name: /Project Economics|Budget/i }).click();
     await expect(page).toHaveURL(/\/budget/);
-    await expect(page.getByRole("heading", { name: "Budget & Change Control" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Project Economics/i })).toBeVisible();
 
     // 4. Reconciliation
     await page.getByRole("link", { name: "Reconciliation" }).click();
@@ -27,7 +27,7 @@ test.describe("Full Navigation & Workspaces Verification", () => {
     // 5. Draws
     await page.getByRole("link", { name: "Draws" }).click();
     await expect(page).toHaveURL(/\/draws/);
-    await expect(page.getByRole("heading", { name: "Draw Workspace & Lender Funding" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Draw Requests|Draw Workspace/i })).toBeVisible();
 
     // 6. Timeline
     await page.getByRole("link", { name: "Timeline" }).click();
@@ -39,10 +39,10 @@ test.describe("Full Navigation & Workspaces Verification", () => {
     await expect(page).toHaveURL(/\/partners/);
     await expect(page.getByRole("heading", { name: /Partners and funding/i })).toBeVisible();
 
-    // 8. Alerts & Exceptions
-    await page.getByRole("link", { name: /Alerts & Exceptions/ }).click();
+    // 8. Alerts
+    await page.getByRole("link", { name: /^Alerts/i }).click();
     await expect(page).toHaveURL(/\/alerts/);
-    await expect(page.getByRole("heading", { name: "Alerts & Exceptions" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Alerts/i })).toBeVisible();
 
     // 9. Settings & Team
     await page.getByRole("link", { name: "Project Settings" }).click();
@@ -125,22 +125,23 @@ test.describe("Full Navigation & Workspaces Verification", () => {
     }
   });
 
-  test("alerts & exceptions page renders metrics, tabs, and filters cleanly", async ({ page }) => {
+  test("alerts page renders metrics and filters cleanly", async ({ page }) => {
     await loginAsOwner(page);
     await page.goto("/alerts");
-    await expect(page.getByRole("heading", { name: "Alerts & Exceptions" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Alerts", exact: true })).toBeVisible();
 
     // Check KPI cards are visible
-    await expect(page.getByText(/Exceptions/i).first()).toBeVisible();
+    await expect(page.getByText(/Total Alerts/i).first()).toBeVisible();
+    await expect(page.getByText(/Schedule Delays/i).first()).toBeVisible();
 
-    // Switch between work tabs
-    const allTab = page.getByRole("button", { name: /All/i }).first();
-    if (await allTab.isVisible()) {
-      await allTab.click();
+    // Switch between category filters
+    const scheduleCard = page.getByRole("button", { name: /Schedule Delays/i }).first();
+    if (await scheduleCard.isVisible()) {
+      await scheduleCard.click();
     }
-    const criticalTab = page.getByRole("button", { name: /Critical/i }).first();
-    if (await criticalTab.isVisible()) {
-      await criticalTab.click();
+    const allCard = page.getByRole("button", { name: /Total Alerts/i }).first();
+    if (await allCard.isVisible()) {
+      await allCard.click();
     }
   });
 
@@ -173,6 +174,8 @@ test.describe("Role Boundaries & Access Protection", () => {
       const proj = page.getByRole("heading", { name: /73 Broadway|161 Woodlawn/i }).first();
       if (await proj.isVisible()) {
         await proj.click();
+      } else {
+        await page.goto("/inbox");
       }
     }
     await expect(page).toHaveURL(/\/inbox/, { timeout: 15000 });

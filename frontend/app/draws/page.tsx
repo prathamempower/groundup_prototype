@@ -6,37 +6,26 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import {
-  Landmark,
   Plus,
-  AlertTriangle,
+  ArrowRight,
   CheckCircle2,
   Clock,
-  DollarSign,
-  ShieldCheck,
-  Building2,
-  GitBranch,
-  Layers,
-  ArrowRight,
-  Filter,
-  Check,
   AlertCircle,
-  Eye,
-  FileText,
-  Sliders,
-  Calendar,
-  Zap,
-  ArrowUpRight,
-  RefreshCw,
-  CreditCard,
-  ChevronRight,
-  TrendingUp,
   FileSpreadsheet,
-  Lock,
+  ListFilter,
+  Layers,
+  ChevronRight,
+  ExternalLink,
+  Check,
+  Zap,
+  SlidersHorizontal,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { DrawItem } from "@/lib/types";
 import { getExcelDrawLines } from "@/lib/data/excel-draw-schedule";
 import { ExcelSovMatrix } from "@/components/draws/excel-sov-matrix";
+import { cn } from "@/lib/utils";
 
 // Modals and Drawers
 import {
@@ -57,309 +46,68 @@ export interface PipelineDrawNode {
   code: string;
   title: string;
   phaseTitle: string;
-  scopeSummary: string;
   amount: string;
   hasPacketBuilt: boolean;
-  allocatedCents: number;
-  spentCents: number;
-  spentFormatted: string;
-  remainingFormatted: string;
   spendProgressPct: number;
   date: string;
   status: "COMPLETED" | "ACTIVE_SPENDING" | "PENDING_REVIEW" | "QUEUED";
-  allocationPass: "FIRST_PASS" | "SUBSEQUENT_PASS" | "NEXT_IN_REVIEW" | "QUEUED";
-  allocationPassLabel: string;
-  drawBankStatement: {
-    bankName: string;
-    accountMask: string;
-    accountPurpose: string;
-    wireRef: string;
-    wireDate: string;
-    disbursedAmount: string;
-    clearedStatus: "CLEARED" | "PENDING" | "SCHEDULED";
-    note: string;
-  };
-  txBankStatement: {
-    bankName: string;
-    accountMask: string;
-    accountPurpose: string;
-    clearedSpends: string;
-    invoiceCount: number;
-    reconciliationStatus: string;
-    trades: { trade: string; amount: string; status: string }[];
-  };
-  nextDrawTrigger: {
-    thresholdPct: number;
-    isTriggered: boolean;
-    triggerStatusMessage: string;
-    unlockedNextDrawNumber: number;
-    readinessChecklist: { item: string; done: boolean }[];
-  };
 }
 
 const DRAW_PIPELINE_DATA: PipelineDrawNode[] = [
   {
     drawNumber: 1,
-    code: "D1",
+    code: "01",
     title: "Draw #1",
-    phaseTitle: "Site Mobilization & Foundation Footings",
-    scopeSummary: "Demolition, perimeter shoring, mass excavation, and concrete footings.",
+    phaseTitle: "Mobilization & Foundation",
     amount: "$50,000",
     hasPacketBuilt: true,
-    allocatedCents: 5000000,
-    spentCents: 5000000,
-    spentFormatted: "$50,000.00",
-    remainingFormatted: "$0.00",
     spendProgressPct: 100,
     date: "Jan 12",
     status: "COMPLETED",
-    allocationPass: "FIRST_PASS",
-    allocationPassLabel: "First-Pass Initial Allocation",
-    drawBankStatement: {
-      bankName: "Capital Reserve Trust",
-      accountMask: "•••• 8904",
-      accountPurpose: "Lender Construction Loan Account",
-      wireRef: "CRT-WIRE-99102",
-      wireDate: "Jan 12, 2026",
-      disbursedAmount: "$50,000.00",
-      clearedStatus: "CLEARED",
-      note: "Initial draw allocated and wired by lender on first pass upon facility execution.",
-    },
-    txBankStatement: {
-      bankName: "BCB Community Bank",
-      accountMask: "•••• 4120",
-      accountPurpose: "Project Operating & Spend Account",
-      clearedSpends: "$50,000.00",
-      invoiceCount: 12,
-      reconciliationStatus: "100% Cleared & Reconciled",
-      trades: [
-        { trade: "Excavation & Shoring", amount: "$22,500.00", status: "Cleared" },
-        { trade: "Concrete Foundation Footings", amount: "$18,500.00", status: "Cleared" },
-        { trade: "Site Permits & Mobilization", amount: "$9,000.00", status: "Cleared" },
-      ],
-    },
-    nextDrawTrigger: {
-      thresholdPct: 100,
-      isTriggered: true,
-      triggerStatusMessage: "Draw #1 fully spent & reconciled ($50,000 / $50,000) via dual statements ➔ Draw #2 unlocked & funded by lender.",
-      unlockedNextDrawNumber: 2,
-      readinessChecklist: [
-        { item: "Draw Bank loan wire verified ($50,000.00)", done: true },
-        { item: "Transaction Bank trade spends 100% matched ($50,000.00)", done: true },
-        { item: "Lender closeout approval cleared ➔ Unlocked Draw #2", done: true },
-      ],
-    },
   },
   {
     drawNumber: 2,
-    code: "D2",
+    code: "02",
     title: "Draw #2",
-    phaseTitle: "Concrete Core & Structural Steel Framing",
-    scopeSummary: "Slab-on-grade concrete pour, structural steel columns, and shear framing.",
+    phaseTitle: "Concrete Core & Framing",
     amount: "$68,200",
     hasPacketBuilt: true,
-    allocatedCents: 6820000,
-    spentCents: 6820000,
-    spentFormatted: "$68,200.00",
-    remainingFormatted: "$0.00",
     spendProgressPct: 100,
     date: "Mar 04",
     status: "COMPLETED",
-    allocationPass: "SUBSEQUENT_PASS",
-    allocationPassLabel: "Funded upon Draw 1 Completion",
-    drawBankStatement: {
-      bankName: "Capital Reserve Trust",
-      accountMask: "•••• 8904",
-      accountPurpose: "Lender Construction Loan Account",
-      wireRef: "CRT-WIRE-99148",
-      wireDate: "Mar 04, 2026",
-      disbursedAmount: "$68,200.00",
-      clearedStatus: "CLEARED",
-      note: "Disbursed following Draw 1 100% spend verification and Amhar photo signoff.",
-    },
-    txBankStatement: {
-      bankName: "BCB Community Bank",
-      accountMask: "•••• 4120",
-      accountPurpose: "Project Operating & Spend Account",
-      clearedSpends: "$68,200.00",
-      invoiceCount: 18,
-      reconciliationStatus: "100% Cleared & Reconciled",
-      trades: [
-        { trade: "Structural Steel Framing", amount: "$38,200.00", status: "Cleared" },
-        { trade: "Slab-on-Grade Concrete", amount: "$21,500.00", status: "Cleared" },
-        { trade: "Formwork & Rebar Tie-ins", amount: "$8,500.00", status: "Cleared" },
-      ],
-    },
-    nextDrawTrigger: {
-      thresholdPct: 100,
-      isTriggered: true,
-      triggerStatusMessage: "Draw #2 fully spent & reconciled ($68,200 / $68,200) via dual statements ➔ Draw #3 unlocked & funded by lender.",
-      unlockedNextDrawNumber: 3,
-      readinessChecklist: [
-        { item: "Draw Bank loan wire verified ($68,200.00)", done: true },
-        { item: "Transaction Bank trade spends 100% matched ($68,200.00)", done: true },
-        { item: "Lender closeout approval cleared ➔ Unlocked Draw #3", done: true },
-      ],
-    },
   },
   {
     drawNumber: 3,
-    code: "D3",
+    code: "03",
     title: "Draw #3",
-    phaseTitle: "Rough MEP & Utility Rough-Ins",
-    scopeSummary: "HVAC sheet metal ductwork, sanitary plumbing stacks, and electrical branch conduit.",
+    phaseTitle: "Rough MEP & Utilities",
     amount: "$84,000",
     hasPacketBuilt: true,
-    allocatedCents: 8400000,
-    spentCents: 7896000,
-    spentFormatted: "$78,960.00",
-    remainingFormatted: "$5,040.00",
     spendProgressPct: 94,
     date: "May 19",
     status: "ACTIVE_SPENDING",
-    allocationPass: "SUBSEQUENT_PASS",
-    allocationPassLabel: "Funded upon Draw 2 Completion",
-    drawBankStatement: {
-      bankName: "Capital Reserve Trust",
-      accountMask: "•••• 8904",
-      accountPurpose: "Lender Construction Loan Account",
-      wireRef: "CRT-WIRE-99214",
-      wireDate: "May 19, 2026",
-      disbursedAmount: "$84,000.00",
-      clearedStatus: "CLEARED",
-      note: "Disbursed following Draw 2 completion. Capital active for MEP subcontractor draws.",
-    },
-    txBankStatement: {
-      bankName: "BCB Community Bank",
-      accountMask: "•••• 4120",
-      accountPurpose: "Project Operating & Spend Account",
-      clearedSpends: "$78,960.00",
-      invoiceCount: 14,
-      reconciliationStatus: "94.0% Cleared (Threshold Passed)",
-      trades: [
-        { trade: "HVAC Ductwork & Equipment", amount: "$34,500.00", status: "Cleared" },
-        { trade: "Plumbing Rough-In Stacks", amount: "$23,260.00", status: "Cleared" },
-        { trade: "Electrical Conduit & Panels", amount: "$21,200.00", status: "Cleared" },
-      ],
-    },
-    nextDrawTrigger: {
-      thresholdPct: 85,
-      isTriggered: true,
-      triggerStatusMessage: "⚡ Spend reached 94.0% ($78,960 / $84,000), crossing the 85% draw-cycle threshold! Draw #4 is ready for you to build the draw packet and assign the requested amount & work.",
-      unlockedNextDrawNumber: 4,
-      readinessChecklist: [
-        { item: "Draw Bank wire received & active ($84,000.00)", done: true },
-        { item: "Transaction Bank spend exceeds 85% threshold (94.0% reached)", done: true },
-        { item: "Draw #4 unlocked: Borrower must build draw packet to set requested amount", done: true },
-        { item: "Amhar third-party inspection scheduled (Oct 18, 2026)", done: true },
-        { item: "Reconcile final $5,040.00 trade balance for 100% closeout", done: false },
-      ],
-    },
   },
   {
     drawNumber: 4,
-    code: "D4",
+    code: "04",
     title: "Draw #4",
-    phaseTitle: "Exterior Enclosure, Glazing & Roofing",
-    scopeSummary: "Curtain wall glass, exterior weatherproofing membrane, and TPO roofing system.",
-    amount: "—",
+    phaseTitle: "Exterior & Roofing",
+    amount: "Pending",
     hasPacketBuilt: false,
-    allocatedCents: 0,
-    spentCents: 0,
-    spentFormatted: "$0.00",
-    remainingFormatted: "—",
     spendProgressPct: 0,
-    date: "Ready to Build",
+    date: "Oct 18",
     status: "PENDING_REVIEW",
-    allocationPass: "NEXT_IN_REVIEW",
-    allocationPassLabel: "Next Draw • Amount Not Decided",
-    drawBankStatement: {
-      bankName: "Capital Reserve Trust",
-      accountMask: "•••• 8904",
-      accountPurpose: "Lender Construction Loan Account",
-      wireRef: "Awaiting Submission",
-      wireDate: "Pending Packet",
-      disbursedAmount: "Pending Packet Submission (Amount TBD)",
-      clearedStatus: "PENDING",
-      note: "In construction lending, Draw #4 amount is not predetermined. Click 'Build Draw Packet' to assign the requested dollar amount and scope of work for bank approval.",
-    },
-    txBankStatement: {
-      bankName: "BCB Community Bank",
-      accountMask: "•••• 4120",
-      accountPurpose: "Project Operating & Spend Account",
-      clearedSpends: "Pending Packet Approval",
-      invoiceCount: 0,
-      reconciliationStatus: "Awaiting Packet & Wire",
-      trades: [
-        { trade: "Exterior Glazing & Curtain Wall", amount: "Pending Claim", status: "Queued" },
-        { trade: "TPO Roofing & Membrane", amount: "Pending Claim", status: "Queued" },
-        { trade: "Exterior Sheathing & Barrier", amount: "Pending Claim", status: "Queued" },
-      ],
-    },
-    nextDrawTrigger: {
-      thresholdPct: 100,
-      isTriggered: false,
-      triggerStatusMessage: "Click 'Build Draw Packet' to assign SOV line claims, attach inspection photos, and submit Draw #4 to Capital Reserve Trust.",
-      unlockedNextDrawNumber: 5,
-      readinessChecklist: [
-        { item: "Draw #3 threshold surpassed (>85% spent)", done: true },
-        { item: "Assign requested amount and work in Build Draw Packet", done: false },
-        { item: "Submit AIA G702/G703 packet to Capital Reserve Trust", done: false },
-        { item: "Amhar onsite physical inspection sign-off", done: false },
-      ],
-    },
   },
   {
     drawNumber: 5,
-    code: "D5",
+    code: "05",
     title: "Draw #5",
-    phaseTitle: "Interior Drywall, Insulation & Finishes",
-    scopeSummary: "Acoustical batting, drywall hanging, taped finish, and primer coats.",
-    amount: "—",
+    phaseTitle: "Drywall & Interior Finishes",
+    amount: "$95,000",
     hasPacketBuilt: false,
-    allocatedCents: 0,
-    spentCents: 0,
-    spentFormatted: "$0.00",
-    remainingFormatted: "—",
     spendProgressPct: 0,
-    date: "Queued",
+    date: "Scheduled",
     status: "QUEUED",
-    allocationPass: "QUEUED",
-    allocationPassLabel: "Queued in Master Pipeline",
-    drawBankStatement: {
-      bankName: "Capital Reserve Trust",
-      accountMask: "•••• 8904",
-      accountPurpose: "Lender Construction Loan Account",
-      wireRef: "—",
-      wireDate: "Est. Nov 20, 2026",
-      disbursedAmount: "Queued (Amount TBD)",
-      clearedStatus: "SCHEDULED",
-      note: "Scheduled in master draw schedule. Amount will be assigned when Draw #4 spends near completion.",
-    },
-    txBankStatement: {
-      bankName: "BCB Community Bank",
-      accountMask: "•••• 4120",
-      accountPurpose: "Project Operating & Spend Account",
-      clearedSpends: "$0.00",
-      invoiceCount: 0,
-      reconciliationStatus: "Queued",
-      trades: [
-        { trade: "Drywall & Acoustic Insulation", amount: "TBD", status: "Queued" },
-        { trade: "Prime Coating & Taping", amount: "TBD", status: "Queued" },
-        { trade: "Door Jambs & Trim Package", amount: "TBD", status: "Queued" },
-      ],
-    },
-    nextDrawTrigger: {
-      thresholdPct: 0,
-      isTriggered: false,
-      triggerStatusMessage: "Preparation unlocks automatically when Draw #4 spends reach the 85% threshold.",
-      unlockedNextDrawNumber: 6,
-      readinessChecklist: [
-        { item: "Preliminary schedule slot reserved", done: true },
-        { item: "Trade subcontracts executed", done: true },
-        { item: "Awaiting Draw #4 funding and execution", done: false },
-      ],
-    },
   },
 ];
 
@@ -368,92 +116,86 @@ const SHOWCASE_ROWS = [
     id: "drw-4",
     badge: "04",
     badgeType: "PENDING",
-    title: "Draw #4 – Exterior Enclosure & Roofing",
+    title: "Draw #4",
+    scopeName: "Exterior Enclosure & Roofing",
     drawRefId: "DRW-2026-004",
-    inspectionDate: "Oct 18, 2026 (Scheduled)",
-    requestedAmt: "Pending Packet Build",
-    eligibleAmt: "—",
-    completionPct: 0,
-    statusLabel: "READY TO BUILD PACKET",
+    date: "Oct 18, 2026",
+    requestedAmt: "Pending Build",
+    statusLabel: "Ready to Build",
     statusType: "PENDING",
-    actionLabel: "+ Build Draw Packet",
+    actionLabel: "Build Packet",
     actionType: "PRIMARY",
     drawNumber: 4,
-    bankCleared: "Pending Packet Submission",
-    spendStatus: "Triggered by Draw 3 Spends (94%)",
+    disbursed: "—",
+    reconciledPct: 0,
   },
   {
     id: "drw-3",
     badge: "03",
     badgeType: "ACTIVE",
-    title: "Draw #3 – Rough MEP & Utility Rough-Ins",
+    title: "Draw #3",
+    scopeName: "Rough MEP & Utility Rough-Ins",
     drawRefId: "DRW-2026-003",
-    inspectionDate: "May 19, 2026",
+    date: "May 19, 2026",
     requestedAmt: "$84,000.00",
-    eligibleAmt: "$84,000.00",
-    completionPct: 94,
-    statusLabel: "ACTIVE SPENDING (94% RECONCILED)",
-    statusType: "PENDING",
-    actionLabel: "View Spends & Statements",
-    actionType: "PRIMARY",
+    statusLabel: "Active Spending",
+    statusType: "ACTIVE",
+    actionLabel: "Review",
+    actionType: "OUTLINE",
     drawNumber: 3,
-    bankCleared: "Wire Cleared • $84,000.00",
-    spendStatus: "$78,960 Spent across 14 Invoices",
+    disbursed: "$84,000.00",
+    reconciledPct: 94,
   },
   {
     id: "drw-2",
     badge: "02",
     badgeType: "FUNDED",
-    title: "Draw #2 – Concrete Core & Framing",
+    title: "Draw #2",
+    scopeName: "Concrete Core & Structural Steel",
     drawRefId: "DRW-2026-002",
-    inspectionDate: "Mar 04, 2026",
+    date: "Mar 04, 2026",
     requestedAmt: "$68,200.00",
-    eligibleAmt: "$68,200.00",
-    completionPct: 100,
-    statusLabel: "100% RECONCILED & SETTLED",
+    statusLabel: "Funded & Settled",
     statusType: "FUNDED",
-    actionLabel: "View Receipt",
+    actionLabel: "Details",
     actionType: "OUTLINE",
     drawNumber: 2,
-    bankCleared: "Wire Cleared • $68,200.00",
-    spendStatus: "100% Spent ($68,200 Reconciled)",
+    disbursed: "$68,200.00",
+    reconciledPct: 100,
   },
   {
     id: "drw-1",
     badge: "01",
     badgeType: "FUNDED",
-    title: "Draw #1 – Mobilization & Foundation",
+    title: "Draw #1",
+    scopeName: "Site Mobilization & Foundation Footings",
     drawRefId: "DRW-2026-001",
-    inspectionDate: "Jan 12, 2026",
+    date: "Jan 12, 2026",
     requestedAmt: "$50,000.00",
-    eligibleAmt: "$50,000.00",
-    completionPct: 100,
-    statusLabel: "FIRST PASS • 100% RECONCILED",
+    statusLabel: "Funded & Settled",
     statusType: "FUNDED",
-    actionLabel: "View Receipt",
+    actionLabel: "Details",
     actionType: "OUTLINE",
     drawNumber: 1,
-    bankCleared: "Wire Cleared • $50,000.00",
-    spendStatus: "100% Spent ($50,000 Reconciled)",
+    disbursed: "$50,000.00",
+    reconciledPct: 100,
   },
   {
     id: "drw-rev3",
     badge: "R3",
     badgeType: "REJECTED",
-    title: "Draw #3 Line Revision – Fire Riser Hydraulic Calc",
+    title: "Draw #3 Revision",
+    scopeName: "Fire Riser Hydraulic Calculation Submittal",
     drawRefId: "DRW-2026-003-REV",
-    inspectionDate: "May 25, 2026",
+    date: "May 25, 2026",
     requestedAmt: "$6,200.00",
-    eligibleAmt: "$0.00",
-    completionPct: 0,
-    statusLabel: "REJECTED / DISCREPANCY",
-    subtitle: "Mechanical PE hydraulic stamp missing on submittal",
+    statusLabel: "Missing PE Stamp",
     statusType: "REJECTED",
-    actionLabel: "Fix Notes",
+    actionLabel: "Resolve",
     actionType: "DANGER_OUTLINE",
     drawNumber: 3,
-    bankCleared: "Hold on Line Item",
-    spendStatus: "Unfunded Item",
+    disbursed: "$0.00",
+    reconciledPct: 0,
   },
 ];
 
@@ -466,22 +208,17 @@ export default function DrawsPage() {
     queryFn: () => api.projects.list(),
   });
 
-  const routeProjectId = typeof window !== "undefined"
-    ? (window.location.pathname.match(/^\/projects\/([^\/]+)/)?.[1] || "")
-    : "";
-  const currentProjectId = (routeProjectId && routeProjectId !== "new")
-    ? routeProjectId
-    : projectsData?.data?.current_project_id || "";
+  const routeProjectId =
+    typeof window !== "undefined"
+      ? window.location.pathname.match(/^\/projects\/([^\/]+)/)?.[1] || ""
+      : "";
+  const currentProjectId =
+    routeProjectId && routeProjectId !== "new"
+      ? routeProjectId
+      : projectsData?.data?.current_project_id || "";
   const currentProject = projectsData?.data?.projects?.find(
     (p) => p.id === currentProjectId
   );
-
-  const { data: userProfile } = useQuery({
-    queryKey: ["identity-me"],
-    queryFn: () => api.identity.getMe(),
-  });
-
-  const currentRole = userProfile?.data?.role || "OWNER";
 
   const { data: drawsData, isLoading: isDrawsLoading } = useQuery({
     queryKey: ["draws", currentProjectId],
@@ -489,15 +226,7 @@ export default function DrawsPage() {
     enabled: Boolean(currentProjectId),
   });
 
-  const { data: unallocatedData } = useQuery({
-    queryKey: ["unallocated-funding", currentProjectId],
-    queryFn: () => api.draws.getUnallocatedFunding(currentProjectId),
-    enabled: Boolean(currentProjectId),
-  });
-
   const draws: DrawItem[] = drawsData?.data || [];
-  const unallocatedDeposits = unallocatedData?.data?.unallocated_deposits || [];
-  const totalUnallocatedCents = unallocatedData?.data?.total_unallocated || "0";
 
   // State
   const [pipelineData, setPipelineData] = useState<PipelineDrawNode[]>(DRAW_PIPELINE_DATA);
@@ -551,12 +280,9 @@ export default function DrawsPage() {
           conditions: [
             { id: "c1", title: "Lender Title Date-Down Endorsement", status: "SATISFIED", required_for: "Wire Clearance" },
             { id: "c2", title: "Subcontractor Lien Waivers Reconciled", status: "SATISFIED", required_for: "Disbursement" },
-            { id: "c3", title: "Dual Bank Statement Spend Reconciliation", status: "OPEN", required_for: "Draw Release" },
           ],
           packet_checklist: [
             { id: "p1", requirement: "AIA G702 / G703 Application for Payment", status: "COMPLETE", document_name: "G702_Signed.pdf" },
-            { id: "p2", requirement: "Transaction Bank Statement Cleared Expenses", status: "COMPLETE", document_name: "BCB_Operating_Stmt.pdf" },
-            { id: "p3", requirement: "Draw Bank Loan Wire Confirmation", status: "COMPLETE", document_name: "CRT_Wire_Receipt.pdf" },
           ],
         };
         setDrawOverrides((prev) => ({ ...prev, [data.drawNumber]: itemizedDraw }));
@@ -570,29 +296,8 @@ export default function DrawsPage() {
                 ...node,
                 hasPacketBuilt: true,
                 amount: data.formattedAmount,
-                allocatedCents: data.totalRequestedCents,
-                spentFormatted: "$0.00",
-                remainingFormatted: data.formattedAmount,
-                allocationPassLabel: "Packet Submitted • In Lender Review",
                 status: "PENDING_REVIEW",
                 date: "Submitted",
-                drawBankStatement: {
-                  ...node.drawBankStatement,
-                  disbursedAmount: `${data.formattedAmount} (Requested)`,
-                  note: `Draw packet submitted to Capital Reserve Trust for ${data.formattedAmount}. Awaiting Amhar onsite inspection and loan committee wire clearance.`,
-                  wireRef: `CRT-REQ-00${data.drawNumber}-SUBMITTED`,
-                  clearedStatus: "PENDING",
-                },
-                nextDrawTrigger: {
-                  ...node.nextDrawTrigger,
-                  triggerStatusMessage: `Draw #${data.drawNumber} packet submitted for ${data.formattedAmount}. Awaiting lender inspection and wire disbursement.`,
-                  readinessChecklist: [
-                    { item: `Draw #${data.drawNumber} packet submitted with assigned SOV lines`, done: true },
-                    { item: "Amhar onsite physical inspection scheduled", done: true },
-                    { item: "Lender loan committee wire approval", done: false },
-                    { item: "Draw #3 full spend reconciliation", done: true },
-                  ],
-                },
               }
             : node
         )
@@ -604,9 +309,8 @@ export default function DrawsPage() {
             ? {
                 ...row,
                 requestedAmt: data.formattedAmount,
-                eligibleAmt: data.formattedAmount,
-                statusLabel: "SUBMITTED TO BANK • IN REVIEW",
-                actionLabel: "Inspect Packet",
+                statusLabel: "In Lender Review",
+                actionLabel: "Review",
                 actionType: "OUTLINE",
               }
             : row
@@ -614,8 +318,6 @@ export default function DrawsPage() {
       );
     }
   };
-
-  const nextDrawNumber = Math.max(0, ...draws.map((d) => d.draw_number)) + 1;
 
   const buildDrawFallback = (drawNumber: number, title: string, amount: string): DrawItem => {
     if (drawOverrides[drawNumber]) {
@@ -655,12 +357,9 @@ export default function DrawsPage() {
       conditions: [
         { id: "c1", title: "Lender Title Date-Down Endorsement", status: "SATISFIED", required_for: "Wire Clearance" },
         { id: "c2", title: "Subcontractor Lien Waivers Reconciled", status: "SATISFIED", required_for: "Disbursement" },
-        { id: "c3", title: "Dual Bank Statement Spend Reconciliation", status: drawNumber <= 2 ? "SATISFIED" : "OPEN", required_for: "Draw Release" },
       ],
       packet_checklist: [
         { id: "p1", requirement: "AIA G702 / G703 Application for Payment", status: "COMPLETE", document_name: "G702_Signed.pdf" },
-        { id: "p2", requirement: "Transaction Bank Statement Cleared Expenses", status: "COMPLETE", document_name: "BCB_Operating_Stmt.pdf" },
-        { id: "p3", requirement: "Draw Bank Loan Wire Confirmation", status: "COMPLETE", document_name: "CRT_Wire_Receipt.pdf" },
       ],
     };
   };
@@ -668,17 +367,6 @@ export default function DrawsPage() {
   const handleUpdateSelectedDraw = (updated: DrawItem) => {
     setSelectedDraw(updated);
     setDrawOverrides((prev) => ({ ...prev, [updated.draw_number]: updated }));
-    setShowcaseRows((prev) =>
-      prev.map((r) =>
-        r.drawNumber === updated.draw_number
-          ? {
-              ...r,
-              requestedAmt: formatMoney(updated.requested_amount),
-              eligibleAmt: formatMoney(updated.approved_amount),
-            }
-          : r
-      )
-    );
   };
 
   const handleOpenDetail = (draw: DrawItem) => {
@@ -690,12 +378,9 @@ export default function DrawsPage() {
     }
   };
 
-
-
-  // Filter logic
   const filteredShowcaseRows = useMemo(() => {
     return showcaseRows.filter((r) => {
-      if (filterTab === "ACTIVE") return r.statusType === "PENDING" || r.badgeType === "ACTIVE";
+      if (filterTab === "ACTIVE") return r.statusType === "ACTIVE" || r.statusType === "PENDING";
       if (filterTab === "FUNDED") return r.statusType === "FUNDED";
       if (filterTab === "DISCREPANCY") return r.statusType === "REJECTED";
       return true;
@@ -703,179 +388,129 @@ export default function DrawsPage() {
   }, [showcaseRows, filterTab]);
 
   return (
-    <div className="space-y-6 pb-16">
-      {/* ========================================================================= */}
-      {/* 1. TOP HEADER (Exact Match to Screenshot 1)                               */}
-      {/* ========================================================================= */}
-      <div className="border-b border-slate-200/80 bg-white px-6 py-5 shadow-2xs">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                Draw Workspace & Lender Funding
+    <div className="space-y-6 pb-12">
+      {/* 1. Clean Enterprise Header */}
+      <div className="border-b border-border bg-white px-6 py-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-bold text-foreground">
+                Draw Requests & Spending Verification
               </h1>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200/80">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Facility Active
+              <span className="text-xs text-muted-foreground font-mono">
+                Facility #23-03394 &middot; Capital Reserve Trust
               </span>
             </div>
-            <p className="text-xs text-slate-500 flex flex-wrap items-center gap-1.5 font-medium">
-              <span>Loan Facility: <strong className="text-slate-700 font-semibold">#23-03394</strong></span>
-              <span>•</span>
-              <span>Lender: <strong className="text-slate-700 font-semibold">Capital Reserve Trust</strong></span>
-              <span>•</span>
-              <span>Property ID: <strong className="text-slate-700 font-semibold">{currentProject?.address || "392 1st St, Jersey City"}</strong></span>
+            <p className="text-xs text-muted-foreground">
+              {currentProject?.name || "73 Broadway"} &middot; {currentProject?.address || "Jersey City, NJ"} &middot; Track bank releases, trade payments, and next draw approvals.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              if (currentProjectId) {
-                router.push(`/projects/${currentProjectId}/draws/build-packet?draw=4`);
-              } else {
-                setPacketDrawNumber(4);
-                setIsBuildDrawPacketOpen(true);
-              }
-            }}
-            className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 active:bg-slate-950 transition-colors shrink-0 cursor-pointer"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Build Draw Packet</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                if (currentProjectId) {
+                  router.push(`/projects/${currentProjectId}/draws/build-packet?draw=4`);
+                } else {
+                  setPacketDrawNumber(4);
+                  setIsBuildDrawPacketOpen(true);
+                }
+              }}
+              className="h-8 text-xs font-medium"
+            >
+              <Plus className="h-3.5 w-3.5 mr-1" />
+              New Draw Request
+            </Button>
+          </div>
         </div>
       </div>
 
       <div className="px-6 max-w-7xl mx-auto space-y-6">
-        {/* ========================================================================= */}
-        {/* 2. FOUR HERO KPI CARDS (Exact Match to Screenshot 1)                      */}
-        {/* ========================================================================= */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: TOTAL DRAW FACILITY */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:shadow-xs transition-shadow">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Total Draw Facility
-              </span>
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                <Clock className="h-4 w-4" />
-              </div>
+        {/* 2. Compact 4 KPI Metric Row with Easy Plain English */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <div className="rounded-xl border border-border bg-white p-4 shadow-2xs">
+            <span className="text-[11px] font-semibold text-muted-foreground block">
+              Total Loan Approved
+            </span>
+            <div className="text-xl font-bold text-foreground font-mono mt-1">
+              $824,450.00
             </div>
-            <div className="mt-3">
-              <span className="text-2xl font-bold tracking-tight text-slate-900 tabular-nums">
-                $824,450.00
-              </span>
-            </div>
-            <div className="mt-3 text-[11px] text-slate-500 font-normal">
-              Original Approved Budget: <span className="font-semibold text-slate-700">$850,000.00</span>
-            </div>
+            <span className="text-[11px] text-muted-foreground mt-1 block">
+              Committed bank construction credit
+            </span>
           </div>
 
-          {/* Card 2: CLEARED CASH FUNDED */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:shadow-xs transition-shadow">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Cleared Cash Disbursed
-              </span>
-              <div className="flex items-center justify-center h-8 px-2.5 rounded-full border-2 border-teal-500 bg-teal-50 text-[11px] font-extrabold text-teal-700 tracking-tight shrink-0 shadow-2xs">
-                24.5%
-              </div>
+          <div className="rounded-xl border border-border bg-white p-4 shadow-2xs">
+            <span className="text-[11px] font-semibold text-muted-foreground block">
+              Total Paid Out by Bank
+            </span>
+            <div className="text-xl font-bold text-foreground font-mono mt-1">
+              $202,200.00
             </div>
-            <div className="mt-2">
-              <span className="text-2xl font-bold tracking-tight text-slate-900 tabular-nums">
-                $202,200.00
-              </span>
-            </div>
-            <div className="mt-3 flex items-center gap-1.5 text-[11px] font-medium text-emerald-700">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-              <span>Draws #1 & #2 100% Settled • Draw #3 Active</span>
-            </div>
+            <span className="text-[11px] text-emerald-600 font-medium mt-1 block">
+              24.5% of total loan released
+            </span>
           </div>
 
-          {/* Card 3: ACTIVE DRAW SPENDING & NEXT DRAW */}
-          <div className="rounded-xl border border-amber-300 bg-amber-50/30 p-5 shadow-2xs hover:shadow-xs transition-shadow">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800">
-                Active Spend • Next Draw
-              </span>
-              <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-800 border border-amber-200">
-                Draw #3 ➔ Draw #4
-              </span>
+          <div className="rounded-xl border border-border bg-white p-4 shadow-2xs">
+            <span className="text-[11px] font-semibold text-muted-foreground block">
+              Draw #3 Money Spent
+            </span>
+            <div className="text-xl font-bold text-foreground font-mono mt-1">
+              $78,960.00
             </div>
-            <div className="mt-2">
-              <span className="text-2xl font-bold tracking-tight text-slate-900 tabular-nums">
-                $78,960.00
-              </span>
-            </div>
-            <div className="mt-1 text-[11px] text-amber-900 font-medium">
-              Draw #3 Spent: <strong>94.0%</strong> of $84,000.00
-            </div>
-            <div className="mt-3 rounded-lg bg-amber-100/80 border border-amber-200/90 px-2.5 py-1.5 flex items-center justify-between text-[11px]">
-              <span className="text-amber-900 font-medium">Draw #4 Pipeline Trigger:</span>
-              <span className="font-bold text-amber-800 flex items-center gap-1">
-                <Zap className="h-3 w-3 text-amber-600" />
-                Ready to Build Packet
-              </span>
-            </div>
+            <span className="text-[11px] text-teal-600 font-medium mt-1 block">
+              94.0% verified paid to trades ($5,040 left)
+            </span>
           </div>
 
-          {/* Card 4: OVERALL COMPLETION */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:shadow-xs transition-shadow">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Reconciled Spend Ratio
-              </span>
-              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">
-                97.5% Cleared
-              </span>
+          <div className="rounded-xl border border-border bg-white p-4 shadow-2xs">
+            <span className="text-[11px] font-semibold text-muted-foreground block">
+              Next Step
+            </span>
+            <div className="text-xl font-bold text-foreground font-mono mt-1">
+              Draw #4 Ready
             </div>
-            <div className="mt-3">
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-800 mb-1.5">
-                <span>Active Draws Reconciliation:</span>
-                <span className="font-bold text-emerald-700">97.5% Matched</span>
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: "97.5%" }} />
-              </div>
-            </div>
-            <div className="mt-3 text-[11px] text-slate-500 leading-tight">
-              Reconciled across Draw Bank wires and BCB operating account statements.
-            </div>
+            <span className="text-[11px] text-muted-foreground mt-1 block">
+              Ready to compile & submit payment packet
+            </span>
           </div>
         </div>
 
-        {/* ========================================================================= */}
-        {/* 3. SEQUENTIAL DRAW PROGRESSION & DUAL-STATEMENT VERIFICATION PANEL         */}
-        {/* ========================================================================= */}
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs space-y-6">
-          {/* Header & Controls */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600 border border-blue-200/60">
-                <Sliders className="h-4 w-4" />
+        {/* 3. Visual Draw Progression Pipeline (Matches Image Mockup) */}
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs">
+          {/* Header & Legend */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+            <div className="flex items-start gap-3">
+              <div className="h-9 w-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5 border border-blue-100">
+                <SlidersHorizontal className="h-4 w-4" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <span>Draw Progression Pipeline & Dual-Statement Verification</span>
-                  <span className="text-[11px] font-normal text-slate-400">|</span>
-                  <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/60">
-                    Sequential Draw 1 ➔ Draw 5
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                    Draw Progression Pipeline & Dual-Statement Verification
+                  </h3>
+                  <span className="text-slate-300">|</span>
+                  <span className="rounded-md bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 text-xs font-semibold font-mono">
+                    Sequential Draw 1 → Draw 5
                   </span>
-                </h3>
-                <p className="text-[11px] text-slate-500">
-                  Sequential funding cadence: First-pass bank allocation ➔ Trade spends reconciliation ➔ Next draw auto-trigger.
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Sequential funding cadence: First-pass bank allocation → Trade spends reconciliation → Next draw auto-trigger.
                 </p>
               </div>
             </div>
 
-            {/* Legend */}
-            <div className="flex flex-wrap items-center gap-3.5 text-xs font-medium text-slate-600">
+            {/* Status Legend Matching Mockup */}
+            <div className="flex items-center flex-wrap gap-3.5 text-xs font-medium text-slate-600 shrink-0">
               <div className="flex items-center gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                 <span>100% Reconciled</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-teal-500 animate-pulse" />
+                <span className="h-2.5 w-2.5 rounded-full bg-teal-400" />
                 <span>Active Spending</span>
               </div>
               <div className="flex items-center gap-1.5">
@@ -889,205 +524,278 @@ export default function DrawsPage() {
             </div>
           </div>
 
-          {/* Sequential Connected Pipeline Stepper */}
-          <div className="relative pt-3 pb-3 px-2 overflow-x-auto">
-            {/* Background Connector Bar with flow colors */}
-            <div className="absolute top-[32px] left-10 right-10 h-1 bg-slate-200 -z-0">
-              <div
-                className="h-full bg-emerald-600 transition-all duration-700"
-                style={{ width: "75%" }}
-              />
-            </div>
+          {/* Stepper Pipeline */}
+          <div className="relative px-6 py-2 overflow-x-auto">
+            <div className="min-w-[680px] relative">
+              {/* Continuous Connecting Track */}
+              <div className="absolute top-[22px] left-[6%] right-[6%] h-[3px] bg-slate-200 z-0">
+                {/* Active/Completed Green line covering D1 to D3 */}
+                <div className="h-full bg-emerald-500 w-[50%] transition-all duration-500" />
+              </div>
 
-            <div className="flex items-start justify-between min-w-[760px] relative z-10 px-2">
-              {pipelineData.map((node) => {
-                const isSelected = selectedTimelineDrawNumber === node.drawNumber;
-                const isCompleted = node.status === "COMPLETED";
-                const isActiveSpending = node.status === "ACTIVE_SPENDING";
-                const isPendingReview = node.status === "PENDING_REVIEW";
-
-                return (
-                  <div
-                    key={node.code}
-                    onClick={() => {
-                      if (!node.hasPacketBuilt) {
-                        if (currentProjectId) {
-                          router.push(`/projects/${currentProjectId}/draws/build-packet?draw=${node.drawNumber}`);
-                        } else {
-                          setPacketDrawNumber(node.drawNumber);
-                          setIsBuildDrawPacketOpen(true);
-                        }
-                      } else {
-                        setSelectedTimelineDrawNumber(node.drawNumber);
-                        const fallback = buildDrawFallback(
-                          node.drawNumber,
-                          node.phaseTitle,
-                          node.amount
-                        );
-                        const matching =
-                          draws.find((d) => d.draw_number === node.drawNumber) || fallback;
-                        handleOpenDetail(matching);
-                      }
-                    }}
-                    className="flex flex-col items-center text-center group cursor-pointer max-w-[130px] transition-all"
-                  >
-                    {/* Node Circle */}
-                    <div
-                      className={`relative flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold transition-all transform ${
-                        isSelected
-                          ? "ring-4 ring-blue-500 ring-offset-2 scale-110 shadow-md"
-                          : "group-hover:scale-105 shadow-xs"
-                      } ${
-                        isCompleted
-                          ? "bg-emerald-500 text-white"
-                          : isActiveSpending
-                          ? "bg-teal-600 text-white ring-2 ring-teal-400 animate-pulse"
-                          : isPendingReview
-                          ? "bg-amber-500 text-white"
-                          : "bg-slate-200 text-slate-600"
-                      }`}
-                    >
-                      {isCompleted ? (
-                        <Check className="h-5 w-5 stroke-[2.5]" />
-                      ) : isActiveSpending ? (
-                        <Zap className="h-4 w-4 fill-white" />
-                      ) : !node.hasPacketBuilt ? (
-                        <Plus className="h-4 w-4 stroke-[2.5]" />
-                      ) : isPendingReview ? (
-                        <Clock className="h-4 w-4" />
-                      ) : (
-                        <Lock className="h-3.5 w-3.5" />
-                      )}
-
-                      {/* Small badge overlay */}
-                      <span className="absolute -top-1.5 -right-1.5 text-[9px] font-extrabold px-1 rounded-full bg-slate-900 text-white shadow-xs">
-                        {node.code}
-                      </span>
+              {/* 5 Nodes Row */}
+              <div className="relative z-10 flex items-start justify-between">
+                {/* Node 1: Draw #1 (Completed) */}
+                <div
+                  className="flex flex-col items-center cursor-pointer group"
+                  onClick={() => {
+                    setSelectedTimelineDrawNumber(1);
+                    const fallback = buildDrawFallback(1, "Draw #1", "$50,000");
+                    const matching = draws.find((d) => d.draw_number === 1) || fallback;
+                    handleOpenDetail(matching);
+                  }}
+                >
+                  <div className="relative">
+                    <div className="h-11 w-11 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md ring-4 ring-white group-hover:scale-105 transition-transform">
+                      <Check className="h-5 w-5 stroke-[3]" />
                     </div>
+                    <span className="absolute -top-1.5 -right-1.5 rounded-full bg-slate-900 text-white text-[9px] font-mono px-1.5 py-0.2 font-bold shadow-xs">
+                      D1
+                    </span>
+                  </div>
 
-                    {/* Node Text & Details */}
-                    <div className="mt-3 space-y-1 w-full">
-                      <div
-                        className={`text-xs font-bold flex items-center justify-center gap-1 ${
-                          isSelected
-                            ? "text-blue-700 underline underline-offset-2"
-                            : isPendingReview
-                            ? "text-amber-700"
-                            : isActiveSpending
-                            ? "text-teal-700"
-                            : "text-slate-900"
-                        }`}
-                      >
-                        <span>{node.title}</span>
-                        {isActiveSpending && (
-                          <span className="text-[10px] bg-teal-100 text-teal-800 px-1 rounded font-semibold">Active</span>
-                        )}
-                        {!node.hasPacketBuilt && (
-                          <span className="text-[10px] bg-amber-100 text-amber-800 px-1 rounded font-semibold">Next</span>
-                        )}
-                      </div>
-
-                      <div className="text-xs font-extrabold text-slate-800 tabular-nums min-h-[20px] flex items-center justify-center">
-                        {node.hasPacketBuilt ? (
-                          <span>{node.amount}</span>
-                        ) : (
-                          <span className="inline-flex items-center text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                            Amount TBD
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Spend Progress Bar */}
-                      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden my-1">
-                        <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            isCompleted
-                              ? "bg-emerald-500"
-                              : isActiveSpending
-                              ? "bg-teal-500"
-                              : isPendingReview && node.hasPacketBuilt
-                              ? "bg-amber-400"
-                              : "bg-slate-200"
-                          }`}
-                          style={{ width: `${node.hasPacketBuilt ? node.spendProgressPct : 0}%` }}
-                        />
-                      </div>
-
-                      {node.hasPacketBuilt && (
-                        <>
-                          <div className="text-[10px] font-semibold text-slate-500 flex items-center justify-center gap-1">
-                            {isCompleted ? (
-                              <span className="text-emerald-700 font-bold">100% Spent</span>
-                            ) : isActiveSpending ? (
-                              <span className="text-teal-700 font-bold">{node.spendProgressPct}% Spent</span>
-                            ) : isPendingReview ? (
-                              <span className="text-amber-700">Awaiting Wire</span>
-                            ) : (
-                              <span>Queued</span>
-                            )}
-                          </div>
-
-                          <div className="text-[10px] text-slate-400">
-                            {node.date}
-                          </div>
-                        </>
-                      )}
+                  <div className="text-center mt-3 space-y-0.5">
+                    <div className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                      Draw #1
+                    </div>
+                    <div className="text-sm font-bold font-mono text-slate-900">
+                      $50,000
+                    </div>
+                    <div className="text-[11px] font-bold text-emerald-600">
+                      100% Spent
+                    </div>
+                    <div className="w-14 h-1 bg-emerald-500 rounded-full mx-auto mt-1" />
+                    <div className="text-[11px] text-slate-400 font-medium pt-0.5">
+                      Jan 12
                     </div>
                   </div>
-                );
-              })}
+                </div>
+
+                {/* Node 2: Draw #2 (Completed) */}
+                <div
+                  className="flex flex-col items-center cursor-pointer group"
+                  onClick={() => {
+                    setSelectedTimelineDrawNumber(2);
+                    const fallback = buildDrawFallback(2, "Draw #2", "$68,200");
+                    const matching = draws.find((d) => d.draw_number === 2) || fallback;
+                    handleOpenDetail(matching);
+                  }}
+                >
+                  <div className="relative">
+                    <div className="h-11 w-11 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md ring-4 ring-white group-hover:scale-105 transition-transform">
+                      <Check className="h-5 w-5 stroke-[3]" />
+                    </div>
+                    <span className="absolute -top-1.5 -right-1.5 rounded-full bg-slate-900 text-white text-[9px] font-mono px-1.5 py-0.2 font-bold shadow-xs">
+                      D2
+                    </span>
+                  </div>
+
+                  <div className="text-center mt-3 space-y-0.5">
+                    <div className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                      Draw #2
+                    </div>
+                    <div className="text-sm font-bold font-mono text-slate-900">
+                      $68,200
+                    </div>
+                    <div className="text-[11px] font-bold text-emerald-600">
+                      100% Spent
+                    </div>
+                    <div className="w-14 h-1 bg-emerald-500 rounded-full mx-auto mt-1" />
+                    <div className="text-[11px] text-slate-400 font-medium pt-0.5">
+                      Mar 04
+                    </div>
+                  </div>
+                </div>
+
+                {/* Node 3: Draw #3 (Active Spending) */}
+                <div
+                  className="flex flex-col items-center cursor-pointer group"
+                  onClick={() => {
+                    setSelectedTimelineDrawNumber(3);
+                    const fallback = buildDrawFallback(3, "Draw #3", "$84,000");
+                    const matching = draws.find((d) => d.draw_number === 3) || fallback;
+                    handleOpenDetail(matching);
+                  }}
+                >
+                  <div className="relative">
+                    <div className="h-12 w-12 rounded-full bg-teal-50 border-2 border-teal-300 ring-4 ring-teal-100 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform animate-pulse">
+                      <div className="h-8.5 w-8.5 rounded-full bg-teal-400 text-white flex items-center justify-center shadow-xs">
+                        <Zap className="h-4.5 w-4.5 fill-white stroke-[2]" />
+                      </div>
+                    </div>
+                    <span className="absolute -top-1 -right-1 rounded-full bg-slate-900 text-white text-[9px] font-mono px-1.5 py-0.2 font-bold shadow-xs">
+                      D3
+                    </span>
+                  </div>
+
+                  <div className="text-center mt-2.5 space-y-0.5">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="text-xs font-bold text-blue-600 underline group-hover:text-blue-700">
+                        Draw #3
+                      </span>
+                      <span className="rounded bg-teal-50 border border-teal-200 text-teal-800 text-[10px] font-bold px-1.5 py-0.2">
+                        Active
+                      </span>
+                    </div>
+                    <div className="text-sm font-bold font-mono text-slate-900">
+                      $84,000
+                    </div>
+                    <div className="text-[11px] font-bold text-teal-600">
+                      94% Spent
+                    </div>
+                    <div className="w-16 h-1 bg-teal-500 rounded-full mx-auto mt-1" />
+                    <div className="text-[11px] text-slate-400 font-medium pt-0.5">
+                      May 19
+                    </div>
+                  </div>
+                </div>
+
+                {/* Node 4: Draw #4 (Next / Pending Review) */}
+                <div
+                  className="flex flex-col items-center cursor-pointer group"
+                  onClick={() => {
+                    setSelectedTimelineDrawNumber(4);
+                    if (currentProjectId) {
+                      router.push(`/projects/${currentProjectId}/draws/build-packet?draw=4`);
+                    } else {
+                      setPacketDrawNumber(4);
+                      setIsBuildDrawPacketOpen(true);
+                    }
+                  }}
+                >
+                  <div className="relative">
+                    <div className="h-11 w-11 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-md ring-4 ring-white group-hover:scale-105 transition-transform">
+                      <Plus className="h-5 w-5 stroke-[3]" />
+                    </div>
+                    <span className="absolute -top-1.5 -right-1.5 rounded-full bg-slate-900 text-white text-[9px] font-mono px-1.5 py-0.2 font-bold shadow-xs">
+                      D4
+                    </span>
+                  </div>
+
+                  <div className="text-center mt-3 space-y-1">
+                    <div className="flex items-center justify-center gap-1">
+                      <span className="text-xs font-bold text-amber-800">
+                        Draw #4
+                      </span>
+                      <span className="rounded bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold px-1.5 py-0.2">
+                        Next
+                      </span>
+                    </div>
+                    <div>
+                      <span className="inline-block rounded-md bg-amber-50 border border-amber-200 text-amber-800 px-2 py-0.5 text-[10px] font-bold font-mono">
+                        Amount TBD
+                      </span>
+                    </div>
+                    <div className="w-14 h-1 bg-slate-200 rounded-full mx-auto mt-1.5" />
+                  </div>
+                </div>
+
+                {/* Node 5: Draw #5 (Queued) */}
+                <div
+                  className="flex flex-col items-center cursor-pointer group"
+                  onClick={() => {
+                    setSelectedTimelineDrawNumber(5);
+                    if (currentProjectId) {
+                      router.push(`/projects/${currentProjectId}/draws/build-packet?draw=5`);
+                    } else {
+                      setPacketDrawNumber(5);
+                      setIsBuildDrawPacketOpen(true);
+                    }
+                  }}
+                >
+                  <div className="relative">
+                    <div className="h-11 w-11 rounded-full bg-slate-100 text-slate-400 border-2 border-slate-300 flex items-center justify-center ring-4 ring-white group-hover:scale-105 transition-transform">
+                      <Plus className="h-4.5 w-4.5 stroke-[2.5]" />
+                    </div>
+                    <span className="absolute -top-1.5 -right-1.5 rounded-full bg-slate-900 text-white text-[9px] font-mono px-1.5 py-0.2 font-bold shadow-xs">
+                      D5
+                    </span>
+                  </div>
+
+                  <div className="text-center mt-3 space-y-1">
+                    <div className="flex items-center justify-center gap-1">
+                      <span className="text-xs font-bold text-slate-700">
+                        Draw #5
+                      </span>
+                      <span className="rounded bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold px-1.5 py-0.2">
+                        Next
+                      </span>
+                    </div>
+                    <div>
+                      <span className="inline-block rounded-md bg-amber-50 border border-amber-200 text-amber-800 px-2 py-0.5 text-[10px] font-bold font-mono">
+                        Amount TBD
+                      </span>
+                    </div>
+                    <div className="w-14 h-1 bg-slate-200 rounded-full mx-auto mt-1.5" />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
 
-      </div>
-
-        {/* ========================================================================= */}
-        {/* 4. VIEW TOGGLE: REGISTER vs EXCEL SCHEDULE MATRIX                         */}
-        {/* ========================================================================= */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-          <div className="flex items-center gap-1.5 p-1 bg-slate-200/80 rounded-xl w-fit">
+        {/* 4. Controls: View Switcher (Register vs SOV Matrix) & Filter Tabs */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {/* Segmented View Switcher */}
+          <div className="flex rounded-lg bg-slate-100 p-0.5 border border-slate-200 w-fit">
             <button
               type="button"
               onClick={() => setMainView("REGISTER")}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={cn(
+                "px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1.5",
                 mainView === "REGISTER"
-                  ? "bg-white text-slate-900 shadow-2xs"
+                  ? "bg-white text-slate-900 shadow-xs font-semibold"
                   : "text-slate-600 hover:text-slate-900"
-              }`}
+              )}
             >
               <Layers className="h-3.5 w-3.5" />
-              <span>Draw Applications Register</span>
+              <span>Draws History</span>
             </button>
             <button
               type="button"
               onClick={() => setMainView("EXCEL_MATRIX")}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={cn(
+                "px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1.5",
                 mainView === "EXCEL_MATRIX"
-                  ? "bg-emerald-600 text-white shadow-2xs"
+                  ? "bg-white text-slate-900 shadow-xs font-semibold"
                   : "text-slate-600 hover:text-slate-900"
-              }`}
+              )}
             >
               <FileSpreadsheet className="h-3.5 w-3.5" />
-              <span>Excel Schedule of Values Matrix</span>
-              <span
-                className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                  mainView === "EXCEL_MATRIX"
-                    ? "bg-white/20 text-white"
-                    : "bg-emerald-100 text-emerald-800"
-                }`}
-              >
-                Draws 1–9 Tasks
-              </span>
+              <span>Budget Lines (Schedule of Values)</span>
             </button>
           </div>
 
-          <div className="text-[11px] text-slate-500 font-medium">
-            {mainView === "REGISTER"
-              ? "Click any draw row to view itemized tasks & allocate work claim"
-              : "Task-by-task breakdown reflecting exact contractor construction ledger"}
-          </div>
+          {/* Filter Pills (Shown only on Register view) */}
+          {mainView === "REGISTER" && (
+            <div className="flex items-center gap-1">
+              {(
+                [
+                  { key: "ALL", label: "All Draws" },
+                  { key: "ACTIVE", label: "Actively Spending" },
+                  { key: "FUNDED", label: "Paid by Bank" },
+                  { key: "DISCREPANCY", label: "Needs Attention" },
+                ] as const
+              ).map(({ key, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setFilterTab(key as FilterTab)}
+                  className={cn(
+                    "px-2.5 py-1 text-xs rounded-md transition-colors font-medium cursor-pointer",
+                    filterTab === key
+                      ? "bg-slate-900 text-white font-semibold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
+        {/* 5. Main View: Clean Table or SOV Matrix */}
         {mainView === "EXCEL_MATRIX" ? (
           <ExcelSovMatrix
             onSelectDraw={(num) => {
@@ -1100,295 +808,157 @@ export default function DrawsPage() {
             }}
           />
         ) : (
-          <div className="rounded-xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden space-y-0">
-            {/* Header & Filter Pills */}
-            <div className="px-5 py-4 border-b border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-sm font-bold text-slate-900">
-                  Draw Applications Register
-                </h2>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Official ledger of requests, lender approvals, and wire clearance status.
-                </p>
-              </div>
-
-            {/* Filter Pills */}
-            <div className="flex items-center gap-1.5 text-xs font-medium bg-slate-100 p-1 rounded-lg">
-              <button
-                type="button"
-                onClick={() => setFilterTab("ALL")}
-                className={`px-3 py-1 rounded-md transition-colors ${
-                  filterTab === "ALL"
-                    ? "bg-white text-slate-900 font-semibold shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                All Draws (5)
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilterTab("ACTIVE")}
-                className={`px-3 py-1 rounded-md transition-colors ${
-                  filterTab === "ACTIVE"
-                    ? "bg-white text-slate-900 font-semibold shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                Active / In Review (2)
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilterTab("FUNDED")}
-                className={`px-3 py-1 rounded-md transition-colors ${
-                  filterTab === "FUNDED"
-                    ? "bg-white text-slate-900 font-semibold shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                Funded & Settled (2)
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilterTab("DISCREPANCY")}
-                className={`px-3 py-1 rounded-md transition-colors ${
-                  filterTab === "DISCREPANCY"
-                    ? "bg-white text-slate-900 font-semibold shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                Discrepancy (1)
-              </button>
-            </div>
-          </div>
-
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-                <tr>
-                  <th className="py-3 px-4">DRAW REF</th>
-                  <th className="py-3 px-4">LENDER INSPECTION</th>
-                  <th className="py-3 px-4">DISBURSED / REQ</th>
-                  <th className="py-3 px-4">DUAL STATEMENT STATUS</th>
-                  <th className="py-3 px-4">SPEND RECONCILIATION</th>
-                  <th className="py-3 px-4">DRAW STATUS</th>
-                  <th className="py-3 px-4 text-right">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                {isDrawsLoading ? (
-                  Array.from({ length: 5 }).map((_, idx) => (
-                    <tr key={`draw-skel-${idx}`} className="animate-pulse">
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-3">
-                          <Skeleton className="h-7 w-7 rounded-lg shrink-0" />
-                          <div className="space-y-1.5">
-                            <Skeleton className="h-3.5 w-32" />
-                            <Skeleton className="h-3 w-20" />
-                          </div>
-                        </div>
+          <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-[11px]">
+                  <tr>
+                    <th className="py-3 px-4">Draw #</th>
+                    <th className="py-3 px-4">Work Scope</th>
+                    <th className="py-3 px-4">Inspection Date</th>
+                    <th className="py-3 px-4 text-right">Requested from Bank</th>
+                    <th className="py-3 px-4 text-right">Paid by Bank</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-800">
+                  {isDrawsLoading ? (
+                    Array.from({ length: 4 }).map((_, idx) => (
+                      <tr key={`skel-${idx}`} className="animate-pulse">
+                        <td className="py-3 px-4"><Skeleton className="h-4 w-20" /></td>
+                        <td className="py-3 px-4"><Skeleton className="h-4 w-40" /></td>
+                        <td className="py-3 px-4"><Skeleton className="h-4 w-24" /></td>
+                        <td className="py-3 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
+                        <td className="py-3 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
+                        <td className="py-3 px-4"><Skeleton className="h-4 w-20" /></td>
+                        <td className="py-3 px-4 text-right"><Skeleton className="h-6 w-16 ml-auto" /></td>
+                      </tr>
+                    ))
+                  ) : filteredShowcaseRows.map((row) => (
+                    <tr
+                      key={row.id}
+                      onClick={() => {
+                        setSelectedTimelineDrawNumber(row.drawNumber);
+                        const matchingDraw =
+                          draws.find((d) => d.draw_number === row.drawNumber) ||
+                          buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
+                        handleOpenDetail(matchingDraw);
+                      }}
+                      className="hover:bg-slate-50/70 transition-colors cursor-pointer"
+                    >
+                      {/* Ref */}
+                      <td className="py-3 px-4 font-mono font-medium text-xs">
+                        <div className="font-bold text-slate-900">{row.title}</div>
+                        <span className="text-[11px] text-slate-400">{row.drawRefId}</span>
                       </td>
-                      <td className="py-3.5 px-4">
-                        <Skeleton className="h-3.5 w-24" />
+
+                      {/* Scope */}
+                      <td className="py-3 px-4 text-slate-800 font-medium">
+                        {row.scopeName}
                       </td>
-                      <td className="py-3.5 px-4">
-                        <Skeleton className="h-4 w-28" />
+
+                      {/* Date */}
+                      <td className="py-3 px-4 text-slate-500 font-medium">
+                        {row.date}
                       </td>
-                      <td className="py-3.5 px-4">
-                        <Skeleton className="h-4 w-28" />
+
+                      {/* Requested */}
+                      <td className="py-3 px-4 font-mono font-bold text-right text-slate-900">
+                        {row.requestedAmt}
                       </td>
-                      <td className="py-3.5 px-4">
-                        <Skeleton className="h-3.5 w-16" />
+
+                      {/* Funded */}
+                      <td className="py-3 px-4 font-mono text-right text-slate-600 font-medium">
+                        {row.disbursed}
                       </td>
-                      <td className="py-3.5 px-4">
-                        <Skeleton className="h-5 w-24 rounded-full" />
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <Skeleton className="h-7 w-16 ml-auto rounded-md" />
-                      </td>
-                    </tr>
-                  ))
-                ) : filteredShowcaseRows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="hover:bg-slate-50/70 transition-colors cursor-pointer"
-                    onClick={() => {
-                      setSelectedTimelineDrawNumber(row.drawNumber);
-                      const matchingDraw =
-                        draws.find((d) => d.draw_number === row.drawNumber) ||
-                        buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
-                      handleOpenDetail(matchingDraw);
-                    }}
-                  >
-                    {/* DRAW REF */}
-                    <td className="py-3.5 px-4 font-medium">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold shrink-0 ${
-                            row.badgeType === "PENDING"
-                              ? "bg-amber-100 text-amber-800 border border-amber-200"
-                              : row.badgeType === "FUNDED"
-                              ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                              : "bg-rose-100 text-rose-800 border border-rose-200"
-                          }`}
-                        >
-                          {row.badge}
-                        </div>
-                        <div>
-                          <div className="font-bold text-slate-900 leading-snug">
-                            {row.title}
-                          </div>
-                          <div className="text-[11px] text-slate-400 font-mono">
-                            ID: {row.drawRefId}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
 
-                    {/* INSPECTION DATE */}
-                    <td className="py-3.5 px-4 text-slate-600 font-medium">
-                      {row.inspectionDate}
-                    </td>
-
-                    {/* REQUESTED AMT */}
-                    <td className="py-3.5 px-4 font-bold text-slate-900 tabular-nums">
-                      {row.requestedAmt}
-                    </td>
-
-                    {/* DUAL STATEMENT STATUS */}
-                    <td className="py-3.5 px-4">
-                      <div className="space-y-0.5">
-                        <div className="font-semibold text-slate-800 text-[11px]">
-                          {row.bankCleared}
-                        </div>
-                        <div className="text-[10px] text-slate-500">
-                          {row.spendStatus}
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* COMPLETION % */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${
-                              row.completionPct > 90
-                                ? row.badgeType === "PENDING"
-                                  ? "bg-amber-500"
-                                  : "bg-emerald-500"
-                                : "bg-slate-300"
-                            }`}
-                            style={{ width: `${row.completionPct}%` }}
-                          />
-                        </div>
-                        <span className="font-semibold text-slate-700 text-[11px] tabular-nums">
-                          {row.completionPct}%
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* STATUS & FLAG */}
-                    <td className="py-3.5 px-4">
-                      {row.statusType === "PENDING" && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200/90 px-2.5 py-0.5 text-[10px] font-bold text-amber-800">
-                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                          • {row.statusLabel}
-                        </span>
-                      )}
-
-                      {row.statusType === "FUNDED" && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/90 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
-                          ✓ {row.statusLabel}
-                        </span>
-                      )}
-
-                      {row.statusType === "REJECTED" && (
-                        <div>
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-200/90 px-2.5 py-0.5 text-[10px] font-bold text-rose-800">
-                            ⚠ {row.statusLabel}
+                      {/* Status badge */}
+                      <td className="py-3 px-4">
+                        {row.statusType === "FUNDED" && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            Paid by Bank
                           </span>
-                          {row.subtitle && (
-                            <div className="text-[10px] text-rose-600 mt-0.5">
-                              {row.subtitle}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </td>
+                        )}
+                        {row.statusType === "ACTIVE" && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-teal-50 text-teal-800 border border-teal-200">
+                            Actively Spending ({row.reconciledPct}%)
+                          </span>
+                        )}
+                        {row.statusType === "PENDING" && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                            Ready to Request
+                          </span>
+                        )}
+                        {row.statusType === "REJECTED" && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-200">
+                            Needs Attention
+                          </span>
+                        )}
+                      </td>
 
-                    {/* ACTIONS */}
-                    <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                      {row.actionType === "PRIMARY" && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedTimelineDrawNumber(row.drawNumber);
-                            if (row.actionLabel.includes("Build Draw Packet")) {
+                      {/* Action */}
+                      <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                        {row.actionType === "PRIMARY" ? (
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedTimelineDrawNumber(row.drawNumber);
                               if (currentProjectId) {
                                 router.push(`/projects/${currentProjectId}/draws/build-packet?draw=${row.drawNumber}`);
                               } else {
                                 setPacketDrawNumber(row.drawNumber);
                                 setIsBuildDrawPacketOpen(true);
                               }
-                            } else {
+                            }}
+                            className="h-7 text-xs font-semibold px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+                          >
+                            Request Draw #4
+                          </Button>
+                        ) : row.actionType === "DANGER_OUTLINE" ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedTimelineDrawNumber(row.drawNumber);
+                              const matchingDraw =
+                                draws.find((d) => d.draw_number === row.drawNumber) ||
+                                buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
+                              setSelectedDraw(matchingDraw);
+                              setIsResubmitRevisionOpen(true);
+                            }}
+                            className="h-7 text-xs font-semibold px-2.5 text-rose-700 border-rose-200 hover:bg-rose-50"
+                          >
+                            Fix & Resubmit
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedTimelineDrawNumber(row.drawNumber);
                               const matchingDraw =
                                 draws.find((d) => d.draw_number === row.drawNumber) ||
                                 buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
                               handleOpenDetail(matchingDraw);
-                            }
-                          }}
-                          className="rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 transition-colors"
-                        >
-                          {row.actionLabel}
-                        </button>
-                      )}
-
-                      {row.actionType === "OUTLINE" && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedTimelineDrawNumber(row.drawNumber);
-                            const matchingDraw =
-                              draws.find((d) => d.draw_number === row.drawNumber) ||
-                              buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
-                            handleOpenDetail(matchingDraw);
-                          }}
-                          className="rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
-                        >
-                          {row.actionLabel}
-                        </button>
-                      )}
-
-                      {row.actionType === "DANGER_OUTLINE" && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedTimelineDrawNumber(row.drawNumber);
-                            const matchingDraw =
-                              draws.find((d) => d.draw_number === row.drawNumber) ||
-                              buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
-                            setSelectedDraw(matchingDraw);
-                            setIsResubmitRevisionOpen(true);
-                          }}
-                          className="rounded-lg border border-rose-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50 transition-colors shadow-2xs"
-                        >
-                          {row.actionLabel}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                            }}
+                            className="h-7 text-xs font-medium px-2.5 text-slate-700 hover:bg-slate-100"
+                          >
+                            View Details
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
 
-      {/* ========================================================================= */}
-      {/* 5. MODALS & DRAWERS                                                       */}
-      {/* ========================================================================= */}
+      {/* Modals & Drawers */}
       <BuildDrawPacketModal
         open={isBuildDrawPacketOpen}
         onOpenChange={setIsBuildDrawPacketOpen}
