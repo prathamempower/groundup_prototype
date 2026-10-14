@@ -1,26 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { PageHeader } from "@/components/layout/page-header";
-import { MilestoneItem, SourceCitation } from "@/lib/types";
+import { MilestoneItem } from "@/lib/types";
 import { formatDate, formatMoney } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import {
-  Calendar,
+  Calendar as CalendarIcon,
   Clock,
   Plus,
   Table as TableIcon,
-  Flame,
-  Scale,
-  FileCheck2,
   ChevronRight,
+  ChevronLeft,
   MoreHorizontal,
   DollarSign,
   AlertTriangle,
   Layers,
   CheckCircle2,
+  Menu,
+  Search,
+  ExternalLink,
+  ShieldAlert,
+  Sparkles,
 } from "lucide-react";
 import { CreateMilestoneModal } from "@/components/timeline/create-milestone-modal";
 import { UpdateMilestoneModal } from "@/components/timeline/update-milestone-modal";
@@ -29,14 +31,41 @@ import { Skeleton, SkeletonTable } from "@/components/ui/skeleton";
 import { ResolveDiscrepancyModal } from "@/components/timeline/resolve-discrepancy-modal";
 import { MilestoneGanttChart } from "@/components/timeline/milestone-gantt-chart";
 import { MilestoneDetailDrawer } from "@/components/timeline/milestone-detail-drawer";
+import { BrandLogo } from "@/components/ui/brand-logo";
+import {
+  ConstructionTask,
+  INITIAL_CONSTRUCTION_TASKS,
+  getStoredConstructionTasks,
+  saveStoredConstructionTasks,
+} from "@/lib/data/construction-calendar-data";
+import { TimelineCalendarView } from "@/components/timeline/timeline-calendar-view";
+import { TaskDetailDrawer } from "@/components/timeline/task-detail-drawer";
+import { CreateFieldTaskModal } from "@/components/timeline/create-field-task-modal";
 
 export default function TimelinePage() {
   const queryClient = useQueryClient();
-  const [viewMode, setViewMode] = useState<"GANTT" | "TABLE">("GANTT");
+
+  // Primary view mode matching target UI: CALENDAR is active by default
+  const [viewMode, setViewMode] = useState<"CALENDAR" | "GANTT" | "TABLE">("CALENDAR");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [activeTradeFilter, setActiveTradeFilter] = useState("");
+  const [activePhaseFilters, setActivePhaseFilters] = useState<Record<string, boolean>>({
+    excavation: true,
+    foundation: true,
+    framing: true,
+    mep: true,
+    critical: true,
+  });
 
-  // Modals & Drawer State
+  // Construction Calendar Tasks State
+  const [constructionTasks, setConstructionTasks] = useState<ConstructionTask[]>(INITIAL_CONSTRUCTION_TASKS);
+  const [selectedDate, setSelectedDate] = useState<string>("2026-10-14");
+  const [activeTaskId, setActiveTaskId] = useState<string | null>("task-oct-14-2");
+  const [isTaskDrawerOpen, setIsTaskDrawerOpen] = useState(false);
+  const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
+
+  // Milestone Modals & Drawer State (for Gantt / Table views)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedMilestone, setSelectedMilestone] = useState<MilestoneItem | null>(null);
   const [isDetailDrawerOpen, setIsDetailDrawerOpen] = useState(false);
@@ -58,8 +87,85 @@ export default function TimelinePage() {
     : projectsData?.data?.current_project_id || "";
 
   const currentProject = projectsData?.data?.projects?.find((p) => p.id === currentProjectId);
+  const projectName = currentProject?.name || "Horizon Heights Tower A";
 
-  // Milestones Query
+  // Load project-scoped tasks from localStorage on mount / project change
+  useEffect(() => {
+    const loaded = getStoredConstructionTasks(currentProjectId || "default");
+    setConstructionTasks(loaded);
+  }, [currentProjectId]);
+
+  // Save tasks when updated
+  const handleUpdateTask = (updatedTask: ConstructionTask) => {
+    setConstructionTasks((prev) => {
+      const next = prev.map((t) => (t.id === updatedTask.id ? updatedTask : t));
+      saveStoredConstructionTasks(currentProjectId || "default", next);
+      return next;
+    });
+  };
+
+  const handleCreateTask = (newTask: ConstructionTask) => {
+    setConstructionTasks((prev) => {
+      const next = [newTask, ...prev];
+      saveStoredConstructionTasks(currentProjectId || "default", next);
+      return next;
+    });
+    setSelectedDate(newTask.date);
+    setActiveTaskId(newTask.id);
+    setIsTaskDrawerOpen(true);
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    setConstructionTasks((prev) => {
+      const next = prev.filter((t) => t.id !== taskId);
+      saveStoredConstructionTasks(currentProjectId || "default", next);
+      return next;
+    });
+    setIsTaskDrawerOpen(false);
+  };
+
+  // Click on any date opens the task allocated on that date
+  const handleSelectDate = (dateStr: string) => {
+    setSelectedDate(dateStr);
+    const tasksForDate = constructionTasks.filter((t) => t.date === dateStr);
+    if (tasksForDate.length > 0) {
+      setActiveTaskId(tasksForDate[0].id);
+    } else {
+      setActiveTaskId(null);
+    }
+    setIsTaskDrawerOpen(true);
+  };
+
+  const handleSelectTask = (taskId: string) => {
+    setActiveTaskId(taskId);
+    const task = constructionTasks.find((t) => t.id === taskId);
+    if (task) {
+      setSelectedDate(task.date);
+    }
+    setIsTaskDrawerOpen(true);
+  };
+
+  // Phase filter toggles
+  const handleTogglePhaseFilter = (phaseId: string) => {
+    setActivePhaseFilters((prev) => ({
+      ...prev,
+      [phaseId]: !prev[phaseId],
+    }));
+  };
+
+  const handleResetFilters = () => {
+    setActivePhaseFilters({
+      excavation: true,
+      foundation: true,
+      framing: true,
+      mep: true,
+      critical: true,
+    });
+    setActiveTradeFilter("");
+    setSearchQuery("");
+  };
+
+  // Milestones Query (for Gantt and KPI cards)
   const { data: milestonesData, isLoading: isMilestonesLoading } = useQuery({
     queryKey: ["milestones", currentProjectId],
     queryFn: () => api.progress.getMilestones(currentProjectId),
@@ -69,7 +175,7 @@ export default function TimelinePage() {
   const milestones = milestonesData?.data || [];
 
   // Schedule Forecast & Carry Impact Query
-  const { data: forecastData, isLoading: isForecastLoading } = useQuery({
+  const { data: forecastData } = useQuery({
     queryKey: ["scheduleForecast", currentProjectId],
     queryFn: () => api.progress.getScheduleForecast(currentProjectId),
     enabled: Boolean(currentProjectId),
@@ -77,28 +183,7 @@ export default function TimelinePage() {
 
   const forecast = forecastData?.data;
 
-  // Handlers
-  const handleOpenMilestoneDrawer = (ms: MilestoneItem) => {
-    setSelectedMilestone(ms);
-    setIsDetailDrawerOpen(true);
-  };
-
-  const handleOpenUpdate = (ms: MilestoneItem) => {
-    setSelectedMilestone(ms);
-    setIsUpdateModalOpen(true);
-  };
-
-  const handleOpenAttach = (ms: MilestoneItem) => {
-    setSelectedMilestone(ms);
-    setIsAttachModalOpen(true);
-  };
-
-  const handleOpenResolve = (ms: MilestoneItem) => {
-    setSelectedMilestone(ms);
-    setIsResolveModalOpen(true);
-  };
-
-  // Direct Date Adjustment Handler
+  // Direct Date Adjustment Handler for Gantt
   const handleUpdateMilestoneDate = async (
     ms: MilestoneItem,
     newForecastEnd: string,
@@ -114,178 +199,261 @@ export default function TimelinePage() {
     await queryClient.invalidateQueries({ queryKey: ["projectDashboard", currentProjectId] });
   };
 
-  // Filtered Milestones for Table
-  const filteredMilestones = milestones.filter((m: MilestoneItem) => {
-    const matchesSearch =
-      m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (m.budget_line_name &&
-        m.budget_line_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (m.budget_line_code && m.budget_line_code.includes(searchQuery)) ||
-      (m.responsible_party &&
-        m.responsible_party.toLowerCase().includes(searchQuery.toLowerCase()));
+  const tasksOnSelectedDate = constructionTasks.filter((t) => t.date === selectedDate);
 
-    const matchesStatus =
-      statusFilter === "ALL" ||
-      (statusFilter === "CRITICAL" && m.critical_path) ||
-      (statusFilter === "DELAYED" && ((m.delay_days || 0) > 0 || m.status === "AT_RISK")) ||
-      m.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
-  });
-
-  // Discrepancy milestone if active
-  const disputedMilestone = milestones.find(
-    (m) => m.progress_conflict?.has_conflict && m.progress_conflict.status === "OPEN"
-  );
-
-  const hasScheduleBaseline = forecast?.has_schedule_baseline ?? (milestones.length > 0);
+  // Count active delayed tasks to reflect on KPI cards
+  const delayedTasksCount = constructionTasks.filter((t) => t.is_delayed).length;
 
   return (
-    <div className="space-y-6 pb-16">
-      <div className="px-6 max-w-7xl mx-auto space-y-6 pt-4">
-        {/* Breadcrumb path dynamically matching active project: [Project Name] > Timeline */}
-        <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-          <span>{currentProject?.name || "161 Woodlawn Ave"}</span>
-          <ChevronRight className="h-3 w-3 text-slate-400" />
-          <span className="text-slate-700">Timeline</span>
-        </div>
-
-        {/* Page Title & Primary Action Strip */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-              Timeline & Progress
-            </h1>
-            <p className="text-xs text-slate-500 mt-1">
-              Track schedule milestones, inspection verification, and financing carry-cost exposure.
-            </p>
+    <div className="space-y-5 pb-16 min-h-screen bg-slate-50/30">
+      <div className="px-4 sm:px-6 max-w-[1600px] mx-auto space-y-4 pt-3">
+        {/* Top Header matching Screenshot 1: Brand Logo + Project + 4 KPI Cards + Client View + User Profile */}
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white rounded-2xl border border-slate-200/90 p-3.5 shadow-2xs">
+          {/* Brand & Project Info */}
+          <div className="flex items-center gap-3 shrink-0">
+            <BrandLogo size="md" showSubtitle={false} />
+            <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-700 border border-blue-200/70">
+              CONSTRUCTION APP
+            </span>
+            <div className="hidden sm:block border-l border-slate-200 pl-3">
+              <span className="text-[11px] font-medium text-slate-400 block">Project:</span>
+              <span className="text-xs font-bold text-slate-900 truncate block max-w-[200px]">
+                {projectName}
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-xs text-xs font-semibold px-4 py-2 cursor-pointer"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Create Milestone Plan</span>
-            </Button>
-            <button
-              type="button"
-              className="h-9 w-9 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-2xs transition-colors"
-              title="More options"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* 4 Clean Metric Cards Matching Target Image */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Forecast Completion */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs hover:border-slate-300 transition-all flex items-center justify-between">
-            <div className="flex items-center gap-3.5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shrink-0">
-                <Calendar className="h-5 w-5" />
+          {/* 4 Clean Metric Cards Matching Screenshot 1 */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 flex-1 max-w-4xl">
+            {/* Card 1: Forecast Completion */}
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-2.5 flex items-center gap-2.5 shadow-2xs hover:border-slate-300 transition-colors">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600 shrink-0">
+                <CalendarIcon className="h-4 w-4" />
               </div>
-              <div>
-                <span className="text-xs font-medium text-slate-500">Forecast Completion</span>
-                <div className="text-lg lg:text-xl font-bold text-slate-900 mt-0.5">
-                  {!hasScheduleBaseline || !forecast?.forecast_completion
-                    ? "Aug 31, 2026"
-                    : formatDate(forecast.forecast_completion)}
-                </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block truncate">
+                  Forecast Completion
+                </span>
+                <span className="text-xs font-extrabold text-slate-900 block truncate">
+                  {forecast?.forecast_completion ? formatDate(forecast.forecast_completion) : "Mar 31, 2026"}
+                </span>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-slate-300 shrink-0" />
-          </div>
 
-          {/* Card 2: Critical Path Delay */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs hover:border-slate-300 transition-all flex items-center justify-between">
-            <div className="flex items-center gap-3.5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shrink-0">
-                <Clock className="h-5 w-5" />
+            {/* Card 2: Critical Path Delay */}
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-2.5 flex items-center gap-2.5 shadow-2xs hover:border-slate-300 transition-colors">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+                <Clock className="h-4 w-4" />
               </div>
-              <div>
-                <span className="text-xs font-medium text-slate-500">Critical Path Delay</span>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-lg lg:text-xl font-bold text-slate-900">
-                    {forecast?.delay_days && forecast.delay_days > 0
-                      ? `+${forecast.delay_days} Days`
-                      : "0 Days"}
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block truncate">
+                  Critical Path Delay
+                </span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-xs font-extrabold text-slate-900">
+                    {delayedTasksCount > 0 ? `+${delayedTasksCount * 2} Days` : "0 Days"}
                   </span>
-                  <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200">
-                    On Track
+                  <span
+                    className={`inline-flex items-center rounded px-1.5 py-0.25 text-[9px] font-bold ${
+                      delayedTasksCount > 0
+                        ? "bg-red-50 text-red-700 border border-red-200"
+                        : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    }`}
+                  >
+                    {delayedTasksCount > 0 ? "At Risk" : "On Track"}
                   </span>
                 </div>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-slate-300 shrink-0" />
-          </div>
 
-          {/* Card 3: Financing Carry Exposure */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs hover:border-slate-300 transition-all flex items-center justify-between">
-            <div className="flex items-center gap-3.5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 shrink-0">
-                <DollarSign className="h-5 w-5" />
+            {/* Card 3: Financing Carry Exposure */}
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-2.5 flex items-center gap-2.5 shadow-2xs hover:border-slate-300 transition-colors">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
+                <DollarSign className="h-4 w-4" />
               </div>
-              <div>
-                <span className="text-xs font-medium text-slate-500">Financing Carry Exposure</span>
-                <div className="text-lg lg:text-xl font-bold text-slate-900 mt-0.5 font-mono">
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block truncate">
+                  Carry Exposure
+                </span>
+                <span className="text-xs font-extrabold text-slate-900 block truncate font-mono">
                   {forecast?.total_carry_cost_exposure
                     ? formatMoney(forecast.total_carry_cost_exposure)
                     : "$0.00"}
-                </div>
+                </span>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-slate-300 shrink-0" />
-          </div>
 
-          {/* Card 4: Verification Conflicts */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs hover:border-slate-300 transition-all flex items-center justify-between">
-            <div className="flex items-center gap-3.5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600 shrink-0">
-                <AlertTriangle className="h-5 w-5" />
+            {/* Card 4: Verification Conflicts */}
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-2.5 flex items-center gap-2.5 shadow-2xs hover:border-slate-300 transition-colors">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600 shrink-0">
+                <AlertTriangle className="h-4 w-4" />
               </div>
-              <div>
-                <span className="text-xs font-medium text-slate-500">Verification Conflicts</span>
-                <div className="text-lg lg:text-xl font-bold text-slate-900 mt-0.5">
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block truncate">
+                  Verification Conflicts
+                </span>
+                <span className="text-xs font-extrabold text-slate-900 block truncate">
                   {forecast?.active_discrepancies_count && forecast.active_discrepancies_count > 0
-                    ? `${forecast.active_discrepancies_count} Conflict`
+                    ? `${forecast.active_discrepancies_count} Disputes`
                     : "0 Disputes"}
-                </div>
+                </span>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-slate-300 shrink-0" />
+          </div>
+
+          {/* Right: Client Live View + User Profile Badge */}
+          <div className="flex items-center gap-3 shrink-0 justify-end">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200/80 bg-emerald-50/70 px-2.5 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 transition-colors"
+            >
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Client Live View</span>
+            </button>
+
+            <div className="flex items-center gap-2 border-l border-slate-200 pl-3">
+              <div className="h-8 w-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shadow-2xs">
+                DR
+              </div>
+              <div className="text-left">
+                <span className="text-xs font-bold text-slate-900 block leading-tight">
+                  Divyanshu Rai
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium leading-none">
+                  Project Owner
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* View Switcher Tabs (Gantt Schedule vs Milestone Table) matching reference UI */}
-        <div className="border-b border-slate-200 flex items-center gap-6">
-          <button
-            type="button"
-            onClick={() => setViewMode("GANTT")}
-            className={`pb-3 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
-              viewMode === "GANTT"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            <Layers className="h-4 w-4" />
-            <span>Gantt Schedule</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode("TABLE")}
-            className={`pb-3 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
-              viewMode === "TABLE"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            <TableIcon className="h-4 w-4" />
-            <span>Milestone Table</span>
-          </button>
+        {/* Toolbar matching Screenshot 1: Hamburger + View Tabs + Date Nav + Search + View Dropdown */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white rounded-2xl border border-slate-200/90 px-4 py-2.5 shadow-2xs">
+          {/* Left: Hamburger & View Mode Switcher Tabs */}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              title="Toggle sidebar"
+            >
+              <Menu className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center gap-1.5 bg-slate-100/70 p-1 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setViewMode("GANTT")}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                  viewMode === "GANTT"
+                    ? "bg-white text-blue-600 shadow-2xs font-bold"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <Layers className="h-3.5 w-3.5" />
+                <span>Gantt Schedule</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewMode("TABLE")}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                  viewMode === "TABLE"
+                    ? "bg-white text-blue-600 shadow-2xs font-bold"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <TableIcon className="h-3.5 w-3.5" />
+                <span>Milestone Table</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewMode("CALENDAR")}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  viewMode === "CALENDAR"
+                    ? "bg-blue-600 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <CalendarIcon className="h-3.5 w-3.5" />
+                <span>Calendar View</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Middle: Date Navigation (Today, < >, October 2026) */}
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedDate("2026-10-14");
+              }}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              Today
+            </button>
+            <div className="flex items-center gap-0.5">
+              <button
+                type="button"
+                className="h-7 w-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 cursor-pointer"
+                aria-label="Previous month"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                className="h-7 w-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 cursor-pointer"
+                aria-label="Next month"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+            <h2 className="text-sm font-extrabold text-slate-900 tracking-tight">
+              October 2026
+            </h2>
+          </div>
+
+          {/* Right: Search Input & View Dropdown */}
+          <div className="flex items-center gap-2">
+            <div className="relative w-56 sm:w-64">
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search site work, trades, tasks..."
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none transition-colors"
+              />
+            </div>
+
+            <select
+              defaultValue="Month"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:outline-none cursor-pointer"
+            >
+              <option value="Month">Month</option>
+              <option value="Week">Week</option>
+              <option value="Day">Day</option>
+            </select>
+          </div>
         </div>
+
+        {/* Main View Area */}
+        {viewMode === "CALENDAR" && (
+          <TimelineCalendarView
+            tasks={constructionTasks}
+            selectedDate={selectedDate}
+            onSelectDate={handleSelectDate}
+            onSelectTask={handleSelectTask}
+            onOpenCreateModal={() => setIsCreateTaskModalOpen(true)}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            activeTradeFilter={activeTradeFilter}
+            onTradeFilterChange={setActiveTradeFilter}
+            activePhaseFilters={activePhaseFilters}
+            onTogglePhaseFilter={handleTogglePhaseFilter}
+            onResetFilters={handleResetFilters}
+          />
+        )}
 
         {/* Gantt Schedule Component */}
         {viewMode === "GANTT" && (
@@ -309,7 +477,7 @@ export default function TimelinePage() {
               </div>
             ) : milestones.length === 0 ? (
               <div className="rounded-xl border border-slate-200 bg-white p-12 text-center">
-                <Calendar className="mx-auto h-8 w-8 text-slate-400" />
+                <CalendarIcon className="mx-auto h-8 w-8 text-slate-400" />
                 <h3 className="mt-2 text-sm font-semibold text-slate-800">
                   No milestones found
                 </h3>
@@ -320,7 +488,10 @@ export default function TimelinePage() {
             ) : (
               <MilestoneGanttChart
                 milestones={milestones}
-                onSelectMilestone={handleOpenMilestoneDrawer}
+                onSelectMilestone={(m) => {
+                  setSelectedMilestone(m);
+                  setIsDetailDrawerOpen(true);
+                }}
                 selectedMilestoneId={selectedMilestone?.id}
                 onUpdateMilestoneDate={handleUpdateMilestoneDate}
                 statusFilter={statusFilter}
@@ -340,9 +511,9 @@ export default function TimelinePage() {
               <div className="p-4">
                 <SkeletonTable rows={5} columns={6} />
               </div>
-            ) : filteredMilestones.length === 0 ? (
+            ) : milestones.length === 0 ? (
               <div className="p-12 text-center">
-                <Calendar className="mx-auto h-8 w-8 text-slate-400" />
+                <CalendarIcon className="mx-auto h-8 w-8 text-slate-400" />
                 <h3 className="mt-2 text-sm font-semibold text-slate-800">
                   No matching milestones
                 </h3>
@@ -358,156 +529,52 @@ export default function TimelinePage() {
                       <th className="py-3 px-5">Milestone & Scope</th>
                       <th className="py-3 px-4">Status</th>
                       <th className="py-3 px-4">Progress</th>
-                      <th className="py-3 px-4">Baseline Target</th>
-                      <th className="py-3 px-4">Forecast Finish</th>
-                      <th className="py-3 px-4">Evidence</th>
-                      <th className="py-3 px-5 text-right">Actions</th>
+                      <th className="py-3 px-4">Forecast End</th>
+                      <th className="py-3 px-4">Responsible Party</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {filteredMilestones.map((ms) => {
-                      const isDelayed = (ms.delay_days || 0) > 0;
-                      const hasConflict =
-                        ms.progress_conflict?.has_conflict &&
-                        ms.progress_conflict.status === "OPEN";
-
-                      return (
-                        <tr
-                          key={ms.id}
-                          className="hover:bg-slate-50/60 transition-colors group cursor-pointer"
-                          onClick={() => handleOpenMilestoneDrawer(ms)}
-                        >
-                          <td className="py-3.5 px-5">
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
-                                {ms.name}
-                              </span>
-                              {ms.critical_path && (
-                                <span className="inline-flex items-center gap-1 rounded bg-rose-50 px-1.5 py-0.5 text-[11px] font-semibold text-rose-700 border border-rose-100">
-                                  <Flame className="h-3 w-3 text-rose-500" /> Critical
-                                </span>
-                              )}
-                              {hasConflict && (
-                                <span className="inline-flex items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-200">
-                                  <Scale className="h-3 w-3 text-amber-600" /> Disputed
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500">
-                              {ms.budget_line_code && (
-                                <span className="font-mono text-slate-600 font-medium">{ms.budget_line_code}</span>
-                              )}
-                              {ms.budget_line_name && (
-                                <span>&bull; {ms.budget_line_name}</span>
-                              )}
-                            </div>
-                          </td>
-
-                          <td className="py-3.5 px-4">
-                            {ms.status === "COMPLETED" && (
-                              <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-100">
-                                <CheckCircle2 className="h-3 w-3 text-emerald-600" /> Complete
-                              </span>
-                            )}
-                            {ms.status === "AT_RISK" && (
-                              <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700 border border-rose-100">
-                                <AlertTriangle className="h-3 w-3 text-rose-500" /> At Risk
-                              </span>
-                            )}
-                            {ms.status === "IN_PROGRESS" && (
-                              <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 border border-blue-100">
-                                <Clock className="h-3 w-3 text-blue-600" /> In Progress
-                              </span>
-                            )}
-                            {ms.status === "NOT_STARTED" && (
-                              <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
-                                Not Started
-                              </span>
-                            )}
-                          </td>
-
-                          <td className="py-3.5 px-4">
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-20 bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                                <div
-                                  className={`h-full ${
-                                    ms.status === "COMPLETED"
-                                      ? "bg-emerald-500"
-                                      : isDelayed
-                                      ? "bg-rose-500"
-                                      : "bg-blue-600"
-                                  }`}
-                                  style={{ width: `${ms.percent_complete}%` }}
-                                />
-                              </div>
-                              <span className="tabular-nums font-semibold text-slate-800">
-                                {ms.percent_complete}%
-                              </span>
-                            </div>
-                          </td>
-
-                          <td className="py-3.5 px-4 tabular-nums text-slate-500">
-                            <div>{formatDate(ms.planned_start)}</div>
-                            <div className="text-[11px] text-slate-400">to {formatDate(ms.planned_end)}</div>
-                          </td>
-
-                          <td className="py-3.5 px-4 tabular-nums">
-                            <div
-                              className={`font-semibold ${
-                                isDelayed ? "text-rose-600" : "text-slate-800"
-                              }`}
-                            >
-                              {formatDate(ms.forecast_end || ms.planned_end)}
-                            </div>
-                            {isDelayed && (
-                              <div className="text-[11px] font-semibold text-rose-600">
-                                +{ms.delay_days}d delay
-                              </div>
-                            )}
-                          </td>
-
-                          <td className="py-3.5 px-4">
-                            <Button
-                              type="button"
-                              variant="secondary"
-                              size="sm"
-                              className="px-2 py-1 gap-1 text-xs cursor-pointer"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleOpenAttach(ms);
-                              }}
-                            >
-                              <FileCheck2 className="h-3.5 w-3.5 text-blue-600" />
-                              <span>{ms.evidence_count || 0} Files</span>
-                            </Button>
-                          </td>
-
-                          <td className="py-3.5 px-5 text-right">
-                            <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                              <Button
-                                type="button"
-                                variant="tertiary"
-                                size="sm"
-                                className="px-2.5 py-1 text-xs cursor-pointer"
-                                onClick={() => handleOpenUpdate(ms)}
-                              >
-                                Update
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleOpenMilestoneDrawer(ms)}
-                                title="View Milestone Details"
-                                className="cursor-pointer"
-                              >
-                                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-700" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {milestones.map((m) => (
+                      <tr key={m.id} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-3.5 px-5 font-bold text-slate-900">
+                          {m.name}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span
+                            className={`rounded px-2 py-0.5 text-[10px] font-bold ${
+                              m.status === "COMPLETED"
+                                ? "bg-emerald-50 text-emerald-700"
+                                : m.status === "DELAYED"
+                                ? "bg-red-50 text-red-700"
+                                : "bg-blue-50 text-blue-700"
+                            }`}
+                          >
+                            {m.status}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 font-semibold text-slate-700">
+                          {m.percent_complete}%
+                        </td>
+                        <td className="py-3.5 px-4 text-slate-600 font-mono">
+                          {formatDate(m.forecast_end)}
+                        </td>
+                        <td className="py-3.5 px-4 text-slate-600">
+                          {m.responsible_party || "Site Team"}
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            onClick={() => {
+                              setSelectedMilestone(m);
+                              setIsDetailDrawerOpen(true);
+                            }}
+                            className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+                          >
+                            View Details
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -516,45 +583,76 @@ export default function TimelinePage() {
         )}
       </div>
 
-      {/* Modals & Slide-out Workbench Drawer */}
-      <CreateMilestoneModal
-        open={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
-        projectId={currentProjectId}
-        existingMilestones={milestones}
+      {/* Task Detail Slide-Over Inspector Drawer matching Screenshot 2 */}
+      <TaskDetailDrawer
+        open={isTaskDrawerOpen}
+        onClose={() => setIsTaskDrawerOpen(false)}
+        selectedDate={selectedDate}
+        tasksOnDate={tasksOnSelectedDate}
+        activeTaskId={activeTaskId}
+        onSelectTask={(id) => setActiveTaskId(id)}
+        onUpdateTask={handleUpdateTask}
+        onDeleteTask={handleDeleteTask}
+        onCreateTaskOnDate={(date) => {
+          setSelectedDate(date);
+          setIsCreateTaskModalOpen(true);
+        }}
       />
 
-      <UpdateMilestoneModal
-        open={isUpdateModalOpen}
-        onOpenChange={setIsUpdateModalOpen}
-        milestone={selectedMilestone}
+      {/* Create Field Task Modal */}
+      <CreateFieldTaskModal
+        open={isCreateTaskModalOpen}
+        onClose={() => setIsCreateTaskModalOpen(false)}
+        defaultDate={selectedDate}
         projectId={currentProjectId}
+        onCreateTask={handleCreateTask}
       />
 
-      <AttachEvidenceModal
-        open={isAttachModalOpen}
-        onOpenChange={setIsAttachModalOpen}
-        milestone={selectedMilestone}
-        projectId={currentProjectId}
-      />
+      {/* Milestone Modals for Gantt/Table compatibility */}
+      {isCreateModalOpen && (
+        <CreateMilestoneModal
+          open={isCreateModalOpen}
+          onOpenChange={setIsCreateModalOpen}
+          projectId={currentProjectId}
+          existingMilestones={milestones}
+        />
+      )}
 
-      <ResolveDiscrepancyModal
-        open={isResolveModalOpen}
-        onOpenChange={setIsResolveModalOpen}
-        milestone={selectedMilestone}
-        projectId={currentProjectId}
-      />
+      {selectedMilestone && (
+        <>
+          <MilestoneDetailDrawer
+            open={isDetailDrawerOpen}
+            onOpenChange={setIsDetailDrawerOpen}
+            milestone={selectedMilestone}
+            allMilestones={milestones}
+            onOpenUpdateModal={() => setIsUpdateModalOpen(true)}
+            onOpenAttachEvidenceModal={() => setIsAttachModalOpen(true)}
+            onOpenResolveDiscrepancyModal={() => setIsResolveModalOpen(true)}
+            onSelectMilestone={(ms) => setSelectedMilestone(ms)}
+          />
 
-      <MilestoneDetailDrawer
-        open={isDetailDrawerOpen}
-        onOpenChange={setIsDetailDrawerOpen}
-        milestone={selectedMilestone}
-        allMilestones={milestones}
-        onOpenUpdateModal={handleOpenUpdate}
-        onOpenAttachEvidenceModal={handleOpenAttach}
-        onOpenResolveDiscrepancyModal={handleOpenResolve}
-        onSelectMilestone={(ms) => setSelectedMilestone(ms)}
-      />
+          <UpdateMilestoneModal
+            open={isUpdateModalOpen}
+            onOpenChange={setIsUpdateModalOpen}
+            milestone={selectedMilestone}
+            projectId={currentProjectId}
+          />
+
+          <AttachEvidenceModal
+            open={isAttachModalOpen}
+            onOpenChange={setIsAttachModalOpen}
+            milestone={selectedMilestone}
+            projectId={currentProjectId}
+          />
+
+          <ResolveDiscrepancyModal
+            open={isResolveModalOpen}
+            onOpenChange={setIsResolveModalOpen}
+            milestone={selectedMilestone}
+            projectId={currentProjectId}
+          />
+        </>
+      )}
     </div>
   );
 }
