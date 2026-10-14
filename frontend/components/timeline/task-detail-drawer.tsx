@@ -5,7 +5,6 @@ import {
   X,
   CheckCircle2,
   AlertTriangle,
-  Clock,
   Calendar,
   Save,
   Trash2,
@@ -128,25 +127,10 @@ export function TaskDetailDrawer({
               {draft?.date || selectedDate || "2026-10-14"}
             </span>
 
-            {draft?.is_delayed ? (
+            {draft?.is_delayed && (
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-2.5 py-1 text-xs font-bold text-red-700 border border-red-200/80 shadow-2xs">
-                <span className="h-2 w-2 rounded-full bg-red-600 animate-pulse" />
+                <span className="h-2.5 w-2.5 rounded-full bg-red-600 animate-pulse" />
                 DELAYED ({draft.delay_days}d)
-              </span>
-            ) : draft?.status === "COMPLETED" ? (
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 border border-emerald-200/80 shadow-2xs">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                COMPLETED
-              </span>
-            ) : draft?.status === "IN_PROGRESS" ? (
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 border border-blue-200/80 shadow-2xs">
-                <Clock className="h-3.5 w-3.5 text-blue-600" />
-                IN PROGRESS
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 border border-amber-200/80 shadow-2xs">
-                <Calendar className="h-3.5 w-3.5 text-amber-600" />
-                SCHEDULED
               </span>
             )}
           </div>
@@ -216,37 +200,6 @@ export function TaskDetailDrawer({
           <div className="bg-emerald-50 border-b border-emerald-200 px-6 py-2.5 flex items-center gap-2 text-xs font-semibold text-emerald-800 animate-in fade-in duration-150">
             <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
             <span>{saveSuccessMessage}</span>
-          </div>
-        )}
-
-        {/* Multi-Task Selector on this Date */}
-        {tasksOnDate.length > 1 && (
-          <div className="flex items-center gap-2 overflow-x-auto border-b border-slate-100 bg-slate-50/70 px-6 py-2 shrink-0">
-            <span className="text-[11px] font-semibold text-slate-500 whitespace-nowrap">
-              Tasks on this date:
-            </span>
-            {tasksOnDate.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => onSelectTask(t.id)}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
-                  t.id === activeTask?.id
-                    ? "bg-white font-bold text-blue-700 shadow-2xs border border-slate-200"
-                    : "text-slate-600 hover:bg-white/80"
-                }`}
-              >
-                <span
-                  className={`h-2 w-2 rounded-full ${
-                    t.is_delayed
-                      ? "bg-red-500"
-                      : t.status === "COMPLETED"
-                      ? "bg-emerald-500"
-                      : "bg-blue-500"
-                  }`}
-                />
-                <span className="truncate max-w-[140px]">{t.title}</span>
-              </button>
-            ))}
           </div>
         )}
 

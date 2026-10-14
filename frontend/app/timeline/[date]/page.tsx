@@ -9,7 +9,6 @@ import {
   ArrowLeft,
   Calendar,
   CheckCircle2,
-  Clock,
   AlertTriangle,
   Trash2,
   Plus,
@@ -169,9 +168,9 @@ function TimelineDatePageContent() {
 
   return (
     <div className="min-h-screen bg-slate-50/40 pb-20">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 space-y-4">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 space-y-4">
         {/* Top Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-2xl border border-slate-200/90 px-5 py-3 shadow-2xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-2xl border border-slate-200/90 px-6 py-4 shadow-2xs">
           <div className="flex items-center gap-3">
             <Link
               href={calendarBackUrl}
@@ -209,25 +208,10 @@ function TimelineDatePageContent() {
               {dateParam}
             </span>
 
-            {draft?.is_delayed ? (
+            {draft?.is_delayed && (
               <span className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700 border border-red-200/80 shadow-2xs">
                 <span className="h-2.5 w-2.5 rounded-full bg-red-600 animate-pulse" />
                 DELAYED ({draft.delay_days} DAYS ACTIVE DELAY)
-              </span>
-            ) : draft?.status === "COMPLETED" ? (
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 border border-emerald-200/80 shadow-2xs">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                WORK COMPLETED
-              </span>
-            ) : draft?.status === "IN_PROGRESS" ? (
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 border border-blue-200/80 shadow-2xs">
-                <Clock className="h-4 w-4 text-blue-600" />
-                IN PROGRESS
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 border border-amber-200/80 shadow-2xs">
-                <Calendar className="h-4 w-4 text-amber-600" />
-                SCHEDULED
               </span>
             )}
           </div>
@@ -362,36 +346,6 @@ function TimelineDatePageContent() {
           </div>
         )}
 
-        {/* Multi-Task Selector on this Date */}
-        {tasksOnDate.length > 1 && (
-          <div className="flex items-center gap-2.5 overflow-x-auto rounded-2xl border border-slate-200/90 bg-white px-5 py-3 shadow-2xs">
-            <span className="text-xs font-bold text-slate-500 whitespace-nowrap">
-              Tasks on {dateParam}:
-            </span>
-            {tasksOnDate.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setActiveTaskId(t.id)}
-                className={`inline-flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
-                  t.id === activeTask?.id
-                    ? "bg-blue-50 font-bold text-blue-700 shadow-2xs border border-blue-200/80"
-                    : "text-slate-600 hover:bg-slate-50 border border-transparent"
-                }`}
-              >
-                <span
-                  className={`h-2.5 w-2.5 rounded-full ${
-                    t.is_delayed
-                      ? "bg-red-500 animate-pulse"
-                      : t.status === "COMPLETED"
-                      ? "bg-emerald-500"
-                      : "bg-blue-500"
-                  }`}
-                />
-                <span>{t.title}</span>
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Main Content Area - Clean, Perfectly Aligned Form */}
         {!draft ? (
@@ -423,7 +377,7 @@ function TimelineDatePageContent() {
             </div>
           </div>
         ) : (
-          <div className="max-w-4xl mx-auto space-y-5">
+          <div className="space-y-4">
             {/* Task Title (Editable by Owner) */}
             <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-2xs space-y-3">
               <div className="flex items-center justify-between">

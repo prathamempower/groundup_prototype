@@ -625,6 +625,58 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
           </div>
         </div>
       </header>
+
+      {/* Real-Time Alert Notification Bar - Strictly scoped to Control Center at top of page */}
+      {!isAlertBarDismissed && isControlCenterPage && (
+        <div className="w-full border-b border-amber-200/90 bg-gradient-to-r from-amber-50 via-amber-50/95 to-amber-100/40 px-5 py-2.5 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs animate-in fade-in duration-150">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-200/80 text-amber-800">
+              <AlertTriangle className="h-4 w-4 animate-pulse text-amber-700" />
+            </span>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+              <span className="font-bold text-amber-900 flex items-center gap-1.5">
+                Critical Path Risk
+                <span className="rounded-full bg-amber-200 text-amber-900 px-2 py-0.5 text-[10px] font-bold">
+                  Active Warning
+                </span>
+              </span>
+              <span className="text-slate-400 hidden sm:inline">·</span>
+              <span className="font-bold text-slate-800">
+                At-Risk Milestone: Structural Steel Fabrication
+              </span>
+              <span className="text-slate-600 hidden xl:inline">
+                (Fabricator lead time extended by 5 weeks. Delays framed assembly and secondary trade access.)
+              </span>
+              <span className="font-mono text-amber-800 text-[11px] font-bold inline-flex items-center gap-1.5">
+                <span className="rounded bg-white/90 border border-amber-200 px-1.5 py-0.5 text-amber-800 font-bold">
+                  Slip: +35 Days
+                </span>
+                <span className="rounded bg-white/90 border border-amber-200 px-1.5 py-0.5 text-amber-800 font-bold">
+                  Carry: +$28,500
+                </span>
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+            <Link
+              href={criticalPathAlert?.link_url || (currentProjectId ? `/projects/${currentProjectId}/timeline` : "/timeline")}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#C85A17] hover:bg-[#B34E14] text-white px-3 py-1.5 text-xs font-bold shadow-xs transition-colors cursor-pointer"
+            >
+              <span>View Milestone Schedule</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <button
+              onClick={() => setIsAlertBarDismissed(true)}
+              className="text-amber-700 hover:text-amber-950 p-1 rounded-md hover:bg-amber-100/60 transition-colors cursor-pointer"
+              title="Dismiss notification"
+              aria-label="Dismiss notification"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
