@@ -15,6 +15,7 @@ import { getDefaultRouteForRole } from "@/lib/navigation";
 import { Button } from "@/components/ui/button";
 
 import { FloatingDemoButton, DemoAccount } from "@/components/auth/floating-demo-button";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -87,31 +88,7 @@ export default function LoginPage() {
         {/* Brand Header */}
         <div className="text-center space-y-3">
           <div className="flex justify-center mb-2">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center p-2 shadow-xs">
-                <Image
-                  src="/icon.svg"
-                  alt="GroundUp"
-                  width={28}
-                  height={28}
-                  className="h-full w-full object-contain"
-                  priority
-                />
-              </div>
-              <div className="flex flex-col text-left">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xl font-extrabold tracking-tight text-slate-900 leading-none">
-                    GroundUp
-                  </span>
-                  <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold text-blue-700 border border-blue-200/60 leading-none">
-                    AI
-                  </span>
-                </div>
-                <span className="text-[11px] text-slate-400 font-medium leading-none mt-1">
-                  Enterprise Capital Management
-                </span>
-              </div>
-            </div>
+            <BrandLogo size="lg" showSubtitle={true} />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             Welcome back

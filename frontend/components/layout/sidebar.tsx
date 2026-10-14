@@ -14,6 +14,7 @@ import {
   Building2,
 } from "lucide-react";
 import { UserRole, Project } from "@/lib/types";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -149,35 +150,7 @@ export function Sidebar({
         <div className="flex h-14 items-center justify-between px-3.5 border-b border-slate-200/70 bg-white">
           {!collapsed ? (
             <>
-              <Link
-                href="/projects"
-                className="flex items-center gap-2.5 group transition-opacity min-w-0"
-                title="GroundUp — Project Portfolio"
-              >
-                <div className="relative h-8 w-8 shrink-0 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center p-1.5 shadow-2xs group-hover:bg-slate-800 transition-colors">
-                  <Image
-                    src="/icon.svg"
-                    alt="GroundUp Logo"
-                    width={20}
-                    height={20}
-                    className="h-5 w-5 object-contain"
-                    priority
-                  />
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-extrabold tracking-tight text-slate-900 leading-none">
-                      GroundUp
-                    </span>
-                    <span className="rounded bg-blue-50 px-1 py-0.5 text-[9px] font-bold text-blue-700 border border-blue-200/60 leading-none">
-                      AI
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-medium leading-none mt-1 truncate">
-                    Enterprise Capital
-                  </span>
-                </div>
-              </Link>
+              <BrandLogo href="/projects" onClick={onCloseMobile} />
               <button
                 onClick={onToggleCollapse}
                 className="hidden md:flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200/70 transition-colors cursor-pointer shrink-0"
@@ -190,16 +163,16 @@ export function Sidebar({
             <div className="w-full flex items-center justify-center">
               <button
                 onClick={onToggleCollapse}
-                className="h-8 w-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center p-1.5 shadow-2xs hover:bg-slate-800 transition-colors cursor-pointer group"
+                className="h-8 w-8 rounded-lg bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center p-1.5 hover:border-blue-400 hover:shadow-xs transition-all cursor-pointer group"
                 aria-label="Expand sidebar"
                 title="Expand sidebar"
               >
                 <Image
-                  src="/icon.svg"
+                  src="/logo.png"
                   alt="GroundUp Logo"
-                  width={20}
-                  height={20}
-                  className="h-5 w-5 object-contain"
+                  width={22}
+                  height={22}
+                  className="h-full w-full object-contain select-none"
                   priority
                 />
               </button>

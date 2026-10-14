@@ -35,6 +35,7 @@ import {
   DrawerBody,
   DrawerFooter,
 } from "@/components/ui/drawer";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -176,15 +177,27 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
   return (
     <div className="sticky top-0 z-30 w-full flex flex-col">
       <header className="flex h-14 w-full items-center justify-between border-b border-slate-200/80 bg-white px-5">
-        {/* Left: Mobile Toggle & Contextual Enterprise Breadcrumb */}
-        <div className="flex items-center gap-3 min-w-0">
+        {/* Left: Mobile Toggle & Brand Logo & Contextual Enterprise Breadcrumb */}
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           <button
             onClick={onToggleSidebar}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 md:hidden cursor-pointer"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 md:hidden cursor-pointer shrink-0"
             aria-label="Toggle navigation sidebar"
           >
             <Menu className="h-5 w-5" />
           </button>
+
+          {/* Brand Logo: always visible on mobile, and on desktop when outside project workspace */}
+          <div className="flex md:hidden shrink-0">
+            <BrandLogo size="sm" iconOnly href="/projects" />
+          </div>
+
+          {!routeProjectId && (
+            <div className="hidden md:flex items-center gap-2.5 shrink-0">
+              <BrandLogo size="sm" href="/projects" showSubtitle={false} />
+              <span className="text-slate-200 select-none font-light">|</span>
+            </div>
+          )}
 
           {/* High-Fidelity Enterprise Breadcrumb */}
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 min-w-0">
