@@ -518,366 +518,117 @@ export function DrawDetailDrawer({
             </div>
           )}
 
-          {/* DUAL VERIFICATION CARD */}
-          <div className="grid grid-cols-2 gap-4">
-            {/* PM Work Verification */}
-            <div className="rounded-lg border border-border bg-surface p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ClipboardCheck className="h-4 w-4 text-primary" />
-                  <span className="text-body font-semibold text-text-primary">
-                    PM Work Verification
-                  </span>
-                </div>
-                {activeDraw.pm_verification?.inspection_passed ? (
-                  <span className="inline-flex items-center gap-1 rounded bg-success-subtle px-2 py-0.5 text-caption font-semibold text-success">
-                    <CheckCircle2 className="h-3 w-3" /> Certified
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 rounded bg-subtle px-2 py-0.5 text-caption font-semibold text-text-muted">
-                    <Clock className="h-3 w-3" /> Pending Review
-                  </span>
-                )}
-              </div>
-              <p className="text-caption text-text-secondary">
-                {activeDraw.pm_verification?.notes ||
-                  "Independent progress inspection confirmation pending certification."}
-              </p>
-              {activeDraw.pm_verification && (
-                <div className="text-[11px] text-text-muted pt-1">
-                  Certified by: {activeDraw.pm_verification.verified_by} • {formatDate(activeDraw.pm_verification.verified_at)}
-                </div>
-              )}
-            </div>
-
-            {/* CFO Cost Verification */}
-            <div className="rounded-lg border border-border bg-surface p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-success" />
-                  <span className="text-body font-semibold text-text-primary">
-                    CFO Cost Verification
-                  </span>
-                </div>
-                {activeDraw.cfo_verification?.costs_verified ? (
-                  <span className="inline-flex items-center gap-1 rounded bg-success-subtle px-2 py-0.5 text-caption font-semibold text-success">
-                    <CheckCircle2 className="h-3 w-3" /> Certified
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 rounded bg-subtle px-2 py-0.5 text-caption font-semibold text-text-muted">
-                    <Clock className="h-3 w-3" /> Pending Review
-                  </span>
-                )}
-              </div>
-              <p className="text-caption text-text-secondary">
-                {activeDraw.cfo_verification
-                  ? "All subcontractor invoices cross-referenced and prior advance payments cleared."
-                  : "Financial audit of invoice attachments and payment clearance pending."}
-              </p>
-              {activeDraw.cfo_verification && (
-                <div className="text-[11px] text-text-muted pt-1">
-                  Certified by: {activeDraw.cfo_verification.verified_by} • {formatDate(activeDraw.cfo_verification.verified_at)}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* TABS: DRAW LINES TABLE & PACKET CHECKLIST */}
+          {/* DRAW LINES TABLE WORKBENCH */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between border-b border-border pb-1">
+            <div className="flex items-center justify-between border-b border-border pb-2">
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setActiveTab("lines")}
-                  className={`px-3 py-1.5 text-body-sm font-medium rounded-t border-b-2 transition-colors ${
-                    activeTab === "lines"
-                      ? "border-primary text-primary"
-                      : "border-transparent text-text-secondary hover:text-text-primary"
-                  }`}
-                >
-                  Line Item Schedule of Values ({activeDraw.lines?.length || 0})
-                </button>
-                <button
-                  onClick={() => setActiveTab("packet")}
-                  className={`px-3 py-1.5 text-body-sm font-medium rounded-t border-b-2 transition-colors ${
-                    activeTab === "packet"
-                      ? "border-primary text-primary"
-                      : "border-transparent text-text-secondary hover:text-text-primary"
-                  }`}
-                >
-                  Lender Packet Checklist & Portal Summary
-                </button>
+                <span className="text-body font-bold text-text-primary">
+                  Line Item Schedule of Values
+                </span>
+                <span className="rounded-full bg-primary-subtle text-primary text-caption font-bold px-2 py-0.5">
+                  {activeDraw.lines?.length || 0}
+                </span>
               </div>
 
-              {activeTab === "lines" && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsAllocateTasksModalOpen(true)}
-                  className="h-8 text-xs font-semibold border-primary/40 text-primary hover:bg-primary-subtle"
-                >
-                  <FileSpreadsheet className="h-3.5 w-3.5 mr-1.5 text-primary" />
-                  Input / Allocate Work Tasks
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsAllocateTasksModalOpen(true)}
+                className="h-8 text-xs font-semibold border-primary/40 text-primary hover:bg-primary-subtle cursor-pointer"
+              >
+                <FileSpreadsheet className="h-3.5 w-3.5 mr-1.5 text-primary" />
+                Input / Allocate Work Tasks
+              </Button>
             </div>
 
-            {/* TAB 1: DRAW LINES TABLE */}
-            {activeTab === "lines" && (
-              <div className="rounded-lg border border-border overflow-hidden bg-surface shadow-xs">
-                <table className="w-full text-left text-body-sm">
-                  <thead className="bg-subtle/50 text-caption font-semibold text-text-secondary border-b border-border">
-                    <tr>
-                      <th className="py-2.5 px-3">CSI Code & Scope</th>
-                      <th className="py-2.5 px-3 text-right">Requested</th>
-                      <th className="py-2.5 px-3 text-right">Recommended</th>
-                      <th className="py-2.5 px-3 text-right">Approved</th>
-                      <th className="py-2.5 px-3 text-right font-bold text-success">Cleared Funded</th>
-                      <th className="py-2.5 px-3">Evidence Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {activeDraw.lines && activeDraw.lines.length > 0 ? (
-                      activeDraw.lines.map((line) => (
-                        <tr key={line.id} className="hover:bg-subtle/20 transition-colors">
-                          <td className="py-3 px-3">
-                            <span className="font-mono text-caption text-text-muted mr-1.5 font-bold">
-                              {line.budget_line_code}
-                            </span>
-                            <span className="font-medium text-text-primary">
-                              {line.budget_line_name}
-                            </span>
-                            {line.lender_notes && (
-                              <p className="text-caption text-warning mt-0.5">
-                                Note: {line.lender_notes}
-                              </p>
-                            )}
-                          </td>
-                          <td className="py-3 px-3 text-right tabular-nums text-text-secondary font-medium">
-                            {formatMoney(line.requested_amount)}
-                          </td>
-                          <td className="py-3 px-3 text-right tabular-nums text-text-secondary">
-                            {formatMoney(line.recommended_amount)}
-                          </td>
-                          <td className="py-3 px-3 text-right tabular-nums font-medium text-text-primary">
-                            {formatMoney(line.approved_amount)}
-                          </td>
-                          <td className="py-3 px-3 text-right tabular-nums font-bold text-success">
-                            {formatMoney(line.funded_amount)}
-                          </td>
-                          <td className="py-3 px-3">
-                            <StatusBadge
-                              status={
-                                line.evidence_status === "VERIFIED"
-                                  ? "verified"
-                                  : line.evidence_status === "PENDING_INSPECTION"
-                                  ? "under_review"
-                                  : "missing_evidence"
-                              }
-                              customLabel={line.evidence_status.replace("_", " ")}
-                            />
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={6} className="p-4 text-center text-caption text-text-muted italic">
-                          No line items attached to this draw application.
+            {/* DRAW LINES TABLE */}
+            <div className="rounded-lg border border-border overflow-hidden bg-surface shadow-xs">
+              <table className="w-full text-left text-body-sm">
+                <thead className="bg-subtle/50 text-caption font-semibold text-text-secondary border-b border-border">
+                  <tr>
+                    <th className="py-2.5 px-3">CSI Code & Scope</th>
+                    <th className="py-2.5 px-3 text-right">Requested</th>
+                    <th className="py-2.5 px-3 text-right">Recommended</th>
+                    <th className="py-2.5 px-3 text-right">Approved</th>
+                    <th className="py-2.5 px-3 text-right font-bold text-success">Cleared Funded</th>
+                    <th className="py-2.5 px-3">Evidence Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {activeDraw.lines && activeDraw.lines.length > 0 ? (
+                    activeDraw.lines.map((line) => (
+                      <tr key={line.id} className="hover:bg-subtle/20 transition-colors">
+                        <td className="py-3 px-3">
+                          <span className="font-mono text-caption text-text-muted mr-1.5 font-bold">
+                            {line.budget_line_code}
+                          </span>
+                          <span className="font-medium text-text-primary">
+                            {line.budget_line_name}
+                          </span>
+                          {line.lender_notes && (
+                            <p className="text-caption text-warning mt-0.5">
+                              Note: {line.lender_notes}
+                            </p>
+                          )}
                         </td>
-                      </tr>
-                    )}
-                  </tbody>
-                  {activeDraw.lines && activeDraw.lines.length > 0 && (
-                    <tfoot className="bg-subtle/60 font-bold border-t border-border">
-                      <tr>
-                        <td className="py-3 px-3 text-text-primary font-bold">
-                          Total ({activeDraw.lines.length} Tasks Allocated)
+                        <td className="py-3 px-3 text-right tabular-nums text-text-secondary font-medium">
+                          {formatMoney(line.requested_amount)}
                         </td>
-                        <td className="py-3 px-3 text-right tabular-nums text-text-primary font-bold">
-                          {formatMoney(String(totalRequestedCents))}
+                        <td className="py-3 px-3 text-right tabular-nums text-text-secondary">
+                          {formatMoney(line.recommended_amount)}
                         </td>
-                        <td className="py-3 px-3 text-right tabular-nums text-text-secondary font-bold">
-                          {formatMoney(String(totalRecommendedCents))}
+                        <td className="py-3 px-3 text-right tabular-nums font-medium text-text-primary">
+                          {formatMoney(line.approved_amount)}
                         </td>
-                        <td className="py-3 px-3 text-right tabular-nums text-text-primary font-bold">
-                          {formatMoney(String(totalApprovedCents))}
+                        <td className="py-3 px-3 text-right tabular-nums font-bold text-success">
+                          {formatMoney(line.funded_amount)}
                         </td>
-                        <td className="py-3 px-3 text-right tabular-nums text-success font-bold">
-                          {formatMoney(String(totalFundedCents))}
-                        </td>
-                        <td className="py-3 px-3"></td>
-                      </tr>
-                    </tfoot>
-                  )}
-                </table>
-              </div>
-            )}
-
-            {/* TAB 2: PACKET CHECKLIST & PORTAL SUMMARY */}
-            {activeTab === "packet" && (
-              <div className="space-y-4">
-                {/* Packet Checklist */}
-                <div className="rounded-lg border border-border bg-surface p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-caption font-semibold uppercase tracking-wider text-text-secondary">
-                      Draw Package Required Checklist
-                    </span>
-                    <span className="text-caption text-text-muted">
-                      Certified submission package items
-                    </span>
-                  </div>
-
-                  <div className="space-y-2">
-                    {activeDraw.packet_checklist && activeDraw.packet_checklist.length > 0 ? (
-                      activeDraw.packet_checklist.map((item) => (
-                        <div
-                          key={item.id}
-                          className="flex items-center justify-between p-2.5 rounded border border-border bg-subtle/30 text-body-sm"
-                        >
-                          <div className="flex items-center gap-3">
-                            <FileText className="h-4 w-4 text-text-muted shrink-0" />
-                            <div>
-                              <span className="font-semibold text-text-primary block">
-                                {item.requirement}
-                              </span>
-                              {item.document_name && (
-                                <span className="text-caption text-primary hover:underline cursor-pointer">
-                                  {item.document_name}
-                                </span>
-                              )}
-                              {item.notes && (
-                                <span className="text-caption text-warning block">
-                                  {item.notes}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
+                        <td className="py-3 px-3">
                           <StatusBadge
                             status={
-                              item.status === "COMPLETE"
+                              line.evidence_status === "VERIFIED"
                                 ? "verified"
-                                : item.status === "PENDING_SIGNOFF"
+                                : line.evidence_status === "PENDING_INSPECTION"
                                 ? "under_review"
                                 : "missing_evidence"
                             }
-                            customLabel={item.status.replace("_", " ")}
+                            customLabel={line.evidence_status.replace("_", " ")}
                           />
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-caption text-text-secondary py-2">
-                        No packet checklist items specified for this draw.
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Portal-Entry Summary */}
-                <div className="rounded-lg border border-border bg-surface p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-body font-bold text-text-primary">
-                        Lender Portal Entry Summary
-                      </h4>
-                      <p className="text-caption text-text-muted">
-                        Fast copy fields for manual entry into bank lending portal (e.g. Columbia Bank / BoA portal)
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 text-body-sm">
-                    <div className="p-3 rounded border border-border bg-subtle/30 flex items-center justify-between">
-                      <div>
-                        <span className="text-caption text-text-muted block">Loan Commitment ID</span>
-                        <span className="font-mono font-bold text-text-primary">
-                          {activeDraw.portal_summary?.commitment_id || "COL-2025-73B"}
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          copyToClipboard(
-                            activeDraw.portal_summary?.commitment_id || "COL-2025-73B",
-                            "commitment"
-                          )
-                        }
-                      >
-                        {copiedField === "commitment" ? "Copied!" : <Copy className="h-3.5 w-3.5" />}
-                      </Button>
-                    </div>
-
-                    <div className="p-3 rounded border border-border bg-subtle/30 flex items-center justify-between">
-                      <div>
-                        <span className="text-caption text-text-muted block">Gross Application Requested</span>
-                        <span className="font-bold tabular-nums text-text-primary">
-                          {formatMoney(String(totalRequestedCents))}
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          copyToClipboard(String(totalRequestedCents), "requested")
-                        }
-                      >
-                        {copiedField === "requested" ? "Copied!" : <Copy className="h-3.5 w-3.5" />}
-                      </Button>
-                    </div>
-
-                    <div className="p-3 rounded border border-border bg-subtle/30 flex items-center justify-between">
-                      <div>
-                        <span className="text-caption text-text-muted block">Retainage Withheld (10%)</span>
-                        <span className="font-bold tabular-nums text-text-muted">
-                          {formatMoney(
-                            activeDraw.portal_summary?.retainage_withheld ||
-                              String(Math.round(totalRequestedCents * 0.1))
-                          )}
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          copyToClipboard(
-                            activeDraw.portal_summary?.retainage_withheld ||
-                              String(Math.round(totalRequestedCents * 0.1)),
-                            "retainage"
-                          )
-                        }
-                      >
-                        {copiedField === "retainage" ? "Copied!" : <Copy className="h-3.5 w-3.5" />}
-                      </Button>
-                    </div>
-
-                    <div className="p-3 rounded border border-border bg-subtle/30 flex items-center justify-between">
-                      <div>
-                        <span className="text-caption text-text-muted block">Net Disbursement Payable</span>
-                        <span className="font-bold tabular-nums text-primary">
-                          {formatMoney(
-                            activeDraw.portal_summary?.net_payable ||
-                              String(totalRequestedCents - Math.round(totalRequestedCents * 0.1))
-                          )}
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          copyToClipboard(
-                            activeDraw.portal_summary?.net_payable ||
-                              String(totalRequestedCents - Math.round(totalRequestedCents * 0.1)),
-                            "net"
-                          )
-                        }
-                      >
-                        {copiedField === "net" ? "Copied!" : <Copy className="h-3.5 w-3.5" />}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="p-4 text-center text-caption text-text-muted italic">
+                        No line items attached to this draw application.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+                {activeDraw.lines && activeDraw.lines.length > 0 && (
+                  <tfoot className="bg-subtle/60 font-bold border-t border-border">
+                    <tr>
+                      <td className="py-3 px-3 text-text-primary font-bold">
+                        Total ({activeDraw.lines.length} Tasks Allocated)
+                      </td>
+                      <td className="py-3 px-3 text-right tabular-nums text-text-primary font-bold">
+                        {formatMoney(String(totalRequestedCents))}
+                      </td>
+                      <td className="py-3 px-3 text-right tabular-nums text-text-secondary font-bold">
+                        {formatMoney(String(totalRecommendedCents))}
+                      </td>
+                      <td className="py-3 px-3 text-right tabular-nums text-text-primary font-bold">
+                        {formatMoney(String(totalApprovedCents))}
+                      </td>
+                      <td className="py-3 px-3 text-right tabular-nums text-success font-bold">
+                        {formatMoney(String(totalFundedCents))}
+                      </td>
+                      <td className="py-3 px-3"></td>
+                    </tr>
+                  </tfoot>
+                )}
+              </table>
+            </div>
           </div>
         </div>
 

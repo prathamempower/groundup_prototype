@@ -515,204 +515,78 @@ export default function DrawDetailPage() {
         </div>
       </div>
 
-      {/* DUAL VERIFICATION CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* PM Work Verification */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-2 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ClipboardCheck className="h-4 w-4 text-blue-600" />
-              <span className="text-xs font-bold text-slate-900">
-                PM Work Verification
-              </span>
-            </div>
-            {activeDraw.pm_verification?.inspection_passed ? (
-              <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
-                <CheckCircle2 className="h-3 w-3" /> Certified
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 border border-slate-200">
-                <Clock className="h-3 w-3" /> Pending Review
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-slate-600 leading-relaxed">
-            {activeDraw.pm_verification?.notes ||
-              "Independent progress inspection confirmation pending certification."}
-          </p>
-          {activeDraw.pm_verification && (
-            <div className="text-[11px] text-slate-400 pt-1 border-t border-slate-100">
-              Certified by: {activeDraw.pm_verification.verified_by} • {formatDate(activeDraw.pm_verification.verified_at)}
-            </div>
-          )}
-        </div>
-
-        {/* CFO Cost Verification */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-2 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
-              <span className="text-xs font-bold text-slate-900">
-                CFO Cost Verification
-              </span>
-            </div>
-            {activeDraw.cfo_verification?.costs_verified ? (
-              <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
-                <CheckCircle2 className="h-3 w-3" /> Certified
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 border border-slate-200">
-                <Clock className="h-3 w-3" /> Pending Review
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-slate-600 leading-relaxed">
-            {activeDraw.cfo_verification
-              ? "All subcontractor invoices cross-referenced and prior advance payments cleared."
-              : "Financial audit of invoice attachments and payment clearance pending."}
-          </p>
-          {activeDraw.cfo_verification && (
-            <div className="text-[11px] text-slate-400 pt-1 border-t border-slate-100">
-              Certified by: {activeDraw.cfo_verification.verified_by} • {formatDate(activeDraw.cfo_verification.verified_at)}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* TABS & WORKBENCH */}
+      {/* LINE ITEM SCHEDULE OF VALUES WORKBENCH */}
       <div className="rounded-xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
-        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/70 px-4 pt-2">
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setActiveTab("lines")}
-              className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
-                activeTab === "lines"
-                  ? "border-blue-600 text-blue-600 bg-white rounded-t-lg shadow-2xs"
-                  : "border-transparent text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              Line Item Schedule of Values ({activeDraw.lines?.length || 0})
-            </button>
-            <button
-              onClick={() => setActiveTab("packet")}
-              className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
-                activeTab === "packet"
-                  ? "border-blue-600 text-blue-600 bg-white rounded-t-lg shadow-2xs"
-                  : "border-transparent text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              Lender Packet Checklist & Portal Summary
-            </button>
+        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/70 px-5 py-3">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xs font-bold text-slate-900">
+              Line Item Schedule of Values
+            </span>
+            <span className="rounded-full bg-blue-50 border border-blue-200/80 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+              {activeDraw.lines?.length || 0}
+            </span>
           </div>
 
-          {activeTab === "lines" && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsAllocateTasksModalOpen(true)}
-              className="text-xs font-semibold gap-1.5 border-slate-300 bg-white shadow-2xs hover:bg-slate-50"
-            >
-              <FileSpreadsheet className="h-3.5 w-3.5" />
-              <span>Input / Allocate Work Tasks</span>
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsAllocateTasksModalOpen(true)}
+            className="text-xs font-semibold gap-1.5 border-slate-300 bg-white shadow-2xs hover:bg-slate-50 cursor-pointer"
+          >
+            <FileSpreadsheet className="h-3.5 w-3.5" />
+            <span>Input / Allocate Work Tasks</span>
+          </Button>
         </div>
 
         <div className="p-5">
-          {/* TAB 1: LINE ITEMS */}
-          {activeTab === "lines" && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
-                  <tr>
-                    <th className="py-3 px-4">CSI Code & Scope</th>
-                    <th className="py-3 px-4 text-right">Requested</th>
-                    <th className="py-3 px-4 text-right">Recommended</th>
-                    <th className="py-3 px-4 text-right">Approved</th>
-                    <th className="py-3 px-4 text-right text-emerald-700 font-bold">Cleared Funded</th>
-                    <th className="py-3 px-4 text-center">Evidence Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
-                  {activeDraw.lines?.map((line) => (
-                    <tr key={line.id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-3.5 px-4">
-                        <div className="font-semibold text-slate-900">
-                          <span className="font-mono text-slate-500 mr-1.5">{line.budget_line_code}</span>
-                          {line.budget_line_name}
-                        </div>
-                        {line.lender_notes && (
-                          <div className="text-[11px] text-amber-700 mt-0.5">
-                            Note: {line.lender_notes}
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-4 text-right tabular-nums font-semibold text-slate-900">
-                        {formatMoney(line.requested_amount)}
-                      </td>
-                      <td className="py-3.5 px-4 text-right tabular-nums text-slate-600">
-                        {formatMoney(line.recommended_amount)}
-                      </td>
-                      <td className="py-3.5 px-4 text-right tabular-nums text-slate-900 font-semibold">
-                        {formatMoney(line.approved_amount)}
-                      </td>
-                      <td className="py-3.5 px-4 text-right tabular-nums text-emerald-600 font-bold">
-                        {formatMoney(line.funded_amount)}
-                      </td>
-                      <td className="py-3.5 px-4 text-center">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
-                          ✓ VERIFIED
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* TAB 2: PACKET & PORTAL SUMMARY */}
-          {activeTab === "packet" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
-                    Packet Checklist
-                  </span>
-                  <div className="space-y-2">
-                    {activeDraw.packet_checklist?.map((chk) => (
-                      <div key={chk.id} className="flex items-center justify-between text-xs p-2 bg-white rounded-lg border border-slate-200">
-                        <span className="font-medium text-slate-800">{chk.requirement}</span>
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700">
-                          <Check className="h-3 w-3 stroke-[3]" /> {chk.status}
-                        </span>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
+                <tr>
+                  <th className="py-3 px-4">CSI Code & Scope</th>
+                  <th className="py-3 px-4 text-right">Requested</th>
+                  <th className="py-3 px-4 text-right">Recommended</th>
+                  <th className="py-3 px-4 text-right">Approved</th>
+                  <th className="py-3 px-4 text-right text-emerald-700 font-bold">Cleared Funded</th>
+                  <th className="py-3 px-4 text-center">Evidence Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {activeDraw.lines?.map((line) => (
+                  <tr key={line.id} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-3.5 px-4">
+                      <div className="font-semibold text-slate-900">
+                        <span className="font-mono text-slate-500 mr-1.5">{line.budget_line_code}</span>
+                        {line.budget_line_name}
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
-                    Lender Portal Reference
-                  </span>
-                  <div className="space-y-2 text-xs">
-                    <div className="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                      <span className="text-slate-500">Gross Requested</span>
-                      <span className="font-bold text-slate-900">{formatMoney(String(totalRequestedCents))}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                      <span className="text-slate-500">10% Retainage Withheld</span>
-                      <span className="font-bold text-amber-700">-{formatMoney(String(Math.round(totalRequestedCents * 0.1)))}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-2 bg-white rounded-lg border border-emerald-200 bg-emerald-50/30">
-                      <span className="font-bold text-slate-800">Net Disbursement</span>
-                      <span className="font-bold text-emerald-700 text-sm">{formatMoney(String(totalRequestedCents - Math.round(totalRequestedCents * 0.1)))}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+                      {line.lender_notes && (
+                        <div className="text-[11px] text-amber-700 mt-0.5">
+                          Note: {line.lender_notes}
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4 text-right tabular-nums font-semibold text-slate-900">
+                      {formatMoney(line.requested_amount)}
+                    </td>
+                    <td className="py-3.5 px-4 text-right tabular-nums text-slate-600">
+                      {formatMoney(line.recommended_amount)}
+                    </td>
+                    <td className="py-3.5 px-4 text-right tabular-nums text-slate-900 font-semibold">
+                      {formatMoney(line.approved_amount)}
+                    </td>
+                    <td className="py-3.5 px-4 text-right tabular-nums text-emerald-600 font-bold">
+                      {formatMoney(line.funded_amount)}
+                    </td>
+                    <td className="py-3.5 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                        ✓ VERIFIED
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

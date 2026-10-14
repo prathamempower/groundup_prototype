@@ -38,6 +38,45 @@ export default function TimelinePage() {
   const [isTaskDrawerOpen, setIsTaskDrawerOpen] = useState(false);
   const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
 
+  // Synchronized month navigation
+  const [currentYear, setCurrentYear] = useState(2026);
+  const [currentMonth, setCurrentMonth] = useState(9); // 0-indexed: 9 = October
+
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
+
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear((y) => y - 1);
+    } else {
+      setCurrentMonth((m) => m - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear((y) => y + 1);
+    } else {
+      setCurrentMonth((m) => m + 1);
+    }
+  };
+
+  const handleToday = () => {
+    setCurrentYear(2026);
+    setCurrentMonth(9);
+    setSelectedDate("2026-10-14");
+    const tasksForDate = constructionTasks.filter((t) => t.date === "2026-10-14");
+    if (tasksForDate.length > 0) {
+      setActiveTaskId(tasksForDate[0].id);
+    } else {
+      setActiveTaskId(null);
+    }
+  };
+
   // Active Project Query
   const { data: projectsData } = useQuery({
     queryKey: ["projects"],
@@ -86,6 +125,25 @@ export default function TimelinePage() {
       saveStoredConstructionTasks(currentProjectId || "default", next);
       return next;
     });
+    // Check if other tasks exist on that date
+    const remainingOnDate = constructionTasks.filter(
+      (t) => t.date === selectedDate && t.id !== taskId
+    );
+    if (remainingOnDate.length > 0) {
+      setActiveTaskId(remainingOnDate[0].id);
+    } else {
+      setActiveTaskId(null);
+      setIsTaskDrawerOpen(false);
+    }
+  };
+
+  const handleDeleteAllTasksOnDate = (dateStr: string) => {
+    setConstructionTasks((prev) => {
+      const next = prev.filter((t) => t.date !== dateStr);
+      saveStoredConstructionTasks(currentProjectId || "default", next);
+      return next;
+    });
+    setActiveTaskId(null);
     setIsTaskDrawerOpen(false);
   };
 
@@ -193,29 +251,31 @@ export default function TimelinePage() {
           <div className="flex items-center gap-2.5">
             <button
               type="button"
-              onClick={() => setSelectedDate("2026-10-14")}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+              onClick={handleToday}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer shadow-2xs"
             >
               Today
             </button>
             <div className="flex items-center gap-0.5">
               <button
                 type="button"
-                className="h-7 w-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 cursor-pointer"
+                onClick={handlePrevMonth}
+                className="h-7 w-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-600 cursor-pointer transition-colors"
                 aria-label="Previous month"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <button
                 type="button"
-                className="h-7 w-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 cursor-pointer"
+                onClick={handleNextMonth}
+                className="h-7 w-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-600 cursor-pointer transition-colors"
                 aria-label="Next month"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
-            <h2 className="text-sm font-extrabold text-slate-900 tracking-tight">
-              October 2026
+            <h2 className="text-sm font-extrabold text-slate-900 tracking-tight min-w-[120px] text-center">
+              {monthNames[currentMonth]} {currentYear}
             </h2>
           </div>
 
@@ -234,11 +294,11 @@ export default function TimelinePage() {
 
             <select
               defaultValue="Month"
-              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:outline-none cursor-pointer"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:outline-none cursor-pointer shadow-2xs"
             >
-              <option value="Month">Month</option>
-              <option value="Week">Week</option>
-              <option value="Day">Day</option>
+              <option value="Month">Month View</option>
+              <option value="Week">Week View</option>
+              <option value="Day">Day View</option>
             </select>
           </div>
         </div>
@@ -257,6 +317,11 @@ export default function TimelinePage() {
           activePhaseFilters={activePhaseFilters}
           onTogglePhaseFilter={handleTogglePhaseFilter}
           onResetFilters={handleResetFilters}
+          currentYear={currentYear}
+          currentMonth={currentMonth}
+          onPrevMonth={handlePrevMonth}
+          onNextMonth={handleNextMonth}
+          onToday={handleToday}
         />
       </div>
 
@@ -270,6 +335,7 @@ export default function TimelinePage() {
         onSelectTask={(id) => setActiveTaskId(id)}
         onUpdateTask={handleUpdateTask}
         onDeleteTask={handleDeleteTask}
+        onDeleteAllTasksOnDate={handleDeleteAllTasksOnDate}
         onCreateTaskOnDate={(date) => {
           setSelectedDate(date);
           setIsCreateTaskModalOpen(true);

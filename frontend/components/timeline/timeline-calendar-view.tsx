@@ -29,6 +29,11 @@ interface TimelineCalendarViewProps {
   activePhaseFilters: Record<string, boolean>;
   onTogglePhaseFilter: (phaseId: string) => void;
   onResetFilters: () => void;
+  currentYear?: number;
+  currentMonth?: number;
+  onPrevMonth?: () => void;
+  onNextMonth?: () => void;
+  onToday?: () => void;
 }
 
 export function TimelineCalendarView({
@@ -44,10 +49,18 @@ export function TimelineCalendarView({
   activePhaseFilters,
   onTogglePhaseFilter,
   onResetFilters,
+  currentYear: propCurrentYear,
+  currentMonth: propCurrentMonth,
+  onPrevMonth,
+  onNextMonth,
+  onToday,
 }: TimelineCalendarViewProps) {
   // Calendar navigation month/year (Defaults to October 2026 matching reference)
-  const [currentYear, setCurrentYear] = useState(2026);
-  const [currentMonth, setCurrentMonth] = useState(9); // 0-indexed: 9 = October
+  const [localYear, setLocalYear] = useState(2026);
+  const [localMonth, setLocalMonth] = useState(9); // 0-indexed: 9 = October
+
+  const currentYear = propCurrentYear !== undefined ? propCurrentYear : localYear;
+  const currentMonth = propCurrentMonth !== undefined ? propCurrentMonth : localMonth;
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
@@ -55,26 +68,38 @@ export function TimelineCalendarView({
   ];
 
   const handlePrevMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear((y) => y - 1);
+    if (onPrevMonth) {
+      onPrevMonth();
+      return;
+    }
+    if (localMonth === 0) {
+      setLocalMonth(11);
+      setLocalYear((y) => y - 1);
     } else {
-      setCurrentMonth((m) => m - 1);
+      setLocalMonth((m) => m - 1);
     }
   };
 
   const handleNextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear((y) => y + 1);
+    if (onNextMonth) {
+      onNextMonth();
+      return;
+    }
+    if (localMonth === 11) {
+      setLocalMonth(0);
+      setLocalYear((y) => y + 1);
     } else {
-      setCurrentMonth((m) => m + 1);
+      setLocalMonth((m) => m + 1);
     }
   };
 
   const handleToday = () => {
-    setCurrentYear(2026);
-    setCurrentMonth(9);
+    if (onToday) {
+      onToday();
+      return;
+    }
+    setLocalYear(2026);
+    setLocalMonth(9);
     onSelectDate("2026-10-14");
   };
 
