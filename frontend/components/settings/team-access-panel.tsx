@@ -66,7 +66,7 @@ export function TeamAccessPanel({ projectId }: TeamAccessPanelProps) {
   return (
     <div className="space-y-6">
       {/* Project Team Card */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden transition-all">
+      <div className="rounded-xl border border-slate-200/80 bg-white shadow-xs overflow-hidden transition-all">
         {/* Header with Title and Invite Button */}
         <div className="flex items-center justify-between p-5 px-6 bg-slate-50/50 border-b border-slate-100">
           <div className="flex items-center gap-3">
@@ -108,34 +108,34 @@ export function TeamAccessPanel({ projectId }: TeamAccessPanelProps) {
                 const roleConfig: Record<string, { badge: string; avatar: string; roleLabel: string }> = {
                   OWNER: {
                     badge: "bg-purple-50 text-purple-700 border-purple-200/60",
-                    avatar: "bg-gradient-to-tr from-purple-600 to-indigo-600 text-white shadow-2xs",
+                    avatar: "bg-purple-700 text-white shadow-2xs",
                     roleLabel: "Owner",
                   },
                   CFO: {
                     badge: "bg-blue-50 text-blue-700 border-blue-200/60",
-                    avatar: "bg-gradient-to-tr from-blue-600 to-cyan-600 text-white shadow-2xs",
+                    avatar: "bg-blue-700 text-white shadow-2xs",
                     roleLabel: "CFO / Finance",
                   },
                   PM: {
                     badge: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
-                    avatar: "bg-gradient-to-tr from-emerald-600 to-teal-600 text-white shadow-2xs",
+                    avatar: "bg-emerald-700 text-white shadow-2xs",
                     roleLabel: "Project Manager",
                   },
                   GC: {
                     badge: "bg-amber-50 text-amber-700 border-amber-200/60",
-                    avatar: "bg-gradient-to-tr from-amber-600 to-orange-500 text-white shadow-2xs",
+                    avatar: "bg-amber-700 text-white shadow-2xs",
                     roleLabel: "General Contractor",
                   },
                   INVESTOR: {
                     badge: "bg-purple-50 text-purple-700 border-purple-200/60",
-                    avatar: "bg-gradient-to-tr from-purple-600 to-pink-600 text-white shadow-2xs",
+                    avatar: "bg-indigo-700 text-white shadow-2xs",
                     roleLabel: "Investor (LP)",
                   },
                 };
 
                 const currentRoleConfig = roleConfig[member.role] || {
                   badge: "bg-slate-50 text-slate-700 border-slate-200",
-                  avatar: "bg-gradient-to-tr from-slate-600 to-slate-700 text-white shadow-2xs",
+                  avatar: "bg-slate-700 text-white shadow-2xs",
                   roleLabel: member.role,
                 };
 
@@ -216,7 +216,7 @@ export function TeamAccessPanel({ projectId }: TeamAccessPanelProps) {
       </div>
 
       {/* Role Permissions Matrix Card */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden transition-all">
+      <div className="rounded-xl border border-slate-200/80 bg-white shadow-xs overflow-hidden transition-all">
         {/* Header */}
         <div className="flex items-center justify-between p-5 px-6 bg-slate-50/50 border-b border-slate-100">
           <div className="flex items-center gap-3">

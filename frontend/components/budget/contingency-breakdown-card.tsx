@@ -17,7 +17,7 @@ export function ContingencyBreakdownCard({
   const totalContingency = hardCostCents + softCostCents;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs flex flex-col justify-between h-full">
+    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-2xs flex flex-col justify-between h-full">
       <div>
         {/* Header */}
         <div className="flex items-start justify-between mb-5">

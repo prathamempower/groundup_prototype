@@ -378,13 +378,16 @@ export interface ChangeOrder {
 export interface ContingencyMovement {
   id: string;
   project_id: string;
-  amount: string; // cents
-  source_line_id: string;
-  destination_line_id: string;
+  amount: number | string; // cents
+  from_budget_line_id?: string;
+  to_budget_line_id?: string;
+  source_line_id?: string;
+  destination_line_id?: string;
   reason: string;
   change_order_id?: string;
   approved_by: string;
   approved_at: string;
+  created_at?: string;
 }
 
 export interface DrawLine {

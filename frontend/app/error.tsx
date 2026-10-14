@@ -47,7 +47,7 @@ export default function ErrorBoundary({
     <div className="flex min-h-[calc(100vh-140px)] w-full items-center justify-center p-6 sm:p-12">
       <div className="w-full max-w-xl text-center">
         {/* Visual Badge / Icon */}
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-rose-200 bg-rose-50/80 shadow-xs">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl border border-rose-200 bg-rose-50/80 shadow-xs">
           <AlertTriangle className="h-8 w-8 text-rose-600" />
         </div>
 

@@ -27,12 +27,13 @@ import {
   MapPin,
   Briefcase,
   ChevronRight,
-  Sparkles,
+  BarChart3,
 } from "lucide-react";
+import { ProjectFinancialComparison } from "@/components/projects/financial-comparison";
 
 export default function ProjectsPortfolioPage() {
   const router = useRouter();
-  const [viewMode, setViewMode] = useState<"CARD" | "TABLE">("CARD");
+  const [viewMode, setViewMode] = useState<"CARD" | "TABLE" | "COMPARE">("CARD");
   const [searchQuery, setSearchQuery] = useState("");
   const [stageFilter, setStageFilter] = useState<string>("ALL");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -168,36 +169,13 @@ export default function ProjectsPortfolioPage() {
   const getCardStatusBadge = (project: Project) => {
     if (project.status === "COMPLETED") {
       return (
-        <span className="inline-flex items-center gap-1 rounded-md bg-blue-600/90 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm shadow-xs">
+        <span className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-xs">
           <CheckCircle2 className="h-3 w-3" />
           Completed
         </span>
       );
     }
-    switch (project.health_status) {
-      case "CRITICAL":
-        return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-rose-600/90 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm shadow-xs">
-            <AlertTriangle className="h-3 w-3" />
-            Critical
-          </span>
-        );
-      case "AT_RISK":
-        return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-amber-600/90 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm shadow-xs">
-            <span className="h-1.5 w-1.5 rounded-full bg-white" />
-            At Risk
-          </span>
-        );
-      case "HEALTHY":
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-600/90 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm shadow-xs">
-            <span className="h-1.5 w-1.5 rounded-full bg-white" />
-            Healthy
-          </span>
-        );
-    }
+    return null;
   };
 
   const getTableHealthBadge = (health?: string) => {
@@ -354,11 +332,60 @@ export default function ProjectsPortfolioPage() {
             <List className="h-3.5 w-3.5" />
             <span>Table</span>
           </button>
+          {canSeeFinancialSummary && (
+            <button
+              onClick={() => setViewMode("COMPARE")}
+              aria-label="Compare financials view"
+              className={`flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-all ${
+                viewMode === "COMPARE"
+                  ? "bg-white text-slate-900 shadow-2xs font-semibold"
+                  : "text-slate-500 hover:text-slate-900"
+              }`}
+            >
+              <BarChart3 className="h-3.5 w-3.5 text-blue-600" />
+              <span>Compare Financials</span>
+              <span className="hidden sm:inline-flex items-center rounded-full bg-blue-100 text-blue-700 px-1.5 py-0.2 text-[9px] font-bold">
+                PRO
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
+      {/* Executive Financial Comparison Callout Banner */}
+      {canSeeFinancialSummary && projects.length >= 2 && viewMode !== "COMPARE" && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50/70 via-white to-slate-50 p-3.5 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-xs">
+              <TrendingUp className="h-4 w-4" />
+            </span>
+            <div>
+              <div className="text-xs font-bold text-slate-900">
+                Compare Cross-Project Financial Performance
+              </div>
+              <div className="text-[11px] text-slate-500">
+                Benchmark GDV, net profit margins, capital stack exposure, and construction yields across your {projects.length} projects.
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => setViewMode("COMPARE")}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-white border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs hover:bg-slate-50 hover:text-slate-900 transition-colors self-start sm:self-auto shrink-0"
+          >
+            <span>View Comparison Matrix</span>
+            <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
+          </button>
+        </div>
+      )}
+
       {/* Projects Display */}
-      {filteredProjects.length === 0 ? (
+      {viewMode === "COMPARE" ? (
+        <ProjectFinancialComparison
+          projects={filteredProjects.length > 0 ? filteredProjects : projects}
+          globalRole={globalRole}
+          onOpenWorkspace={handleOpenWorkspace}
+        />
+      ) : filteredProjects.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-200 bg-white p-12 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 text-slate-400 mb-3 border border-slate-100">
             <Building2 className="h-6 w-6" />
@@ -528,7 +555,7 @@ export default function ProjectsPortfolioPage() {
         </div>
       ) : (
         /* Clean SaaS Table View */
-        <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs">
+        <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs">
               <thead className="border-b border-slate-200 bg-slate-50/80 font-bold uppercase tracking-wider text-[10px] text-slate-500">

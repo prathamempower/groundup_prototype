@@ -21,15 +21,15 @@ describe("Role Permissions & Navigation Matrix", () => {
     expect(getDefaultWorkspaceRoute("OWNER", testProjectId)).toBe(`/projects/${testProjectId}/control-center`);
     expect(getDefaultWorkspaceRoute("CFO", testProjectId)).toBe(`/projects/${testProjectId}/control-center`);
     expect(getDefaultWorkspaceRoute("PM", testProjectId)).toBe(`/projects/${testProjectId}/timeline`);
-    expect(getDefaultWorkspaceRoute("GC", testProjectId)).toBe(`/projects/${testProjectId}/submissions`);
+    expect(getDefaultWorkspaceRoute("GC", testProjectId)).toBe(`/projects/${testProjectId}/inbox`);
     expect(getDefaultWorkspaceRoute("INVESTOR", testProjectId)).toBe(`/projects/${testProjectId}/control-center`);
   });
 
-  it("strictly enforces GC project workspace boundaries (GC can only see submissions)", () => {
+  it("strictly enforces GC project workspace boundaries (GC sees inbox, blocked from financials)", () => {
     const testProjectId = "proj_test_123";
     const gcNav = getProjectNavItems(testProjectId, "GC").map((item) => item.href);
 
-    expect(gcNav).toContain(`/projects/${testProjectId}/submissions`);
+    expect(gcNav).toContain(`/projects/${testProjectId}/inbox`);
     expect(gcNav).not.toContain(`/projects/${testProjectId}/budget`);
     expect(gcNav).not.toContain(`/projects/${testProjectId}/draws`);
     expect(gcNav).not.toContain(`/projects/${testProjectId}/reconciliation`);

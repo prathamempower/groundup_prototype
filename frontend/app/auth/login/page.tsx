@@ -21,7 +21,6 @@ export default function LoginPage() {
   const queryClient = useQueryClient();
   const [email, setEmail] = useState("m.vance@vancedev.com");
   const [password, setPassword] = useState("Password123!");
-  const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [validationError, setValidationError] = useState("");
   const [activeDemoId, setActiveDemoId] = useState<string | null>(null);
@@ -37,7 +36,7 @@ export default function LoginPage() {
       authAdapter.signIn(
         (emailToUse || email).trim(),
         passwordToUse || password,
-        rememberMe
+        true
       ),
     onSuccess: ({ user }) => {
       window.localStorage.setItem("groundup_session_seen", "1");
@@ -178,17 +177,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-0.5">
-            <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(event) => setRememberMe(event.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 accent-blue-600 focus:ring-blue-500"
-              />
-              <span>Keep me signed in</span>
-            </label>
-          </div>
 
           <button
             type="submit"

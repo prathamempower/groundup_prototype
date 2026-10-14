@@ -67,7 +67,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         )}
 
         {/* Clean, perfectly structured enterprise card */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-7 sm:p-9 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.06)]">
+        <div className="rounded-xl border border-slate-200/80 bg-white p-7 sm:p-9 shadow-overlay">
           {children}
         </div>
       </div>

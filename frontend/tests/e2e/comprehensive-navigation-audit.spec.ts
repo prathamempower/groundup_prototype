@@ -90,7 +90,6 @@ test.describe("Full Navigation & Workspace Page Audit", () => {
       ["/draws", `/projects/${projectId}/draws`],
       ["/timeline", `/projects/${projectId}/timeline`],
       ["/partners", `/projects/${projectId}/partners`],
-      ["/submissions", `/projects/${projectId}/submissions`],
       ["/alerts", `/projects/${projectId}/alerts`],
       ["/investor-update", `/projects/${projectId}/control-center`],
     ];

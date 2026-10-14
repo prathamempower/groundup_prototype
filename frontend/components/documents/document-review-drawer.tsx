@@ -19,7 +19,7 @@ import {
   CheckCircle2,
   XCircle,
   Edit3,
-  Sparkles,
+  ScanText,
   CheckCheck,
   AlertTriangle,
   FileCheck,
@@ -170,7 +170,7 @@ export function DocumentReviewDrawer({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent maxWidth="full" className="p-0 overflow-hidden flex flex-col h-[90vh] max-h-[92vh] rounded-2xl bg-white border border-slate-200/90 shadow-2xl">
+      <ModalContent maxWidth="full" className="p-0 overflow-hidden flex flex-col h-[90vh] max-h-[92vh] rounded-xl bg-white border border-slate-200/90 shadow-overlay">
         {/* Modal Header */}
         <ModalHeader className="border-b border-slate-200/80 bg-slate-50/70 px-6 py-3.5 flex-shrink-0">
           <div className="flex items-center justify-between pr-8">
@@ -195,7 +195,7 @@ export function DocumentReviewDrawer({
                 {document?.original_filename || "Review Document"}
               </ModalTitle>
               <ModalDescription className="text-xs text-slate-500 font-normal">
-                Verify AI candidate extractions against the source document. Accepted values become immutable evidence.
+                Verify OCR candidate extractions against the source document. Accepted values become immutable evidence.
               </ModalDescription>
             </div>
 
@@ -243,8 +243,8 @@ export function DocumentReviewDrawer({
                 <div className="p-4 border-b border-border bg-subtle/20 space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold text-text-primary flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
-                      Extraction Review Queue ({extractions.length} fields)
+                      <ScanText className="h-3.5 w-3.5 text-primary" />
+                      Extracted Fields Queue ({extractions.length} fields)
                     </span>
                     <span className="text-caption text-text-secondary font-mono">
                       {acceptedCount} of {totalFields} verified

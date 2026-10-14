@@ -162,12 +162,16 @@ class EconomicsService:
             ).all()
             for bl in budget_lines:
                 amt = bl.current_approved_amount
-                if bl.category in ["HARD_COSTS", "DIRECT_CONSTRUCTION"]:
-                    hard_costs += amt
-                elif bl.category in ["SOFT_COSTS", "INDIRECT_CONSTRUCTION"]:
-                    soft_costs += amt
-                elif bl.category == "CONTINGENCY":
+                cat_upper = (bl.category or "").upper()
+                name_upper = (bl.name or "").upper()
+                if "CONTINGENCY" in cat_upper or "CONTINGENCY" in name_upper:
                     contingency += amt
+                elif cat_upper in ["HARD_COST", "HARD_COSTS", "DIRECT_CONSTRUCTION"] or "CONSTRUCTION" in name_upper or "STRUCTURAL" in name_upper:
+                    hard_costs += amt
+                elif cat_upper in ["SOFT_COST", "SOFT_COSTS", "INDIRECT_CONSTRUCTION"] or "CONSULTANT" in name_upper or "PERMIT" in name_upper:
+                    soft_costs += amt
+                else:
+                    hard_costs += amt
 
         # Loan details
         loan = self.db.scalars(select(Loan).where(Loan.project_id == project.id)).first()
@@ -202,11 +206,22 @@ class EconomicsService:
             or 0
         )
 
+        # Financing & carrying costs
+        carrying_financing_cost = 0
+        if active_plan and active_plan.payload and "lines" in active_plan.payload:
+            for item in active_plan.payload["lines"]:
+                if item.get("category") == "FINANCING":
+                    carrying_financing_cost += item.get("current_forecast_amount", item.get("original_plan_amount", 0))
+        if carrying_financing_cost == 0 and loan:
+            for t in (loan.terms or []):
+                carrying_financing_cost += (t.interest_reserve_amount or 0)
+
         # Calculate GDV and proceeds
         gdv = disposition.sale_price if disposition else (active_plan.projected_revenue if active_plan else 0)
         net_sales = disposition.net_proceeds if disposition else gdv
 
-        total_costs = hard_costs + soft_costs + contingency + (acquisition.purchase_price if acquisition else 0)
+        acquisition_cost = acquisition.purchase_price if acquisition else 0
+        total_costs = hard_costs + soft_costs + contingency + acquisition_cost + carrying_financing_cost
         if total_costs == 0 and active_plan:
             total_costs = active_plan.projected_cost
 
@@ -283,7 +298,7 @@ class EconomicsService:
             net_sales_proceeds=net_sales,
             total_hard_costs=hard_costs,
             total_soft_costs=soft_costs,
-            carrying_financing_cost=0,
+            carrying_financing_cost=carrying_financing_cost,
             total_cost=total_costs,
             net_profit=net_profit,
             return_on_cost_pct=round(return_on_cost, 2),

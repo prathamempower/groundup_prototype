@@ -28,7 +28,6 @@ const LEGACY_WORKSPACE_SECTIONS = [
   "reconciliation",
   "draws",
   "timeline",
-  "submissions",
   "alerts",
   "partners",
   "inbox",
@@ -249,7 +248,9 @@ export function AppShell({ children }: AppShellProps) {
               </div>
             </div>
           ) : (
-            children
+            <div key={pathname} className="page-enter min-h-full">
+              {children}
+            </div>
           )}
         </main>
       </div>

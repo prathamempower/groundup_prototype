@@ -114,7 +114,7 @@ export function ChangeOrderReviewModal({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent maxWidth="md" className="p-0 overflow-hidden rounded-2xl border-slate-200 shadow-xl">
+      <ModalContent maxWidth="md" className="p-0 overflow-hidden rounded-xl border-slate-200 shadow-overlay">
         {/* Clean Header */}
         <div className="px-6 pt-6 pb-4 border-b border-slate-100 flex items-start justify-between gap-4">
           <div>

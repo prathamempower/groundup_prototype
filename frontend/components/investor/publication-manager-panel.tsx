@@ -9,7 +9,7 @@ import { PublishSnapshotModal } from "./publish-snapshot-modal";
 import { WithdrawSnapshotModal } from "./withdraw-snapshot-modal";
 import { InvestorUpdatePreview } from "./investor-update-preview";
 import {
-  Sparkles,
+  FilePlus,
   Plus,
   Edit3,
   ShieldCheck,
@@ -148,9 +148,9 @@ export function PublicationManagerPanel({
         <button
           onClick={() => generateDraftMutation.mutate()}
           disabled={generateDraftMutation.isPending}
-          className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body font-medium text-white hover:bg-primary-hover shadow-xs transition-colors shrink-0"
+          className="flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-body font-medium text-white hover:bg-slate-800 shadow-xs transition-colors shrink-0 disabled:opacity-50"
         >
-          <Sparkles className="h-4 w-4" />
+          <FilePlus className="h-4 w-4" />
           {generateDraftMutation.isPending ? "Generating Draft..." : "Generate Draft from Approved Data"}
         </button>
       </div>

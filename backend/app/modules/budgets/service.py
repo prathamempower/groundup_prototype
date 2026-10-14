@@ -697,3 +697,14 @@ class BudgetService:
         )
 
         return line
+
+    def list_contingency_movements(
+        self, user: User, project_id: uuid.UUID
+    ) -> list[ContingencyMovement]:
+        project = self._get_project_with_access(user, project_id)
+        return (
+            self.db.query(ContingencyMovement)
+            .filter(ContingencyMovement.project_id == project.id)
+            .order_by(ContingencyMovement.created_at.desc())
+            .all()
+        )

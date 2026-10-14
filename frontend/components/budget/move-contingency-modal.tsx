@@ -41,10 +41,14 @@ export function MoveContingencyModal({
   const { toast } = useToast();
 
   const contingencyLine = budgetLines.find(
-    (l) => l.code === "20-000" || l.category === "Contingency"
+    (l) =>
+      l.code === "20-000" ||
+      l.code === "6.02" ||
+      l.category?.toUpperCase() === "CONTINGENCY" ||
+      l.name.toLowerCase().includes("contingency")
   );
   const eligibleDestinationLines = budgetLines.filter(
-    (l) => l.code !== "20-000" && l.category !== "Contingency"
+    (l) => l.id !== contingencyLine?.id && !l.name.toLowerCase().includes("contingency")
   );
 
   const availableContingencyCents = parseInt(contingencyLine?.current_approved_amount || "0", 10);

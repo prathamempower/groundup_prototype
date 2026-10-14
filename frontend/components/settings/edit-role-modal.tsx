@@ -56,7 +56,7 @@ export function EditRoleModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xl space-y-5 animate-in zoom-in-95 duration-150">
+      <div className="w-full max-w-md rounded-xl border border-slate-200/90 bg-white p-6 shadow-overlay space-y-5 animate-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="flex items-start justify-between border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">

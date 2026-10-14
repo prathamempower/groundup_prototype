@@ -24,7 +24,7 @@ import {
   FolderSync,
   Download,
   Eye,
-  Sparkles,
+  CheckCheck,
   AlertCircle,
   FileCheck,
   ChevronRight,
@@ -218,7 +218,7 @@ export default function DocumentsPage() {
               <span className="text-xs font-medium text-slate-500">Files</span>
             </div>
             <div className="mt-2.5 flex items-center gap-1.5 text-xs text-blue-700 font-medium">
-              <Sparkles className="h-3.5 w-3.5" />
+              <CheckCheck className="h-3.5 w-3.5" />
               <span>Parsed & indexed in vault</span>
             </div>
           </div>

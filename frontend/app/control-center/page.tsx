@@ -19,7 +19,6 @@ import {
   PiggyBank,
   CalendarClock,
   ArrowUpRight,
-  Sparkles,
   FileText,
   Eye,
   FileSpreadsheet,
@@ -182,21 +181,21 @@ export default function ControlCenterPage() {
           </div>
 
           {/* Card 2: ACTUAL SPEND */}
-          <div className="rounded-xl border border-blue-200/70 bg-gradient-to-b from-white to-blue-50/20 p-5 shadow-xs flex flex-col justify-between transition-all hover:border-blue-300 hover:shadow-sm">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-blue-900/70 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Actual Spend
                 </span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-2 py-0.5 font-mono">
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200/70 rounded-full px-2 py-0.5 font-mono">
                   63.6% Spent
                 </span>
               </div>
               <div className="mt-3">
-                <div className="text-2xl lg:text-[26px] font-bold tracking-tight text-blue-950 font-mono tabular-nums leading-none">
+                <div className="text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
                   $936,600
                 </div>
-                <div className="mt-2 text-xs text-slate-600 flex items-center gap-1">
+                <div className="mt-2 text-xs text-slate-500 flex items-center gap-1">
                   <span>Hard: $702.5k</span>
                   <span className="text-slate-300">·</span>
                   <span>Soft: $234.1k</span>
@@ -204,43 +203,43 @@ export default function ControlCenterPage() {
               </div>
             </div>
 
-            <div className="mt-4 pt-3.5 border-t border-blue-100/70 space-y-1.5">
-              <div className="h-1.5 w-full rounded-full bg-blue-100/70 overflow-hidden">
+            <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-1.5">
+              <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
                 <div className="h-full bg-blue-600 rounded-full transition-all" style={{ width: "63.6%" }} />
               </div>
-              <div className="flex justify-between text-[11px] text-blue-800/80 font-medium">
+              <div className="flex justify-between text-[11px] text-slate-500 font-medium">
                 <span>Paid to Date</span>
-                <span className="font-mono">$534.5k Rem.</span>
+                <span className="font-mono text-slate-700 font-semibold">$534.5k Rem.</span>
               </div>
             </div>
           </div>
 
           {/* Card 3: CASH RECEIVED */}
-          <div className="rounded-xl border border-emerald-200/70 bg-gradient-to-b from-white to-emerald-50/20 p-5 shadow-xs flex flex-col justify-between transition-all hover:border-emerald-300 hover:shadow-sm">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Cash Received
                 </span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5 font-mono">
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/70 rounded-full px-2 py-0.5 font-mono">
                   73.8% Drawn
                 </span>
               </div>
               <div className="mt-3">
-                <div className="text-2xl lg:text-[26px] font-bold tracking-tight text-emerald-950 font-mono tabular-nums leading-none">
+                <div className="text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
                   $1,086,000
                 </div>
-                <div className="mt-2 text-xs text-emerald-800 font-medium">
+                <div className="mt-2 text-xs text-emerald-700 font-medium">
                   <span>+$149,400 liquidity cushion</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 pt-3.5 border-t border-emerald-100/70 space-y-1.5">
-              <div className="h-1.5 w-full rounded-full bg-emerald-100/70 overflow-hidden">
+            <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-1.5">
+              <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
                 <div className="h-full bg-emerald-600 rounded-full transition-all" style={{ width: "73.8%" }} />
               </div>
-              <div className="flex justify-between text-[11px] text-emerald-800/80 font-medium">
+              <div className="flex justify-between text-[11px] text-slate-500 font-medium">
                 <span>Draw Funds Cleared</span>
                 <span>Facility: $1.47M</span>
               </div>
@@ -248,13 +247,13 @@ export default function ControlCenterPage() {
           </div>
 
           {/* Card 4: ESTIMATED COMPLETION */}
-          <div className="rounded-xl border border-amber-200/70 bg-gradient-to-b from-white to-amber-50/20 p-5 shadow-xs flex flex-col justify-between transition-all hover:border-amber-300 hover:shadow-sm">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-amber-900/70 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Target Completion
                 </span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200/70 rounded-full px-2 py-0.5">
                   <CalendarClock className="h-3 w-3" />
                   +35d Variance
                 </span>
@@ -270,7 +269,7 @@ export default function ControlCenterPage() {
               </div>
             </div>
 
-            <div className="mt-4 pt-3.5 border-t border-amber-100/70 space-y-1.5">
+            <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-1.5">
               <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden flex">
                 <div className="h-full bg-emerald-500" style={{ width: "70%" }} />
                 <div className="h-full bg-amber-500" style={{ width: "18%" }} />

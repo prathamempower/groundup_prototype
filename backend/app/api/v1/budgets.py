@@ -274,6 +274,36 @@ async def move_contingency_endpoint(
     )
 
 
+@router.get(
+    "/projects/{pid}/contingency-movements",
+    response_model=ResponseEnvelope[list[ContingencyMovementRead]],
+)
+async def list_contingency_movements_endpoint(
+    pid: uuid.UUID,
+    user: User = Depends(require_role(["OWNER", "CFO", "PM", "INVESTOR", "LENDER"])),
+    db: Session = Depends(get_db),
+):
+    service = BudgetService(db)
+    movements = service.list_contingency_movements(user, pid)
+    return ResponseEnvelope(
+        data=[
+            ContingencyMovementRead(
+                id=str(cm.id),
+                organization_id=str(cm.organization_id),
+                project_id=str(cm.project_id),
+                from_budget_line_id=str(cm.from_budget_line_id),
+                to_budget_line_id=str(cm.to_budget_line_id),
+                amount=cm.amount,
+                reason=cm.reason,
+                approved_by=str(cm.approved_by),
+                approved_at=cm.approved_at.isoformat() if cm.approved_at else None,
+                created_at=cm.created_at.isoformat() if cm.created_at else None,
+            )
+            for cm in movements
+        ]
+    )
+
+
 @router.patch("/budget-lines/{id}/milestone", response_model=ResponseEnvelope[BudgetLineRead])
 async def link_budget_line_milestone_endpoint(
     id: uuid.UUID,

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
-import { Table, Search, Download, AlertCircle, FileSpreadsheet, Loader2, Sparkles } from "lucide-react";
+import { Table, Search, Download, AlertCircle, FileSpreadsheet, Loader2 } from "lucide-react";
 
 interface SpreadsheetViewerProps {
   url: string;

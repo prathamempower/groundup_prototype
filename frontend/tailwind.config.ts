@@ -74,6 +74,8 @@ const config: Config = {
           "sans-serif",
         ],
         mono: [
+          "var(--font-mono)",
+          "var(--font-ibm-plex-mono)",
           "var(--font-jetbrains-mono)",
           "ui-monospace",
           "SFMono-Regular",

@@ -59,7 +59,7 @@ test.describe("Visual Regression & Responsive Inspection", () => {
     await page.getByRole("button", { name: "Sign in" }).click();
     await page.waitForURL(/\/projects/);
     await page.getByRole("heading", { name: "73 Broadway" }).first().click();
-    await page.waitForURL(/\/projects\/[^\/]+\/submissions/);
+    await page.waitForURL(/\/projects\/[^\/]+\/inbox/);
     await page.waitForTimeout(1000);
     await page.screenshot({ path: "screenshots/workspace-gc-1440.png" });
   });

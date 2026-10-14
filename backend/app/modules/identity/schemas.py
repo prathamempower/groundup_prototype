@@ -30,7 +30,7 @@ class SignUpRequest(BaseModel):
 class SignInRequest(BaseModel):
     email: EmailStr
     password: str
-    remember_me: bool = False
+    remember_me: bool = True
 
 
 class TokenResponse(BaseModel):

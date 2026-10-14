@@ -357,7 +357,7 @@ export function BuildDrawPacketModal({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent maxWidth="xl" className="p-0 overflow-hidden border-slate-200 bg-white shadow-2xl rounded-2xl gap-0 max-h-[92vh] flex flex-col">
+      <ModalContent maxWidth="xl" className="p-0 overflow-hidden border-slate-200 bg-white shadow-overlay rounded-xl gap-0 max-h-[92vh] flex flex-col">
         {/* Dark Header Banner (Exact match to Screenshot 2) */}
         <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-3">
@@ -698,7 +698,7 @@ export function BuildDrawPacketModal({
 
                     {/* Bottom pill label */}
                     <div className="absolute bottom-2 left-2 right-2">
-                      <span className="inline-block rounded-md bg-black/75 backdrop-blur-xs px-2 py-1 text-[10px] font-bold text-white shadow-xs">
+                      <span className="inline-block rounded-md bg-slate-900/90 px-2 py-1 text-[10px] font-bold text-white shadow-xs">
                         {photo.title}
                       </span>
                     </div>

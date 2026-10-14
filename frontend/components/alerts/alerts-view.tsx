@@ -249,7 +249,7 @@ export function AlertsView({ projectId, projectName, userRole }: AlertsViewProps
         <div
           onClick={() => setActiveTab("CRITICAL")}
           className={cn(
-            "rounded-2xl border bg-white p-5 shadow-xs transition-all cursor-pointer flex items-center justify-between group hover:shadow-md",
+            "rounded-xl border bg-white p-5 shadow-xs transition-all cursor-pointer flex items-center justify-between group hover:shadow-md",
             activeTab === "CRITICAL" ? "border-rose-300 ring-2 ring-rose-100" : "border-slate-200/90 hover:border-rose-200"
           )}
         >
@@ -276,7 +276,7 @@ export function AlertsView({ projectId, projectName, userRole }: AlertsViewProps
         <div
           onClick={() => setActiveTab("WARNINGS")}
           className={cn(
-            "rounded-2xl border bg-white p-5 shadow-xs transition-all cursor-pointer flex items-center justify-between group hover:shadow-md",
+            "rounded-xl border bg-white p-5 shadow-xs transition-all cursor-pointer flex items-center justify-between group hover:shadow-md",
             activeTab === "WARNINGS" ? "border-amber-300 ring-2 ring-amber-100" : "border-slate-200/90 hover:border-amber-200"
           )}
         >
@@ -303,7 +303,7 @@ export function AlertsView({ projectId, projectName, userRole }: AlertsViewProps
         <div
           onClick={() => setActiveTab("INTEGRITY")}
           className={cn(
-            "rounded-2xl border bg-white p-5 shadow-xs transition-all cursor-pointer flex items-center justify-between group hover:shadow-md",
+            "rounded-xl border bg-white p-5 shadow-xs transition-all cursor-pointer flex items-center justify-between group hover:shadow-md",
             activeTab === "INTEGRITY" ? "border-blue-300 ring-2 ring-blue-100" : "border-slate-200/90 hover:border-blue-200"
           )}
         >
@@ -330,7 +330,7 @@ export function AlertsView({ projectId, projectName, userRole }: AlertsViewProps
         <div
           onClick={() => setActiveTab("RESOLVED")}
           className={cn(
-            "rounded-2xl border bg-white p-5 shadow-xs transition-all cursor-pointer flex items-center justify-between group hover:shadow-md",
+            "rounded-xl border bg-white p-5 shadow-xs transition-all cursor-pointer flex items-center justify-between group hover:shadow-md",
             activeTab === "RESOLVED" ? "border-emerald-300 ring-2 ring-emerald-100" : "border-slate-200/90 hover:border-emerald-200"
           )}
         >
@@ -355,7 +355,7 @@ export function AlertsView({ projectId, projectName, userRole }: AlertsViewProps
       </div>
 
       {/* Main Table Container */}
-      <div className="rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden">
+      <div className="rounded-xl border border-slate-200/90 bg-white shadow-xs overflow-hidden">
         {/* Filter & Search Header Row */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 border-b border-slate-200/80">
           {/* Horizontal Text Tabs */}

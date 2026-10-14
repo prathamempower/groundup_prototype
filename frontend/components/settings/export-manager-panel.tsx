@@ -14,7 +14,7 @@ import {
   CheckCircle2,
   Calendar,
   Layers,
-  Sparkles,
+  FileDown,
   ExternalLink,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -68,9 +68,9 @@ export function ExportManagerPanel({ projectId }: ExportManagerPanelProps) {
 
         <button
           onClick={() => setIsExportModalOpen(true)}
-          className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body font-medium text-white hover:bg-primary-hover shadow-xs transition-colors shrink-0"
+          className="flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-body font-medium text-white hover:bg-slate-800 shadow-xs transition-colors shrink-0"
         >
-          <Sparkles className="h-4 w-4" />
+          <FileDown className="h-4 w-4" />
           <span>Generate New Export Package</span>
         </button>
       </div>

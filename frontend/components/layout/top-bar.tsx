@@ -175,45 +175,39 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
 
   return (
     <div className="sticky top-0 z-30 w-full flex flex-col">
-      <header className="flex h-14 w-full items-center justify-between border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-5">
-        {/* Left: Mobile Toggle & Contextual Breadcrumb / Title */}
-        <div className="flex items-center gap-3">
+      <header className="flex h-14 w-full items-center justify-between border-b border-slate-200/80 bg-white px-5">
+        {/* Left: Mobile Toggle & Contextual Enterprise Breadcrumb */}
+        <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={onToggleSidebar}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 md:hidden"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 md:hidden cursor-pointer"
             aria-label="Toggle navigation sidebar"
           >
             <Menu className="h-5 w-5" />
           </button>
 
-          {/* Clean title or breadcrumb */}
-          <div className="flex items-center gap-2">
+          {/* High-Fidelity Enterprise Breadcrumb */}
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 min-w-0">
             <Link
               href="/projects"
-              className="text-xs font-semibold text-slate-400 hover:text-slate-800 uppercase tracking-wider hidden sm:inline transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors group shrink-0"
             >
-              WORKSPACE
+              <Building2 className="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600 transition-colors" />
+              <span>Workspace</span>
             </Link>
-            <span className="text-blue-600 hidden sm:inline font-bold">›</span>
-            <span className="text-sm font-bold text-slate-900 truncate max-w-[200px] sm:max-w-[320px]">
+
+            <span className="text-slate-300 select-none font-normal">/</span>
+
+            <span
+              className="text-xs font-bold text-slate-900 truncate max-w-[160px] sm:max-w-[280px] md:max-w-[360px]"
+              title={currentProject ? currentProject.name : pathname.startsWith("/projects") ? "Project Portfolio" : "161 Woodlawn Ave"}
+            >
               {currentProject ? currentProject.name : pathname.startsWith("/projects") ? "Project Portfolio" : "161 Woodlawn Ave"}
             </span>
-          </div>
+          </nav>
         </div>
 
-        {/* Center: Global Search Bar */}
-        <div className="hidden lg:flex items-center flex-1 max-w-xs xl:max-w-sm mx-3 xl:mx-6 min-w-0">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search line items, draws, risks..."
-              className="w-full rounded-lg border border-slate-200/80 bg-slate-50/70 pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300 transition-all text-ellipsis"
-            />
-          </div>
-        </div>
-
-        {/* Right: Tasks, Notifications & User Menu */}
+        {/* Right: Tasks, Inbox, Notifications & User Menu */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Tasks Trigger */}
           <button
@@ -222,31 +216,17 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
               setIsNotificationsOpen(false);
               setIsUserDropdownOpen(false);
             }}
-            className="relative flex h-8 items-center gap-1.5 px-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+            className="relative flex h-8 items-center gap-1.5 px-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent hover:border-slate-200/80 transition-all cursor-pointer"
             aria-label="View onboarding and delegated tasks"
           >
-            <CheckSquare className="h-3.5 w-3.5 text-slate-500" />
+            <CheckSquare className="h-3.5 w-3.5 text-slate-400" />
             <span className="hidden sm:inline">Tasks</span>
             {pendingTasksCount > 0 && (
-              <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-slate-200 px-1 text-[10px] font-semibold text-slate-700">
+              <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-slate-100 text-slate-700 border border-slate-200/70 px-1 text-[10px] font-bold tabular-nums">
                 {pendingTasksCount}
               </span>
             )}
           </button>
-
-          {/* Inbox Link */}
-          <Link
-            href={currentProjectId ? `/projects/${currentProjectId}/inbox` : "/inbox"}
-            className="relative flex h-8 items-center gap-1.5 px-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-            title="Inbox"
-            aria-label="Inbox"
-          >
-            <Inbox className="h-3.5 w-3.5 text-slate-500" />
-            <span className="hidden sm:inline">Inbox</span>
-            <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-slate-100 border border-slate-200 px-1 text-[10px] font-semibold text-slate-700">
-              4
-            </span>
-          </Link>
 
           {/* Tasks Slide-out Drawer */}
           <Drawer open={isTasksOpen} onOpenChange={setIsTasksOpen}>
@@ -374,12 +354,12 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
               setIsProjectDropdownOpen(false);
               setIsTasksOpen(false);
             }}
-            className="relative flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+            className="relative flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 border border-transparent hover:border-slate-200/80 transition-all cursor-pointer"
             aria-label="View notifications and alerts"
           >
-            <Bell className="h-4 w-4" />
+            <Bell className="h-4 w-4 text-slate-500" />
             {unreadNotificationsCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-xs">
+              <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-2xs">
                 {unreadNotificationsCount}
               </span>
             )}
@@ -561,19 +541,22 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
                 setIsProjectDropdownOpen(false);
                 setIsNotificationsOpen(false);
               }}
-              className="flex items-center gap-2 rounded-lg p-1 hover:bg-slate-100 transition-colors shrink-0"
+              className="flex items-center gap-2.5 rounded-lg py-1 px-1.5 hover:bg-slate-100/80 border border-transparent hover:border-slate-200/80 transition-all shrink-0 cursor-pointer group"
+              aria-expanded={isUserDropdownOpen}
+              aria-haspopup="menu"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white tracking-wider shrink-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white tracking-wider shrink-0 ring-2 ring-slate-100 shadow-2xs group-hover:bg-slate-800 transition-colors">
                 {currentUser?.avatarInitials || "MV"}
               </div>
               <div className="hidden sm:flex flex-col text-left shrink-0">
                 <span className="text-xs font-bold leading-tight text-slate-900 whitespace-nowrap">
                   {currentUser?.name || "Marcus Vance"}
                 </span>
-                <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider whitespace-nowrap">
+                <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider whitespace-nowrap leading-tight mt-0.5">
                   {currentUser?.role || "OWNER"}
                 </span>
               </div>
+              <ChevronDown className={`h-3 w-3 text-slate-400 hidden sm:block transition-transform duration-150 ${isUserDropdownOpen ? "rotate-180 text-slate-700" : ""}`} />
             </button>
 
             {/* User Dropdown */}
@@ -629,55 +612,6 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
           </div>
         </div>
       </header>
-
-      {/* Real-Time Alert Notification Bar - Strictly scoped to Control Center */}
-      {!isAlertBarDismissed && isControlCenterPage && (
-        <div className="w-full border-b border-amber-200/90 bg-gradient-to-r from-amber-50 via-amber-50/95 to-amber-100/40 px-5 py-2 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-amber-200/70 text-amber-800">
-              <AlertTriangle className="h-3.5 w-3.5 animate-pulse" />
-            </span>
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 truncate text-xs">
-              <span className="font-bold text-amber-900 flex items-center gap-1.5">
-                Critical Path Risk
-                <span className="rounded bg-amber-200/90 text-amber-900 px-1.5 py-0.5 text-[10px] font-bold">
-                  Active Warning
-                </span>
-              </span>
-              <span className="text-slate-400 hidden md:inline">·</span>
-              <span className="font-semibold text-slate-800 truncate">
-                {criticalPathAlert ? criticalPathAlert.title : "At-Risk Milestone: Structural Steel Fabrication"}
-              </span>
-              <span className="font-mono text-amber-800 text-[11px] font-semibold hidden lg:inline">
-                (+35 Days Slip · Carry Impact: +$28,500)
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-            <Link
-              href={criticalPathAlert?.link_url || (currentProjectId ? `/projects/${currentProjectId}/timeline` : "/projects")}
-              className="inline-flex items-center gap-1 rounded-md bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 text-[11px] font-bold shadow-2xs transition-colors"
-            >
-              View Milestone Schedule →
-            </Link>
-            <button
-              onClick={() => setIsNotificationsOpen(true)}
-              className="rounded-md border border-amber-300/80 bg-white hover:bg-amber-100/60 text-amber-900 px-2.5 py-1 text-[11px] font-semibold transition-colors"
-            >
-              Notifications ({unreadNotificationsCount > 0 ? unreadNotificationsCount : notifications.length})
-            </button>
-            <button
-              onClick={() => setIsAlertBarDismissed(true)}
-              className="text-amber-700 hover:text-amber-950 p-1 transition-colors"
-              title="Dismiss notification bar"
-              aria-label="Dismiss notification bar"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

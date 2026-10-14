@@ -87,6 +87,8 @@ export function normalizeUserProfile(user: ApiUser): UserProfile {
   };
 }
 
+const SESSION_DURATION_MS = 60 * 24 * 60 * 60 * 1000; // 60 days
+
 export class LiveAuthAdapter implements AuthAdapter {
   private readonly baseUrl: string;
 
@@ -137,7 +139,7 @@ export class LiveAuthAdapter implements AuthAdapter {
     });
     return {
       user: normalizeUserProfile(user),
-      expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+      expiresAt: new Date(Date.now() + SESSION_DURATION_MS).toISOString(),
     };
   }
 
@@ -168,7 +170,7 @@ export class LiveAuthAdapter implements AuthAdapter {
       const user = await this.call<ApiUser>("/me");
       return {
         user: normalizeUserProfile(user),
-        expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+        expiresAt: new Date(Date.now() + SESSION_DURATION_MS).toISOString(),
       };
     } catch (error) {
       if (!(error instanceof AuthApiError) || error.status !== 401) {
@@ -181,7 +183,7 @@ export class LiveAuthAdapter implements AuthAdapter {
       const user = await this.call<ApiUser>("/me");
       return {
         user: normalizeUserProfile(user),
-        expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+        expiresAt: new Date(Date.now() + SESSION_DURATION_MS).toISOString(),
       };
     } catch (error) {
       if (error instanceof AuthApiError && error.status === 401) {

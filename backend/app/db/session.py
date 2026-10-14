@@ -11,6 +11,10 @@ engine = create_engine(
     settings.DATABASE_URL,
     echo=settings.DB_ECHO,
     pool_pre_ping=True,
+    pool_size=10,
+    max_overflow=20,
+    pool_recycle=1800,
+    pool_timeout=30,
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -19,6 +23,10 @@ async_engine = create_async_engine(
     settings.ASYNC_DATABASE_URL,
     echo=settings.DB_ECHO,
     pool_pre_ping=True,
+    pool_size=15,
+    max_overflow=25,
+    pool_recycle=1800,
+    pool_timeout=30,
 )
 AsyncSessionLocal = async_sessionmaker(
     bind=async_engine,

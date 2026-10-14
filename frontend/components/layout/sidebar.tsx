@@ -10,13 +10,9 @@ import { getProjectNavItems } from "@/lib/navigation";
 import {
   ChevronLeft,
   ChevronRight,
-  Building2,
-  ArrowLeft,
-  Briefcase,
-  Layers,
-  Sliders,
+  ArrowUpRight,
 } from "lucide-react";
-import { UserRole } from "@/lib/types";
+import { UserRole, Project } from "@/lib/types";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -42,13 +38,19 @@ export function Sidebar({
     queryFn: () => api.identity.getMe(),
   });
 
+  const { data: projectsData } = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => api.projects.list(),
+  });
+
   const { data: activeProjectData } = useQuery({
     queryKey: ["project", workspaceProjectId],
     queryFn: () => api.projects.getById(workspaceProjectId),
     enabled: Boolean(workspaceProjectId),
   });
 
-  const activeProject = activeProjectData?.data;
+  const allProjects: Project[] = projectsData?.data?.projects || [];
+  const activeProject = activeProjectData?.data || (allProjects.find(p => p.id === workspaceProjectId));
 
   // Derive effective role on this active project
   const userMemberships = meData?.data?.project_memberships || [];
@@ -78,21 +80,45 @@ export function Sidebar({
     reconciliation: recData?.data?.total_pending || 0,
     timeline: 0,
     alerts: openAlertsCount,
+    inbox: 4,
   };
 
   const visibleNavItems = workspaceProjectId
     ? getProjectNavItems(workspaceProjectId, effectiveRole)
     : [];
 
-  // Categorize navigation items into 3 clean, logical sections
-  const coreItemIds = ["control-center", "inbox", "documents", "timeline", "submissions"];
-  const financeItemIds = ["budget", "reconciliation", "draws"];
-  const governanceItemIds = ["partners", "alerts"];
+  // Business-minded enterprise categorization:
+  // 1. Executive & Overview (Command/Summary & Communication)
+  // 2. Financial Management (Capital & Cost Control)
+  // 3. Project Execution (Field, Timeline & Assets)
+  // 4. Governance & Risk (Exceptions, Compliance & Capital Partners)
+  const executiveItemIds = ["control-center", "inbox"];
+  const financialItemIds = ["budget", "draws", "reconciliation"];
+  const executionItemIds = ["timeline", "documents"];
+  const governanceItemIds = ["alerts", "partners"];
 
-  const coreNavItems = visibleNavItems.filter((i) => coreItemIds.includes(i.id));
-  const financeNavItems = visibleNavItems.filter((i) => financeItemIds.includes(i.id));
+  const executiveNavItems = visibleNavItems.filter((i) => executiveItemIds.includes(i.id));
+  const financialNavItems = visibleNavItems.filter((i) => financialItemIds.includes(i.id));
+  const executionNavItems = visibleNavItems.filter((i) => executionItemIds.includes(i.id));
   const governanceNavItems = visibleNavItems.filter((i) => governanceItemIds.includes(i.id));
   const bottomNavItems = visibleNavItems.filter((i) => i.id === "settings");
+
+  const getProjectThumbnail = (proj?: Project | null) => {
+    if (!proj) return "/projects/woodlawn-card.jpg";
+    const nameLower = (proj.name || "").toLowerCase();
+    const addressLower = (proj.address || "").toLowerCase();
+
+    if (nameLower.includes("woodlawn") || addressLower.includes("woodlawn")) {
+      return "/projects/woodlawn-card.jpg";
+    }
+    if (nameLower.includes("first") || addressLower.includes("first")) {
+      return "/projects/first-street-new.jpg";
+    }
+    if (nameLower.includes("broadway") || addressLower.includes("broadway")) {
+      return "/projects/broadway-new.jpg";
+    }
+    return "/projects/woodlawn-card.jpg";
+  };
 
   return (
     <>
@@ -100,18 +126,18 @@ export function Sidebar({
       {mobileOpen && (
         <div
           onClick={onCloseMobile}
-          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs md:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-xs md:hidden"
         />
       )}
 
       {/* Sidebar container */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-white border-r border-slate-200/90 transition-all duration-200 ease-in-out md:static ${
-          collapsed ? "w-[70px]" : "w-[256px]"
-        } ${mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0"}`}
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-slate-50/60 border-r border-slate-200/80 transition-all duration-200 ease-in-out md:static ${
+          collapsed ? "w-[72px]" : "w-[260px]"
+        } ${mobileOpen ? "translate-x-0 shadow-overlay" : "-translate-x-full md:translate-x-0"}`}
       >
         {/* Top Header: Brand Logo & Collapse Toggle */}
-        <div className="flex h-16 items-center justify-between px-4 border-b border-slate-100">
+        <div className="flex h-14 items-center justify-between px-4 border-b border-slate-200/70 bg-white">
           {!collapsed ? (
             <>
               <Link
@@ -124,13 +150,13 @@ export function Sidebar({
                   alt="GroundUp"
                   width={132}
                   height={32}
-                  className="h-7 w-auto object-contain"
+                  className="h-6.5 w-auto object-contain"
                   priority
                 />
               </Link>
               <button
                 onClick={onToggleCollapse}
-                className="hidden md:flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="hidden md:flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                 aria-label="Collapse sidebar"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -140,7 +166,7 @@ export function Sidebar({
             <div className="w-full flex items-center justify-center">
               <button
                 onClick={onToggleCollapse}
-                className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="hidden md:flex h-8 w-8 items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                 aria-label="Expand sidebar"
                 title="Expand sidebar"
               >
@@ -150,44 +176,59 @@ export function Sidebar({
           )}
         </div>
 
-        {/* Project Card & Back to Portfolio Navigation */}
-        <div className="p-3 border-b border-slate-100 bg-slate-50/40">
+        {/* Focused Active Project Card */}
+        <div className="p-3 border-b border-slate-200/70 bg-white">
           {!collapsed ? (
-            <div className="space-y-2">
-              {/* Back to Projects link */}
-              <Link
-                href="/projects"
-                aria-label="Back to all projects"
-                className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-500 hover:text-primary transition-colors group"
-                title="Return to all projects"
-              >
-                <ArrowLeft className="h-3 w-3 text-slate-400 group-hover:text-primary transition-transform group-hover:-translate-x-0.5" />
-                <span>Back to all projects</span>
-              </Link>
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-2.5 transition-colors">
+              <div className="flex items-center gap-3">
+                {/* Building Thumbnail */}
+                <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-slate-200/80 bg-white shadow-2xs">
+                  <Image
+                    src={getProjectThumbnail(activeProject)}
+                    alt={activeProject?.name || "Project"}
+                    fill
+                    className="object-cover"
+                    sizes="44px"
+                    priority
+                  />
+                </div>
 
-              {/* Active Project Card */}
-              <div className="rounded-xl border border-slate-200/80 bg-white p-2.5 shadow-xs hover:border-slate-300 transition-colors">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-xs border border-primary/20">
-                    <Building2 className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="text-xs font-semibold text-slate-900 block truncate" title={activeProject?.name}>
-                      {activeProject?.name || "Workspace"}
+                {/* Project Metadata */}
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs font-bold text-slate-900 truncate block leading-tight">
+                    {activeProject?.name || "161 Woodlawn Ave"}
+                  </span>
+
+                  <span className="mt-0.5 text-[11px] text-slate-500 truncate block leading-snug">
+                    {activeProject?.address || "Jersey City, NJ"}
+                  </span>
+
+                  <div className="mt-1 flex items-center text-[10px] text-slate-400 font-medium">
+                    <span className="font-semibold text-slate-600 capitalize">
+                      {effectiveRole.toLowerCase()}
+                    </span>
+                    <span className="mx-1 text-slate-300">•</span>
+                    <span className="truncate text-slate-500">
+                      {meData?.data?.name || "Marcus Vance"}
                     </span>
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-2">
-              <Link
-                href="/projects"
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-700 shadow-2xs hover:border-primary hover:text-primary transition-all"
-                title={`${activeProject?.name || "Projects"} — Back to all projects`}
+            <div className="flex flex-col items-center">
+              <div
+                className="relative h-10 w-10 overflow-hidden rounded-lg border border-slate-200 shadow-2xs"
+                title={activeProject?.name || "161 Woodlawn Ave"}
               >
-                <Building2 className="h-4 w-4" />
-              </Link>
+                <Image
+                  src={getProjectThumbnail(activeProject)}
+                  alt={activeProject?.name || "Project"}
+                  fill
+                  className="object-cover"
+                  sizes="40px"
+                />
+              </div>
             </div>
           )}
         </div>
@@ -199,223 +240,150 @@ export function Sidebar({
           }`}
           aria-label="Project Workspace Navigation"
         >
-          {/* Section 1: Operations */}
-          {coreNavItems.length > 0 && (
-            <div>
-              {!collapsed && (
-                <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                  Operations
-                </div>
-              )}
-              <div className="space-y-0.5">
-                {coreNavItems.map((item) => {
-                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-                  const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
-                  const Icon = item.icon;
+          {/* Helper Section Renderer for consistent enterprise navigation */}
+          {[
+            {
+              title: "Executive & Overview",
+              items: executiveNavItems,
+            },
+            {
+              title: "Financial Management",
+              items: financialNavItems,
+            },
+            {
+              title: "Project Execution",
+              items: executionNavItems,
+            },
+            {
+              title: "Governance & Risk",
+              items: governanceNavItems,
+            },
+          ].map((section) => {
+            if (section.items.length === 0) return null;
+            return (
+              <div key={section.title}>
+                {!collapsed && (
+                  <div className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    {section.title}
+                  </div>
+                )}
+                <div className="space-y-0.5">
+                  {section.items.map((item) => {
+                    const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                    const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
+                    const isAlert = item.id === "alerts" && badgeCount > 0;
+                    const Icon = item.icon;
 
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      onClick={onCloseMobile}
-                      title={collapsed ? item.label : undefined}
-                      className={`group relative flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
-                        collapsed
-                          ? "h-9 w-9 mx-auto justify-center"
-                          : "gap-3 px-3 py-2"
-                      } ${
-                        isActive
-                          ? "bg-slate-900 text-white font-medium shadow-xs"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
-                      }`}
-                    >
-                      <Icon
-                        className={`h-4 w-4 shrink-0 transition-colors ${
-                          isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600"
+                    return (
+                      <Link
+                        key={item.id}
+                        href={item.href}
+                        onClick={onCloseMobile}
+                        title={collapsed ? item.label : undefined}
+                        className={`group relative flex items-center rounded-lg text-xs transition-all duration-150 ${
+                          collapsed
+                            ? "h-9 w-9 mx-auto justify-center"
+                            : "gap-2.5 px-3 py-2"
+                        } ${
+                          isActive
+                            ? "bg-white text-blue-600 font-bold shadow-2xs border border-slate-200/80"
+                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium"
                         }`}
-                      />
+                      >
+                        {/* Active Indicator Accent Bar */}
+                        {isActive && !collapsed && (
+                          <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-sm bg-blue-600" />
+                        )}
 
-                      {!collapsed && (
-                        <div className="flex flex-1 items-center justify-between overflow-hidden">
-                          <span className="truncate">{item.label}</span>
-                          {badgeCount > 0 && (
-                            <span className={`ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-medium tabular-nums ${
-                              isActive
-                                ? "bg-white/20 text-white"
-                                : "bg-slate-100 text-slate-600"
-                            }`}>
-                              {badgeCount}
-                            </span>
-                          )}
-                        </div>
-                      )}
+                        <Icon
+                          className={`h-4 w-4 shrink-0 transition-colors ${
+                            isActive
+                              ? "text-blue-600 stroke-[2.25]"
+                              : "text-slate-400 group-hover:text-slate-600 stroke-[1.75]"
+                          }`}
+                        />
 
-                      {/* Collapsed view indicator dot */}
-                      {collapsed && badgeCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-slate-400 ring-2 ring-white" />
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+                        {!collapsed && (
+                          <div className="flex flex-1 items-center justify-between overflow-hidden">
+                            <span className="truncate">{item.label}</span>
+                            {badgeCount > 0 && (
+                              <span
+                                className={`ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums ${
+                                  isAlert
+                                    ? "bg-rose-500 text-white"
+                                    : "bg-slate-200/80 text-slate-700"
+                                }`}
+                              >
+                                {badgeCount}
+                              </span>
+                            )}
+                          </div>
+                        )}
 
-          {/* Section 2: Finance & Control */}
-          {financeNavItems.length > 0 && (
-            <div>
-              {!collapsed && (
-                <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                  Finance & Control
+                        {/* Collapsed view indicator dot */}
+                        {collapsed && badgeCount > 0 && (
+                          <span
+                            className={`absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full ring-2 ring-white ${
+                              isAlert ? "bg-rose-500" : "bg-blue-600"
+                            }`}
+                          />
+                        )}
+                      </Link>
+                    );
+                  })}
                 </div>
-              )}
-              <div className="space-y-0.5">
-                {financeNavItems.map((item) => {
-                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-                  const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
-                  const Icon = item.icon;
-
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      onClick={onCloseMobile}
-                      title={collapsed ? item.label : undefined}
-                      className={`group relative flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
-                        collapsed
-                          ? "h-9 w-9 mx-auto justify-center"
-                          : "gap-3 px-3 py-2"
-                      } ${
-                        isActive
-                          ? "bg-slate-900 text-white font-medium shadow-xs"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
-                      }`}
-                    >
-                      <Icon
-                        className={`h-4 w-4 shrink-0 transition-colors ${
-                          isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600"
-                        }`}
-                      />
-
-                      {!collapsed && (
-                        <div className="flex flex-1 items-center justify-between overflow-hidden">
-                          <span className="truncate">{item.label}</span>
-                          {badgeCount > 0 && (
-                            <span className={`ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1.5 text-[10px] font-medium tabular-nums ${
-                              isActive
-                                ? "bg-white/20 text-white"
-                                : "bg-slate-100 text-slate-600"
-                            }`}>
-                              {badgeCount}
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Collapsed view indicator dot */}
-                      {collapsed && badgeCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-slate-400 ring-2 ring-white" />
-                      )}
-                    </Link>
-                  );
-                })}
               </div>
-            </div>
-          )}
-
-          {/* Section 3: Partners & Risk */}
-          {governanceNavItems.length > 0 && (
-            <div>
-              {!collapsed && (
-                <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                  Partners & Risk
-                </div>
-              )}
-              <div className="space-y-0.5">
-                {governanceNavItems.map((item) => {
-                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-                  const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
-                  const Icon = item.icon;
-
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      onClick={onCloseMobile}
-                      title={collapsed ? item.label : undefined}
-                      className={`group relative flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
-                        collapsed
-                          ? "h-9 w-9 mx-auto justify-center"
-                          : "gap-3 px-3 py-2"
-                      } ${
-                        isActive
-                          ? "bg-slate-900 text-white font-medium shadow-xs"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
-                      }`}
-                    >
-                      <Icon
-                        className={`h-4 w-4 shrink-0 transition-colors ${
-                          isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600"
-                        }`}
-                      />
-
-                      {!collapsed && (
-                        <div className="flex flex-1 items-center justify-between overflow-hidden">
-                          <span className="truncate">{item.label}</span>
-                          {badgeCount > 0 && (
-                            <span className={`ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1.5 text-[10px] font-medium tabular-nums ${
-                              isActive
-                                ? "bg-white/20 text-white"
-                                : "bg-slate-100 text-slate-600"
-                            }`}>
-                              {badgeCount}
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Collapsed view indicator dot */}
-                      {collapsed && badgeCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-slate-400 ring-2 ring-white" />
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+            );
+          })}
         </nav>
 
-        {/* Sidebar Footer: Settings & Workspace Configuration */}
-        {bottomNavItems.length > 0 && (
-          <div className="p-3 border-t border-slate-100 bg-slate-50/30">
-            {bottomNavItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-              const Icon = item.icon;
+        {/* Sidebar Footer: Settings & Portfolio Link */}
+        <div className="p-3 border-t border-slate-200/70 bg-white space-y-0.5">
+          {bottomNavItems.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const Icon = item.icon;
 
-              return (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  onClick={onCloseMobile}
-                  title={collapsed ? item.label : undefined}
-                  className={`group flex items-center rounded-lg text-xs font-medium transition-all duration-150 ${
-                    collapsed
-                      ? "h-9 w-9 mx-auto justify-center"
-                      : "gap-3 px-3 py-2"
-                  } ${
-                    isActive
-                      ? "bg-slate-900 text-white font-medium shadow-xs"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                onClick={onCloseMobile}
+                title={collapsed ? item.label : undefined}
+                className={`group relative flex items-center rounded-lg text-xs transition-all duration-150 ${
+                  collapsed
+                    ? "h-9 w-9 mx-auto justify-center"
+                    : "gap-2.5 px-3 py-2"
+                } ${
+                  isActive
+                    ? "bg-white text-blue-600 font-bold shadow-2xs border border-slate-200/80"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium"
+                }`}
+              >
+                {isActive && !collapsed && (
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-sm bg-blue-600" />
+                )}
+                <Icon
+                  className={`h-4 w-4 shrink-0 transition-colors ${
+                    isActive ? "text-blue-600 stroke-[2.25]" : "text-slate-400 group-hover:text-slate-600 stroke-[1.75]"
                   }`}
-                >
-                  <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600"}`} />
-                  {!collapsed && <span className="truncate">{item.label}</span>}
-                </Link>
-              );
-            })}
-          </div>
-        )}
+                />
+                {!collapsed && <span className="truncate">{item.label}</span>}
+              </Link>
+            );
+          })}
+
+          {/* Clean link to Portfolio */}
+          {!collapsed && (
+            <Link
+              href="/projects"
+              onClick={onCloseMobile}
+              className="flex items-center justify-between rounded-lg px-3 py-1.5 text-[11px] font-medium text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors group"
+            >
+              <span>Projects Portfolio</span>
+              <ArrowUpRight className="h-3 w-3 text-slate-400 group-hover:text-slate-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </Link>
+          )}
+        </div>
       </aside>
     </>
   );

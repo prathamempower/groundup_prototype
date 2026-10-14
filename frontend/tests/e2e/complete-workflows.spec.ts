@@ -165,19 +165,17 @@ test.describe("Full Navigation & Workspaces Verification", () => {
 });
 
 test.describe("Role Boundaries & Access Protection", () => {
-  test("general contractor (GC) is restricted to submissions and blocked from owner settings", async ({ page }) => {
+  test("general contractor (GC) is restricted to assigned workspace and blocked from owner settings", async ({ page }) => {
     await loginAsUser(page, "frank@apexconstruction.com");
-    await expect(page).toHaveURL(/\/(submissions|projects)/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/(inbox|projects)/, { timeout: 15000 });
 
-    if (page.url().includes("/projects") && !page.url().includes("/submissions")) {
+    if (page.url().includes("/projects") && !page.url().includes("/inbox")) {
       const proj = page.getByRole("heading", { name: /73 Broadway|161 Woodlawn/i }).first();
       if (await proj.isVisible()) {
         await proj.click();
-      } else {
-        await page.goto("/submissions");
       }
     }
-    await expect(page).toHaveURL(/\/submissions/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/inbox/, { timeout: 15000 });
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
     // Attempt direct access to Settings

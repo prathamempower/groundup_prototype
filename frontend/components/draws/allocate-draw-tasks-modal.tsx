@@ -12,7 +12,6 @@ import {
   FileSpreadsheet,
   Plus,
   Trash2,
-  Sparkles,
   Search,
   CheckCircle2,
   DollarSign,
@@ -147,7 +146,7 @@ export function AllocateDrawTasksModal({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent className="max-w-4xl max-h-[92vh] flex flex-col p-0 overflow-hidden bg-white border-slate-200 shadow-2xl rounded-2xl">
+      <ModalContent className="max-w-4xl max-h-[92vh] flex flex-col p-0 overflow-hidden bg-white border-slate-200 shadow-overlay rounded-xl">
         {/* Header */}
         <div className="bg-slate-900 text-white px-6 py-4 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -168,9 +167,9 @@ export function AllocateDrawTasksModal({
             <button
               type="button"
               onClick={handleApplyExcelPreset}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/90 hover:bg-blue-600 text-white text-xs font-semibold transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors"
             >
-              <Sparkles className="h-3.5 w-3.5" />
+              <Layers className="h-3.5 w-3.5" />
               <span>Load Draw #{drawNumber} Excel Schedule</span>
             </button>
             <button

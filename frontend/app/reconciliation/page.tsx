@@ -21,7 +21,6 @@ import {
   Building2,
   CreditCard,
   Layers,
-  Sparkles,
   Link2,
   FileText,
   AlertTriangle,

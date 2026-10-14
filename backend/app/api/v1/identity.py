@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth import get_current_user, require_role
+from app.core.config import settings
 from app.core.envelope import ResponseEnvelope
 from app.core.errors import NotFoundException
 from app.core.rate_limit import auth_rate_limiter
@@ -37,6 +38,28 @@ from app.modules.identity.service import IdentityService
 router = APIRouter()
 
 
+def _set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
+    """Set long-lived, robust HTTP-only session cookies by default."""
+    access_max_age = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+    refresh_max_age = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        samesite="lax",
+        path="/",
+        max_age=access_max_age,
+    )
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        samesite="lax",
+        path="/",
+        max_age=refresh_max_age,
+    )
+
+
 @router.post("/auth/signup", response_model=ResponseEnvelope[UserRead])
 async def signup(
     data: SignUpRequest, request: Request, response: Response, db: Session = Depends(get_db)
@@ -46,15 +69,7 @@ async def signup(
     user, access_token, refresh_token = service.sign_up_owner(data)
     db.commit()
 
-    # Keep the owner session across browser restarts while retaining short-lived access tokens.
-    response.set_cookie(
-        key="access_token", value=access_token, httponly=True, samesite="lax",
-        path="/", max_age=60 * 60,
-    )
-    response.set_cookie(
-        key="refresh_token", value=refresh_token, httponly=True, samesite="lax",
-        path="/", max_age=7 * 24 * 60 * 60,
-    )
+    _set_auth_cookies(response, access_token, refresh_token)
 
     profile = service.get_user_profile(user)
     return ResponseEnvelope(data=profile)
@@ -68,16 +83,8 @@ async def signin(
     service = IdentityService(db)
     user, access_token, refresh_token = service.sign_in(data)
 
-    # Set httpOnly cookies
-    cookie_lifetime = 7 * 24 * 60 * 60 if data.remember_me else None
-    response.set_cookie(
-        key="access_token", value=access_token, httponly=True, samesite="lax",
-        path="/", max_age=60 * 60 if data.remember_me else None,
-    )
-    response.set_cookie(
-        key="refresh_token", value=refresh_token, httponly=True, samesite="lax",
-        path="/", max_age=cookie_lifetime,
-    )
+    # Persistent cookies by default for robust authentication
+    _set_auth_cookies(response, access_token, refresh_token)
 
     profile = service.get_user_profile(user)
     return ResponseEnvelope(data=profile)
@@ -100,8 +107,7 @@ async def refresh_token_endpoint(
     service = IdentityService(db)
     _, new_access, new_refresh = service.refresh_session(refresh_token)
 
-    response.set_cookie(key="access_token", value=new_access, httponly=True, samesite="lax", path="/")
-    response.set_cookie(key="refresh_token", value=new_refresh, httponly=True, samesite="lax", path="/")
+    _set_auth_cookies(response, new_access, new_refresh)
 
     return ResponseEnvelope(data=TokenResponse(access_token=new_access))
 
@@ -439,8 +445,7 @@ async def accept_invitation_endpoint(
     user, access_token, refresh_token = service.accept_invitation(token, data)
     db.commit()
 
-    response.set_cookie(key="access_token", value=access_token, httponly=True, samesite="lax")
-    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, samesite="lax")
+    _set_auth_cookies(response, access_token, refresh_token)
 
     profile = service.get_user_profile(user)
     return ResponseEnvelope(data=profile)

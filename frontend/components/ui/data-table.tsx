@@ -188,7 +188,7 @@ export function DataTable<T>({
       {/* Main Table Container */}
       <div className="rounded-lg border border-border bg-surface shadow-xs overflow-x-auto">
         <table className="w-full text-left text-body border-collapse">
-          <thead className="sticky top-0 z-10 border-b border-border bg-subtle/80 backdrop-blur-xs text-caption font-semibold text-text-secondary">
+          <thead className="sticky top-0 z-10 border-b border-border bg-subtle text-caption font-semibold text-text-secondary">
             <tr>
               {selectable && (
                 <th className="w-10 px-3.5 py-3">

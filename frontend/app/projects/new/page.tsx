@@ -240,10 +240,10 @@ export default function CreateProjectPage() {
                       tabIndex={0}
                       onClick={() => setStage(1)}
                       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setStage(1)}
-                      className="cursor-pointer rounded-2xl border-2 border-slate-900 bg-slate-50/60 p-6 transition-all shadow-xs hover:shadow-md hover:border-blue-600 group flex flex-col justify-between min-h-[190px]"
+                      className="cursor-pointer rounded-xl border-2 border-slate-900 bg-slate-50/60 p-6 transition-all shadow-xs hover:shadow-md hover:border-blue-600 group flex flex-col justify-between min-h-[190px]"
                     >
                       <div>
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white mb-4 shadow-xs group-hover:scale-105 group-hover:bg-blue-600 transition-all">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-white mb-4 shadow-xs group-hover:scale-105 group-hover:bg-blue-600 transition-all">
                           <FolderPlus className="h-5 w-5" />
                         </div>
                         <h3 className="font-bold text-slate-900 text-sm">Guided Setup</h3>
@@ -257,7 +257,7 @@ export default function CreateProjectPage() {
                     </div>
 
                     {/* Secondary Option: Import Pro-Forma */}
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-6 flex flex-col justify-between min-h-[190px]">
+                    <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-6 flex flex-col justify-between min-h-[190px]">
                       <div>
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-200 text-slate-700 mb-4">
                           <Clock className="h-5 w-5" />
@@ -838,7 +838,7 @@ export default function CreateProjectPage() {
                   </div>
 
                   <div className="space-y-3.5 pt-1">
-                    <div className="rounded-2xl border border-slate-200 p-4.5 bg-white shadow-2xs hover:border-slate-300 transition-colors">
+                    <div className="rounded-xl border border-slate-200 p-4.5 bg-white shadow-2xs hover:border-slate-300 transition-colors">
                       <span className="text-xs font-bold text-slate-900 block mb-1">
                         CFO / Accounting Lead
                       </span>
@@ -854,7 +854,7 @@ export default function CreateProjectPage() {
                       </span>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-200 p-4.5 bg-white shadow-2xs hover:border-slate-300 transition-colors">
+                    <div className="rounded-xl border border-slate-200 p-4.5 bg-white shadow-2xs hover:border-slate-300 transition-colors">
                       <span className="text-xs font-bold text-slate-900 block mb-1">
                         Project Manager (PM)
                       </span>
@@ -870,7 +870,7 @@ export default function CreateProjectPage() {
                       </span>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-200 p-4.5 bg-white shadow-2xs hover:border-slate-300 transition-colors">
+                    <div className="rounded-xl border border-slate-200 p-4.5 bg-white shadow-2xs hover:border-slate-300 transition-colors">
                       <span className="text-xs font-bold text-slate-900 block mb-1">
                         General Contractor (GC)
                       </span>
@@ -973,7 +973,7 @@ export default function CreateProjectPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 space-y-4 text-xs">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-5 space-y-4 text-xs">
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                       <div>
                         <span className="text-slate-500 block text-[11px]">Project Name:</span>
@@ -1002,7 +1002,7 @@ export default function CreateProjectPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-white p-5 text-xs text-slate-600 space-y-2 shadow-2xs">
+                  <div className="rounded-xl border border-slate-200 bg-white p-5 text-xs text-slate-600 space-y-2 shadow-2xs">
                     <p className="font-bold text-slate-900">What happens when you launch:</p>
                     <div className="space-y-1.5 text-slate-500">
                       <p className="flex items-center gap-2">
@@ -1044,7 +1044,7 @@ export default function CreateProjectPage() {
       {/* Duplicate Check Warning Modal */}
       {showDuplicateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-          <div className="max-w-lg w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
+          <div className="max-w-lg w-full rounded-xl border border-slate-200 bg-white p-6 shadow-overlay">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 shrink-0">
                 <CopyCheck className="h-5 w-5" />

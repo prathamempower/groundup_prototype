@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   XCircle,
   Edit3,
-  Sparkles,
+  ScanText,
   CheckCheck,
   FileCheck,
   Calendar,
@@ -251,7 +251,7 @@ export default function DocumentReviewPage() {
           <div className="p-4 border-b border-slate-200/80 bg-slate-50/50 space-y-2 shrink-0">
             <div className="flex items-center justify-between text-xs">
               <span className="font-bold text-slate-900 flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-blue-600" />
+                <ScanText className="h-3.5 w-3.5 text-blue-600" />
                 Extraction Queue ({extractions.length} fields)
               </span>
               <span className="text-[11px] font-mono text-slate-500 font-medium">

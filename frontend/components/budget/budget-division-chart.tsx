@@ -144,7 +144,7 @@ export function BudgetDivisionChart({ data = defaultChartData, divisionCount = 6
   }));
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs flex flex-col justify-between h-full">
+    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-2xs flex flex-col justify-between h-full">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div>
           <div className="flex items-center gap-2">

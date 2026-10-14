@@ -45,10 +45,9 @@ export interface WorkspaceNavItem {
  * 5. Draws (Owner, CFO, PM)
  * 6. Timeline (Owner, CFO, PM)
  * 7. Economics (Owner, CFO)
- * 8. Submissions (Owner, CFO, PM review queue; GC submissions)
- * 9. Alerts & exceptions (Owner, CFO, PM)
- * 10. Investor updates (Owner only)
- * 11. Project settings (Owner only)
+ * 8. Alerts & exceptions (Owner, CFO, PM)
+ * 9. Investor updates (Owner only)
+ * 10. Project settings (Owner only)
  */
 export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
   {
@@ -68,7 +67,7 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
   },
   {
     id: "budget",
-    label: "Budget",
+    label: "Project Economics",
     path: "budget",
     icon: PieChart,
     allowedRoles: ["OWNER", "CFO", "PM"],
@@ -96,13 +95,6 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     icon: CalendarDays,
     allowedRoles: ["OWNER", "CFO", "PM"],
     badgeKey: "timeline",
-  },
-  {
-    id: "submissions",
-    label: "Submissions",
-    path: "submissions",
-    icon: Send,
-    allowedRoles: ["CFO", "PM", "GC"],
   },
   {
     id: "alerts",
@@ -152,14 +144,15 @@ export const WORKSPACE_ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   "control-center": ["OWNER", "CFO", "PM", "INVESTOR"],
   "documents": ["OWNER", "CFO", "PM"],
   "budget": ["OWNER", "CFO", "PM"],
+  "economics": ["OWNER", "CFO", "PM"],
   "reconciliation": ["OWNER", "CFO"],
   "draws": ["OWNER", "CFO", "PM"],
   "timeline": ["OWNER", "CFO", "PM"],
-  "submissions": ["OWNER", "CFO", "PM", "GC"],
   "alerts": ["OWNER", "CFO", "PM"],
   "partners": ["OWNER", "CFO", "INVESTOR"],
   "inbox": ["OWNER", "CFO", "PM", "GC", "INVESTOR"],
   "directs": ["OWNER", "CFO", "PM", "GC", "INVESTOR"],
+  "build-packet": ["OWNER", "CFO", "PM"],
   // "investor-updates": ["OWNER", "INVESTOR"],
   "settings": ["OWNER"],
 };
@@ -172,7 +165,7 @@ export function getDefaultWorkspaceRoute(role: UserRole, projectId: string): str
     case "PM":
       return `/projects/${projectId}/timeline`;
     case "GC":
-      return `/projects/${projectId}/submissions`;
+      return `/projects/${projectId}/inbox`;
     case "INVESTOR":
       return `/projects/${projectId}/control-center`;
     default:

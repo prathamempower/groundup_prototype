@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
@@ -457,6 +458,7 @@ const SHOWCASE_ROWS = [
 ];
 
 export default function DrawsPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const { data: projectsData } = useQuery({
@@ -680,8 +682,12 @@ export default function DrawsPage() {
   };
 
   const handleOpenDetail = (draw: DrawItem) => {
-    setSelectedDraw(draw);
-    setIsDrawerOpen(true);
+    if (currentProjectId) {
+      router.push(`/projects/${currentProjectId}/draws/${draw.id || draw.draw_number}`);
+    } else {
+      setSelectedDraw(draw);
+      setIsDrawerOpen(true);
+    }
   };
 
 
@@ -725,10 +731,14 @@ export default function DrawsPage() {
           <button
             type="button"
             onClick={() => {
-              setPacketDrawNumber(4);
-              setIsBuildDrawPacketOpen(true);
+              if (currentProjectId) {
+                router.push(`/projects/${currentProjectId}/draws/build-packet?draw=4`);
+              } else {
+                setPacketDrawNumber(4);
+                setIsBuildDrawPacketOpen(true);
+              }
             }}
-            className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 active:bg-slate-950 transition-colors shrink-0"
+            className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 active:bg-slate-950 transition-colors shrink-0 cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             <span>Build Draw Packet</span>
@@ -884,7 +894,7 @@ export default function DrawsPage() {
             {/* Background Connector Bar with flow colors */}
             <div className="absolute top-[32px] left-10 right-10 h-1 bg-slate-200 -z-0">
               <div
-                className="h-full bg-gradient-to-r from-emerald-500 via-emerald-500 to-amber-500 transition-all duration-700"
+                className="h-full bg-emerald-600 transition-all duration-700"
                 style={{ width: "75%" }}
               />
             </div>
@@ -901,8 +911,12 @@ export default function DrawsPage() {
                     key={node.code}
                     onClick={() => {
                       if (!node.hasPacketBuilt) {
-                        setPacketDrawNumber(node.drawNumber);
-                        setIsBuildDrawPacketOpen(true);
+                        if (currentProjectId) {
+                          router.push(`/projects/${currentProjectId}/draws/build-packet?draw=${node.drawNumber}`);
+                        } else {
+                          setPacketDrawNumber(node.drawNumber);
+                          setIsBuildDrawPacketOpen(true);
+                        }
                       } else {
                         setSelectedTimelineDrawNumber(node.drawNumber);
                         const fallback = buildDrawFallback(
@@ -1311,8 +1325,12 @@ export default function DrawsPage() {
                           onClick={() => {
                             setSelectedTimelineDrawNumber(row.drawNumber);
                             if (row.actionLabel.includes("Build Draw Packet")) {
-                              setPacketDrawNumber(row.drawNumber);
-                              setIsBuildDrawPacketOpen(true);
+                              if (currentProjectId) {
+                                router.push(`/projects/${currentProjectId}/draws/build-packet?draw=${row.drawNumber}`);
+                              } else {
+                                setPacketDrawNumber(row.drawNumber);
+                                setIsBuildDrawPacketOpen(true);
+                              }
                             } else {
                               const matchingDraw =
                                 draws.find((d) => d.draw_number === row.drawNumber) ||

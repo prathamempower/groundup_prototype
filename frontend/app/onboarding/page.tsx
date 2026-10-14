@@ -224,7 +224,7 @@ export default function OnboardingPage() {
   if (!question) {
     return (
       <div className="min-h-screen bg-[#f1f3f6] flex flex-col justify-center items-center py-10 px-4 sm:px-6">
-        <div className="w-full max-w-4xl rounded-3xl bg-white shadow-xl border border-slate-200/80 overflow-hidden">
+        <div className="w-full max-w-4xl rounded-xl bg-white shadow-xs border border-slate-200/80 overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
             {/* Left Support Sidebar */}
             <aside className="lg:col-span-4 bg-[#f8fafc] border-b lg:border-b-0 lg:border-r border-slate-200/80 p-8 flex flex-col justify-between">
@@ -280,7 +280,7 @@ export default function OnboardingPage() {
             {/* Right Main Content */}
             <main className="lg:col-span-8 p-8 sm:p-12 flex flex-col justify-between">
               <div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-sm mb-6">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm mb-6">
                   <CircleCheck className="h-6 w-6" />
                 </div>
 
@@ -296,7 +296,7 @@ export default function OnboardingPage() {
 
                 {/* Governance Activation Gates Status */}
                 {gates.length > 0 && (
-                  <div className="mt-6 text-left rounded-2xl border border-slate-200/80 bg-[#f8fafc] p-5">
+                  <div className="mt-6 text-left rounded-xl border border-slate-200/80 bg-[#f8fafc] p-5">
                     <h3 className="text-xs font-semibold text-slate-900 mb-3 flex items-center gap-2">
                       <ShieldCheck className="h-4 w-4 text-emerald-600" />
                       Governance & Activation Status
@@ -328,7 +328,7 @@ export default function OnboardingPage() {
 
                 {/* Pending Approvals */}
                 {user.role === "OWNER" && pendingApprovals.length > 0 && (
-                  <div className="mt-6 text-left rounded-2xl border border-amber-200 bg-amber-50/40 p-5">
+                  <div className="mt-6 text-left rounded-xl border border-amber-200 bg-amber-50/40 p-5">
                     <h3 className="text-xs font-semibold text-amber-900 mb-2 flex items-center gap-2">
                       <AlertTriangle className="h-4 w-4 text-amber-600" />
                       Pending Configuration Approvals ({pendingApprovals.length})
@@ -374,7 +374,7 @@ export default function OnboardingPage() {
 
                 {/* Accountable Onboarding Tasks */}
                 {tasks.length > 0 && (
-                  <div className="mt-6 text-left rounded-2xl border border-slate-200/80 bg-[#f8fafc] p-5">
+                  <div className="mt-6 text-left rounded-xl border border-slate-200/80 bg-[#f8fafc] p-5">
                     <h3 className="text-xs font-semibold text-slate-900 mb-2 flex items-center gap-2">
                       <ListTodo className="h-4 w-4 text-emerald-600" />
                       Accountable Onboarding Tasks ({tasks.length})
@@ -425,7 +425,7 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center items-center py-10 px-4 sm:px-6">
-      <div className="w-full max-w-5xl rounded-2xl bg-white shadow-xl border border-slate-200/80 overflow-hidden">
+      <div className="w-full max-w-5xl rounded-xl bg-white shadow-xs border border-slate-200/80 overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[620px]">
           {/* Left Context Rail */}
           <aside className="lg:col-span-4 bg-slate-50/70 border-b lg:border-b-0 lg:border-r border-slate-200/80 p-8 flex flex-col justify-between">
@@ -544,7 +544,7 @@ export default function OnboardingPage() {
                               setAnswerValue(option.value);
                               setSpecialType(null);
                             }}
-                            className={`cursor-pointer rounded-2xl border p-4.5 transition-all flex flex-col justify-between min-h-[92px] ${
+                            className={`cursor-pointer rounded-xl border p-4.5 transition-all flex flex-col justify-between min-h-[92px] ${
                               isSelected
                                 ? "border-slate-900 bg-slate-50/80 ring-1 ring-slate-900 shadow-2xs"
                                 : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
@@ -572,7 +572,7 @@ export default function OnboardingPage() {
 
                     {/* Inline detail if OTHER selected */}
                     {answerValue === "OTHER" && !specialType && (
-                      <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
                         <label
                           htmlFor="other-specification"
                           className="block text-xs font-semibold text-slate-700 mb-1"
@@ -610,7 +610,7 @@ export default function OnboardingPage() {
                               setAnswerValue(opt.val);
                               setSpecialType(null);
                             }}
-                            className={`cursor-pointer rounded-2xl border p-4.5 transition-all flex flex-col justify-between min-h-[92px] ${
+                            className={`cursor-pointer rounded-xl border p-4.5 transition-all flex flex-col justify-between min-h-[92px] ${
                               isSelected
                                 ? "border-slate-900 bg-slate-50/80 ring-1 ring-slate-900 shadow-2xs"
                                 : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
@@ -688,7 +688,7 @@ export default function OnboardingPage() {
                     </div>
 
                     {specialType && (
-                      <div className="mt-3.5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="mt-3.5 rounded-xl border border-slate-200 bg-slate-50 p-4">
                         <label htmlFor="setup-reason" className="block text-xs font-semibold text-slate-700 mb-1">
                           Follow-Up Note & Rationale *
                         </label>

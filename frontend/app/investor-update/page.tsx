@@ -13,7 +13,6 @@ import {
   FileSpreadsheet,
   Lock,
   Layers,
-  Sparkles,
 } from "lucide-react";
 
 export default function InvestorUpdatePage() {

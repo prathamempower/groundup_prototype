@@ -62,7 +62,7 @@ export function ModernEmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center p-12 text-center rounded-xl border border-dashed border-border bg-gradient-to-b from-surface to-subtle/30 shadow-xs",
+        "flex flex-col items-center justify-center p-12 text-center rounded-xl border border-dashed border-border bg-surface shadow-2xs",
         className
       )}
     >

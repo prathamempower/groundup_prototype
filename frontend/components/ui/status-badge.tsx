@@ -2,7 +2,7 @@ import * as React from "react";
 import {
   CheckCircle2,
   AlertTriangle,
-  Sparkles,
+  HelpCircle,
   FileQuestion,
   Ban,
   DollarSign,
@@ -41,7 +41,7 @@ const BADGE_CONFIGS: Record<StatusBadgeType, StatusBadgeConfig> = {
   proposed: {
     label: "Proposed",
     className: "bg-info-subtle text-info border-info/30",
-    icon: Sparkles,
+    icon: HelpCircle,
   },
   missing_evidence: {
     label: "Missing evidence",

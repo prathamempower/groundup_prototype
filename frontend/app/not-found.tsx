@@ -14,7 +14,7 @@ export default function NotFound() {
     <div className="flex min-h-[calc(100vh-140px)] w-full items-center justify-center p-6 sm:p-12">
       <div className="w-full max-w-xl text-center">
         {/* Visual Badge / Icon */}
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl border border-slate-200/80 bg-white shadow-xs">
           <FileQuestion className="h-8 w-8 text-slate-700" />
         </div>
 

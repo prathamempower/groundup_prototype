@@ -378,6 +378,8 @@ export const api = {
           reason,
         }),
       }),
+    getContingencyMovements: (projectId: string) =>
+      request<ContingencyMovement[]>(`/projects/${projectId}/contingency-movements`),
     linkMilestone: (budgetLineId: string, milestoneId: string | null) =>
       request<BudgetLine>(`/budget-lines/${budgetLineId}/milestone`, {
         method: "PATCH",
@@ -695,6 +697,21 @@ export const api = {
       request<ProjectEconomics>(`/projects/${projectId}/economics`),
     getProForma: (projectId: string) =>
       request<ProFormaLineItem[]>(`/projects/${projectId}/pro-forma`),
+    createFinancialPlan: (
+      projectId: string,
+      data: {
+        plan_type: "PRO_FORMA" | "UNDERWRITING" | "BUDGET_BASELINE";
+        projected_revenue: number;
+        projected_cost: number;
+        target_irr?: number;
+        target_equity_multiple?: number;
+        lines?: any[];
+      }
+    ) =>
+      request<any>(`/projects/${projectId}/financial-plans`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
     getInvestorContributions: (projectId: string) =>
       request<InvestorContribution[]>(`/projects/${projectId}/investors/contributions`),
     recordInvestorContribution: (

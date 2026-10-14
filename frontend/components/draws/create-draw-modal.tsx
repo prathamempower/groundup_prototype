@@ -8,7 +8,7 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { formatMoney } from "@/lib/format";
-import { Landmark, AlertCircle, FileText, CheckCircle2, Sparkles } from "lucide-react";
+import { Landmark, AlertCircle, FileText, CheckCircle2, Layers } from "lucide-react";
 import type { BudgetLine } from "@/lib/types";
 import { EXCEL_DRAW_TASKS } from "@/lib/data/excel-draw-schedule";
 
@@ -220,7 +220,7 @@ export function CreateDrawModal({
                   onClick={() => handleApplyPreset(drawNumber)}
                   className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline"
                 >
-                  <Sparkles className="h-3 w-3" />
+                  <Layers className="h-3 w-3" />
                   <span>Load Draw #{drawNumber} Schedule</span>
                 </button>
                 <span className="text-caption text-text-muted">

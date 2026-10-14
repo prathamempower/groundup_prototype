@@ -19,7 +19,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  Sparkles,
   ArrowRight,
   X,
   FileSpreadsheet,
@@ -134,7 +133,7 @@ export function UploadModal({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent maxWidth="lg" className="p-0 overflow-hidden rounded-xl border border-slate-200/90 shadow-2xl bg-white">
+      <ModalContent maxWidth="lg" className="p-0 overflow-hidden rounded-xl border border-slate-200/90 shadow-overlay bg-white">
         {/* Header */}
         <ModalHeader className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-start gap-3.5">
@@ -301,7 +300,7 @@ export function UploadModal({
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500">Candidate Fields Extracted:</span>
                   <span className="font-semibold text-emerald-700 flex items-center gap-1 font-mono">
-                    <Sparkles className="h-3 w-3" /> Proposals Generated
+                    <CheckCircle2 className="h-3 w-3" /> Proposals Generated
                   </span>
                 </div>
               </div>

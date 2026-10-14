@@ -18,8 +18,8 @@ class Settings(BaseSettings):
     # Security (loaded from .env; no hardcoded fallback)
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 120
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 60
     SEED_DEFAULT_PASSWORD: str
 
     # CORS

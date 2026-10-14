@@ -30,7 +30,7 @@ export function DocumentQuickPreviewModal({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent maxWidth="full" className="p-0 overflow-hidden flex flex-col h-[90vh] max-h-[92vh] rounded-2xl bg-white border border-slate-200/90 shadow-2xl">
+      <ModalContent maxWidth="full" className="p-0 overflow-hidden flex flex-col h-[90vh] max-h-[92vh] rounded-xl bg-white border border-slate-200/90 shadow-overlay">
         <ModalHeader className="border-b border-slate-200/80 bg-slate-50/80 px-6 py-3.5 flex-shrink-0">
           <div className="flex items-center justify-between pr-8">
             <div className="space-y-0.5">
