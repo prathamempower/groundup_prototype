@@ -2915,6 +2915,9 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
           {/* ──────────────────────────────────────────────────────────── */}
           {/* SCREEN 8: WORKSPACE SETUP AND REAL LOADING                  */}
           {/* ──────────────────────────────────────────────────────────── */}
+          {/* ──────────────────────────────────────────────────────────── */}
+          {/* SCREEN 8: ARCHITECTURAL WORKSPACE INITIALIZATION             */}
+          {/* ──────────────────────────────────────────────────────────── */}
           {currentStep === 8 && (
             <div className="space-y-6 text-center">
               <div className="space-y-1.5">
@@ -2926,13 +2929,13 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                 >
                   Setting up your workspace
                 </TextEffect>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Configuring organization security, CSI MasterFormat cost ledger, and personalized command center.
+                <p className="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
+                  Configuring organization multi-tenancy, CSI MasterFormat cost code ledger, and automated lender draw engines.
                 </p>
               </div>
 
-              {/* Animated Circular Gauge */}
-              <div className="py-2 flex justify-center">
+              {/* Architectural Linear Calibration Gauge */}
+              <div className="py-1">
                 <CircularWorkspaceGauge
                   percentage={
                     setupStages.finalizing ? 100 :
@@ -2941,76 +2944,111 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                           setupStages.savingOrg ? 25 : 10
                   }
                   currentStage={
-                    setupStages.finalizing ? 'Finalizing security keys and launching workspace...' :
-                      setupStages.preparingDashboard ? 'Calibrating financial ledger and focus modules...' :
-                        setupStages.creatingProject ? `Provisioning ${projectName || 'project'} ledger records...` :
-                          setupStages.savingOrg ? `Configuring ${orgName || 'organization'} multi-tenant workspace...` :
-                            'Initializing relational ledger database...'
+                    setupStages.finalizing ? 'Finalizing security keys and launching workspace…' :
+                      setupStages.preparingDashboard ? 'Calibrating financial ledger and focus modules…' :
+                        setupStages.creatingProject ? `Provisioning ${projectName || 'project'} ledger records…` :
+                          setupStages.savingOrg ? `Configuring ${orgName || 'organization'} multi-tenant workspace…` :
+                            'Initializing relational ledger database…'
                   }
                 />
               </div>
 
-              {/* Verified Real Backend Stages */}
-              <div className="space-y-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl p-4 text-left">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
+              {/* Verified Architectural Ledger Telemetry Rows */}
+              <div className="space-y-2 bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs text-left max-w-md mx-auto">
+                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 px-1 pb-1 border-b border-slate-100 flex items-center justify-between">
+                  <span>System Module</span>
+                  <span>Ledger Status</span>
+                </div>
+
+                {/* Module 1: Org */}
+                <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
+                  <div className="flex items-center gap-2.5">
                     {setupStages.savingOrg ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     ) : (
-                      <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-800 rounded-full animate-spin shrink-0" />
+                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
                     )}
-                    <span className="font-semibold text-slate-800">Setting up your organization workspace</span>
+                    <div>
+                      <span className="font-bold text-slate-800 block text-xs">Organization Isolation</span>
+                      <span className="text-[10px] text-slate-500 font-mono">SYS-01 · Multi-Tenant Row Security</span>
+                    </div>
                   </div>
-                  <span className="text-[11px] text-slate-500 font-mono">
-                    {setupStages.savingOrg ? 'Verified' : 'In progress'}
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                    setupStages.savingOrg ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-blue-50 text-blue-700 border border-blue-200/60'
+                  }`}>
+                    {setupStages.savingOrg ? 'VERIFIED' : 'ACTIVE'}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
+                {/* Module 2: Project Ledger */}
+                <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
+                  <div className="flex items-center gap-2.5">
                     {setupStages.creatingProject ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : setupStages.savingOrg ? (
+                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
                     ) : (
-                      <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-800 rounded-full animate-spin shrink-0" />
+                      <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
                     )}
-                    <span className="font-semibold text-slate-800">Initializing your project ledger</span>
+                    <div>
+                      <span className="font-bold text-slate-800 block text-xs">CSI MasterFormat Structure</span>
+                      <span className="text-[10px] text-slate-500 font-mono">WBS-50 · 50-Division Cost Baseline</span>
+                    </div>
                   </div>
-                  <span className="text-[11px] text-slate-500 font-mono">
-                    {setupStages.creatingProject ? 'Configured' : 'Waiting'}
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                    setupStages.creatingProject ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : setupStages.savingOrg ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {setupStages.creatingProject ? 'LOCKED' : setupStages.savingOrg ? 'ACTIVE' : 'PENDING'}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
+                {/* Module 3: Lien Compliance */}
+                <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
+                  <div className="flex items-center gap-2.5">
                     {setupStages.preparingDashboard ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : setupStages.creatingProject ? (
+                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
                     ) : (
-                      <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-800 rounded-full animate-spin shrink-0" />
+                      <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
                     )}
-                    <span className="font-semibold text-slate-800">Calibrating dashboard priorities</span>
+                    <div>
+                      <span className="font-bold text-slate-800 block text-xs">Statutory Lien Defense</span>
+                      <span className="text-[10px] text-slate-500 font-mono">LIEN-CA · § 8132-8138 Automatic Waivers</span>
+                    </div>
                   </div>
-                  <span className="text-[11px] text-slate-500 font-mono">
-                    {setupStages.preparingDashboard ? 'Calibrated' : 'Waiting'}
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                    setupStages.preparingDashboard ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : setupStages.creatingProject ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {setupStages.preparingDashboard ? 'ENFORCED' : setupStages.creatingProject ? 'ACTIVE' : 'PENDING'}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
+                {/* Module 4: Draw Package Assembly */}
+                <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
+                  <div className="flex items-center gap-2.5">
                     {setupStages.finalizing ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : setupStages.preparingDashboard ? (
+                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
                     ) : (
-                      <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-800 rounded-full animate-spin shrink-0" />
+                      <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
                     )}
-                    <span className="font-semibold text-slate-800">Preparing document intake and team access</span>
+                    <div>
+                      <span className="font-bold text-slate-800 block text-xs">Lender Draw Engine</span>
+                      <span className="text-[10px] text-slate-500 font-mono">DRAW-AIA · G702 / G703 Package Engine</span>
+                    </div>
                   </div>
-                  <span className="text-[11px] text-slate-500 font-mono">
-                    {setupStages.finalizing ? 'Ready' : 'Waiting'}
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                    setupStages.finalizing ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : setupStages.preparingDashboard ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {setupStages.finalizing ? 'READY' : setupStages.preparingDashboard ? 'ACTIVE' : 'PENDING'}
                   </span>
                 </div>
               </div>
 
               {setupError && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center justify-between text-left">
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center justify-between text-left max-w-md mx-auto">
                   <span>{setupError}</span>
                   <button
                     type="button"
