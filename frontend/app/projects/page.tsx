@@ -60,11 +60,14 @@ export default function ProjectsPortfolioPage() {
         const query = searchQuery.trim().toLowerCase();
         const matchesSearch =
           query === "" ||
-          p.name.toLowerCase().includes(query) ||
-          p.address.toLowerCase().includes(query) ||
-          (p.project_entity && p.project_entity.toLowerCase().includes(query));
+          p.name.toLowerCase().includes(query);
 
-        const matchesStage = stageFilter === "ALL" || p.lifecycle_stage === stageFilter;
+        const matchesStage =
+          stageFilter === "ALL" ||
+          (stageFilter === "PRE_CONSTRUCTION" && p.lifecycle_stage === "PRE_CONSTRUCTION") ||
+          (stageFilter === "UNDER_CONSTRUCTION" && (p.lifecycle_stage === "UNDER_CONSTRUCTION" || p.lifecycle_stage === "CONSTRUCTION")) ||
+          (stageFilter === "POST_CONSTRUCTION" && (p.lifecycle_stage === "POST_CONSTRUCTION" || p.lifecycle_stage === "DISPOSITION")) ||
+          (stageFilter === "COMPLETE" && (p.lifecycle_stage === "COMPLETE" || p.lifecycle_stage === "COMPLETION" || p.lifecycle_stage === "CLOSED" || p.status === "COMPLETED"));
         const matchesStatus =
           statusFilter === "ALL" ||
           (statusFilter === "HEALTHY" && p.health_status === "HEALTHY") ||
@@ -110,11 +113,26 @@ export default function ProjectsPortfolioPage() {
   };
 
   const formatStageLabel = (stage: string) => {
-    return stage
-      .toLowerCase()
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+    switch (stage) {
+      case "UNDER_CONSTRUCTION":
+      case "CONSTRUCTION":
+        return "Under Construction";
+      case "PRE_CONSTRUCTION":
+        return "Pre-Construction";
+      case "POST_CONSTRUCTION":
+      case "DISPOSITION":
+        return "Post-Construction";
+      case "COMPLETE":
+      case "COMPLETION":
+      case "CLOSED":
+        return "Complete";
+      default:
+        return stage
+          .toLowerCase()
+          .split("_")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+    }
   };
 
   const getProjectImage = (project: Project) => {
@@ -135,17 +153,17 @@ export default function ProjectsPortfolioPage() {
 
   const getProjectProgress = (project: Project) => {
     if (project.progress_pct !== undefined) return project.progress_pct;
-    if (project.status === "COMPLETED" || project.lifecycle_stage === "CLOSED" || project.lifecycle_stage === "DISPOSITION") {
+    if (project.status === "COMPLETED" || project.lifecycle_stage === "CLOSED" || project.lifecycle_stage === "COMPLETE" || project.lifecycle_stage === "COMPLETION") {
       return 100;
     }
     switch (project.lifecycle_stage) {
-      case "ACQUISITION":
-        return 15;
       case "PRE_CONSTRUCTION":
         return 35;
+      case "UNDER_CONSTRUCTION":
       case "CONSTRUCTION":
         return 68;
-      case "COMPLETION":
+      case "POST_CONSTRUCTION":
+      case "DISPOSITION":
         return 92;
       default:
         return 45;
@@ -252,7 +270,7 @@ export default function ProjectsPortfolioPage() {
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search projects, addresses, metrics…"
+              placeholder="Search projects..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50/50 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 transition-colors hover:border-slate-300 focus:border-slate-900 focus:bg-white focus:outline-none"
@@ -266,12 +284,10 @@ export default function ProjectsPortfolioPage() {
             className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 focus:border-slate-900 focus:outline-none cursor-pointer"
           >
             <option value="ALL">All Stages</option>
-            <option value="ACQUISITION">Acquisition</option>
             <option value="PRE_CONSTRUCTION">Pre-Construction</option>
-            <option value="CONSTRUCTION">Construction</option>
-            <option value="COMPLETION">Completion</option>
-            <option value="DISPOSITION">Disposition</option>
-            <option value="CLOSED">Closed</option>
+            <option value="UNDER_CONSTRUCTION">Under Construction</option>
+            <option value="POST_CONSTRUCTION">Post-Construction</option>
+            <option value="COMPLETE">Complete</option>
           </select>
 
           {/* Status Filter */}
@@ -346,31 +362,7 @@ export default function ProjectsPortfolioPage() {
         </div>
       </div>
 
-      {/* Executive Financial Comparison Callout Banner */}
-      {canSeeFinancialSummary && projects.length >= 2 && viewMode !== "COMPARE" && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50/70 via-white to-slate-50 p-3.5 shadow-2xs">
-          <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-xs">
-              <TrendingUp className="h-4 w-4" />
-            </span>
-            <div>
-              <div className="text-xs font-bold text-slate-900">
-                Compare Cross-Project Financial Performance
-              </div>
-              <div className="text-[11px] text-slate-500">
-                Benchmark GDV, net profit margins, capital stack exposure, and construction yields across your {projects.length} projects.
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={() => setViewMode("COMPARE")}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-white border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs hover:bg-slate-50 hover:text-slate-900 transition-colors self-start sm:self-auto shrink-0"
-          >
-            <span>View Comparison Matrix</span>
-            <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
-          </button>
-        </div>
-      )}
+
 
       {/* Projects Display */}
       {viewMode === "COMPARE" ? (

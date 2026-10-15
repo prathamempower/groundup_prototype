@@ -98,6 +98,8 @@ export function AppShell({ children }: AppShellProps) {
 
     if (standaloneSection === "directs") {
       router.replace(`/projects/${resolvedProjectId}/inbox`);
+    } else if (standaloneSection === "timeline" || pathname.includes("/timeline")) {
+      router.replace(`/projects/${resolvedProjectId}/control-center`);
     } else if (standaloneSection && LEGACY_WORKSPACE_SECTIONS.includes(standaloneSection)) {
       router.replace(`/projects/${resolvedProjectId}/${standaloneSection}`);
     } else if (pathname === "/investor-update" || pathname.includes("/investor-updates")) {

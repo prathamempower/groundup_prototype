@@ -117,7 +117,12 @@ export function ProjectFinancialComparison({
         projectSearch === "" ||
         p.name.toLowerCase().includes(projectSearch.toLowerCase()) ||
         (p.address || "").toLowerCase().includes(projectSearch.toLowerCase());
-      const matchesStage = stageFilter === "ALL" || p.lifecycle_stage === stageFilter;
+      const matchesStage =
+        stageFilter === "ALL" ||
+        (stageFilter === "PRE_CONSTRUCTION" && p.lifecycle_stage === "PRE_CONSTRUCTION") ||
+        (stageFilter === "UNDER_CONSTRUCTION" && (p.lifecycle_stage === "UNDER_CONSTRUCTION" || p.lifecycle_stage === "CONSTRUCTION")) ||
+        (stageFilter === "POST_CONSTRUCTION" && (p.lifecycle_stage === "POST_CONSTRUCTION" || p.lifecycle_stage === "DISPOSITION")) ||
+        (stageFilter === "COMPLETE" && (p.lifecycle_stage === "COMPLETE" || p.lifecycle_stage === "COMPLETION" || p.lifecycle_stage === "CLOSED" || p.status === "COMPLETED"));
       return matchesSearch && matchesStage;
     });
   }, [projects, projectSearch, stageFilter]);
@@ -399,10 +404,10 @@ export function ProjectFinancialComparison({
               className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-700 focus:outline-none"
             >
               <option value="ALL">All Stages</option>
-              <option value="ACQUISITION">Acquisition</option>
               <option value="PRE_CONSTRUCTION">Pre-Construction</option>
-              <option value="CONSTRUCTION">Construction</option>
-              <option value="COMPLETION">Completion</option>
+              <option value="UNDER_CONSTRUCTION">Under Construction</option>
+              <option value="POST_CONSTRUCTION">Post-Construction</option>
+              <option value="COMPLETE">Complete</option>
             </select>
           </div>
         )}

@@ -14,7 +14,6 @@ import {
   ShieldCheck,
   Layers,
   AlertCircle,
-  Clock,
   Landmark,
   Users,
   FileCheck,
@@ -233,7 +232,7 @@ export default function CreateProjectPage() {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                  <div className="max-w-md pt-1">
                     {/* Primary Option: Create New */}
                     <div
                       role="button"
@@ -253,22 +252,6 @@ export default function CreateProjectPage() {
                       </div>
                       <div className="mt-5 inline-flex items-center text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
                         Begin Setup <ArrowRight className="ml-1 h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </div>
-
-                    {/* Secondary Option: Import Pro-Forma */}
-                    <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-6 flex flex-col justify-between min-h-[190px]">
-                      <div>
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-200 text-slate-700 mb-4">
-                          <Clock className="h-5 w-5" />
-                        </div>
-                        <h3 className="font-bold text-slate-800 text-sm">Import Pro-Forma</h3>
-                        <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                          Reconstruct from Excel models or ledger files after setup.
-                        </p>
-                      </div>
-                      <div className="mt-5 inline-flex items-center text-xs font-semibold text-slate-500">
-                        Via Document Inbox
                       </div>
                     </div>
                   </div>
@@ -849,9 +832,6 @@ export default function CreateProjectPage() {
                         placeholder="cfo@developmentpartners.com"
                         className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                       />
-                      <span className="text-[11px] text-slate-500 mt-1.5 block">
-                        Enables bank mapping, baseline lock, and cleared deposit reconciliation.
-                      </span>
                     </div>
 
                     <div className="rounded-xl border border-slate-200 p-4.5 bg-white shadow-2xs hover:border-slate-300 transition-colors">
@@ -865,9 +845,6 @@ export default function CreateProjectPage() {
                         placeholder="pm@fieldbuilders.com"
                         className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                       />
-                      <span className="text-[11px] text-slate-500 mt-1.5 block">
-                        Enables milestone Gantt schedule, permit tracking, and draw inspections.
-                      </span>
                     </div>
 
                     <div className="rounded-xl border border-slate-200 p-4.5 bg-white shadow-2xs hover:border-slate-300 transition-colors">
@@ -881,9 +858,6 @@ export default function CreateProjectPage() {
                         placeholder="lead@generalcontractor.com"
                         className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                       />
-                      <span className="text-[11px] text-slate-500 mt-1.5 block">
-                        Enables monthly payment applications (G702/G703) and lien waiver uploads.
-                      </span>
                     </div>
                   </div>
 

@@ -468,7 +468,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
                         key={notif.id}
                         onClick={() => {
                           if (isUnread) markReadMutation.mutate(notif.id);
-                          if (notif.link_url) {
+                          if (notif.link_url && !notif.link_url.includes("timeline")) {
                             setIsNotificationsOpen(false);
                             router.push(notif.link_url);
                           }
@@ -525,8 +525,8 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
                                 <span>Schedule Slip: <strong className="font-mono text-amber-700">+35 Days</strong></span>
                                 <span>Carry Impact: <strong className="font-mono text-amber-700">+$28,500</strong></span>
                               </div>
-                              <span className="text-amber-800 font-bold flex items-center gap-1 text-[10px] mt-0.5">
-                                View Milestone Schedule →
+                              <span className="text-amber-800/80 font-bold flex items-center gap-1 text-[10px] mt-0.5 select-none">
+                                View Milestone Schedule
                               </span>
                             </div>
                           )}
@@ -671,13 +671,20 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
           </div>
 
           <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-            <Link
-              href={criticalPathAlert?.link_url || (currentProjectId ? `/projects/${currentProjectId}/timeline` : "/timeline")}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#C85A17] hover:bg-[#B34E14] text-white px-3 py-1.5 text-xs font-bold shadow-xs transition-colors cursor-pointer"
+            <button
+              type="button"
+              disabled
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#C85A17] text-white px-3 py-1.5 text-xs font-bold shadow-xs opacity-75 cursor-not-allowed select-none"
+              title="Milestone schedule is currently frozen"
+              aria-disabled="true"
             >
               <span>View Milestone Schedule</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+              <ArrowRight className="h-3.5 w-3.5 opacity-60" />
+            </button>
             <button
               onClick={() => setIsAlertBarDismissed(true)}
               className="text-amber-700 hover:text-amber-950 p-1 rounded-md hover:bg-amber-100/60 transition-colors cursor-pointer"

@@ -217,31 +217,7 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
         </div>
       )}
 
-      {activeTab === "CASH_POSITION" && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-6 py-3.5 border-b border-slate-100 bg-white">
-          <div className="rounded-lg border border-rose-100 bg-rose-50/40 px-3.5 py-2">
-            <span className="text-[11px] font-semibold text-rose-800 uppercase tracking-wider block">Current Gap (Oct 26)</span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-mono text-rose-900">-$1.02M</span>
-              <span className="text-[11px] font-medium text-rose-700">Pending Draw #8</span>
-            </div>
-          </div>
-          <div className="rounded-lg border border-blue-100 bg-blue-50/40 px-3.5 py-2">
-            <span className="text-[11px] font-semibold text-blue-800 uppercase tracking-wider block">Forecast Recovery</span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-mono text-blue-900">Nov 26</span>
-              <span className="text-[11px] font-medium text-blue-700">Normalizes to -$320k</span>
-            </div>
-          </div>
-          <div className="rounded-lg border border-emerald-100 bg-emerald-50/40 px-3.5 py-2">
-            <span className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wider block">Max Peak Cushion</span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-mono text-emerald-900">+$580k</span>
-              <span className="text-[11px] font-medium text-emerald-700">Jan 26 recorded</span>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {activeTab === "PROJECTED_PROFIT" && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-6 py-3.5 border-b border-slate-100 bg-white">

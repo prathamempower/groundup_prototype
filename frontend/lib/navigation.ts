@@ -114,7 +114,7 @@ export const WORKSPACE_ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   "changes": ["OWNER", "CFO", "PM"],
   "reconciliation": ["OWNER", "CFO"],
   "draws": ["OWNER", "CFO", "PM"],
-  "timeline": ["OWNER", "CFO", "PM"],
+  "timeline": [],
   "alerts": ["OWNER", "CFO", "PM"],
   "partners": ["OWNER", "CFO", "INVESTOR"],
   "inbox": ["OWNER", "CFO", "PM", "GC", "INVESTOR"],

@@ -205,17 +205,6 @@ export default function ControlCenterPage() {
                 </span>
               </div>
             </div>
-
-            <div className="flex items-center gap-3 shrink-0 pt-1 md:pt-0 border-t md:border-t-0 border-slate-100">
-              <div className="text-right hidden sm:block">
-                <span className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 block">
-                  Data Baseline
-                </span>
-                <span className="text-xs font-mono font-medium text-slate-700">
-                  {formatAsOf(meta?.as_of) || "Oct 26, 2025"}
-                </span>
-              </div>
-            </div>
           </div>
         </div>
 
