@@ -816,46 +816,33 @@ export default function CreateProjectPage() {
                       Team & Role Delegation
                     </h2>
                     <p className="mt-1 text-xs text-slate-500">
-                      Invite team members to participate in role-based setup questions.
+                      Invite principals, co-owners, or development partners to this project.
                     </p>
                   </div>
 
                   <div className="space-y-3.5 pt-1">
                     <div className="rounded-xl border border-slate-200 p-4.5 bg-white shadow-2xs hover:border-slate-300 transition-colors">
                       <span className="text-xs font-bold text-slate-900 block mb-1">
-                        CFO / Accounting Lead
+                        Co-Owner / Principal Developer
                       </span>
                       <input
                         type="email"
                         value={cfoEmail}
                         onChange={(e) => setCfoEmail(e.target.value)}
-                        placeholder="cfo@developmentpartners.com"
+                        placeholder="partner@developmentpartners.com"
                         className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                       />
                     </div>
 
                     <div className="rounded-xl border border-slate-200 p-4.5 bg-white shadow-2xs hover:border-slate-300 transition-colors">
                       <span className="text-xs font-bold text-slate-900 block mb-1">
-                        Project Manager (PM)
+                        Executive Partner / Co-Sponsor
                       </span>
                       <input
                         type="email"
                         value={pmEmail}
                         onChange={(e) => setPmEmail(e.target.value)}
-                        placeholder="pm@fieldbuilders.com"
-                        className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                      />
-                    </div>
-
-                    <div className="rounded-xl border border-slate-200 p-4.5 bg-white shadow-2xs hover:border-slate-300 transition-colors">
-                      <span className="text-xs font-bold text-slate-900 block mb-1">
-                        General Contractor (GC)
-                      </span>
-                      <input
-                        type="email"
-                        value={gcEmail}
-                        onChange={(e) => setGcEmail(e.target.value)}
-                        placeholder="lead@generalcontractor.com"
+                        placeholder="sponsor@fieldbuilders.com"
                         className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                       />
                     </div>
@@ -905,7 +892,7 @@ export default function CreateProjectPage() {
                       {
                         doc: "Municipal Building Permit Set",
                         gate: "Permit Gate",
-                        status: "Assigned to PM",
+                        status: "Pending Municipal Review",
                       },
                     ].map((row, idx) => (
                       <div
@@ -985,7 +972,7 @@ export default function CreateProjectPage() {
                       </p>
                       <p className="flex items-center gap-2">
                         <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                        Initial onboarding tasks will be dispatched to CFO and PM.
+                        Initial verification checklist will be configured for your review.
                       </p>
                       <p className="flex items-center gap-2">
                         <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />

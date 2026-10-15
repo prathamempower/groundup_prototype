@@ -623,13 +623,19 @@ class MockStore {
   }
 
   getExtractions(documentId: string): ExtractionField[] {
-    return this.state.extractions[documentId] || [
+    if (this.state.extractions[documentId]) {
+      return this.state.extractions[documentId];
+    }
+    const doc = this.getDocumentById(documentId);
+    const proj = doc ? this.state.projects.find((p) => p.id === doc.project_id) : null;
+    const projectName = proj?.name || "Development Project";
+    return [
       {
         id: `ext-${documentId}-1`,
         document_id: documentId,
         field_name: "Project Name",
-        raw_value: "73 Broadway",
-        normalized_value: "73 Broadway",
+        raw_value: projectName,
+        normalized_value: projectName,
         confidence: 0.98,
         citation: { page_number: 1 },
         status: "ACCEPTED",
@@ -637,9 +643,9 @@ class MockStore {
       {
         id: `ext-${documentId}-2`,
         document_id: documentId,
-        field_name: "Invoice Total",
-        raw_value: "$34,250.00",
-        normalized_value: "$34,250.00",
+        field_name: "Document Reference",
+        raw_value: doc?.original_filename || "Source Document",
+        normalized_value: doc?.original_filename || "Source Document",
         confidence: 0.96,
         citation: { page_number: 1 },
         status: "PROPOSED",
@@ -991,9 +997,9 @@ class MockStore {
     const ipt: InterProjectTransfer = {
       id: `ipt-${Date.now()}`,
       from_project_id: projectId,
-      from_project_name: fromProject?.name || "73 Broadway",
+      from_project_name: fromProject?.name || "Source Project",
       to_project_id: data.to_project_id,
-      to_project_name: toProject?.name || "161 Woodlawn Ave",
+      to_project_name: toProject?.name || "Target Project",
       transaction_id: `tx-ipt-${Date.now()}`,
       amount: data.amount,
       transfer_date: data.transfer_date || new Date().toISOString().split("T")[0],
