@@ -267,7 +267,7 @@ export const api = {
     },
     getDownloadUrl: async (documentId: string) => {
       const doc = mockStore.getDocumentById(documentId);
-      const filename = doc ? doc.original_filename : "Budget for 73 Broadway (1).pdf";
+      const filename = doc?.original_filename || "document.pdf";
       return wrap({
         document_id: documentId,
         download_url: `/sample-docs/${encodeURIComponent(filename)}`,

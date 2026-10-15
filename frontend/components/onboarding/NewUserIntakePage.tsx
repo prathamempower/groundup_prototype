@@ -311,12 +311,8 @@ const DOC_TYPE_CHOICES = [
 ];
 
 const ROLE_OPTIONS: Array<{ role: OnboardingRole; label: string; desc: string }> = [
-  { role: 'FINANCE_LEAD', label: 'Finance Lead', desc: 'Draw packages, loan disbursements, and wire reconciliation' },
-  { role: 'ACCOUNTANT', label: 'Project Accountant', desc: 'Invoice coding, vendor bills, and statutory lien waivers' },
-  { role: 'PM', label: 'Project Manager', desc: 'Field milestones, municipal inspections, and daily site logs' },
-  { role: 'GC', label: 'General Contractor', desc: 'Pay applications, subcontractor logs, and photo verification' },
-  { role: 'INVESTOR', label: 'Limited Partner', desc: 'Read-only capital oversight and distribution reporting' },
-  { role: 'PARTNER', label: 'Co-Sponsor Equity', desc: 'Executive capital position and milestone updates' },
+  { role: 'OWNER', label: 'Co-Owner / Principal', desc: 'Full portfolio, pro forma, draw packages, and audit ledger authority' },
+  { role: 'PARTNER', label: 'Co-Sponsor Equity Partner', desc: 'Executive capital position, milestone progress, and distribution updates' },
 ];
 
 function ActiveJobsiteSvg({ active }: { active: boolean }) {
@@ -601,7 +597,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
 
   // Screen 7: Collaborators
   const [inviteEmail, setInviteEmail] = useState<string>('');
-  const [inviteRole, setInviteRole] = useState<OnboardingRole>('PM');
+  const [inviteRole, setInviteRole] = useState<OnboardingRole>('OWNER');
   const [teamList, setTeamList] = useState<TeamMemberInvite[]>([]);
 
   // Validation errors
@@ -1463,11 +1459,11 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
         break;
       case 7:
         setTeamList([
-          { email: 'elena.rostova@gothamdev.com', role: 'FINANCE_LEAD' },
-          { email: 'marcus.vance@gothamdev.com', role: 'PM' },
+          { email: 'sarah.lin@gothamdev.com', role: 'OWNER' },
+          { email: 'marcus.vance@gothamdev.com', role: 'PARTNER' },
         ]);
         setInviteError(null);
-        showToast('info', 'Added Finance Lead and PM to collaborator access queue.', 'Collaborators');
+        showToast('info', 'Added Co-Owner and Development Partner to collaborator access queue.', 'Collaborators');
         break;
     }
   };

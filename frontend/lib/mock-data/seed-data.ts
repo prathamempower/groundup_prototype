@@ -599,7 +599,7 @@ export const SEED_DOCUMENTS: DocumentItem[] = [
     uploader_name: "Sarah Lin",
     uploaded_at: "2025-03-26T16:00:00Z",
     pages_count: 28,
-    notes: "Columbia Bank construction loan agreement ($1,200,000 commitment)",
+    notes: "Commercial construction loan agreement ($1,200,000 commitment)",
   },
   {
     id: "doc-broadway-closing",

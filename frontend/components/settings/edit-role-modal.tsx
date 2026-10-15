@@ -99,11 +99,7 @@ export function EditRoleModal({
                 onChange={(e) => setRole(e.target.value as UserRole)}
                 className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-800 shadow-2xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer"
               >
-                <option value="OWNER">Owner — Principal Developer</option>
-                <option value="CFO">CFO — Head of Project Finance</option>
-                <option value="PM">PM — Senior Project Manager</option>
-                <option value="GC">GC — General Contractor / Submissions</option>
-                <option value="INVESTOR">Investor — LP Syndicate Lead</option>
+                <option value="OWNER">Owner — Principal Developer / Portfolio Lead</option>
               </select>
             </div>
           </div>

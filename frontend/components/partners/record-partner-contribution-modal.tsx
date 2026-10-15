@@ -35,7 +35,7 @@ export function RecordPartnerContributionModal({
   partners,
   onRecord,
 }: RecordPartnerContributionModalProps) {
-  const [partnerName, setPartnerName] = useState(partners[0]?.name || "Kirit Shah");
+  const [partnerName, setPartnerName] = useState(partners[0]?.name || "Marcus Vance");
   const [amountDollars, setAmountDollars] = useState("50000");
   const [sourceType, setSourceType] = useState<"Partner Equity" | "Partner Loans" | "Unclassified">("Partner Equity");
   const [sourceName, setSourceName] = useState("Bank transfer");

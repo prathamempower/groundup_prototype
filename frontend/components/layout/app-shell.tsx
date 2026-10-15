@@ -157,7 +157,7 @@ export function AppShell({ children }: AppShellProps) {
 
   if (isPublicRoute) {
     return (
-      <div className="min-h-screen w-full overflow-y-auto bg-app text-text-primary">
+      <div className="min-h-screen w-full bg-app text-text-primary">
         {children}
       </div>
     );

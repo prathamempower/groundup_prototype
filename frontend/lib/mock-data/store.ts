@@ -271,11 +271,10 @@ class MockStore {
       company: userData.company || "Development Firm",
       avatarInitials: initials,
       is_active: true,
-      project_memberships: userData.project_memberships || [
-        { project_id: "df16b577-3585-4fb0-a13a-ffadaca73e0f", role: userData.role || "OWNER" },
-        { project_id: "7a2ae0d8-92ee-4992-8148-8c7107654c7b", role: userData.role || "OWNER" },
-        { project_id: "4dbc506e-d18d-4ac2-ba8b-10c4274fec5a", role: userData.role || "OWNER" },
-      ],
+      project_memberships: userData.project_memberships || this.state.projects.map((p) => ({
+        project_id: p.id,
+        role: userData.role || "OWNER",
+      })),
       permissions: ["all"],
     };
 
@@ -336,10 +335,10 @@ class MockStore {
       return existing;
     }
 
-    const id = `proj-${Date.now()}`;
+    const id = projectData.id || `proj-${Date.now()}`;
     const newProject: Project = {
       id,
-      organization_id: "org-vance-dev",
+      organization_id: projectData.organization_id || "org-vance-dev",
       name: projectData.name || "New Development Project",
       project_entity: projectData.project_entity || `${projectData.name || "New"} LLC`,
       address: projectData.address || "100 Construction Way",
@@ -361,12 +360,22 @@ class MockStore {
     this.state.projects.unshift(newProject);
     this.state.activeProjectId = id;
 
-    // Add membership to current user
-    const cur = this.getCurrentUser();
-    if (cur) {
-      cur.project_memberships = cur.project_memberships || [];
-      cur.project_memberships.push({ project_id: id, role: cur.role });
-    }
+    const cur = this.getCurrentUser() || this.state.users[0] || {
+      name: "Alex Morgan",
+      email: "alex@vancedev.com",
+      role: "OWNER",
+      title: "Principal Developer",
+      company: "Vance Development",
+      avatarInitials: "AM",
+    };
+
+    // Add membership to all registered users (Owner gets full access)
+    this.state.users.forEach((u) => {
+      u.project_memberships = u.project_memberships || [];
+      if (!u.project_memberships.some((m) => m.project_id === id)) {
+        u.project_memberships.push({ project_id: id, role: u.role || "OWNER" });
+      }
+    });
 
     // Initialize mock structures for new project
     this.state.dashboards[id] = {
@@ -625,13 +634,19 @@ class MockStore {
   }
 
   getExtractions(documentId: string): ExtractionField[] {
-    return this.state.extractions[documentId] || [
+    if (this.state.extractions[documentId]) {
+      return this.state.extractions[documentId];
+    }
+    const doc = this.getDocumentById(documentId);
+    const proj = doc ? this.state.projects.find((p) => p.id === doc.project_id) : null;
+    const projectName = proj?.name || "Development Project";
+    return [
       {
         id: `ext-${documentId}-1`,
         document_id: documentId,
         field_name: "Project Name",
-        raw_value: "73 Broadway",
-        normalized_value: "73 Broadway",
+        raw_value: projectName,
+        normalized_value: projectName,
         confidence: 0.98,
         citation: { page_number: 1 },
         status: "ACCEPTED",
@@ -639,9 +654,9 @@ class MockStore {
       {
         id: `ext-${documentId}-2`,
         document_id: documentId,
-        field_name: "Invoice Total",
-        raw_value: "$34,250.00",
-        normalized_value: "$34,250.00",
+        field_name: "Document Reference",
+        raw_value: doc?.original_filename || "Source Document",
+        normalized_value: doc?.original_filename || "Source Document",
         confidence: 0.96,
         citation: { page_number: 1 },
         status: "PROPOSED",
@@ -993,9 +1008,9 @@ class MockStore {
     const ipt: InterProjectTransfer = {
       id: `ipt-${Date.now()}`,
       from_project_id: projectId,
-      from_project_name: fromProject?.name || "73 Broadway",
+      from_project_name: fromProject?.name || "Source Project",
       to_project_id: data.to_project_id,
-      to_project_name: toProject?.name || "161 Woodlawn Ave",
+      to_project_name: toProject?.name || "Target Project",
       transaction_id: `tx-ipt-${Date.now()}`,
       amount: data.amount,
       transfer_date: data.transfer_date || new Date().toISOString().split("T")[0],
