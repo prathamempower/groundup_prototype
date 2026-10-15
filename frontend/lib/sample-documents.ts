@@ -30,16 +30,7 @@ export const PRE_EXISTING_DOCUMENTS: PreExistingDocDef[] = [
     description: "Certified field inspection report with retainage & milestone certification",
     recommendedProjectName: "73 Broadway",
   },
-  {
-    id: "broadway-sov-xlsx",
-    filename: "73 Broadway.xlsx",
-    label: "73 Broadway.xlsx",
-    category: "BUDGET_SOV",
-    badge: "Detailed SOV",
-    sizeText: "116 KB",
-    description: "Multi-tab contractor schedule of values & trades breakdown",
-    recommendedProjectName: "73 Broadway",
-  },
+
   {
     id: "aia-form-xlsx",
     filename: "AIA Form (1).xlsx",

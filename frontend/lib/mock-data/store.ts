@@ -155,6 +155,11 @@ class MockStore {
           const parsed = JSON.parse(saved);
           if (parsed && Array.isArray(parsed.projects) && parsed.projects.length > 0) {
             parsed.projects = deduplicateProjects(parsed.projects);
+            if (Array.isArray(parsed.documents)) {
+              parsed.documents = parsed.documents.filter(
+                (d: any) => d.id !== "doc-broadway-sov" && d.original_filename !== "73 Broadway.xlsx"
+              );
+            }
             try {
               window.localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
             } catch {}
@@ -548,14 +553,20 @@ class MockStore {
   // Documents
   // -------------------------------------------------------------
   getDocuments(projectId?: string): DocumentItem[] {
+    const docs = (this.state.documents || []).filter(
+      (d) => d.id !== "doc-broadway-sov" && d.original_filename !== "73 Broadway.xlsx"
+    );
     if (projectId) {
-      return this.state.documents.filter((d) => d.project_id === projectId);
+      return docs.filter((d) => d.project_id === projectId);
     }
-    return this.state.documents;
+    return docs;
   }
 
   getDocumentById(documentId: string): DocumentItem | undefined {
-    return this.state.documents.find((d) => d.id === documentId);
+    if (documentId === "doc-broadway-sov") return undefined;
+    return this.state.documents.find(
+      (d) => d.id === documentId && d.original_filename !== "73 Broadway.xlsx"
+    );
   }
 
   createDocument(docData: {

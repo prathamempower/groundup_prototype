@@ -585,21 +585,7 @@ export const SEED_DOCUMENTS: DocumentItem[] = [
     pages_count: 12,
     notes: "Certified field inspection report documenting Draw #3 progress discrepancy",
   },
-  {
-    id: "doc-broadway-sov",
-    organization_id: "org-vance-dev",
-    project_id: "df16b577-3585-4fb0-a13a-ffadaca73e0f",
-    original_filename: "73 Broadway.xlsx",
-    mime_type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    document_type: "BUDGET_SOV",
-    document_date: "2025-04-01",
-    ingestion_status: "REVIEWED",
-    uploaded_by: "user-frank",
-    uploader_name: "Frank Miller",
-    uploaded_at: "2025-04-02T11:00:00Z",
-    pages_count: 4,
-    notes: "Detailed contractor schedule of values and 200+ vendor ledger records",
-  },
+
   {
     id: "doc-broadway-loan",
     organization_id: "org-vance-dev",

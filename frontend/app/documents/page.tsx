@@ -23,7 +23,6 @@ import {
   ArrowUpDown,
   FolderSync,
   Download,
-  Eye,
   CheckCheck,
   AlertCircle,
   FileCheck,
@@ -655,16 +654,7 @@ export default function DocumentsPage() {
                         {/* Actions */}
                         <td className="py-3.5 px-5 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setQuickPreviewDoc(doc)}
-                              className="h-7 px-2 text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-blue-50/70 gap-1 border border-slate-200/80"
-                              title="Show PDF / Preview Document without downloading"
-                            >
-                              <Eye className="h-3.5 w-3.5 text-blue-600" />
-                              <span>Show</span>
-                            </Button>
+
                             {doc.ingestion_status === "QUARANTINED" ? (
                               <Button
                                 variant="destructive"
