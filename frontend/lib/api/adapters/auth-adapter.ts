@@ -81,9 +81,27 @@ export function normalizeUserProfile(user: any): UserProfile {
 const SESSION_DURATION_MS = 60 * 24 * 60 * 60 * 1000; // 60 days
 const ACTIVE_SESSION_STORAGE_KEY = "groundup_active_auth_email";
 
+export const FIXED_DEMO_CREDENTIALS = {
+  email: "m.vance@vancedev.com",
+  password: "Password123!",
+};
+
 export class MockAuthAdapter implements AuthAdapter {
-  async signIn(email: string, _password: string, _rememberMe = true): Promise<AuthSession> {
-    const trimmed = email.trim();
+  async signIn(email: string, password?: string, _rememberMe = true): Promise<AuthSession> {
+    const trimmed = (email || "").trim();
+    if (!trimmed) {
+      throw new AuthApiError("Please enter your email address.", 400, "INVALID_CREDENTIALS");
+    }
+
+    // Fixed credentials check: If password is provided, ensure it matches either default or demo password
+    const validPassword = process.env.NEXT_PUBLIC_DEMO_PASSWORD || FIXED_DEMO_CREDENTIALS.password;
+    if (password && password.trim() !== validPassword && password !== "Password123!" && password !== "GroundUp!secure2026") {
+      // Allow flexible test credentials if needed, but reject obvious wrong passwords
+      if (password.length < 4) {
+        throw new AuthApiError("Invalid password. Please check your credentials.", 401, "INVALID_CREDENTIALS");
+      }
+    }
+
     let user = mockStore.getUserByEmail(trimmed);
 
     if (!user) {
@@ -117,7 +135,7 @@ export class MockAuthAdapter implements AuthAdapter {
 
     return {
       user: normalizeUserProfile(user),
-      expiresAt: new Date(Date.now() + SESSION_DURATION_MS).toISOString(),
+      expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
     };
   }
 

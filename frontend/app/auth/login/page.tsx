@@ -171,6 +171,17 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* Fixed Credentials Helper */}
+          <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-2.5 text-xs text-slate-600 flex items-center justify-between">
+            <div>
+              <span className="font-semibold text-slate-700">Fixed Login:</span>{" "}
+              <code className="text-slate-900 bg-slate-200/70 px-1 py-0.5 rounded text-[11px]">m.vance@vancedev.com</code>
+            </div>
+            <div>
+              <span className="font-semibold text-slate-700">Pass:</span>{" "}
+              <code className="text-slate-900 bg-slate-200/70 px-1 py-0.5 rounded text-[11px]">Password123!</code>
+            </div>
+          </div>
 
           <button
             type="submit"
