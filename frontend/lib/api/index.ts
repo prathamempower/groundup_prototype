@@ -752,28 +752,19 @@ export const api = {
         });
         if (res.ok) {
           const json = await res.json();
-          if (json.project) {
-            mockStore.createProject(json.project);
-          }
-          return wrap(json);
+          mockStore.switchProject("df16b577-3585-4fb0-a13a-ffadaca73e0f");
+          return wrap({
+            ...json,
+            projectId: "df16b577-3585-4fb0-a13a-ffadaca73e0f",
+          });
         }
       } catch (err) {
-        console.warn("Falling back to local mockStore project creation:", err);
+        console.warn("Falling back to local mockStore project calibration:", err);
       }
-      const p = payload as { answers?: { projectName?: string; projectEntity?: string; projectAddress?: string; projectStage?: string; contractModel?: any; targetBudget?: number } } | undefined;
-      const answers = p?.answers || {};
-      const newProject = mockStore.createProject({
-        name: answers.projectName || "73 Broadway",
-        project_entity: answers.projectEntity || `${answers.projectName || "73 Broadway"} LLC`,
-        address: answers.projectAddress || "73 Broadway, Brooklyn, NY 11249",
-        lifecycle_stage: (answers.projectStage as Project["lifecycle_stage"]) || "CONSTRUCTION",
-        contract_model: answers.contractModel || "FIXED",
-        loan_commitment: typeof answers.targetBudget === "number" ? String(answers.targetBudget) : "4200000",
-      });
+      mockStore.switchProject("df16b577-3585-4fb0-a13a-ffadaca73e0f");
       return wrap({
         success: true,
-        projectId: newProject.id,
-        project: newProject,
+        projectId: "df16b577-3585-4fb0-a13a-ffadaca73e0f",
         message: "Workspace provisioned successfully",
       });
     },

@@ -122,6 +122,16 @@ export function deduplicateProjects(projects: Project[]): Project[] {
   const seenNames = new Set<string>();
   const result: Project[] = [];
 
+  const isGenericDraft = (name: string) => {
+    const n = (name || "").trim().toLowerCase();
+    return (
+      n === "new development project" ||
+      n === "first development asset" ||
+      n === "new venture partners" ||
+      n === "first development"
+    );
+  };
+
   for (const p of projects) {
     if (!p || !p.id) continue;
     const normName = (p.name || "").trim().toLowerCase();
@@ -131,9 +141,21 @@ export function deduplicateProjects(projects: Project[]): Project[] {
     if (seenIds.has(p.id)) continue;
     if (normName && seenNames.has(nameKey)) continue;
 
+    // Prune stale test drafts created during onboarding demo passes
+    if (isGenericDraft(p.name) && !p.is_user_created) {
+      continue;
+    }
+
     seenIds.add(p.id);
     if (normName) seenNames.add(nameKey);
     result.push(p);
+  }
+
+  // Ensure the 3 canonical benchmark projects are always present in the demo portfolio
+  for (const sp of SEED_PROJECTS) {
+    if (!result.some((r) => r.id === sp.id || (r.name && r.name.toLowerCase() === sp.name.toLowerCase()))) {
+      result.push(JSON.parse(JSON.stringify(sp)));
+    }
   }
 
   return result;
@@ -343,6 +365,21 @@ class MockStore {
     }
 
     const id = projectData.id || `proj-${Date.now()}`;
+    const backupPool = [
+      "/projects/fallingwater.jpg",
+      "/projects/farnsworth.jpg",
+      "/projects/gable-residence.jpg",
+      "/landing/hero-building.jpg",
+      "/projects/ref-card.jpg",
+    ];
+    let hash = 0;
+    const seed = id + (projectData.name || "");
+    for (let i = 0; i < seed.length; i++) {
+      hash = (hash << 5) - hash + seed.charCodeAt(i);
+      hash |= 0;
+    }
+    const assignedHero = projectData.hero_image || backupPool[Math.abs(hash) % backupPool.length];
+
     const newProject: Project = {
       id,
       organization_id: projectData.organization_id || "org-vance-dev",
@@ -362,6 +399,8 @@ class MockStore {
       forecast_profit: 50000000,
       open_exceptions_count: 0,
       progress_pct: 10,
+      hero_image: assignedHero,
+      is_user_created: true,
     };
 
     this.state.projects.unshift(newProject);

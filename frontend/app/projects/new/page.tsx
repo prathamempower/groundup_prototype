@@ -102,6 +102,7 @@ export default function CreateProjectPage() {
         contract_model: contractModel,
         status: "SETUP_INCOMPLETE",
         currency: "USD",
+        is_user_created: true,
         ...(startedAt ? { started_at: new Date(startedAt).toISOString() } : {}),
         ...(targetCompletionAt
           ? { target_completion_at: new Date(targetCompletionAt).toISOString() }

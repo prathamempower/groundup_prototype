@@ -59,6 +59,13 @@ export default function ProjectsPortfolioPage() {
     return list.filter((p: Project) => {
       const key = (p.name || "").trim().toLowerCase();
       if (!key || seen.has(key)) return false;
+      // Filter out stale generic onboarding draft leftovers
+      if (
+        (key === "new development project" || key === "first development asset") &&
+        !p.is_user_created
+      ) {
+        return false;
+      }
       seen.add(key);
       return true;
     });
@@ -145,19 +152,38 @@ export default function ProjectsPortfolioPage() {
   };
 
   const getProjectImage = (project: Project) => {
+    if (project.hero_image) {
+      return project.hero_image;
+    }
+
     const nameLower = project.name.toLowerCase();
     const addressLower = (project.address || "").toLowerCase();
 
     if (nameLower.includes("woodlawn") || addressLower.includes("woodlawn")) {
       return "/projects/woodlawn-new.jpg";
     }
-    if (nameLower.includes("first") || addressLower.includes("first")) {
+    if (nameLower.includes("first") || addressLower.includes("first") || nameLower.includes("392")) {
       return "/projects/first-street-new.jpg";
     }
-    if (nameLower.includes("broadway") || addressLower.includes("broadway")) {
+    if (nameLower.includes("broadway") || addressLower.includes("broadway") || nameLower.includes("73")) {
       return "/projects/broadway-new.jpg";
     }
-    return "/projects/broadway-new.jpg";
+
+    // Deterministic backup hero image pool for user-created projects
+    const backupPool = [
+      "/projects/fallingwater.jpg",
+      "/projects/farnsworth.jpg",
+      "/projects/gable-residence.jpg",
+      "/landing/hero-building.jpg",
+      "/projects/ref-card.jpg",
+    ];
+    let hash = 0;
+    const seed = (project.id || "") + (project.name || "");
+    for (let i = 0; i < seed.length; i++) {
+      hash = (hash << 5) - hash + seed.charCodeAt(i);
+      hash |= 0;
+    }
+    return backupPool[Math.abs(hash) % backupPool.length];
   };
 
   const getProjectProgress = (project: Project) => {

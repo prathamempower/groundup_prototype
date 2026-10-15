@@ -223,6 +223,8 @@ export interface Project {
   next_milestone?: string | null;
   last_activity?: string | null;
   progress_pct?: number;
+  hero_image?: string;
+  is_user_created?: boolean;
 }
 
 export interface ApiMeta {

@@ -11,9 +11,8 @@ export async function POST(request: Request) {
     const projectStage = answers.projectStage || 'IN_CONSTRUCTION';
     const primaryFocus = answers.primaryFocus || answers.primaryChallenge || 'cash_flow';
     
-    // Deterministic slugified project ID
-    const sanitizedName = projectName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-    const projectId = sanitizedName ? `proj-${sanitizedName}` : `proj-${Date.now()}`;
+    // Canonical demo project ID for 73 Broadway
+    const projectId = 'df16b577-3585-4fb0-a13a-ffadaca73e0f';
 
     const projectData = {
       id: projectId,

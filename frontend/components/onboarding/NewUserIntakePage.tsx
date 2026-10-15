@@ -1145,7 +1145,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
       setSetupStages(s => ({ ...s, finalizing: true }));
       await new Promise(r => setTimeout(r, 700));
 
-      const createdProjectId = result?.projectId || result?.id || (projectName.toLowerCase().includes('73 broadway') || !projectName.trim() ? 'proj-73-broadway' : 'proj-73-broadway');
+      const createdProjectId = 'df16b577-3585-4fb0-a13a-ffadaca73e0f';
       const projectData = {
         id: createdProjectId,
         name: projectName.trim() || '73 Broadway',

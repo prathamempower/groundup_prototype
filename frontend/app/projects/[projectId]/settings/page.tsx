@@ -373,6 +373,9 @@ export default function ProjectSettingsPage() {
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
               <span>{project.name}</span>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Active Jobsite
+              </span>
             </h1>
           </div>
 
