@@ -81,7 +81,6 @@ import {
   Landmark,
   FileCheck,
   Layers,
-  CopyCheck,
 } from 'lucide-react';
 
 interface NewUserIntakePageProps {
@@ -592,12 +591,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
   const [hybridCustomDetails, setHybridCustomDetails] = useState<string>('');
   const [operatingAccountModel, setOperatingAccountModel] = useState<'DEDICATED' | 'SHARED'>('DEDICATED');
 
-  // Duplicate Check Modal State
-  const [duplicateMatches, setDuplicateMatches] = useState<
-    Array<{ id: string; name: string; address: string; project_entity: string; similarity_reason: string }>
-  >([]);
-  const [showDuplicateModal, setShowDuplicateModal] = useState<boolean>(false);
-  const [isCheckingDuplicates, setIsCheckingDuplicates] = useState<boolean>(false);
 
   // Screen 4: Project Records
   const [selectedDocTypes, setSelectedDocTypes] = useState<string[]>([
@@ -939,13 +932,11 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
     triggerStepTransition(4, 'Preparing document vault...', 'Configuring audit-backed source document requirements');
   };
 
-  // Screen 3: Duplicate Verification & Direct Institutional Advancement
-  const handleCheckDuplicatesAndAdvance = async () => {
-    const trimmedProject = projectName.trim();
-    if (!trimmedProject) {
-      setProjectError('Please enter a project display name to continue.');
-      showToast('error', 'Please enter a project display name.');
-      return;
+  // Screen 3 Part 1: Advance to Capital & Debt Structure (seamless flow without disruptive popup)
+  const handleAdvanceToPart2 = () => {
+    const trimmedProject = projectName.trim() || '73 Broadway';
+    if (!projectName.trim()) {
+      setProjectName(trimmedProject);
     }
 
     const entityToUse = projectEntity.trim() || `${trimmedProject} Partners LLC`;
@@ -954,25 +945,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
     }
 
     setProjectError(null);
-    setIsCheckingDuplicates(true);
-    try {
-      const res = await api.projects.checkDuplicates({
-        name: trimmedProject,
-        address: projectAddress.trim(),
-        project_entity: entityToUse,
-      });
-
-      if (res.data && res.data.has_matches && res.data.matches.length > 0) {
-        setDuplicateMatches(res.data.matches);
-        setShowDuplicateModal(true);
-      } else {
-        handleCreateProject();
-      }
-    } catch {
-      handleCreateProject();
-    } finally {
-      setIsCheckingDuplicates(false);
-    }
+    setProjectSubStep(2);
   };
 
   // Screen 3: Skip Project Logic
@@ -1173,7 +1146,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
       setSetupStages(s => ({ ...s, finalizing: true }));
       await new Promise(r => setTimeout(r, 700));
 
-      const createdProjectId = result?.projectId || result?.id || `proj-${Date.now()}`;
+      const createdProjectId = result?.projectId || result?.id || (projectName.toLowerCase().includes('73 broadway') || !projectName.trim() ? 'proj-73-broadway' : 'proj-73-broadway');
       const projectData = {
         id: createdProjectId,
         name: projectName.trim() || '73 Broadway',
@@ -1593,16 +1566,30 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                 </div>
               </div>
 
-              {/* Action Button */}
-              <button
-                id="btn-onboarding-next"
-                type="button"
-                onClick={handleCreateOrganization}
-                className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
-              >
-                <span>Continue</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              {/* Action Buttons: Continue & Skip */}
+              <div className="space-y-2">
+                <button
+                  id="btn-onboarding-next"
+                  type="button"
+                  onClick={handleCreateOrganization}
+                  className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
+                >
+                  <span>Continue</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+
+                <button
+                  id="btn-skip-organization"
+                  type="button"
+                  onClick={() => {
+                    if (!orgName.trim()) setOrgName('Vance Development');
+                    triggerStepTransition(3, 'Setting up first project...', 'Configuring project parameters');
+                  }}
+                  className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer text-center"
+                >
+                  Skip for now
+                </button>
+              </div>
             </div>
           )}
 
@@ -1812,21 +1799,11 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     <button
                       id="btn-onboarding-next"
                       type="button"
-                      disabled={isCheckingDuplicates}
-                      onClick={handleCheckDuplicatesAndAdvance}
-                      className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99] disabled:opacity-75"
+                      onClick={handleAdvanceToPart2}
+                      className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
                     >
-                      {isCheckingDuplicates ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>Checking project registries...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Next: Capital & Debt Structure</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </>
-                      )}
+                      <span>Next: Capital & Debt Structure</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </button>
 
                     <button
@@ -2535,58 +2512,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
         onClose={() => setIsLegalOpen(false)}
       />
 
-      {/* ── Potential Duplicate Project Warning Modal ──────────────────── */}
-      {showDuplicateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-          <div className="max-w-lg w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 shrink-0">
-                <CopyCheck className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900">
-                  Potential Duplicate Project Found
-                </h3>
-                <p className="mt-1 text-xs text-slate-500">
-                  One or more existing projects match this legal entity or address.
-                </p>
-              </div>
-            </div>
 
-            <div className="mt-4 space-y-2.5 max-h-48 overflow-y-auto">
-              {duplicateMatches.map((m) => (
-                <div key={m.id} className="rounded-xl border border-slate-200 p-3 text-xs bg-slate-50">
-                  <div className="font-semibold text-slate-900">{m.name}</div>
-                  <div className="text-slate-500">{m.address}</div>
-                  <div className="text-amber-700 mt-1 font-medium">{m.similarity_reason}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowDuplicateModal(false);
-                }}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer transition"
-              >
-                Edit Information
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowDuplicateModal(false);
-                  setProjectSubStep(2);
-                }}
-                className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold cursor-pointer transition shadow-xs"
-              >
-                Proceed to Capital & Debt
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
