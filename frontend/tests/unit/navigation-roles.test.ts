@@ -21,7 +21,7 @@ describe("Role Permissions & Navigation Matrix", () => {
     expect(getDefaultWorkspaceRoute("OWNER", testProjectId)).toBe(`/projects/${testProjectId}/control-center`);
   });
 
-  it("grants OWNER access to the 5 kept project workspace pages", () => {
+  it("grants OWNER access to project workspace pages including Project Settings", () => {
     const testProjectId = "proj_test_123";
     const ownerNav = getProjectNavItems(testProjectId, "OWNER").map((item) => item.href);
 
@@ -31,9 +31,9 @@ describe("Role Permissions & Navigation Matrix", () => {
     expect(ownerNav).toContain(`/projects/${testProjectId}/draws`);
     expect(ownerNav).toContain(`/projects/${testProjectId}/documents`);
     expect(ownerNav).toContain(`/projects/${testProjectId}/alerts`);
+    expect(ownerNav).toContain(`/projects/${testProjectId}/settings`);
 
     // Hidden / sub-pages:
-    expect(ownerNav).not.toContain(`/projects/${testProjectId}/settings`);
     expect(ownerNav).not.toContain(`/projects/${testProjectId}/budget`);
     expect(ownerNav).not.toContain(`/projects/${testProjectId}/changes`);
     expect(ownerNav).not.toContain(`/projects/${testProjectId}/partners`);

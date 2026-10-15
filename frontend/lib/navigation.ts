@@ -96,7 +96,7 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     label: "Project Settings",
     path: "settings",
     icon: Settings,
-    allowedRoles: [],
+    allowedRoles: ["OWNER"],
   },
 ];
 
