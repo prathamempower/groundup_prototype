@@ -50,7 +50,7 @@ export function ProjectOverview() {
             {INCOMING_DOCS.map((doc) => (
               <div
                 key={doc.id}
-                className="relative flex items-center gap-2 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl border border-border/80 bg-card/95 backdrop-blur-md shadow-xs text-xs shrink-0 cursor-pointer w-[150px] sm:w-[170px] lg:w-auto snap-start"
+                className="relative flex items-center gap-2 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl border border-border bg-card shadow-md text-xs shrink-0 cursor-pointer w-[150px] sm:w-[170px] lg:w-auto snap-start"
               >
                 {/* Type Badge */}
                 <div
@@ -93,11 +93,11 @@ export function ProjectOverview() {
 
         {/* Main Dashboard Window Card (Layer 3) */}
         <div 
-          className="flex-1 w-full min-w-0 max-w-full rounded-2xl border border-border/80 bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden"
+          className="flex-1 w-full min-w-0 max-w-full rounded-2xl border border-border bg-card shadow-2xl overflow-hidden"
           data-layer="3"
         >
           {/* Window Frame Bar */}
-          <div className="flex items-center justify-between border-b border-border/70 px-3 sm:px-6 py-2.5 sm:py-3 bg-muted/30 gap-2 min-w-0">
+          <div className="flex items-center justify-between border-b border-border px-3 sm:px-6 py-2.5 sm:py-3 bg-muted/40 gap-2 min-w-0">
             {/* Window Controls + Project Identity */}
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <div className="flex items-center gap-1 sm:gap-1.5 shrink-0" aria-hidden="true">
@@ -105,7 +105,7 @@ export function ProjectOverview() {
                 <span className="size-2 sm:size-2.5 rounded-full bg-amber-400" />
                 <span className="size-2 sm:size-2.5 rounded-full bg-emerald-400" />
               </div>
-              <div className="flex items-center gap-2 pl-2 border-l border-border/70 min-w-0">
+              <div className="flex items-center gap-2 pl-2 border-l border-border min-w-0">
                 <span className="font-bold text-xs sm:text-sm text-foreground truncate">73 Broadway, Hoboken</span>
               </div>
             </div>
@@ -119,7 +119,7 @@ export function ProjectOverview() {
           </div>
 
           {/* Sub Navigation Tabs with Smooth Horizontal Scroll & Right Fade Mask */}
-          <div className="relative border-b border-border/70 bg-muted/10">
+          <div className="relative border-b border-border bg-card">
             <div className="px-3 sm:px-6 flex items-center gap-1 sm:gap-3 overflow-x-auto no-scrollbar scroll-smooth text-[10px] sm:text-xs font-semibold text-muted-foreground pr-8">
               {TABS.map((tab) => (
                 <button
@@ -138,11 +138,11 @@ export function ProjectOverview() {
               ))}
             </div>
             {/* Subtle Right Edge Fade Indicator to prevent harsh text slicing on mobile */}
-            <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-card via-card/80 to-transparent pointer-events-none lg:hidden" aria-hidden="true" />
+            <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-card to-transparent pointer-events-none lg:hidden" aria-hidden="true" />
           </div>
 
           {/* KPI Summary Strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border/60 border-b border-border/70">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border/60 border-b border-border">
             <div className="bg-card p-2 sm:p-3.5 min-w-0">
               <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground mb-0.5 min-w-0">
                 <span className="size-1.5 sm:size-2 rounded-full bg-slate-400 shrink-0" />
@@ -174,7 +174,7 @@ export function ProjectOverview() {
           </div>
 
           {/* Inner Analytics Grids */}
-          <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch bg-card">
             {/* Left: Cost vs. Funding Line Chart */}
             <div className="lg:col-span-7 flex flex-col justify-between">
               <div>

@@ -135,10 +135,10 @@ export function SiteHeader({ onStartOnboarding, onAuthenticate }: SiteHeaderProp
         id="site-header"
         role="banner"
         className={cn(
-          "sticky top-0 z-50 transition-all duration-200 border-b",
+          "sticky top-0 z-50 transition-all duration-200 border-b bg-background",
           scrolled
-            ? "border-border/80 bg-background/95 backdrop-blur-md shadow-xs py-3"
-            : "border-border/40 bg-background/80 backdrop-blur-sm py-4"
+            ? "border-border/80 shadow-xs py-3"
+            : "border-border/40 py-4"
         )}
       >
         <div className="mx-auto flex max-w-7xl 2xl:max-w-screen-2xl items-center justify-between gap-2 sm:gap-4 px-3 sm:px-6 lg:px-8 2xl:px-12">
@@ -220,7 +220,7 @@ export function SiteHeader({ onStartOnboarding, onAuthenticate }: SiteHeaderProp
             id="mobile-navigation-drawer"
             role="region"
             aria-label="Mobile Navigation"
-            className="lg:hidden border-b border-border bg-background/98 backdrop-blur-xl px-4 pt-3 pb-6 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200"
+            className="lg:hidden border-b border-border bg-background px-4 pt-3 pb-6 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200"
           >
             <nav aria-label="Mobile Primary Navigation" className="space-y-1 mb-4">
               {NAV_ITEMS.map((item) => {

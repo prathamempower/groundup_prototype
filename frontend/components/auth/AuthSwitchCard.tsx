@@ -61,8 +61,8 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
   };
 
   // ── Log In Form State ────────────────────────────────────────────────────────
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
+  const [loginEmail, setLoginEmail] = useState('m.vance@vancedev.com');
+  const [loginPassword, setLoginPassword] = useState('Password123!');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
 
