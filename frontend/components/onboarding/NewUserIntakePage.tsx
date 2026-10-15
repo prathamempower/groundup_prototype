@@ -815,16 +815,14 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
 
   // ── Guard Against Skipping Required Steps ────────────────────────────────
   const getEarliestIncompleteStep = useCallback((): number => {
-    if (!workEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(workEmail.trim())) return 1;
-    if (!firstName.trim() || !lastName.trim()) return 2;
-    if (!primaryFocus) return 3;
-    if (!orgName.trim()) return 4;
-    if (!skippedProject && !projectName.trim()) return 5;
-    return 8;
-  }, [workEmail, firstName, lastName, primaryFocus, orgName, skippedProject, projectName]);
+    if (!primaryFocus) return 1;
+    if (!orgName.trim()) return 2;
+    if (!skippedProject && !projectName.trim()) return 3;
+    return 6;
+  }, [primaryFocus, orgName, skippedProject, projectName]);
 
   useEffect(() => {
-    if (currentStep > 1) {
+    if (currentStep > 1 && currentStep < 6) {
       const earliest = getEarliestIncompleteStep();
       if (currentStep > earliest) {
         setCurrentStep(earliest);
@@ -833,179 +831,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
     }
   }, [currentStep, getEarliestIncompleteStep]);
 
-  // ── Step Navigation Handlers ──────────────────────────────────────────────
+  // ── Step Navigation Handlers ──────────────────────────────────────────────  // ── Step Navigation Handlers ──────────────────────────────────────────────
 
-  // Screen 1: Work Email & Verification
-  const handleInitiateEmail = (overrideEmail?: string) => {
-    const emailToValidate = (overrideEmail || workEmail).trim().toLowerCase();
-    const validation = step1EmailSchema.safeParse({
-      workEmail: emailToValidate,
-      isEmailVerified,
-    });
-    if (!validation.success) {
-      const msg = validation.error.errors[0]?.message || 'Please enter a valid work email address.';
-      setEmailError(msg);
-      showToast('error', msg);
-      return;
-    }
-
-    // Verify company email domain
-    const freeDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com', 'icloud.com'];
-    const domain = emailToValidate.split('@')[1];
-    if (freeDomains.includes(domain)) {
-      showToast('info', 'Please use your organization work domain for enterprise security.', 'Company Domain Recommended');
-    }
-
-    setEmailError(null);
-    saveAnswer('email', emailToValidate);
-
-    // If already verified or demo, proceed directly
-    if (isEmailVerified || overrideEmail?.includes('vancedevelopment.com')) {
-      setIsEmailVerified(true);
-      setCurrentStep(2);
-      saveAnswer('step', 2, 2);
-      return;
-    }
-
-    // Otherwise show email OTP drawer with countdown
-    setShowEmailOtpDrawer(true);
-    setEmailOtpTimer(30);
-    setEmailOtpError(null);
-    showToast('info', `Verification code dispatched to ${emailToValidate}.`, 'Code Sent');
-  };
-
-  const handleVerifyEmailOtp = async (codeToVerify?: string) => {
-    const entered = codeToVerify || emailOtpCode.join('');
-    if (entered.length < 6) {
-      setEmailOtpError('Please enter all 6 digits of the confirmation code.');
-      showToast('error', 'Please enter all 6 digits of the confirmation code.');
-      return;
-    }
-
-    setIsVerifyingEmailOtp(true);
-    // Purposeful authentic verification delay (450ms)
-    await new Promise(r => setTimeout(r, 450));
-
-    setIsEmailVerified(true);
-    setShowEmailOtpDrawer(false);
-    setEmailOtpError(null);
-    setIsVerifyingEmailOtp(false);
-    saveAnswer('emailVerified', true);
-    showToast('success', 'Corporate email verified successfully.', 'Verified');
-
-    setCurrentStep(2);
-    saveAnswer('step', 2, 2);
-  };
-
-  // Screen 2: Create Account & Username / DOB / Phone Validation
-  const handleSendPhoneOtp = () => {
-    const cleaned = phoneNumber.replace(/\D/g, '');
-    if (cleaned.length < 7) {
-      setPhoneError('Please enter a valid phone number (at least 7 digits).');
-      showToast('error', 'Please enter a valid phone number with dialing code.');
-      return;
-    }
-    setPhoneError(null);
-    setShowOtpSection(true);
-    setOtpTimer(30);
-    setOtpError(null);
-    showToast('info', `SMS verification code dispatched to ${countryCode} ${phoneNumber}.`, 'SMS Dispatched');
-  };
-
-  const handleVerifyPhoneOtp = async (codeToVerify?: string) => {
-    const entered = codeToVerify || otpCode.join('');
-    if (entered.length < 6) {
-      setOtpError('Please enter all 6 digits of the SMS code.');
-      showToast('error', 'Please enter all 6 digits of the SMS code.');
-      return;
-    }
-
-    setIsVerifyingPhoneOtp(true);
-    await new Promise(r => setTimeout(r, 400));
-    setIsPhoneVerified(true);
-    setShowOtpSection(false);
-    setOtpError(null);
-    setIsVerifyingPhoneOtp(false);
-    saveAnswer('phoneNumber', `${countryCode} ${phoneNumber}`);
-    saveAnswer('phoneVerified', true);
-    showToast('success', 'Phone number confirmed for loan draw authorizations.', 'Phone Verified');
-  };
-
-  const handleContinueAccount = () => {
-    const trimmedFirst = firstName.trim();
-    const trimmedLast = lastName.trim();
-    const cleanUsername = username.trim().toLowerCase().replace(/^@/, '');
-
-    const validation = step2AccountSchema.safeParse({
-      firstName: trimmedFirst,
-      lastName: trimmedLast,
-      username: cleanUsername,
-      dob: dob || undefined,
-      countryCode,
-      phoneNumber: phoneNumber || undefined,
-      isPhoneVerified,
-    });
-
-    if (!validation.success) {
-      const msg = validation.error.errors[0]?.message || 'Please complete all required account fields.';
-      setAccountError(msg);
-      showToast('error', msg);
-      return;
-    }
-
-    // Username validation (length and allowed characters)
-    if (cleanUsername) {
-      if (cleanUsername.length < 3 || cleanUsername.length > 30 || !/^[a-z0-9_]+$/.test(cleanUsername)) {
-        setAccountError('Username must be 3 to 30 characters using letters, numbers, or underscores.');
-        showToast('error', 'Invalid username format.');
-        return;
-      }
-    }
-
-    // Date of Birth validation (Must be >= 18 years old)
-    if (dob) {
-      const birthDate = new Date(dob);
-      const today = new Date();
-      if (isNaN(birthDate.getTime())) {
-        setDobError('Please enter a valid date of birth.');
-        showToast('error', 'Invalid date of birth format.');
-        return;
-      }
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      if (age < 18) {
-        setDobError('You must be at least 18 years old to hold financial signing authority.');
-        showToast('error', 'You must be at least 18 years old to hold financial signing authority.', 'Age Requirement');
-        return;
-      }
-      setDobError(null);
-    }
-
-    if (password.length > 0 && password.length < 8) {
-      setAccountError('Password must be at least 8 characters long.');
-      showToast('error', 'Password must be at least 8 characters long.');
-      return;
-    }
-
-    saveAnswer('firstName', trimmedFirst);
-    saveAnswer('lastName', trimmedLast);
-    saveAnswer('fullName', `${trimmedFirst} ${trimmedLast}`);
-    if (cleanUsername) {
-      saveAnswer('username', cleanUsername);
-    }
-    if (dob) {
-      saveAnswer('dob', dob);
-    }
-    if (phoneNumber) {
-      saveAnswer('phoneNumber', `${countryCode} ${phoneNumber}`);
-      saveAnswer('phoneVerified', isPhoneVerified);
-    }
-
-    triggerStepTransition(3, 'Calibrating workspace...', 'Evaluating project portfolio structure');
-  };
 
   // Screen 3: Project Status ("Do you have an active project or are you new to construction?")
   const handleContinueChallenge = () => {
@@ -1026,7 +853,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
     saveAnswer('primaryChallenge', primaryFocus);
     saveAnswer('secondaryFocuses', secondaryFocuses);
     saveAnswer('secondaryChallenges', secondaryFocuses);
-    triggerStepTransition(4, 'Configuring organization...', 'Setting up developer entity records');
+    triggerStepTransition(2, 'Configuring organization...', 'Setting up developer entity records');
   };
 
   const toggleSecondaryChallenge = (id: string) => {
@@ -1036,7 +863,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
     );
   };
 
-  // Screen 4: Organization Details
+  // Screen 2: Organization Details
   const handleCreateOrganization = () => {
     const trimmedOrg = orgName.trim();
     const validation = step4OrganizationSchema.safeParse({
@@ -1058,10 +885,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
     saveAnswer('organizationSize', orgSize);
     saveAnswer('employeeCount', employeeCount);
     saveAnswer('website', website.trim());
-    triggerStepTransition(5, 'Structuring project...', 'Configuring CSI MasterFormat cost codes');
+    triggerStepTransition(3, 'Structuring project...', 'Configuring CSI MasterFormat cost codes');
   };
 
-  // Screen 5: Create Project (Full Institutional Validation & Persistence)
+  // Screen 3: Create Project (Full Institutional Validation & Persistence)
   const handleCreateProject = () => {
     const trimmedProject = projectName.trim();
     const entityToUse = projectEntity.trim() || `${trimmedProject} Partners LLC`;
@@ -1108,10 +935,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
     saveAnswer('contractModel', contractModel);
     saveAnswer('hybridCustomDetails', hybridCustomDetails.trim());
     saveAnswer('operatingAccountModel', operatingAccountModel);
-    triggerStepTransition(6, 'Preparing document vault...', 'Configuring audit-backed source document requirements');
+    triggerStepTransition(4, 'Preparing document vault...', 'Configuring audit-backed source document requirements');
   };
 
-  // Screen 5: Duplicate Verification & Direct Institutional Advancement
+  // Screen 3: Duplicate Verification & Direct Institutional Advancement
   const handleCheckDuplicatesAndAdvance = async () => {
     const trimmedProject = projectName.trim();
     if (!trimmedProject) {
@@ -1147,17 +974,17 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
     }
   };
 
-  // Screen 5: Skip Project Logic
+  // Screen 3: Skip Project Logic
   const handleSkipProject = () => {
     setSkippedProject(true);
     setProjectError(null);
     saveAnswer('hasProject', false);
     saveAnswer('skippedProject', true);
     saveAnswer('projectName', 'New Development Project');
-    triggerStepTransition(7, 'Setting up team access...', 'Configuring role-based project permissions');
+    triggerStepTransition(5, 'Setting up team access...', 'Configuring role-based project permissions');
   };
 
-  // Screen 6: Add Project Records
+  // Screen 4: Add Project Records
   const handleContinueRecords = (skipped = false) => {
     if (!skipped) {
       const validation = step6RecordsSchema.safeParse({
@@ -1175,7 +1002,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
     if (!skipped) {
       saveAnswer('uploadedDocuments', documentsList);
     }
-    triggerStepTransition(7, 'Setting up team access...', 'Configuring role-based project permissions');
+    triggerStepTransition(5, 'Setting up team access...', 'Configuring role-based project permissions');
   };
 
   const handleAddFiles = (files: FileList | null) => {
@@ -1249,8 +1076,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
     if (!skipped) {
       saveAnswer('teamInvitations', teamList);
     }
-    setCurrentStep(8);
-    saveAnswer('step', 8, 8);
+    setCurrentStep(6);
+    saveAnswer('step', 6, 6);
     executeWorkspaceSetup();
   };
 
@@ -1273,9 +1100,9 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
 
       const payload: OnboardingAnswers = {
         role: 'OWNER',
-        email: workEmail.trim(),
-        firstName: firstName.trim() || 'Project',
-        lastName: lastName.trim() || 'Owner',
+        email: workEmail.trim() || user.email || 'developer@groundup.ai',
+        firstName: firstName.trim() || user.name?.split(' ')[0] || 'Project',
+        lastName: lastName.trim() || user.name?.split(' ').slice(1).join(' ') || 'Owner',
         username: username.trim().toLowerCase().replace(/^@/, '') || undefined,
         dob: dob || undefined,
         emailVerified: isEmailVerified,
@@ -1397,7 +1224,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
   };
 
   const handleBack = () => {
-    if (currentStep === 5 && projectSubStep > 1) {
+    if (currentStep === 3 && projectSubStep > 1) {
       setProjectSubStep((s) => (s - 1) as 1 | 2 | 3);
       return;
     }
@@ -1405,35 +1232,25 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
       onCancelOrSignOut();
       return;
     }
-    if (currentStep === 7 && skippedProject) {
-      setCurrentStep(5);
-      setProjectSubStep(1);
-      saveAnswer('step', 5, 5);
-      return;
-    }
-    if (currentStep > 1 && currentStep < 8) {
+    if (currentStep > 1 && currentStep < 6) {
       const prev = currentStep - 1;
       setCurrentStep(prev);
       saveAnswer('step', prev, prev);
     }
   };
 
-
-
-  // Step Title Map for top indicator
+  // Step Title Map for top indicator (5 interactive steps + provisioning)
   const STEP_TITLES = [
     '',
-    'Work Email',
-    'Account Setup',
-    'Project Status',
+    'Project Calibration',
     'Organization',
-    'First Project',
+    'Project Setup',
     'Project Records',
     'Team Access',
     'Workspace Setup'
   ];
 
-  const fullDisplayName = `${firstName} ${lastName}`.trim() || 'Alex Morgan';
+  const fullDisplayName = `${firstName} ${lastName}`.trim() || 'Alex Vance';
 
   return (
     <div className="min-h-screen bg-slate-50/40 relative flex flex-col font-sans text-slate-900 selection:bg-slate-200 overflow-x-hidden">
@@ -1458,10 +1275,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
           </button>
 
           {/* Step Progress Pill: Clean single indicator */}
-          {currentStep >= 1 && currentStep <= 8 && (
+          {currentStep >= 1 && currentStep <= 5 && (
             <div className="flex items-center gap-2 px-3 py-1 bg-slate-50/90 border border-slate-200/80 rounded-full text-center shadow-2xs">
               <span className="text-[11px] font-mono text-sky-600 font-bold whitespace-nowrap">
-                {currentStep} / 8
+                {currentStep} / 5
               </span>
               <div className="h-3 w-px bg-slate-200 shrink-0" />
               <span className="text-xs font-bold text-slate-800 truncate max-w-[130px] sm:max-w-none">
@@ -1489,7 +1306,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
           <div
             className="h-full rounded-r-full transition-all duration-500 ease-out shadow-[0_0_8px_rgba(14,165,233,0.4)]"
             style={{
-              width: `${(currentStep / 8) * 100}%`,
+              width: `${Math.min(100, (currentStep / 5) * 100)}%`,
               background: 'linear-gradient(to right, #0ea5e9, #0d9488)'
             }}
           />
@@ -1498,11 +1315,11 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
 
       {/* ── Structured Onboarding Container (Pro UI/UX, Balanced White Space) ── */}
       <main className={`flex-1 w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col justify-center relative z-10 transition-all duration-200 ${
-        currentStep === 5 ? 'max-w-2xl sm:max-w-3xl' : 'max-w-xl sm:max-w-2xl'
+        currentStep === 3 ? 'max-w-2xl sm:max-w-3xl' : 'max-w-xl sm:max-w-2xl'
       }`}>
-        <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-6 sm:p-9 shadow-[0_10px_30px_-5px_rgba(15,23,42,0.04),0_1px_3px_rgba(0,0,0,0.02)] transition-all">
-          {/* Back button for steps 2 to 7 (Step 1 has Exit in header, no duplicate exit/back) */}
-          {currentStep > 1 && currentStep < 8 && (
+        <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-6 sm:p-9 shadow-[0_10px_30px_-5px_rgba(15,23,42,0.04),0_1px_3px_rgba(0,0,0,0.02)] transition-all relative">
+          {/* Back button for steps 2 to 5 */}
+          {currentStep > 1 && currentStep < 6 && (
             <div className="mb-4">
               <button
                 id="btn-onboarding-back"
@@ -1516,538 +1333,29 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
             </div>
           )}
 
-          {/* ──────────────────────────────────────────────────────────── */}
-          {/* SCREEN 1: WORK EMAIL & CORPORATE OTP VERIFICATION            */}
-          {/* ──────────────────────────────────────────────────────────── */}
+          {/* Step Transition Overlay with subtle blur */}
+          {isTransitioning && (
+            <div className="absolute inset-0 bg-white/70 backdrop-blur-xs flex flex-col items-center justify-center z-20 rounded-2xl animate-in fade-in duration-200">
+              <Loader2 className="w-6 h-6 animate-spin text-sky-600 mb-2" />
+              <p className="text-xs font-bold text-slate-800">{transitionMessage.title}</p>
+              <p className="text-[11px] text-slate-500">{transitionMessage.subtitle}</p>
+            </div>
+          )}
           {currentStep === 1 && (
-            <div className="space-y-5">
-              <div className="flex items-start justify-between gap-3">
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="flex items-start justify-between">
                 <div className="space-y-1.5">
+                  <span className="text-[11px] font-bold tracking-wider uppercase text-sky-600 block">
+                    Step 1 of 5 • Project Calibration
+                  </span>
                   <TextEffect
                     as="h1"
                     preset="fade-in-blur"
                     per="word"
-                    className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight"
+                    className="text-2xl font-bold text-slate-900 tracking-tight"
                   >
-                    Welcome to GroundUp
-                  </TextEffect>
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                    Bring your project costs, construction progress, and funding into one clear view.
-                  </p>
-                </div>
-              </div>
-
-              {/* Google SSO Button */}
-              <div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const sampleEmail = 'alex.morgan@vancedevelopment.com';
-                    setWorkEmail(sampleEmail);
-                    setIsEmailVerified(true);
-                    handleInitiateEmail(sampleEmail);
-                  }}
-                  className="w-full py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-700 flex items-center justify-center gap-2.5 transition cursor-pointer shadow-2xs"
-                >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-                  </svg>
-                  <span>Continue with Google</span>
-                </button>
-              </div>
-
-              <div className="relative flex items-center justify-center">
-                <div className="border-t border-slate-200 w-full" />
-                <span className="bg-white px-3 text-[11px] uppercase tracking-wider text-slate-400 font-medium absolute">
-                  or
-                </span>
-              </div>
-
-              {/* Email Form */}
-              <form
-                onSubmit={(e) => { e.preventDefault(); handleInitiateEmail(); }}
-                className="space-y-4"
-              >
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="input-work-email" className="block text-xs font-bold text-slate-800">
-                      Work email
-                    </label>
-                    {isEmailVerified && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                        <span>Corporate email verified</span>
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      id="input-work-email"
-                      type="email"
-                      value={workEmail}
-                      onChange={(e) => {
-                        setWorkEmail(e.target.value);
-                        if (emailError) setEmailError(null);
-                      }}
-                      placeholder="name@company.com"
-                      className={`w-full pl-9 pr-3.5 py-2.5 bg-white border rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 transition ${emailError ? 'border-red-400 focus:ring-red-500' : 'border-slate-200 focus:ring-slate-900'
-                        }`}
-                    />
-                  </div>
-                  {emailError && (
-                    <p className="text-[11px] text-red-600 font-medium flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      <span>{emailError}</span>
-                    </p>
-                  )}
-                </div>
-
-                {/* Email OTP Verification Drawer */}
-                {showEmailOtpDrawer && !isEmailVerified && (
-                  <div className="p-3.5 bg-indigo-50/60 border border-indigo-100 rounded-2xl space-y-3 animate-in fade-in duration-200">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-                      <KeyRound className="w-3.5 h-3.5 text-indigo-600" />
-                      <span>Enter 6-digit confirmation code</span>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-1.5 max-w-xs mx-auto">
-                      {emailOtpCode.map((digit, idx) => (
-                        <input
-                          key={idx}
-                          id={`input-email-otp-${idx}`}
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={1}
-                          value={digit}
-                          onChange={(e) => {
-                            const char = e.target.value.slice(-1);
-                            const updated = [...emailOtpCode];
-                            updated[idx] = char;
-                            setEmailOtpCode(updated);
-                            if (char && idx < 5) {
-                              document.getElementById(`input-email-otp-${idx + 1}`)?.focus();
-                            }
-                            if (updated.every(d => d !== '')) {
-                              handleVerifyEmailOtp(updated.join(''));
-                            }
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Backspace' && !emailOtpCode[idx] && idx > 0) {
-                              document.getElementById(`input-email-otp-${idx - 1}`)?.focus();
-                            }
-                          }}
-                          className="w-9 sm:w-10 h-10 text-center bg-white border border-slate-200 rounded-xl text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-600 shadow-2xs"
-                        />
-                      ))}
-                    </div>
-
-                    {emailOtpError && (
-                      <p className="text-[11px] text-red-600 font-medium text-center flex items-center justify-center gap-1">
-                        <AlertCircle className="w-3 h-3" />
-                        <span>{emailOtpError}</span>
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between pt-1 text-[11px] text-slate-500">
-                      {emailOtpTimer > 0 ? (
-                        <span>Resend in {emailOtpTimer}s</span>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => handleInitiateEmail()}
-                          className="text-indigo-600 font-bold hover:underline cursor-pointer"
-                        >
-                          Resend code
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        disabled={isVerifyingEmailOtp}
-                        onClick={() => handleVerifyEmailOtp()}
-                        className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 text-white rounded-lg font-bold text-xs cursor-pointer shadow-2xs flex items-center gap-1.5"
-                      >
-                        {isVerifyingEmailOtp ? (
-                          <>
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                            <span>Verifying...</span>
-                          </>
-                        ) : (
-                          <span>Confirm &amp; Proceed</span>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {!showEmailOtpDrawer && (
-                  <button
-                    id="btn-onboarding-next"
-                    type="submit"
-                    className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
-                  >
-                    <span>Continue with email</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </form>
-
-              {/* Terms of Service & Privacy Policy Modal Triggers */}
-              <p className="text-[11px] text-slate-400 text-center leading-relaxed">
-                By continuing, you agree to the GroundUp{' '}
-                <button
-                  type="button"
-                  onClick={() => { setLegalTab('terms'); setIsLegalOpen(true); }}
-                  className="underline hover:text-slate-700 cursor-pointer"
-                >
-                  Terms of Service
-                </button>{' '}
-                and{' '}
-                <button
-                  type="button"
-                  onClick={() => { setLegalTab('privacy'); setIsLegalOpen(true); }}
-                  className="underline hover:text-slate-700 cursor-pointer"
-                >
-                  Privacy Policy
-                </button>.
-              </p>
-            </div>
-          )}
-
-          {/* ──────────────────────────────────────────────────────────── */}
-          {/* SCREEN 2: ACCOUNT SETUP (First/Last, Username, DOB, Phone)   */}
-          {/* ──────────────────────────────────────────────────────────── */}
-          {currentStep === 2 && (
-            <div className="space-y-5">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-                    Let&apos;s set up your account
-                  </h1>
-                  <p className="text-xs text-slate-500">
-                    Signing up as <span className="font-semibold text-slate-800">{workEmail}</span> &bull; <span className="font-semibold text-slate-700">Project Owner</span>
-                  </p>
-                </div>
-              </div>
-
-              <form
-                onSubmit={(e) => { e.preventDefault(); handleContinueAccount(); }}
-                className="space-y-3.5"
-              >
-                {/* Name Row: First Name & Last Name (Strictly No Full Legal Name Prompt) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <div className="space-y-1.5">
-                    <label htmlFor="input-first-name" className="block text-xs font-bold text-slate-800">
-                      First name <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                      <input
-                        id="input-first-name"
-                        type="text"
-                        value={firstName}
-                        onChange={(e) => {
-                          setFirstName(e.target.value);
-                          if (accountError) setAccountError(null);
-                        }}
-                        placeholder="e.g. Alex"
-                        className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label htmlFor="input-last-name" className="block text-xs font-bold text-slate-800">
-                      Last name <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                      <input
-                        id="input-last-name"
-                        type="text"
-                        value={lastName}
-                        onChange={(e) => {
-                          setLastName(e.target.value);
-                          if (accountError) setAccountError(null);
-                        }}
-                        placeholder="e.g. Morgan"
-                        className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Backward-compatible hidden input for existing test automation */}
-                <input
-                  id="input-full-name"
-                  type="hidden"
-                  value={fullDisplayName}
-                />
-
-                {/* Username Row & DOB Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  {/* Unique Organization Username (Demo mode) */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <label htmlFor="input-username" className="block text-xs font-bold text-slate-800">
-                        Workspace handle
-                      </label>
-                      {username.trim().length >= 3 && (
-                        <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1 bg-emerald-50 px-1.5 py-0.5 rounded">
-                          <Check className="w-3 h-3 text-emerald-600" />
-                          <span>Available</span>
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="relative">
-                      <AtSign className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                      <input
-                        id="input-username"
-                        type="text"
-                        value={username}
-                        onChange={(e) => {
-                          setUsername(e.target.value);
-                          if (accountError) setAccountError(null);
-                        }}
-                        placeholder="e.g. alex_morgan"
-                        className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Date of Birth (Financial Signing Authority Requirement >= 18) */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <label htmlFor="input-dob" className="block text-xs font-bold text-slate-800">
-                        Date of birth
-                      </label>
-                      <span className="text-[10px] text-slate-400">18+ authority</span>
-                    </div>
-                    <div className="relative">
-                      <Calendar className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                      <input
-                        id="input-dob"
-                        type="date"
-                        value={dob}
-                        onChange={(e) => {
-                          setDob(e.target.value);
-                          if (dobError) setDobError(null);
-                          if (accountError) setAccountError(null);
-                        }}
-                        className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                      />
-                    </div>
-                    {dobError && (
-                      <p className="text-[10px] text-red-600 font-medium">
-                        {dobError}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Phone Number with Integrated Country Code & OTP Verification */}
-                <div className="space-y-1.5 pt-1 border-t border-slate-100">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="input-phone-number" className="block text-xs font-bold text-slate-800">
-                      Phone number
-                    </label>
-                    {isPhoneVerified ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                        <span>Phone verified via OTP</span>
-                      </span>
-                    ) : (
-                      <span className="text-[11px] text-slate-400">SMS loan draw alerts</span>
-                    )}
-                  </div>
-
-                  <div className="flex rounded-xl border border-slate-200 bg-white focus-within:ring-1 focus-within:ring-slate-900 focus-within:border-slate-900 transition overflow-hidden shadow-2xs">
-                    <select
-                      value={countryCode}
-                      onChange={(e) => setCountryCode(e.target.value)}
-                      className="bg-slate-50 border-r border-slate-200 px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer shrink-0"
-                      title="Country dialing code"
-                    >
-                      <option value="+1">🇺🇸 +1</option>
-                      <option value="+44">🇬🇧 +44</option>
-                      <option value="+91">🇮🇳 +91</option>
-                      <option value="+61">🇦🇺 +61</option>
-                      <option value="+49">🇩🇪 +49</option>
-                      <option value="+33">🇫🇷 +33</option>
-                      <option value="+971">🇦🇪 +971</option>
-                      <option value="+65">🇸🇬 +65</option>
-                    </select>
-
-                    <div className="relative flex-1">
-                      <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                      <input
-                        id="input-phone-number"
-                        type="tel"
-                        value={phoneNumber}
-                        onChange={(e) => {
-                          setPhoneNumber(e.target.value);
-                          if (phoneError) setPhoneError(null);
-                          if (isPhoneVerified) setIsPhoneVerified(false);
-                        }}
-                        placeholder="(555) 019-8201"
-                        className="w-full pl-9 pr-3 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none"
-                      />
-                    </div>
-
-                    {!isPhoneVerified && (
-                      <button
-                        type="button"
-                        onClick={handleSendPhoneOtp}
-                        className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition shrink-0 cursor-pointer border-l border-slate-200 flex items-center gap-1.5"
-                        title="Send 6-digit verification code"
-                      >
-                        <KeyRound className="w-3.5 h-3.5 text-slate-600" />
-                        <span>{showOtpSection ? 'Resend' : 'Verify via SMS'}</span>
-                      </button>
-                    )}
-                  </div>
-
-                  {phoneError && (
-                    <p className="text-[11px] text-red-600 font-medium flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      <span>{phoneError}</span>
-                    </p>
-                  )}
-
-                  {/* Interactive 6-Digit SMS OTP Drawer */}
-                  {showOtpSection && !isPhoneVerified && (
-                    <div className="p-3 bg-indigo-50/60 border border-indigo-100 rounded-2xl space-y-2.5 mt-2 animate-in fade-in duration-200">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-                        <KeyRound className="w-3.5 h-3.5 text-indigo-600" />
-                        <span>Enter 6-digit SMS code</span>
-                      </div>
-
-                      <div className="flex items-center justify-between gap-1.5 max-w-xs mx-auto">
-                        {otpCode.map((digit, idx) => (
-                          <input
-                            key={idx}
-                            id={`input-otp-${idx}`}
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={1}
-                            value={digit}
-                            onChange={(e) => {
-                              const char = e.target.value.slice(-1);
-                              const updated = [...otpCode];
-                              updated[idx] = char;
-                              setOtpCode(updated);
-                              if (char && idx < 5) {
-                                document.getElementById(`input-otp-${idx + 1}`)?.focus();
-                              }
-                              if (updated.every(d => d !== '')) {
-                                handleVerifyPhoneOtp(updated.join(''));
-                              }
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Backspace' && !otpCode[idx] && idx > 0) {
-                                document.getElementById(`input-otp-${idx - 1}`)?.focus();
-                              }
-                            }}
-                            className="w-9 sm:w-10 h-10 text-center bg-white border border-slate-200 rounded-xl text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-600 shadow-2xs"
-                          />
-                        ))}
-                      </div>
-
-                      {otpError && (
-                        <p className="text-[11px] text-red-600 font-medium text-center flex items-center justify-center gap-1">
-                          <AlertCircle className="w-3 h-3" />
-                          <span>{otpError}</span>
-                        </p>
-                      )}
-
-                      <div className="flex items-center justify-between pt-1 text-[11px] text-slate-500">
-                        {otpTimer > 0 ? (
-                          <span>Resend in {otpTimer}s</span>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={handleSendPhoneOtp}
-                            className="text-indigo-600 font-bold hover:underline cursor-pointer"
-                          >
-                            Resend code
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          disabled={isVerifyingPhoneOtp}
-                          onClick={() => handleVerifyPhoneOtp()}
-                          className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 text-white rounded-lg font-bold text-xs cursor-pointer shadow-2xs flex items-center gap-1"
-                        >
-                          {isVerifyingPhoneOtp ? (
-                            <>
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                              <span>Verifying...</span>
-                            </>
-                          ) : (
-                            <span>Confirm code</span>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Password Input */}
-                <div className="space-y-1">
-                  <label htmlFor="input-password" className="block text-xs font-bold text-slate-800">
-                    Password <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      id="input-password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        if (accountError) setAccountError(null);
-                      }}
-                      placeholder="At least 8 characters"
-                      className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                    />
-                  </div>
-                  <p className="text-[11px] text-slate-400">Must be at least 8 characters</p>
-                </div>
-
-                {accountError && (
-                  <p className="text-[11px] text-red-600 font-medium flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    <span>{accountError}</span>
-                  </p>
-                )}
-
-                <button
-                  id="btn-onboarding-next"
-                  type="submit"
-                  className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs mt-2 text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
-                >
-                  <span>Continue</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </form>
-            </div>
-          )}
-
-          {/* ──────────────────────────────────────────────────────────── */}
-          {/* SCREEN 3: DO YOU HAVE AN ACTIVE PROJECT OR NEW TO CONSTRUCTION? */}
-          {/* ──────────────────────────────────────────────────────────── */}
-          {currentStep === 3 && (
-            <div className="space-y-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1.5">
-                  <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
                     Do you have an active project or are you new to construction?
-                  </h1>
+                  </TextEffect>
                   <p className="text-xs text-slate-500 leading-relaxed">
                     Select your project phase to calibrate cost codes, draw schedules, and workflow.
                   </p>
@@ -2185,13 +1493,21 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
           {/* ──────────────────────────────────────────────────────────── */}
           {/* SCREEN 4: ORGANIZATION DETAILS                              */}
           {/* ──────────────────────────────────────────────────────────── */}
-          {currentStep === 4 && (
-            <div className="space-y-6">
+          {currentStep === 2 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="flex items-start justify-between">
                 <div className="space-y-1.5">
-                  <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                  <span className="text-[11px] font-bold tracking-wider uppercase text-sky-600 block">
+                    Step 2 of 5 • Organization
+                  </span>
+                  <TextEffect
+                    as="h1"
+                    preset="fade-in-blur"
+                    per="word"
+                    className="text-2xl font-bold text-slate-900 tracking-tight"
+                  >
                     Tell us about your organization
-                  </h1>
+                  </TextEffect>
                   <p className="text-xs text-slate-600 leading-relaxed">
                     We customize your cost codes, approval limits, and portfolio reporting to your operation scale.
                   </p>
@@ -2394,20 +1710,14 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
           {/* ──────────────────────────────────────────────────────────── */}
           {/* SCREEN 5: CREATE YOUR FIRST PROJECT (PROGRESSIVE 3 PARTS)   */}
           {/* ──────────────────────────────────────────────────────────── */}
-          {currentStep === 5 && (
+          {currentStep === 3 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               {/* Header with Step Indicator */}
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">
-                      Step 5 of 8 • Project Setup
-                    </span>
-                    <span className="text-slate-300">/</span>
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-900 text-white">
-                      Part {projectSubStep} of 3
-                    </span>
-                  </div>
+                  <span className="text-[11px] font-bold tracking-wider uppercase text-sky-600 block">
+                    Step 3 of 5 • Project Setup
+                  </span>
                   <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
                     {projectSubStep === 1 && "Let's add your first project"}
                     {projectSubStep === 2 && 'Project Capital & Debt Structure'}
@@ -2896,13 +2206,21 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
           {/* ──────────────────────────────────────────────────────────── */}
           {/* SCREEN 6: ADD PROJECT RECORDS                               */}
           {/* ──────────────────────────────────────────────────────────── */}
-          {currentStep === 6 && (
-            <div className="space-y-6">
+          {currentStep === 4 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="flex items-start justify-between">
                 <div className="space-y-1.5">
-                  <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                  <span className="text-[11px] font-bold tracking-wider uppercase text-sky-600 block">
+                    Step 4 of 5 • Project Records
+                  </span>
+                  <TextEffect
+                    as="h1"
+                    preset="fade-in-blur"
+                    per="word"
+                    className="text-2xl font-bold text-slate-900 tracking-tight"
+                  >
                     Do you have project documents ready?
-                  </h1>
+                  </TextEffect>
                   <p className="text-xs text-slate-600 leading-relaxed">
                     Upload your budget spreadsheets, vendor bills, or bank draw packages. You can also skip this and add them later.
                   </p>
@@ -3042,13 +2360,21 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
           {/* ──────────────────────────────────────────────────────────── */}
           {/* SCREEN 7: INVITE YOUR TEAM                                  */}
           {/* ──────────────────────────────────────────────────────────── */}
-          {currentStep === 7 && (
-            <div className="space-y-6">
+          {currentStep === 5 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="flex items-start justify-between">
                 <div className="space-y-1.5">
-                  <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                  <span className="text-[11px] font-bold tracking-wider uppercase text-sky-600 block">
+                    Step 5 of 5 • Collaborator Access
+                  </span>
+                  <TextEffect
+                    as="h1"
+                    preset="fade-in-blur"
+                    per="word"
+                    className="text-2xl font-bold text-slate-900 tracking-tight"
+                  >
                     Who else works on this project?
-                  </h1>
+                  </TextEffect>
                   <p className="text-xs text-slate-600 leading-relaxed">
                     Invite your team and external partners. Each role gets dedicated permissions and filtered views.
                   </p>
@@ -3175,7 +2501,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
           {/* ──────────────────────────────────────────────────────────── */}
           {/* SCREEN 8: ARCHITECTURAL WORKSPACE INITIALIZATION             */}
           {/* ──────────────────────────────────────────────────────────── */}
-          {currentStep === 8 && (
+          {currentStep === 6 && (
             <div className="space-y-6 text-center">
               <div className="space-y-1.5">
                 <TextEffect
@@ -3319,7 +2645,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
             </div>
           )}
         </div>
-
       </main>
 
       {/* ── GroundUp Micro-Transition Loader ────────────────────────────── */}
