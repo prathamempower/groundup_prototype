@@ -31,6 +31,8 @@ import {
 } from "lucide-react";
 import { ProjectFinancialComparison } from "@/components/projects/financial-comparison";
 
+const DEFAULT_GLOBAL_ROLE: UserRole = "OWNER";
+
 export default function ProjectsPortfolioPage() {
   const router = useRouter();
   const [viewMode, setViewMode] = useState<"CARD" | "TABLE" | "COMPARE">("CARD");
@@ -50,7 +52,7 @@ export default function ProjectsPortfolioPage() {
   });
 
   const user = meData?.data;
-  const globalRole = user?.role || "OWNER";
+  const globalRole: UserRole = user?.role || DEFAULT_GLOBAL_ROLE;
   const projects = useMemo(() => {
     const list = projectsData?.data?.projects || [];
     const seen = new Set<string>();
@@ -112,7 +114,7 @@ export default function ProjectsPortfolioPage() {
   const getEffectiveRoleOnProject = (project: Project): UserRole => {
     if (project.role_on_project) return project.role_on_project;
     const membership = (user?.project_memberships || []).find((m: any) => m.project_id === project.id);
-    return (membership?.role as UserRole) || globalRole;
+    return (membership?.role as UserRole) || globalRole || DEFAULT_GLOBAL_ROLE;
   };
 
   const handleOpenWorkspace = (project: Project) => {
@@ -377,7 +379,7 @@ export default function ProjectsPortfolioPage() {
       {viewMode === "COMPARE" ? (
         <ProjectFinancialComparison
           projects={filteredProjects.length > 0 ? filteredProjects : projects}
-          globalRole={globalRole}
+          globalRole={globalRole || DEFAULT_GLOBAL_ROLE}
           onOpenWorkspace={handleOpenWorkspace}
         />
       ) : filteredProjects.length === 0 ? (

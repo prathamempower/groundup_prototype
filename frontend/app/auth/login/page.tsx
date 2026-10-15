@@ -88,7 +88,7 @@ export default function LoginPage() {
         {/* Brand Header */}
         <div className="text-center space-y-3">
           <div className="flex justify-center mb-2">
-            <BrandLogo size="lg" showSubtitle={true} />
+            <BrandLogo size="lg" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             Welcome back
@@ -196,7 +196,7 @@ export default function LoginPage() {
         <div className="pt-2 text-center text-xs text-slate-500 border-t border-slate-100">
           Don&apos;t have an account?{" "}
           <Link
-            href="/auth/sign-up"
+            href="/onboarding"
             className="font-semibold text-slate-900 hover:underline"
           >
             Sign up

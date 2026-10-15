@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Eye,
@@ -78,6 +78,10 @@ const roleOptions: Array<{ role: UserRole; label: string }> = [
 export default function SignUpPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    router.replace("/onboarding");
+  }, [router]);
 
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
 
