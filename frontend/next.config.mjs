@@ -15,6 +15,10 @@ const nextConfig = {
     const apiProxyUrl = process.env.API_PROXY_URL || "http://127.0.0.1:8000";
     return [
       {
+        source: "/api/v1/sample-docs/:path*",
+        destination: "/sample-docs/:path*",
+      },
+      {
         source: "/api/v1/:path*",
         destination: `${apiProxyUrl}/api/v1/:path*`,
       },

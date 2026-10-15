@@ -141,6 +141,28 @@ export const api = {
       }
       return wrap(p);
     },
+    update: async (projectId: string, updates: Partial<Project>) => {
+      const p = mockStore.updateProject(projectId, updates);
+      if (!p) {
+        throw new ApiError(404, {
+          code: "NOT_FOUND",
+          message: `Project ${projectId} not found`,
+          request_id: "req_not_found",
+        });
+      }
+      return wrap(p);
+    },
+    delete: async (projectId: string) => {
+      const success = mockStore.deleteProject(projectId);
+      if (!success) {
+        throw new ApiError(404, {
+          code: "NOT_FOUND",
+          message: `Project ${projectId} not found`,
+          request_id: "req_not_found",
+        });
+      }
+      return wrap({ success: true, id: projectId });
+    },
     getDashboard: async (projectId: string) => {
       const dashboard = mockStore.getDashboard(projectId);
       return wrap(dashboard);

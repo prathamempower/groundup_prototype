@@ -111,8 +111,8 @@ export function Sidebar({
     ? getProjectNavItems(workspaceProjectId, effectiveRole)
     : [];
 
-  // Visible workspace items: Control Center, Reconciliation, Draws, Documents, Alerts
-  const mainWorkspaceItemIds = ["control-center", "reconciliation", "draws", "documents", "alerts"];
+  // Visible workspace items: Control Center, Reconciliation, Draws, Documents, Alerts, Project Settings
+  const mainWorkspaceItemIds = ["control-center", "reconciliation", "draws", "documents", "alerts", "settings"];
 
   const mainNavItems = mainWorkspaceItemIds
     .map((id) => visibleNavItems.find((i) => i.id === id))
