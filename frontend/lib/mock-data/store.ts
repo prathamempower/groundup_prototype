@@ -266,11 +266,10 @@ class MockStore {
       company: userData.company || "Development Firm",
       avatarInitials: initials,
       is_active: true,
-      project_memberships: userData.project_memberships || [
-        { project_id: "df16b577-3585-4fb0-a13a-ffadaca73e0f", role: userData.role || "OWNER" },
-        { project_id: "7a2ae0d8-92ee-4992-8148-8c7107654c7b", role: userData.role || "OWNER" },
-        { project_id: "4dbc506e-d18d-4ac2-ba8b-10c4274fec5a", role: userData.role || "OWNER" },
-      ],
+      project_memberships: userData.project_memberships || this.state.projects.map((p) => ({
+        project_id: p.id,
+        role: userData.role || "OWNER",
+      })),
       permissions: ["all"],
     };
 
@@ -331,10 +330,10 @@ class MockStore {
       return existing;
     }
 
-    const id = `proj-${Date.now()}`;
+    const id = projectData.id || `proj-${Date.now()}`;
     const newProject: Project = {
       id,
-      organization_id: "org-vance-dev",
+      organization_id: projectData.organization_id || "org-vance-dev",
       name: projectData.name || "New Development Project",
       project_entity: projectData.project_entity || `${projectData.name || "New"} LLC`,
       address: projectData.address || "100 Construction Way",
@@ -356,12 +355,22 @@ class MockStore {
     this.state.projects.unshift(newProject);
     this.state.activeProjectId = id;
 
-    // Add membership to current user
-    const cur = this.getCurrentUser();
-    if (cur) {
-      cur.project_memberships = cur.project_memberships || [];
-      cur.project_memberships.push({ project_id: id, role: cur.role });
-    }
+    const cur = this.getCurrentUser() || this.state.users[0] || {
+      name: "Alex Morgan",
+      email: "alex@vancedev.com",
+      role: "OWNER",
+      title: "Principal Developer",
+      company: "Vance Development",
+      avatarInitials: "AM",
+    };
+
+    // Add membership to all registered users (Owner gets full access)
+    this.state.users.forEach((u) => {
+      u.project_memberships = u.project_memberships || [];
+      if (!u.project_memberships.some((m) => m.project_id === id)) {
+        u.project_memberships.push({ project_id: id, role: u.role || "OWNER" });
+      }
+    });
 
     // Initialize mock structures for new project
     this.state.dashboards[id] = {

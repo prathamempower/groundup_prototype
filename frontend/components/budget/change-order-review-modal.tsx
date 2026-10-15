@@ -32,11 +32,11 @@ type FundingSourceOption = "CONTINGENCY" | "SPONSOR_EQUITY" | "LOAN_EXPANSION" |
 // Active equity partners on the development
 const PROJECT_SPONSORS = [
   { id: "sp-all", name: "Pro-Rata All Partners", share: "100%" },
-  { id: "sp-1", name: "Kirit Shah", share: "25%" },
-  { id: "sp-2", name: "Nilesh Patel", share: "25%" },
-  { id: "sp-3", name: "Kunal Mehta", share: "20%" },
-  { id: "sp-4", name: "Swekit Desai", share: "20%" },
-  { id: "sp-5", name: "Maulik Shah", share: "10%" },
+  { id: "sp-1", name: "Marcus Vance", share: "30%" },
+  { id: "sp-2", name: "Elena Rostova", share: "25%" },
+  { id: "sp-3", name: "Apex Equity Partners", share: "20%" },
+  { id: "sp-4", name: "Horizon Investments LLC", share: "15%" },
+  { id: "sp-5", name: "Summit Capital Group", share: "10%" },
 ];
 
 const LOAN_FACILITIES = [

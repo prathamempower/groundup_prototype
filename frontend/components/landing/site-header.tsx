@@ -178,10 +178,10 @@ export function SiteHeader({ onStartOnboarding, onAuthenticate }: SiteHeaderProp
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {mounted && hasExistingSession ? (
               <Link
-                href={activeProjectId ? `/projects/${activeProjectId}/control-center` : "/projects"}
+                href="/projects"
                 className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-slate-900 hover:bg-slate-50 transition-colors shadow-2xs"
               >
-                Dashboard
+                Portfolio
               </Link>
             ) : (
               <Link
@@ -246,11 +246,11 @@ export function SiteHeader({ onStartOnboarding, onAuthenticate }: SiteHeaderProp
             <div className="pt-3 border-t border-border flex flex-col gap-2">
               {mounted && hasExistingSession ? (
                 <Link
-                  href={activeProjectId ? `/projects/${activeProjectId}/control-center` : "/projects"}
+                  href="/projects"
                   onClick={() => setMobileMenuOpen(false)}
                   className="w-full py-2.5 px-3 rounded-xl border border-border bg-background text-foreground text-xs font-semibold text-center hover:bg-muted transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                 >
-                  <span>Enter Dashboard</span>
+                  <span>Enter Portfolio</span>
                 </Link>
               ) : (
                 <Link

@@ -101,13 +101,6 @@ export function WorkspaceReadyScreen({
   const address = projectData?.address || '73 Broadway, Brooklyn, NY 11249';
 
   const handleEnterDashboard = useCallback(async () => {
-    const activeProjectId =
-      projectData?.id ||
-      (typeof window !== 'undefined' &&
-        (window.localStorage.getItem('groundup_active_project_id') ||
-          window.localStorage.getItem('groundup_last_project_id'))) ||
-      '73-broadway';
-
     if (typeof window !== 'undefined') {
       try {
         let authEmail = window.localStorage.getItem('groundup_active_auth_email');
@@ -124,12 +117,12 @@ export function WorkspaceReadyScreen({
         await authAdapter.signIn(authEmail, 'password');
         window.localStorage.setItem('groundup_session_seen', '1');
       } catch (err) {
-        console.warn('Auto-session initialization before entering dashboard:', err);
+        console.warn('Auto-session initialization before entering portfolio:', err);
       }
     }
 
-    router.push(`/projects/${activeProjectId}/control-center`);
-  }, [projectData?.id, router]);
+    router.push('/projects');
+  }, [router]);
 
   // ── 4 Key Educational Tour Slides ──────────────────────────────────────────
   const slides: TourSlide[] = [
@@ -534,7 +527,7 @@ export function WorkspaceReadyScreen({
             onClick={handleEnterDashboard}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl text-white text-sm font-bold shadow-md hover:shadow-lg transition cursor-pointer bg-slate-900 hover:bg-slate-800 active:scale-98"
           >
-            <span>Enter Dashboard</span>
+            <span>Go to Project Portfolio</span>
             <ArrowRight className="w-4 h-4 text-emerald-400" />
           </button>
         </div>
