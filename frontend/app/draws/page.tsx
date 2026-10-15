@@ -394,17 +394,9 @@ export default function DrawsPage() {
       <div className="border-b border-border bg-white px-6 py-4">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-foreground">
-                Draw Requests & Spending Verification
-              </h1>
-              <span className="text-xs text-muted-foreground font-mono">
-                Facility #23-03394 &middot; Capital Reserve Trust
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {currentProject?.name || "73 Broadway"} &middot; {currentProject?.address || "Jersey City, NJ"} &middot; Track bank releases, trade payments, and next draw approvals.
-            </p>
+            <h1 className="text-lg font-bold text-foreground">
+              Draw Requests & Spending Verification
+            </h1>
           </div>
 
           <div className="flex items-center gap-2">
@@ -498,9 +490,6 @@ export default function DrawsPage() {
                     Sequential Draw 1 → Draw 5
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Sequential funding cadence: First-pass bank allocation → Trade spends reconciliation → Next draw auto-trigger.
-                </p>
               </div>
             </div>
 

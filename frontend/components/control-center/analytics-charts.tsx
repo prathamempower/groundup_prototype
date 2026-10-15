@@ -183,39 +183,7 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
         </div>
       </div>
 
-      {/* KPI Highlight Strip for Instant Executive Clarity */}
-      {activeTab === "COST_VS_FUNDING" && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-6 py-3.5 border-b border-slate-100 bg-white">
-          <div className="rounded-lg border border-blue-100 bg-blue-50/40 px-3.5 py-2">
-            <span className="text-[11px] font-semibold text-blue-800 uppercase tracking-wider block">Spend to Date</span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-mono text-blue-900">$10.1M</span>
-              <span className="text-[11px] font-medium text-blue-700">68% of baseline</span>
-            </div>
-          </div>
-          <div className="rounded-lg border border-emerald-100 bg-emerald-50/40 px-3.5 py-2">
-            <span className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wider block">Verified Progress</span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-mono text-emerald-900">$9.2M</span>
-              <span className="text-[11px] font-medium text-emerald-700">Site confirmed</span>
-            </div>
-          </div>
-          <div className="rounded-lg border border-amber-100 bg-amber-50/40 px-3.5 py-2">
-            <span className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider block">Cleared Funding</span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-mono text-amber-900">$8.8M</span>
-              <span className="text-[11px] font-medium text-amber-700">Bank disbursed</span>
-            </div>
-          </div>
-          <div className="rounded-lg border border-slate-200/80 bg-slate-50/60 px-3.5 py-2">
-            <span className="text-[11px] font-semibold text-slate-700 uppercase tracking-wider block">Planned Target</span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-mono text-slate-900">$10.4M</span>
-              <span className="text-[11px] font-medium text-slate-500">Baseline to date</span>
-            </div>
-          </div>
-        </div>
-      )}
+
 
 
 

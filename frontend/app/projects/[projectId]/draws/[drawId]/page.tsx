@@ -231,15 +231,7 @@ export default function DrawDetailPage() {
             </Button>
           )}
 
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => router.push(`/projects/${projectId}/draws`)}
-            className="text-xs font-semibold border-slate-300 hover:bg-slate-50"
-          >
-            Close Workbench
-          </Button>
+
         </div>
       </div>
 

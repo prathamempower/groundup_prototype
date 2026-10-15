@@ -531,7 +531,7 @@ export function DrawDetailDrawer({
             Draw Record ID: {activeDraw.id} • Loan Ref: {activeDraw.loan_id}
           </span>
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
-            Close Workbench
+            Close
           </Button>
         </DrawerFooter>
 
