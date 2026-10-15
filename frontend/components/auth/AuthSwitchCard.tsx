@@ -212,49 +212,53 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
 
   return (
     <div className="w-full flex flex-col items-center">
-      {/* ── Uiverse-Inspired 3D Toggle Switch ───────────────────────────────── */}
-      <div className="mb-6 flex items-center justify-center gap-4 select-none">
-        <span 
-          onClick={() => handleToggle(false)}
-          className={`text-xs font-bold transition-all cursor-pointer ${
-            !isSignUp 
-              ? 'text-slate-900 border-b-2 border-slate-900 pb-0.5' 
-              : 'text-slate-400 hover:text-slate-600'
-          }`}
-        >
-          Log in
-        </span>
-
-        {/* Minimalist Pill Slider */}
-        <label 
-          htmlFor="auth-card-toggle"
-          className="relative inline-flex h-6 w-12 cursor-pointer items-center rounded-full bg-slate-200 transition-colors focus-within:ring-2 focus-within:ring-blue-600/20"
-        >
-          <input
-            id="auth-card-toggle"
-            type="checkbox"
-            checked={isSignUp}
-            onChange={(e) => handleToggle(e.target.checked)}
-            className="sr-only"
-            aria-label="Toggle between Log in and Sign up"
-          />
-          <span 
-            className={`inline-block size-5 transform rounded-full bg-white shadow-md transition-transform duration-300 ${
-              isSignUp ? 'translate-x-6 bg-blue-600' : 'translate-x-1'
-            }`}
-          />
-        </label>
-
-        <span 
-          onClick={() => handleToggle(true)}
-          className={`text-xs font-bold transition-all cursor-pointer ${
+      {/* ── Apple-Style Segmented Control (HIG Physical Spring Pill) ── */}
+      <div 
+        role="tablist"
+        aria-label="Authentication mode selection"
+        className="mb-6 w-full max-w-[280px] p-1 bg-slate-200/75 border border-slate-300/60 rounded-2xl flex items-center relative select-none shadow-xs"
+      >
+        {/* Sliding Physical Spring Background Pill */}
+        <div
+          aria-hidden="true"
+          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-xl shadow-sm border border-slate-200/80 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none ${
             isSignUp 
-              ? 'text-slate-900 border-b-2 border-slate-900 pb-0.5' 
-              : 'text-slate-400 hover:text-slate-600'
+              ? 'left-[calc(50%+2px)]' 
+              : 'left-1'
+          }`}
+        />
+
+        {/* Log In Tab Button */}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={!isSignUp}
+          aria-controls="auth-login-panel"
+          onClick={() => handleToggle(false)}
+          className={`relative z-10 w-1/2 py-2 text-xs sm:text-sm font-semibold text-center transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-xl ${
+            !isSignUp 
+              ? 'text-slate-950 font-bold' 
+              : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          Sign up
-        </span>
+          <span>Log In</span>
+        </button>
+
+        {/* Sign Up Tab Button */}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={isSignUp}
+          aria-controls="auth-signup-panel"
+          onClick={() => handleToggle(true)}
+          className={`relative z-10 w-1/2 py-2 text-xs sm:text-sm font-semibold text-center transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-xl ${
+            isSignUp 
+              ? 'text-slate-950 font-bold' 
+              : 'text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <span>Sign Up</span>
+        </button>
       </div>
 
       {/* ── 3D Flip Card Container ─────────────────────────────────────────── */}
@@ -269,6 +273,9 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
               FRONT FACE: LOG IN
              ─────────────────────────────────────────────────────────────────── */}
           <div 
+            id="auth-login-panel"
+            role="tabpanel"
+            aria-labelledby="auth-login-tab"
             className={`w-full rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-overlay [backface-visibility:hidden] flex flex-col justify-start space-y-3.5 ${
               isSignUp ? 'absolute inset-0 pointer-events-none' : 'relative pointer-events-auto'
             }`}
@@ -393,6 +400,9 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
               BACK FACE: SIGN UP (2-STAGE PROGRESSION)
              ─────────────────────────────────────────────────────────────────── */}
           <div 
+            id="auth-signup-panel"
+            role="tabpanel"
+            aria-labelledby="auth-signup-tab"
             className={`w-full rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-overlay [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-start ${
               !isSignUp ? 'absolute inset-0 pointer-events-none' : 'relative pointer-events-auto'
             }`}

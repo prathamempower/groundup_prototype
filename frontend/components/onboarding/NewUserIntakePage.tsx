@@ -224,95 +224,70 @@ const ORG_SIZE_TIERS = [
 export const ACTIVE_STAGE_CHOICES = [
   {
     id: 'Under construction',
-    label: 'Active Construction',
-    stageNum: 'Construction Stage',
-    desc: 'Foundations, structural framing, exterior envelope, and MEP trades.'
+    label: 'Under Construction',
+    stageNum: 'Active Stage',
+    desc: 'Active foundation, structural framing, and MEP trades.'
   },
   {
     id: 'Procurement',
     label: 'Procurement & Buyout',
-    stageNum: 'Procurement Stage',
-    desc: 'Trade contract execution, vendor buyout, and material purchase orders.'
+    stageNum: 'Active Stage',
+    desc: 'Trade contracts buyout and vendor purchase orders.'
   },
   {
     id: 'Preconstruction phase',
-    label: 'Pre-Construction & Bidding',
-    stageNum: 'Pre-Construction Stage',
-    desc: 'Engineering reviews, subcontractor bid leveling, and site logistics.'
-  },
-  {
-    id: 'Building permits',
-    label: 'Entitlements & Permitting',
-    stageNum: 'Permitting Stage',
-    desc: 'Municipal filings, zoning approvals, and building permit issuances.'
-  },
-  {
-    id: 'Conception, design & planning',
-    label: 'Pre-Development & Feasibility',
-    stageNum: 'Planning Stage',
-    desc: 'Architectural schematics, zoning feasibility, and development pro forma.'
+    label: 'Preconstruction Logistics',
+    stageNum: 'Active Stage',
+    desc: 'Soil borings, engineering, and site logistics lock.'
   },
   {
     id: 'Post-construction',
-    label: 'Closeout & Final Occupancy',
-    stageNum: 'Closeout Stage',
-    desc: 'Punch lists, final inspections, Certificate of Occupancy, and loan conversion.'
+    label: 'Post-Construction & Closeout',
+    stageNum: 'Active Stage',
+    desc: 'Punch lists, final municipal inspections, and Certificate of Occupancy.'
   },
 ];
 
 export const NEW_STAGE_CHOICES = [
   {
     id: 'Conception, design & planning',
-    label: 'Pre-Development & Feasibility',
+    label: 'Conception & Feasibility',
     stageNum: 'Planning Stage',
-    desc: 'Architectural schematics, zoning feasibility, and development pro forma.'
+    desc: 'Architectural drawings, zoning feasibility, and development pro forma.'
   },
   {
     id: 'Building permits',
-    label: 'Entitlements & Permitting',
-    stageNum: 'Permitting Stage',
-    desc: 'Municipal filings, zoning approvals, and building permit issuances.'
+    label: 'Building Permits',
+    stageNum: 'Planning Stage',
+    desc: 'Township permit filings and agency plan sign-offs.'
   },
   {
     id: 'Preconstruction phase',
-    label: 'Pre-Construction & Bidding',
-    stageNum: 'Pre-Construction Stage',
-    desc: 'Subcontractor bid packages, estimation, and site logistics.'
+    label: 'Preconstruction Bidding',
+    stageNum: 'Planning Stage',
+    desc: 'Subcontractor bid packages and initial cost estimation lock.'
   },
   {
     id: 'Procurement',
-    label: 'Procurement & Buyout',
-    stageNum: 'Procurement Stage',
-    desc: 'Contractor buyout, GMP contracts, and trade purchase orders.'
-  },
-  {
-    id: 'Under construction',
-    label: 'Active Construction',
-    stageNum: 'Construction Stage',
-    desc: 'Foundations, structural framing, exterior envelope, and MEP trades.'
-  },
-  {
-    id: 'Post-construction',
-    label: 'Closeout & Final Occupancy',
-    stageNum: 'Closeout Stage',
-    desc: 'Punch lists, final inspections, Certificate of Occupancy, and loan conversion.'
+    label: 'Contractor Buyout',
+    stageNum: 'Planning Stage',
+    desc: 'General Contractor RFP buyout and pricing negotiations.'
   },
 ];
 
 export const ACTIVE_DOC_TYPES = [
-  'Master Schedule of Values (SOV)',
-  'Development budget spreadsheet',
-  'Executed General Contractor contract',
+  'Budget or cost spreadsheet',
+  'Executed GC contract',
   'Subcontractor pay application (AIA G702)',
   'Bank construction loan agreement',
-  'Building permits & inspection cards',
+  'Municipal inspection card',
   'Not ready yet',
 ];
 
 export const NEW_DOC_TYPES = [
-  'Development pro forma & budget',
+  'Development pro forma spreadsheet',
   'Architectural schematic plans',
-  'Municipal permit filings',
+  'Township permit filing document',
   'Land purchase contract or LOI',
   'Bank financing term sheet',
   'Not ready yet',
@@ -990,10 +965,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
         setDuplicateMatches(res.data.matches);
         setShowDuplicateModal(true);
       } else {
-        setProjectSubStep(2);
+        handleCreateProject();
       }
     } catch {
-      setProjectSubStep(2);
+      handleCreateProject();
     } finally {
       setIsCheckingDuplicates(false);
     }
@@ -1375,10 +1350,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     per="word"
                     className="text-2xl font-bold text-slate-900 tracking-tight"
                   >
-                    What is the current status of your project?
+                    Select your project phase
                   </TextEffect>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Select your project status to calibrate cost code ledgers, bank draw schedules, and approval workflows.
+                    Calibrate your cost codes, draw schedules, and workflow.
                   </p>
                 </div>
               </div>
@@ -1408,14 +1383,14 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         </div>
                         <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${projectStatus === 'active' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-600'
                           }`}>
-                          Active Construction
+                          Active Jobsite
                         </span>
                       </div>
                       <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                        Active project currently under construction
+                        Active Construction
                       </h3>
-                      <p className="text-xs text-slate-500 leading-relaxed mt-1">
-                        Live jobsites with active subcontractor invoices, AIA G702 pay applications, and monthly bank inspection draws.
+                      <p className="text-xs text-slate-500 leading-relaxed mt-0.5">
+                        Live site with ongoing draw packages, bills, and lien waivers.
                       </p>
                     </div>
 
@@ -1460,14 +1435,14 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         </div>
                         <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${projectStatus === 'new' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-600'
                           }`}>
-                          Pre-Development &amp; Planning
+                          Pre-Development
                         </span>
                       </div>
                       <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                        Planning a new project / In pre-development
+                        Planning & Pre-Development
                       </h3>
-                      <p className="text-xs text-slate-500 leading-relaxed mt-1">
-                        Development pro forma budgets, CSI MasterFormat 50-division structures, and municipal permit filings.
+                      <p className="text-xs text-slate-500 leading-relaxed mt-0.5">
+                        Pro forma budgets, CSI 50 divisions, and municipal permits.
                       </p>
                     </div>
 
@@ -1527,7 +1502,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     Tell us about your organization
                   </TextEffect>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Configure your organization profile to calibrate approval thresholds, cost code structures, and portfolio reporting.
+                    We customize your cost codes, approval limits, and portfolio reporting to your operation scale.
                   </p>
                 </div>
               </div>
@@ -1617,9 +1592,9 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                     {[
                       { id: '1-5', label: '1 to 5', value: 5, desc: 'Core team' },
-                      { id: '5+', label: '6 to 20', value: 12, desc: 'Growing firm' },
-                      { id: '50+', label: '21 to 50', value: 35, desc: 'Mid-size firm' },
-                      { id: '100+', label: '50+', value: 75, desc: 'Enterprise' },
+                      { id: '5+', label: '5+', value: 12, desc: 'Growing team' },
+                      { id: '50+', label: '50+', value: 50, desc: 'Mid-size firm' },
+                      { id: '100+', label: '100+', value: 100, desc: 'Enterprise' },
                       { id: 'custom', label: 'Custom', value: employeeCount, desc: 'Specific count' },
                     ].map(opt => {
                       const isSelected = teamSizeChoice === opt.id;
@@ -1716,7 +1691,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                 onClick={handleCreateOrganization}
                 className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
               >
-                <span>Continue to Project Setup</span>
+                <span>Create organization</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -1735,14 +1710,9 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                 <div className="space-y-1">
                   <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
                     {projectSubStep === 1 && "Let's add your first project"}
-                    {projectSubStep === 2 && 'Project Capital & Debt Structure'}
-                    {projectSubStep === 3 && 'Contract Model & Operating Account'}
+                    {projectSubStep === 2 && 'Capital & Debt Structure'}
+                    {projectSubStep === 3 && 'Contract Model & Banking'}
                   </h1>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    {projectSubStep === 1 && 'Enter your project details, legal entity, asset type, and estimated timeline.'}
-                    {projectSubStep === 2 && 'Define property acquisition status, equity sources, and construction financing.'}
-                    {projectSubStep === 3 && 'Select your contractor billing structure and operating bank account model.'}
-                  </p>
                 </div>
               </div>
 
@@ -1755,7 +1725,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     className="group text-left cursor-pointer focus:outline-none"
                   >
                     <div className={`h-1.5 rounded-full transition-colors ${projectSubStep >= 1 ? 'bg-slate-900' : 'bg-slate-200'}`} />
-                    <span className={`block text-[10px] sm:text-[11px] truncate font-semibold mt-1.5 transition-colors ${projectSubStep === 1 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                    <span className={`block text-[11px] font-semibold mt-1.5 transition-colors ${projectSubStep === 1 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
                       1. Identity & Dates
                     </span>
                   </button>
@@ -1767,7 +1737,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     className="group text-left cursor-pointer focus:outline-none"
                   >
                     <div className={`h-1.5 rounded-full transition-colors ${projectSubStep >= 2 ? 'bg-slate-900' : 'bg-slate-200'}`} />
-                    <span className={`block text-[10px] sm:text-[11px] truncate font-semibold mt-1.5 transition-colors ${projectSubStep === 2 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                    <span className={`block text-[11px] font-semibold mt-1.5 transition-colors ${projectSubStep === 2 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
                       2. Capital & Debt
                     </span>
                   </button>
@@ -1779,8 +1749,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     className="group text-left cursor-pointer focus:outline-none"
                   >
                     <div className={`h-1.5 rounded-full transition-colors ${projectSubStep >= 3 ? 'bg-slate-900' : 'bg-slate-200'}`} />
-                    <span className={`block text-[10px] sm:text-[11px] truncate font-semibold mt-1.5 transition-colors ${projectSubStep === 3 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
-                      3. Contract & Governance
+                    <span className={`block text-[11px] font-semibold mt-1.5 transition-colors ${projectSubStep === 3 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                      3. Contract & Banking
                     </span>
                   </button>
                 </div>
@@ -1800,7 +1770,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div className="space-y-1.5">
                       <label htmlFor="input-project-name" className="block text-xs font-bold text-slate-800">
-                        Project name <span className="text-red-500">*</span>
+                        Project display name <span className="text-red-500">*</span>
                       </label>
                       <input
                         id="input-project-name"
@@ -1829,7 +1799,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         type="text"
                         value={projectEntity}
                         onChange={(e) => setProjectEntity(e.target.value)}
-                        placeholder="e.g. 73 Broadway Development LLC"
+                        placeholder="e.g. 161 Woodlawn Partners LLC"
                         className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
                       />
                     </div>
@@ -1838,7 +1808,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   {/* Site Address */}
                   <div className="space-y-1.5">
                     <label htmlFor="input-project-address" className="block text-xs font-bold text-slate-800">
-                      Site address <span className="text-slate-400 font-normal">(optional)</span>
+                      Site address / location <span className="text-slate-400 font-normal">(optional)</span>
                     </label>
                     <div className="relative">
                       <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -1847,18 +1817,18 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         type="text"
                         value={projectAddress}
                         onChange={(e) => setProjectAddress(e.target.value)}
-                        placeholder="e.g. 73 Broadway, Brooklyn, NY 11249"
+                        placeholder={projectStatus === 'active' ? 'e.g. 73 Broadway, Jersey City, NJ 07306' : 'e.g. 161 Woodlawn Ave, Jersey City, NJ 07305'}
                         className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
                       />
                     </div>
                   </div>
 
-                  {/* Dropdowns for Asset Type and Stage */}
+                  {/* Minimalist Dropdowns for Archetype and Stage */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    {/* Project Asset Type */}
+                    {/* Project Asset Archetype */}
                     <div className="space-y-1.5">
                       <label htmlFor="select-asset-archetype" className="block text-xs font-bold text-slate-800">
-                        Project asset type
+                        Project asset archetype
                       </label>
                       <select
                         id="select-asset-archetype"
@@ -1869,6 +1839,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         <option value="MULTIFAMILY">Multifamily</option>
                         <option value="SINGLE_FAMILY">Single Family</option>
                         <option value="MIXED_USE">Mixed-Use</option>
+                        <option value="SUBDIVISION">Subdivision</option>
                       </select>
                     </div>
 
@@ -1969,22 +1940,21 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     <label className="block text-xs font-bold text-slate-800">
                       Property acquisition status
                     </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div className="grid grid-cols-2 gap-2.5">
                       {[
-                        { val: 'true', label: 'Title / Deed Closed', desc: 'Settlement statement recorded and title deed conveyed.' },
-                        { val: 'false', label: 'Under Diligence / LOI', desc: 'Purchase contract or LOI executed; diligence in progress.' },
+                        { val: 'true', label: 'Title / Deed Closed' },
+                        { val: 'false', label: 'Under Contract / LOI' },
                       ].map((opt) => (
                         <button
                           key={opt.val}
                           type="button"
                           onClick={() => setIsAcquired(opt.val as any)}
-                          className={`rounded-xl border p-3 text-left transition cursor-pointer ${isAcquired === opt.val
-                            ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                            : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                          className={`rounded-xl border py-2.5 px-3.5 text-center transition cursor-pointer ${isAcquired === opt.val
+                            ? 'border-slate-900 bg-slate-900 text-white shadow-xs font-bold'
+                            : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium'
                             }`}
                         >
-                          <span className="block text-xs font-bold leading-tight">{opt.label}</span>
-                          <span className={`mt-0.5 block text-[11px] ${isAcquired === opt.val ? 'text-slate-300' : 'text-slate-500'}`}>{opt.desc}</span>
+                          <span className="text-xs">{opt.label}</span>
                         </button>
                       ))}
                     </div>
@@ -1997,10 +1967,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {[
-                        { id: 'ACQUISITION_LOAN', label: 'Bank Debt', sub: 'Senior acquisition loan' },
-                        { id: 'EQUITY', label: 'Sponsor Equity', sub: 'General Partner capital' },
-                        { id: 'LP_EQUITY', label: 'LP Equity', sub: 'Limited Partner capital' },
-                        { id: 'SELLER_FINANCED', label: 'Seller Note', sub: 'Owner-carried note' },
+                        { id: 'ACQUISITION_LOAN', label: 'Bank Debt' },
+                        { id: 'EQUITY', label: 'Sponsor Equity' },
+                        { id: 'LP_EQUITY', label: 'LP Equity' },
+                        { id: 'SELLER_FINANCED', label: 'Seller Note' },
                       ].map((f) => {
                         const isSelected = acquisitionFunding === f.id;
                         return (
@@ -2008,15 +1978,12 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                             key={f.id}
                             type="button"
                             onClick={() => setAcquisitionFunding(f.id)}
-                            className={`rounded-xl border p-2.5 text-left transition cursor-pointer ${isSelected
-                              ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                              : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                            className={`rounded-xl border py-2.5 px-3 text-center transition cursor-pointer ${isSelected
+                              ? 'border-slate-900 bg-slate-900 text-white shadow-xs font-bold'
+                              : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium'
                               }`}
                           >
-                            <span className="block text-xs font-bold leading-tight">{f.label}</span>
-                            <span className={`block text-[10px] mt-0.5 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
-                              {f.sub}
-                            </span>
+                            <span className="text-xs">{f.label}</span>
                           </button>
                         );
                       })}
@@ -2028,22 +1995,21 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     <label className="block text-xs font-bold text-slate-800">
                       Construction debt structure
                     </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div className="grid grid-cols-2 gap-2.5">
                       {[
-                        { val: 'true', label: 'Construction Loan in Place', desc: 'Senior construction loan with monthly bank draw inspections.' },
-                        { val: 'false', label: 'All-Equity Self-Funded', desc: 'Direct equity funded from sponsor and partner capital accounts.' },
+                        { val: 'true', label: 'Construction Loan' },
+                        { val: 'false', label: 'All-Equity / Self-Funded' },
                       ].map((opt) => (
                         <button
                           key={opt.val}
                           type="button"
                           onClick={() => setHasConstructionLoan(opt.val as any)}
-                          className={`rounded-xl border p-3 text-left transition cursor-pointer ${hasConstructionLoan === opt.val
-                            ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                            : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                          className={`rounded-xl border py-2.5 px-3.5 text-center transition cursor-pointer ${hasConstructionLoan === opt.val
+                            ? 'border-slate-900 bg-slate-900 text-white shadow-xs font-bold'
+                            : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium'
                             }`}
                         >
-                          <span className="block text-xs font-bold leading-tight">{opt.label}</span>
-                          <span className={`mt-0.5 block text-[11px] ${hasConstructionLoan === opt.val ? 'text-slate-300' : 'text-slate-500'}`}>{opt.desc}</span>
+                          <span className="text-xs">{opt.label}</span>
                         </button>
                       ))}
                     </div>
@@ -2053,7 +2019,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   {hasConstructionLoan === 'true' && (
                     <div className="space-y-1.5 animate-in fade-in duration-150">
                       <label htmlFor="input-lender-name" className="block text-xs font-bold text-slate-800">
-                        Primary construction lender name
+                        Primary construction lender
                       </label>
                       <div className="relative">
                         <Landmark className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -2086,7 +2052,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         onClick={() => setProjectSubStep(3)}
                         className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.99]"
                       >
-                        <span>Next: Contract & Governance</span>
+                        <span>Next: Contract & Banking</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -2107,7 +2073,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
               {projectSubStep === 3 && (
                 <div className="space-y-4 animate-in fade-in duration-150">
                   {/* GC Contract Model */}
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <label className="block text-xs font-bold text-slate-800">
                       General Contractor contract model
                     </label>
@@ -2116,14 +2082,12 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         {
                           value: 'FIXED',
                           badge: 'Lump Sum',
-                          title: 'Fixed Price (GMP / Stipulated Sum)',
-                          desc: 'Predetermined contract amount; disbursements released against completion milestones and monthly draw inspections.',
+                          title: 'Fixed Price Contract',
                         },
                         {
                           value: 'DAILY',
-                          badge: 'Actuals / T&M',
-                          title: 'Cost-Plus / Time & Materials',
-                          desc: 'Contractor compensation billed on verified daily time logs, actual work days, and itemized receipts.',
+                          badge: 'Day Rate',
+                          title: 'Time & Material / Daily',
                         },
                       ].map((m) => {
                         const isSelected = contractModel === m.value || (m.value === 'FIXED' && contractModel !== 'DAILY');
@@ -2132,7 +2096,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                             key={m.value}
                             type="button"
                             onClick={() => setContractModel(m.value as ContractModel)}
-                            className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${isSelected
+                            className={`rounded-xl border py-3 px-3.5 text-left transition cursor-pointer ${isSelected
                               ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
                               : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
                               }`}
@@ -2141,7 +2105,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                               <span className={`font-bold text-xs ${isSelected ? 'text-white' : 'text-slate-900'}`}>{m.title}</span>
                               <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>{m.badge}</span>
                             </div>
-                            <p className={`mt-1 text-[11px] leading-snug ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>{m.desc}</p>
                           </button>
                         );
                       })}
@@ -2149,14 +2112,14 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   </div>
 
                   {/* Operating Bank Account */}
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <label className="block text-xs font-bold text-slate-800">
                       Operating bank account model
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       {[
-                        { val: 'DEDICATED', badge: 'Recommended', title: 'Dedicated Project Account', desc: 'Single-entity LLC account with clean 1:1 transaction matching.' },
-                        { val: 'SHARED', badge: 'Multi-Entity', title: 'Shared Master Account', desc: 'Master account requiring strict inter-entity transfer controls.' },
+                        { val: 'DEDICATED', badge: 'Recommended', title: 'Dedicated Project Account' },
+                        { val: 'SHARED', badge: 'Multi-Project', title: 'Shared / Master Account' },
                       ].map((opt) => {
                         const isSelected = operatingAccountModel === opt.val;
                         return (
@@ -2164,7 +2127,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                             key={opt.val}
                             type="button"
                             onClick={() => setOperatingAccountModel(opt.val as any)}
-                            className={`rounded-xl border p-3 text-left transition cursor-pointer ${isSelected
+                            className={`rounded-xl border py-3 px-3.5 text-left transition cursor-pointer ${isSelected
                               ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
                               : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
                               }`}
@@ -2173,7 +2136,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                               <span className={`font-bold text-xs ${isSelected ? 'text-white' : 'text-slate-900'}`}>{opt.title}</span>
                               <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>{opt.badge}</span>
                             </div>
-                            <p className={`mt-1 text-[11px] leading-snug ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>{opt.desc}</p>
                           </button>
                         );
                       })}
@@ -2189,7 +2151,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         className="flex-1 py-3 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
                       >
                         <ArrowLeft className="w-3.5 h-3.5" />
-                        <span>Back to Capital &amp; Debt</span>
+                        <span>Back to Capital</span>
                       </button>
                       <button
                         id="btn-onboarding-next"
@@ -2229,10 +2191,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     per="word"
                     className="text-2xl font-bold text-slate-900 tracking-tight"
                   >
-                    Add project documents &amp; budget
+                    Do you have project documents ready?
                   </TextEffect>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Upload your development budget, contractor agreements, or bank draw packages to automatically populate your ledger. You can also skip this and add them later.
+                    Upload your budget spreadsheets, vendor bills, or bank draw packages. You can also skip this and add them later.
                   </p>
                 </div>
               </div>
@@ -2240,7 +2202,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
               {/* Document Type Chips */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-800">
-                  Select document types you are working with:
+                  What document types are you working with?
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {(projectStatus === 'active' ? ACTIVE_DOC_TYPES : NEW_DOC_TYPES).map(type => {
@@ -2351,7 +2313,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   onClick={() => handleContinueRecords(false)}
                   className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
                 >
-                  <span>{documentsList.length > 0 ? 'Continue with documents' : 'Continue to Collaborator Access'}</span>
+                  <span>{documentsList.length > 0 ? 'Continue with documents' : 'Continue'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
 
@@ -2380,10 +2342,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     per="word"
                     className="text-2xl font-bold text-slate-900 tracking-tight"
                   >
-                    Invite project team &amp; collaborators
+                    Who else works on this project?
                   </TextEffect>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Invite team members and external partners. Each collaborator receives role-based permissions and dedicated dashboard views.
+                    Invite your team and external partners. Each role gets dedicated permissions and filtered views.
                   </p>
                 </div>
               </div>
@@ -2486,7 +2448,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   onClick={() => handleSendInvitations(false)}
                   className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
                 >
-                  <span>{teamList.length > 0 ? 'Send invitations & launch workspace' : 'Complete setup & launch workspace'}</span>
+                  <span>{teamList.length > 0 ? 'Send invitations & setup workspace' : 'Complete setup'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
 
@@ -2503,6 +2465,9 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
           )}
 
           {/* ──────────────────────────────────────────────────────────── */}
+          {/* SCREEN 8: WORKSPACE SETUP AND REAL LOADING                  */}
+          {/* ──────────────────────────────────────────────────────────── */}
+          {/* ──────────────────────────────────────────────────────────── */}
           {/* SCREEN 8: ARCHITECTURAL WORKSPACE INITIALIZATION             */}
           {/* ──────────────────────────────────────────────────────────── */}
           {currentStep === 6 && (
@@ -2514,10 +2479,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   per="word"
                   className="text-2xl font-bold text-slate-900 tracking-tight"
                 >
-                  Provisioning your project workspace
+                  Setting up your workspace
                 </TextEffect>
                 <p className="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
-                  Configuring organization multi-tenancy, CSI MasterFormat cost code ledger, and automated lender draw workflows.
+                  Configuring organization multi-tenancy, CSI MasterFormat cost code ledger, and automated lender draw engines.
                 </p>
               </div>
 
@@ -2553,7 +2518,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     {setupStages.savingOrg ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     ) : (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 ml-1 mr-1" />
+                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
                     )}
                     <div>
                       <span className="font-bold text-slate-800 block text-xs">Organization Isolation</span>
@@ -2572,7 +2537,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     {setupStages.creatingProject ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     ) : setupStages.savingOrg ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 ml-1 mr-1" />
+                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
                     ) : (
                       <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
                     )}
@@ -2593,7 +2558,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     {setupStages.preparingDashboard ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     ) : setupStages.creatingProject ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 ml-1 mr-1" />
+                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
                     ) : (
                       <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
                     )}
@@ -2614,7 +2579,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     {setupStages.finalizing ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     ) : setupStages.preparingDashboard ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 ml-1 mr-1" />
+                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
                     ) : (
                       <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
                     )}
