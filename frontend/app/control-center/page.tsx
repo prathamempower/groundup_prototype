@@ -447,15 +447,19 @@ export default function ControlCenterPage() {
                   CSI Category allocations, verified spend, and variances
                 </p>
               </div>
-              <Link href={currentProjectId ? `/projects/${currentProjectId}/budget` : "/projects"}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 gap-1 h-8 px-2.5"
-                >
-                  Budget Details <ArrowRight className="h-3 w-3" />
-                </Button>
-              </Link>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                className="text-xs font-semibold text-blue-600 hover:text-blue-600 hover:bg-transparent gap-1 h-8 px-2.5 cursor-default select-none"
+                title="Budget Details is currently frozen"
+              >
+                Budget Details <ArrowRight className="h-3 w-3" />
+              </Button>
             </div>
 
             <div className="overflow-x-auto">

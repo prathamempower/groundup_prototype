@@ -571,13 +571,7 @@ export default function ReconciliationPage() {
             </div>
           </div>
 
-          <Button
-            variant="primary"
-            onClick={() => setIsImportOpen(true)}
-            className="text-xs font-semibold shadow-xs bg-slate-900 text-white hover:bg-slate-800 self-start"
-          >
-            + Import data
-          </Button>
+
         </div>
 
         {/* 4 KPI Metric Cards Strip */}
