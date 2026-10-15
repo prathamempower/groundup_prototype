@@ -7,7 +7,7 @@ test.describe("Visual Regression & Responsive Inspection", () => {
     await page.goto("/auth/login");
     await page.getByLabel("Work email").fill("m.vance@vancedev.com");
     await page.getByLabel("Password", { exact: true }).fill("Password123!");
-    await page.getByRole("button", { name: "Sign in" }).click();
+    await page.getByRole("button", { name: /Log in|Sign in/i }).click();
     await page.waitForURL(/\/projects/);
     await page.waitForTimeout(1000);
     await page.screenshot({ path: "screenshots/portfolio-1440.png" });
@@ -39,7 +39,7 @@ test.describe("Visual Regression & Responsive Inspection", () => {
     await page.goto("/auth/login");
     await page.getByLabel("Work email").fill("d.ross@vancedev.com");
     await page.getByLabel("Password", { exact: true }).fill("Password123!");
-    await page.getByRole("button", { name: "Sign in" }).click();
+    await page.getByRole("button", { name: /Log in|Sign in/i }).click();
     await page.waitForURL(/\/projects/);
     await page.getByRole("heading", { name: "73 Broadway" }).first().click();
     await page.waitForURL(/\/projects\/[^\/]+\/timeline/);
@@ -56,7 +56,7 @@ test.describe("Visual Regression & Responsive Inspection", () => {
     await page.goto("/auth/login");
     await page.getByLabel("Work email").fill("frank@apexconstruction.com");
     await page.getByLabel("Password", { exact: true }).fill("Password123!");
-    await page.getByRole("button", { name: "Sign in" }).click();
+    await page.getByRole("button", { name: /Log in|Sign in/i }).click();
     await page.waitForURL(/\/projects/);
     await page.getByRole("heading", { name: "73 Broadway" }).first().click();
     await page.waitForURL(/\/projects\/[^\/]+\/inbox/);

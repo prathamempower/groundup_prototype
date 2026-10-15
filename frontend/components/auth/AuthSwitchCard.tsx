@@ -14,7 +14,8 @@ import {
   Sparkles,
   Calendar,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  X
 } from 'lucide-react';
 import { authAdapter } from '@/lib/api/adapters/auth-adapter';
 import { getDefaultRouteForRole } from '@/lib/navigation';
@@ -276,20 +277,32 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             id="auth-login-panel"
             role="tabpanel"
             aria-labelledby="auth-login-tab"
-            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-overlay [backface-visibility:hidden] flex flex-col justify-start space-y-3.5 ${
+            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-overlay [backface-visibility:hidden] flex flex-col justify-start space-y-3.5 relative ${
               isSignUp ? 'absolute inset-0 pointer-events-none' : 'relative pointer-events-auto'
             }`}
           >
+            {/* Exit to Home Close Button */}
+            <Link
+              href="/"
+              className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-20 cursor-pointer"
+              aria-label="Exit to landing page"
+              title="Exit to home"
+            >
+              <X className="size-4" />
+            </Link>
+
             {/* Brand Header */}
             <div className="text-center space-y-1 mb-1.5">
               <div className="flex justify-center mb-1">
-                <BrandLogo size="lg" />
+                <Link href="/" className="inline-block hover:opacity-90 transition-opacity" aria-label="Return to GroundUp home">
+                  <BrandLogo size="lg" />
+                </Link>
               </div>
               <h1 className="text-xl font-bold tracking-tight text-slate-900">
                 Welcome back
               </h1>
               <p className="text-xs text-slate-500">
-                Sign in to your account
+                Log in to your account
               </p>
             </div>
 
@@ -371,7 +384,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 disabled={signInMutation.isPending}
                 className="mt-1 h-10 w-full rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-900/20 disabled:opacity-60 flex items-center justify-center cursor-pointer"
               >
-                {signInMutation.isPending ? 'Signing in…' : 'Sign in'}
+                {signInMutation.isPending ? 'Logging in…' : 'Log In'}
               </button>
 
               {/* Terms of Service & Privacy Policy Notice */}
@@ -403,14 +416,26 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             id="auth-signup-panel"
             role="tabpanel"
             aria-labelledby="auth-signup-tab"
-            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-overlay [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-start ${
+            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-overlay [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-start relative ${
               !isSignUp ? 'absolute inset-0 pointer-events-none' : 'relative pointer-events-auto'
             }`}
           >
+            {/* Exit to Home Close Button */}
+            <Link
+              href="/"
+              className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-20 cursor-pointer"
+              aria-label="Exit to landing page"
+              title="Exit to home"
+            >
+              <X className="size-4" />
+            </Link>
+
             {/* Brand Header */}
             <div className="text-center space-y-0.5 mb-2.5">
               <div className="flex justify-center mb-1">
-                <BrandLogo size="lg" />
+                <Link href="/" className="inline-block hover:opacity-90 transition-opacity" aria-label="Return to GroundUp home">
+                  <BrandLogo size="lg" />
+                </Link>
               </div>
               <h2 className="text-xl font-bold tracking-tight text-slate-900">
                 Create your account
@@ -775,6 +800,18 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
           </div>
 
         </div>
+      </div>
+
+      {/* Exit to Landing Page */}
+      <div className="mt-4 text-center">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-800 transition-colors cursor-pointer group"
+          aria-label="Exit to landing page"
+        >
+          <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5" />
+          <span>Exit to GroundUp home</span>
+        </Link>
       </div>
 
       <LegalModal

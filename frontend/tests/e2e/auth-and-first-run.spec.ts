@@ -61,7 +61,7 @@ test("owner creates an account and launches a first project", async ({ page }) =
   await expect(page).toHaveURL(/\/auth\/login/);
   await page.getByLabel("Work email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.getByRole("button", { name: /Log in|Sign in/i }).click();
   await expect(page).toHaveURL(/\/(control-center|projects)/);
 });
 

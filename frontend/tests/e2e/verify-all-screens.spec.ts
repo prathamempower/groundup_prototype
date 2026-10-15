@@ -22,7 +22,7 @@ test.describe("Full Visual Screen Capture & Verification", () => {
     // Login as Marcus Vance (Owner)
     await page.getByLabel("Work email", { exact: true }).fill("m.vance@vancedev.com");
     await page.getByLabel("Password", { exact: true }).fill("Password123!");
-    await page.getByRole("button", { name: "Sign in" }).click();
+    await page.getByRole("button", { name: /Log in|Sign in/i }).click();
 
     // 2. Portfolio View
     await expect(page).toHaveURL(/\/(projects|control-center)/, { timeout: 15000 });

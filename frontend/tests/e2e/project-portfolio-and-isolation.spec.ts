@@ -9,7 +9,7 @@ test.describe("Multi-Project Portfolio & Strict Isolation", () => {
     await page.goto("/auth/login");
     await page.getByLabel("Work email").fill("kunal@builderscapital.com");
     await page.getByLabel("Password", { exact: true }).fill("Password123!");
-    await page.getByRole("button", { name: "Sign in" }).click();
+    await page.getByRole("button", { name: /Log in|Sign in/i }).click();
 
     // 2. Confirms arrival on /projects portfolio
     await expect(page).toHaveURL(/\/projects/, { timeout: 15000 });

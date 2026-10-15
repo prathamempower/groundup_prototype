@@ -4,7 +4,7 @@ export async function loginAsOwner(page: Page) {
   await page.goto("/auth/login");
   await page.getByLabel("Work email").fill("m.vance@vancedev.com");
   await page.getByLabel("Password", { exact: true }).fill("Password123!");
-  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.getByRole("button", { name: /Log in|Sign in/i }).click();
   await expect(page).toHaveURL(/\/(projects|control-center)/, { timeout: 15000 });
 
   if (page.url().includes("/projects") && !page.url().includes("/control-center")) {
@@ -23,5 +23,5 @@ export async function loginAsUser(page: Page, email: string, password = "Passwor
   await page.goto("/auth/login");
   await page.getByLabel("Work email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.getByRole("button", { name: /Log in|Sign in/i }).click();
 }
