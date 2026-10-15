@@ -144,12 +144,12 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100/80 p-0.5 text-xs font-medium">
+        <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto scrollbar-none">
+          <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100/80 p-0.5 text-xs font-medium whitespace-nowrap shrink-0">
             <button
               type="button"
               onClick={() => setActiveTab("COST_VS_FUNDING")}
-              className={`rounded-md px-3 py-1.5 transition-all ${
+              className={`rounded-md px-3 py-1.5 transition-all shrink-0 ${
                 activeTab === "COST_VS_FUNDING"
                   ? "bg-white text-blue-700 shadow-xs font-semibold"
                   : "text-slate-600 hover:text-slate-900"
@@ -160,7 +160,7 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab("CASH_POSITION")}
-              className={`rounded-md px-3 py-1.5 transition-all ${
+              className={`rounded-md px-3 py-1.5 transition-all shrink-0 ${
                 activeTab === "CASH_POSITION"
                   ? "bg-white text-blue-700 shadow-xs font-semibold"
                   : "text-slate-600 hover:text-slate-900"
@@ -171,7 +171,7 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab("PROJECTED_PROFIT")}
-              className={`rounded-md px-3 py-1.5 transition-all ${
+              className={`rounded-md px-3 py-1.5 transition-all shrink-0 ${
                 activeTab === "PROJECTED_PROFIT"
                   ? "bg-white text-blue-700 shadow-xs font-semibold"
                   : "text-slate-600 hover:text-slate-900"

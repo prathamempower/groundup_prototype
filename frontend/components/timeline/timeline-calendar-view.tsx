@@ -417,8 +417,10 @@ export function TimelineCalendarView({
 
       {/* Main Calendar Grid Area */}
       <div className="flex-1 w-full min-w-0 flex flex-col rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden">
-        {/* Calendar Day Header */}
-        <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/70 text-center py-2.5 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+        <div className="overflow-x-auto w-full">
+          <div className="min-w-[680px] md:min-w-0 flex flex-col">
+            {/* Calendar Day Header */}
+            <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/70 text-center py-2.5 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
           <span>SUN</span>
           <span>MON</span>
           <span>TUE</span>
@@ -464,7 +466,7 @@ export function TimelineCalendarView({
                   {/* Red dot badge if date contains delayed tasks */}
                   {hasDelayedTask && (
                     <span
-                      className="h-2 w-2 rounded-full bg-red-600 animate-pulse ring-2 ring-red-200"
+                      className="h-2 w-2 rounded-full bg-red-600 ring-2 ring-red-200"
                       title="Delayed work on this date"
                     />
                   )}
@@ -534,6 +536,8 @@ export function TimelineCalendarView({
               </div>
             );
           })}
+        </div>
+          </div>
         </div>
       </div>
     </div>

@@ -108,7 +108,7 @@ export const INITIAL_CONSTRUCTION_TASKS: ConstructionTask[] = [
   {
     id: "task-oct-09-2",
     project_id: "default",
-    title: "! Empower Inspection",
+    title: "! Municipal Footing Inspection",
     date: "2026-10-09",
     time: "10:30 AM",
     phase_id: "foundation",
@@ -185,7 +185,7 @@ export const INITIAL_CONSTRUCTION_TASKS: ConstructionTask[] = [
   {
     id: "task-oct-13-1",
     project_id: "default",
-    title: "Empower Meeting",
+    title: "Lender Draw Inspection Meeting",
     date: "2026-10-13",
     time: "10:30 AM",
     phase_id: "foundation",

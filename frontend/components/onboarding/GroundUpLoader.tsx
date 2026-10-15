@@ -42,7 +42,7 @@ export function GroundUpTransitionLoader({
         
         {/* Architectural Brand Emblem with Precision Pulse */}
         <div className="relative w-14 h-14 flex items-center justify-center">
-          <div className="absolute inset-0 rounded-2xl bg-blue-50 border border-blue-100 animate-pulse" />
+          <div className="absolute inset-0 rounded-2xl bg-blue-50 border border-blue-100" />
           <div className="relative z-10">
             <GroundUpMark size={28} />
           </div>
@@ -87,7 +87,7 @@ export function CircularWorkspaceGauge({ percentage, stageTitle, currentStage }:
         {/* Telemetry Header */}
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 rounded-full bg-[#0066ee] animate-pulse" />
+            <span className="flex h-2 w-2 rounded-full bg-[#0066ee]" />
             <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500">
               Calibration Feed
             </span>

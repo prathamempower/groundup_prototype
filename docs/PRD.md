@@ -39,7 +39,7 @@ Permission is organization- and project-scoped. Every write records actor, time,
 
 The owner creates the organization and project, sets approval boundaries, and invites participants. The platform then runs a versioned, role-specific question graph rather than one fixed form. Each answer can reveal the next relevant question, create a document/task requirement, configure a workflow, or require a designated approval. CFOs configure sources/account mappings; PMs configure milestones/inspections; GCs confirm contract and submission requirements; investors complete profile/notification setup only.
 
-Answers may be `UNKNOWN`, `NOT_YET_AVAILABLE`, or `NOT_APPLICABLE`; the system creates an accountable task rather than forcing a fabricated value. High-risk configuration changes—contract model, loan/account mapping, approved baseline, investor visibility, and approval policy—require owner approval and retain configuration history.
+Answers may be `UNKNOWN`, `NOT_YET_AVAILABLE`, or `NOT_APPLICABLE`; the system creates an accountable task rather than forcing a fabricated value. High-risk configuration changes (contract model, loan/account mapping, approved baseline, investor visibility, and approval policy) require owner approval and retain configuration history.
 
 ## 3. Functional requirements
 
@@ -49,7 +49,7 @@ The owner creates a project with identity/lifecycle data and chooses or defers k
 
 ### Document intake and evidence
 
-The system accepts PDF, image, XLSX, CSV, and email-exported files. Each file is immutable, hashed, classified, and connected to a project only after review. Extraction creates proposals—not records of truth. Users can correct fields, mark the file duplicate/misfiled/irrelevant, and see whether a figure is supported by an invoice, contract, bank/card transaction, or manual confirmation.
+The system accepts PDF, image, XLSX, CSV, and email-exported files. Each file is immutable, hashed, classified, and connected to a project only after review. Extraction creates proposals rather than direct records of truth. Users can correct fields, mark the file duplicate/misfiled/irrelevant, and see whether a figure is supported by an invoice, contract, bank/card transaction, or manual confirmation.
 
 For pilot workbooks, GroundUp imports raw source rows/cells and their workbook, sheet, and row lineage. It does not trust a summary-sheet total or a source category as an accounting fact until it independently recomputes and reviews the underlying rows. Workbook layouts are versioned import templates with a manual-mapping fallback.
 

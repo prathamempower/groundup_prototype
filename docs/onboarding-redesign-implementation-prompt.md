@@ -1,4 +1,4 @@
-# GroundUp AI — Owner and Role Onboarding Redesign Prompt
+# GroundUp AI: Owner and Role Onboarding Redesign Prompt
 
 You are redesigning and implementing the onboarding experience for **GroundUp AI**, a Next.js/TypeScript and FastAPI/Python construction-development control platform. This is not a cosmetic form refresh. Build a guided, adaptive, evidence-aware system that gets each person to a useful, correctly permissioned workspace without forcing them to invent missing information.
 
@@ -6,7 +6,7 @@ You are redesigning and implementing the onboarding experience for **GroundUp AI
 
 GroundUp AI manages project identity, budgets, loans, draws, construction progress, source documents, reconciled spend, forecasts, and investor reporting. Its roles are `OWNER`, `CFO`, `PM`, `GC`, and `INVESTOR`.
 
-- Cleared cash—not loan approval—is the funding truth.
+- Cleared cash, not loan approval, is the funding truth.
 - Original baselines and historical answers are never overwritten. Material changes are versioned and auditable.
 - An answer may be `UNKNOWN`, `NOT_YET_AVAILABLE`, or `NOT_APPLICABLE`, but each non-answer needs a reason and creates a visible accountable follow-up. Do not make users invent values just to finish setup.
 - Questions, required evidence, approvals, and gate logic must be enforced server-side. The UI renders the permitted next steps; it must not be able to skip rules.
@@ -22,7 +22,7 @@ GroundUp AI manages project identity, budgets, loans, draws, construction progre
 
 ## Design direction
 
-Design one cohesive, professional B2B product experience—calm, precise, evidence-forward, and task-oriented. It must feel like a capable project-control system rather than a survey.
+Design one cohesive, professional B2B product experience: calm, precise, evidence-forward, and task-oriented. It must feel like a capable project-control system rather than a survey.
 
 - Use a focused two-column desktop layout: a persistent left step/outcome rail and a large main work area. Collapse elegantly on mobile into a compact progress/disclosure control.
 - Show meaningful context at all times: project name or invite scope, role, “what this unlocks,” optionality, source/evidence status, and gate impact.
@@ -34,9 +34,9 @@ Design one cohesive, professional B2B product experience—calm, precise, eviden
 
 ## A. Owner first-run: organization and project bootstrap
 
-After account creation, route a new Owner into a proper project bootstrap—not directly into a minimal project-create form. A returning Owner can start this from Portfolio/Projects.
+After account creation, route a new Owner into a proper project bootstrap instead of directly into a minimal project-create form. A returning Owner can start this from Portfolio/Projects.
 
-### Stage 0 — Welcome and setup framing
+### Stage 0: Welcome and setup framing
 
 Show the organization, the Owner’s profile, a concise explanation of what setup will create, and two choices:
 
@@ -45,7 +45,7 @@ Show the organization, the Owner’s profile, a concise explanation of what setu
 
 Explain that only core identity is required to create a draft and the rest can be delegated. Start as `DRAFT` / `SETUP_INCOMPLETE`, never fully active simply because basic fields were entered.
 
-### Stage 1 — Project identity and structure
+### Stage 1: Project identity and structure
 
 Collect and validate:
 
@@ -58,7 +58,7 @@ Collect and validate:
 
 Before project creation, perform a server-side duplicate candidate check using entity/address/name. Show likely matches without merging automatically. Allow `Create anyway`, `Open existing`, or `Save draft for review` with an audit reason.
 
-### Stage 2 — Acquisition, capital, and loan path
+### Stage 2: Acquisition, capital, and loan path
 
 Branch based on lifecycle and whether property is acquired. Collect only applicable information:
 
@@ -68,20 +68,20 @@ Branch based on lifecycle and whether property is acquired. Collect only applica
 - For investor equity: whether contributions, ownership/allocation, distribution/waterfall policy, and reporting permissions are already known; create delegated finance/owner follow-ups where needed.
 - Capture source status for every material item: not received, uploaded/unreviewed, reviewed, contradicted, not applicable, or waived with reason/expiry.
 
-### Stage 3 — Construction and governance model
+### Stage 3: Construction and governance model
 
 Collect and branch on:
 
 - Contract model: open-book, cost-plus, GMP, fixed price, milestone-based, profit share, or hybrid. For hybrid, identify each scope and its model.
 - GC identity/contact and whether a signed contract exists.
-- Contract value, fee/markup, retainage, payment application cadence, change-order rules, schedule-of-values availability, lien-waiver and evidence requirements—only if the chosen model requires them.
+- Contract value, fee/markup, retainage, payment application cadence, change-order rules, schedule-of-values availability, lien-waiver and evidence requirements, only if the chosen model requires them.
 - Financial operating model: dedicated project operating account, shared account with allocation policy/inter-project transfer controls, card/cash/personal-payment paths, reconciliation cadence, and finance review policy.
 - Budget/SOV availability, source/format, baseline owner, and whether it must be imported, mapped, or reconstructed.
 - Schedule availability, source, milestone ownership, permit/inspection process, and current known blockers.
 
 High-risk financial, contractual, access, or reporting settings should create a pending configuration version for Owner approval; no irreversible setting is silently applied.
 
-### Stage 4 — Team, parties, access, and delegation
+### Stage 4: Team, parties, access, and delegation
 
 Present a role-specific invite builder for CFO, PM, GC, and Investor. Owner may add email, name, company/party, project scope, effective dates, role, optional task due date, and a short contextual invitation message.
 
@@ -91,13 +91,13 @@ Present a role-specific invite builder for CFO, PM, GC, and Investor. Owner may 
 - Generate focused setup tasks automatically from project configuration: e.g., CFO account mapping/budget baseline; PM milestone schedule; GC contract and payment-evidence requirements; Investor visibility and delivery preference.
 - Include a party checklist for lender, GC/vendors, investors, and other relevant contacts even when no invite is sent.
 
-### Stage 5 — Source-document checklist
+### Stage 5: Source-document checklist
 
 Generate a living checklist from the selected paths. At minimum, assess acquisition documents, loan documents, GC contract/SOV, budget baseline, schedule, bank/card statements, permits/inspections, and disposition information where applicable.
 
 Each row needs status, responsible person, due date, gate impact, request/upload action, source link, and explanation of what remains blocked. Permit document upload/request actions from the wizard, but do not pretend an upload is reviewed or verified.
 
-### Stage 6 — Review, launch, and readiness
+### Stage 6: Review, launch, and readiness
 
 Show a plain-English summary of selected models, unresolved facts, generated delegated tasks, outstanding evidence, approval-required settings, and exactly what workflows are now available/blocked.
 
@@ -107,7 +107,7 @@ Actions:
 - `Create project and send invitations`
 - `Create project without invitations`
 
-After creation, route to a redesigned project setup/readiness hub—not a generic dashboard. The hub should show project state (`DRAFT`, `SETUP_INCOMPLETE`, `READY_FOR_APPROVAL`, `ACTIVE`, `BLOCKED`), outcome gates, task ownership, approval queue, evidence checklist, and clear next actions. A project becomes active only once its relevant minimum configuration has passed its gate rules.
+After creation, route to a redesigned project setup/readiness hub instead of a generic dashboard. The hub should show project state (`DRAFT`, `SETUP_INCOMPLETE`, `READY_FOR_APPROVAL`, `ACTIVE`, `BLOCKED`), outcome gates, task ownership, approval queue, evidence checklist, and clear next actions. A project becomes active only once its relevant minimum configuration has passed its gate rules.
 
 ## B. Invite acceptance and self-onboarding
 
@@ -145,7 +145,7 @@ Goal: establish the evidence-backed milestone and field-progress workflow.
 
 ### GC flow
 
-Goal: configure compliant, limited submission and evidence capture—not gain financial-control access.
+Goal: configure compliant, limited submission and evidence capture, not gain financial-control access.
 
 - Confirm legal company, primary contact, project and assigned scopes/trades.
 - Confirm contract model and signed-contract/SOV status; discrepancies create a task rather than modify Owner configuration.
@@ -175,14 +175,14 @@ Implement or extend models/endpoints as needed for:
 - Source checklist items, task assignment/due date/status, and document request links.
 - Versioned high-risk configuration proposal / Owner approval-rejection flow with evidence and rationale.
 - Multi-project role setup and project-scoped invite state.
-- Readiness responses that expose outcome/gate status and blockers—not only an arbitrary aggregate percentage.
+- Readiness responses that expose outcome/gate status and blockers instead of an arbitrary aggregate percentage.
 
 Maintain backward compatibility where feasible, migrate current data safely, write Alembic migrations, and add backend tests for every major branch and permission boundary.
 
 ## D. Acceptance criteria
 
 - A new Owner can create a saved project draft with only the required identity fields, then resume it.
-- An Owner can complete the detailed configuration above, delegate role setup, upload/request evidence, and launch a project with transparent readiness—not false “active” status.
+- An Owner can complete the detailed configuration above, delegate role setup, upload/request evidence, and launch a project with transparent readiness rather than a false "active" status.
 - Each role sees a purpose-built flow and only information/actions allowed by its scope.
 - The graph branches by lifecycle, financing path, account model, contract model, schedule/source availability, and investor/disposition relevance.
 - Unknown/not-yet-available/not-applicable answers produce reasoned follow-up work and only block dependent gates.

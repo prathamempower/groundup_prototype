@@ -143,7 +143,7 @@ The product uses a portfolio-first desktop layout for Owner/CFO work and respons
 - Header: project identity, stage, contract model, as-of, data quality, and quick actions.
 - KPI band: original/current forecast profit, ROI, total forecast cost, cleared lender/equity funding, funding gap, forecast completion, delay days, contingency remaining.
 - Decision panels: top variance drivers, open draw conditions, milestone risks, evidence gaps, outstanding transfers, and near-term approvals.
-- Every number opens a scoped drill-down showing contributing actual/committed/estimated values and sources. Incomplete inputs display warning and methodology—not precision theater.
+- Every number opens a scoped drill-down showing contributing actual/committed/estimated values and sources. Incomplete inputs display warning and methodology rather than false precision.
 
 ### S-13 Budget/SOV workspace
 
@@ -309,7 +309,7 @@ The product uses a portfolio-first desktop layout for Owner/CFO work and respons
 ## Cross-screen UX rules
 
 - Money always has currency, data basis, source/review state, and as-of date.
-- Status badges expose meaningful differences: draft, submitted, approved, cleared-funded, verified, provisional, conflicted, and missing—not generic “complete.”
+- Status badges expose meaningful differences (draft, submitted, approved, cleared-funded, verified, provisional, conflicted, and missing) instead of generic "complete."
 - All destructive-looking actions use reversible status/adjustment flows for financial records and clear confirmation for drafts.
 - Tables support filters, saved views, column controls, export, accessible keyboard operation, and no data loss during navigation.
 - Mobile is required for capture/review tasks; complex reconciliation, budgeting, and forecasting are desktop-first.

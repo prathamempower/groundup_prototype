@@ -176,25 +176,26 @@ export default function DocumentReviewPage() {
   return (
     <div className="flex flex-col h-screen w-full bg-slate-50 overflow-hidden">
       {/* Top Navbar */}
-      <header className="h-14 border-b border-slate-200/80 bg-white px-5 flex items-center justify-between shrink-0 shadow-2xs z-10">
-        <div className="flex items-center gap-3 min-w-0">
+      <header className="min-h-14 h-auto py-2 sm:py-2.5 px-3 sm:px-5 border-b border-slate-200/80 bg-white flex flex-wrap items-center justify-between gap-2.5 shrink-0 shadow-2xs z-10">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleBack}
-            className="h-8 px-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 gap-1.5 rounded-lg"
+            className="h-8 px-2 sm:px-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 gap-1.5 rounded-lg shrink-0"
+            title="Back to Documents"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span>Documents</span>
+            <span className="hidden sm:inline">Documents</span>
           </Button>
 
-          <div className="h-4 w-px bg-slate-200" />
+          <div className="h-4 w-px bg-slate-200 shrink-0" />
 
-          <div className="flex items-center gap-2.5 truncate">
-            <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-700 border border-blue-200/70">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="hidden md:inline-block rounded bg-blue-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-700 border border-blue-200/70 shrink-0">
               OCR REVIEW WORKBENCH
             </span>
-            <span className="text-sm font-semibold text-slate-900 truncate">
+            <span className="text-xs sm:text-sm font-semibold text-slate-900 truncate max-w-[130px] sm:max-w-[200px] md:max-w-[300px]">
               {document.original_filename}
             </span>
             <StatusBadge
@@ -210,22 +211,20 @@ export default function DocumentReviewPage() {
         </div>
 
         {/* Stats & Actions */}
-        <div className="flex items-center gap-3">
-
-
+        <div className="flex items-center gap-2 shrink-0">
           {extractions.length > 0 && (
             <Button
               variant="secondary"
               size="sm"
               onClick={() => setShowSideReview((prev) => !prev)}
               className={cn(
-                "h-8 px-3 text-xs font-semibold rounded-lg shadow-2xs gap-1.5",
+                "h-8 px-2 sm:px-3 text-xs font-semibold rounded-lg shadow-2xs gap-1.5",
                 showSideReview ? "bg-slate-900 text-white hover:bg-slate-800 border-transparent" : "bg-white text-slate-700 border-slate-200"
               )}
               title={showSideReview ? "Hide review panel" : "Open review panel"}
             >
               <PanelRight className="h-3.5 w-3.5" />
-              <span>{showSideReview ? "Hide Review" : `Review Extractions (${extractions.length})`}</span>
+              <span>{showSideReview ? "Hide" : `Review (${extractions.length})`}</span>
             </Button>
           )}
 
@@ -235,10 +234,10 @@ export default function DocumentReviewPage() {
               size="sm"
               onClick={() => acceptAllMutation.mutate()}
               isLoading={acceptAllMutation.isPending}
-              className="h-8 px-3 text-xs font-semibold rounded-lg shadow-2xs"
+              className="h-8 px-2 sm:px-3 text-xs font-semibold rounded-lg shadow-2xs"
             >
-              <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
-              Accept All ({proposedCount})
+              <CheckCheck className="h-3.5 w-3.5 sm:mr-1.5" />
+              <span className="hidden sm:inline">Accept All </span>({proposedCount})
             </Button>
           )}
 
@@ -247,10 +246,10 @@ export default function DocumentReviewPage() {
             size="sm"
             onClick={() => completeReviewMutation.mutate()}
             isLoading={completeReviewMutation.isPending}
-            className="h-8 px-3.5 text-xs font-semibold rounded-lg shadow-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="h-8 px-2.5 sm:px-3.5 text-xs font-semibold rounded-lg shadow-xs bg-emerald-600 hover:bg-emerald-700 text-white"
           >
-            <FileCheck className="h-3.5 w-3.5 mr-1.5" />
-            Complete & Done
+            <FileCheck className="h-3.5 w-3.5 sm:mr-1.5" />
+            <span className="hidden sm:inline">Complete & </span>Done
           </Button>
         </div>
       </header>

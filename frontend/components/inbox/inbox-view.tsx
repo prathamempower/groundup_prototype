@@ -772,9 +772,9 @@ export function InboxView({
           {/* Typing Indicator */}
           {isTyping && (
             <div className="flex items-center gap-2 text-xs text-slate-400 pl-10">
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse" />
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse delay-100" />
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse delay-200" />
+              <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+              <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+              <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
               <span>{activeContact.name} is typing...</span>
             </div>
           )}

@@ -130,7 +130,7 @@ export function InviteMemberModal({
                 onChange={(e) => setRole(e.target.value as UserRole)}
                 className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body font-medium text-text-primary focus:border-primary focus:outline-hidden"
               >
-                <option value="OWNER">OWNER — Full Portfolio & Budget Authority</option>
+                <option value="OWNER">OWNER: Full Portfolio & Budget Authority</option>
               </select>
             </div>
 

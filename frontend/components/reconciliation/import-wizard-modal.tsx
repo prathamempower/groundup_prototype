@@ -159,7 +159,7 @@ export function ImportWizardModal({
               <option value="">Leave unlinked for review</option>
               {(accounts.data?.data ?? []).filter((account) => account.status === "ACTIVE").map((account) => (
                 <option key={account.id} value={account.id}>
-                  {account.institution} {account.masked_identifier} — {account.account_purpose}
+                  {account.institution} {account.masked_identifier}: {account.account_purpose}
                 </option>
               ))}
             </select>

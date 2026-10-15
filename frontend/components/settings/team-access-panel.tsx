@@ -171,7 +171,7 @@ export function TeamAccessPanel({ projectId }: TeamAccessPanelProps) {
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-medium bg-emerald-50/80 px-2 py-0.5 rounded-md border border-emerald-200/50">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                             Active
                           </span>
                         )}

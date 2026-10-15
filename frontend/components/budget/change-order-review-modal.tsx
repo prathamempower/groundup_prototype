@@ -330,7 +330,7 @@ export function ChangeOrderReviewModal({
                     >
                       {LOAN_FACILITIES.map((ln) => (
                         <option key={ln.id} value={ln.id}>
-                          {ln.name} &mdash; {ln.available}
+                          {ln.name}: {ln.available}
                         </option>
                       ))}
                     </select>

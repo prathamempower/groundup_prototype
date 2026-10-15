@@ -228,7 +228,7 @@ export default function TimelinePage() {
               type="button"
               className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200/80 bg-emerald-50/70 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 transition-colors"
             >
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
               <span>Client Live View</span>
             </button>
 
@@ -293,8 +293,8 @@ export default function TimelinePage() {
           </div>
 
           {/* Right: Search Input & View Dropdown */}
-          <div className="flex items-center gap-2">
-            <div className="relative w-56 sm:w-64">
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <div className="relative flex-1 md:w-56 lg:w-64">
               <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
               <input
                 type="text"
@@ -307,7 +307,7 @@ export default function TimelinePage() {
 
             <select
               defaultValue="Month"
-              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:outline-none cursor-pointer shadow-2xs"
+              className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:outline-none cursor-pointer shadow-2xs"
             >
               <option value="Month">Month View</option>
               <option value="Week">Week View</option>

@@ -153,7 +153,7 @@ export function Sidebar({
 
       {/* Sidebar container */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-slate-50/60 border-r border-slate-200/80 transition-all duration-200 ease-in-out md:static ${
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-slate-50/60 border-r border-slate-200/80 transition-all duration-200 ease-in-out md:static max-w-[85vw] ${
           collapsed ? "w-[72px]" : "w-[260px]"
         } ${mobileOpen ? "translate-x-0 shadow-overlay" : "-translate-x-full md:translate-x-0"}`}
       >

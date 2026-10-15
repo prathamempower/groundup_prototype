@@ -155,7 +155,7 @@ export function StickyReveal() {
         {/* Top Floating Stepper Navigator & Telemetry Bar */}
         <header className="relative z-20 max-w-5xl w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-4 sm:px-5 py-2.5 rounded-2xl shadow-xs shrink-0">
           <div className="flex items-center gap-2.5">
-            <span className="size-2 rounded-full bg-primary animate-pulse" />
+            <span className="size-2 rounded-full bg-primary" />
             <h3 className="text-xs font-mono font-bold tracking-widest text-slate-800 dark:text-slate-200 uppercase">
               The Four Synchronized Truths
             </h3>

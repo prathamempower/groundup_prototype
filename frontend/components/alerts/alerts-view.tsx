@@ -253,7 +253,7 @@ export function AlertsView({
         </div>
       </div>
 
-      <div className="px-6 max-w-7xl mx-auto space-y-5">
+      <div className="px-4 sm:px-6 max-w-7xl mx-auto space-y-5">
         {/* 2. Top 5 Filter KPI Cards Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
           {/* Card 1: Total Alerts */}
@@ -347,7 +347,7 @@ export function AlertsView({
               )
             }
             className={cn(
-              "rounded-lg border bg-white p-4 text-left transition-all cursor-pointer",
+              "col-span-2 sm:col-span-1 rounded-lg border bg-white p-4 text-left transition-all cursor-pointer",
               selectedFilter === "documents"
                 ? "border-primary ring-1 ring-primary/20 bg-primary/5"
                 : "border-border hover:bg-subtle/50"
@@ -557,14 +557,14 @@ export function AlertsView({
               </div>
 
               {/* Modal Footer */}
-              <div className="border-t border-border bg-subtle/40 px-6 py-4 flex items-center justify-between gap-3">
+              <div className="border-t border-border bg-subtle/40 px-4 sm:px-6 py-3 sm:py-4 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3">
                 {selectedAlert.actionHref === "/timeline" ? (
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     disabled
-                    className="text-xs h-8 text-muted-foreground border-border gap-1.5 opacity-60 cursor-not-allowed font-medium select-none"
+                    className="text-xs h-8 text-muted-foreground border-border gap-1.5 opacity-60 cursor-not-allowed font-medium select-none w-full sm:w-auto"
                     title="Milestone schedule is currently frozen"
                   >
                     <span>Schedule Frozen</span>
@@ -579,14 +579,14 @@ export function AlertsView({
                       const targetUrl = projectId ? `/projects/${projectId}${href}` : href;
                       router.push(targetUrl);
                     }}
-                    className="text-xs h-8 text-primary border-border gap-1.5 cursor-pointer font-medium"
+                    className="text-xs h-8 text-primary border-border gap-1.5 cursor-pointer font-medium w-full sm:w-auto"
                   >
                     <span>Go to {selectedAlert.actionLabel}</span>
                     <ExternalLink className="h-3 w-3" />
                   </Button>
                 )}
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                   {selectedAlert.status === "Open" ? (
                     <Button
                       type="button"

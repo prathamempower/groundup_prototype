@@ -210,7 +210,7 @@ function TimelineDatePageContent() {
 
             {draft?.is_delayed && (
               <span className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700 border border-red-200/80 shadow-2xs">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-600 animate-pulse" />
+                <span className="h-2.5 w-2.5 rounded-full bg-red-600" />
                 DELAYED ({draft.delay_days} DAYS ACTIVE DELAY)
               </span>
             )}
@@ -299,7 +299,7 @@ function TimelineDatePageContent() {
         {draft?.is_delayed && (
           <div className="rounded-2xl border border-red-200 bg-red-50/70 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-150">
             <div className="flex items-center gap-3">
-              <span className="h-3 w-3 rounded-full bg-red-600 animate-pulse shrink-0" />
+              <span className="h-3 w-3 rounded-full bg-red-600 shrink-0" />
               <div>
                 <span className="text-xs font-bold text-red-900 block">
                   Active Schedule Delay ({draft.delay_days} Days) • Red dot active on calendar

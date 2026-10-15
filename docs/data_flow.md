@@ -2,7 +2,7 @@
 
 ## 1. Data-flow principles
 
-GroundUp AI operates on four separate truths—Budget, Spend, Funding, and Progress—and connects them through reviewed links. Original source files are immutable. Imported and AI-extracted values are proposals until a permitted person reviews them. Reports calculate from canonical reviewed records and always show an as-of time and data-quality state.
+GroundUp AI operates on four separate truths (Budget, Spend, Funding, and Progress) and connects them through reviewed links. Original source files are immutable. Imported and AI-extracted values are proposals until a permitted person reviews them. Reports calculate from canonical reviewed records and always show an as-of time and data-quality state.
 
 ```text
 Source evidence
@@ -61,7 +61,7 @@ Examples: a `COST_PLUS` answer enables granular spend/invoice requirements; a `F
 
 1. A Python Celery worker identifies format and likely document type.
 2. OCR/table parsing runs where needed; source page/row/cell citations are retained.
-3. Structured extractors produce proposed entities/fields—never direct financial writes—with raw value, normalized value, confidence, extraction version, and citation.
+3. Structured extractors produce proposed entities/fields, never direct financial writes, with raw value, normalized value, confidence, extraction version, and citation.
 4. Rules identify possible project, lender, account, vendor, draw number, invoice number, or budget mapping.
 5. Low-confidence, conflicting, or unmatched fields go to review. A failed extraction stays recoverable through manual entry linked to the file.
 
@@ -134,7 +134,7 @@ PM/GC update, photo, inspection, permit, appraiser report
   → delay attribution and carry-cost forecast
 ```
 
-Milestones represent material categories—permits, site work, foundation, framing, mechanical, interiors, completion—not every small transaction. A milestone can connect the project plan, budget roll-up, actual spend, draw evidence, and schedule; its evidence does not prove a payment unless payment evidence also exists.
+Milestones represent material categories (permits, site work, foundation, framing, mechanical, interiors, completion) rather than every small transaction. A milestone can connect the project plan, budget roll-up, actual spend, draw evidence, and schedule; its evidence does not prove a payment unless payment evidence also exists.
 
 **Produces:** `project_milestones`, `progress_records`, `progress_evidence`, `inspections`, `permits`.
 
@@ -209,7 +209,7 @@ Reports are read models. They never become the source of truth and cannot be dir
 2. Every API call verifies active account, organization, project membership, role, and record scope.
 3. The database applies row-level security as a second enforcement layer.
 4. Private documents use short-lived signed URLs validated for exact object/project scope.
-5. Sensitive actions—access changes, publication, verified-record correction, high-sensitivity export—require the correct role and, where configured, step-up authentication.
+5. Sensitive actions (access changes, publication, verified-record correction, high-sensitivity export) require the correct role and, where configured, step-up authentication.
 
 ## 9. End-to-end flow for a live project
 

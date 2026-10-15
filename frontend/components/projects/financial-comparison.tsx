@@ -736,7 +736,7 @@ export function ProjectFinancialComparison({
                       const roc = econ?.return_on_cost_pct;
                       return (
                         <td key={p.id} className="px-5 py-3.5 text-right font-bold text-blue-600 tabular-nums">
-                          {roc !== undefined ? `${roc.toFixed(1)}%` : "—"}
+                          {roc !== undefined ? `${roc.toFixed(1)}%` : "-"}
                         </td>
                       );
                     })}
@@ -759,7 +759,7 @@ export function ProjectFinancialComparison({
                       const commitment = toNum(p.loan_commitment);
                       return (
                         <td key={p.id} className="px-5 py-3.5 text-right font-medium text-slate-800 tabular-nums">
-                          {commitment > 0 ? formatMoney(commitment) : "—"}
+                          {commitment > 0 ? formatMoney(commitment) : "-"}
                         </td>
                       );
                     })}
@@ -788,7 +788,7 @@ export function ProjectFinancialComparison({
                     </td>
                   </tr>
 
-                  {/* LTC Leverage */}
+                  {/* Loan-to-Cost Ratio */}
                   <tr className="hover:bg-slate-50/60 transition-colors">
                     <td className="sticky left-0 z-10 bg-white px-5 py-3.5 font-semibold text-slate-900 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] border-r border-slate-100">
                       <div>Current Loan-to-Cost (LTC)</div>
@@ -868,7 +868,7 @@ export function ProjectFinancialComparison({
                         </td>
                       );
                     })}
-                    <td className="px-5 py-3.5 text-right text-slate-400 bg-slate-50/50">—</td>
+                    <td className="px-5 py-3.5 text-right text-slate-400 bg-slate-50/50">-</td>
                   </tr>
 
                   {/* Completion % */}
@@ -913,7 +913,7 @@ export function ProjectFinancialComparison({
                         </span>
                       </td>
                     ))}
-                    <td className="px-5 py-3.5 text-right text-slate-400 bg-slate-50/50">—</td>
+                    <td className="px-5 py-3.5 text-right text-slate-400 bg-slate-50/50">-</td>
                   </tr>
                 </>
               )}

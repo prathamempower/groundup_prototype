@@ -127,7 +127,7 @@ const SHOWCASE_ROWS = [
     actionLabel: "Build Packet",
     actionType: "PRIMARY",
     drawNumber: 4,
-    disbursed: "—",
+    disbursed: "-",
     reconciledPct: 0,
   },
   {
@@ -422,7 +422,7 @@ export default function DrawsPage() {
 
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5 sm:space-y-6 min-w-0">
         {/* 2. Compact 4 KPI Metric Row with Easy Plain English */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           <div className="rounded-xl border border-border bg-white p-4 shadow-2xs">
             <span className="text-[11px] font-semibold text-muted-foreground block">
               Total Loan Approved
@@ -608,7 +608,7 @@ export default function DrawsPage() {
                   }}
                 >
                   <div className="relative">
-                    <div className="h-12 w-12 rounded-full bg-teal-50 border-2 border-teal-300 ring-4 ring-teal-100 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform animate-pulse">
+                    <div className="h-12 w-12 rounded-full bg-teal-50 border-2 border-teal-300 ring-4 ring-teal-100 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
                       <div className="h-8.5 w-8.5 rounded-full bg-teal-400 text-white flex items-center justify-center shadow-xs">
                         <Zap className="h-4.5 w-4.5 fill-white stroke-[2]" />
                       </div>
@@ -727,12 +727,12 @@ export default function DrawsPage() {
         {/* 4. Controls: View Switcher (Register vs SOV Matrix) & Filter Tabs */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           {/* Segmented View Switcher */}
-          <div className="flex rounded-lg bg-slate-100 p-0.5 border border-slate-200 w-fit">
+          <div className="flex rounded-lg bg-slate-100 p-0.5 border border-slate-200 w-full sm:w-fit overflow-x-auto scrollbar-none">
             <button
               type="button"
               onClick={() => setMainView("REGISTER")}
               className={cn(
-                "px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1.5",
+                "px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shrink-0",
                 mainView === "REGISTER"
                   ? "bg-white text-slate-900 shadow-xs font-semibold"
                   : "text-slate-600 hover:text-slate-900"
@@ -745,7 +745,7 @@ export default function DrawsPage() {
               type="button"
               onClick={() => setMainView("EXCEL_MATRIX")}
               className={cn(
-                "px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1.5",
+                "px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shrink-0",
                 mainView === "EXCEL_MATRIX"
                   ? "bg-white text-slate-900 shadow-xs font-semibold"
                   : "text-slate-600 hover:text-slate-900"
@@ -758,7 +758,7 @@ export default function DrawsPage() {
 
           {/* Filter Pills (Shown only on Register view) */}
           {mainView === "REGISTER" && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-none">
               {(
                 [
                   { key: "ALL", label: "All Draws" },
@@ -772,7 +772,7 @@ export default function DrawsPage() {
                   type="button"
                   onClick={() => setFilterTab(key as FilterTab)}
                   className={cn(
-                    "px-2.5 py-1 text-xs rounded-md transition-colors font-medium cursor-pointer",
+                    "px-2.5 py-1 text-xs rounded-md transition-colors font-medium cursor-pointer shrink-0",
                     filterTab === key
                       ? "bg-slate-900 text-white font-semibold"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"

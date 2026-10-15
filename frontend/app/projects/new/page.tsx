@@ -128,13 +128,13 @@ export default function CreateProjectPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F2F4F7] flex flex-col justify-center items-center py-8 sm:py-12 px-4 sm:px-6 font-sans">
-      {/* Light Untitled-UI Style Elevated Modal Container */}
-      <div className="w-full max-w-5xl rounded-[32px] bg-white shadow-[0_20px_50px_rgba(15,23,42,0.08)] border border-slate-200/80 overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-[#F2F4F7] flex flex-col justify-center items-center py-4 sm:py-12 px-2 sm:px-6 font-sans">
+      {/* Light Untitled-UI Style Raised Modal Container */}
+      <div className="w-full max-w-5xl rounded-2xl sm:rounded-[32px] bg-white shadow-[0_20px_50px_rgba(15,23,42,0.08)] border border-slate-200/80 overflow-hidden flex flex-col">
         <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[620px]">
           
           {/* Left Sidebar / Rail */}
-          <aside className="lg:col-span-4 bg-[#F8FAFC] border-b lg:border-b-0 lg:border-r border-slate-200/80 p-8 flex flex-col justify-between">
+          <aside className="lg:col-span-4 bg-[#F8FAFC] border-b lg:border-b-0 lg:border-r border-slate-200/80 p-5 sm:p-8 flex flex-col justify-between">
             <div className="space-y-8">
               {/* Brand Header */}
               <div className="flex items-center gap-3">
@@ -201,7 +201,7 @@ export default function CreateProjectPage() {
           </aside>
 
           {/* Right Main Content Area */}
-          <main className="lg:col-span-8 p-8 sm:p-12 flex flex-col justify-between bg-white">
+          <main className="lg:col-span-8 p-5 sm:p-8 lg:p-12 flex flex-col justify-between bg-white">
             <div>
               {/* Centered / Header Icon Badge */}
               <div className="mb-6">
@@ -343,12 +343,11 @@ export default function CreateProjectPage() {
                           <label className="block text-xs font-semibold text-slate-700 mb-2">
                             Project Asset Type
                           </label>
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                             {[
                               { value: "MULTIFAMILY", label: "Multifamily", sub: "Residential" },
                               { value: "SINGLE_FAMILY", label: "Single Family", sub: "Ground-Up" },
                               { value: "MIXED_USE", label: "Mixed-Use", sub: "Commercial" },
-                              { value: "SUBDIVISION", label: "Subdivision", sub: "Land Dev" },
                             ].map((type) => {
                               const isSelected = projectType === type.value;
                               return (
@@ -897,15 +896,15 @@ export default function CreateProjectPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                       <div>
                         <span className="text-slate-500 block text-[11px]">Project Name:</span>
-                        <span className="font-bold text-slate-900 text-sm mt-0.5 block">{name || "—"}</span>
+                        <span className="font-bold text-slate-900 text-sm mt-0.5 block">{name || "-"}</span>
                       </div>
                       <div>
                         <span className="text-slate-500 block text-[11px]">Legal Entity:</span>
-                        <span className="font-semibold text-slate-900 mt-0.5 block">{projectEntity || "—"}</span>
+                        <span className="font-semibold text-slate-900 mt-0.5 block">{projectEntity || "-"}</span>
                       </div>
                       <div>
                         <span className="text-slate-500 block text-[11px]">Address:</span>
-                        <span className="text-slate-700 mt-0.5 block">{address || "—"}</span>
+                        <span className="text-slate-700 mt-0.5 block">{address || "-"}</span>
                       </div>
                       <div>
                         <span className="text-slate-500 block text-[11px]">Contract Model:</span>

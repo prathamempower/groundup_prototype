@@ -490,7 +490,7 @@ export function PartnersAndFundingView({ projectId }: PartnersAndFundingViewProp
         </div>
 
         {/* Card 5: Capital Outstanding */}
-        <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
+        <div className="col-span-1 sm:col-span-2 lg:col-span-1 flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200">
               <FileText className="h-5 w-5" />
@@ -719,7 +719,7 @@ export function PartnersAndFundingView({ projectId }: PartnersAndFundingViewProp
                 <tfoot>
                   <tr className="border-t-2 border-slate-200 bg-slate-50/50 font-bold text-slate-900">
                     <td className="py-3 pl-4 pr-3">Total</td>
-                    <td className="px-3 py-3 text-slate-400">—</td>
+                    <td className="px-3 py-3 text-slate-400">-</td>
                     <td className="px-3 py-3 text-right tabular-nums">100%</td>
                     <td className="px-3 py-3 text-right tabular-nums">
                       {formatCurrency(totalFunded)}

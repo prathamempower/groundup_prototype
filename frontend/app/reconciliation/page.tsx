@@ -552,7 +552,7 @@ export default function ReconciliationPage() {
 
   return (
     <div className="space-y-6 pb-16">
-      <div className="px-6 max-w-7xl mx-auto space-y-6 pt-2">
+      <div className="px-4 sm:px-6 max-w-7xl mx-auto space-y-6 pt-2">
         {/* Page Subtitle Breadcrumb & Title Header */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
@@ -628,7 +628,7 @@ export default function ReconciliationPage() {
 
         {/* Segmented Underline Navigation Tabs */}
         <div className="border-b border-slate-200">
-          <nav className="flex items-center gap-6 text-xs font-semibold">
+          <nav className="flex items-center gap-4 sm:gap-6 text-xs font-semibold overflow-x-auto scrollbar-none whitespace-nowrap">
             <button
               onClick={() => setActiveTab("queue")}
               className={`flex items-center gap-1.5 pb-2.5 transition-colors border-b-2 -mb-px ${
@@ -698,11 +698,11 @@ export default function ReconciliationPage() {
                 />
               </div>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <select
                   value={accountFilter}
                   onChange={(e) => setAccountFilter(e.target.value)}
-                  className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
+                  className="flex-1 min-w-[130px] sm:flex-none rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
                 >
                   <option value="ALL">All accounts</option>
                   <option value="OPERATING">Operating · 4821</option>
@@ -712,7 +712,7 @@ export default function ReconciliationPage() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
+                  className="flex-1 min-w-[120px] sm:flex-none rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
                 >
                   <option value="ALL">All statuses</option>
                   <option value="PENDING">Pending action</option>
@@ -722,7 +722,7 @@ export default function ReconciliationPage() {
                 <select
                   value={evidenceFilter}
                   onChange={(e) => setEvidenceFilter(e.target.value)}
-                  className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
+                  className="flex-1 min-w-[110px] sm:flex-none rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
                 >
                   <option value="ALL">All evidence</option>
                   <option value="STRONG">Strong</option>
@@ -733,7 +733,7 @@ export default function ReconciliationPage() {
                 <select
                   value={sortOrder}
                   onChange={(e) => setSortOrder(e.target.value as any)}
-                  className="rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
+                  className="flex-1 min-w-[110px] sm:flex-none rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
                 >
                   <option value="NEWEST">Newest first</option>
                   <option value="OLDEST">Oldest first</option>
@@ -945,7 +945,8 @@ export default function ReconciliationPage() {
             </div>
 
             <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
-              <table className="w-full text-left text-xs border-collapse">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[640px] text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                     <th className="px-4 py-2.5">Account / Period</th>
@@ -990,9 +991,9 @@ export default function ReconciliationPage() {
                       <div className="text-[10px] text-slate-400 mt-0.5">Oct 1–31, 2026</div>
                     </td>
                     <td className="px-4 py-3.5 font-mono text-slate-900 font-semibold">4,155.00</td>
-                    <td className="px-4 py-3.5 text-slate-400">—</td>
-                    <td className="px-4 py-3.5 text-slate-400">—</td>
-                    <td className="px-4 py-3.5 text-slate-400">—</td>
+                    <td className="px-4 py-3.5 text-slate-400">-</td>
+                    <td className="px-4 py-3.5 text-slate-400">-</td>
+                    <td className="px-4 py-3.5 text-slate-400">-</td>
                     <td className="px-4 py-3.5">
                       <span className="rounded bg-slate-100 text-slate-600 px-2 py-0.5 text-[10px] font-bold border border-slate-200">
                         Missing!
@@ -1011,6 +1012,7 @@ export default function ReconciliationPage() {
                   </tr>
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )}
@@ -1031,7 +1033,8 @@ export default function ReconciliationPage() {
             </div>
 
             <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
-              <table className="w-full text-left text-xs border-collapse">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[640px] text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                     <th className="px-4 py-2.5">Exception</th>
@@ -1085,6 +1088,7 @@ export default function ReconciliationPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )}

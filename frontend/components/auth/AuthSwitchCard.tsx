@@ -390,7 +390,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
           </div>
 
           {/* ───────────────────────────────────────────────────────────────────
-              BACK FACE: SIGN UP (STREAMLINED 2-STAGE PROGRESSION)
+              BACK FACE: SIGN UP (2-STAGE PROGRESSION)
              ─────────────────────────────────────────────────────────────────── */}
           <div 
             className={`w-full rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-overlay [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-start ${

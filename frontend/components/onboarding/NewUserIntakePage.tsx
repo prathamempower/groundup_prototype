@@ -224,70 +224,95 @@ const ORG_SIZE_TIERS = [
 export const ACTIVE_STAGE_CHOICES = [
   {
     id: 'Under construction',
-    label: 'Under Construction',
-    stageNum: 'Active Stage',
-    desc: 'Active foundation, structural framing, and MEP trades.'
+    label: 'Active Construction',
+    stageNum: 'Construction Stage',
+    desc: 'Foundations, structural framing, exterior envelope, and MEP trades.'
   },
   {
     id: 'Procurement',
     label: 'Procurement & Buyout',
-    stageNum: 'Active Stage',
-    desc: 'Trade contracts buyout and vendor purchase orders.'
+    stageNum: 'Procurement Stage',
+    desc: 'Trade contract execution, vendor buyout, and material purchase orders.'
   },
   {
     id: 'Preconstruction phase',
-    label: 'Preconstruction Logistics',
-    stageNum: 'Active Stage',
-    desc: 'Soil borings, engineering, and site logistics lock.'
+    label: 'Pre-Construction & Bidding',
+    stageNum: 'Pre-Construction Stage',
+    desc: 'Engineering reviews, subcontractor bid leveling, and site logistics.'
+  },
+  {
+    id: 'Building permits',
+    label: 'Entitlements & Permitting',
+    stageNum: 'Permitting Stage',
+    desc: 'Municipal filings, zoning approvals, and building permit issuances.'
+  },
+  {
+    id: 'Conception, design & planning',
+    label: 'Pre-Development & Feasibility',
+    stageNum: 'Planning Stage',
+    desc: 'Architectural schematics, zoning feasibility, and development pro forma.'
   },
   {
     id: 'Post-construction',
-    label: 'Post-Construction & Closeout',
-    stageNum: 'Active Stage',
-    desc: 'Punch lists, final municipal inspections, and Certificate of Occupancy.'
+    label: 'Closeout & Final Occupancy',
+    stageNum: 'Closeout Stage',
+    desc: 'Punch lists, final inspections, Certificate of Occupancy, and loan conversion.'
   },
 ];
 
 export const NEW_STAGE_CHOICES = [
   {
     id: 'Conception, design & planning',
-    label: 'Conception & Feasibility',
+    label: 'Pre-Development & Feasibility',
     stageNum: 'Planning Stage',
-    desc: 'Architectural drawings, zoning feasibility, and development pro forma.'
+    desc: 'Architectural schematics, zoning feasibility, and development pro forma.'
   },
   {
     id: 'Building permits',
-    label: 'Building Permits',
-    stageNum: 'Planning Stage',
-    desc: 'Township permit filings and agency plan sign-offs.'
+    label: 'Entitlements & Permitting',
+    stageNum: 'Permitting Stage',
+    desc: 'Municipal filings, zoning approvals, and building permit issuances.'
   },
   {
     id: 'Preconstruction phase',
-    label: 'Preconstruction Bidding',
-    stageNum: 'Planning Stage',
-    desc: 'Subcontractor bid packages and initial cost estimation lock.'
+    label: 'Pre-Construction & Bidding',
+    stageNum: 'Pre-Construction Stage',
+    desc: 'Subcontractor bid packages, estimation, and site logistics.'
   },
   {
     id: 'Procurement',
-    label: 'Contractor Buyout',
-    stageNum: 'Planning Stage',
-    desc: 'General Contractor RFP buyout and pricing negotiations.'
+    label: 'Procurement & Buyout',
+    stageNum: 'Procurement Stage',
+    desc: 'Contractor buyout, GMP contracts, and trade purchase orders.'
+  },
+  {
+    id: 'Under construction',
+    label: 'Active Construction',
+    stageNum: 'Construction Stage',
+    desc: 'Foundations, structural framing, exterior envelope, and MEP trades.'
+  },
+  {
+    id: 'Post-construction',
+    label: 'Closeout & Final Occupancy',
+    stageNum: 'Closeout Stage',
+    desc: 'Punch lists, final inspections, Certificate of Occupancy, and loan conversion.'
   },
 ];
 
 export const ACTIVE_DOC_TYPES = [
-  'Budget or cost spreadsheet',
-  'Executed GC contract',
+  'Master Schedule of Values (SOV)',
+  'Development budget spreadsheet',
+  'Executed General Contractor contract',
   'Subcontractor pay application (AIA G702)',
   'Bank construction loan agreement',
-  'Municipal inspection card',
+  'Building permits & inspection cards',
   'Not ready yet',
 ];
 
 export const NEW_DOC_TYPES = [
-  'Development pro forma spreadsheet',
+  'Development pro forma & budget',
   'Architectural schematic plans',
-  'Township permit filing document',
+  'Municipal permit filings',
   'Land purchase contract or LOI',
   'Bank financing term sheet',
   'Not ready yet',
@@ -965,10 +990,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
         setDuplicateMatches(res.data.matches);
         setShowDuplicateModal(true);
       } else {
-        handleCreateProject();
+        setProjectSubStep(2);
       }
     } catch {
-      handleCreateProject();
+      setProjectSubStep(2);
     } finally {
       setIsCheckingDuplicates(false);
     }
@@ -1350,10 +1375,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     per="word"
                     className="text-2xl font-bold text-slate-900 tracking-tight"
                   >
-                    Do you have an active project or are you new to construction?
+                    What is the current status of your project?
                   </TextEffect>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Select your project phase to calibrate cost codes, draw schedules, and workflow.
+                    Select your project status to calibrate cost code ledgers, bank draw schedules, and approval workflows.
                   </p>
                 </div>
               </div>
@@ -1383,14 +1408,14 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         </div>
                         <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${projectStatus === 'active' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-600'
                           }`}>
-                          Active Jobsite
+                          Active Construction
                         </span>
                       </div>
                       <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                        Yes, I have active construction projects underway
+                        Active project currently under construction
                       </h3>
                       <p className="text-xs text-slate-500 leading-relaxed mt-1">
-                        Live job sites with subcontractor pay applications, bank draw schedules, and statutory lien waivers.
+                        Live jobsites with active subcontractor invoices, AIA G702 pay applications, and monthly bank inspection draws.
                       </p>
                     </div>
 
@@ -1435,14 +1460,14 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         </div>
                         <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${projectStatus === 'new' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-600'
                           }`}>
-                          Pre-Development
+                          Pre-Development &amp; Planning
                         </span>
                       </div>
                       <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                        I am planning a new project / New to construction
+                        Planning a new project / In pre-development
                       </h3>
                       <p className="text-xs text-slate-500 leading-relaxed mt-1">
-                        Baseline pro forma budgets, CSI MasterFormat 50 divisions, and municipal permit filings.
+                        Development pro forma budgets, CSI MasterFormat 50-division structures, and municipal permit filings.
                       </p>
                     </div>
 
@@ -1502,7 +1527,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     Tell us about your organization
                   </TextEffect>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    We customize your cost codes, approval limits, and portfolio reporting to your operation scale.
+                    Configure your organization profile to calibrate approval thresholds, cost code structures, and portfolio reporting.
                   </p>
                 </div>
               </div>
@@ -1592,9 +1617,9 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                     {[
                       { id: '1-5', label: '1 to 5', value: 5, desc: 'Core team' },
-                      { id: '5+', label: '5+', value: 12, desc: 'Growing team' },
-                      { id: '50+', label: '50+', value: 50, desc: 'Mid-size firm' },
-                      { id: '100+', label: '100+', value: 100, desc: 'Enterprise' },
+                      { id: '5+', label: '6 to 20', value: 12, desc: 'Growing firm' },
+                      { id: '50+', label: '21 to 50', value: 35, desc: 'Mid-size firm' },
+                      { id: '100+', label: '50+', value: 75, desc: 'Enterprise' },
                       { id: 'custom', label: 'Custom', value: employeeCount, desc: 'Specific count' },
                     ].map(opt => {
                       const isSelected = teamSizeChoice === opt.id;
@@ -1691,7 +1716,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                 onClick={handleCreateOrganization}
                 className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
               >
-                <span>Create organization</span>
+                <span>Continue to Project Setup</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -1713,6 +1738,11 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     {projectSubStep === 2 && 'Project Capital & Debt Structure'}
                     {projectSubStep === 3 && 'Contract Model & Operating Account'}
                   </h1>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {projectSubStep === 1 && 'Enter your project details, legal entity, asset type, and estimated timeline.'}
+                    {projectSubStep === 2 && 'Define property acquisition status, equity sources, and construction financing.'}
+                    {projectSubStep === 3 && 'Select your contractor billing structure and operating bank account model.'}
+                  </p>
                 </div>
               </div>
 
@@ -1725,7 +1755,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     className="group text-left cursor-pointer focus:outline-none"
                   >
                     <div className={`h-1.5 rounded-full transition-colors ${projectSubStep >= 1 ? 'bg-slate-900' : 'bg-slate-200'}`} />
-                    <span className={`block text-[11px] font-semibold mt-1.5 transition-colors ${projectSubStep === 1 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                    <span className={`block text-[10px] sm:text-[11px] truncate font-semibold mt-1.5 transition-colors ${projectSubStep === 1 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
                       1. Identity & Dates
                     </span>
                   </button>
@@ -1737,7 +1767,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     className="group text-left cursor-pointer focus:outline-none"
                   >
                     <div className={`h-1.5 rounded-full transition-colors ${projectSubStep >= 2 ? 'bg-slate-900' : 'bg-slate-200'}`} />
-                    <span className={`block text-[11px] font-semibold mt-1.5 transition-colors ${projectSubStep === 2 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                    <span className={`block text-[10px] sm:text-[11px] truncate font-semibold mt-1.5 transition-colors ${projectSubStep === 2 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
                       2. Capital & Debt
                     </span>
                   </button>
@@ -1749,7 +1779,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     className="group text-left cursor-pointer focus:outline-none"
                   >
                     <div className={`h-1.5 rounded-full transition-colors ${projectSubStep >= 3 ? 'bg-slate-900' : 'bg-slate-200'}`} />
-                    <span className={`block text-[11px] font-semibold mt-1.5 transition-colors ${projectSubStep === 3 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                    <span className={`block text-[10px] sm:text-[11px] truncate font-semibold mt-1.5 transition-colors ${projectSubStep === 3 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
                       3. Contract & Governance
                     </span>
                   </button>
@@ -1770,7 +1800,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div className="space-y-1.5">
                       <label htmlFor="input-project-name" className="block text-xs font-bold text-slate-800">
-                        Project display name <span className="text-red-500">*</span>
+                        Project name <span className="text-red-500">*</span>
                       </label>
                       <input
                         id="input-project-name"
@@ -1799,7 +1829,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         type="text"
                         value={projectEntity}
                         onChange={(e) => setProjectEntity(e.target.value)}
-                        placeholder="e.g. 161 Woodlawn Partners LLC"
+                        placeholder="e.g. 73 Broadway Development LLC"
                         className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
                       />
                     </div>
@@ -1808,7 +1838,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   {/* Site Address */}
                   <div className="space-y-1.5">
                     <label htmlFor="input-project-address" className="block text-xs font-bold text-slate-800">
-                      Site address / location <span className="text-slate-400 font-normal">(optional)</span>
+                      Site address <span className="text-slate-400 font-normal">(optional)</span>
                     </label>
                     <div className="relative">
                       <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -1817,18 +1847,18 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         type="text"
                         value={projectAddress}
                         onChange={(e) => setProjectAddress(e.target.value)}
-                        placeholder={projectStatus === 'active' ? 'e.g. 73 Broadway, Jersey City, NJ 07306' : 'e.g. 161 Woodlawn Ave, Jersey City, NJ 07305'}
+                        placeholder="e.g. 73 Broadway, Brooklyn, NY 11249"
                         className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
                       />
                     </div>
                   </div>
 
-                  {/* Minimalist Dropdowns for Archetype and Stage */}
+                  {/* Dropdowns for Asset Type and Stage */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    {/* Project Asset Archetype */}
+                    {/* Project Asset Type */}
                     <div className="space-y-1.5">
                       <label htmlFor="select-asset-archetype" className="block text-xs font-bold text-slate-800">
-                        Project asset archetype
+                        Project asset type
                       </label>
                       <select
                         id="select-asset-archetype"
@@ -1839,7 +1869,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         <option value="MULTIFAMILY">Multifamily</option>
                         <option value="SINGLE_FAMILY">Single Family</option>
                         <option value="MIXED_USE">Mixed-Use</option>
-                        <option value="SUBDIVISION">Subdivision</option>
                       </select>
                     </div>
 
@@ -1942,8 +1971,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       {[
-                        { val: 'true', label: 'Title / Deed Closed', desc: 'Settlement statement recorded and closed.' },
-                        { val: 'false', label: 'Under Diligence / LOI', desc: 'Purchase contract or LOI pending closing.' },
+                        { val: 'true', label: 'Title / Deed Closed', desc: 'Settlement statement recorded and title deed conveyed.' },
+                        { val: 'false', label: 'Under Diligence / LOI', desc: 'Purchase contract or LOI executed; diligence in progress.' },
                       ].map((opt) => (
                         <button
                           key={opt.val}
@@ -1968,10 +1997,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {[
-                        { id: 'ACQUISITION_LOAN', label: 'Bank Debt', sub: 'Acquisition loan' },
-                        { id: 'EQUITY', label: 'Sponsor Equity', sub: 'Internal capital' },
-                        { id: 'LP_EQUITY', label: 'LP Equity', sub: 'Partner capital' },
-                        { id: 'SELLER_FINANCED', label: 'Seller Note', sub: 'Owner financed' },
+                        { id: 'ACQUISITION_LOAN', label: 'Bank Debt', sub: 'Senior acquisition loan' },
+                        { id: 'EQUITY', label: 'Sponsor Equity', sub: 'General Partner capital' },
+                        { id: 'LP_EQUITY', label: 'LP Equity', sub: 'Limited Partner capital' },
+                        { id: 'SELLER_FINANCED', label: 'Seller Note', sub: 'Owner-carried note' },
                       ].map((f) => {
                         const isSelected = acquisitionFunding === f.id;
                         return (
@@ -2001,8 +2030,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       {[
-                        { val: 'true', label: 'Construction Loan in Place', desc: 'Disbursements routed via monthly draw inspections.' },
-                        { val: 'false', label: 'All-Equity Self-Funded', desc: 'Funded directly from sponsor or partner equity accounts.' },
+                        { val: 'true', label: 'Construction Loan in Place', desc: 'Senior construction loan with monthly bank draw inspections.' },
+                        { val: 'false', label: 'All-Equity Self-Funded', desc: 'Direct equity funded from sponsor and partner capital accounts.' },
                       ].map((opt) => (
                         <button
                           key={opt.val}
@@ -2033,7 +2062,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                           type="text"
                           value={lenderName}
                           onChange={(e) => setLenderName(e.target.value)}
-                          placeholder="e.g. Pacific Western Bank"
+                          placeholder="e.g. Columbia Bank"
                           className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
                         />
                       </div>
@@ -2057,7 +2086,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         onClick={() => setProjectSubStep(3)}
                         className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.99]"
                       >
-                        <span>Next: Contract & Banking</span>
+                        <span>Next: Contract & Governance</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -2087,14 +2116,14 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         {
                           value: 'FIXED',
                           badge: 'Lump Sum',
-                          title: 'Fixed',
-                          desc: 'Predetermined contract amount; disbursements tied to completion milestones and draw inspections.',
+                          title: 'Fixed Price (GMP / Stipulated Sum)',
+                          desc: 'Predetermined contract amount; disbursements released against completion milestones and monthly draw inspections.',
                         },
                         {
                           value: 'DAILY',
-                          badge: 'Day Rate',
-                          title: 'Daily',
-                          desc: 'Contractor compensation billed on daily rates, actual work days, and verified time logs.',
+                          badge: 'Actuals / T&M',
+                          title: 'Cost-Plus / Time & Materials',
+                          desc: 'Contractor compensation billed on verified daily time logs, actual work days, and itemized receipts.',
                         },
                       ].map((m) => {
                         const isSelected = contractModel === m.value || (m.value === 'FIXED' && contractModel !== 'DAILY');
@@ -2126,8 +2155,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       {[
-                        { val: 'DEDICATED', badge: 'Recommended', title: 'Dedicated Project Account', desc: 'Single entity LLC account with 1:1 transaction matching.' },
-                        { val: 'SHARED', badge: 'Transfer Controls', title: 'Shared / Master Account', desc: 'Master account requiring strict inter-project transfer controls.' },
+                        { val: 'DEDICATED', badge: 'Recommended', title: 'Dedicated Project Account', desc: 'Single-entity LLC account with clean 1:1 transaction matching.' },
+                        { val: 'SHARED', badge: 'Multi-Entity', title: 'Shared Master Account', desc: 'Master account requiring strict inter-entity transfer controls.' },
                       ].map((opt) => {
                         const isSelected = operatingAccountModel === opt.val;
                         return (
@@ -2160,7 +2189,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         className="flex-1 py-3 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
                       >
                         <ArrowLeft className="w-3.5 h-3.5" />
-                        <span>Back to Capital</span>
+                        <span>Back to Capital &amp; Debt</span>
                       </button>
                       <button
                         id="btn-onboarding-next"
@@ -2200,10 +2229,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     per="word"
                     className="text-2xl font-bold text-slate-900 tracking-tight"
                   >
-                    Do you have project documents ready?
+                    Add project documents &amp; budget
                   </TextEffect>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Upload your budget spreadsheets, vendor bills, or bank draw packages. You can also skip this and add them later.
+                    Upload your development budget, contractor agreements, or bank draw packages to automatically populate your ledger. You can also skip this and add them later.
                   </p>
                 </div>
               </div>
@@ -2211,7 +2240,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
               {/* Document Type Chips */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-800">
-                  What document types are you working with?
+                  Select document types you are working with:
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {(projectStatus === 'active' ? ACTIVE_DOC_TYPES : NEW_DOC_TYPES).map(type => {
@@ -2322,7 +2351,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   onClick={() => handleContinueRecords(false)}
                   className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
                 >
-                  <span>{documentsList.length > 0 ? 'Continue with documents' : 'Continue'}</span>
+                  <span>{documentsList.length > 0 ? 'Continue with documents' : 'Continue to Collaborator Access'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
 
@@ -2351,10 +2380,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     per="word"
                     className="text-2xl font-bold text-slate-900 tracking-tight"
                   >
-                    Who else works on this project?
+                    Invite project team &amp; collaborators
                   </TextEffect>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Invite your team and external partners. Each role gets dedicated permissions and filtered views.
+                    Invite team members and external partners. Each collaborator receives role-based permissions and dedicated dashboard views.
                   </p>
                 </div>
               </div>
@@ -2457,7 +2486,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   onClick={() => handleSendInvitations(false)}
                   className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
                 >
-                  <span>{teamList.length > 0 ? 'Send invitations & setup workspace' : 'Complete setup'}</span>
+                  <span>{teamList.length > 0 ? 'Send invitations & launch workspace' : 'Complete setup & launch workspace'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
 
@@ -2474,9 +2503,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
           )}
 
           {/* ──────────────────────────────────────────────────────────── */}
-          {/* SCREEN 8: WORKSPACE SETUP AND REAL LOADING                  */}
-          {/* ──────────────────────────────────────────────────────────── */}
-          {/* ──────────────────────────────────────────────────────────── */}
           {/* SCREEN 8: ARCHITECTURAL WORKSPACE INITIALIZATION             */}
           {/* ──────────────────────────────────────────────────────────── */}
           {currentStep === 6 && (
@@ -2488,10 +2514,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   per="word"
                   className="text-2xl font-bold text-slate-900 tracking-tight"
                 >
-                  Setting up your workspace
+                  Provisioning your project workspace
                 </TextEffect>
                 <p className="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
-                  Configuring organization multi-tenancy, CSI MasterFormat cost code ledger, and automated lender draw engines.
+                  Configuring organization multi-tenancy, CSI MasterFormat cost code ledger, and automated lender draw workflows.
                 </p>
               </div>
 
@@ -2527,7 +2553,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     {setupStages.savingOrg ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     ) : (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
+                      <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 ml-1 mr-1" />
                     )}
                     <div>
                       <span className="font-bold text-slate-800 block text-xs">Organization Isolation</span>
@@ -2546,7 +2572,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     {setupStages.creatingProject ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     ) : setupStages.savingOrg ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
+                      <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 ml-1 mr-1" />
                     ) : (
                       <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
                     )}
@@ -2567,7 +2593,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     {setupStages.preparingDashboard ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     ) : setupStages.creatingProject ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
+                      <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 ml-1 mr-1" />
                     ) : (
                       <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
                     )}
@@ -2588,7 +2614,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     {setupStages.finalizing ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     ) : setupStages.preparingDashboard ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
+                      <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 ml-1 mr-1" />
                     ) : (
                       <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
                     )}

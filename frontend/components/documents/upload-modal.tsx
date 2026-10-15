@@ -229,7 +229,7 @@ export function UploadModal({
 
           {(step === "UPLOADING" || step === "SCANNING") && (
             <div className="py-8 space-y-6 text-center">
-              <div className="mx-auto h-16 w-16 rounded-full bg-blue-50 border border-blue-200/70 flex items-center justify-center text-blue-600 animate-pulse">
+              <div className="mx-auto h-16 w-16 rounded-full bg-blue-50 border border-blue-200/70 flex items-center justify-center text-blue-600">
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
 
@@ -237,7 +237,7 @@ export function UploadModal({
                 <div className="text-base font-bold text-slate-900">
                   {step === "UPLOADING" ? "Uploading Source Document to Secure Vault..." : "Running OCR Layout & Schema Matching..."}
                 </div>
-                <p className="text-xs text-blue-600 font-medium max-w-md mx-auto leading-relaxed animate-pulse">
+                <p className="text-xs text-blue-600 font-medium max-w-md mx-auto leading-relaxed">
                   {stageMessage}
                 </p>
               </div>

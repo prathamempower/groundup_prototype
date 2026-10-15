@@ -57,13 +57,13 @@ To enable precise operational tracking and cross-functional alignment, we implem
 ### Workflow-Specific State Machines
 Entity-specific workflows (draw/change order/inspection) with server-side enforced transitions ensuring policy compliance.
 
-*Note:* "VERIFIED" indicates designated human review per organizational policy—it represents internal validation, not external party endorsement.
+*Note:* "VERIFIED" indicates designated human review per organizational policy; it represents internal validation rather than external party endorsement.
 
 ## Global Data Field Standards
 
 ### Foundational Data Types
 - **Identifiers:** Server-generated UUIDs/opaque IDs preventing client-side scope bypass
-- **Financial Values:** ISO 4217 currency codes with exact `numeric(19,4)` storage or integer minor units—eliminating floating-point inaccuracies
+- **Financial Values:** ISO 4217 currency codes with exact `numeric(19,4)` storage or integer minor units, eliminating floating-point inaccuracies
 - **Temporal Data:** Date-only fields for accounting events; UTC timestamps for system events with source timezone preservation
 - **Text Fields:** Whitespace-trimming with raw source preservation; searchable normalization; length governance; HTML/script sanitization
 - **Enumerations:** Server-controlled allowlists with raw value preservation for unknown imports requiring mapping
@@ -161,7 +161,7 @@ All identity management adheres to zero-trust principles with:
 
 ### Project Closure Governance
 - **Exit Criteria:** Prohibition against closure with open draws, unallocated cash, unresolved material reconciliation exceptions, or unpaid loan balances without owner-approved closeout exception
-- **Cost Component Isolation:** Separate modeling of acquisition, construction, financing, holding, sale proceeds, selling costs, debt payoff, and distributions—no manual "total cost" field overrides without documented adjustment
+- **Cost Component Isolation:** Separate modeling of acquisition, construction, financing, holding, sale proceeds, selling costs, debt payoff, and distributions, with no manual "total cost" field overrides without documented adjustment
 - **Forecast Transparency:** Methodology and component disclosure for all projections; `INCOMPLETE_FORECAST` state for missing inputs (never zero-substitution)
 - **Disposition Integrity:** Prevention of double-counting in sale/unit proceeds; shared cost allocation reconciliation to total statement value
 - **Return Calculation Rigor:** Explicit denominator definition (invested equity/cash contributed) and date basis for ROI; IRR requiring positive/negative cash flow pairs (else `NOT_MEANINGFUL`)
@@ -211,7 +211,7 @@ Rejected transitions provide user-readable explanations with audit logging for m
 - **Bank Cash Classification:** Mandatory linkage to mapped financial account and statement period (or approved exception) for "cleared bank cash" designation
 - **Transaction Classification:** Normalization rules plus reviewer confirmation required for expense/funding/transfer/card settlement/refund designations (negative value alone insufficient)
 - **File Provenance:** `MISFILED` status for documents in conflicting project folders pending explicit reclassification (folder path as provenance, not project identity)
-- **Report Control Validation:** Formula totals/summary tabs/manual project treated as report controls—GroundUp independently computes from accepted detail and exposes variances
+- **Report Control Validation:** Formula totals/summary tabs/manual project treated as report controls: GroundUp independently computes from accepted detail and exposes variances
 
 ### Period Close Discipline
 Period reconciliation requires:
@@ -240,7 +240,7 @@ Clear delineation of actual, committed, approved, and estimated values in all fo
 Material KPI-affecting exceptions trigger visible warnings with direct links to exception detail (no deceptive precision masking)
 
 ### Export Governance
-Immutable snapshots only—later corrections generate new exports (never historic file modification)
+Immutable snapshots only: later corrections generate new exports (never historic file modification)
 
 ## Validation Ownership & Service Commitment
 

@@ -1,6 +1,6 @@
 # GroundUp AI: Code Optimization and Anti-Pattern Removal Guide (REMOVE.md)
 
-This document identifies inefficient, deadlock-prone, redundant, and buggy code patterns across the platform, providing concrete architectural refactoring solutions to ensure high concurrency, zero deadlocks, and streamlined maintainability.
+This document identifies inefficient, deadlock-prone, redundant, and buggy code patterns across the platform, providing concrete architectural refactoring solutions to ensure high concurrency, zero deadlocks, and clean maintainability.
 
 ***
 

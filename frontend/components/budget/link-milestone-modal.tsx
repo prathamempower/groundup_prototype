@@ -97,7 +97,7 @@ export function LinkMilestoneModal({
           <div className="bg-subtle/40 p-3.5 rounded-lg border border-border text-xs space-y-1">
             <div className="font-semibold text-text-primary">Selected Budget Line:</div>
             <div className="font-mono text-primary font-bold">
-              {budgetLine.code} — {budgetLine.name}
+              {budgetLine.code}: {budgetLine.name}
             </div>
           </div>
 

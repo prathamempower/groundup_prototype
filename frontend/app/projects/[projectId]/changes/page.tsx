@@ -260,13 +260,13 @@ export default function ChangesAndApprovalsPage() {
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+          <div className="flex items-center gap-1.5 sm:gap-2 pt-2 border-t border-slate-100 overflow-x-auto scrollbar-none whitespace-nowrap pb-1 sm:pb-0">
             {["ALL", "PENDING", "APPROVED", "REJECTED"].map((st) => (
               <button
                 key={st}
                 onClick={() => setCoStatusFilter(st)}
                 className={cn(
-                  "px-3 py-1 text-xs rounded-lg font-medium transition-colors cursor-pointer",
+                  "px-3 py-1 text-xs rounded-lg font-medium transition-colors cursor-pointer shrink-0",
                   coStatusFilter === st
                     ? "bg-blue-600 text-white font-semibold"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -318,7 +318,7 @@ export default function ChangesAndApprovalsPage() {
                         <td className="py-2.5 px-3 text-right tabular-nums text-slate-700">
                           {co.approved_amount
                             ? formatMoney(parseInt(String(co.approved_amount), 10))
-                            : "—"}
+                            : "-"}
                         </td>
                         <td className="py-2.5 px-3 text-slate-700">
                           {(() => {
@@ -418,7 +418,7 @@ export default function ChangesAndApprovalsPage() {
                   {contingencyMovements.map((cm) => (
                     <tr key={cm.id} className="hover:bg-slate-50/50">
                       <td className="py-2.5 px-3 text-slate-500">
-                        {cm.created_at ? new Date(cm.created_at).toLocaleDateString() : "—"}
+                        {cm.created_at ? new Date(cm.created_at).toLocaleDateString() : "-"}
                       </td>
                       <td className="py-2.5 px-3 text-right font-bold text-slate-900 tabular-nums">
                         {formatMoney(parseInt(String(cm.amount || "0"), 10))}

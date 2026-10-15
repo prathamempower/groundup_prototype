@@ -157,7 +157,7 @@ export function OwnerResolutionModal({
         if (customAction.trim()) {
           finalReason = finalReason ? `${customAction.trim()} · ${finalReason}` : customAction.trim();
         } else if (!finalReason) {
-          finalReason = "Others — Custom resolution";
+          finalReason = "Others: Custom resolution";
         }
       } else {
         finalReason = finalReason || currentAction?.label || "Resolved by owner";

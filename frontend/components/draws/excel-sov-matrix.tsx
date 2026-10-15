@@ -87,18 +87,18 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full md:w-auto">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search tasks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 pr-3 py-1 text-xs bg-white border border-slate-200 rounded-md focus:outline-none focus:border-emerald-600 w-48"
+              className="pl-8 pr-3 py-1 text-xs bg-white border border-slate-200 rounded-md focus:outline-none focus:border-emerald-600 w-full sm:w-48"
             />
           </div>
-          <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
+          <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md shrink-0">
             {EXCEL_DRAW_TASKS.length} Tasks • 9 Draws Scheduled
           </span>
         </div>
@@ -154,16 +154,16 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
             {/* Row 2: On-Site Inspection Sub-header (Matches Image 3) */}
             <tr className="bg-slate-50 text-[11px] border-b border-slate-200 font-semibold text-slate-600">
               <td className="py-1.5 px-3 border-r border-slate-200 sticky left-0 z-30 bg-slate-50 font-medium italic">
-                —
+                -
               </td>
               <td className="py-1.5 px-3 border-r border-slate-200 sticky left-[70px] z-30 bg-slate-50 font-bold text-slate-900">
                 On-Site Inspection?
               </td>
               <td className="py-1.5 px-3 text-right border-r border-slate-200 text-slate-400">
-                —
+                -
               </td>
               <td className="py-1.5 px-3 text-right border-r border-slate-200 text-slate-400">
-                —
+                -
               </td>
               {EXCEL_DRAW_COLUMNS.map((col) => (
                 <td

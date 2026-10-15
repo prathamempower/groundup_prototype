@@ -15,7 +15,7 @@ The supplied records validate the problem but are not a clean source of truth:
 - **73 Broadway** contains a construction budget, loan/closing material, lender inspection reports, BCB and Columbia statements, and an accounting workbook. The lender reports demonstrate that a requested draw can be adjusted by inspection and then funded at a lender-specific percentage; requested, approved, and funded are therefore distinct facts.
 - **392 First Street** is the strongest completed-project reconstruction sample: acquisition/HUD material, loan report, draw data, operating-bank statements, card activity, and sale/HUD material. The loan report identifies 15 draws, while the query log flags a 2024 draw date that is not yet corroborated by the available statements.
 - **161 Woodlawn Ave** is incomplete and should not be the first source-of-truth pilot. It has a workbook and statements, but the requested loan, draw, invoice, schedule, and closeout evidence is not present. A misfiled `Budget for 73 Broadway` document appears inside this project folder.
-- The query sheet contains **13 unresolved or pending questions**, including missing vendor invoices, loan approval/draw support, investor formula, account/project inventory, and partial-draw treatment. These are product requirements for exception handling—not facts the system may invent.
+- The query sheet contains **13 unresolved or pending questions**, including missing vendor invoices, loan approval/draw support, investor formula, account/project inventory, and partial-draw treatment. These are product requirements for exception handling, not facts the system may invent.
 
 ## Product thesis
 

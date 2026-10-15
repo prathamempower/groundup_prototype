@@ -15,7 +15,7 @@
 | Background jobs | Celery with Redis broker/result backend | reliable asynchronous ingestion, OCR, extraction, report, notification, and retry jobs |
 | Workers | Separate Python Celery worker deployments | isolates long-running/CPU-intensive work from FastAPI request handling |
 | Document processing | OCR + structured extraction service behind a provider interface | vendor flexibility and human-review workflow |
-| AI | structured-output LLM behind an evaluation/versioning layer | classification, extraction, match suggestions—not autonomous posting |
+| AI | structured-output LLM behind an evaluation/versioning layer | classification, extraction, match suggestions without autonomous posting |
 | Observability | OpenTelemetry, error tracking, structured logs, product analytics | trace import failures and user-review friction |
 | Deployment | managed containers/serverless for app and workers, managed Postgres | small operational footprint for pilot |
 
@@ -44,7 +44,7 @@
 - Unit tests for calculation, state transition, permission, and importer logic.
 - API integration tests against ephemeral PostgreSQL with Alembic migrations applied, including RLS and reconciliation invariants.
 - Celery integration tests for retries, duplicate delivery, job failure, and source-document processing; no task may create verified financial facts without a human review transition.
-- Golden-document tests from de-identified 73 Broadway/392 samples; compare extraction proposals and citations, not just text accuracy.
+- Golden-document tests from de-identified 73 Broadway/392 samples; compare extraction proposals and citations along with text accuracy.
 - End-to-end tests for owner, CFO, PM, GC, and investor journeys.
 - Load test document batches and concurrent reconciliation writes before pilot expansion.
 - Security review for access control, file handling, secrets, and audit integrity before external investor access.

@@ -518,7 +518,7 @@ export default function ProjectsPortfolioPage() {
                           Forecast Profit
                         </div>
                         <div className="mt-0.5 text-sm font-bold text-slate-900 tabular-nums truncate">
-                          {canSeeProfit ? formatCompactProfit(project.forecast_profit) : "—"}
+                          {canSeeProfit ? formatCompactProfit(project.forecast_profit) : "-"}
                         </div>
                       </div>
 
@@ -609,7 +609,7 @@ export default function ProjectsPortfolioPage() {
                       </td>
                       {canSeeFinancialSummary && (
                         <td className="px-4 py-4 text-right font-extrabold text-slate-900 tabular-nums">
-                          {canSeeProfit ? formatMoney(project.forecast_profit || 0) : "—"}
+                          {canSeeProfit ? formatMoney(project.forecast_profit || 0) : "-"}
                         </td>
                       )}
                       <td className="px-4 py-4 text-slate-600 truncate max-w-[170px]">

@@ -71,7 +71,7 @@ Each flow identifies the actor, starting condition, main path, branching decisio
 
 **Branches:**
 
-- If dates are missing, show schedule risk as unknown—not zero delay.
+- If dates are missing, show schedule risk as unknown rather than zero delay.
 - If a forecast moves, require a reason; do not overwrite planned baseline.
 - If lender/appraiser evidence disagrees with PM update, show a conflict requiring resolution rather than auto-selecting one.
 

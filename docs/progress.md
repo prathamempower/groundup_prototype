@@ -24,10 +24,10 @@ The frontend now uses the live FastAPI identity and project APIs. Auth pages are
 
 ## Validation
 
-- `backend/venv/bin/pytest backend/tests/ -v` — passed (39 tests including permission matrix and cross-project isolation).
-- `npm --prefix frontend test` — passed (20 vitest tests across navigation matrix, business rules, formatters).
-- `npx playwright test tests/e2e/project-portfolio-and-isolation.spec.ts` — passed.
-- `npm --prefix frontend run build` — passed (Next.js 14 production build compiled).
+- `backend/venv/bin/pytest backend/tests/ -v`: passed (39 tests including permission matrix and cross-project isolation).
+- `npm --prefix frontend test`: passed (20 vitest tests across navigation matrix, business rules, formatters).
+- `npx playwright test tests/e2e/project-portfolio-and-isolation.spec.ts`: passed.
+- `npm --prefix frontend run build`: passed (Next.js 14 production build compiled).
 - Responsive screenshots captured and verified at 1440px and 820px (`frontend/screenshots/portfolio-1440.png`, `portfolio-820.png`, `workspace-owner-1440.png`, `workspace-owner-820.png`).
 - Documented in [`qa/project-isolation.md`](../qa/project-isolation.md).
 

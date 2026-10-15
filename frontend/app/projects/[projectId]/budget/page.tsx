@@ -559,11 +559,11 @@ export default function ProjectEconomicsAndBudgetPage() {
           </div>
 
           {/* Functional 3 Tabs: Overview, Budget Breakdown, Forecast & Returns */}
-          <div className="flex border-b border-slate-200 gap-8 mt-6">
+          <div className="flex border-b border-slate-200 gap-4 sm:gap-8 mt-6 overflow-x-auto scrollbar-none whitespace-nowrap">
             <button
               onClick={() => setActiveTab("overview")}
               className={cn(
-                "flex items-center gap-2 pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors -mb-px cursor-pointer",
+                "flex items-center gap-2 pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors -mb-px cursor-pointer shrink-0",
                 activeTab === "overview"
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
@@ -575,7 +575,7 @@ export default function ProjectEconomicsAndBudgetPage() {
             <button
               onClick={() => setActiveTab("breakdown")}
               className={cn(
-                "flex items-center gap-2 pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors -mb-px cursor-pointer",
+                "flex items-center gap-2 pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors -mb-px cursor-pointer shrink-0",
                 activeTab === "breakdown"
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
@@ -587,7 +587,7 @@ export default function ProjectEconomicsAndBudgetPage() {
             <button
               onClick={() => setActiveTab("forecast")}
               className={cn(
-                "flex items-center gap-2 pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors -mb-px cursor-pointer",
+                "flex items-center gap-2 pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors -mb-px cursor-pointer shrink-0",
                 activeTab === "forecast"
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
@@ -801,12 +801,12 @@ export default function ProjectEconomicsAndBudgetPage() {
                                 className="text-slate-900 font-bold"
                               />
                             ) : (
-                              "—"
+                              "-"
                             )}
                           </td>
                           <td className="py-2.5 px-3 text-right tabular-nums font-semibold text-rose-600">
                             {isZeroOrDash ? (
-                              row.category.includes("Contingency") ? "—" : "$0"
+                              row.category.includes("Contingency") ? "-" : "$0"
                             ) : (
                               <ClickableAmount
                                 amountCents={row.varianceCents}
@@ -821,7 +821,7 @@ export default function ProjectEconomicsAndBudgetPage() {
                           </td>
                           <td className="py-2.5 px-3 text-right tabular-nums font-semibold text-rose-600">
                             {row.category.includes("Contingency")
-                              ? "—"
+                              ? "-"
                               : row.pctChange > 0
                               ? `+${row.pctChange}%`
                               : "0%"}
@@ -1581,19 +1581,19 @@ export default function ProjectEconomicsAndBudgetPage() {
                   </div>
                   <div className="py-2 flex items-center justify-between">
                     <span className="text-slate-500">Projected Profit</span>
-                    <span className="text-slate-400 font-mono">—</span>
+                    <span className="text-slate-400 font-mono">-</span>
                   </div>
                   <div className="py-2 flex items-center justify-between">
                     <span className="text-slate-500">Projected Profit Margin</span>
-                    <span className="text-slate-400 font-mono">—</span>
+                    <span className="text-slate-400 font-mono">-</span>
                   </div>
                   <div className="py-2 flex items-center justify-between">
                     <span className="text-slate-500">Projected ROI</span>
-                    <span className="text-slate-400 font-mono">—</span>
+                    <span className="text-slate-400 font-mono">-</span>
                   </div>
                   <div className="py-2 flex items-center justify-between">
                     <span className="text-slate-500">Projected IRR</span>
-                    <span className="text-slate-400 font-mono">—</span>
+                    <span className="text-slate-400 font-mono">-</span>
                   </div>
                 </div>
               </div>
@@ -1623,27 +1623,27 @@ export default function ProjectEconomicsAndBudgetPage() {
                 <div className="divide-y divide-slate-100 text-xs">
                   <div className="py-2 flex items-center justify-between">
                     <span className="text-slate-500">Forecast Completion Date</span>
-                    <span className="text-slate-400 font-mono">—</span>
+                    <span className="text-slate-400 font-mono">-</span>
                   </div>
                   <div className="py-2 flex items-center justify-between">
                     <span className="text-slate-500">Estimated Sale Price</span>
-                    <span className="text-slate-400 font-mono">—</span>
+                    <span className="text-slate-400 font-mono">-</span>
                   </div>
                   <div className="py-2 flex items-center justify-between">
                     <span className="text-slate-500">Selling Costs (% or amount)</span>
-                    <span className="text-slate-400 font-mono">—</span>
+                    <span className="text-slate-400 font-mono">-</span>
                   </div>
                   <div className="py-2 flex items-center justify-between">
                     <span className="text-slate-500">Loan Payoff (if any)</span>
-                    <span className="text-slate-400 font-mono">—</span>
+                    <span className="text-slate-400 font-mono">-</span>
                   </div>
                   <div className="py-2 flex items-center justify-between">
                     <span className="text-slate-500">Carrying Costs (monthly)</span>
-                    <span className="text-slate-400 font-mono">—</span>
+                    <span className="text-slate-400 font-mono">-</span>
                   </div>
                   <div className="py-2 flex items-center justify-between">
                     <span className="text-slate-500">Exit Timing</span>
-                    <span className="text-slate-400 font-mono">—</span>
+                    <span className="text-slate-400 font-mono">-</span>
                   </div>
                 </div>
               </div>
@@ -1827,10 +1827,10 @@ export default function ProjectEconomicsAndBudgetPage() {
                           <td className="py-2.5 px-3 font-medium text-slate-800">
                             {sc.name}
                           </td>
-                          <td className="py-2.5 px-3 text-right text-slate-400 font-mono">—</td>
-                          <td className="py-2.5 px-3 text-right text-slate-400 font-mono">—</td>
-                          <td className="py-2.5 px-3 text-right text-slate-400 font-mono">—</td>
-                          <td className="py-2.5 px-3 text-right text-slate-400 font-mono">—</td>
+                          <td className="py-2.5 px-3 text-right text-slate-400 font-mono">-</td>
+                          <td className="py-2.5 px-3 text-right text-slate-400 font-mono">-</td>
+                          <td className="py-2.5 px-3 text-right text-slate-400 font-mono">-</td>
+                          <td className="py-2.5 px-3 text-right text-slate-400 font-mono">-</td>
                         </tr>
                       ))}
                     </tbody>

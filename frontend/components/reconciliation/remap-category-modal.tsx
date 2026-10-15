@@ -113,7 +113,7 @@ export function RemapCategoryModal({
             >
               {budgetLines.map((bl) => (
                 <option key={bl.id} value={bl.id}>
-                  {bl.code} — {bl.name} ({bl.category})
+                  {bl.code}: {bl.name} ({bl.category})
                 </option>
               ))}
             </select>

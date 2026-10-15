@@ -129,7 +129,7 @@ export function TaskDetailDrawer({
 
             {draft?.is_delayed && (
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-2.5 py-1 text-xs font-bold text-red-700 border border-red-200/80 shadow-2xs">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-600 animate-pulse" />
+                <span className="h-2.5 w-2.5 rounded-full bg-red-600" />
                 DELAYED ({draft.delay_days}d)
               </span>
             )}
@@ -323,7 +323,7 @@ export function TaskDetailDrawer({
                     <span
                       className={`h-3 w-3 rounded-full shrink-0 ${
                         draft.is_delayed
-                          ? "bg-red-600 animate-pulse ring-4 ring-red-200"
+                          ? "bg-red-600 ring-4 ring-red-200"
                           : "bg-slate-300"
                       }`}
                     />

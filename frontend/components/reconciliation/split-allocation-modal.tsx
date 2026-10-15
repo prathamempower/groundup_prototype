@@ -269,7 +269,7 @@ export function SplitAllocationModal({
                     >
                       {budgetLines.map((bl) => (
                         <option key={bl.id} value={bl.id}>
-                          {bl.code} — {bl.name}
+                          {bl.code}: {bl.name}
                         </option>
                       ))}
                     </select>

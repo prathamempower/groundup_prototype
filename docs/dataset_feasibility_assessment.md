@@ -6,9 +6,9 @@ The GroundUp AI plan is feasible for the supplied material **if it is delivered 
 
 The best pilot order is:
 
-1. **392 First Street** — completed-project reconstruction and closeout validation.
-2. **73 Broadway** — live-project monitoring, bank/draw reconciliation, and evidence workflow.
-3. **161 Woodlawn Ave** — controlled retrospective import after missing loan, draw, invoice, schedule, and sale/closeout records are supplied or formally waived.
+1. **392 First Street**: completed-project reconstruction and closeout validation.
+2. **73 Broadway**: live-project monitoring, bank/draw reconciliation, and evidence workflow.
+3. **161 Woodlawn Ave**: controlled retrospective import after missing loan, draw, invoice, schedule, and sale/closeout records are supplied or formally waived.
 
 ## Dataset inventory reviewed
 

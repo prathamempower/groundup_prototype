@@ -450,7 +450,7 @@ export const BUDGET_AMOUNT_MAPS: Record<string, AmountMapDetail> = {
       {
         id: "dr-1",
         code: "DRAW #1",
-        name: "Draw #1 — Demolition & Foundation",
+        name: "Draw #1: Demolition & Foundation",
         payeeOrVendor: "First National Bank Disbursed",
         source: "Draw #1 Inspection Report & Wire #W-8812",
         amountCents: 5000000,
@@ -462,7 +462,7 @@ export const BUDGET_AMOUNT_MAPS: Record<string, AmountMapDetail> = {
       {
         id: "dr-2",
         code: "DRAW #2",
-        name: "Draw #2 — Structural Framing & Rough MEP",
+        name: "Draw #2: Structural Framing & Rough MEP",
         payeeOrVendor: "First National Bank Disbursed",
         source: "Draw #2 Inspection Report & Wire #W-8940",
         amountCents: 6820000,
@@ -474,7 +474,7 @@ export const BUDGET_AMOUNT_MAPS: Record<string, AmountMapDetail> = {
       {
         id: "dr-3",
         code: "DRAW #3",
-        name: "Draw #3 — Mechanical & Electrical (Active)",
+        name: "Draw #3: Mechanical & Electrical (Active)",
         payeeOrVendor: "First National Bank Disbursed",
         source: "Draw #3 Inspection Report & Wire #W-9102",
         amountCents: 8400000,
@@ -486,7 +486,7 @@ export const BUDGET_AMOUNT_MAPS: Record<string, AmountMapDetail> = {
       {
         id: "dr-4",
         code: "DRAW #4",
-        name: "Draw #4 — Insulation & Drywall (Next)",
+        name: "Draw #4: Insulation & Drywall (Next)",
         payeeOrVendor: "First National Bank Allocation",
         source: "Credit Agreement § 2.01 (Undrawn Facility)",
         amountCents: 8500000,
@@ -866,7 +866,7 @@ export function getAmountMap(
     breakdown: [
       {
         id: "dyn-1",
-        code: "—",
+        code: "-",
         name: "Primary Contract Scope",
         payeeOrVendor: "Hudson Peak General Contracting",
         source: "Hudson Peak Contract Agreement",
@@ -877,7 +877,7 @@ export function getAmountMap(
       },
       {
         id: "dyn-2",
-        code: "—",
+        code: "-",
         name: "Direct Labor & Materials",
         payeeOrVendor: "Trade Subcontractors",
         source: "Trade Subcontractor Invoices Ledger",

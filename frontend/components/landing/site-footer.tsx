@@ -61,7 +61,7 @@ export function SiteFooter({ onStartOnboarding }: SiteFooterProps) {
             />
             
             <p className="text-sm text-slate-600 leading-relaxed max-w-sm">
-              The construction financial command center for real estate developers. Reconcile trade invoices, municipal building inspections, and bank construction loan draws in one synchronized source of truth.
+              Construction financial management software for real estate developers. Reconcile trade invoices, municipal building inspections, and bank construction loan draws in one synchronized source of truth.
             </p>
 
             <div className="pt-2 space-y-2 text-xs text-slate-500">

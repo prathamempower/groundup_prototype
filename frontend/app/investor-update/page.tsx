@@ -122,7 +122,7 @@ export default function InvestorUpdatePage() {
                   >
                     {investorVisibleSnapshots.map((s, idx) => (
                       <option key={s.id} value={idx}>
-                        {s.title} (As of {s.as_of_date}) {s.status === "WITHDRAWN" ? "— [WITHDRAWN]" : ""}
+                        {s.title} (As of {s.as_of_date}) {s.status === "WITHDRAWN" ? ": [WITHDRAWN]" : ""}
                       </option>
                     ))}
                   </select>

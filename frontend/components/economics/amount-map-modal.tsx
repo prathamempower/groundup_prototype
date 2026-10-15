@@ -206,7 +206,7 @@ export function AmountMapModal({
                         </div>
                       </td>
                       <td className="py-2.5 px-2.5 font-mono text-[11px] text-slate-500">
-                        {item.code || "—"}
+                        {item.code || "-"}
                       </td>
                       <td
                         className={cn(
@@ -219,7 +219,7 @@ export function AmountMapModal({
                           : formatMoney(item.amountCents)}
                       </td>
                       <td className="py-2.5 px-2.5 text-right tabular-nums text-slate-500">
-                        {item.pctOfTotal > 0 ? `${item.pctOfTotal}%` : "—"}
+                        {item.pctOfTotal > 0 ? `${item.pctOfTotal}%` : "-"}
                       </td>
                       <td className="py-2.5 px-3 text-center">
                         <span
@@ -257,7 +257,7 @@ export function AmountMapModal({
                     {isNegative ? `-${formatMoney(absAmountCents)}` : formatMoney(absAmountCents)}
                   </td>
                   <td className="py-2.5 px-2.5 text-right tabular-nums">100%</td>
-                  <td className="py-2.5 px-3 text-center text-slate-400">—</td>
+                  <td className="py-2.5 px-3 text-center text-slate-400">-</td>
                 </tr>
               </tfoot>
             </table>

@@ -58,15 +58,15 @@ export const ERROR_MAPPINGS: Record<ApiErrorCode | string, ErrorDescriptor> = {
     isRetryable: true,
   },
   STEP_UP_REQUIRED: {
-    title: "Elevated Security Verification",
-    message: "This sensitive financial action requires elevated credentials.",
+    title: "Privileged Security Verification",
+    message: "This sensitive financial action requires privileged credentials.",
     actionHint: "Re-authenticate to confirm this operation.",
     isRetryable: true,
   },
   FORBIDDEN: {
     title: "Permission Denied",
     message: "Your current role does not have authorization to perform this operation.",
-    actionHint: "Contact an organization Owner to request elevated access.",
+    actionHint: "Contact an organization Owner to request privileged access.",
     isRetryable: false,
   },
   PROJECT_SCOPE_DENIED: {
