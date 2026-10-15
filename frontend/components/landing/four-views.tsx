@@ -18,7 +18,8 @@ export function FourViews() {
               </MaskedText>
             </h2>
             <p className="mt-4 text-fluid-subtitle leading-relaxed text-pretty text-muted-foreground">
-              A draw requested is not a draw approved. An invoice received is not an invoice paid. GroundUp tracks each milestone separately so you only count verified funds.
+              A draw request, a lender approval, and cleared bank funds are three different facts. An invoice and proof of
+              payment are two more. GroundUp tracks each stage separately and only counts money once it is verified.
             </p>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
               Step through the stages or watch the auto-advance cycle to see what GroundUp counts at each milestone.

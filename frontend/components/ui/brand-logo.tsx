@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { GroundUpMark } from "@/components/brand/GroundUpBrand";
 
 export interface BrandLogoProps {
   size?: "sm" | "md" | "lg";
@@ -51,18 +51,11 @@ export function BrandLogo({
 
   const content = (
     <div className={`flex items-center gap-2.5 min-w-0 ${className}`}>
-      {/* High-Contrast Crisp Emblem Badge */}
+      {/* High-Contrast Crisp Emblem Badge (High-Resolution Vector SVG) */}
       <div
         className={`relative shrink-0 ${sizeConfig.box} bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center transition-all group-hover:border-blue-400 group-hover:shadow-xs`}
       >
-        <Image
-          src="/logo.png"
-          alt="GroundUp Logo"
-          width={sizeConfig.iconSize}
-          height={sizeConfig.iconSize}
-          className="h-full w-full object-contain select-none"
-          priority
-        />
+        <GroundUpMark size={sizeConfig.iconSize} className="select-none" />
       </div>
 
       {!iconOnly && showWordmark && (

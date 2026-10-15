@@ -6,6 +6,8 @@ import { cn } from '../../lib/utils';
 import { MaskedText } from '../ui/masked-text';
 import { Reveal } from '../reveal';
 
+import { useInView } from '../../hooks/use-in-view';
+
 interface ProductFilmProps {
   onStartOnboarding?: () => void;
 }
@@ -21,7 +23,12 @@ const SCENE_CHAPTERS = [
 export function ProductFilm({ onStartOnboarding }: ProductFilmProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const { ref: inViewRef, inView: isNearView } = useInView<HTMLElement>({
+    threshold: 0,
+    rootMargin: '400px 0px 400px 0px',
+    once: false,
+  });
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(30);
@@ -40,16 +47,22 @@ export function ProductFilm({ onStartOnboarding }: ProductFilmProps) {
         }
       }
     }
+  }, []);
 
-    // Attempt video playback
-    if (videoRef.current) {
+  // Smart playback: automatically pause when out of view, resume when back in view
+  useEffect(() => {
+    if (!videoRef.current || reducedMotion) return;
+    if (isNearView) {
       videoRef.current.play().then(() => {
         setIsPlaying(true);
       }).catch(() => {
         setIsPlaying(false);
       });
+    } else {
+      videoRef.current.pause();
+      setIsPlaying(false);
     }
-  }, []);
+  }, [isNearView, reducedMotion]);
 
   const handleTimeUpdate = () => {
     if (videoRef.current) {
@@ -110,6 +123,7 @@ export function ProductFilm({ onStartOnboarding }: ProductFilmProps) {
   return (
     <section 
       id="product-film" 
+      ref={inViewRef}
       className="relative border-b border-border bg-card/40 py-16 sm:py-20 lg:py-24 overflow-hidden"
       aria-labelledby="product-film-heading"
     >
@@ -159,6 +173,7 @@ export function ProductFilm({ onStartOnboarding }: ProductFilmProps) {
               ref={videoRef}
               src="/videos/groundup-processing-demo.mp4"
               poster="/videos/groundup-processing-demo-poster.jpg"
+              preload="metadata"
               playsInline
               autoPlay={!reducedMotion}
               muted={isMuted}

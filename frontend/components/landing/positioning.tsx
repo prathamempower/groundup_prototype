@@ -20,9 +20,9 @@ const INTEGRATIONS = [
 ];
 
 const AUDIENCE = [
-  { title: 'Owners & Developers', body: 'Track investor equity and loan advances against live trade spend—no month-end wait required.' },
-  { title: 'Finance Controllers & Accountants', body: 'Work from one verified ledger instead of disconnected spreadsheets. Turn HUD statements and invoices into clean draw packages.' },
-  { title: "Owner's Representatives & PMs", body: 'Track permit sign-offs, forecast delay carry, and verify retainage before releasing funds.' },
+  { title: 'Owners & Developers', body: 'Reconcile investor equity and bank loan capital against actual trade spend without waiting for month-end reconciliation reports.' },
+  { title: 'Finance Controllers & Accountants', body: 'Collaborate on one verified ledger instead of passing fragile spreadsheets. Ingest HUD filings and loan notes directly into automated draw packets.' },
+  { title: "Owner's Representatives & PMs", body: 'Track municipal building department inspection signoffs, predict schedule delay carry, and verify 10% retainage before funds move.' },
 ];
 
 export function Positioning() {

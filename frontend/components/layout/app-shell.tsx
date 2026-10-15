@@ -40,6 +40,8 @@ export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
 
+  const isPublicRoute = pathname === "/" || pathname === "/onboarding" || pathname.startsWith("/onboarding");
+
   const {
     data: session,
     isLoading: isSessionLoading,
@@ -53,13 +55,24 @@ export function AppShell({ children }: AppShellProps) {
   });
 
   React.useEffect(() => {
-    if (pathname === "/" || pathname.startsWith("/auth/") || isSessionLoading || sessionError || session) return;
+    if (isPublicRoute || pathname.startsWith("/auth/") || isSessionLoading || sessionError || session) return;
+    const previouslyAuthenticated =
+      typeof window !== "undefined" && window.localStorage.getItem("groundup_session_seen") === "1";
+    if (previouslyAuthenticated) {
+      window.localStorage.removeItem("groundup_session_seen");
+      const returnTo =
+        typeof window !== "undefined"
+          ? `${window.location.pathname}${window.location.search}`
+          : pathname;
+      router.replace(`/auth/session-expired?returnTo=${encodeURIComponent(returnTo)}`);
+      return;
+    }
     const returnTo =
       typeof window !== "undefined"
         ? `${window.location.pathname}${window.location.search}`
         : pathname;
     router.replace(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
-  }, [pathname, router, session, sessionError, isSessionLoading]);
+  }, [pathname, router, session, sessionError, isSessionLoading, isPublicRoute]);
 
   const currentRole = session?.user.role || "OWNER";
 
@@ -127,12 +140,19 @@ export function AppShell({ children }: AppShellProps) {
   const isAccessDenied = isGlobalAccessDenied || isSectionForbidden;
 
   const isAuthRoute = pathname.startsWith("/auth/");
-  const isPublicRoute = pathname === "/";
   const isDedicatedFlow = pathname === "/projects/new" || pathname === "/onboarding";
 
-  if (isPublicRoute || isAuthRoute) {
+  if (isAuthRoute) {
     return (
       <div className="min-h-screen w-full bg-app text-text-primary">
+        {children}
+      </div>
+    );
+  }
+
+  if (isPublicRoute) {
+    return (
+      <div className="min-h-screen w-full overflow-y-auto bg-app text-text-primary">
         {children}
       </div>
     );
@@ -213,7 +233,7 @@ export function AppShell({ children }: AppShellProps) {
                   className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body font-medium text-white hover:bg-primary-hover focus-visible:outline-primary"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Return to Projects
+                  Return to Project Portfolio
                 </Link>
               </div>
             </div>

@@ -11,9 +11,17 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  async rewrites() {
+    const apiProxyUrl = process.env.API_PROXY_URL || "http://127.0.0.1:8000";
+    return [
+      {
+        source: "/api/v1/:path*",
+        destination: `${apiProxyUrl}/api/v1/:path*`,
+      },
+    ];
+  },
   webpack: (config, { dev }) => {
     if (dev) {
-      // Prevent ChunkLoadError timeouts during heavy initial compilation on dev
       config.output = config.output || {};
       config.output.chunkLoadTimeout = 300000;
     }

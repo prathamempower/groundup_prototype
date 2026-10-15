@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { LandingPageClient } from "@/components/landing/LandingPageClient";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://groundup.ai"),
   title: "GroundUp AI",
   description:
     "Source-led financial control layer for real estate developers, owners, and capital partners. Automated draw package assembly, statutory lien protection, and live forecast at completion.",
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "GroundUp AI" }],
   openGraph: {
-    title: "GroundUp AI",
+    title: "GroundUp AI: Development Financial Control & Construction Intelligence",
     description:
       "Source-led financial control layer for real estate developers, owners, and capital partners.",
     url: "https://groundup.ai",
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
         url: "/landing/hero-building.jpg",
         width: 1200,
         height: 630,
-        alt: "GroundUp AI",
+        alt: "GroundUp AI Construction Financial Platform",
       },
     ],
     locale: "en_US",
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "GroundUp AI",
+    title: "GroundUp AI: Development Financial Control",
     description:
       "Source-led financial control layer for real estate developers, owners, and capital partners.",
     images: ["/landing/hero-building.jpg"],

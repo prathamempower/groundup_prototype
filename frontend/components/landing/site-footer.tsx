@@ -336,7 +336,7 @@ export function SiteFooter({ onStartOnboarding }: SiteFooterProps) {
         {/* Brand Mission Row */}
         <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <Logo theme="dark" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
+            <Logo onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
             <p className="text-xs text-slate-400 leading-relaxed">
               GroundUp AI delivers the construction financial command center for real estate developers: reconciling investor equity, construction loans, bank statements, and HUD settlement filings, enforcing 10% retainage withholdings, and building lender-ready draw packages without spreadsheet delays.
             </p>

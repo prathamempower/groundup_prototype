@@ -25,6 +25,228 @@ export interface AuthenticatedUser {
   authProvider: 'google' | 'email' | 'demo';
 }
 
+export type OnboardingRole = string;
+
+export interface UserContext {
+  id: string;
+  name: string;
+  role: string;
+  roleTitle: string;
+  roleDescription: string;
+  badgeColor: string;
+}
+
+export const USER_ROLES: Record<string, UserContext> = {
+  OWNER: {
+    id: 'user-owner-1',
+    name: 'Hardik Parikh',
+    role: 'OWNER',
+    roleTitle: 'Project Owner',
+    roleDescription: 'Highest executive authority with full portfolio, pro forma, draw, and audit control.',
+    badgeColor: 'bg-slate-900 text-white',
+  },
+  DEVELOPER: {
+    id: 'user-dev-lead',
+    name: 'David Vance',
+    role: 'DEVELOPER',
+    roleTitle: 'Developer',
+    roleDescription: 'Underwriting pro forma, municipal entitlements, budget lines, and project milestones.',
+    badgeColor: 'bg-blue-900 text-white',
+  },
+  FINANCE_LEAD: {
+    id: 'user-fin-1',
+    name: 'Sarah Jenkins',
+    role: 'FINANCE_LEAD',
+    roleTitle: 'Finance Lead',
+    roleDescription: 'Financial ledger: matches expenses to budget lines, draw compilation, and cash flow governance.',
+    badgeColor: 'bg-emerald-800 text-white',
+  },
+  ACCOUNTANT: {
+    id: 'user-acct-1',
+    name: 'Elena Rostova',
+    role: 'ACCOUNTANT',
+    roleTitle: 'Accountant',
+    roleDescription: 'Expense ledger, invoice intake, lien waiver compliance, and credit card reconciliation.',
+    badgeColor: 'bg-teal-800 text-white',
+  },
+  PM: {
+    id: 'user-pm-1',
+    name: 'Marcus Vance',
+    role: 'PM',
+    roleTitle: 'Project Manager',
+    roleDescription: 'Field and Schedule: milestone progress, municipal inspections, root-cause delay attribution.',
+    badgeColor: 'bg-sky-800 text-white',
+  },
+  GC: {
+    id: 'user-gc-1',
+    name: 'Kunal Shah',
+    role: 'GC',
+    roleTitle: 'General Contractor',
+    roleDescription: 'Milestone claims, change order requests, worker logs, material receipts, and photo proof.',
+    badgeColor: 'bg-indigo-700 text-white',
+  },
+  INVESTOR: {
+    id: 'user-investor-1',
+    name: 'Krutarth Shah',
+    role: 'INVESTOR',
+    roleTitle: 'Investor',
+    roleDescription: 'Read-only transparency: capital deployed, projected ROI vs baseline, next funding events, narrative updates.',
+    badgeColor: 'bg-violet-800 text-white',
+  },
+  PARTNER: {
+    id: 'user-partner-1',
+    name: 'Sanjay Patel',
+    role: 'PARTNER',
+    roleTitle: 'Partner',
+    roleDescription: 'Co-sponsor equity visibility, milestone progress, risk exposure, and executive updates.',
+    badgeColor: 'bg-purple-800 text-white',
+  },
+  ADMIN: {
+    id: 'user-admin-1',
+    name: 'Workspace Administrator',
+    role: 'ADMIN',
+    roleTitle: 'Admin',
+    roleDescription: 'Workspace administration, team roles, integration credentials, and audit inspection.',
+    badgeColor: 'bg-slate-800 text-white',
+  },
+  DEVELOPER_OWNER: {
+    id: 'user-dev-1',
+    name: 'Hardik Parikh',
+    role: 'DEVELOPER_OWNER',
+    roleTitle: 'Project Owner',
+    roleDescription: 'Full control: portfolio economics, pro forma ROI, cash gap, change order approvals, draw packets.',
+    badgeColor: 'bg-slate-900 text-white',
+  },
+  CFO: {
+    id: 'user-cfo-1',
+    name: 'Sarah Jenkins',
+    role: 'CFO',
+    roleTitle: 'Finance Lead',
+    roleDescription: 'Financial ledger: matches expenses to budget lines, Amex card feeds, contingency absorption, draw reconciliation.',
+    badgeColor: 'bg-emerald-800 text-white',
+  },
+};
+
+export type OnboardingProjectStage =
+  | 'PRE_CONSTRUCTION'
+  | 'IN_CONSTRUCTION'
+  | 'NEAR_COMPLETION'
+  | 'COMPLETED_HISTORICAL'
+  | 'MULTIPLE_ACTIVE';
+
+export type OnboardingFundingStructure =
+  | 'CONSTRUCTION_LOAN'
+  | 'INVESTOR_CAPITAL'
+  | 'OWNER_EQUITY'
+  | 'MIXED_FUNDING'
+  | 'NOT_SURE_YET';
+
+export type OnboardingDataSource =
+  | 'BUDGET_SOV'
+  | 'BANK_STATEMENTS'
+  | 'ACCOUNTING_GL'
+  | 'INVOICES_VENDOR_RECORDS'
+  | 'LOAN_DRAW_DOCS'
+  | 'INSPECTIONS_SCHEDULE'
+  | 'SETTLEMENT_CLOSING_DOCS'
+  | 'NOT_ORGANIZED_YET';
+
+export type OnboardingConcern =
+  | 'BUDGET_OVERRUN'
+  | 'CASH_FUNDING_GAP'
+  | 'DRAW_DELAYS'
+  | 'RECONCILIATION_PROBLEMS'
+  | 'INSPECTION_SCHEDULE_DELAYS'
+  | 'MISSING_DOCUMENTATION'
+  | 'FORECAST_PROFIT_VISIBILITY'
+  | 'GENERAL_PROJECT_CONTROL';
+
+export type OnboardingTeamStructure =
+  | 'SOLO_OWNER'
+  | 'FINANCE_TEAM'
+  | 'INTERNAL_PROJECT_TEAM'
+  | 'EXTERNAL_GC_CONTRACTORS'
+  | 'INVESTORS_PARTNERS'
+  | 'MULTIPLE_STAKEHOLDERS';
+
+export type OnboardingDashboardPreference =
+  | 'EXECUTIVE_OVERVIEW'
+  | 'FINANCIAL_CONTROL'
+  | 'CONSTRUCTION_OPERATIONS'
+  | 'FUNDING_DRAWS'
+  | 'INVESTOR_VIEW'
+  | 'ADAPTIVE_RECOMMENDED';
+
+export interface OnboardingAnswers {
+  role?: string;
+  priority?: string;
+  stage?: OnboardingProjectStage;
+  funding?: OnboardingFundingStructure;
+  availableSources?: OnboardingDataSource[];
+  concern?: OnboardingConcern;
+  teamStructure?: OnboardingTeamStructure;
+  dashboardBehavior?: OnboardingDashboardPreference;
+  firstName?: string;
+  lastName?: string;
+  username?: string;
+  dob?: string;
+  email?: string;
+  emailVerified?: boolean;
+  phoneNumber?: string;
+  phoneVerified?: boolean;
+  organizationName?: string;
+  organizationType?: string;
+  organizationDomain?: string;
+  domainOption?: 'connect_domain' | 'use_current_email' | 'skip_domain';
+  organizationSize?: 'Small' | 'Medium' | 'Large';
+  employeeCount?: number;
+  website?: string;
+  organizationWebsite?: string;
+  projectName?: string;
+  projectAddress?: string;
+  projectStage?: OnboardingProjectStage;
+  targetCompletionDate?: string;
+  skipProjectCreation?: boolean;
+  primaryChallenge?: string;
+  secondaryChallenges?: string[];
+  primaryFocus?: string;
+  secondaryFocuses?: string[];
+  selectedDocumentTypes?: string[];
+  password?: string;
+  teamInvitations?: Array<{ email: string; role: OnboardingRole }>;
+  uploadedDocuments?: Array<{
+    id: string;
+    name: string;
+    size: number;
+    type: string;
+    status: 'uploading' | 'processing' | 'review' | 'verified';
+    category?: string;
+  }>;
+}
+
+export interface OnboardingConfigurationResult {
+  role: string;
+  roleDisplayName: string;
+  dashboardLayout: OnboardingDashboardPreference;
+  commandCenterTitle: string;
+  prioritizedModules: string[];
+  whyPersonalizedReason: string;
+  recommendedLandingScreen: string;
+  recommendedFirstAction: {
+    title: string;
+    description: string;
+    buttonLabel: string;
+    targetScreen: string;
+  };
+  onboardingChecklist: Array<{
+    id: string;
+    title: string;
+    status: 'COMPLETED' | 'RECOMMENDED' | 'PENDING';
+    detail: string;
+  }>;
+}
+
+
 export type LifecycleStage =
   | "ACQUISITION"
   | "PRE_CONSTRUCTION"
@@ -412,7 +634,7 @@ export interface DrawLine {
   budget_line_id: string;
   budget_line_name: string;
   budget_line_code: string;
-  budgeted_amount?: string; // cents
+  budgeted_amount?: string;
   requested_amount: string; // cents
   recommended_amount: string;
   approved_amount: string;
@@ -1104,3 +1326,29 @@ export interface ReviewGCSubmissionPayload {
   decision: "APPROVED" | "REJECTED";
   comments?: string;
 }
+
+export type {
+  SpecialResponseValue,
+  OnboardingRole as ValidatedOnboardingRole,
+  Step1EmailInput,
+  Step2AccountInput,
+  Step3ChallengeInput,
+  Step4OrganizationInput,
+  Step5ProjectInput,
+  Step6RecordsInput,
+  Step7TeamInput,
+  OnboardingSubmissionPayload,
+} from "../validations/onboarding";
+export {
+  SPECIAL_RESPONSE_VALUES,
+  specialResponseSchema,
+  step1EmailSchema,
+  step2AccountSchema,
+  step3ChallengeSchema,
+  step4OrganizationSchema,
+  step5ProjectSchema,
+  step6RecordsSchema,
+  step7TeamSchema,
+  onboardingSubmissionSchema,
+  STEP_SCHEMAS,
+} from "../validations/onboarding";

@@ -5,20 +5,20 @@ import { useEffect, useRef } from 'react';
 export interface UseScrollParallaxOptions {
   layerOffsets?: number[];
   disabled?: boolean;
+  speedMultiplier?: number;
 }
 
 /**
- * Hook to coordinate CSS Scroll-Driven Parallax animations.
- * If native CSS scroll-driven animations are supported (animation-timeline: view()),
- * the browser's compositor handles the effect natively.
- * For unsupported browsers (such as Firefox), an IntersectionObserver + scroll listener
- * fallback updates the transform translateY properties with zero jitter.
+ * Universal GPU-accelerated Scroll Parallax Hook.
+ * Coordinates smooth spatial depth using requestAnimationFrame and IntersectionObserver.
+ * Operates on .parallax-layer children without layout thrashing.
+ * Respects prefers-reduced-motion and gracefully resets transforms upon unmount.
  */
 export function useScrollParallax<T extends HTMLElement = HTMLDivElement>(
   options: UseScrollParallaxOptions = {}
 ) {
   const wrapperRef = useRef<T>(null);
-  const { layerOffsets = [40, 80, 140, 200], disabled = false } = options;
+  const { layerOffsets = [-15, 12, -20, 15, -10], disabled = false, speedMultiplier = 1 } = options;
 
   useEffect(() => {
     if (disabled || typeof window === 'undefined') {
@@ -36,18 +36,6 @@ export function useScrollParallax<T extends HTMLElement = HTMLDivElement>(
       return;
     }
 
-    // Check for native CSS Scroll-Driven Animations support
-    const hasNativeSupport =
-      typeof CSS !== 'undefined' &&
-      CSS.supports &&
-      CSS.supports('(animation-timeline: view()) and (animation-range: entry)');
-
-    if (hasNativeSupport) {
-      // Native CSS compositor handles the animation via view-timeline
-      return;
-    }
-
-    // Fallback for browsers without native scroll-driven animations (e.g. Firefox)
     const layers = wrapper.querySelectorAll<HTMLElement>('.parallax-layer');
     if (layers.length === 0) {
       return;
@@ -56,29 +44,34 @@ export function useScrollParallax<T extends HTMLElement = HTMLDivElement>(
     let isListening = false;
     let rafId: number | null = null;
 
-    const onScroll = () => {
-      if (rafId !== null) {
-        return;
-      }
+    const updateParallax = () => {
+      rafId = null;
+      const rect = wrapper.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
 
-      rafId = window.requestAnimationFrame(() => {
-        rafId = null;
-        const scrollY = window.scrollY;
-        const wrapperRect = wrapper.getBoundingClientRect();
-        const wrapperTop = wrapperRect.top + scrollY;
-        const wrapperHeight = wrapperRect.height;
-        const windowHeight = window.innerHeight;
+      // Wrapper center relative to viewport center (-1 to 1)
+      const wrapperCenter = rect.top + rect.height / 2;
+      const viewportCenter = windowHeight / 2;
+      const normalizedOffset = (wrapperCenter - viewportCenter) / (windowHeight / 2);
 
-        if (scrollY >= wrapperTop - windowHeight && scrollY <= wrapperTop + wrapperHeight) {
-          const scrollPercent = (scrollY - (wrapperTop - windowHeight)) / (wrapperHeight + windowHeight);
+      // Clamp to reasonable bounds to prevent over-extension
+      const clampedOffset = Math.max(-1.5, Math.min(1.5, normalizedOffset));
 
-          layers.forEach((layer, index) => {
-            const configuredOffset = layerOffsets[index] ?? 100 * (index + 1);
-            const translateY = configuredOffset * (1 - scrollPercent);
-            layer.style.transform = `translateY(${translateY}px)`;
-          });
-        }
+      layers.forEach((layer, index) => {
+        // Allow per-element data-parallax-speed override, otherwise use layerOffsets array
+        const customSpeed = layer.dataset.parallaxSpeed ? parseFloat(layer.dataset.parallaxSpeed) : null;
+        const baseOffset = customSpeed !== null ? customSpeed : (layerOffsets[index % layerOffsets.length] ?? 15);
+        const translateY = Math.round(baseOffset * clampedOffset * speedMultiplier * 10) / 10;
+
+        layer.style.transform = `translate3d(0, ${translateY}px, 0)`;
+        layer.style.willChange = 'transform';
       });
+    };
+
+    const onScroll = () => {
+      if (rafId === null) {
+        rafId = window.requestAnimationFrame(updateParallax);
+      }
     };
 
     const observer = new IntersectionObserver(
@@ -87,18 +80,24 @@ export function useScrollParallax<T extends HTMLElement = HTMLDivElement>(
           if (entry.isIntersecting) {
             if (!isListening) {
               window.addEventListener('scroll', onScroll, { passive: true });
+              window.addEventListener('resize', onScroll, { passive: true });
               isListening = true;
               onScroll();
             }
           } else {
             if (isListening) {
               window.removeEventListener('scroll', onScroll);
+              window.removeEventListener('resize', onScroll);
               isListening = false;
+            }
+            if (rafId !== null) {
+              window.cancelAnimationFrame(rafId);
+              rafId = null;
             }
           }
         });
       },
-      { threshold: 0 }
+      { threshold: 0, rootMargin: '100px 0px 100px 0px' }
     );
 
     observer.observe(wrapper);
@@ -108,15 +107,17 @@ export function useScrollParallax<T extends HTMLElement = HTMLDivElement>(
       observer.disconnect();
       if (isListening) {
         window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onScroll);
       }
       if (rafId !== null) {
         window.cancelAnimationFrame(rafId);
       }
       layers.forEach((layer) => {
         layer.style.transform = '';
+        layer.style.willChange = '';
       });
     };
-  }, [disabled, layerOffsets]);
+  }, [disabled, layerOffsets, speedMultiplier]);
 
   return wrapperRef;
 }

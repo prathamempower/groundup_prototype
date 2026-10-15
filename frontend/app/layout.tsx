@@ -5,6 +5,7 @@ import { AppProviders } from "@/components/providers/app-providers";
 import { AppShell } from "@/components/layout/app-shell";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://groundup.ai"),
   title: {
     default: "GroundUp AI",
     template: "%s | GroundUp AI",
@@ -32,9 +33,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${fontSans.variable} ${fontMono.variable} font-sans`}
     >
-      <body className="font-sans antialiased bg-app text-text-primary selection:bg-primary-subtle selection:text-primary">
+      <body suppressHydrationWarning className="font-sans antialiased bg-app text-text-primary selection:bg-primary-subtle selection:text-primary">
         <AppProviders>
           <AppShell>{children}</AppShell>
         </AppProviders>

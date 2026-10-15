@@ -49,25 +49,33 @@ export function StickyReveal() {
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
+    let rafId: number | null = null;
     const handleScroll = () => {
-      const el = containerRef.current;
-      if (!el) return;
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        const el = containerRef.current;
+        if (!el) return;
 
-      const rect = el.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      const totalScrollable = rect.height - windowHeight;
+        const rect = el.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        const totalScrollable = rect.height - windowHeight;
 
-      if (totalScrollable <= 0) return;
+        if (totalScrollable <= 0) return;
 
-      const currentScroll = -rect.top;
-      const progress = Math.min(Math.max(currentScroll / totalScrollable, 0), 1);
-      setScrollProgress(progress);
+        const currentScroll = -rect.top;
+        const progress = Math.min(Math.max(currentScroll / totalScrollable, 0), 1);
+        setScrollProgress(progress);
+      });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+    };
   }, []);
 
   // Determine active phase based on progress (0.0 to 1.0)

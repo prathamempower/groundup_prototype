@@ -721,6 +721,38 @@ export const api = {
     getTasks: async (projectId: string) => {
       return wrap(mockStore.getOnboardingTasks(projectId));
     },
+    complete: async (payload: any) => {
+      try {
+        const res = await fetch("/api/onboarding/complete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.project) {
+            mockStore.createProject(json.project);
+          }
+          return wrap(json);
+        }
+      } catch (err) {
+        console.warn("Falling back to local mockStore project creation:", err);
+      }
+      const p = payload as { answers?: { projectName?: string; projectAddress?: string; projectStage?: string; targetBudget?: number } } | undefined;
+      const answers = p?.answers || {};
+      const newProject = mockStore.createProject({
+        name: answers.projectName || "73 Broadway",
+        address: answers.projectAddress || "73 Broadway, Brooklyn, NY 11249",
+        lifecycle_stage: (answers.projectStage as Project["lifecycle_stage"]) || "CONSTRUCTION",
+        loan_commitment: typeof answers.targetBudget === "number" ? String(answers.targetBudget) : "4200000",
+      });
+      return wrap({
+        success: true,
+        projectId: newProject.id,
+        project: newProject,
+        message: "Workspace provisioned successfully",
+      });
+    },
   },
 
   readiness: {

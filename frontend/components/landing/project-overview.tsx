@@ -232,6 +232,18 @@ export function ProjectOverview() {
                       strokeWidth="2"
                     />
 
+                    {/* Vertical Hairline Guide at x=140 connecting to milestone */}
+                    <line
+                      x1="140"
+                      y1="8"
+                      x2="140"
+                      y2="118"
+                      stroke="#94a3b8"
+                      strokeWidth="1"
+                      strokeDasharray="2 2"
+                      strokeOpacity="0.4"
+                    />
+
                     {/* Forecast Continuation (Dashed) */}
                     <path
                       d="M 140 60 Q 220 25, 320 8"
@@ -242,43 +254,53 @@ export function ProjectOverview() {
                       strokeDasharray="4 3"
                     />
 
-                    {/* Target Current Milestone Dot at x=140 */}
-                    <circle cx="140" cy="60" r="3.5" fill="#0f172a" className="dark:fill-white" />
-                    <circle cx="140" cy="66" r="3" fill="#10b981" />
-                    <circle cx="140" cy="70" r="3" fill="#f59e0b" />
+                    {/* Target Current Milestone Dots at x=140 with crisp white outline */}
+                    <circle cx="140" cy="60" r="4.5" fill="#0f172a" stroke="#ffffff" strokeWidth="1.5" />
+                    <circle cx="140" cy="66" r="3.5" fill="#10b981" stroke="#ffffff" strokeWidth="1.5" />
+                    <circle cx="140" cy="70" r="3.5" fill="#f59e0b" stroke="#ffffff" strokeWidth="1.5" />
                   </svg>
 
-                  {/* Interactive Tooltip Callout at Mar 26 */}
+                  {/* Fully Opaque Solid Tooltip Callout at Mar 26 Milestone */}
                   {hoveredPoint && (
-                    <div className="absolute top-2 left-1/2 -translate-x-1/2 rounded-xl border border-border bg-card/95 backdrop-blur-md p-2.5 shadow-xl text-[10px] space-y-1 min-w-[125px] pointer-events-none">
-                      <span className="font-bold text-foreground block border-b border-border/60 pb-1">Mar 26</span>
-                      <div className="flex items-center justify-between text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <span className="size-1.5 rounded-full bg-slate-400" />
-                          <span>Planned</span>
+                    <div
+                      className="absolute top-1 left-[44%] -translate-x-1/2 rounded-xl border border-slate-200/90 bg-white shadow-2xl p-3 text-xs space-y-2 min-w-[175px] pointer-events-none z-30 ring-1 ring-slate-900/5 select-none"
+                      style={{ backgroundColor: '#ffffff', opacity: 1 }}
+                    >
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                        <span className="font-bold text-slate-900 text-xs font-sans">Mar 26</span>
+                        <span className="text-[9px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded-md">
+                          Draw #6
                         </span>
-                        <span className="font-mono font-semibold text-foreground">$3.30M</span>
                       </div>
-                      <div className="flex items-center justify-between text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <span className="size-1.5 rounded-full bg-foreground" />
-                          <span>Spend</span>
-                        </span>
-                        <span className="font-mono font-semibold text-foreground">$3.40M</span>
-                      </div>
-                      <div className="flex items-center justify-between text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <span className="size-1.5 rounded-full bg-emerald-500" />
-                          <span>Progress</span>
-                        </span>
-                        <span className="font-mono font-semibold text-foreground">$3.20M</span>
-                      </div>
-                      <div className="flex items-center justify-between text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <span className="size-1.5 rounded-full bg-amber-500" />
-                          <span>Funding</span>
-                        </span>
-                        <span className="font-mono font-semibold text-foreground">$3.20M</span>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-slate-600 gap-4">
+                          <span className="flex items-center gap-1.5 text-[11px] font-medium">
+                            <span className="size-2 rounded-full bg-slate-400 shrink-0" />
+                            <span>Planned</span>
+                          </span>
+                          <span className="font-mono font-bold text-slate-900 tabular-nums text-xs">$3.30M</span>
+                        </div>
+                        <div className="flex items-center justify-between text-slate-600 gap-4">
+                          <span className="flex items-center gap-1.5 text-[11px] font-medium">
+                            <span className="size-2 rounded-full bg-slate-900 shrink-0" />
+                            <span>Spend</span>
+                          </span>
+                          <span className="font-mono font-bold text-slate-900 tabular-nums text-xs">$3.40M</span>
+                        </div>
+                        <div className="flex items-center justify-between text-slate-600 gap-4">
+                          <span className="flex items-center gap-1.5 text-[11px] font-medium">
+                            <span className="size-2 rounded-full bg-emerald-500 shrink-0" />
+                            <span>Progress</span>
+                          </span>
+                          <span className="font-mono font-bold text-emerald-700 tabular-nums text-xs">$3.20M</span>
+                        </div>
+                        <div className="flex items-center justify-between text-slate-600 gap-4">
+                          <span className="flex items-center gap-1.5 text-[11px] font-medium">
+                            <span className="size-2 rounded-full bg-amber-500 shrink-0" />
+                            <span>Funding</span>
+                          </span>
+                          <span className="font-mono font-bold text-amber-700 tabular-nums text-xs">$3.20M</span>
+                        </div>
                       </div>
                     </div>
                   )}

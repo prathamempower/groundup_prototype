@@ -22,7 +22,8 @@ import { Reveal } from '../reveal';
 export function RecordsStory() {
   const [activeStep, setActiveStep] = useState(1);
   const flowRef = useScrollParallax<HTMLElement>({
-    layerOffsets: [20, 45, 70, 95, 120],
+    layerOffsets: [-12, 10, -16, 12, -10],
+    speedMultiplier: 0.8,
   });
 
   return (
@@ -59,10 +60,10 @@ export function RecordsStory() {
                 1
               </div>
               <h3 className="font-bold text-sm text-foreground">
-                Send or upload
+                Email or upload
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Send invoices, loan agreements, bank statements, and lien waivers to your project inbox.
+                Forward bank statements, HUD filings, loan statements, and trade bills to your project inbox or dropzone.
               </p>
             </div>
 
@@ -73,7 +74,7 @@ export function RecordsStory() {
               </div>
               <span className="text-xs font-semibold text-foreground">Project Inbox &amp; Dropzone</span>
               <span className="text-[10px] font-mono text-muted-foreground tracking-tight">
-                Invoices, Bank Statements, Waivers, Settlements
+                HUD, Bank Statements, Invoices, Lien Waivers
               </span>
             </div>
           </div>
@@ -88,10 +89,10 @@ export function RecordsStory() {
                 2
               </div>
               <h3 className="font-bold text-sm text-foreground">
-                Extract &amp; classify
+                Budget &amp; loan parsing
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Automatically extract line items, CSI cost codes, and loan terms directly into your budget ledger.
+                Parse line items, loan amortization notes, and CSI cost codes, linking each transaction to your pro forma ledger.
               </p>
             </div>
 
@@ -132,10 +133,10 @@ export function RecordsStory() {
                 3
               </div>
               <h3 className="font-bold text-sm text-foreground">
-                Reconcile &amp; verify
+                Reconciliation &amp; liens
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Match bank wires to settlement sheets, catch duplicate bills, and verify signed lien waivers.
+                Reconcile bank wires against HUD settlements, catch duplicate invoices, and verify statutory lien waivers.
               </p>
             </div>
 
@@ -173,7 +174,7 @@ export function RecordsStory() {
                 The Four Truths
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Track loan funds, equity, actual spend, and physical progress together on one real-time ledger.
+                Synchronize investor equity and bank loan funding with actual incurred spend and physical site milestones.
               </p>
             </div>
 
@@ -201,17 +202,17 @@ export function RecordsStory() {
           {/* Step 5: Draw Packet Builder & Delay Forecast */}
           <div 
             className="parallax-layer card-micro rounded-2xl border border-border bg-card p-5 shadow-xs flex flex-col justify-between space-y-4 hover:border-foreground/30 transition-all cursor-pointer"
-            data-layer="3"
+            data-layer="4"
           >
             <div className="space-y-2">
               <div className="size-7 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs font-mono">
                 5
               </div>
               <h3 className="font-bold text-sm text-foreground">
-                Draw packets &amp; forecast
+                Packet builder &amp; forecast
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Assemble lender-ready AIA G702 packets and forecast interest carry impact from inspection delays.
+                Build lender-ready AIA G702 packages collaboratively. Forecast municipal inspection delays and daily debt carry burn.
               </p>
             </div>
 

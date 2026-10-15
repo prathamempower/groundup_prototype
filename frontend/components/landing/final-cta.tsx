@@ -6,10 +6,10 @@ import { Reveal } from '../reveal';
 import { MaskedText } from '../ui/masked-text';
 
 const STEPS = [
-  'Send bank statements, loan agreements, and bills to your project inbox',
-  'Reconcile equity and bank loan advances against CSI cost codes',
-  'Assemble lender-ready draw packages with complete lien waiver tracking',
-  'Forecast inspection delay carry and protect project returns on a live timeline',
+  'Forward bank statements, HUD filings, and loan agreements to your project inbox',
+  'Reconcile investor equity and bank loan advances against CSI cost codes',
+  'Assemble lender-ready draw packages collaboratively with your project team',
+  'Forecast municipal inspection delay carry and protect project returns on one live timeline',
 ];
 
 export interface FinalCtaProps {
@@ -27,7 +27,7 @@ export function FinalCta({ onStartOnboarding }: FinalCtaProps) {
             </span>
           </h2>
           <p className="mt-5 max-w-md text-fluid-subtitle leading-relaxed text-slate-300">
-            Connect your active construction loan agreements, bank statements, and trade bills. See where every dollar clears across your Four Truths ledger.
+            Connect your active construction loan agreements, bank statements, and trade bills. See where every dollar originates and clears across your Four Truths ledger.
           </p>
           <button
             type="button"

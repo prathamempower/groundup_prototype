@@ -1,4 +1,4 @@
-import type { UserProfile, UserRole } from "@/lib/types";
+import { UserProfile, UserRole } from "@/lib/types";
 import { mockStore } from "@/lib/mock-data/store";
 
 export interface AuthSession {
@@ -170,6 +170,14 @@ export class MockAuthAdapter implements AuthAdapter {
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
       window.localStorage.removeItem("groundup_session_seen");
+      window.localStorage.removeItem("groundup_user");
+      window.localStorage.removeItem("groundup_active_project_id");
+      window.localStorage.removeItem("groundup_last_project_id");
+      window.localStorage.removeItem("groundup_onboarding_session");
+      window.localStorage.removeItem("groundup_onboarding_prefill");
+      try {
+        window.sessionStorage.clear();
+      } catch {}
     }
   }
 

@@ -23,19 +23,19 @@ const VIEWS: { key: View; label: string; title: string; body: string }[] = [
     key: 'cost',
     label: 'Cost vs. funding',
     title: 'Cumulative cost, progress, and funding against plan',
-    body: 'Spend is pacing ahead of verified site progress. Incoming loan disbursements trail expenses until monthly draws clear.',
+    body: 'Spend is running ahead of verified progress, and both are behind the planned draw curve. Cleared funding trails spend because draws arrive after costs are paid.',
   },
   {
     key: 'cash',
     label: 'Cash position',
     title: 'Cleared funding minus supported spend, by month',
-    body: 'Negative months show cash deficits where disbursements exceeded loan draws, requiring temporary equity bridge funds.',
+    body: 'Months below zero are periods where the project paid out more than it had received. Each gap has to be covered by equity, a faster draw, or delayed payables.',
   },
   {
     key: 'profit',
     label: 'Projected profit',
     title: 'Projected profit against the underwritten deal',
-    body: 'As total estimated completion costs rise, net profit decreases. Line-item cost variances directly impact investor returns.',
+    body: 'As the forecast cost at completion rises, projected profit falls. Small overruns on individual lines add up to a visible change in the return.',
   },
 ];
 
@@ -80,7 +80,10 @@ function MoneyTooltip({
     return true;
   });
   return (
-    <div className="min-w-44 rounded-md border border-border bg-card px-3 py-2 text-xs shadow-md">
+    <div
+      className="min-w-44 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-xs shadow-xl ring-1 ring-slate-950/5 select-none"
+      style={{ backgroundColor: '#ffffff', opacity: 1 }}
+    >
       <p className="mb-1.5 font-medium text-foreground">{label}</p>
       <ul className="space-y-1">
         {rows.map((entry) => {
@@ -214,7 +217,7 @@ function CostChart() {
       <LineChart data={COST_SERIES} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#E2E8F0" />
         <XAxis dataKey="month" {...axisProps} interval={2} />
-        <YAxis {...axisProps} tickFormatter={(v) => `$${v}M`} width={52} />
+        <YAxis {...axisProps} tickFormatter={(v: any) => `$${v}M`} width={52} />
         <ChartTooltip content={<MoneyTooltip config={costConfig} />} />
         <ReferenceLine
           x={SNAPSHOT.month}
@@ -240,7 +243,7 @@ function CashChart() {
       <BarChart data={CASH_SERIES} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#E2E8F0" />
         <XAxis dataKey="month" {...axisProps} interval={2} />
-        <YAxis {...axisProps} tickFormatter={(v) => `$${v}M`} width={52} />
+        <YAxis {...axisProps} tickFormatter={(v: any) => `$${v}M`} width={52} />
         <ChartTooltip cursor={{ fill: 'rgba(226, 232, 240, 0.4)' }} content={<MoneyTooltip config={cashConfig} />} />
         <ReferenceLine y={0} stroke="#0F172A" strokeOpacity={0.4} />
         <ReferenceLine x={SNAPSHOT.month} stroke="#0F172A" strokeOpacity={0.35} strokeDasharray="3 3" />
@@ -264,7 +267,7 @@ function ProfitChart() {
       <LineChart data={PROFIT_SERIES} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#E2E8F0" />
         <XAxis dataKey="month" {...axisProps} interval={1} />
-        <YAxis {...axisProps} domain={[5, 6.4]} tickFormatter={(v) => `$${Number(v).toFixed(1)}M`} width={56} />
+        <YAxis {...axisProps} domain={[5, 6.4]} tickFormatter={(v: any) => `$${Number(v).toFixed(1)}M`} width={56} />
         <ChartTooltip content={<MoneyTooltip config={profitConfig} />} />
         <Line dataKey="underwritten" stroke="#94A3B8" strokeWidth={1.5} strokeDasharray="3 3" dot={false} />
         <Line dataKey="profit" stroke="#0F172A" strokeWidth={2.5} dot={{ r: 3, fill: '#0F172A' }} />
