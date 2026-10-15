@@ -12,6 +12,10 @@ import {
   ChevronRight,
   ArrowUpRight,
   Building2,
+  PanelLeftClose,
+  PanelLeftOpen,
+  ArrowLeft,
+  ChevronsUpDown,
 } from "lucide-react";
 import { UserRole, Project } from "@/lib/types";
 import { BrandLogo } from "@/components/ui/brand-logo";
@@ -156,28 +160,22 @@ export function Sidebar({
               <BrandLogo href="/projects" onClick={onCloseMobile} />
               <button
                 onClick={onToggleCollapse}
-                className="hidden md:flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200/70 transition-colors cursor-pointer shrink-0"
+                className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 border border-slate-200/60 shadow-2xs transition-all cursor-pointer shrink-0 active:scale-95"
                 aria-label="Collapse sidebar"
+                title="Collapse sidebar"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <PanelLeftClose className="h-4 w-4" />
               </button>
             </>
           ) : (
             <div className="w-full flex items-center justify-center">
               <button
                 onClick={onToggleCollapse}
-                className="h-8 w-8 rounded-lg bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center p-1.5 hover:border-blue-400 hover:shadow-xs transition-all cursor-pointer group"
+                className="h-8 w-8 rounded-lg bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center p-1.5 hover:border-blue-500 hover:text-blue-600 hover:shadow-xs transition-all cursor-pointer group"
                 aria-label="Expand sidebar"
                 title="Expand sidebar"
               >
-                <Image
-                  src="/logo.png"
-                  alt="GroundUp Logo"
-                  width={22}
-                  height={22}
-                  className="h-full w-full object-contain select-none"
-                  priority
-                />
+                <PanelLeftOpen className="h-4 w-4 text-slate-600 group-hover:text-blue-600 transition-colors" />
               </button>
             </div>
           )}
@@ -186,7 +184,7 @@ export function Sidebar({
         {/* Focused Active Project Card */}
         <div className="p-3 border-b border-slate-200/70 bg-white">
           {!collapsed ? (
-            <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-2.5 transition-colors">
+            <div className="rounded-xl border border-slate-200/90 bg-slate-50/70 p-2.5 transition-all shadow-2xs hover:border-slate-300">
               <div className="flex items-center gap-3">
                 {/* Building Thumbnail */}
                 <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-slate-200/80 bg-slate-100 shadow-2xs flex items-center justify-center">
@@ -213,12 +211,6 @@ export function Sidebar({
                     <span className="text-xs font-bold text-slate-900 truncate block leading-tight">
                       {activeProject?.name || "161 Woodlawn Ave"}
                     </span>
-                    <Link
-                      href="/projects"
-                      className="text-[10px] font-semibold text-blue-600 hover:text-blue-700 hover:underline shrink-0"
-                    >
-                      Switch
-                    </Link>
                   </div>
 
                   <span className="mt-0.5 text-[11px] text-slate-500 truncate block leading-snug">
@@ -236,9 +228,26 @@ export function Sidebar({
                   </div>
                 </div>
               </div>
+
+              {/* Distinctive Go Back / Switch Project Button */}
+              <div className="mt-2.5 pt-2 border-t border-slate-200/70">
+                <Link
+                  href="/projects"
+                  className="flex items-center justify-between w-full px-2 py-1.5 rounded-lg bg-white hover:bg-blue-50/80 border border-slate-200/80 hover:border-blue-200 text-slate-700 hover:text-blue-700 text-[11px] font-semibold transition-all shadow-2xs group"
+                  title="Return to all projects"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <ArrowLeft className="h-3 w-3 text-slate-400 group-hover:text-blue-600 group-hover:-translate-x-0.5 transition-transform" />
+                    <span>All Projects</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400 group-hover:text-blue-600 font-medium">
+                    Switch
+                  </span>
+                </Link>
+              </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center gap-2">
               <div
                 className="relative h-10 w-10 overflow-hidden rounded-lg border border-slate-200 shadow-2xs flex items-center justify-center bg-slate-100"
                 title={activeProject?.name || "161 Woodlawn Ave"}
@@ -258,6 +267,13 @@ export function Sidebar({
                   </div>
                 )}
               </div>
+              <Link
+                href="/projects"
+                className="h-7 w-7 rounded-lg bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
+                title="All Projects (Switch)"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+              </Link>
             </div>
           )}
         </div>
