@@ -17,6 +17,7 @@ import {
   Building2,
   CreditCard,
   Ban,
+  MoreHorizontal,
 } from "lucide-react";
 
 export interface ReviewItemData {
@@ -40,7 +41,8 @@ export type ResolutionActionType =
   | "ASSIGN_TRADE"
   | "CONFIRM_DRAW"
   | "SETTLE_LIABILITY"
-  | "EXCLUDE_NON_PROJECT";
+  | "EXCLUDE_NON_PROJECT"
+  | "OTHER";
 
 interface ActionConfig {
   id: ResolutionActionType;
@@ -80,6 +82,12 @@ const ACTION_OPTIONS: ActionConfig[] = [
     quickTags: ["Non-project overhead", "Owner distribution", "Personal draw"],
     icon: Ban,
   },
+  {
+    id: "OTHER",
+    label: "Others",
+    quickTags: ["Custom action", "Pending clarification", "Escrow / Title", "Municipal adjustment"],
+    icon: MoreHorizontal,
+  },
 ];
 
 interface OwnerResolutionModalProps {
@@ -97,10 +105,12 @@ export function OwnerResolutionModal({
 }: OwnerResolutionModalProps) {
   const [selectedAction, setSelectedAction] = useState<ResolutionActionType>("REQUEST_INVOICE");
   const [reason, setReason] = useState<string>("");
+  const [customAction, setCustomAction] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   React.useEffect(() => {
     if (open && item) {
+      setCustomAction("");
       if (item.resolutionType) {
         setSelectedAction(item.resolutionType as ResolutionActionType);
         setReason(item.resolutionNote || "");
@@ -132,13 +142,26 @@ export function OwnerResolutionModal({
   };
 
   const handleAddTag = (tag: string) => {
-    setReason((prev) => (prev.trim() ? `${prev.trim()} · ${tag}` : tag));
+    if (selectedAction === "OTHER" && !customAction) {
+      setCustomAction(tag);
+    } else {
+      setReason((prev) => (prev.trim() ? `${prev.trim()} · ${tag}` : tag));
+    }
   };
 
   const handleSubmit = () => {
     setIsSubmitting(true);
     setTimeout(() => {
-      const finalReason = reason.trim() || currentAction?.label || "Resolved by owner";
+      let finalReason = reason.trim();
+      if (selectedAction === "OTHER") {
+        if (customAction.trim()) {
+          finalReason = finalReason ? `${customAction.trim()} · ${finalReason}` : customAction.trim();
+        } else if (!finalReason) {
+          finalReason = "Others — Custom resolution";
+        }
+      } else {
+        finalReason = finalReason || currentAction?.label || "Resolved by owner";
+      }
       onResolve(item.id, selectedAction, finalReason);
       setIsSubmitting(false);
       onOpenChange(false);
@@ -209,6 +232,22 @@ export function OwnerResolutionModal({
             })}
           </div>
         </div>
+
+        {/* If 'Others' is selected, field to mention specific custom action */}
+        {selectedAction === "OTHER" && (
+          <div className="space-y-1.5 pt-3">
+            <label className="text-[11px] font-semibold text-slate-700 block">
+              Specify Other Action
+            </label>
+            <input
+              type="text"
+              value={customAction}
+              onChange={(e) => setCustomAction(e.target.value)}
+              placeholder="Mention the specific action (e.g. Escrow deposit, municipal permit fee, title adjustment)..."
+              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900"
+            />
+          </div>
+        )}
 
         {/* Short, optional reason input */}
         <div className="space-y-1.5 pt-3">

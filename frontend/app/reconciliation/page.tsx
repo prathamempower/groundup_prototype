@@ -33,6 +33,7 @@ import {
   ArrowUpRight,
   Info,
   DollarSign,
+  MoreHorizontal,
 } from "lucide-react";
 
 import { ImportWizardModal } from "@/components/reconciliation/import-wizard-modal";
@@ -495,6 +496,12 @@ export default function ReconciliationPage() {
         return (
           <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700 border border-slate-200">
             <Ban className="h-2.5 w-2.5" /> Excluded
+          </span>
+        );
+      case "OTHER":
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-700 border border-purple-200">
+            <MoreHorizontal className="h-2.5 w-2.5" /> Others
           </span>
         );
       default:
