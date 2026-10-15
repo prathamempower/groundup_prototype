@@ -228,26 +228,9 @@ export function Sidebar({
                   </div>
                 </div>
               </div>
-
-              {/* Distinctive Go Back / Switch Project Button */}
-              <div className="mt-2.5 pt-2 border-t border-slate-200/70">
-                <Link
-                  href="/projects"
-                  className="flex items-center justify-between w-full px-2 py-1.5 rounded-lg bg-white hover:bg-blue-50/80 border border-slate-200/80 hover:border-blue-200 text-slate-700 hover:text-blue-700 text-[11px] font-semibold transition-all shadow-2xs group"
-                  title="Return to all projects"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <ArrowLeft className="h-3 w-3 text-slate-400 group-hover:text-blue-600 group-hover:-translate-x-0.5 transition-transform" />
-                    <span>All Projects</span>
-                  </span>
-                  <span className="text-[10px] text-slate-400 group-hover:text-blue-600 font-medium">
-                    Switch
-                  </span>
-                </Link>
-              </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center">
               <div
                 className="relative h-10 w-10 overflow-hidden rounded-lg border border-slate-200 shadow-2xs flex items-center justify-center bg-slate-100"
                 title={activeProject?.name || "161 Woodlawn Ave"}
@@ -267,13 +250,6 @@ export function Sidebar({
                   </div>
                 )}
               </div>
-              <Link
-                href="/projects"
-                className="h-7 w-7 rounded-lg bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
-                title="All Projects (Switch)"
-              >
-                <ArrowLeft className="h-3.5 w-3.5" />
-              </Link>
             </div>
           )}
         </div>
