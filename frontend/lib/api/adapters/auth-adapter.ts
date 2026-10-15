@@ -53,10 +53,6 @@ export class AuthApiError extends Error {
 
 const roleTitles: Record<UserRole, string> = {
   OWNER: "Owner",
-  CFO: "Finance lead",
-  PM: "Project manager",
-  GC: "General contractor",
-  INVESTOR: "Investor",
 };
 
 export function normalizeUserProfile(user: any): UserProfile {
@@ -66,15 +62,18 @@ export function normalizeUserProfile(user: any): UserProfile {
     organization_id: user.organization_id || "org-vance-dev",
     name,
     email: user.email,
-    role: user.role,
-    title: user.title || roleTitles[user.role as UserRole] || "Principal",
-    company: user.company || "",
+    role: "OWNER",
+    title: "Owner",
+    company: user.company || "Vance Development LLC",
     avatarInitials:
       user.avatarInitials ||
       `${user.first_name?.[0] || user.name?.[0] || "U"}${user.last_name?.[0] || ""}`.toUpperCase(),
     is_active: user.is_active ?? true,
-    project_memberships: user.project_memberships || [],
-    permissions: user.permissions || ["all"],
+    project_memberships: (user.project_memberships || []).map((m: any) => ({
+      ...m,
+      role: "OWNER",
+    })),
+    permissions: ["all"],
   };
 }
 
@@ -105,16 +104,7 @@ export class MockAuthAdapter implements AuthAdapter {
     let user = mockStore.getUserByEmail(trimmed);
 
     if (!user) {
-      // Determine persona role based on email or domain
-      const role: UserRole = trimmed.includes("cfo") || trimmed.includes("s.lin")
-        ? "CFO"
-        : trimmed.includes("pm") || trimmed.includes("d.ross")
-        ? "PM"
-        : trimmed.includes("gc") || trimmed.includes("frank") || trimmed.includes("apex")
-        ? "GC"
-        : trimmed.includes("investor") || trimmed.includes("rostova")
-        ? "INVESTOR"
-        : "OWNER";
+      const role: UserRole = "OWNER";
 
       const nameParts = trimmed.split("@")[0].split(/[._-]/);
       const firstName = nameParts[0]?.charAt(0).toUpperCase() + nameParts[0]?.slice(1) || "User";
@@ -208,7 +198,7 @@ export class MockAuthAdapter implements AuthAdapter {
           window.localStorage.getItem("groundup_last_project_id")
       );
       if (hasSessionSeen || hasActiveProject) {
-        activeEmail = "alex.morgan@vancedevelopment.com";
+        activeEmail = "m.vance@vancedev.com";
         window.localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, activeEmail);
       } else {
         return null;

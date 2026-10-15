@@ -86,7 +86,7 @@ export function ResolveDiscrepancyModal({
             <div>
               <ModalTitle>Resolve Progress Verification Dispute</ModalTitle>
               <ModalDescription>
-                Conflict between PM self-reported progress and third-party certified inspection report on{" "}
+                Conflict between reported progress and third-party certified inspection report on{" "}
                 <span className="font-semibold text-text-primary">{milestone.name}</span>.
               </ModalDescription>
             </div>
@@ -113,12 +113,12 @@ export function ResolveDiscrepancyModal({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-md border border-border bg-surface p-3">
-                <div className="text-[11px] font-semibold text-text-muted">PM Self-Reported Progress</div>
+                <div className="text-[11px] font-semibold text-text-muted">Self-Reported Progress</div>
                 <div className="text-section font-bold text-text-primary tabular-nums mt-0.5">
                   {conflict.pm_percent}% Complete
                 </div>
                 <div className="text-caption text-text-secondary mt-1">
-                  Claimed by Project Manager in monthly draw application
+                  Claimed in monthly draw application
                 </div>
               </div>
 
@@ -191,7 +191,7 @@ export function ResolveDiscrepancyModal({
                     Submit Contractor Rebuttal & Request Expedited Re-Inspection
                   </div>
                   <div className="text-caption text-text-secondary mt-0.5">
-                    Maintain PM valuation ({conflict.pm_percent}%) while submitting photo logs and contractor affidavits for an expedited field re-survey.
+                    Maintain reported valuation ({conflict.pm_percent}%) while submitting photo logs and contractor affidavits for an expedited field re-survey.
                   </div>
                 </div>
               </label>

@@ -111,25 +111,10 @@ export function TeamAccessPanel({ projectId }: TeamAccessPanelProps) {
                     avatar: "bg-purple-700 text-white shadow-2xs",
                     roleLabel: "Owner",
                   },
-                  CFO: {
-                    badge: "bg-blue-50 text-blue-700 border-blue-200/60",
-                    avatar: "bg-blue-700 text-white shadow-2xs",
-                    roleLabel: "CFO / Finance",
-                  },
-                  PM: {
-                    badge: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
-                    avatar: "bg-emerald-700 text-white shadow-2xs",
-                    roleLabel: "Project Manager",
-                  },
-                  GC: {
-                    badge: "bg-amber-50 text-amber-700 border-amber-200/60",
-                    avatar: "bg-amber-700 text-white shadow-2xs",
-                    roleLabel: "General Contractor",
-                  },
-                  INVESTOR: {
-                    badge: "bg-purple-50 text-purple-700 border-purple-200/60",
+                  PARTNER: {
+                    badge: "bg-indigo-50 text-indigo-700 border-indigo-200/60",
                     avatar: "bg-indigo-700 text-white shadow-2xs",
-                    roleLabel: "Investor (LP)",
+                    roleLabel: "Partner / Co-Owner",
                   },
                 };
 
@@ -243,27 +228,12 @@ export function TeamAccessPanel({ projectId }: TeamAccessPanelProps) {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs">
-                <th className="py-3.5 px-6 font-semibold text-slate-600 min-w-[280px]">Feature / Capability</th>
-                <th className="py-3.5 px-4 text-center min-w-[120px] bg-purple-50/30 text-purple-900 border-x border-slate-200/50">
-                  <div className="font-bold text-xs text-purple-950">Owner</div>
-                  <div className="text-[10px] text-purple-600/80 font-medium">GP</div>
+                <th className="py-3.5 px-6 font-semibold text-slate-600 min-w-[260px]">Feature / Capability</th>
+                <th className="py-3.5 px-4 text-center min-w-[140px] bg-purple-50/30 text-purple-900 border-x border-slate-200/50">
+                  <div className="font-bold text-xs text-purple-950">Owner Authority</div>
+                  <div className="text-[10px] text-purple-600/80 font-medium">Full Governance</div>
                 </th>
-                <th className="py-3.5 px-4 text-center min-w-[120px] bg-blue-50/30 text-blue-900 border-r border-slate-200/50">
-                  <div className="font-bold text-xs text-blue-950">CFO</div>
-                  <div className="text-[10px] text-blue-600/80 font-medium">Finance</div>
-                </th>
-                <th className="py-3.5 px-4 text-center min-w-[120px] bg-emerald-50/30 text-emerald-900 border-r border-slate-200/50">
-                  <div className="font-bold text-xs text-emerald-950">PM</div>
-                  <div className="text-[10px] text-emerald-600/80 font-medium">Field</div>
-                </th>
-                <th className="py-3.5 px-4 text-center min-w-[120px] bg-amber-50/30 text-amber-900 border-r border-slate-200/50">
-                  <div className="font-bold text-xs text-amber-950">GC</div>
-                  <div className="text-[10px] text-amber-600/80 font-medium">Contractor</div>
-                </th>
-                <th className="py-3.5 px-4 text-center min-w-[120px] bg-slate-50/50 text-slate-900">
-                  <div className="font-bold text-xs text-slate-900">Investor</div>
-                  <div className="text-[10px] text-slate-500 font-medium">LP</div>
-                </th>
+                <th className="py-3.5 px-6 font-semibold text-slate-600 min-w-[340px]">Governance Scope & Audit Controls</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100/90 text-xs">
@@ -275,19 +245,13 @@ export function TeamAccessPanel({ projectId }: TeamAccessPanelProps) {
                   </div>
                 </td>
                 <td className="py-3 px-4 text-center border-x border-slate-100/80 bg-purple-50/5">
-                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold text-[11px]">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>Full Access</span>
+                  </div>
                 </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-blue-50/5">
-                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
-                </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-emerald-50/5">
-                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
-                </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-amber-50/5">
-                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
-                </td>
-                <td className="py-3 px-4 text-center">
-                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
+                <td className="py-3 px-6 text-slate-600 font-normal">
+                  Real-time cross-project KPI tracking, pro forma returns, cash flow forecasting, and debt exposure monitoring.
                 </td>
               </tr>
 
@@ -299,19 +263,13 @@ export function TeamAccessPanel({ projectId }: TeamAccessPanelProps) {
                   </div>
                 </td>
                 <td className="py-3 px-4 text-center border-x border-slate-100/80 bg-purple-50/5">
-                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold text-[11px]">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>Sole Sign-off</span>
+                  </div>
                 </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-blue-50/5">
-                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
-                </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-emerald-50/5 text-slate-600 font-medium text-[11px]">
-                  <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">Propose only</span>
-                </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-amber-50/5 text-slate-600 font-medium text-[11px]">
-                  <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">COR Request only</span>
-                </td>
-                <td className="py-3 px-4 text-center">
-                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
+                <td className="py-3 px-6 text-slate-600 font-normal">
+                  Sole authority to lock original budget baselines, authorize contingency allocations, and approve binding contractor change orders.
                 </td>
               </tr>
 
@@ -323,19 +281,13 @@ export function TeamAccessPanel({ projectId }: TeamAccessPanelProps) {
                   </div>
                 </td>
                 <td className="py-3 px-4 text-center border-x border-slate-100/80 bg-purple-50/5">
-                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold text-[11px]">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>Authorized Signer</span>
+                  </div>
                 </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-blue-50/5">
-                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
-                </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-emerald-50/5">
-                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
-                </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-amber-50/5">
-                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
-                </td>
-                <td className="py-3 px-4 text-center">
-                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
+                <td className="py-3 px-6 text-slate-600 font-normal">
+                  Full control over connected operating accounts, dual-signature bank wire executions, and end-of-period reconciliation lockups.
                 </td>
               </tr>
 
@@ -347,19 +299,13 @@ export function TeamAccessPanel({ projectId }: TeamAccessPanelProps) {
                   </div>
                 </td>
                 <td className="py-3 px-4 text-center border-x border-slate-100/80 bg-purple-50/5">
-                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold text-[11px]">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>Fiduciary Release</span>
+                  </div>
                 </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-blue-50/5">
-                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
-                </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-emerald-50/5 text-slate-600 font-medium text-[11px]">
-                  <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">Work Verify only</span>
-                </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-amber-50/5">
-                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
-                </td>
-                <td className="py-3 px-4 text-center">
-                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
+                <td className="py-3 px-6 text-slate-600 font-normal">
+                  Exclusive power to approve construction draw requests, submit loan draw packets to lenders, and release trade contractor disbursements.
                 </td>
               </tr>
 
@@ -371,19 +317,13 @@ export function TeamAccessPanel({ projectId }: TeamAccessPanelProps) {
                   </div>
                 </td>
                 <td className="py-3 px-4 text-center border-x border-slate-100/80 bg-purple-50/5">
-                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold text-[11px]">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>Baseline Lock</span>
+                  </div>
                 </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-blue-50/5">
-                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
-                </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-emerald-50/5">
-                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
-                </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-amber-50/5 text-slate-600 font-medium text-[11px]">
-                  <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">Submit claims only</span>
-                </td>
-                <td className="py-3 px-4 text-center text-slate-600 font-medium text-[11px]">
-                  <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">Read brief only</span>
+                <td className="py-3 px-6 text-slate-600 font-normal">
+                  Authority to approve schedule baseline modifications, certify municipal permit sign-offs, and verify milestone proof documentation.
                 </td>
               </tr>
 
@@ -391,23 +331,17 @@ export function TeamAccessPanel({ projectId }: TeamAccessPanelProps) {
                 <td className="py-3 px-6 font-medium text-slate-800">
                   <div className="flex items-center gap-2.5">
                     <span className="h-6 w-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 text-xs font-mono">📈</span>
-                    <span>Investor Snapshot Publication & Rescission</span>
+                    <span>Executive Reporting & Audit Trails</span>
                   </div>
                 </td>
                 <td className="py-3 px-4 text-center border-x border-slate-100/80 bg-purple-50/5">
-                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold text-[11px]">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>Executive Publishing</span>
+                  </div>
                 </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-blue-50/5">
-                  <CheckCircle2 className="mx-auto h-4.5 w-4.5 text-emerald-600" />
-                </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-emerald-50/5">
-                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
-                </td>
-                <td className="py-3 px-4 text-center border-r border-slate-100/80 bg-amber-50/5">
-                  <XCircle className="mx-auto h-4 w-4 text-slate-250 opacity-40" />
-                </td>
-                <td className="py-3 px-4 text-center text-slate-600 font-medium text-[11px]">
-                  <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">Read published</span>
+                <td className="py-3 px-6 text-slate-600 font-normal">
+                  Direct oversight of immutable audit event logs, automated document parsing pipelines, and publication of stakeholder reports.
                 </td>
               </tr>
             </tbody>

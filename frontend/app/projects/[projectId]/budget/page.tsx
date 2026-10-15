@@ -1457,7 +1457,7 @@ export default function ProjectEconomicsAndBudgetPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-slate-900">
-                  Detailed Trade Line Items — Interior
+                  Detailed Trade Line Items - Interior
                 </h3>
               </div>
               <Button

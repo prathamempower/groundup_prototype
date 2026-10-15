@@ -45,7 +45,7 @@ export function VerifyWorkModal({
       onSuccess();
       onOpenChange(false);
     } catch (err: unknown) {
-      setErrorMsg((err as Error).message || "Failed to record PM work verification.");
+      setErrorMsg((err as Error).message || "Failed to record work verification.");
     } finally {
       setIsSubmitting(false);
     }
@@ -60,7 +60,7 @@ export function VerifyWorkModal({
               <ClipboardCheck className="h-5 w-5" />
             </div>
             <div>
-              <ModalTitle>PM Work Verification</ModalTitle>
+              <ModalTitle>Physical Progress & Work Certification</ModalTitle>
               <p className="text-caption text-text-muted mt-0.5">
                 Draw #{draw.draw_number} • Certification of physical construction progress
               </p>

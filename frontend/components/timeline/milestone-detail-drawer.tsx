@@ -131,7 +131,7 @@ export function MilestoneDetailDrawer({
               </div>
 
               <p className="text-caption text-text-secondary">
-                PM reports <strong className="text-text-primary">{milestone.progress_conflict.pm_percent}%</strong> completion, but third-party certified inspection ({milestone.progress_conflict.inspector_report_name}) certifies <strong className="text-danger">{milestone.progress_conflict.inspector_percent}%</strong> ({milestone.progress_conflict.discrepancy_percent}% variance &bull; {formatMoney(milestone.progress_conflict.estimated_value_at_risk)} at risk).
+                Field logs report <strong className="text-text-primary">{milestone.progress_conflict.pm_percent}%</strong> completion, but third-party certified inspection ({milestone.progress_conflict.inspector_report_name}) certifies <strong className="text-danger">{milestone.progress_conflict.inspector_percent}%</strong> ({milestone.progress_conflict.discrepancy_percent}% variance &bull; {formatMoney(milestone.progress_conflict.estimated_value_at_risk)} at risk).
               </p>
             </div>
           )}
@@ -411,7 +411,7 @@ export function MilestoneDetailDrawer({
           {/* Audit Trail & History */}
           <div className="rounded-lg border border-border bg-subtle/30 p-3.5 space-y-1.5 text-[11px] text-text-muted">
             <div className="flex items-center justify-between">
-              <span>Last updated by: <strong className="text-text-primary">{milestone.last_updated_by || "David Ross (PM)"}</strong></span>
+              <span>Last updated by: <strong className="text-text-primary">{milestone.last_updated_by || "David Ross (Co-Owner)"}</strong></span>
               <span>{milestone.last_updated_at ? formatDate(milestone.last_updated_at) : "Baseline"}</span>
             </div>
             {milestone.update_rationale && (

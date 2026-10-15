@@ -67,27 +67,25 @@ export function Sidebar({
   const allProjects: Project[] = projectsData?.data?.projects || [];
   const activeProject = activeProjectData?.data || (allProjects.find(p => p.id === workspaceProjectId));
 
-  // Derive effective role on this active project
-  const userMemberships = meData?.data?.project_memberships || [];
-  const projectMembership = userMemberships.find((m: any) => m.project_id === workspaceProjectId);
-  const effectiveRole: UserRole = (projectMembership?.role as UserRole) || meData?.data?.role || "OWNER";
+  // Derive effective role on this active project - always OWNER
+  const effectiveRole: UserRole = "OWNER";
 
   const { data: alertsData } = useQuery({
     queryKey: ["alerts", workspaceProjectId],
     queryFn: () => api.alerts.list(workspaceProjectId),
-    enabled: Boolean(workspaceProjectId && ["OWNER", "CFO", "PM"].includes(effectiveRole)),
+    enabled: Boolean(workspaceProjectId),
   });
 
   const { data: recData } = useQuery({
     queryKey: ["reconciliation-queue", workspaceProjectId],
     queryFn: () => api.spend.getReconciliationQueue(workspaceProjectId),
-    enabled: Boolean(workspaceProjectId && ["OWNER", "CFO"].includes(effectiveRole)),
+    enabled: Boolean(workspaceProjectId),
   });
 
   const { data: changeOrdersData } = useQuery({
     queryKey: ["change-orders", workspaceProjectId],
     queryFn: () => api.budget.getChangeOrders(workspaceProjectId),
-    enabled: Boolean(workspaceProjectId && ["OWNER", "CFO", "PM"].includes(effectiveRole)),
+    enabled: Boolean(workspaceProjectId),
   });
 
   // Calculate material badges

@@ -145,10 +145,10 @@ export function InboxView({
     {
       id: "ar",
       name: "Alex Rivera",
-      role: "PM",
-      roleBadge: "PM",
-      roleTitle: "Project Manager",
-      subtitle: "Project Manager • Site Operations & Quality Oversight",
+      role: "Co-Owner",
+      roleBadge: "Co-Owner",
+      roleTitle: "Operations Partner",
+      subtitle: "Operations Partner • Site Operations & Quality Oversight",
       avatar: "AR",
       avatarBg: "bg-sky-100 text-sky-800 border-sky-200",
       badgeBg: "bg-sky-50 text-sky-700 border border-sky-200/60",
@@ -158,13 +158,13 @@ export function InboxView({
       email: "a.rivera@vancedev.com",
       phone: "+1 (201) 640-1294",
       company: "Vance Development Management",
-      license: "PMP #440912",
+      license: "Licensed Developer #440912",
       messages: [
         {
           id: "m-ar-1",
           senderId: "ar",
           senderName: "Alex Rivera",
-          senderRole: "PM",
+          senderRole: "Co-Owner",
           roleBadgeStyle: "bg-sky-50 text-sky-700 border border-sky-200/60",
           timestamp: "10:15 AM",
           content:
@@ -186,7 +186,7 @@ export function InboxView({
           id: "m-ar-3",
           senderId: "ar",
           senderName: "Alex Rivera",
-          senderRole: "PM",
+          senderRole: "Co-Owner",
           roleBadgeStyle: "bg-sky-50 text-sky-700 border border-sky-200/60",
           timestamp: "10:35 AM",
           content:
@@ -398,7 +398,7 @@ export function InboxView({
       let replyText = `Thanks Marcus. I will incorporate this directly into our 161 Woodlawn workflow.`;
       if (activeContact.role === "GC") {
         replyText = `Understood Marcus. Site crew is notified and ready to proceed once Draw #4 funds clear.`;
-      } else if (activeContact.role === "PM") {
+      } else if (activeContact.role === "Co-Owner" || activeContact.role === "PM") {
         replyText = `Copy that. I have updated the site checklist and logged this in the daily field report.`;
       } else if (activeContact.role === "CFO") {
         replyText = `Noted Marcus. Treasury ledger has been updated to reflect this transaction.`;

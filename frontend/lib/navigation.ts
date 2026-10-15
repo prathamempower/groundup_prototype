@@ -57,14 +57,14 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     label: "Control Center",
     path: "control-center",
     icon: LayoutDashboard,
-    allowedRoles: ["OWNER", "CFO", "PM", "INVESTOR"],
+    allowedRoles: ["OWNER"],
   },
   {
     id: "reconciliation",
     label: "Reconciliation",
     path: "reconciliation",
     icon: Scale,
-    allowedRoles: ["OWNER", "CFO"],
+    allowedRoles: ["OWNER"],
     badgeKey: "reconciliation",
   },
   {
@@ -72,7 +72,7 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     label: "Draws",
     path: "draws",
     icon: Landmark,
-    allowedRoles: ["OWNER", "CFO", "PM"],
+    allowedRoles: ["OWNER"],
     badgeKey: "draws",
   },
   {
@@ -80,7 +80,7 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     label: "Documents",
     path: "documents",
     icon: FileText,
-    allowedRoles: ["OWNER", "CFO", "PM"],
+    allowedRoles: ["OWNER"],
     badgeKey: "documents",
   },
   {
@@ -88,7 +88,7 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     label: "Alerts",
     path: "alerts",
     icon: Bell,
-    allowedRoles: ["OWNER", "CFO", "PM"],
+    allowedRoles: ["OWNER"],
     badgeKey: "alerts",
   },
 ];
@@ -107,33 +107,24 @@ export function getProjectNavItems(projectId: string, role: UserRole): NavItemCo
 }
 
 export const WORKSPACE_ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
-  "control-center": ["OWNER", "CFO", "PM", "INVESTOR"],
-  "documents": ["OWNER", "CFO", "PM"],
-  "budget": ["OWNER", "CFO", "PM"],
-  "economics": ["OWNER", "CFO", "PM"],
-  "changes": ["OWNER", "CFO", "PM"],
-  "reconciliation": ["OWNER", "CFO"],
-  "draws": ["OWNER", "CFO", "PM"],
-  "timeline": [],
-  "alerts": ["OWNER", "CFO", "PM"],
-  "partners": ["OWNER", "CFO", "INVESTOR"],
-  "inbox": ["OWNER", "CFO", "PM", "GC", "INVESTOR"],
-  "directs": ["OWNER", "CFO", "PM", "GC", "INVESTOR"],
-  "build-packet": ["OWNER", "CFO", "PM"],
-  // "investor-updates": ["OWNER", "INVESTOR"],
+  "control-center": ["OWNER"],
+  "documents": ["OWNER"],
+  "budget": ["OWNER"],
+  "economics": ["OWNER"],
+  "changes": ["OWNER"],
+  "reconciliation": ["OWNER"],
+  "draws": ["OWNER"],
+  "timeline": ["OWNER"],
+  "alerts": ["OWNER"],
+  "partners": ["OWNER"],
+  "inbox": ["OWNER"],
+  "directs": ["OWNER"],
+  "build-packet": ["OWNER"],
   "settings": ["OWNER"],
 };
 
 export function getDefaultWorkspaceRoute(role: UserRole, projectId: string): string {
-  switch (role) {
-    case "OWNER":
-    case "CFO":
-    case "PM":
-    case "GC":
-    case "INVESTOR":
-    default:
-      return `/projects/${projectId}/control-center`;
-  }
+  return `/projects/${projectId}/control-center`;
 }
 
 // Keep NAV_ITEMS for backward compatibility where static lists are queried
@@ -147,11 +138,11 @@ export const NAV_ITEMS = PROJECT_WORKSPACE_NAV.map(item => ({
 }));
 
 export const ROUTE_ACCESS_MAP: Record<string, UserRole[]> = {
-  "/projects": ["OWNER", "CFO", "PM", "GC", "INVESTOR"],
+  "/projects": ["OWNER"],
   "/projects/new": ["OWNER"],
-  "/account": ["OWNER", "CFO", "PM", "GC", "INVESTOR"],
+  "/account": ["OWNER"],
   "/settings": ["OWNER"],
-  "/onboarding": ["OWNER", "CFO", "PM", "GC", "INVESTOR"],
+  "/onboarding": ["OWNER"],
 };
 
 export function getDefaultRouteForRole(role: UserRole): string {

@@ -131,8 +131,8 @@ export function AppShell({ children }: AppShellProps) {
     : null;
   const isUnauthorizedProject = Boolean(workspaceProjectId && !projectMembership);
 
-  // Check if current route is allowed for the active role
-  const effectiveRole = (projectMembership?.role as import("@/lib/types").UserRole) || currentRole;
+  // Check if current route is allowed for the active role - always OWNER
+  const effectiveRole: import("@/lib/types").UserRole = "OWNER";
   const sectionAllowedRoles = workspaceSection ? WORKSPACE_ROUTE_PERMISSIONS[workspaceSection] : null;
   const isSectionForbidden = Boolean(sectionAllowedRoles && !sectionAllowedRoles.includes(effectiveRole));
 

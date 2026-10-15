@@ -52,7 +52,7 @@ export default function ProjectsPortfolioPage() {
   });
 
   const user = meData?.data;
-  const globalRole: UserRole = user?.role || DEFAULT_GLOBAL_ROLE;
+  const globalRole: UserRole = "OWNER";
   const projects = useMemo(() => {
     const list = projectsData?.data?.projects || [];
     const seen = new Set<string>();
@@ -96,7 +96,7 @@ export default function ProjectsPortfolioPage() {
       });
   }, [projects, searchQuery, stageFilter, statusFilter, sortBy]);
 
-  const canSeeFinancialSummary = ["OWNER", "CFO"].includes(globalRole);
+  const canSeeFinancialSummary = globalRole === "OWNER";
   const showPortfolioSummary = canSeeFinancialSummary && projects.length >= 2;
 
   const totalCommitted = useMemo(() => {
@@ -111,10 +111,8 @@ export default function ProjectsPortfolioPage() {
     return projects.filter((p) => p.status === "ACTIVE").length;
   }, [projects]);
 
-  const getEffectiveRoleOnProject = (project: Project): UserRole => {
-    if (project.role_on_project) return project.role_on_project;
-    const membership = (user?.project_memberships || []).find((m: any) => m.project_id === project.id);
-    return (membership?.role as UserRole) || globalRole || DEFAULT_GLOBAL_ROLE;
+  const getEffectiveRoleOnProject = (_project: Project): UserRole => {
+    return "OWNER";
   };
 
   const handleOpenWorkspace = (project: Project) => {
@@ -182,7 +180,7 @@ export default function ProjectsPortfolioPage() {
   };
 
   const formatCompactProfit = (cents?: number | null) => {
-    if (cents === null || cents === undefined) return "—";
+    if (cents === null || cents === undefined) return "-";
     const dollars = cents / 100;
     if (dollars >= 1_000_000) {
       const millions = dollars / 1_000_000;
@@ -435,7 +433,7 @@ export default function ProjectsPortfolioPage() {
           {filteredProjects.map((project) => {
             const effectiveRole = getEffectiveRoleOnProject(project);
             const canSeeProfit =
-              ["OWNER", "CFO"].includes(effectiveRole) && project.forecast_profit !== undefined;
+              effectiveRole === "OWNER" && project.forecast_profit !== undefined;
             const heroImage = getProjectImage(project);
             const progress = getProjectProgress(project);
 
@@ -571,7 +569,7 @@ export default function ProjectsPortfolioPage() {
                 {filteredProjects.map((project) => {
                   const effectiveRole = getEffectiveRoleOnProject(project);
                   const canSeeProfit =
-                    ["OWNER", "CFO"].includes(effectiveRole) && project.forecast_profit !== undefined;
+                    effectiveRole === "OWNER" && project.forecast_profit !== undefined;
                   const progress = getProjectProgress(project);
 
                   return (
