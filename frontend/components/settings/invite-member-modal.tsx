@@ -131,10 +131,6 @@ export function InviteMemberModal({
                 className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body font-medium text-text-primary focus:border-primary focus:outline-hidden"
               >
                 <option value="OWNER">OWNER — Full Portfolio & Budget Authority</option>
-                <option value="CFO">CFO — Treasury, Banking & Reconciliations</option>
-                <option value="PM">PM — Field Progress, Milestones & Inspections</option>
-                <option value="GC">GC — Limited Submissions & Lien Intake</option>
-                <option value="INVESTOR">INVESTOR — Read-Only Published Briefs</option>
               </select>
             </div>
 
