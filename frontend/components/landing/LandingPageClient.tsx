@@ -16,7 +16,7 @@ export function LandingPageClient() {
         localStorage.setItem("groundup_onboarding_prefill", JSON.stringify(prefill));
       } catch {}
     }
-    router.push("/onboarding");
+    router.push("/auth/sign-up");
   };
 
   const handleAuthenticate = (user: AuthenticatedUser) => {

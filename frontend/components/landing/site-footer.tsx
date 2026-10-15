@@ -155,7 +155,7 @@ export function SiteFooter({ onStartOnboarding }: SiteFooterProps) {
                       Start Project Intake
                     </button>
                   ) : (
-                    <Link href="/onboarding" className="hover:text-slate-900 transition-colors">
+                    <Link href="/auth/sign-up" className="hover:text-slate-900 transition-colors">
                       Start Project Intake
                     </Link>
                   )}

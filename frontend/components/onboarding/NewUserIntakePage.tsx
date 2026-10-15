@@ -728,7 +728,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
           setCurrentStep(parsedStep);
         }
       }
-    } catch {}
+    } catch { }
 
     async function rehydrateSession() {
       try {
@@ -795,7 +795,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
         localStorage.setItem('groundup_onboarding_step', String(nextStepIdx));
       }
       localStorage.setItem('groundup_onboarding_draft', JSON.stringify(draft));
-    } catch {}
+    } catch { }
 
     try {
       await fetch('/api/onboarding/answer', {
@@ -1201,7 +1201,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
         localStorage.setItem('groundup_active_project_id', createdProjectId);
         localStorage.removeItem('groundup_onboarding_draft');
         localStorage.removeItem('groundup_onboarding_step');
-      } catch {}
+      } catch { }
 
       onCompleteIntake(createdProjectId, projectData);
     } catch (err: any) {
@@ -1314,9 +1314,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
       </header>
 
       {/* ── Structured Onboarding Container (Pro UI/UX, Balanced White Space) ── */}
-      <main className={`flex-1 w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col justify-center relative z-10 transition-all duration-200 ${
-        currentStep === 3 ? 'max-w-2xl sm:max-w-3xl' : 'max-w-xl sm:max-w-2xl'
-      }`}>
+      <main className={`flex-1 w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col justify-center relative z-10 transition-all duration-200 ${currentStep === 3 ? 'max-w-2xl sm:max-w-3xl' : 'max-w-xl sm:max-w-2xl'
+        }`}>
         <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-6 sm:p-9 shadow-[0_10px_30px_-5px_rgba(15,23,42,0.04),0_1px_3px_rgba(0,0,0,0.02)] transition-all relative">
           {/* Back button for steps 2 to 5 */}
           {currentStep > 1 && currentStep < 6 && (
@@ -1345,9 +1344,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="flex items-start justify-between">
                 <div className="space-y-1.5">
-                  <span className="text-[11px] font-bold tracking-wider uppercase text-sky-600 block">
-                    Step 1 of 5 • Project Calibration
-                  </span>
                   <TextEffect
                     as="h1"
                     preset="fade-in-blur"
@@ -1374,8 +1370,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     setSecondaryFocuses([]);
                   }}
                   className={`p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${projectStatus === 'active'
-                      ? 'bg-sky-50/50 border-sky-600 ring-1 ring-sky-600/15 text-slate-900 shadow-2xs'
-                      : 'bg-white text-slate-800 border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/60 shadow-2xs'
+                    ? 'bg-sky-50/50 border-sky-600 ring-1 ring-sky-600/15 text-slate-900 shadow-2xs'
+                    : 'bg-white text-slate-800 border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/60 shadow-2xs'
                     }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
@@ -1426,8 +1422,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     setSecondaryFocuses([]);
                   }}
                   className={`p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${projectStatus === 'new'
-                      ? 'bg-sky-50/50 border-sky-600 ring-1 ring-sky-600/15 text-slate-900 shadow-2xs'
-                      : 'bg-white text-slate-800 border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/60 shadow-2xs'
+                    ? 'bg-sky-50/50 border-sky-600 ring-1 ring-sky-600/15 text-slate-900 shadow-2xs'
+                    : 'bg-white text-slate-800 border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/60 shadow-2xs'
                     }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
@@ -1497,9 +1493,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="flex items-start justify-between">
                 <div className="space-y-1.5">
-                  <span className="text-[11px] font-bold tracking-wider uppercase text-sky-600 block">
-                    Step 2 of 5 • Organization
-                  </span>
                   <TextEffect
                     as="h1"
                     preset="fade-in-blur"
@@ -1557,8 +1550,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                           type="button"
                           onClick={() => setOrgSize(tier.id)}
                           className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${isSelected
-                              ? 'bg-slate-50 border-slate-900 ring-1 ring-slate-900/10 text-slate-900 shadow-2xs'
-                              : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
+                            ? 'bg-slate-50 border-slate-900 ring-1 ring-slate-900/10 text-slate-900 shadow-2xs'
+                            : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
                             }`}
                         >
                           <div>
@@ -1617,8 +1610,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                             }
                           }}
                           className={`p-2.5 rounded-xl border text-center transition cursor-pointer flex flex-col items-center justify-center ${isSelected
-                              ? 'bg-slate-50 border-slate-900 ring-1 ring-slate-900/10 text-slate-900 font-bold shadow-2xs'
-                              : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
+                            ? 'bg-slate-50 border-slate-900 ring-1 ring-slate-900/10 text-slate-900 font-bold shadow-2xs'
+                            : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
                             }`}
                         >
                           <span className="text-xs font-bold text-slate-900">{opt.label}</span>
@@ -1715,9 +1708,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
               {/* Header with Step Indicator */}
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">
-                  <span className="text-[11px] font-bold tracking-wider uppercase text-sky-600 block">
-                    Step 3 of 5 • Project Setup
-                  </span>
                   <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
                     {projectSubStep === 1 && "Let's add your first project"}
                     {projectSubStep === 2 && 'Project Capital & Debt Structure'}
@@ -1795,9 +1785,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                           if (projectError) setProjectError(null);
                         }}
                         placeholder={projectStatus === 'active' ? 'e.g. 73 Broadway Mixed-Use' : 'e.g. 161 Woodlawn Mixed-Use'}
-                        className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition ${
-                          projectError ? 'border-red-400 focus:ring-red-500/20' : 'border-slate-200 focus:border-slate-900 focus:ring-slate-900/10'
-                        }`}
+                        className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition ${projectError ? 'border-red-400 focus:ring-red-500/20' : 'border-slate-200 focus:border-slate-900 focus:ring-slate-900/10'
+                          }`}
                       />
                     </div>
 
@@ -1960,11 +1949,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                           key={opt.val}
                           type="button"
                           onClick={() => setIsAcquired(opt.val as any)}
-                          className={`rounded-xl border p-3 text-left transition cursor-pointer ${
-                            isAcquired === opt.val
-                              ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                              : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
-                          }`}
+                          className={`rounded-xl border p-3 text-left transition cursor-pointer ${isAcquired === opt.val
+                            ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                            : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
                         >
                           <span className="block text-xs font-bold leading-tight">{opt.label}</span>
                           <span className={`mt-0.5 block text-[11px] ${isAcquired === opt.val ? 'text-slate-300' : 'text-slate-500'}`}>{opt.desc}</span>
@@ -1991,11 +1979,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                             key={f.id}
                             type="button"
                             onClick={() => setAcquisitionFunding(f.id)}
-                            className={`rounded-xl border p-2.5 text-left transition cursor-pointer ${
-                              isSelected
-                                ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                                : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
-                            }`}
+                            className={`rounded-xl border p-2.5 text-left transition cursor-pointer ${isSelected
+                              ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                              : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                              }`}
                           >
                             <span className="block text-xs font-bold leading-tight">{f.label}</span>
                             <span className={`block text-[10px] mt-0.5 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
@@ -2021,11 +2008,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                           key={opt.val}
                           type="button"
                           onClick={() => setHasConstructionLoan(opt.val as any)}
-                          className={`rounded-xl border p-3 text-left transition cursor-pointer ${
-                            hasConstructionLoan === opt.val
-                              ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                              : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
-                          }`}
+                          className={`rounded-xl border p-3 text-left transition cursor-pointer ${hasConstructionLoan === opt.val
+                            ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                            : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
                         >
                           <span className="block text-xs font-bold leading-tight">{opt.label}</span>
                           <span className={`mt-0.5 block text-[11px] ${hasConstructionLoan === opt.val ? 'text-slate-300' : 'text-slate-500'}`}>{opt.desc}</span>
@@ -2117,11 +2103,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                             key={m.value}
                             type="button"
                             onClick={() => setContractModel(m.value as ContractModel)}
-                            className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${
-                              isSelected
-                                ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                                : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
-                            }`}
+                            className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${isSelected
+                              ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                              : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                              }`}
                           >
                             <div className="flex items-center justify-between gap-1.5">
                               <span className={`font-bold text-xs ${isSelected ? 'text-white' : 'text-slate-900'}`}>{m.title}</span>
@@ -2150,11 +2135,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                             key={opt.val}
                             type="button"
                             onClick={() => setOperatingAccountModel(opt.val as any)}
-                            className={`rounded-xl border p-3 text-left transition cursor-pointer ${
-                              isSelected
-                                ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                                : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
-                            }`}
+                            className={`rounded-xl border p-3 text-left transition cursor-pointer ${isSelected
+                              ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                              : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                              }`}
                           >
                             <div className="flex items-center justify-between gap-1.5">
                               <span className={`font-bold text-xs ${isSelected ? 'text-white' : 'text-slate-900'}`}>{opt.title}</span>
@@ -2210,9 +2194,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="flex items-start justify-between">
                 <div className="space-y-1.5">
-                  <span className="text-[11px] font-bold tracking-wider uppercase text-sky-600 block">
-                    Step 4 of 5 • Project Records
-                  </span>
                   <TextEffect
                     as="h1"
                     preset="fade-in-blur"
@@ -2253,8 +2234,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                           }
                         }}
                         className={`text-xs px-3 py-1.5 rounded-lg border transition cursor-pointer flex items-center gap-1.5 ${isSelected
-                            ? 'bg-slate-50 border-slate-900 text-slate-900 font-bold ring-1 ring-slate-900/10 shadow-2xs'
-                            : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
+                          ? 'bg-slate-50 border-slate-900 text-slate-900 font-bold ring-1 ring-slate-900/10 shadow-2xs'
+                          : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
                           }`}
                       >
                         {isSelected && <Check className="w-3 h-3 text-slate-900 stroke-[3]" />}
@@ -2364,9 +2345,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="flex items-start justify-between">
                 <div className="space-y-1.5">
-                  <span className="text-[11px] font-bold tracking-wider uppercase text-sky-600 block">
-                    Step 5 of 5 • Collaborator Access
-                  </span>
                   <TextEffect
                     as="h1"
                     preset="fade-in-blur"
@@ -2556,9 +2534,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                       <span className="text-[10px] text-slate-500 font-mono">SYS-01 · Multi-Tenant Row Security</span>
                     </div>
                   </div>
-                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
-                    setupStages.savingOrg ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-blue-50 text-blue-700 border border-blue-200/60'
-                  }`}>
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${setupStages.savingOrg ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-blue-50 text-blue-700 border border-blue-200/60'
+                    }`}>
                     {setupStages.savingOrg ? 'VERIFIED' : 'ACTIVE'}
                   </span>
                 </div>
@@ -2578,9 +2555,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                       <span className="text-[10px] text-slate-500 font-mono">WBS-50 · 50-Division Cost Baseline</span>
                     </div>
                   </div>
-                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
-                    setupStages.creatingProject ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : setupStages.savingOrg ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-slate-100 text-slate-500'
-                  }`}>
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${setupStages.creatingProject ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : setupStages.savingOrg ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-slate-100 text-slate-500'
+                    }`}>
                     {setupStages.creatingProject ? 'LOCKED' : setupStages.savingOrg ? 'ACTIVE' : 'PENDING'}
                   </span>
                 </div>
@@ -2600,9 +2576,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                       <span className="text-[10px] text-slate-500 font-mono">LIEN-CA · § 8132-8138 Automatic Waivers</span>
                     </div>
                   </div>
-                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
-                    setupStages.preparingDashboard ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : setupStages.creatingProject ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-slate-100 text-slate-500'
-                  }`}>
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${setupStages.preparingDashboard ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : setupStages.creatingProject ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-slate-100 text-slate-500'
+                    }`}>
                     {setupStages.preparingDashboard ? 'ENFORCED' : setupStages.creatingProject ? 'ACTIVE' : 'PENDING'}
                   </span>
                 </div>
@@ -2622,9 +2597,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                       <span className="text-[10px] text-slate-500 font-mono">DRAW-AIA · G702 / G703 Package Engine</span>
                     </div>
                   </div>
-                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
-                    setupStages.finalizing ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : setupStages.preparingDashboard ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-slate-100 text-slate-500'
-                  }`}>
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${setupStages.finalizing ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : setupStages.preparingDashboard ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-slate-100 text-slate-500'
+                    }`}>
                     {setupStages.finalizing ? 'READY' : setupStages.preparingDashboard ? 'ACTIVE' : 'PENDING'}
                   </span>
                 </div>

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Eye, 
@@ -26,10 +26,29 @@ export interface AuthSwitchCardProps {
 
 export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
 
   // Mode: false = login, true = signup
   const [isSignUp, setIsSignUp] = useState(initialMode === 'signup');
+
+  // Synchronize mode with pathname dynamically
+  useEffect(() => {
+    if (pathname?.includes('sign-up') || pathname?.includes('signup')) {
+      setIsSignUp(true);
+    } else if (pathname?.includes('login')) {
+      setIsSignUp(false);
+    }
+  }, [pathname]);
+
+  const handleToggle = (nextSignUp: boolean) => {
+    setIsSignUp(nextSignUp);
+    const targetUrl = nextSignUp ? '/auth/sign-up' : '/auth/login';
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', targetUrl);
+    }
+    router.replace(targetUrl);
+  };
 
   // ── Log In Form State ────────────────────────────────────────────────────────
   const [loginEmail, setLoginEmail] = useState('');
@@ -186,10 +205,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
       {/* ── Uiverse-Inspired 3D Toggle Switch ───────────────────────────────── */}
       <div className="mb-6 flex items-center justify-center gap-4 select-none">
         <span 
-          onClick={() => {
-            setIsSignUp(false);
-            router.replace('/auth/login');
-          }}
+          onClick={() => handleToggle(false)}
           className={`text-xs font-bold transition-all cursor-pointer ${
             !isSignUp 
               ? 'text-slate-900 border-b-2 border-slate-900 pb-0.5' 
@@ -208,11 +224,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             id="auth-card-toggle"
             type="checkbox"
             checked={isSignUp}
-            onChange={(e) => {
-              const nextSignUp = e.target.checked;
-              setIsSignUp(nextSignUp);
-              router.replace(nextSignUp ? '/auth/sign-up' : '/auth/login');
-            }}
+            onChange={(e) => handleToggle(e.target.checked)}
             className="sr-only"
             aria-label="Toggle between Log in and Sign up"
           />
@@ -224,10 +236,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
         </label>
 
         <span 
-          onClick={() => {
-            setIsSignUp(true);
-            router.replace('/auth/sign-up');
-          }}
+          onClick={() => handleToggle(true)}
           className={`text-xs font-bold transition-all cursor-pointer ${
             isSignUp 
               ? 'text-slate-900 border-b-2 border-slate-900 pb-0.5' 
@@ -239,7 +248,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
       </div>
 
       {/* ── 3D Flip Card Container ─────────────────────────────────────────── */}
-      <div className={`w-full [perspective:1200px] transition-[min-height] duration-500 ${isSignUp ? 'min-h-[580px]' : 'min-h-[470px]'}`}>
+      <div className={`w-full [perspective:1200px] transition-[min-height] duration-500 ${isSignUp ? 'min-h-[580px]' : 'min-h-[460px]'}`}>
         <div 
           className={`relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] ${
             isSignUp ? '[transform:rotateY(180deg)]' : '[transform:rotateY(0deg)]'
@@ -250,16 +259,16 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
               FRONT FACE: LOG IN
              ─────────────────────────────────────────────────────────────────── */}
           <div 
-            className={`w-full min-h-[470px] rounded-2xl border border-slate-200/80 bg-white p-7 sm:p-8 shadow-overlay [backface-visibility:hidden] flex flex-col justify-between ${
+            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-7 sm:p-8 shadow-overlay [backface-visibility:hidden] flex flex-col justify-center space-y-4 ${
               isSignUp ? 'pointer-events-none' : 'pointer-events-auto'
             }`}
           >
             {/* Brand Header */}
-            <div className="text-center space-y-2 mb-6">
-              <div className="flex justify-center mb-1">
+            <div className="text-center space-y-1 mb-2">
+              <div className="flex justify-center mb-1.5">
                 <BrandLogo size="lg" />
               </div>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              <h1 className="text-xl font-bold tracking-tight text-slate-900">
                 Welcome back
               </h1>
               <p className="text-xs text-slate-500">
@@ -347,6 +356,31 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
               >
                 {signInMutation.isPending ? 'Signing in…' : 'Sign in'}
               </button>
+
+              {/* Terms of Service & Privacy Policy Notice */}
+              <p className="text-[11px] leading-relaxed text-slate-500 text-center pt-1">
+                By continuing, you agree to the GroundUp{' '}
+                <Link href="/terms" className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600">
+                  Terms of Service
+                </Link>{' '}
+                and{' '}
+                <Link href="/privacy" className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600">
+                  Privacy Policy
+                </Link>.
+              </p>
+
+              <div className="text-center pt-1">
+                <span className="text-xs text-slate-500">
+                  Don&apos;t have an account?{' '}
+                  <button
+                    type="button"
+                    onClick={() => handleToggle(true)}
+                    className="font-bold text-slate-900 hover:text-blue-600 hover:underline cursor-pointer bg-transparent border-none p-0 inline"
+                  >
+                    Sign up
+                  </button>
+                </span>
+              </div>
             </form>
           </div>
 
@@ -354,17 +388,17 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
               BACK FACE: SIGN UP (STREAMLINED 2-STAGE PROGRESSION)
              ─────────────────────────────────────────────────────────────────── */}
           <div 
-            className={`w-full min-h-[580px] rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-overlay absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-between ${
+            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-overlay absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-center overflow-y-auto ${
               !isSignUp ? 'pointer-events-none' : 'pointer-events-auto'
             }`}
           >
             {/* Brand Header */}
-            <div className="text-center space-y-1 mb-4">
+            <div className="text-center space-y-1 mb-3">
               <div className="flex justify-center mb-1">
-                <BrandLogo size="md" />
+                <BrandLogo size="lg" />
               </div>
               <h2 className="text-xl font-bold tracking-tight text-slate-900">
-                Create your account
+                Create your workspace
               </h2>
             </div>
 
@@ -580,11 +614,36 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 {/* Continue to Password Stage Button */}
                 <button
                   type="submit"
-                  className="w-full h-10 rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-semibold shadow-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer mt-2"
+                  className="w-full h-10 rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-semibold shadow-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer mt-1"
                 >
                   <span>Next: Create Password</span>
                   <ArrowRight className="size-3.5" />
                 </button>
+
+                {/* Terms of Service & Privacy Policy Notice */}
+                <p className="text-[11px] leading-relaxed text-slate-500 text-center pt-1">
+                  By continuing, you agree to the GroundUp{' '}
+                  <Link href="/terms" className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600">
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600">
+                    Privacy Policy
+                  </Link>.
+                </p>
+
+                <div className="text-center pt-1">
+                  <span className="text-xs text-slate-500">
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => handleToggle(false)}
+                      className="font-bold text-slate-900 hover:text-blue-600 hover:underline cursor-pointer bg-transparent border-none p-0 inline"
+                    >
+                      Log in
+                    </button>
+                  </span>
+                </div>
               </form>
             )}
 
@@ -660,18 +719,6 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                   </div>
                 </div>
 
-                {/* Terms of Service & Privacy Policy Notice */}
-                <p className="text-[11px] leading-relaxed text-slate-500">
-                  By continuing, you agree to the GroundUp{' '}
-                  <span className="font-semibold text-slate-900 underline underline-offset-2 cursor-pointer">
-                    Terms of Service
-                  </span>{' '}
-                  and{' '}
-                  <span className="font-semibold text-slate-900 underline underline-offset-2 cursor-pointer">
-                    Privacy Policy
-                  </span>.
-                </p>
-
                 {/* Navigation Buttons */}
                 <div className="flex gap-2 pt-1">
                   <button
@@ -690,6 +737,18 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                     <ArrowRight className="size-3.5" />
                   </button>
                 </div>
+
+                {/* Terms of Service & Privacy Policy Notice AT THE VERY LAST */}
+                <p className="text-[11px] leading-relaxed text-slate-500 text-center pt-1">
+                  By continuing, you agree to the GroundUp{' '}
+                  <Link href="/terms" className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600">
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600">
+                    Privacy Policy
+                  </Link>.
+                </p>
               </form>
             )}
           </div>
