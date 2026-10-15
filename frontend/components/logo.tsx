@@ -17,7 +17,7 @@ export function Logo({
   onClick,
   className = '',
   size = 'md',
-  theme = 'auto',
+  theme = 'light',
   showSubtitle = false,
   variant = 'full',
   monochrome = false,
