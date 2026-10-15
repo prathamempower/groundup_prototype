@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" width="200" height="48" fill="none">
+  <!-- GroundUp Architectural Hexagonal Mark -->
+  <g transform="translate(2, 4) scale(0.555)">
+    <!-- Foundation (Navy) -->
+    <path
+      fill="#041f39"
+      fill-rule="evenodd"
+      d="M 36 12 L 7 27 L 7 55 L 30 68 L 49 57 L 49 39 L 27 39 L 27 45 L 41 45 L 41 52 L 30 58 L 16 50 L 16 32 L 36 22 Z"
+    />
+    <!-- Skyscraper Tower 1 (Middle Blue) -->
+    <path fill="#0075ff" d="M 41 9 L 52 4 L 52 35 L 41 30 Z" />
+    <!-- Skyscraper Tower 2 (Right Blue) -->
+    <path fill="#0075ff" d="M 56 12 L 65 17 L 65 55 L 56 60 Z" />
+  </g>
+  <!-- GroundUp Typography Wordmark -->
+  <text x="48" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="26" font-weight="800" letter-spacing="-0.5px">
+    <tspan fill="#041f39">Ground</tspan><tspan fill="#0075ff">Up</tspan>
+  </text>
+</svg>

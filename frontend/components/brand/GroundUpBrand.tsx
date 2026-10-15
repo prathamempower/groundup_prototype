@@ -131,7 +131,7 @@ export const GroundUpPrimaryLogo: React.FC<BrandProps> = ({
   onClick,
 }) => {
   const markSize = resolveSize(size, 32);
-  const navyText = theme === 'dark' ? 'text-white' : theme === 'auto' ? 'text-[#041f39] dark:text-white' : 'text-[#041f39]';
+  const navyText = theme === 'dark' ? 'text-white' : theme === 'auto' ? 'text-[#0f172a] dark:text-white' : 'text-[#0f172a]';
 
   return (
     <div
@@ -149,8 +149,9 @@ export const GroundUpPrimaryLogo: React.FC<BrandProps> = ({
       <GroundUpMark size={markSize} theme={theme} monochrome={monochrome} />
       <div className="flex flex-col text-left leading-none">
         <div className="flex items-baseline gap-1">
-          <span className={`font-bold tracking-tight text-xl ${navyText}`}>
-            Ground<span className="text-[#0075ff]">Up</span>
+          <span className="font-extrabold tracking-tight text-xl">
+            <span className={navyText}>Ground</span>
+            <span className="text-[#0066ee]">Up</span>
           </span>
         </div>
         {showSubtitle && (
@@ -172,7 +173,7 @@ export const GroundUpSecondaryLogo: React.FC<BrandProps> = ({
   onClick,
 }) => {
   const markSize = resolveSize(size, 26);
-  const navyText = theme === 'dark' ? 'text-white' : theme === 'auto' ? 'text-[#041f39] dark:text-white' : 'text-[#041f39]';
+  const navyText = theme === 'dark' ? 'text-white' : theme === 'auto' ? 'text-[#0f172a] dark:text-white' : 'text-[#0f172a]';
 
   return (
     <div
@@ -184,8 +185,9 @@ export const GroundUpSecondaryLogo: React.FC<BrandProps> = ({
     >
       <GroundUpMark size={markSize} theme={theme} monochrome={monochrome} />
       <div className="flex items-center gap-2">
-        <span className={`font-bold text-lg tracking-tight ${navyText}`}>
-          Ground<span className="text-[#0075ff]">Up</span>
+        <span className="font-extrabold text-lg tracking-tight">
+          <span className={navyText}>Ground</span>
+          <span className="text-[#0066ee]">Up</span>
         </span>
         <span className="text-slate-300 dark:text-slate-600 font-light">|</span>
         <span className="text-[11px] font-medium tracking-wide uppercase text-slate-500 dark:text-slate-400">

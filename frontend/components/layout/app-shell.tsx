@@ -56,23 +56,28 @@ export function AppShell({ children }: AppShellProps) {
 
   React.useEffect(() => {
     if (isPublicRoute || pathname.startsWith("/auth/") || isSessionLoading || sessionError || session) return;
-    const previouslyAuthenticated =
-      typeof window !== "undefined" && window.localStorage.getItem("groundup_session_seen") === "1";
-    if (previouslyAuthenticated) {
-      window.localStorage.removeItem("groundup_session_seen");
-      const returnTo =
-        typeof window !== "undefined"
-          ? `${window.location.pathname}${window.location.search}`
-          : pathname;
-      router.replace(`/auth/session-expired?returnTo=${encodeURIComponent(returnTo)}`);
+
+    // Check if user has an existing workspace session or stored identity
+    const hasStoredUser =
+      typeof window !== "undefined" &&
+      Boolean(
+        window.localStorage.getItem("groundup_user") ||
+          window.localStorage.getItem("groundup_active_auth_email") ||
+          window.localStorage.getItem("groundup_active_project_id")
+      );
+
+    if (hasStoredUser) {
+      // Re-trigger session check to let authAdapter auto-recover
+      retrySession();
       return;
     }
+
     const returnTo =
       typeof window !== "undefined"
         ? `${window.location.pathname}${window.location.search}`
         : pathname;
     router.replace(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
-  }, [pathname, router, session, sessionError, isSessionLoading, isPublicRoute]);
+  }, [pathname, router, session, sessionError, isSessionLoading, isPublicRoute, retrySession]);
 
   const currentRole = session?.user.role || "OWNER";
 

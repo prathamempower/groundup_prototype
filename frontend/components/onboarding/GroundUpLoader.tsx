@@ -1,13 +1,12 @@
 'use client';
 
-// GroundUp AI: Precision Construction Financial Animated Loaders
-// Features: Geometric blueprint brand emblem, circular SVG progress gauge,
-// animated precision loading bars, and psychological progress feedback.
-// Governance: Zero em dashes, zero executive acronyms, zero ungrounded pulsing slop.
+// GroundUp AI: Precision Construction Financial Calibration Loaders
+// Impeccable Design: Minimalist architectural linear telemetry, high-trust fintech styling
+// Governance: Zero em dashes, zero executive acronyms, zero ungrounded circular spinning slop
 
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, ShieldCheck, Database, HardHat, FileText, Layers } from 'lucide-react';
-import { Logo } from '../logo';
+import { CheckCircle2, ShieldCheck, Database, HardHat, FileText, Layers, Lock, Cpu } from 'lucide-react';
+import { GroundUpMark } from '@/components/brand/GroundUpBrand';
 
 interface GroundUpTransitionLoaderProps {
   isVisible?: boolean;
@@ -17,7 +16,7 @@ interface GroundUpTransitionLoaderProps {
 
 export function GroundUpTransitionLoader({
   isVisible = false,
-  message = 'Securing workspace data...',
+  message = 'Securing workspace data…',
   subMessage = 'Calibrating relational project ledger'
 }: GroundUpTransitionLoaderProps) {
   const [progress, setProgress] = useState(15);
@@ -38,40 +37,18 @@ export function GroundUpTransitionLoader({
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
-      <div className="bg-white rounded-2xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border border-slate-100 flex flex-col items-center text-center space-y-4">
+    <div className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+      <div className="bg-white rounded-2xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border border-slate-200/90 flex flex-col items-center text-center space-y-4">
         
-        {/* Animated Brand Emblem with Precision Concentric Circles */}
-        <div className="relative w-16 h-16 flex items-center justify-center">
-          <div className="absolute inset-0 rounded-2xl bg-indigo-50 border border-indigo-100 animate-pulse" />
-          <svg className="w-16 h-16 absolute -rotate-90" viewBox="0 0 64 64">
-            <circle
-              cx="32"
-              cy="32"
-              r="28"
-              fill="none"
-              stroke="#e2e8f0"
-              strokeWidth="3"
-            />
-            <circle
-              cx="32"
-              cy="32"
-              r="28"
-              fill="none"
-              stroke="#4f46e5"
-              strokeWidth="3.5"
-              strokeDasharray={176}
-              strokeDashoffset={176 - (176 * progress) / 100}
-              strokeLinecap="round"
-              className="transition-all duration-300 ease-out"
-            />
-          </svg>
-          <div className="relative z-10 w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-md">
-            <Layers className="w-5 h-5 text-indigo-400" />
+        {/* Architectural Brand Emblem with Precision Pulse */}
+        <div className="relative w-14 h-14 flex items-center justify-center">
+          <div className="absolute inset-0 rounded-2xl bg-blue-50 border border-blue-100 animate-pulse" />
+          <div className="relative z-10">
+            <GroundUpMark size={28} />
           </div>
         </div>
 
-        {/* Informative Psychological Micro-Copy */}
+        {/* Informative Micro-Copy */}
         <div className="space-y-1">
           <h4 className="text-sm font-bold text-slate-900 tracking-tight">
             {message}
@@ -81,10 +58,10 @@ export function GroundUpTransitionLoader({
           </p>
         </div>
 
-        {/* Precision Progress Bar */}
+        {/* Precision Linear Beam */}
         <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
           <div 
-            className="h-full bg-indigo-600 rounded-full transition-all duration-300 ease-out"
+            className="h-full bg-gradient-to-r from-slate-900 to-[#0066ee] rounded-full transition-all duration-300 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -101,55 +78,47 @@ interface CircularWorkspaceGaugeProps {
 }
 
 export function CircularWorkspaceGauge({ percentage, stageTitle, currentStage }: CircularWorkspaceGaugeProps) {
-  const radius = 54;
-  const circumference = 2 * Math.PI * radius; // ~339.29
-  const strokeDashoffset = circumference - (circumference * Math.min(percentage, 100)) / 100;
-  const activeTitle = currentStage || stageTitle || 'Calibrating workspace environment...';
+  const activeTitle = currentStage || stageTitle || 'Calibrating workspace environment…';
+  const clamped = Math.min(Math.max(percentage, 5), 100);
 
   return (
-    <div className="flex flex-col items-center justify-center py-4">
-      <div className="relative w-36 h-36 flex items-center justify-center">
-        {/* Background Track */}
-        <svg className="w-36 h-36 -rotate-90" viewBox="0 0 128 128">
-          <circle
-            cx="64"
-            cy="64"
-            r={radius}
-            fill="none"
-            stroke="#f1f5f9"
-            strokeWidth="8"
-          />
-          {/* Animated Gauge Ring */}
-          <circle
-            cx="64"
-            cy="64"
-            r={radius}
-            fill="none"
-            stroke="#0f172a"
-            strokeWidth="8"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
-            className="transition-all duration-500 ease-out"
-          />
-        </svg>
-
-        {/* Center Percentage Display */}
-        <div className="absolute flex flex-col items-center justify-center">
-          <span className="text-2xl font-black text-slate-900 tracking-tight">
-            {percentage}%
-          </span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
-            Synchronizing
+    <div className="w-full max-w-md mx-auto py-2">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-3">
+        {/* Telemetry Header */}
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2">
+            <span className="flex h-2 w-2 rounded-full bg-[#0066ee] animate-pulse" />
+            <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              Calibration Feed
+            </span>
+          </div>
+          <span className="font-mono text-xs font-bold text-slate-900 tabular-nums">
+            {clamped}% COMPLETE
           </span>
         </div>
-      </div>
 
-      <div className="mt-3 text-center">
-        <span className="text-xs font-bold text-slate-800 block">
-          {activeTitle}
-        </span>
+        {/* Precision Dual-Track Progress Bar */}
+        <div className="relative h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-slate-900 via-blue-700 to-[#0066ee] rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${clamped}%` }}
+          />
+        </div>
+
+        {/* Dynamic Status Text */}
+        <div className="flex items-center justify-between pt-0.5 text-left">
+          <span className="text-xs font-semibold text-slate-700 truncate pr-2">
+            {activeTitle}
+          </span>
+          <span className="font-mono text-[10px] text-slate-400 uppercase shrink-0 font-medium">
+            ACID SYNC
+          </span>
+        </div>
       </div>
     </div>
   );
 }
+
+// Named alias for architectural calibration
+export { CircularWorkspaceGauge as ArchitecturalWorkspaceCalibrator };
+

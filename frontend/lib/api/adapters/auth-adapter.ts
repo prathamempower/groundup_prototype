@@ -186,12 +186,51 @@ export class MockAuthAdapter implements AuthAdapter {
       return null;
     }
 
-    const activeEmail = window.localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY);
+    let activeEmail = window.localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY);
     if (!activeEmail) {
-      return null;
+      try {
+        const stored = window.localStorage.getItem("groundup_user");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed?.email) {
+            const emailStr = String(parsed.email);
+            activeEmail = emailStr;
+            window.localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, emailStr);
+          }
+        }
+      } catch {}
+    }
+
+    if (!activeEmail) {
+      const hasSessionSeen = window.localStorage.getItem("groundup_session_seen") === "1";
+      const hasActiveProject = Boolean(
+        window.localStorage.getItem("groundup_active_project_id") ||
+          window.localStorage.getItem("groundup_last_project_id")
+      );
+      if (hasSessionSeen || hasActiveProject) {
+        activeEmail = "alex.morgan@vancedevelopment.com";
+        window.localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, activeEmail);
+      } else {
+        return null;
+      }
     }
 
     let user = mockStore.getUserByEmail(activeEmail);
+    if (!user) {
+      try {
+        const stored = window.localStorage.getItem("groundup_user");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          user = mockStore.createUser({
+            name: parsed.name || "Alex Morgan",
+            email: activeEmail,
+            role: "OWNER",
+            company: parsed.company || "Vance Development",
+          });
+        }
+      } catch {}
+    }
+
     if (!user) {
       user = mockStore.getCurrentUser();
     } else {

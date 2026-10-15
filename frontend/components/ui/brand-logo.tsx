@@ -61,10 +61,9 @@ export function BrandLogo({
       {!iconOnly && showWordmark && (
         <div className="flex flex-col min-w-0 select-none">
           <div className="flex items-center gap-1.5">
-            <span
-              className={`${sizeConfig.title} tracking-tight text-slate-900 leading-none group-hover:text-blue-600 transition-colors`}
-            >
-              GroundUp
+            <span className={`${sizeConfig.title} tracking-tight leading-none`}>
+              <span className="text-slate-950 dark:text-white font-extrabold">Ground</span>
+              <span className="text-[#0066ee] font-extrabold">Up</span>
             </span>
             {showBadge && (
               <span

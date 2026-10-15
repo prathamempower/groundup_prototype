@@ -37,6 +37,7 @@ import {
   DrawerFooter,
 } from "@/components/ui/drawer";
 import { BrandLogo } from "@/components/ui/brand-logo";
+import { useSignOut } from "@/lib/hooks/use-sign-out";
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -75,14 +76,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
   // do not latch onto a random project or leak project-specific tasks/alerts.
   const currentProjectId = routeProjectId || null;
   const currentProject = routeProjectId ? projects.find((p) => p.id === routeProjectId) : null;
-  const signOutMutation = useMutation({
-    mutationFn: () => authAdapter.signOut(),
-    onSuccess: async () => {
-      window.localStorage.removeItem("groundup_session_seen");
-      queryClient.clear();
-      router.replace("/auth/login");
-    },
-  });
+  const { signOut, isSigningOut, SignOutOverlay } = useSignOut();
 
   const switchProjectMutation = useMutation({
     mutationFn: (projectId: string) => api.projects.switchProject(projectId),
@@ -621,16 +615,13 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
                   </div>
                 </div>
 
-                {signOutMutation.error instanceof Error && (
-                  <p role="alert" className="px-2 py-1 text-caption text-danger">{signOutMutation.error.message}</p>
-                )}
                 <button
-                  onClick={() => signOutMutation.mutate()}
-                  disabled={signOutMutation.isPending}
-                  className="flex w-full items-center gap-2 rounded px-2 py-2 text-left text-body text-danger hover:bg-danger-subtle disabled:opacity-60"
+                  onClick={() => signOut()}
+                  disabled={isSigningOut}
+                  className="flex w-full items-center gap-2 rounded px-2.5 py-2 text-left text-body text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-60 cursor-pointer"
                 >
-                  <LogOut className="h-4 w-4" />
-                  {signOutMutation.isPending ? "Signing out…" : "Sign out"}
+                  <LogOut className="h-4 w-4 text-rose-500" />
+                  {isSigningOut ? "Signing out…" : "Sign out"}
                 </button>
               </div>
             )}
@@ -696,6 +687,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
           </div>
         </div>
       )}
+      <SignOutOverlay />
     </div>
   );
 }

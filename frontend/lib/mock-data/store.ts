@@ -116,6 +116,29 @@ interface MockDbState {
 
 const STORAGE_KEY = "groundup_mock_db_v2";
 
+export function deduplicateProjects(projects: Project[]): Project[] {
+  if (!Array.isArray(projects)) return [];
+  const seenIds = new Set<string>();
+  const seenNames = new Set<string>();
+  const result: Project[] = [];
+
+  for (const p of projects) {
+    if (!p || !p.id) continue;
+    const normName = (p.name || "").trim().toLowerCase();
+    const normAddr = (p.address || "").trim().toLowerCase();
+    const nameKey = `${normName}::${normAddr}`;
+
+    if (seenIds.has(p.id)) continue;
+    if (normName && seenNames.has(nameKey)) continue;
+
+    seenIds.add(p.id);
+    if (normName) seenNames.add(nameKey);
+    result.push(p);
+  }
+
+  return result;
+}
+
 class MockStore {
   private state: MockDbState;
 
@@ -131,6 +154,10 @@ class MockStore {
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed && Array.isArray(parsed.projects) && parsed.projects.length > 0) {
+            parsed.projects = deduplicateProjects(parsed.projects);
+            try {
+              window.localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+            } catch {}
             return parsed;
           }
         }
@@ -258,10 +285,12 @@ class MockStore {
   // -------------------------------------------------------------
   getProjects(): Project[] {
     const currentUser = this.getCurrentUser();
+    let rawList: Project[] = [];
+
     // If user is Kunal, strict project isolation applies!
-    if (currentUser.email === "kunal@builderscapital.com") {
+    if (currentUser?.email === "kunal@builderscapital.com") {
       const allowedIds = currentUser.project_memberships.map((m) => m.project_id);
-      return this.state.projects
+      rawList = this.state.projects
         .filter((p) => allowedIds.includes(p.id))
         .map((p) => {
           const mem = currentUser.project_memberships.find((m) => m.project_id === p.id);
@@ -270,15 +299,17 @@ class MockStore {
             role_on_project: (mem?.role as UserRole) || p.role_on_project,
           };
         });
+    } else {
+      rawList = this.state.projects.map((p) => {
+        const mem = currentUser?.project_memberships?.find((m) => m.project_id === p.id);
+        return {
+          ...p,
+          role_on_project: (mem?.role as UserRole) || p.role_on_project || currentUser?.role || "OWNER",
+        };
+      });
     }
 
-    return this.state.projects.map((p) => {
-      const mem = currentUser.project_memberships?.find((m) => m.project_id === p.id);
-      return {
-        ...p,
-        role_on_project: (mem?.role as UserRole) || p.role_on_project || currentUser.role,
-      };
-    });
+    return deduplicateProjects(rawList);
   }
 
   getProjectById(projectId: string): Project | undefined {
@@ -286,6 +317,20 @@ class MockStore {
   }
 
   createProject(projectData: Partial<Project>): Project {
+    const normName = (projectData.name || "").trim().toLowerCase();
+    const existing = this.state.projects.find(
+      (p) => (p.name || "").trim().toLowerCase() === normName
+    );
+
+    if (existing) {
+      Object.assign(existing, projectData, {
+        updated_at: new Date().toISOString(),
+      });
+      this.state.activeProjectId = existing.id;
+      this.save();
+      return existing;
+    }
+
     const id = `proj-${Date.now()}`;
     const newProject: Project = {
       id,
