@@ -7,10 +7,6 @@ import {
   X,
   Loader2,
   Building2,
-  HardHat,
-  BarChart3,
-  Briefcase,
-  TrendingUp,
 } from "lucide-react";
 
 export interface DemoAccount {
@@ -28,34 +24,6 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
     name: "Marcus Vance",
     email: "m.vance@vancedev.com",
     icon: Building2,
-  },
-  {
-    id: "cfo",
-    role: "CFO",
-    name: "Sarah Lin",
-    email: "s.lin@vancedev.com",
-    icon: BarChart3,
-  },
-  {
-    id: "pm",
-    role: "PM",
-    name: "David Ross",
-    email: "d.ross@vancedev.com",
-    icon: Briefcase,
-  },
-  {
-    id: "gc",
-    role: "GC",
-    name: "Frank Miller",
-    email: "frank@apexconstruction.com",
-    icon: HardHat,
-  },
-  {
-    id: "investor",
-    role: "Investor",
-    name: "Elena Rostova",
-    email: "e.rostova@meridiancap.com",
-    icon: TrendingUp,
   },
 ];
 
