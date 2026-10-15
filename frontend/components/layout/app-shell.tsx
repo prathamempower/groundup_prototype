@@ -222,7 +222,7 @@ export function AppShell({ children }: AppShellProps) {
                   className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-body font-medium text-white hover:bg-primary-hover focus-visible:outline-primary"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Return to Project Portfolio
+                  Return to Projects
                 </Link>
               </div>
             </div>

@@ -199,24 +199,49 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
             </div>
           )}
 
-          {/* High-Fidelity Enterprise Breadcrumb */}
+          {/* Clean Standard Breadcrumb */}
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 min-w-0">
-            <Link
-              href="/projects"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors group shrink-0"
-            >
-              <Building2 className="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600 transition-colors" />
-              <span>Workspace</span>
-            </Link>
+            {routeProjectId ? (
+              <>
+                <Link
+                  href="/projects"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors group shrink-0"
+                >
+                  <Building2 className="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600 transition-colors" />
+                  <span>Projects</span>
+                </Link>
 
-            <span className="text-slate-300 select-none font-normal">/</span>
+                <span className="text-slate-300 select-none font-normal">/</span>
 
-            <span
-              className="text-xs font-bold text-slate-900 truncate max-w-[160px] sm:max-w-[280px] md:max-w-[360px]"
-              title={currentProject ? currentProject.name : pathname.startsWith("/projects") ? "Project Portfolio" : "161 Woodlawn Ave"}
-            >
-              {currentProject ? currentProject.name : pathname.startsWith("/projects") ? "Project Portfolio" : "161 Woodlawn Ave"}
-            </span>
+                <span
+                  className="text-xs font-bold text-slate-900 truncate max-w-[160px] sm:max-w-[280px] md:max-w-[360px]"
+                  title={currentProject ? currentProject.name : "Project"}
+                >
+                  {currentProject ? currentProject.name : "Project"}
+                </span>
+              </>
+            ) : pathname === "/projects/new" ? (
+              <>
+                <Link
+                  href="/projects"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors group shrink-0"
+                >
+                  <Building2 className="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600 transition-colors" />
+                  <span>Projects</span>
+                </Link>
+
+                <span className="text-slate-300 select-none font-normal">/</span>
+
+                <span className="text-xs font-bold text-slate-900">
+                  New Project
+                </span>
+              </>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                <Building2 className="h-3.5 w-3.5 text-blue-600" />
+                <span>Projects</span>
+              </span>
+            )}
           </nav>
         </div>
 
@@ -539,7 +564,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
                   }}
                   className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 active:bg-slate-950 transition-colors cursor-pointer"
                 >
-                  <span>View All in Alerts Workspace</span>
+                  <span>View All Alerts</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </DrawerFooter>

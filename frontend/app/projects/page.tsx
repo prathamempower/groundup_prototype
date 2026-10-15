@@ -223,18 +223,12 @@ export default function ProjectsPortfolioPage() {
       {/* Clean Page Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Workspace
-            </span>
-            <span className="text-slate-300">/</span>
-            <span className="text-xs text-slate-500">
-              {projects.length} accessible {projects.length === 1 ? "project" : "projects"}
-            </span>
-          </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Project Portfolio
+            Projects
           </h1>
+          <p className="mt-1 text-xs text-slate-500">
+            {projects.length} active {projects.length === 1 ? "project" : "projects"}
+          </p>
         </div>
 
         {globalRole === "OWNER" && (

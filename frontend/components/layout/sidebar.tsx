@@ -272,7 +272,7 @@ export function Sidebar({
           {/* Workspace Navigation Items */}
           {[
             {
-              title: "Workspace",
+              title: "Navigation",
               items: mainNavItems,
             },
           ].map((section) => {
