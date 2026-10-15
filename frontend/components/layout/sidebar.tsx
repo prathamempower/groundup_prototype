@@ -260,94 +260,129 @@ export function Sidebar({
 
         {/* Navigation list */}
         <nav
-          className={`flex-1 overflow-y-auto py-3 space-y-4 ${
+          className={`flex-1 flex flex-col justify-between overflow-y-auto py-3 ${
             collapsed ? "px-2" : "px-3"
           }`}
           aria-label="Project Workspace Navigation"
         >
-          {/* Workspace Navigation Items */}
-          {[
-            {
-              title: "Navigation",
-              items: mainNavItems,
-            },
-          ].map((section) => {
-            if (section.items.length === 0) return null;
-            return (
-              <div key={section.title}>
-                {!collapsed && (
-                  <div className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    {section.title}
-                  </div>
-                )}
-                <div className="space-y-0.5">
-                  {section.items.map((item) => {
-                    const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-                    const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
-                    const isAlert = item.id === "alerts" && badgeCount > 0;
-                    const Icon = item.icon;
+          {/* Main Operational Navigation Items */}
+          <div>
+            {!collapsed && (
+              <div className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Navigation
+              </div>
+            )}
+            <div className="space-y-0.5">
+              {mainNavItems.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
+                const isAlert = item.id === "alerts" && badgeCount > 0;
+                const Icon = item.icon;
 
-                    return (
-                      <Link
-                        key={item.id}
-                        href={item.href}
-                        onClick={onCloseMobile}
-                        title={collapsed ? item.label : undefined}
-                        className={`group relative flex items-center rounded-lg text-xs transition-all duration-150 ${
-                          collapsed
-                            ? "h-9 w-9 mx-auto justify-center"
-                            : "gap-2.5 px-3 py-2"
-                        } ${
-                          isActive
-                            ? "bg-white text-blue-600 font-bold shadow-2xs border border-slate-200/80"
-                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium"
-                        }`}
-                      >
-                        {/* Active Indicator Accent Bar */}
-                        {isActive && !collapsed && (
-                          <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-sm bg-blue-600" />
-                        )}
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    onClick={onCloseMobile}
+                    title={collapsed ? item.label : undefined}
+                    className={`group relative flex items-center rounded-lg text-xs transition-all duration-150 ${
+                      collapsed
+                        ? "h-9 w-9 mx-auto justify-center"
+                        : "gap-2.5 px-3 py-2"
+                    } ${
+                      isActive
+                        ? "bg-white text-blue-600 font-bold shadow-2xs border border-slate-200/80"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium"
+                    }`}
+                  >
+                    {/* Active Indicator Accent Bar */}
+                    {isActive && !collapsed && (
+                      <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-sm bg-blue-600" />
+                    )}
 
-                        <Icon
-                          className={`h-4 w-4 shrink-0 transition-colors ${
-                            isActive
-                              ? "text-blue-600 stroke-[2.25]"
-                              : "text-slate-400 group-hover:text-slate-600 stroke-[1.75]"
-                          }`}
-                        />
+                    <Icon
+                      className={`h-4 w-4 shrink-0 transition-colors ${
+                        isActive
+                          ? "text-blue-600 stroke-[2.25]"
+                          : "text-slate-400 group-hover:text-slate-600 stroke-[1.75]"
+                      }`}
+                    />
 
-                        {!collapsed && (
-                          <div className="flex flex-1 items-center justify-between overflow-hidden">
-                            <span className="truncate">{item.label}</span>
-                            {badgeCount > 0 && (
-                              <span
-                                className={`ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums ${
-                                  isAlert
-                                    ? "bg-rose-500 text-white"
-                                    : "bg-slate-200/80 text-slate-700"
-                                }`}
-                              >
-                                {badgeCount}
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Collapsed view indicator dot */}
-                        {collapsed && badgeCount > 0 && (
+                    {!collapsed && (
+                      <div className="flex flex-1 items-center justify-between overflow-hidden">
+                        <span className="truncate">{item.label}</span>
+                        {badgeCount > 0 && (
                           <span
-                            className={`absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full ring-2 ring-white ${
-                              isAlert ? "bg-rose-500" : "bg-blue-600"
+                            className={`ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums ${
+                              isAlert
+                                ? "bg-rose-500 text-white"
+                                : "bg-slate-200/80 text-slate-700"
                             }`}
-                          />
+                          >
+                            {badgeCount}
+                          </span>
                         )}
-                      </Link>
-                    );
-                  })}
-                </div>
+                      </div>
+                    )}
+
+                    {/* Collapsed view indicator dot */}
+                    {collapsed && badgeCount > 0 && (
+                      <span
+                        className={`absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full ring-2 ring-white ${
+                          isAlert ? "bg-rose-500" : "bg-blue-600"
+                        }`}
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Bottom Section: Project Settings */}
+          {settingsItem && (() => {
+            const isActive = pathname === settingsItem.href || pathname.startsWith(`${settingsItem.href}/`);
+            const Icon = settingsItem.icon;
+
+            return (
+              <div className="mt-auto pt-3 space-y-0.5">
+                <Link
+                  key={settingsItem.id}
+                  href={settingsItem.href}
+                  onClick={onCloseMobile}
+                  title={collapsed ? settingsItem.label : undefined}
+                  className={`group relative flex items-center rounded-lg text-xs transition-all duration-150 ${
+                    collapsed
+                      ? "h-9 w-9 mx-auto justify-center"
+                      : "gap-2.5 px-3 py-2"
+                  } ${
+                    isActive
+                      ? "bg-white text-blue-600 font-bold shadow-2xs border border-slate-200/80"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium"
+                  }`}
+                >
+                  {/* Active Indicator Accent Bar */}
+                  {isActive && !collapsed && (
+                    <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-sm bg-blue-600" />
+                  )}
+
+                  <Icon
+                    className={`h-4 w-4 shrink-0 transition-colors ${
+                      isActive
+                        ? "text-blue-600 stroke-[2.25]"
+                        : "text-slate-400 group-hover:text-slate-600 stroke-[1.75]"
+                    }`}
+                  />
+
+                  {!collapsed && (
+                    <div className="flex flex-1 items-center justify-between overflow-hidden">
+                      <span className="truncate">{settingsItem.label}</span>
+                    </div>
+                  )}
+                </Link>
               </div>
             );
-          })}
+          })()}
         </nav>
 
         {/* Footer: Sign Out */}
