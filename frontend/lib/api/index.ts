@@ -738,12 +738,14 @@ export const api = {
       } catch (err) {
         console.warn("Falling back to local mockStore project creation:", err);
       }
-      const p = payload as { answers?: { projectName?: string; projectAddress?: string; projectStage?: string; targetBudget?: number } } | undefined;
+      const p = payload as { answers?: { projectName?: string; projectEntity?: string; projectAddress?: string; projectStage?: string; contractModel?: any; targetBudget?: number } } | undefined;
       const answers = p?.answers || {};
       const newProject = mockStore.createProject({
         name: answers.projectName || "73 Broadway",
+        project_entity: answers.projectEntity || `${answers.projectName || "73 Broadway"} LLC`,
         address: answers.projectAddress || "73 Broadway, Brooklyn, NY 11249",
         lifecycle_stage: (answers.projectStage as Project["lifecycle_stage"]) || "CONSTRUCTION",
+        contract_model: answers.contractModel || "COST_PLUS",
         loan_commitment: typeof answers.targetBudget === "number" ? String(answers.targetBudget) : "4200000",
       });
       return wrap({

@@ -203,6 +203,17 @@ export interface OnboardingAnswers {
   website?: string;
   organizationWebsite?: string;
   projectName?: string;
+  projectEntity?: string;
+  assetType?: 'MULTIFAMILY' | 'SINGLE_FAMILY' | 'MIXED_USE' | 'SUBDIVISION';
+  targetStartDate?: string;
+  startedAt?: string;
+  isAcquired?: 'true' | 'false';
+  acquisitionFunding?: string;
+  hasConstructionLoan?: 'true' | 'false';
+  lenderName?: string;
+  contractModel?: ContractModel;
+  hybridCustomDetails?: string;
+  operatingAccountModel?: 'DEDICATED' | 'SHARED';
   projectAddress?: string;
   projectStage?: OnboardingProjectStage;
   targetCompletionDate?: string;
@@ -265,6 +276,7 @@ export type ContractModel =
   | "FIXED_PRICE"
   | "MILESTONE_BASED"
   | "PROFIT_SHARE"
+  | "GMP"
   | "HYBRID";
 
 export interface Project {
