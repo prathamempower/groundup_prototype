@@ -51,6 +51,16 @@ const config: Config = {
           subtle: "var(--info-subtle)",
           foreground: "#FFFFFF",
         },
+        verified: "var(--verified, #059669)",
+        attention: "var(--attention, #2563EB)",
+        destructive: "var(--destructive, #DC2626)",
+        card: {
+          DEFAULT: "var(--card, #FFFFFF)",
+          foreground: "var(--card-foreground, #0F172A)",
+        },
+        background: "var(--background, #FFFFFF)",
+        foreground: "var(--foreground, #0F172A)",
+        "muted-foreground": "var(--muted-foreground, #64748B)",
       },
       borderRadius: {
         sm: "6px",

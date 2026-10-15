@@ -99,7 +99,7 @@ export default function ProjectsPortfolioPage() {
 
   const getEffectiveRoleOnProject = (project: Project): UserRole => {
     if (project.role_on_project) return project.role_on_project;
-    const membership = (user?.project_memberships || []).find((m) => m.project_id === project.id);
+    const membership = (user?.project_memberships || []).find((m: any) => m.project_id === project.id);
     return (membership?.role as UserRole) || globalRole;
   };
 

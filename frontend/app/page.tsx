@@ -1,31 +1,57 @@
-"use client";
+import type { Metadata, Viewport } from "next";
+import { LandingPageClient } from "@/components/landing/LandingPageClient";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
-import { getDefaultRouteForRole } from "@/lib/navigation";
+export const metadata: Metadata = {
+  title: "GroundUp AI: Development Financial Control & Construction Intelligence",
+  description:
+    "Source-led financial control layer for real estate developers, owners, and capital partners. Automated draw package assembly, statutory lien protection, and live forecast at completion.",
+  keywords: [
+    "construction finance",
+    "real estate development",
+    "draw requests",
+    "AIA G702",
+    "construction loan management",
+    "lien waivers",
+    "CSI MasterFormat",
+    "pro forma forecast",
+  ],
+  authors: [{ name: "GroundUp AI" }],
+  openGraph: {
+    title: "GroundUp AI: Development Financial Control & Construction Intelligence",
+    description:
+      "Source-led financial control layer for real estate developers, owners, and capital partners.",
+    url: "https://groundup.ai",
+    siteName: "GroundUp AI",
+    images: [
+      {
+        url: "/landing/hero-building.jpg",
+        width: 1200,
+        height: 630,
+        alt: "GroundUp AI Construction Financial Platform",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "GroundUp AI: Development Financial Control",
+    description:
+      "Source-led financial control layer for real estate developers, owners, and capital partners.",
+    images: ["/landing/hero-building.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
 
-import { Skeleton } from "@/components/ui/skeleton";
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export default function HomePage() {
-  const router = useRouter();
-
-  const { data: meData, isLoading } = useQuery({
-    queryKey: ["me"],
-    queryFn: () => api.identity.getMe(),
-  });
-
-  useEffect(() => {
-    router.replace("/projects");
-  }, [router]);
-
-  return (
-    <div className="flex h-[400px] w-full items-center justify-center">
-      <div className="flex flex-col items-center gap-3">
-        <Skeleton className="h-6 w-6 rounded-full" />
-        <Skeleton className="h-4 w-48" />
-      </div>
-    </div>
-  );
+  return <LandingPageClient />;
 }

@@ -10,6 +10,7 @@ export const metadata: Metadata = {
     "Source-led financial control layer for real estate developers, owners, and capital partners.",
   icons: {
     icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
       { url: "/favicon.ico", sizes: "any" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
       { url: "/icon.png", sizes: "192x192", type: "image/png" },

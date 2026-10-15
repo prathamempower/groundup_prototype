@@ -53,7 +53,7 @@ export function AppShell({ children }: AppShellProps) {
   });
 
   React.useEffect(() => {
-    if (pathname.startsWith("/auth/") || isSessionLoading || sessionError || session) return;
+    if (pathname === "/" || pathname.startsWith("/auth/") || isSessionLoading || sessionError || session) return;
     const previouslyAuthenticated =
       typeof window !== "undefined" && window.localStorage.getItem("groundup_session_seen") === "1";
     if (previouslyAuthenticated) {
@@ -136,9 +136,10 @@ export function AppShell({ children }: AppShellProps) {
   const isAccessDenied = isGlobalAccessDenied || isSectionForbidden;
 
   const isAuthRoute = pathname.startsWith("/auth/");
+  const isPublicRoute = pathname === "/";
   const isDedicatedFlow = pathname === "/projects/new" || pathname === "/onboarding";
 
-  if (isAuthRoute) {
+  if (isPublicRoute || isAuthRoute) {
     return (
       <div className="min-h-screen w-full bg-app text-text-primary">
         {children}
