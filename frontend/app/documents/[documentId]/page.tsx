@@ -160,18 +160,7 @@ export default function DocumentReviewPage() {
   const acceptedCount = extractions.filter((e) => e.status === "ACCEPTED" || e.status === "EDITED").length;
   const proposedCount = extractions.filter((e) => e.status === "PROPOSED").length;
 
-  const confidenceStats = React.useMemo(() => {
-    let high = 0;
-    let med = 0;
-    let low = 0;
-    extractions.forEach((field) => {
-      const score = field.confidence > 1 ? field.confidence : field.confidence * 100;
-      if (score >= 85) high++;
-      else if (score >= 70) med++;
-      else low++;
-    });
-    return { high, med, low };
-  }, [extractions]);
+
 
   if (isLoadingDoc || !document) {
     return (
@@ -222,26 +211,7 @@ export default function DocumentReviewPage() {
 
         {/* Stats & Actions */}
         <div className="flex items-center gap-3">
-          {totalFields > 0 && (
-            <div className="hidden lg:flex items-center gap-3 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
-              <div className="flex items-center gap-1.5" title="High confidence extractions (≥85%)">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                <span className="font-semibold text-slate-800">{confidenceStats.high} Verified</span>
-              </div>
-              {confidenceStats.med > 0 && (
-                <div className="flex items-center gap-1.5" title="Medium confidence extractions (70-84%)">
-                  <span className="h-2 w-2 rounded-full bg-amber-500" />
-                  <span className="font-semibold text-slate-800">{confidenceStats.med} Review</span>
-                </div>
-              )}
-              {confidenceStats.low > 0 && (
-                <div className="flex items-center gap-1.5" title="Low confidence extractions (<70%)">
-                  <span className="h-2 w-2 rounded-full bg-rose-500" />
-                  <span className="font-semibold text-rose-700">{confidenceStats.low} Attention</span>
-                </div>
-              )}
-            </div>
-          )}
+
 
           {extractions.length > 0 && (
             <Button
