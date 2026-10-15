@@ -22,7 +22,7 @@ export function InviteMemberModal({
   const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const [role, setRole] = useState<UserRole>("PM");
+  const [role, setRole] = useState<UserRole>("OWNER");
   const [title, setTitle] = useState("");
   const [company, setCompany] = useState("");
   const [scope, setScope] = useState("");
