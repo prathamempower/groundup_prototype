@@ -203,6 +203,17 @@ export interface OnboardingAnswers {
   website?: string;
   organizationWebsite?: string;
   projectName?: string;
+  projectEntity?: string;
+  assetType?: 'MULTIFAMILY' | 'SINGLE_FAMILY' | 'MIXED_USE' | 'SUBDIVISION';
+  targetStartDate?: string;
+  startedAt?: string;
+  isAcquired?: 'true' | 'false';
+  acquisitionFunding?: string;
+  hasConstructionLoan?: 'true' | 'false';
+  lenderName?: string;
+  contractModel?: ContractModel;
+  hybridCustomDetails?: string;
+  operatingAccountModel?: 'DEDICATED' | 'SHARED';
   projectAddress?: string;
   projectStage?: OnboardingProjectStage;
   targetCompletionDate?: string;
@@ -251,7 +262,10 @@ export type LifecycleStage =
   | "ACQUISITION"
   | "PRE_CONSTRUCTION"
   | "CONSTRUCTION"
+  | "UNDER_CONSTRUCTION"
+  | "POST_CONSTRUCTION"
   | "COMPLETION"
+  | "COMPLETE"
   | "MARKETING"
   | "DISPOSITION"
   | "CLOSED";
@@ -262,6 +276,7 @@ export type ContractModel =
   | "FIXED_PRICE"
   | "MILESTONE_BASED"
   | "PROFIT_SHARE"
+  | "GMP"
   | "HYBRID";
 
 export interface Project {
@@ -600,8 +615,10 @@ export interface ChangeOrder {
   approved_amount?: string;
   status: "DRAFT" | "SUBMITTED" | "APPROVED" | "REJECTED";
   target_budget_line_id: string;
-  funding_source: "CONTINGENCY" | "SPONSOR_EQUITY" | "LOAN_EXPANSION";
+  funding_source: "CONTINGENCY" | "SPONSOR_EQUITY" | "LOAN_EXPANSION" | "OTHER";
   requested_by: string;
+  requester_name?: string;
+  requester_role?: string;
   requested_at: string;
   approved_by?: string;
   approved_at?: string;
@@ -629,6 +646,7 @@ export interface DrawLine {
   budget_line_id: string;
   budget_line_name: string;
   budget_line_code: string;
+  budgeted_amount?: string;
   requested_amount: string; // cents
   recommended_amount: string;
   approved_amount: string;

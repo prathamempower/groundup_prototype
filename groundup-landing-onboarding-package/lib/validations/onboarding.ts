@@ -53,7 +53,7 @@ export const step2AccountSchema = z.object({
     .string()
     .trim()
     .refine(
-      (val) => val === "" || val.replace(/^@/, "").length >= 3,
+      (val: string) => val === "" || val.replace(/^@/, "").length >= 3,
       "Username must be at least 3 characters"
     )
     .optional(),
@@ -106,6 +106,12 @@ export const step5ProjectSchema = z.object({
     z.string().trim().min(1, "Please enter a project name"),
     specialResponseSchema,
   ]),
+  projectEntity: z.union([
+    z.string().trim().min(1, "Legal ownership entity is required"),
+    specialResponseSchema,
+    z.literal(""),
+  ]).optional(),
+  assetType: z.enum(["MULTIFAMILY", "SINGLE_FAMILY", "MIXED_USE", "SUBDIVISION"]).default("MULTIFAMILY"),
   projectAddress: z.union([
     z.string().trim(),
     specialResponseSchema,
@@ -115,6 +121,11 @@ export const step5ProjectSchema = z.object({
     z.string().min(1, "Project stage is required"),
     specialResponseSchema,
   ]).default("Under construction"),
+  startedAt: z.union([
+    z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+    z.literal(""),
+    specialResponseSchema,
+  ]).optional(),
   targetDate: z.union([
     z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
     z.literal(""),
@@ -125,6 +136,13 @@ export const step5ProjectSchema = z.object({
     z.string(),
     specialResponseSchema,
   ]).optional(),
+  isAcquired: z.enum(["true", "false"]).default("true"),
+  acquisitionFunding: z.enum(["CASH_EQUITY", "ACQUISITION_LOAN", "SELLER_FINANCING", "OTHER"]).default("ACQUISITION_LOAN"),
+  hasConstructionLoan: z.enum(["true", "false"]).default("true"),
+  lenderName: z.string().optional(),
+  contractModel: z.enum(["COST_PLUS", "GMP", "FIXED_PRICE", "MILESTONE_BASED", "OPEN_BOOK", "HYBRID"]).default("COST_PLUS"),
+  hybridCustomDetails: z.string().optional(),
+  operatingAccountModel: z.enum(["DEDICATED", "SHARED"]).default("DEDICATED"),
 });
 
 export type Step5ProjectInput = z.infer<typeof step5ProjectSchema>;
@@ -181,6 +199,16 @@ export const onboardingSubmissionSchema = z.object({
     employeeCount: z.number().default(3),
     website: z.string().optional(),
     projectName: z.string().min(1),
+    projectEntity: z.string().optional(),
+    assetType: z.string().optional(),
+    startedAt: z.string().optional(),
+    isAcquired: z.string().optional(),
+    acquisitionFunding: z.string().optional(),
+    hasConstructionLoan: z.string().optional(),
+    lenderName: z.string().optional(),
+    contractModel: z.string().optional(),
+    hybridCustomDetails: z.string().optional(),
+    operatingAccountModel: z.string().optional(),
     projectAddress: z.string().optional(),
     projectStage: z.string().default("Under construction"),
     targetCompletionDate: z.string().optional(),
