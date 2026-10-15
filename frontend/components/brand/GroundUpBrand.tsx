@@ -53,7 +53,7 @@ export const GroundUpMark: React.FC<{
 }> = ({
   size = 32,
   className = '',
-  theme = 'auto',
+  theme = 'light',
   monochrome = false,
 }) => {
   const pixelSize = resolveSize(size, 32);
@@ -74,7 +74,7 @@ export const GroundUpMark: React.FC<{
       <path
         fill={navyColor}
         fillRule="evenodd"
-        className={theme === 'auto' ? 'dark:fill-white' : ''}
+        className={theme === 'dark' ? 'fill-white' : ''}
         d="
           M 36 12
           L 7 27
@@ -125,13 +125,13 @@ export const GroundUpMark: React.FC<{
 export const GroundUpPrimaryLogo: React.FC<BrandProps> = ({
   className = '',
   size = 'md',
-  theme = 'auto',
+  theme = 'light',
   showSubtitle = false,
   monochrome = false,
   onClick,
 }) => {
   const markSize = resolveSize(size, 32);
-  const navyText = theme === 'dark' ? 'text-white' : theme === 'auto' ? 'text-[#0f172a] dark:text-white' : 'text-[#0f172a]';
+  const navyText = theme === 'dark' ? 'text-white' : 'text-[#0f172a]';
 
   return (
     <div
@@ -168,12 +168,12 @@ export const GroundUpPrimaryLogo: React.FC<BrandProps> = ({
 export const GroundUpSecondaryLogo: React.FC<BrandProps> = ({
   className = '',
   size = 'sm',
-  theme = 'auto',
+  theme = 'light',
   monochrome = false,
   onClick,
 }) => {
   const markSize = resolveSize(size, 26);
-  const navyText = theme === 'dark' ? 'text-white' : theme === 'auto' ? 'text-[#0f172a] dark:text-white' : 'text-[#0f172a]';
+  const navyText = theme === 'dark' ? 'text-white' : 'text-[#0f172a]';
 
   return (
     <div

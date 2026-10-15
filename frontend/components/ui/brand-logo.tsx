@@ -6,6 +6,7 @@ import { GroundUpMark } from "@/components/brand/GroundUpBrand";
 
 export interface BrandLogoProps {
   size?: "sm" | "md" | "lg";
+  theme?: "light" | "dark";
   showWordmark?: boolean;
   showBadge?: boolean;
   showSubtitle?: boolean;
@@ -17,6 +18,7 @@ export interface BrandLogoProps {
 
 export function BrandLogo({
   size = "md",
+  theme = "light",
   showWordmark = true,
   showBadge = false,
   showSubtitle = false,
@@ -55,14 +57,14 @@ export function BrandLogo({
       <div
         className={`relative shrink-0 ${sizeConfig.box} bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center transition-all group-hover:border-blue-400 group-hover:shadow-xs`}
       >
-        <GroundUpMark size={sizeConfig.iconSize} className="select-none" />
+        <GroundUpMark size={sizeConfig.iconSize} className="select-none" theme={theme} />
       </div>
 
       {!iconOnly && showWordmark && (
         <div className="flex flex-col min-w-0 select-none">
           <div className="flex items-center gap-1.5">
             <span className={`${sizeConfig.title} tracking-tight leading-none`}>
-              <span className="text-slate-950 dark:text-white font-extrabold">Ground</span>
+              <span className={`${theme === "dark" ? "text-white" : "text-slate-950"} font-extrabold`}>Ground</span>
               <span className="text-[#0066ee] font-extrabold">Up</span>
             </span>
             {showBadge && (
@@ -75,7 +77,7 @@ export function BrandLogo({
           </div>
           {showSubtitle && (
             <span
-              className={`${sizeConfig.subtitle} text-slate-400 font-medium leading-none mt-1 truncate`}
+              className={`${sizeConfig.subtitle} text-slate-500 font-medium leading-none mt-1 truncate`}
             >
               Enterprise Capital
             </span>
