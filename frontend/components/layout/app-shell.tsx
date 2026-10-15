@@ -32,6 +32,7 @@ const LEGACY_WORKSPACE_SECTIONS = [
   "partners",
   "inbox",
   "directs",
+  "settings",
 ];
 
 export function AppShell({ children }: AppShellProps) {

@@ -22,17 +22,29 @@ export function DocumentViewer({ document, extractions, selectedFieldId, hideHea
     retry: false,
   });
   const rawUrl = download.data?.data.download_url;
-  const baseUrl = rawUrl
-    ? rawUrl.startsWith("http")
-      ? rawUrl
-      : `${process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1"}${rawUrl.replace(/^\/api\/v1/, "")}`
-    : undefined;
-  
-  // For viewing inline in iframe / new tab without triggering automatic download:
-  const viewUrl = baseUrl ? `${baseUrl}?inline=true` : undefined;
-  const downloadUrl = baseUrl ? `${baseUrl}?inline=false` : undefined;
-  // Fallback direct static URL if it's one of the known sample documents
   const sampleUrl = `/sample-docs/${encodeURIComponent(document.original_filename)}`;
+  
+  const isSampleDoc = Boolean(
+    rawUrl?.startsWith("/sample-docs/") ||
+    rawUrl?.includes("sample-docs")
+  );
+
+  let baseUrl: string | undefined;
+  if (rawUrl) {
+    if (rawUrl.startsWith("http") || isSampleDoc) {
+      baseUrl = rawUrl;
+    } else {
+      baseUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1"}${rawUrl.replace(/^\/api\/v1/, "")}`;
+    }
+  }
+
+  // For static sample docs, use direct static path without proxying to backend
+  const viewUrl = baseUrl
+    ? (isSampleDoc ? baseUrl : `${baseUrl}?inline=true`)
+    : sampleUrl;
+  const downloadUrl = baseUrl
+    ? (isSampleDoc ? baseUrl : `${baseUrl}?inline=false`)
+    : sampleUrl;
   const url = viewUrl || sampleUrl;
   const isPdf = document.mime_type.toLowerCase().includes("pdf") || document.original_filename.toLowerCase().endsWith(".pdf");
   const isImage = document.mime_type.toLowerCase().startsWith("image/") || /\.(png|jpe?g|webp)$/i.test(document.original_filename);

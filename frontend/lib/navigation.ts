@@ -91,6 +91,13 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     allowedRoles: ["OWNER"],
     badgeKey: "alerts",
   },
+  {
+    id: "settings",
+    label: "Project Settings",
+    path: "settings",
+    icon: Settings,
+    allowedRoles: [],
+  },
 ];
 
 export function getProjectNavItems(projectId: string, role: UserRole): NavItemConfig[] {

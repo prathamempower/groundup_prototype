@@ -526,6 +526,35 @@ class MockStore {
     return this.getProjectById(projectId);
   }
 
+  updateProject(projectId: string, updates: Partial<Project>): Project | undefined {
+    const idx = this.state.projects.findIndex((p) => p.id === projectId);
+    if (idx === -1) return undefined;
+    this.state.projects[idx] = {
+      ...this.state.projects[idx],
+      ...updates,
+    };
+    if (this.state.dashboards[projectId]) {
+      this.state.dashboards[projectId].project = this.state.projects[idx];
+    }
+    this.save();
+    return this.state.projects[idx];
+  }
+
+  deleteProject(projectId: string): boolean {
+    const idx = this.state.projects.findIndex((p) => p.id === projectId);
+    if (idx === -1) return false;
+    this.state.projects.splice(idx, 1);
+    if (this.state.activeProjectId === projectId) {
+      this.state.activeProjectId = this.state.projects[0]?.id || "";
+      if (typeof window !== "undefined" && this.state.activeProjectId) {
+        window.localStorage.setItem("groundup_active_project_id", this.state.activeProjectId);
+        window.localStorage.setItem("groundup_last_project_id", this.state.activeProjectId);
+      }
+    }
+    this.save();
+    return true;
+  }
+
   getActiveProjectId(): string {
     if (typeof window !== "undefined") {
       const stored = window.localStorage.getItem("groundup_active_project_id") || window.localStorage.getItem("groundup_last_project_id");
