@@ -201,12 +201,7 @@ export function AlertsView({
     return alerts.filter((a) => a.filterGroup === selectedFilter);
   }, [alerts, selectedFilter]);
 
-  // Handler to navigate via action button
-  const handleActionClick = (e: React.MouseEvent, href: string) => {
-    e.stopPropagation();
-    const targetUrl = projectId ? `/projects/${projectId}${href}` : href;
-    router.push(targetUrl);
-  };
+
 
   // Handler to resolve alert
   const handleResolveAlert = (e?: React.FormEvent) => {
@@ -464,12 +459,22 @@ export function AlertsView({
                       </td>
 
                       {/* Action */}
-                      <td className="py-3.5 px-5 text-right whitespace-nowrap">
+                      <td
+                        className="py-3.5 px-5 text-right whitespace-nowrap"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                      >
                         <Button
+                          type="button"
                           variant="outline"
                           size="sm"
-                          onClick={(e) => handleActionClick(e, item.actionHref)}
-                          className="h-7 px-2.5 text-xs font-medium text-primary hover:text-primary gap-1 cursor-pointer"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                          className="h-7 px-2.5 text-xs font-medium text-primary hover:text-primary gap-1"
                         >
                           <span>{item.actionLabel}</span>
                           <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -553,20 +558,33 @@ export function AlertsView({
 
               {/* Modal Footer */}
               <div className="border-t border-border bg-subtle/40 px-6 py-4 flex items-center justify-between gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const href = selectedAlert.actionHref;
-                    const targetUrl = projectId ? `/projects/${projectId}${href}` : href;
-                    router.push(targetUrl);
-                  }}
-                  className="text-xs h-8 text-primary border-border gap-1.5 cursor-pointer font-medium"
-                >
-                  <span>Go to {selectedAlert.actionLabel}</span>
-                  <ExternalLink className="h-3 w-3" />
-                </Button>
+                {selectedAlert.actionHref === "/timeline" ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled
+                    className="text-xs h-8 text-muted-foreground border-border gap-1.5 opacity-60 cursor-not-allowed font-medium select-none"
+                    title="Milestone schedule is currently frozen"
+                  >
+                    <span>Schedule Frozen</span>
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const href = selectedAlert.actionHref;
+                      const targetUrl = projectId ? `/projects/${projectId}${href}` : href;
+                      router.push(targetUrl);
+                    }}
+                    className="text-xs h-8 text-primary border-border gap-1.5 cursor-pointer font-medium"
+                  >
+                    <span>Go to {selectedAlert.actionLabel}</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </Button>
+                )}
 
                 <div className="flex items-center gap-2">
                   {selectedAlert.status === "Open" ? (

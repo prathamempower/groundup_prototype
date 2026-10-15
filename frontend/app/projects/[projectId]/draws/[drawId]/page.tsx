@@ -219,17 +219,7 @@ export default function DrawDetailPage() {
             </Button>
           )}
 
-          {(isShortFunded || activeDraw.status === "APPROVED") && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsAllocateFundingOpen(true)}
-              className="text-xs font-semibold text-emerald-700 border-emerald-300 hover:bg-emerald-50 shadow-2xs flex items-center gap-1.5"
-            >
-              <DollarSign className="h-3.5 w-3.5" />
-              <span>Allocate Cash Wire</span>
-            </Button>
-          )}
+
 
 
         </div>

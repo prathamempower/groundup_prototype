@@ -309,29 +309,16 @@ export function DrawDetailDrawer({
                 </Button>
               )}
 
-              {(isShortFunded || activeDraw.status === "APPROVED") && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onAllocateFunding}
-                    className="flex items-center gap-1.5 text-success border-success/30 hover:bg-success-subtle/20"
-                  >
-                    <DollarSign className="h-3.5 w-3.5" />
-                    Allocate Cash Wire
-                  </Button>
-                  {isShortFunded && (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={onResubmitRevision}
-                      className="flex items-center gap-1.5"
-                    >
-                      <GitBranch className="h-3.5 w-3.5" />
-                      Create Resubmission Revision
-                    </Button>
-                  )}
-                </>
+              {isShortFunded && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={onResubmitRevision}
+                  className="flex items-center gap-1.5"
+                >
+                  <GitBranch className="h-3.5 w-3.5" />
+                  Create Resubmission Revision
+                </Button>
               )}
             </div>
           </div>

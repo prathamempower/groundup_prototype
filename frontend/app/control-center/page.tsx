@@ -20,8 +20,6 @@ import {
   CalendarClock,
   ArrowUpRight,
   FileText,
-  Eye,
-  FileSpreadsheet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ControlCenterAnalytics } from "@/components/control-center/analytics-charts";
@@ -710,72 +708,7 @@ export default function ControlCenterPage() {
               </div>
             </div>
 
-            {/* Source Documents & Evidence In-App PDF Preview Panel */}
-            <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-blue-600" />
-                  <h3 className="text-xs font-bold text-slate-900">
-                    Source Documents &amp; Evidence
-                  </h3>
-                </div>
-                <Link href={currentProjectId ? `/projects/${currentProjectId}/documents` : "/documents"}>
-                  <span className="text-[11px] font-semibold text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-0.5">
-                    View all <ArrowRight className="h-3 w-3" />
-                  </span>
-                </Link>
-              </div>
 
-              <div className="space-y-2">
-                {projectDocs.slice(0, 4).map((doc) => {
-                  const isPdf = doc.mime_type.toLowerCase().includes("pdf") || doc.original_filename.toLowerCase().endsWith(".pdf");
-                  const isXlsx = doc.mime_type.toLowerCase().includes("spreadsheet") || doc.original_filename.toLowerCase().endsWith(".xlsx");
-
-                  return (
-                    <div
-                      key={doc.id}
-                      className="group flex items-center justify-between gap-2.5 p-2 rounded-lg border border-slate-100 hover:border-blue-200 hover:bg-blue-50/40 transition-all text-xs"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="h-7 w-7 rounded-md bg-slate-50 border border-slate-200/70 flex items-center justify-center shrink-0 text-slate-600 group-hover:text-blue-600 group-hover:bg-blue-50">
-                          {isXlsx ? (
-                            <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
-                          ) : (
-                            <FileText className="h-3.5 w-3.5 text-blue-600" />
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-slate-800 truncate group-hover:text-blue-700" title={doc.original_filename}>
-                            {doc.original_filename}
-                          </p>
-                          <p className="text-[10px] text-slate-400 uppercase font-mono tracking-tight">
-                            {doc.document_type.replace(/_/g, " ")}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1 shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setPreviewDoc(doc)}
-                          className="h-7 px-2 text-xs font-semibold text-blue-700 hover:bg-blue-100/70 gap-1"
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                          <span>Show</span>
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {projectDocs.length === 0 && (
-                  <div className="py-4 text-center text-xs text-slate-400">
-                    No documents uploaded yet.
-                  </div>
-                )}
-              </div>
-            </div>
 
           </div>
 
