@@ -1242,7 +1242,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
   // Step Title Map for top indicator (5 interactive steps + provisioning)
   const STEP_TITLES = [
     '',
-    'Project Calibration',
+    'Project Details',
     'Organization',
     'Project Setup',
     'Project Records',
