@@ -280,7 +280,7 @@ export default function DocumentReviewPage() {
             className="h-8 px-3.5 text-xs font-semibold rounded-lg shadow-xs bg-emerald-600 hover:bg-emerald-700 text-white"
           >
             <FileCheck className="h-3.5 w-3.5 mr-1.5" />
-            Complete & Publish
+            Complete & Done
           </Button>
         </div>
       </header>
