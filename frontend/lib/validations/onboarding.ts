@@ -21,12 +21,6 @@ export const optionalStringOrSpecial = (baseSchema: z.ZodString) =>
 // Canonical roles supported across GroundUp onboarding
 export const ONBOARDING_ROLES = [
   "OWNER",
-  "DEVELOPER",
-  "FINANCE_LEAD",
-  "ACCOUNTANT",
-  "PM",
-  "GC",
-  "INVESTOR",
   "PARTNER",
 ] as const;
 

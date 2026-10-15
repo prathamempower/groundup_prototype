@@ -69,10 +69,7 @@ interface TeamInviteRow {
 }
 
 const roleOptions: Array<{ role: UserRole; label: string }> = [
-  { role: "CFO", label: "Finance Lead / CFO" },
-  { role: "PM", label: "Project Manager" },
-  { role: "GC", label: "General Contractor" },
-  { role: "INVESTOR", label: "Equity Investor" },
+  { role: "OWNER", label: "Project Owner / Principal" },
 ];
 
 export default function SignUpPage() {
@@ -99,7 +96,7 @@ export default function SignUpPage() {
 
   // Step 2 fields (Team Invites)
   const [teamInvites, setTeamInvites] = useState<TeamInviteRow[]>([
-    { id: "1", email: "", role: "CFO" },
+    { id: "1", email: "", role: "OWNER" },
   ]);
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -187,7 +184,7 @@ export default function SignUpPage() {
   const addInviteRow = () => {
     setTeamInvites((prev) => [
       ...prev,
-      { id: String(Date.now()), email: "", role: "PM" },
+      { id: String(Date.now()), email: "", role: "OWNER" },
     ]);
   };
 
