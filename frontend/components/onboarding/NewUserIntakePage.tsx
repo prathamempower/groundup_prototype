@@ -1359,12 +1359,17 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
   };
 
   const handleBack = () => {
+    if (currentStep === 5 && projectSubStep > 1) {
+      setProjectSubStep((s) => (s - 1) as 1 | 2 | 3);
+      return;
+    }
     if (currentStep === 1) {
       onCancelOrSignOut();
       return;
     }
     if (currentStep === 7 && skippedProject) {
       setCurrentStep(5);
+      setProjectSubStep(1);
       saveAnswer('step', 5, 5);
       return;
     }
@@ -2503,31 +2508,84 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
           {/* ──────────────────────────────────────────────────────────── */}
           {/* SCREEN 5: CREATE YOUR FIRST PROJECT                         */}
           {/* ──────────────────────────────────────────────────────────── */}
+          {/* ──────────────────────────────────────────────────────────── */}
+          {/* SCREEN 5: CREATE YOUR FIRST PROJECT (PROGRESSIVE 3 PARTS)   */}
+          {/* ──────────────────────────────────────────────────────────── */}
           {currentStep === 5 && (
             <div className="space-y-6 animate-in fade-in duration-200">
-              {/* Header */}
+              {/* Header with Step Indicator */}
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">
+                      Step 5 of 8 • Project Setup
+                    </span>
+                    <span className="text-slate-300">/</span>
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-900 text-white">
+                      Part {projectSubStep} of 3
+                    </span>
+                  </div>
                   <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-                    Let&apos;s add your first project
+                    {projectSubStep === 1 && "Let's add your first project"}
+                    {projectSubStep === 2 && 'Project Capital & Debt Structure'}
+                    {projectSubStep === 3 && 'Contract Model & Operating Account'}
                   </h1>
                   <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-                    Set up your active jobsite, legal entity, and institutional capital structure.
+                    {projectSubStep === 1 && 'Set up your active jobsite, legal entity, and target timeline.'}
+                    {projectSubStep === 2 && 'Configure property acquisition terms, equity, and construction lending.'}
+                    {projectSubStep === 3 && 'Establish General Contractor billing mechanics and escrow controls.'}
                   </p>
                 </div>
                 <button
                   id="btn-fill-demo"
                   type="button"
-                  onClick={() => {
-                    handleFillDemo(5);
-                    setShowGovDetails(true);
-                  }}
+                  onClick={() => handleFillDemo(5)}
                   className="text-xs text-slate-700 hover:text-slate-900 font-semibold inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 cursor-pointer shrink-0 transition shadow-2xs"
                   title="Load institutional demo project profile"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-slate-600" />
                   <span>Demo project</span>
                 </button>
+              </div>
+
+              {/* Progress Indicator: 3 segments */}
+              <div className="space-y-1.5">
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setProjectSubStep(1)}
+                    className="group text-left cursor-pointer focus:outline-none"
+                  >
+                    <div className={`h-1.5 rounded-full transition-colors ${projectSubStep >= 1 ? 'bg-slate-900' : 'bg-slate-200'}`} />
+                    <span className={`block text-[11px] font-semibold mt-1.5 transition-colors ${projectSubStep === 1 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                      1. Identity & Dates
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (projectName.trim()) setProjectSubStep(2);
+                    }}
+                    className="group text-left cursor-pointer focus:outline-none"
+                  >
+                    <div className={`h-1.5 rounded-full transition-colors ${projectSubStep >= 2 ? 'bg-slate-900' : 'bg-slate-200'}`} />
+                    <span className={`block text-[11px] font-semibold mt-1.5 transition-colors ${projectSubStep === 2 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                      2. Capital & Debt
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (projectName.trim()) setProjectSubStep(3);
+                    }}
+                    className="group text-left cursor-pointer focus:outline-none"
+                  >
+                    <div className={`h-1.5 rounded-full transition-colors ${projectSubStep >= 3 ? 'bg-slate-900' : 'bg-slate-200'}`} />
+                    <span className={`block text-[11px] font-semibold mt-1.5 transition-colors ${projectSubStep === 3 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                      3. Contract & Governance
+                    </span>
+                  </button>
+                </div>
               </div>
 
               {projectError && (
@@ -2537,397 +2595,478 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                 </div>
               )}
 
-              {/* Core Physical & Entity Identity */}
-              <div className="space-y-4">
-                {/* Project Name and Auto-derived Legal Entity */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <div className="space-y-1.5">
-                    <label htmlFor="input-project-name" className="block text-xs font-bold text-slate-800">
-                      Project display name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="input-project-name"
-                      type="text"
-                      autoFocus
-                      value={projectName}
-                      onChange={(e) => {
-                        setProjectName(e.target.value);
-                        if (!projectEntity || projectEntity === `${projectName} Partners LLC`) {
-                          setProjectEntity(`${e.target.value} Partners LLC`);
-                        }
-                        if (projectError) setProjectError(null);
-                      }}
-                      placeholder={projectStatus === 'active' ? 'e.g. 73 Broadway Mixed-Use' : 'e.g. 161 Woodlawn Mixed-Use'}
-                      className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition ${
-                        projectError ? 'border-red-400 focus:ring-red-500/20' : 'border-slate-200 focus:border-slate-900 focus:ring-slate-900/10'
-                      }`}
-                    />
+              {/* ────────────────── PART 1: IDENTITY & SCHEDULE ────────────────── */}
+              {projectSubStep === 1 && (
+                <div className="space-y-4 animate-in fade-in duration-150">
+                  {/* Project Name and Auto-derived Legal Entity */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div className="space-y-1.5">
+                      <label htmlFor="input-project-name" className="block text-xs font-bold text-slate-800">
+                        Project display name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="input-project-name"
+                        type="text"
+                        autoFocus
+                        value={projectName}
+                        onChange={(e) => {
+                          setProjectName(e.target.value);
+                          if (!projectEntity || projectEntity === `${projectName} Partners LLC`) {
+                            setProjectEntity(`${e.target.value} Partners LLC`);
+                          }
+                          if (projectError) setProjectError(null);
+                        }}
+                        placeholder={projectStatus === 'active' ? 'e.g. 73 Broadway Mixed-Use' : 'e.g. 161 Woodlawn Mixed-Use'}
+                        className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition ${
+                          projectError ? 'border-red-400 focus:ring-red-500/20' : 'border-slate-200 focus:border-slate-900 focus:ring-slate-900/10'
+                        }`}
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="input-project-entity" className="block text-xs font-bold text-slate-800">
+                        Legal ownership entity (LLC / LP) <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="input-project-entity"
+                        type="text"
+                        value={projectEntity}
+                        onChange={(e) => setProjectEntity(e.target.value)}
+                        placeholder="e.g. 161 Woodlawn Partners LLC"
+                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                      />
+                    </div>
                   </div>
 
+                  {/* Site Address */}
                   <div className="space-y-1.5">
-                    <label htmlFor="input-project-entity" className="block text-xs font-bold text-slate-800">
-                      Legal ownership entity (LLC / LP) <span className="text-red-500">*</span>
+                    <label htmlFor="input-project-address" className="block text-xs font-bold text-slate-800">
+                      Site address / location <span className="text-slate-400 font-normal">(optional)</span>
                     </label>
-                    <input
-                      id="input-project-entity"
-                      type="text"
-                      value={projectEntity}
-                      onChange={(e) => setProjectEntity(e.target.value)}
-                      placeholder="e.g. 161 Woodlawn Partners LLC"
-                      className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                    />
+                    <div className="relative">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        id="input-project-address"
+                        type="text"
+                        value={projectAddress}
+                        onChange={(e) => setProjectAddress(e.target.value)}
+                        placeholder={projectStatus === 'active' ? 'e.g. 73 Broadway, Jersey City, NJ 07306' : 'e.g. 161 Woodlawn Ave, Jersey City, NJ 07305'}
+                        className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Project Asset Archetype */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Project asset archetype
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {[
+                        { value: 'MULTIFAMILY', label: 'Multifamily', sub: 'Residential' },
+                        { value: 'SINGLE_FAMILY', label: 'Single Family', sub: 'Ground-Up' },
+                        { value: 'MIXED_USE', label: 'Mixed-Use', sub: 'Commercial' },
+                        { value: 'SUBDIVISION', label: 'Subdivision', sub: 'Land Dev' },
+                      ].map((type) => {
+                        const isSelected = assetType === type.value;
+                        return (
+                          <button
+                            key={type.value}
+                            type="button"
+                            onClick={() => setAssetType(type.value)}
+                            className={`rounded-xl border p-2.5 text-left transition cursor-pointer ${
+                              isSelected
+                                ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                                : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
+                          >
+                            <span className="block text-xs font-bold leading-tight">{type.label}</span>
+                            <span className={`block text-[10px] mt-0.5 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
+                              {type.sub}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Current Project Stage */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Current project stage
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {(projectStatus === 'active' ? ACTIVE_STAGE_CHOICES : NEW_STAGE_CHOICES).map((choice) => {
+                        const isSelected = projectStage === choice.id;
+                        return (
+                          <button
+                            key={choice.id}
+                            type="button"
+                            onClick={() => setProjectStage(choice.id)}
+                            className={`p-3.5 rounded-xl border text-left transition cursor-pointer ${
+                              isSelected
+                                ? 'bg-slate-900 border-slate-900 text-white shadow-xs'
+                                : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/70'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-1 mb-1">
+                              <span className={`text-xs font-bold leading-tight ${isSelected ? 'text-white' : 'text-slate-900'}`}>
+                                {choice.label}
+                              </span>
+                              <div className="shrink-0 mt-0.5">
+                                {isSelected ? (
+                                  <div className="w-4 h-4 rounded-full bg-white text-slate-900 flex items-center justify-center shadow-2xs">
+                                    <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                  </div>
+                                ) : (
+                                  <div className="w-4 h-4 rounded-full border border-slate-300" />
+                                )}
+                              </div>
+                            </div>
+                            <p className={`text-[11px] leading-snug ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
+                              {choice.desc}
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Timeline Schedule: Start and Completion Dates */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div className="space-y-1.5">
+                      <label htmlFor="input-started-at" className="block text-xs font-bold text-slate-800">
+                        Target construction start <span className="text-slate-400 font-normal">(optional)</span>
+                      </label>
+                      <div className="relative">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          id="input-started-at"
+                          type="date"
+                          value={startedAt}
+                          onChange={(e) => setStartedAt(e.target.value)}
+                          className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="input-target-date" className="block text-xs font-bold text-slate-800">
+                        Target completion date <span className="text-slate-400 font-normal">(optional)</span>
+                      </label>
+                      <div className="relative">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          id="input-target-date"
+                          type="date"
+                          value={targetDate}
+                          onChange={(e) => setTargetDate(e.target.value)}
+                          className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Part 1 Actions */}
+                  <div className="space-y-2.5 pt-3">
+                    <button
+                      id="btn-onboarding-next"
+                      type="button"
+                      disabled={isCheckingDuplicates}
+                      onClick={handleCheckDuplicatesAndAdvance}
+                      className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99] disabled:opacity-75"
+                    >
+                      {isCheckingDuplicates ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Checking project registries...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Next: Capital & Debt Structure</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      id="btn-skip-project"
+                      type="button"
+                      onClick={handleSkipProject}
+                      className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer text-center"
+                    >
+                      Skip for now, I&apos;ll add a project later
+                    </button>
                   </div>
                 </div>
+              )}
 
-                {/* Site Address */}
-                <div className="space-y-1.5">
-                  <label htmlFor="input-project-address" className="block text-xs font-bold text-slate-800">
-                    Site address / location <span className="text-slate-400 font-normal">(optional)</span>
-                  </label>
-                  <div className="relative">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      id="input-project-address"
-                      type="text"
-                      value={projectAddress}
-                      onChange={(e) => setProjectAddress(e.target.value)}
-                      placeholder={projectStatus === 'active' ? 'e.g. 73 Broadway, Jersey City, NJ 07306' : 'e.g. 161 Woodlawn Ave, Jersey City, NJ 07305'}
-                      className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                    />
-                  </div>
-                </div>
-
-                {/* Project Asset Archetype */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-800">
-                    Project asset archetype
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      { value: 'MULTIFAMILY', label: 'Multifamily', sub: 'Residential' },
-                      { value: 'SINGLE_FAMILY', label: 'Single Family', sub: 'Ground-Up' },
-                      { value: 'MIXED_USE', label: 'Mixed-Use', sub: 'Commercial' },
-                      { value: 'SUBDIVISION', label: 'Subdivision', sub: 'Land Dev' },
-                    ].map((type) => {
-                      const isSelected = assetType === type.value;
-                      return (
+              {/* ────────────────── PART 2: CAPITAL & DEBT ────────────────── */}
+              {projectSubStep === 2 && (
+                <div className="space-y-4 animate-in fade-in duration-150">
+                  {/* Property Acquisition Status */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Property acquisition status
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {[
+                        { val: 'true', label: 'Title / Deed Closed', desc: 'Settlement statement recorded and closed.' },
+                        { val: 'false', label: 'Under Diligence / LOI', desc: 'Purchase contract or LOI pending closing.' },
+                      ].map((opt) => (
                         <button
-                          key={type.value}
+                          key={opt.val}
                           type="button"
-                          onClick={() => setAssetType(type.value)}
-                          className={`rounded-xl border p-2.5 text-left transition cursor-pointer ${
-                            isSelected
+                          onClick={() => setIsAcquired(opt.val as any)}
+                          className={`rounded-xl border p-3 text-left transition cursor-pointer ${
+                            isAcquired === opt.val
                               ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
                               : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
                           }`}
                         >
-                          <span className="block text-xs font-bold leading-tight">{type.label}</span>
-                          <span className={`block text-[10px] mt-0.5 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
-                            {type.sub}
-                          </span>
+                          <span className="block text-xs font-bold leading-tight">{opt.label}</span>
+                          <span className={`mt-0.5 block text-[11px] ${isAcquired === opt.val ? 'text-slate-300' : 'text-slate-500'}`}>{opt.desc}</span>
                         </button>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* Current Project Stage */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-800">
-                    Current project stage
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {(projectStatus === 'active' ? ACTIVE_STAGE_CHOICES : NEW_STAGE_CHOICES).map((choice) => {
-                      const isSelected = projectStage === choice.id;
-                      return (
+                  {/* Initial Acquisition Funding Source */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Initial acquisition capital source
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {[
+                        { id: 'ACQUISITION_LOAN', label: 'Bank Debt', sub: 'Acquisition loan' },
+                        { id: 'EQUITY', label: 'Sponsor Equity', sub: 'Internal capital' },
+                        { id: 'LP_EQUITY', label: 'LP Equity', sub: 'Partner capital' },
+                        { id: 'SELLER_FINANCED', label: 'Seller Note', sub: 'Owner financed' },
+                      ].map((f) => {
+                        const isSelected = acquisitionFunding === f.id;
+                        return (
+                          <button
+                            key={f.id}
+                            type="button"
+                            onClick={() => setAcquisitionFunding(f.id)}
+                            className={`rounded-xl border p-2.5 text-left transition cursor-pointer ${
+                              isSelected
+                                ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                                : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
+                          >
+                            <span className="block text-xs font-bold leading-tight">{f.label}</span>
+                            <span className={`block text-[10px] mt-0.5 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
+                              {f.sub}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Construction Debt Structure */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Construction debt structure
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {[
+                        { val: 'true', label: 'Construction Loan in Place', desc: 'Disbursements routed via monthly draw inspections.' },
+                        { val: 'false', label: 'All-Equity Self-Funded', desc: 'Funded directly from sponsor or partner equity accounts.' },
+                      ].map((opt) => (
                         <button
-                          key={choice.id}
+                          key={opt.val}
                           type="button"
-                          onClick={() => setProjectStage(choice.id)}
-                          className={`p-3.5 rounded-xl border text-left transition cursor-pointer ${
-                            isSelected
-                              ? 'bg-slate-900 border-slate-900 text-white shadow-xs'
-                              : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/70'
+                          onClick={() => setHasConstructionLoan(opt.val as any)}
+                          className={`rounded-xl border p-3 text-left transition cursor-pointer ${
+                            hasConstructionLoan === opt.val
+                              ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                              : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
                           }`}
                         >
-                          <div className="flex items-start justify-between gap-1 mb-1">
-                            <span className={`text-xs font-bold leading-tight ${isSelected ? 'text-white' : 'text-slate-900'}`}>
-                              {choice.label}
-                            </span>
-                            <div className="shrink-0 mt-0.5">
-                              {isSelected ? (
-                                <div className="w-4 h-4 rounded-full bg-white text-slate-900 flex items-center justify-center shadow-2xs">
-                                  <Check className="w-2.5 h-2.5 stroke-[3]" />
-                                </div>
-                              ) : (
-                                <div className="w-4 h-4 rounded-full border border-slate-300" />
-                              )}
-                            </div>
-                          </div>
-                          <p className={`text-[11px] leading-snug ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
-                            {choice.desc}
-                          </p>
+                          <span className="block text-xs font-bold leading-tight">{opt.label}</span>
+                          <span className={`mt-0.5 block text-[11px] ${hasConstructionLoan === opt.val ? 'text-slate-300' : 'text-slate-500'}`}>{opt.desc}</span>
                         </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Timeline Schedule: Start and Completion Dates */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <div className="space-y-1.5">
-                    <label htmlFor="input-started-at" className="block text-xs font-bold text-slate-800">
-                      Target construction start <span className="text-slate-400 font-normal">(optional)</span>
-                    </label>
-                    <div className="relative">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        id="input-started-at"
-                        type="date"
-                        value={startedAt}
-                        onChange={(e) => setStartedAt(e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                      />
+                      ))}
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label htmlFor="input-target-date" className="block text-xs font-bold text-slate-800">
-                      Target completion date <span className="text-slate-400 font-normal">(optional)</span>
-                    </label>
-                    <div className="relative">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        id="input-target-date"
-                        type="date"
-                        value={targetDate}
-                        onChange={(e) => setTargetDate(e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Institutional Capital & Governance Controls Panel */}
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                      <span className="text-xs font-bold text-slate-900">Capital & Governance Controls</span>
-                      <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
-                        Standards Active
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-600">
-                      {hasConstructionLoan === 'true' ? `Construction Loan (${lenderName || 'Senior Lender'})` : 'All-Equity Self-Funded'} • {contractModel === 'COST_PLUS' ? 'Cost-Plus with Fee Cap' : contractModel === 'GMP' ? 'Guaranteed Maximum Price' : contractModel} • {operatingAccountModel === 'DEDICATED' ? 'Dedicated LLC Account' : 'Shared Account'}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowGovDetails(!showGovDetails)}
-                    className="text-xs font-semibold text-slate-700 hover:text-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white shadow-2xs transition cursor-pointer self-start sm:self-center"
-                  >
-                    {showGovDetails ? 'Hide Customization' : 'Customize Terms'}
-                  </button>
-                </div>
-
-                {showGovDetails && (
-                  <div className="pt-4 border-t border-slate-200/80 space-y-5 animate-in fade-in duration-150">
-                    {/* Acquisition Status & Senior Debt */}
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                          Property acquisition status
-                        </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                          {[
-                            { val: 'true', label: 'Title / Deed Closed', desc: 'Settlement statement recorded and closed.' },
-                            { val: 'false', label: 'Under Diligence / LOI', desc: 'Purchase contract or LOI pending closing.' },
-                          ].map((opt) => (
-                            <button
-                              key={opt.val}
-                              type="button"
-                              onClick={() => setIsAcquired(opt.val as any)}
-                              className={`rounded-xl border p-3 text-left transition cursor-pointer ${
-                                isAcquired === opt.val
-                                  ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                                  : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
-                              }`}
-                            >
-                              <span className="block text-xs font-bold leading-tight">{opt.label}</span>
-                              <span className={`mt-0.5 block text-[11px] ${isAcquired === opt.val ? 'text-slate-300' : 'text-slate-500'}`}>{opt.desc}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                          Construction debt structure
-                        </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                          {[
-                            { val: 'true', label: 'Construction Loan in Place', desc: 'Disbursements routed via monthly draw inspections.' },
-                            { val: 'false', label: 'All-Equity Self-Funded', desc: 'Funded directly from sponsor or partner equity accounts.' },
-                          ].map((opt) => (
-                            <button
-                              key={opt.val}
-                              type="button"
-                              onClick={() => setHasConstructionLoan(opt.val as any)}
-                              className={`rounded-xl border p-3 text-left transition cursor-pointer ${
-                                hasConstructionLoan === opt.val
-                                  ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                                  : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
-                              }`}
-                            >
-                              <span className="block text-xs font-bold leading-tight">{opt.label}</span>
-                              <span className={`mt-0.5 block text-[11px] ${hasConstructionLoan === opt.val ? 'text-slate-300' : 'text-slate-500'}`}>{opt.desc}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {hasConstructionLoan === 'true' && (
-                        <div className="space-y-1.5">
-                          <label htmlFor="input-lender-name" className="block text-xs font-bold text-slate-800">
-                            Primary construction lender name
-                          </label>
-                          <div className="relative">
-                            <Landmark className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                            <input
-                              id="input-lender-name"
-                              type="text"
-                              value={lenderName}
-                              onChange={(e) => setLenderName(e.target.value)}
-                              placeholder="e.g. Pacific Western Bank"
-                              className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* GC Contract Model */}
-                    <div className="space-y-2">
-                      <label className="block text-xs font-bold text-slate-800">
-                        General Contractor contract model
+                  {/* Senior Lender Name */}
+                  {hasConstructionLoan === 'true' && (
+                    <div className="space-y-1.5 animate-in fade-in duration-150">
+                      <label htmlFor="input-lender-name" className="block text-xs font-bold text-slate-800">
+                        Primary construction lender name
                       </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        {[
-                          { value: 'COST_PLUS', badge: 'Popular', title: 'Cost-Plus with Fee Cap', desc: 'Verified trade costs with capped GC markup fee.' },
-                          { value: 'GMP', badge: 'AIA G702', title: 'Guaranteed Maximum Price', desc: 'Capped total price; bills against itemized SOV.' },
-                          { value: 'FIXED_PRICE', badge: 'Lump Sum', title: 'Fixed Price', desc: 'Disbursements tied strictly to percent completion.' },
-                          { value: 'MILESTONE_BASED', badge: 'Staged', title: 'Milestone-Based', desc: 'Funded upon certified physical milestones.' },
-                          { value: 'OPEN_BOOK', badge: 'Direct Cost', title: 'Open-Book Transparency', desc: 'Itemized invoices, payroll, and receipts.' },
-                          { value: 'HYBRID', badge: 'Custom', title: 'Hybrid / Split Scopes', desc: 'Combine fixed and open-book scopes on one job.' },
-                        ].map((m) => {
-                          const isSelected = contractModel === m.value;
-                          return (
-                            <button
-                              key={m.value}
-                              type="button"
-                              onClick={() => setContractModel(m.value as ContractModel)}
-                              className={`rounded-xl border p-3 text-left transition cursor-pointer ${
-                                isSelected
-                                  ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                                  : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between gap-1.5">
-                                <span className={`font-bold text-xs ${isSelected ? 'text-white' : 'text-slate-900'}`}>{m.title}</span>
-                                <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>{m.badge}</span>
-                              </div>
-                              <p className={`mt-1 text-[11px] leading-snug ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>{m.desc}</p>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {contractModel === 'HYBRID' && (
-                        <div className="mt-2 rounded-xl border border-slate-200 bg-white p-3">
-                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                            Define hybrid scope allocation
-                          </label>
-                          <input
-                            type="text"
-                            value={hybridCustomDetails}
-                            onChange={(e) => setHybridCustomDetails(e.target.value)}
-                            placeholder="e.g. Sitework & Foundation: Cost-Plus; Framing & Finishes: Fixed Lump Sum"
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-slate-900"
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Operating Bank Account */}
-                    <div className="space-y-2">
-                      <label className="block text-xs font-bold text-slate-800">
-                        Operating bank account model
-                      </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        {[
-                          { val: 'DEDICATED', badge: 'Recommended', title: 'Dedicated Project Account', desc: 'Single entity LLC account with 1:1 transaction matching.' },
-                          { val: 'SHARED', badge: 'Transfer Controls', title: 'Shared / Master Account', desc: 'Master account requiring strict inter-project transfer controls.' },
-                        ].map((opt) => {
-                          const isSelected = operatingAccountModel === opt.val;
-                          return (
-                            <button
-                              key={opt.val}
-                              type="button"
-                              onClick={() => setOperatingAccountModel(opt.val as any)}
-                              className={`rounded-xl border p-3 text-left transition cursor-pointer ${
-                                isSelected
-                                  ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                                  : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between gap-1.5">
-                                <span className={`font-bold text-xs ${isSelected ? 'text-white' : 'text-slate-900'}`}>{opt.title}</span>
-                                <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>{opt.badge}</span>
-                              </div>
-                              <p className={`mt-1 text-[11px] leading-snug ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>{opt.desc}</p>
-                            </button>
-                          );
-                        })}
+                      <div className="relative">
+                        <Landmark className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          id="input-lender-name"
+                          type="text"
+                          value={lenderName}
+                          onChange={(e) => setLenderName(e.target.value)}
+                          placeholder="e.g. Pacific Western Bank"
+                          className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                        />
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Actions: Primary CTA and Skip */}
-              <div className="space-y-2.5 pt-2">
-                <button
-                  id="btn-onboarding-next"
-                  type="button"
-                  disabled={isCheckingDuplicates}
-                  onClick={handleCheckDuplicatesAndAdvance}
-                  className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99] disabled:opacity-75"
-                >
-                  {isCheckingDuplicates ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Checking project registries...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Continue to Project Records</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </>
                   )}
-                </button>
 
-                <button
-                  id="btn-skip-project"
-                  type="button"
-                  onClick={handleSkipProject}
-                  className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer text-center"
-                >
-                  Skip for now, I&apos;ll add a project later
-                </button>
-              </div>
+                  {/* Part 2 Actions */}
+                  <div className="space-y-2.5 pt-3">
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setProjectSubStep(1)}
+                        className="flex-1 py-3 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+                      >
+                        <ArrowLeft className="w-3.5 h-3.5" />
+                        <span>Back to Identity</span>
+                      </button>
+                      <button
+                        id="btn-onboarding-next"
+                        type="button"
+                        onClick={() => setProjectSubStep(3)}
+                        className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.99]"
+                      >
+                        <span>Next: Contract & Banking</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <button
+                      id="btn-skip-project"
+                      type="button"
+                      onClick={handleSkipProject}
+                      className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer text-center"
+                    >
+                      Skip for now, I&apos;ll add a project later
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ────────────────── PART 3: CONTRACT & GOVERNANCE ────────────────── */}
+              {projectSubStep === 3 && (
+                <div className="space-y-4 animate-in fade-in duration-150">
+                  {/* GC Contract Model */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-slate-800">
+                      General Contractor contract model
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {[
+                        { value: 'COST_PLUS', badge: 'Popular', title: 'Cost-Plus with Fee Cap', desc: 'Verified trade costs with capped GC markup fee.' },
+                        { value: 'GMP', badge: 'AIA G702', title: 'Guaranteed Maximum Price', desc: 'Capped total price; bills against itemized SOV.' },
+                        { value: 'FIXED_PRICE', badge: 'Lump Sum', title: 'Fixed Price', desc: 'Disbursements tied strictly to percent completion.' },
+                        { value: 'MILESTONE_BASED', badge: 'Staged', title: 'Milestone-Based', desc: 'Funded upon certified physical milestones.' },
+                        { value: 'OPEN_BOOK', badge: 'Direct Cost', title: 'Open-Book Transparency', desc: 'Itemized invoices, payroll, and receipts.' },
+                        { value: 'HYBRID', badge: 'Custom', title: 'Hybrid / Split Scopes', desc: 'Combine fixed and open-book scopes on one job.' },
+                      ].map((m) => {
+                        const isSelected = contractModel === m.value;
+                        return (
+                          <button
+                            key={m.value}
+                            type="button"
+                            onClick={() => setContractModel(m.value as ContractModel)}
+                            className={`rounded-xl border p-3 text-left transition cursor-pointer ${
+                              isSelected
+                                ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                                : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-1.5">
+                              <span className={`font-bold text-xs ${isSelected ? 'text-white' : 'text-slate-900'}`}>{m.title}</span>
+                              <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>{m.badge}</span>
+                            </div>
+                            <p className={`mt-1 text-[11px] leading-snug ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>{m.desc}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {contractModel === 'HYBRID' && (
+                      <div className="mt-2 rounded-xl border border-slate-200 bg-white p-3">
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          Define hybrid scope allocation
+                        </label>
+                        <input
+                          type="text"
+                          value={hybridCustomDetails}
+                          onChange={(e) => setHybridCustomDetails(e.target.value)}
+                          placeholder="e.g. Sitework & Foundation: Cost-Plus; Framing & Finishes: Fixed Lump Sum"
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-slate-900"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Operating Bank Account */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Operating bank account model
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {[
+                        { val: 'DEDICATED', badge: 'Recommended', title: 'Dedicated Project Account', desc: 'Single entity LLC account with 1:1 transaction matching.' },
+                        { val: 'SHARED', badge: 'Transfer Controls', title: 'Shared / Master Account', desc: 'Master account requiring strict inter-project transfer controls.' },
+                      ].map((opt) => {
+                        const isSelected = operatingAccountModel === opt.val;
+                        return (
+                          <button
+                            key={opt.val}
+                            type="button"
+                            onClick={() => setOperatingAccountModel(opt.val as any)}
+                            className={`rounded-xl border p-3 text-left transition cursor-pointer ${
+                              isSelected
+                                ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                                : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-1.5">
+                              <span className={`font-bold text-xs ${isSelected ? 'text-white' : 'text-slate-900'}`}>{opt.title}</span>
+                              <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>{opt.badge}</span>
+                            </div>
+                            <p className={`mt-1 text-[11px] leading-snug ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>{opt.desc}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Part 3 Actions */}
+                  <div className="space-y-2.5 pt-3">
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setProjectSubStep(2)}
+                        className="flex-1 py-3 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+                      >
+                        <ArrowLeft className="w-3.5 h-3.5" />
+                        <span>Back to Capital</span>
+                      </button>
+                      <button
+                        id="btn-onboarding-next"
+                        type="button"
+                        onClick={handleCreateProject}
+                        className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.99]"
+                      >
+                        <span>Continue to Project Records</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <button
+                      id="btn-skip-project"
+                      type="button"
+                      onClick={handleSkipProject}
+                      className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer text-center"
+                    >
+                      Skip for now, I&apos;ll add a project later
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -3434,11 +3573,11 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                 type="button"
                 onClick={() => {
                   setShowDuplicateModal(false);
-                  handleCreateProject();
+                  setProjectSubStep(2);
                 }}
                 className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold cursor-pointer transition shadow-xs"
               >
-                Proceed Anyway
+                Proceed to Capital & Debt
               </button>
             </div>
           </div>

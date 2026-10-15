@@ -18,8 +18,8 @@ export interface BrandLogoProps {
 export function BrandLogo({
   size = "md",
   showWordmark = true,
-  showBadge = true,
-  showSubtitle = true,
+  showBadge = false,
+  showSubtitle = false,
   className = "",
   iconOnly = false,
   href,

@@ -72,7 +72,7 @@ const getProjectThumbnail = (proj: Project) => {
 
 export function ProjectFinancialComparison({
   projects,
-  globalRole,
+  globalRole = "OWNER",
   onOpenWorkspace,
 }: ProjectFinancialComparisonProps) {
   // If user has many projects, start with top 4 by default for peak legibility and speed, or all if <= 4

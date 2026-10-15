@@ -1,16 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Menu, 
-  X, 
-  ArrowRight, 
-  ChevronRight, 
-  Layers, 
-  Workflow, 
-  LineChart, 
-  Scale, 
-  ShieldAlert, 
+import {
+  Menu,
+  X,
+  ArrowRight,
+  ChevronRight,
+  Layers,
+  Workflow,
+  LineChart,
+  Scale,
+  ShieldAlert,
   FileCheck2,
   Lock
 } from 'lucide-react';
@@ -56,7 +56,7 @@ export function SiteHeader({ onStartOnboarding, onAuthenticate }: SiteHeaderProp
         setHasExistingSession(true);
         if (activeProj) setActiveProjectId(activeProj);
       }
-    } catch {}
+    } catch { }
   }, []);
 
   useEffect(() => {
@@ -131,13 +131,13 @@ export function SiteHeader({ onStartOnboarding, onAuthenticate }: SiteHeaderProp
       </a>
 
       {/* Main Architectural Header */}
-      <header 
+      <header
         id="site-header"
         role="banner"
         className={cn(
           "sticky top-0 z-50 transition-all duration-200 border-b",
-          scrolled 
-            ? "border-border/80 bg-background/95 backdrop-blur-md shadow-xs py-3" 
+          scrolled
+            ? "border-border/80 bg-background/95 backdrop-blur-md shadow-xs py-3"
             : "border-border/40 bg-background/80 backdrop-blur-sm py-4"
         )}
       >
@@ -162,12 +162,12 @@ export function SiteHeader({ onStartOnboarding, onAuthenticate }: SiteHeaderProp
                   )}
                 >
                   <span>{item.label}</span>
-                  <span 
+                  <span
                     className={cn(
                       "absolute inset-x-3 -bottom-0.5 h-0.5 bg-foreground transition-transform duration-200 ease-out origin-center rounded-full",
                       isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                     )}
-                    aria-hidden="true" 
+                    aria-hidden="true"
                   />
                 </a>
               );
@@ -196,7 +196,7 @@ export function SiteHeader({ onStartOnboarding, onAuthenticate }: SiteHeaderProp
               onClick={onStartOnboarding}
               className="btn-micro inline-flex items-center gap-1 sm:gap-1.5 rounded-xl border border-foreground/15 bg-primary px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-primary-foreground hover:bg-primary/90 shadow-sm cursor-pointer whitespace-nowrap"
             >
-              <span><span className="hidden sm:inline">Start your project</span><span className="sm:hidden">Start project</span></span>
+              <span><span className="hidden sm:inline">Sign Up</span><span className="sm:hidden">Start project</span></span>
               <ArrowRight className="size-3.5 hidden sm:inline-block" aria-hidden="true" />
             </button>
 
@@ -217,7 +217,7 @@ export function SiteHeader({ onStartOnboarding, onAuthenticate }: SiteHeaderProp
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div 
+          <div
             id="mobile-navigation-drawer"
             role="region"
             aria-label="Mobile Navigation"

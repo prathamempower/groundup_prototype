@@ -117,6 +117,12 @@ interface MoneyOverTimeProps {
 export function MoneyOverTime({ onStartOnboarding }: MoneyOverTimeProps) {
   const [view, setView] = useState<View>('cost');
 
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   useEffect(() => {
     const handler = (e: Event) => {
       const ce = e as CustomEvent<{ targetId?: string; view?: View }>;
@@ -176,10 +182,19 @@ export function MoneyOverTime({ onStartOnboarding }: MoneyOverTimeProps) {
 
             <div id="money-panel" role="tabpanel" aria-labelledby={`money-tab-${view}`} className="grid lg:grid-cols-[1.55fr_1fr]">
               <div className="p-5 sm:p-6">
-                <div className="mt-4">
-                  {view === 'cost' && <CostChart />}
-                  {view === 'cash' && <CashChart />}
-                  {view === 'profit' && <ProfitChart />}
+                <div className="mt-4 min-h-[18rem] sm:min-h-[20rem]">
+                  {isMounted ? (
+                    <>
+                      {view === 'cost' && <CostChart />}
+                      {view === 'cash' && <CashChart />}
+                      {view === 'profit' && <ProfitChart />}
+                    </>
+                  ) : (
+                    <div className="aspect-auto h-72 w-full sm:h-80 rounded-xl bg-slate-50/60 dark:bg-slate-900/60 border border-border/40 flex flex-col items-center justify-center gap-2.5">
+                      <div className="size-5 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                      <span className="text-xs font-medium text-muted-foreground">Synchronizing cash flow telemetry...</span>
+                    </div>
+                  )}
                 </div>
                 <ChartLegend view={view} />
               </div>
@@ -213,7 +228,7 @@ export function MoneyOverTime({ onStartOnboarding }: MoneyOverTimeProps) {
 
 function CostChart() {
   return (
-    <ChartContainer config={costConfig} className="aspect-auto h-72 w-full sm:h-80">
+    <ChartContainer id="cost-chart" config={costConfig} className="aspect-auto h-72 w-full sm:h-80">
       <LineChart data={COST_SERIES} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#E2E8F0" />
         <XAxis dataKey="month" {...axisProps} interval={2} />
@@ -239,7 +254,7 @@ function CostChart() {
 
 function CashChart() {
   return (
-    <ChartContainer config={cashConfig} className="aspect-auto h-72 w-full sm:h-80">
+    <ChartContainer id="cash-chart" config={cashConfig} className="aspect-auto h-72 w-full sm:h-80">
       <BarChart data={CASH_SERIES} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#E2E8F0" />
         <XAxis dataKey="month" {...axisProps} interval={2} />
@@ -263,7 +278,7 @@ function CashChart() {
 
 function ProfitChart() {
   return (
-    <ChartContainer config={profitConfig} className="aspect-auto h-72 w-full sm:h-80">
+    <ChartContainer id="profit-chart" config={profitConfig} className="aspect-auto h-72 w-full sm:h-80">
       <LineChart data={PROFIT_SERIES} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#E2E8F0" />
         <XAxis dataKey="month" {...axisProps} interval={1} />
