@@ -46,7 +46,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   }, [data, pathname, router]);
 
   return (
-    <div className="min-h-screen bg-slate-50/70 relative flex items-center justify-center p-4 selection:bg-slate-200 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50/70 relative flex flex-col items-center justify-center py-6 px-4 sm:px-6 selection:bg-slate-200 overflow-x-hidden">
       {/* Subtle blueprint architectural grid and isometric structural shards */}
       <div className="blueprint-grid pointer-events-none absolute inset-0 opacity-[0.035]" aria-hidden="true" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(0,102,238,0.06),rgba(255,255,255,0))]" aria-hidden="true" />
@@ -64,8 +64,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </Link>
       </div>
 
-      {/* Main Form Centerpiece - Completely Deterministic SSR & Hydration */}
-      <main className="relative z-10 w-full max-w-[440px]">
+      {/* Main Form Centerpiece - Optical Center, Auto-Fit, Auto-Height */}
+      <main className="relative z-10 w-full max-w-[420px] my-auto flex flex-col items-center">
         {error && !isSessionExpired && (
           <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-800 flex items-center justify-between" role="status">
             <span>Session check unavailable. You can continue signing in.</span>
