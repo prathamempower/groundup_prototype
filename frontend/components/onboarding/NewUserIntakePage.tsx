@@ -33,6 +33,7 @@ import { GroundUpTransitionLoader, CircularWorkspaceGauge } from '@/components/o
 import { LegalModal } from '@/components/LegalModal';
 import { ToastContainer, ToastMessage } from '@/components/Toast';
 import { TextEffect } from '@/components/motion-primitives/text-effect';
+import { AmbientStructuralWireframes } from '@/components/ui/AmbientStructuralWireframes';
 import {
   OnboardingRole,
   OnboardingAnswers,
@@ -1254,8 +1255,9 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
 
   return (
     <div className="min-h-screen bg-slate-50/40 relative flex flex-col font-sans text-slate-900 selection:bg-slate-200 overflow-x-hidden">
-      {/* Subtle blueprint grid for architectural depth */}
+      {/* Subtle blueprint grid and isometric structural shards */}
       <div className="blueprint-grid pointer-events-none absolute inset-0 opacity-[0.05]" aria-hidden="true" />
+      <AmbientStructuralWireframes intensity="subtle" />
 
       {/* ── Toast Notification Container ───────────────────────────────── */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />

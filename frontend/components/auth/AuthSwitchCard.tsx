@@ -217,12 +217,12 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
       <div 
         role="tablist"
         aria-label="Authentication mode selection"
-        className="mb-6 w-full max-w-[280px] p-1 bg-slate-200/75 border border-slate-300/60 rounded-2xl flex items-center relative select-none shadow-xs"
+        className="mb-3 w-full max-w-[260px] p-1 bg-slate-200/75 border border-slate-300/60 rounded-xl flex items-center relative select-none shadow-xs"
       >
         {/* Sliding Physical Spring Background Pill */}
         <div
           aria-hidden="true"
-          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-xl shadow-sm border border-slate-200/80 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none ${
+          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-lg shadow-sm border border-slate-200/80 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none ${
             isSignUp 
               ? 'left-[calc(50%+2px)]' 
               : 'left-1'
@@ -236,7 +236,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
           aria-selected={!isSignUp}
           aria-controls="auth-login-panel"
           onClick={() => handleToggle(false)}
-          className={`relative z-10 w-1/2 py-2 text-xs sm:text-sm font-semibold text-center transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-xl ${
+          className={`relative z-10 w-1/2 py-1.5 text-xs font-semibold text-center transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-lg ${
             !isSignUp 
               ? 'text-slate-950 font-bold' 
               : 'text-slate-500 hover:text-slate-800'
@@ -252,7 +252,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
           aria-selected={isSignUp}
           aria-controls="auth-signup-panel"
           onClick={() => handleToggle(true)}
-          className={`relative z-10 w-1/2 py-2 text-xs sm:text-sm font-semibold text-center transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-xl ${
+          className={`relative z-10 w-1/2 py-1.5 text-xs font-semibold text-center transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-lg ${
             isSignUp 
               ? 'text-slate-950 font-bold' 
               : 'text-slate-500 hover:text-slate-800'
@@ -277,14 +277,14 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             id="auth-login-panel"
             role="tabpanel"
             aria-labelledby="auth-login-tab"
-            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-overlay [backface-visibility:hidden] flex flex-col justify-start space-y-3.5 relative ${
+            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-overlay [backface-visibility:hidden] flex flex-col justify-start space-y-3 relative ${
               isSignUp ? 'absolute inset-0 pointer-events-none' : 'relative pointer-events-auto'
             }`}
           >
             {/* Exit to Home Close Button */}
             <Link
               href="/"
-              className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-20 cursor-pointer"
+              className="absolute top-3.5 right-3.5 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-20 cursor-pointer"
               aria-label="Exit to landing page"
               title="Exit to home"
             >
@@ -292,13 +292,13 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             </Link>
 
             {/* Brand Header */}
-            <div className="text-center space-y-1 mb-1.5">
-              <div className="flex justify-center mb-1">
+            <div className="text-center space-y-0.5 mb-1">
+              <div className="flex justify-center mb-0.5">
                 <Link href="/" className="inline-block hover:opacity-90 transition-opacity" aria-label="Return to GroundUp home">
-                  <BrandLogo size="lg" />
+                  <BrandLogo size="md" />
                 </Link>
               </div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900">
+              <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
                 Welcome back
               </h1>
               <p className="text-xs text-slate-500">
@@ -416,14 +416,14 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             id="auth-signup-panel"
             role="tabpanel"
             aria-labelledby="auth-signup-tab"
-            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-overlay [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-start relative ${
+            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-overlay [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-start relative ${
               !isSignUp ? 'absolute inset-0 pointer-events-none' : 'relative pointer-events-auto'
             }`}
           >
             {/* Exit to Home Close Button */}
             <Link
               href="/"
-              className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-20 cursor-pointer"
+              className="absolute top-3.5 right-3.5 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-20 cursor-pointer"
               aria-label="Exit to landing page"
               title="Exit to home"
             >
@@ -431,13 +431,13 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             </Link>
 
             {/* Brand Header */}
-            <div className="text-center space-y-0.5 mb-2.5">
-              <div className="flex justify-center mb-1">
+            <div className="text-center space-y-0.5 mb-1.5">
+              <div className="flex justify-center mb-0.5">
                 <Link href="/" className="inline-block hover:opacity-90 transition-opacity" aria-label="Return to GroundUp home">
-                  <BrandLogo size="lg" />
+                  <BrandLogo size="md" />
                 </Link>
               </div>
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
                 Create your account
               </h2>
               <p className="text-xs text-slate-500">
@@ -458,7 +458,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
 
             {/* ── STAGE 1: GOOGLE FIRST, IDENTITY, HANDLE, DOB & EMAIL ──────── */}
             {signUpStep === 1 && (
-              <form onSubmit={handleSignUpStep1Next} className="space-y-2.5">
+              <form onSubmit={handleSignUpStep1Next} className="space-y-2">
                 {/* 1. Continue with Google OAuth Button (At the Top for Best UX) */}
                 <button
                   type="button"
@@ -478,7 +478,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                     } catch {}
                     router.push('/onboarding');
                   }}
-                  className="w-full h-9 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs"
+                  className="w-full h-8.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs"
                 >
                   <svg className="size-3.5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -490,20 +490,20 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 </button>
 
                 {/* 2. OR Divider */}
-                <div className="relative my-1 text-center">
+                <div className="relative my-0.5 text-center">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-slate-200"></div>
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="bg-white px-2.5 text-[10px] uppercase font-semibold text-slate-400 tracking-wider">
+                    <span className="bg-white px-2 text-[10px] uppercase font-semibold text-slate-400 tracking-wider">
                       or sign up with email
                     </span>
                   </div>
                 </div>
 
                 {/* 3. First Name & Last Name */}
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div className="space-y-1">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-0.5">
                     <label htmlFor="signup-first-name" className="block text-[11px] font-semibold text-slate-700">
                       First name <span className="text-red-500">*</span>
                     </label>
@@ -514,10 +514,10 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       placeholder="Alex"
-                      className="h-9 w-full rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
+                      className="h-8.5 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
                     />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-0.5">
                     <label htmlFor="signup-last-name" className="block text-[11px] font-semibold text-slate-700">
                       Last name <span className="text-red-500">*</span>
                     </label>
@@ -528,13 +528,13 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       placeholder="Vance"
-                      className="h-9 w-full rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
+                      className="h-8.5 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
                     />
                   </div>
                 </div>
 
                 {/* 4. Username & Availability Badge */}
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <div className="flex items-center justify-between">
                     <label htmlFor="signup-username" className="block text-[11px] font-semibold text-slate-700">
                       Username <span className="text-red-500">*</span>
@@ -557,13 +557,13 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                       value={username}
                       onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
                       placeholder="alexvance"
-                      className="h-9 w-full rounded-lg border border-slate-300 bg-white pl-24 pr-3 text-xs font-mono text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
+                      className="h-8.5 w-full rounded-lg border border-slate-300 bg-white pl-24 pr-3 text-xs font-mono text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
                     />
                   </div>
                 </div>
 
                 {/* 5. DOB with 18+ Calendar Validation */}
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <div className="flex items-center justify-between">
                     <label htmlFor="signup-dob" className="block text-[11px] font-semibold text-slate-700">
                       Date of birth <span className="text-red-500">*</span>
@@ -579,13 +579,13 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                       required
                       value={dob}
                       onChange={(e) => setDob(e.target.value)}
-                      className="h-9 w-full rounded-lg border border-slate-300 bg-white pl-9 pr-3 text-xs text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
+                      className="h-8.5 w-full rounded-lg border border-slate-300 bg-white pl-9 pr-3 text-xs text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
                     />
                   </div>
                 </div>
 
                 {/* 6. Work Email & Verification */}
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <div className="flex items-center justify-between">
                     <label htmlFor="signup-email" className="block text-[11px] font-semibold text-slate-700">
                       Work email <span className="text-red-500">*</span>
@@ -606,13 +606,13 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                       value={signUpEmail}
                       onChange={(e) => setSignUpEmail(e.target.value)}
                       placeholder="alex@vancedevelopment.com"
-                      className="h-9 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15 disabled:bg-slate-50 disabled:text-slate-600"
+                      className="h-8.5 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15 disabled:bg-slate-50 disabled:text-slate-600"
                     />
                     {!isEmailVerified && (
                       <button
                         type="button"
                         onClick={handleSendOtp}
-                        className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-semibold transition-colors cursor-pointer shrink-0"
+                        className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-semibold transition-colors cursor-pointer shrink-0"
                       >
                         {isOtpSent ? 'Resend' : 'Send Code'}
                       </button>
@@ -657,14 +657,14 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 {/* Continue to Password Stage Button */}
                 <button
                   type="submit"
-                  className="w-full h-10 rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-semibold shadow-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                  className="w-full h-9 rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-semibold shadow-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer mt-0.5"
                 >
                   <span>Next: Create Password</span>
                   <ArrowRight className="size-3.5" />
                 </button>
 
                 {/* Terms of Service & Privacy Policy Notice */}
-                <p className="text-[11px] leading-relaxed text-slate-500 text-center pt-1">
+                <p className="text-[10.5px] leading-relaxed text-slate-500 text-center pt-0.5">
                   By continuing, you agree to the GroundUp{' '}
                   <button
                     type="button"
@@ -800,18 +800,6 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
           </div>
 
         </div>
-      </div>
-
-      {/* Exit to Landing Page */}
-      <div className="mt-4 text-center">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-800 transition-colors cursor-pointer group"
-          aria-label="Exit to landing page"
-        >
-          <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5" />
-          <span>Exit to GroundUp home</span>
-        </Link>
       </div>
 
       <LegalModal

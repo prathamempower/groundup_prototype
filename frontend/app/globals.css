@@ -210,6 +210,41 @@
   }
 }
 
+/* Ambient Blueprint Shard Drift */
+@keyframes ambientFloatSlow {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(0.8deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes ambientFloatReverse {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(12px) rotate(-0.8deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+.animate-ambient-float-slow {
+  animation: ambientFloatSlow 22s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-ambient-float-reverse {
+  animation: ambientFloatReverse 26s ease-in-out infinite;
+  will-change: transform;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page-enter,
   .hover-lift,
