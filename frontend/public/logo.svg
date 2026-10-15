@@ -1,24 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
-  <!-- Architectural base rounded container for crisp tab contrast in both light and dark browser themes -->
-  <rect width="64" height="64" rx="14" fill="#0b1329" />
-  
-  <!-- Subtle institutional grid accent lines -->
-  <path d="M12 48L52 48" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" />
-  
-  <!-- Stylized GroundUp Architectural "G" Foundation in Emerald & Sky -->
-  <!-- Left Column Foundation -->
-  <path d="M14 26L24 20V46L14 40V26Z" fill="#0284c7" />
-  <!-- Center Base Span -->
-  <path d="M24 46L38 52V44L24 38V46Z" fill="#0369a1" />
-  <!-- Ascending Middle Tower (Precision Capital) -->
-  <path d="M26 14L36 8V38L26 32V14Z" fill="#38bdf8" />
-  <!-- Tower Cap Facet -->
-  <path d="M26 14L36 8L44 13L34 19L26 14Z" fill="#7dd3fc" />
-  
-  <!-- High Tower: Right Spire (Audited Truth) in Emerald -->
-  <path d="M38 18L48 12V42L38 36V18Z" fill="#10b981" />
-  <path d="M38 18L48 12L54 16L44 22L38 18Z" fill="#34d399" />
-  
-  <!-- Cross-beam Tie (Lien Waiver & Retainage Integrity) -->
-  <path d="M32 30L44 24V28L32 34V30Z" fill="#059669" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" width="200" height="48" fill="none">
+  <!-- GroundUp Architectural Hexagonal Mark -->
+  <g transform="translate(2, 4) scale(0.555)">
+    <!-- Foundation (Navy) -->
+    <path
+      fill="#041f39"
+      fill-rule="evenodd"
+      d="M 36 12 L 7 27 L 7 55 L 30 68 L 49 57 L 49 39 L 27 39 L 27 45 L 41 45 L 41 52 L 30 58 L 16 50 L 16 32 L 36 22 Z"
+    />
+    <!-- Skyscraper Tower 1 (Middle Blue) -->
+    <path fill="#0075ff" d="M 41 9 L 52 4 L 52 35 L 41 30 Z" />
+    <!-- Skyscraper Tower 2 (Right Blue) -->
+    <path fill="#0075ff" d="M 56 12 L 65 17 L 65 55 L 56 60 Z" />
+  </g>
+  <!-- GroundUp Typography Wordmark -->
+  <text x="48" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="26" font-weight="800" letter-spacing="-0.5px">
+    <tspan fill="#041f39">Ground</tspan><tspan fill="#0075ff">Up</tspan>
+  </text>
 </svg>

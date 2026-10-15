@@ -12,12 +12,21 @@ import {
   Activity
 } from 'lucide-react';
 import { Logo } from '../logo';
+import { LegalModal } from '../LegalModal';
 
 export interface SiteFooterProps {
   onStartOnboarding?: () => void;
 }
 
 export function SiteFooter({ onStartOnboarding }: SiteFooterProps) {
+  const [isLegalOpen, setIsLegalOpen] = React.useState(false);
+  const [legalTab, setLegalTab] = React.useState<'terms' | 'privacy'>('terms');
+
+  const openLegal = (tab: 'terms' | 'privacy') => {
+    setLegalTab(tab);
+    setIsLegalOpen(true);
+  };
+
   const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     const targetId = href.replace('#', '');
@@ -336,7 +345,7 @@ export function SiteFooter({ onStartOnboarding }: SiteFooterProps) {
         {/* Brand Mission Row */}
         <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <Logo onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
+            <Logo theme="dark" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
             <p className="text-xs text-slate-400 leading-relaxed">
               GroundUp AI delivers the construction financial command center for real estate developers: reconciling investor equity, construction loans, bank statements, and HUD settlement filings, enforcing 10% retainage withholdings, and building lender-ready draw packages without spreadsheet delays.
             </p>
@@ -351,13 +360,21 @@ export function SiteFooter({ onStartOnboarding }: SiteFooterProps) {
               Agent Governance
             </a>
             <span aria-hidden="true">·</span>
-            <a href="#main-content" onClick={(e) => handleScrollTo(e, '#main-content')} className="hover:text-slate-300 transition-colors cursor-pointer">
+            <button
+              type="button"
+              onClick={() => openLegal('privacy')}
+              className="hover:text-slate-300 transition-colors cursor-pointer text-[11px] bg-transparent border-none p-0 text-slate-500"
+            >
               Privacy Policy
-            </a>
+            </button>
             <span aria-hidden="true">·</span>
-            <a href="#main-content" onClick={(e) => handleScrollTo(e, '#main-content')} className="hover:text-slate-300 transition-colors cursor-pointer">
+            <button
+              type="button"
+              onClick={() => openLegal('terms')}
+              className="hover:text-slate-300 transition-colors cursor-pointer text-[11px] bg-transparent border-none p-0 text-slate-500"
+            >
               Terms of Service
-            </a>
+            </button>
             <span aria-hidden="true">·</span>
             <a 
               href="https://groundupdoc.vercel.app/" 
@@ -372,6 +389,12 @@ export function SiteFooter({ onStartOnboarding }: SiteFooterProps) {
         </div>
 
       </div>
+
+      <LegalModal
+        isOpen={isLegalOpen}
+        initialTab={legalTab}
+        onClose={() => setIsLegalOpen(false)}
+      />
     </footer>
   );
 }

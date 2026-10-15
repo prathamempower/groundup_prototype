@@ -51,7 +51,16 @@ export default function ProjectsPortfolioPage() {
 
   const user = meData?.data;
   const globalRole = user?.role || "OWNER";
-  const projects = useMemo(() => projectsData?.data?.projects || [], [projectsData]);
+  const projects = useMemo(() => {
+    const list = projectsData?.data?.projects || [];
+    const seen = new Set<string>();
+    return list.filter((p: Project) => {
+      const key = (p.name || "").trim().toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [projectsData]);
 
   // Filter & Search
   const filteredProjects = useMemo(() => {

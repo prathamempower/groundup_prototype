@@ -16,9 +16,11 @@ import {
   PanelLeftOpen,
   ArrowLeft,
   ChevronsUpDown,
+  LogOut,
 } from "lucide-react";
 import { UserRole, Project } from "@/lib/types";
 import { BrandLogo } from "@/components/ui/brand-logo";
+import { useSignOut } from "@/lib/hooks/use-sign-out";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -43,6 +45,8 @@ export function Sidebar({
   React.useEffect(() => {
     setThumbnailError(false);
   }, [workspaceProjectId]);
+
+  const { signOut, isSigningOut, SignOutOverlay } = useSignOut();
 
   const { data: meData } = useQuery({
     queryKey: ["me"],
@@ -346,8 +350,25 @@ export function Sidebar({
           })}
         </nav>
 
-
+        {/* Footer: Sign Out */}
+        <div className="p-2.5 border-t border-slate-200/70 bg-white">
+          <button
+            onClick={() => signOut()}
+            disabled={isSigningOut}
+            className={`w-full flex items-center rounded-lg text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all p-2 ${
+              collapsed ? "justify-center" : "gap-2.5 px-3"
+            } disabled:opacity-50 cursor-pointer group`}
+            title="Sign out of GroundUp"
+            aria-label="Sign out"
+          >
+            <LogOut className="h-4 w-4 shrink-0 text-rose-500 group-hover:text-rose-600 transition-colors" />
+            {!collapsed && <span>{isSigningOut ? "Signing out…" : "Sign out"}</span>}
+          </button>
+        </div>
       </aside>
+
+      <SignOutOverlay />
     </>
   );
 }
+

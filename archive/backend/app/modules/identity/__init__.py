@@ -1,1 +1,0 @@
-# GroundUp Domain Module: Identity
