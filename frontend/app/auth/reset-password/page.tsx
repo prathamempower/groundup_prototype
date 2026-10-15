@@ -45,7 +45,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div>
+    <div className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-overlay">
       <div className="mb-7">
         <div className="mb-3 grid h-10 w-10 place-items-center rounded-md bg-primary-subtle text-primary">
           <KeyRound className="h-5 w-5" aria-hidden="true" />

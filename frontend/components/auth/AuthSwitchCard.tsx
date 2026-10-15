@@ -4,13 +4,13 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  Eye, 
-  EyeOff, 
-  Check, 
-  ArrowRight, 
-  ArrowLeft, 
-  CheckCircle2, 
+import {
+  Eye,
+  EyeOff,
+  Check,
+  ArrowRight,
+  ArrowLeft,
+  CheckCircle2,
   Sparkles,
   Calendar,
   ShieldCheck,
@@ -206,7 +206,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
         email: signUpEmail.trim(),
         username: username.trim(),
       }));
-    } catch {}
+    } catch { }
 
     router.push('/onboarding');
   };
@@ -214,7 +214,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
   return (
     <div className="w-full flex flex-col items-center">
       {/* ── Apple-Style Segmented Control (HIG Physical Spring Pill) ── */}
-      <div 
+      <div
         role="tablist"
         aria-label="Authentication mode selection"
         className="mb-3 w-full max-w-[260px] p-1 bg-slate-200/75 border border-slate-300/60 rounded-xl flex items-center relative select-none shadow-xs"
@@ -222,11 +222,10 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
         {/* Sliding Physical Spring Background Pill */}
         <div
           aria-hidden="true"
-          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-lg shadow-sm border border-slate-200/80 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none ${
-            isSignUp 
-              ? 'left-[calc(50%+2px)]' 
+          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-lg shadow-sm border border-slate-200/80 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none ${isSignUp
+              ? 'left-[calc(50%+2px)]'
               : 'left-1'
-          }`}
+            }`}
         />
 
         {/* Log In Tab Button */}
@@ -236,11 +235,10 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
           aria-selected={!isSignUp}
           aria-controls="auth-login-panel"
           onClick={() => handleToggle(false)}
-          className={`relative z-10 w-1/2 py-1.5 text-xs font-semibold text-center transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-lg ${
-            !isSignUp 
-              ? 'text-slate-950 font-bold' 
+          className={`relative z-10 w-1/2 py-1.5 text-xs font-semibold text-center transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-lg ${!isSignUp
+              ? 'text-slate-950 font-bold'
               : 'text-slate-500 hover:text-slate-800'
-          }`}
+            }`}
         >
           <span>Log In</span>
         </button>
@@ -252,11 +250,10 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
           aria-selected={isSignUp}
           aria-controls="auth-signup-panel"
           onClick={() => handleToggle(true)}
-          className={`relative z-10 w-1/2 py-1.5 text-xs font-semibold text-center transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-lg ${
-            isSignUp 
-              ? 'text-slate-950 font-bold' 
+          className={`relative z-10 w-1/2 py-1.5 text-xs font-semibold text-center transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-lg ${isSignUp
+              ? 'text-slate-950 font-bold'
               : 'text-slate-500 hover:text-slate-800'
-          }`}
+            }`}
         >
           <span>Sign Up</span>
         </button>
@@ -264,22 +261,20 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
 
       {/* ── 3D Flip Card Container ─────────────────────────────────────────── */}
       <div className="w-full [perspective:1200px]">
-        <div 
-          className={`relative w-full transition-transform duration-700 [transform-style:preserve-3d] ${
-            isSignUp ? '[transform:rotateY(180deg)]' : '[transform:rotateY(0deg)]'
-          }`}
+        <div
+          className={`relative w-full transition-transform duration-700 [transform-style:preserve-3d] ${isSignUp ? '[transform:rotateY(180deg)]' : '[transform:rotateY(0deg)]'
+            }`}
         >
-          
+
           {/* ───────────────────────────────────────────────────────────────────
               FRONT FACE: LOG IN
              ─────────────────────────────────────────────────────────────────── */}
-          <div 
+          <div
             id="auth-login-panel"
             role="tabpanel"
             aria-labelledby="auth-login-tab"
-            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-overlay [backface-visibility:hidden] flex flex-col justify-start space-y-3 relative ${
-              isSignUp ? 'absolute inset-0 pointer-events-none' : 'relative pointer-events-auto'
-            }`}
+            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-overlay [backface-visibility:hidden] flex flex-col justify-start space-y-3 relative ${isSignUp ? 'absolute inset-0 pointer-events-none' : 'relative pointer-events-auto'
+              }`}
           >
             {/* Exit to Home Close Button */}
             <Link
@@ -412,13 +407,12 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
           {/* ───────────────────────────────────────────────────────────────────
               BACK FACE: SIGN UP (2-STAGE PROGRESSION)
              ─────────────────────────────────────────────────────────────────── */}
-          <div 
+          <div
             id="auth-signup-panel"
             role="tabpanel"
             aria-labelledby="auth-signup-tab"
-            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-overlay [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-start relative ${
-              !isSignUp ? 'absolute inset-0 pointer-events-none' : 'relative pointer-events-auto'
-            }`}
+            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-overlay [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-start relative ${!isSignUp ? 'absolute inset-0 pointer-events-none' : 'relative pointer-events-auto'
+              }`}
           >
             {/* Exit to Home Close Button */}
             <Link
@@ -440,9 +434,6 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
               <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
                 Create your account
               </h2>
-              <p className="text-xs text-slate-500">
-                Get started with your enterprise workspace
-              </p>
             </div>
 
             {/* Error Notice */}
@@ -475,7 +466,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                         email: 'alex@vancedevelopment.com',
                         username: 'alexvance',
                       }));
-                    } catch {}
+                    } catch { }
                     router.push('/onboarding');
                   }}
                   className="w-full h-8.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs"
@@ -722,9 +713,8 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                         {[1, 2, 3, 4].map((step) => (
                           <div
                             key={step}
-                            className={`flex-1 transition-all duration-300 ${
-                              step <= passwordStrength.score ? passwordStrength.color : 'bg-slate-200'
-                            }`}
+                            className={`flex-1 transition-all duration-300 ${step <= passwordStrength.score ? passwordStrength.color : 'bg-slate-200'
+                              }`}
                           />
                         ))}
                       </div>

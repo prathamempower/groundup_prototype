@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -8,14 +9,22 @@ import { authAdapter } from "@/lib/api/adapters/auth-adapter";
 import { getDefaultRouteForRole } from "@/lib/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { AmbientStructuralWireframes } from "@/components/ui/AmbientStructuralWireframes";
+
+// Load ambient structural wireframes purely on the client to avoid SSR hydration shifts
+const AmbientStructuralWireframes = dynamic(
+  () =>
+    import("@/components/ui/AmbientStructuralWireframes").then(
+      (m) => m.AmbientStructuralWireframes
+    ),
+  { ssr: false }
+);
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const isSessionExpired = pathname === "/auth/session-expired";
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, error, refetch } = useQuery({
     queryKey: ["auth-session"],
     queryFn: () => authAdapter.getSession(),
     enabled: !isSessionExpired,
@@ -36,33 +45,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     }
   }, [data, pathname, router]);
 
-  if (!isSessionExpired && isLoading) {
-    return (
-      <main className="grid min-h-screen place-items-center bg-slate-50 relative" aria-label="Checking your session">
-        <div className="w-full max-w-sm animate-pulse space-y-4 px-6">
-          <div className="h-10 w-40 rounded-md bg-slate-200" />
-          <div className="h-8 w-56 rounded-md bg-slate-200" />
-          <div className="h-48 rounded-lg bg-slate-200" />
-        </div>
-      </main>
-    );
-  }
-
-  if (!isSessionExpired && data?.user) {
-    return (
-      <main className="grid min-h-screen place-items-center bg-slate-50 relative">
-        <p className="text-sm font-medium text-slate-500">Opening your workspace…</p>
-      </main>
-    );
-  }
-
-  const isSwitchCardPage = 
-    pathname === "/auth/login" || 
-    pathname === "/auth/sign-up" || 
-    pathname === "/auth/signup" || 
-    pathname === "/signup" || 
-    pathname === "/login";
-
   return (
     <div className="min-h-screen bg-slate-50/70 relative flex items-center justify-center p-4 selection:bg-slate-200 overflow-x-hidden">
       {/* Subtle blueprint architectural grid and isometric structural shards */}
@@ -82,7 +64,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </Link>
       </div>
 
-      {/* Main Form Centerpiece - Perfectly Centered in Viewport */}
+      {/* Main Form Centerpiece - Completely Deterministic SSR & Hydration */}
       <main className="relative z-10 w-full max-w-[440px]">
         {error && !isSessionExpired && (
           <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-800 flex items-center justify-between" role="status">
@@ -93,13 +75,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </div>
         )}
 
-        {isSwitchCardPage ? (
-          children
-        ) : (
-          <div className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-overlay">
-            {children}
-          </div>
-        )}
+        {children}
       </main>
     </div>
   );
