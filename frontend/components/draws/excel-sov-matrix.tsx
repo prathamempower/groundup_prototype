@@ -45,6 +45,11 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
     0
   );
 
+  const totalChangeOrdersCents = EXCEL_DRAW_TASKS.reduce(
+    (sum, t) => sum + t.changeOrdersCents,
+    0
+  );
+
   const getDrawTotalCents = (drawNumber: number) => {
     return Object.values(taskDrawAmounts).reduce(
       (sum, drawMap) => sum + (drawMap[drawNumber] || 0),
@@ -94,7 +99,7 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
             />
           </div>
           <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
-            23 Tasks • 9 Draws Scheduled
+            {EXCEL_DRAW_TASKS.length} Tasks • 9 Draws Scheduled
           </span>
         </div>
       </div>
@@ -207,7 +212,9 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
                   </td>
 
                   {/* Change Orders */}
-                  <td className="py-2 px-3 text-right tabular-nums text-slate-400 border-r border-slate-200">
+                  <td className={`py-2 px-3 text-right tabular-nums border-r border-slate-200 ${
+                    task.changeOrdersCents > 0 ? "text-amber-800 font-semibold" : "text-slate-400"
+                  }`}>
                     {formatMoney(task.changeOrdersCents)}
                   </td>
 
@@ -264,8 +271,8 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
               <td className="py-3 px-3 text-right tabular-nums border-r border-slate-300 font-bold">
                 {formatMoney(totalScheduledValueCents)}
               </td>
-              <td className="py-3 px-3 text-right tabular-nums border-r border-slate-300 text-slate-500 font-normal">
-                $0.00
+              <td className="py-3 px-3 text-right tabular-nums border-r border-slate-300 font-bold text-amber-800">
+                {formatMoney(totalChangeOrdersCents)}
               </td>
               {EXCEL_DRAW_COLUMNS.map((col) => {
                 const colTotal = getDrawTotalCents(col.drawNumber);

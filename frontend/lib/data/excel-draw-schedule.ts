@@ -7,166 +7,272 @@ export interface ExcelTaskScheduleItem {
 }
 
 export const EXCEL_DRAW_TASKS: ExcelTaskScheduleItem[] = [
+  // --- Division 01: General Requirements ---
   {
     number: "1.01",
-    description: "Consultant Fees: Architect (10% max if funded)",
-    scheduledValueCents: 1500000,
+    description: "Architectural & Engineering Design",
+    scheduledValueCents: 9500000,
     changeOrdersCents: 0,
-    draws: { 1: 1250000, 2: 250000 },
+    draws: { 1: 5500000, 2: 2500000, 8: 1500000 },
   },
   {
     number: "1.02",
-    description: "Consultant Fees: Engineer (10% max if funded)",
-    scheduledValueCents: 500000,
+    description: "Permitting & Municipal Plan Check",
+    scheduledValueCents: 3500000,
     changeOrdersCents: 0,
-    draws: { 2: 500000 },
+    draws: { 1: 3500000 },
   },
   {
     number: "1.03",
-    description: "Consultant Fees: Surveyor (10% max if funded)",
-    scheduledValueCents: 250000,
+    description: "Project Management & Site Supervision",
+    scheduledValueCents: 13500000,
     changeOrdersCents: 0,
-    draws: { 1: 240000, 3: 10000 },
+    draws: {
+      1: 1500000,
+      2: 1500000,
+      3: 1500000,
+      4: 1500000,
+      5: 1500000,
+      6: 1500000,
+      7: 1500000,
+      8: 1500000,
+      9: 1500000,
+    },
+  },
+  {
+    number: "1.04",
+    description: "Insurance, Bonding & Builder's Risk",
+    scheduledValueCents: 4500000,
+    changeOrdersCents: 0,
+    draws: { 1: 3000000, 9: 1500000 },
   },
   {
     number: "1.05",
-    description: "Permits (Invoices Required)",
-    scheduledValueCents: 800000,
+    description: "Temporary Utilities & Site Power",
+    scheduledValueCents: 2500000,
     changeOrdersCents: 0,
-    draws: { 1: 800000 },
+    draws: { 1: 1000000, 9: 1500000 },
   },
+
+  // --- Division 02: Site Work & Civil Utilities ---
   {
-    number: "4.01",
-    description: "Rough Plumbing",
-    scheduledValueCents: 2100000,
+    number: "2.01",
+    description: "Site Clearing & Tree Removal",
+    scheduledValueCents: 3000000,
     changeOrdersCents: 0,
-    draws: { 8: 1890000, 9: 210000 },
-  },
-  {
-    number: "4.04",
-    description: "Water Heater(s)",
-    scheduledValueCents: 400000,
-    changeOrdersCents: 0,
-    draws: {},
-  },
-  {
-    number: "4.05",
-    description: "Rough Electrical",
-    scheduledValueCents: 2700000,
-    changeOrdersCents: 0,
-    draws: { 8: 2700000 },
-  },
-  {
-    number: "4.09",
-    description: "HVAC Finish (furnace, condenser)",
-    scheduledValueCents: 2700000,
-    changeOrdersCents: 0,
-    draws: { 8: 1000000 },
-  },
-  {
-    number: "4.10",
-    description: "Fire Protection",
-    scheduledValueCents: 700000,
-    changeOrdersCents: 0,
-    draws: { 9: 700000 },
+    draws: { 1: 2500000, 2: 500000 },
   },
   {
     number: "2.02",
-    description: "Temporary Utilities",
-    scheduledValueCents: 200000,
-    changeOrdersCents: 0,
-    draws: { 3: 200000 },
+    description: "Site Demolition & Environmental Remediation",
+    scheduledValueCents: 6500000,
+    changeOrdersCents: 500000,
+    draws: { 2: 4500000, 3: 2500000 },
   },
   {
     number: "2.03",
-    description: "Site Prep: Site Clearing",
-    scheduledValueCents: 300000,
-    changeOrdersCents: 0,
-    draws: { 3: 300000 },
+    description: "Earthwork, Excavation & Mass Grading",
+    scheduledValueCents: 11000000,
+    changeOrdersCents: 850000,
+    draws: { 2: 6000000, 3: 5850000 },
   },
   {
     number: "2.04",
-    description: "Site Prep: Demolition",
-    scheduledValueCents: 3000000,
+    description: "Soil Retention, Shoring & Deep Foundation",
+    scheduledValueCents: 7500000,
     changeOrdersCents: 0,
-    draws: { 2: 1500000, 3: 1500000 },
+    draws: { 2: 4500000, 3: 3000000 },
   },
   {
     number: "2.05",
-    description: "Site Prep: Grading/Excavation",
-    scheduledValueCents: 2500000,
+    description: "Stormwater Detention & Site Drainage",
+    scheduledValueCents: 8500000,
     changeOrdersCents: 0,
-    draws: { 2: 2500000 },
+    draws: { 3: 4000000, 9: 4500000 },
   },
   {
     number: "2.06",
-    description: "Site Prep: Dumpsters",
-    scheduledValueCents: 1800000,
+    description: "Water, Sanitary Sewer & Gas Utilities",
+    scheduledValueCents: 9500000,
     changeOrdersCents: 0,
-    draws: { 2: 500000, 3: 800000, 4: 250000, 9: 250000 },
+    draws: { 2: 3500000, 3: 3500000, 9: 2500000 },
   },
   {
     number: "2.07",
-    description: "Site Prep: Security Fencing",
-    scheduledValueCents: 900000,
+    description: "Perimeter Security Fencing & Waste Logistics",
+    scheduledValueCents: 3500000,
     changeOrdersCents: 0,
-    draws: { 3: 400000, 4: 250000, 9: 250000 },
+    draws: { 1: 1500000, 2: 1500000, 9: 500000 },
+  },
+
+  // --- Division 03: Concrete & Foundation ---
+  {
+    number: "3.01",
+    description: "Concrete Footings & Structural Grade Beams",
+    scheduledValueCents: 18500000,
+    changeOrdersCents: 1200000,
+    draws: { 3: 12500000, 4: 7200000 },
   },
   {
-    number: "2.09",
-    description: "Foundation/Structural: Concrete, Walls",
+    number: "3.02",
+    description: "Concrete Slab-on-Grade & Post-Tension Deck",
+    scheduledValueCents: 14500000,
+    changeOrdersCents: 0,
+    draws: { 4: 9000000, 5: 5500000 },
+  },
+  {
+    number: "3.03",
+    description: "Exterior Curbs, Gutters & Site Flatwork",
+    scheduledValueCents: 5500000,
+    changeOrdersCents: 0,
+    draws: { 9: 5500000 },
+  },
+
+  // --- Division 04 & 05: Structural Framing & Steel ---
+  {
+    number: "4.01",
+    description: "Structural Steel Columns & Moment Frames",
+    scheduledValueCents: 16000000,
+    changeOrdersCents: 0,
+    draws: { 4: 9500000, 5: 6500000 },
+  },
+  {
+    number: "4.02",
+    description: "Metal Decking, Stairs & Misc Metals",
+    scheduledValueCents: 12500000,
+    changeOrdersCents: 0,
+    draws: { 4: 6000000, 5: 6500000 },
+  },
+  {
+    number: "4.03",
+    description: "Wood Framing, Roof Trusses & Sheathing",
+    scheduledValueCents: 24000000,
+    changeOrdersCents: 1500000,
+    draws: { 4: 7000000, 5: 10000000, 6: 8500000 },
+  },
+
+  // --- Division 07: Thermal & Moisture Protection ---
+  {
+    number: "5.01",
+    description: "Waterproofing, Air Barrier & Foundation Drainage",
+    scheduledValueCents: 6500000,
+    changeOrdersCents: 0,
+    draws: { 5: 4000000, 7: 2500000 },
+  },
+  {
+    number: "5.02",
+    description: "Commercial TPO Roofing & Flashing Systems",
+    scheduledValueCents: 14000000,
+    changeOrdersCents: 0,
+    draws: { 5: 8000000, 6: 6000000 },
+  },
+  {
+    number: "5.03",
+    description: "Exterior Insulation & Stucco Cladding (EIFS)",
+    scheduledValueCents: 15500000,
+    changeOrdersCents: 0,
+    draws: { 6: 9000000, 7: 6500000 },
+  },
+
+  // --- Division 08: Openings ---
+  {
+    number: "6.01",
+    description: "Aluminum Storefront & Glazed Window Units",
+    scheduledValueCents: 13500000,
+    changeOrdersCents: 0,
+    draws: { 6: 8500000, 7: 5000000 },
+  },
+  {
+    number: "6.02",
+    description: "Commercial Hollow Metal Doors & Hardware",
+    scheduledValueCents: 7500000,
+    changeOrdersCents: 0,
+    draws: { 7: 3500000, 8: 4000000 },
+  },
+
+  // --- Division 09: Finishes ---
+  {
+    number: "7.01",
+    description: "Interior Light-Gauge Framing & Drywall",
+    scheduledValueCents: 16500000,
+    changeOrdersCents: 0,
+    draws: { 7: 9500000, 8: 7000000 },
+  },
+  {
+    number: "7.02",
+    description: "Flooring, Ceramic Tile & Acoustic Ceilings",
+    scheduledValueCents: 11000000,
+    changeOrdersCents: 0,
+    draws: { 8: 7000000, 9: 4000000 },
+  },
+  {
+    number: "7.03",
+    description: "Interior Prime, Finish Paint & Wallcoverings",
+    scheduledValueCents: 6000000,
+    changeOrdersCents: 0,
+    draws: { 8: 4000000, 9: 2000000 },
+  },
+
+  // --- Division 15: Mechanical & Plumbing ---
+  {
+    number: "8.01",
+    description: "Sanitary Plumbing, Domestic Water & Gas Piping",
+    scheduledValueCents: 17500000,
+    changeOrdersCents: 650000,
+    draws: { 5: 2500000, 6: 6500000, 7: 5000000, 8: 4150000 },
+  },
+  {
+    number: "8.02",
+    description: "HVAC Ductwork Distribution, RTUs & Controls",
+    scheduledValueCents: 19500000,
+    changeOrdersCents: 0,
+    draws: { 6: 7500000, 7: 6500000, 8: 5500000 },
+  },
+  {
+    number: "8.03",
+    description: "Fire Suppression Sprinklers & Standpipe System",
+    scheduledValueCents: 8500000,
+    changeOrdersCents: 0,
+    draws: { 6: 4000000, 8: 4500000 },
+  },
+
+  // --- Division 16: Electrical & Systems ---
+  {
+    number: "9.01",
+    description: "Electrical Main Distribution, Feeders & Branch Wiring",
+    scheduledValueCents: 19000000,
+    changeOrdersCents: 700000,
+    draws: { 6: 8000000, 7: 6500000, 8: 5200000 },
+  },
+  {
+    number: "9.02",
+    description: "LED Lighting Fixtures, Dimming & Emergency Backup",
+    scheduledValueCents: 7000000,
+    changeOrdersCents: 0,
+    draws: { 8: 5000000, 9: 2000000 },
+  },
+  {
+    number: "9.03",
+    description: "Life Safety Fire Alarm & Structured Telecom Cabling",
     scheduledValueCents: 5000000,
     changeOrdersCents: 0,
-    draws: { 3: 2500000, 4: 1250000, 6: 1250000 },
+    draws: { 9: 5000000 },
+  },
+
+  // --- Division 10: Exterior & Site Civil ---
+  {
+    number: "10.01",
+    description: "Final Grading, Site Landscaping & Irrigation",
+    scheduledValueCents: 6500000,
+    changeOrdersCents: 0,
+    draws: { 9: 6500000 },
   },
   {
-    number: "2.12",
-    description: "Concrete Slabs/Foundation",
-    scheduledValueCents: 700000,
+    number: "10.02",
+    description: "Site Signage, Pavement Striping & Punchlist Closeout",
+    scheduledValueCents: 3500000,
     changeOrdersCents: 0,
-    draws: { 4: 350000, 6: 350000 },
-  },
-  {
-    number: "2.14",
-    description: "Concrete (walks)",
-    scheduledValueCents: 450000,
-    changeOrdersCents: 0,
-    draws: { 6: 450000 },
-  },
-  {
-    number: "2.15",
-    description: "Patios",
-    scheduledValueCents: 1500000,
-    changeOrdersCents: 0,
-    draws: { 9: 500000 },
-  },
-  {
-    number: "2.17",
-    description: "Water/Sewer (includes well, septic and city)",
-    scheduledValueCents: 1800000,
-    changeOrdersCents: 0,
-    draws: { 3: 1000000, 4: 800000 },
-  },
-  {
-    number: "2.23",
-    description: "Landscaping",
-    scheduledValueCents: 800000,
-    changeOrdersCents: 0,
-    draws: {},
-  },
-  {
-    number: "2.27",
-    description: "Sewer/Septic",
-    scheduledValueCents: 600000,
-    changeOrdersCents: 0,
-    draws: { 4: 600000 },
-  },
-  {
-    number: "2.29",
-    description: "Equipment Rental",
-    scheduledValueCents: 1300000,
-    changeOrdersCents: 0,
-    draws: { 2: 350000, 3: 500000, 4: 450000 },
+    draws: { 9: 3500000 },
   },
 ];
 
@@ -190,7 +296,7 @@ export const EXCEL_DRAW_COLUMNS: DrawColumnMetadata[] = [
 
 /**
  * Returns line items for a given draw number based on the Excel schedule.
- * If targetDrawTotalCents is provided (e.g. 5000000 for $50k), scales or pads lines so total matches exactly.
+ * If targetDrawTotalCents is provided, scales lines proportionally so total matches exactly.
  */
 export function getExcelDrawLines(
   drawNumber: number,
@@ -200,8 +306,7 @@ export function getExcelDrawLines(
   const matching = EXCEL_DRAW_TASKS.filter((t) => (t.draws[drawNumber] || 0) > 0);
 
   if (matching.length === 0) {
-    // If draw has no explicit schedule entries (like Draw 5 or 7), pick available tasks
-    const fallbackTasks = EXCEL_DRAW_TASKS.slice(0, 3);
+    const fallbackTasks = EXCEL_DRAW_TASKS.slice(0, 4);
     return fallbackTasks.map((task, idx) => {
       const cents = targetDrawTotalCents
         ? Math.round(targetDrawTotalCents / fallbackTasks.length)
@@ -224,142 +329,11 @@ export function getExcelDrawLines(
     });
   }
 
-  if (drawNumber === 4 && targetDrawTotalCents && Math.abs(targetDrawTotalCents - 5000000) < 1000) {
-    // Return all 7 Excel tasks with exact sheet amounts plus Demolition & Grading to match $50,000.00 exactly
-    return [
-      {
-        id: "line-4-1",
-        draw_id: "draw-fallback-4",
-        budget_line_id: "b-line-2.06",
-        budget_line_name: "Site Prep: Dumpsters",
-        budget_line_code: "2.06",
-        scheduled_value_cents: 1800000,
-        requested_amount: "250000", // $2,500.00
-        recommended_amount: "250000",
-        approved_amount: "250000",
-        funded_amount: "0",
-        evidence_status: "VERIFIED" as const,
-        lender_notes: "Site Prep: Dumpsters container haul verified",
-      },
-      {
-        id: "line-4-2",
-        draw_id: "draw-fallback-4",
-        budget_line_id: "b-line-2.07",
-        budget_line_name: "Site Prep: Security Fencing",
-        budget_line_code: "2.07",
-        scheduled_value_cents: 900000,
-        requested_amount: "250000", // $2,500.00
-        recommended_amount: "250000",
-        approved_amount: "250000",
-        funded_amount: "0",
-        evidence_status: "VERIFIED" as const,
-        lender_notes: "Perimeter security fence inspection passed",
-      },
-      {
-        id: "line-4-3",
-        draw_id: "draw-fallback-4",
-        budget_line_id: "b-line-2.09",
-        budget_line_name: "Foundation/Structural: Concrete, Walls",
-        budget_line_code: "2.09",
-        scheduled_value_cents: 5000000,
-        requested_amount: "1250000", // $12,500.00
-        recommended_amount: "1250000",
-        approved_amount: "1250000",
-        funded_amount: "0",
-        evidence_status: "VERIFIED" as const,
-        lender_notes: "Structural concrete walls pour inspection verified",
-      },
-      {
-        id: "line-4-4",
-        draw_id: "draw-fallback-4",
-        budget_line_id: "b-line-2.12",
-        budget_line_name: "Concrete Slabs/Foundation",
-        budget_line_code: "2.12",
-        scheduled_value_cents: 700000,
-        requested_amount: "350000", // $3,500.00
-        recommended_amount: "350000",
-        approved_amount: "350000",
-        funded_amount: "0",
-        evidence_status: "VERIFIED" as const,
-        lender_notes: "Slab foundation core curing verified",
-      },
-      {
-        id: "line-4-5",
-        draw_id: "draw-fallback-4",
-        budget_line_id: "b-line-2.17",
-        budget_line_name: "Water/Sewer (includes well, septic and city)",
-        budget_line_code: "2.17",
-        scheduled_value_cents: 1800000,
-        requested_amount: "800000", // $8,000.00
-        recommended_amount: "800000",
-        approved_amount: "800000",
-        funded_amount: "0",
-        evidence_status: "VERIFIED" as const,
-        lender_notes: "Underground utility water/sewer tap certified",
-      },
-      {
-        id: "line-4-6",
-        draw_id: "draw-fallback-4",
-        budget_line_id: "b-line-2.27",
-        budget_line_name: "Sewer/Septic",
-        budget_line_code: "2.27",
-        scheduled_value_cents: 600000,
-        requested_amount: "600000", // $6,000.00
-        recommended_amount: "600000",
-        approved_amount: "600000",
-        funded_amount: "0",
-        evidence_status: "VERIFIED" as const,
-        lender_notes: "Septic connection & civil rough inspection passed",
-      },
-      {
-        id: "line-4-7",
-        draw_id: "draw-fallback-4",
-        budget_line_id: "b-line-2.29",
-        budget_line_name: "Equipment Rental",
-        budget_line_code: "2.29",
-        scheduled_value_cents: 1300000,
-        requested_amount: "450000", // $4,500.00
-        recommended_amount: "450000",
-        approved_amount: "450000",
-        funded_amount: "0",
-        evidence_status: "VERIFIED" as const,
-        lender_notes: "Hydraulic lift & backhoe rental log reconciled",
-      },
-      {
-        id: "line-4-8",
-        draw_id: "draw-fallback-4",
-        budget_line_id: "b-line-2.04",
-        budget_line_name: "Site Prep: Demolition",
-        budget_line_code: "2.04",
-        scheduled_value_cents: 3000000,
-        requested_amount: "500000", // $5,000.00
-        recommended_amount: "500000",
-        approved_amount: "500000",
-        funded_amount: "0",
-        evidence_status: "VERIFIED" as const,
-        lender_notes: "Phase 2 demolition debris clearance verified",
-      },
-      {
-        id: "line-4-9",
-        draw_id: "draw-fallback-4",
-        budget_line_id: "b-line-2.05",
-        budget_line_name: "Site Prep: Grading/Excavation",
-        budget_line_code: "2.05",
-        scheduled_value_cents: 2500000,
-        requested_amount: "550000", // $5,500.00
-        recommended_amount: "550000",
-        approved_amount: "550000",
-        funded_amount: "0",
-        evidence_status: "VERIFIED" as const,
-        lender_notes: "Rough grading & soil compaction certification",
-      },
-    ];
-  }
-
   const rawSum = matching.reduce((sum, t) => sum + (t.draws[drawNumber] || 0), 0);
 
   // If a specific target total is requested, allocate delta proportionally
-  const needAdjustment = targetDrawTotalCents && targetDrawTotalCents > 0 && targetDrawTotalCents !== rawSum;
+  const needAdjustment =
+    targetDrawTotalCents && targetDrawTotalCents > 0 && targetDrawTotalCents !== rawSum;
 
   return matching.map((task, idx) => {
     const originalCents = task.draws[drawNumber] || 0;

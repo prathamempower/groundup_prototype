@@ -565,15 +565,7 @@ export default function ReconciliationPage() {
             <p className="text-xs text-slate-500 mt-1">
               Make sure every bank transaction is explained and supported.
             </p>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 border border-amber-200/60">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                In progress
-              </span>
-              <span className="text-[11px] text-slate-400">
-                As of {getRealDate(0)}, 6:00 PM
-              </span>
-            </div>
+
           </div>
 
 

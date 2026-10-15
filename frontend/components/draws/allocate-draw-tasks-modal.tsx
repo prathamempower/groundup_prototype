@@ -79,11 +79,6 @@ export function AllocateDrawTasksModal({
         preset[t.number] = (cents / 100).toString();
       }
     });
-    // For Draw 4, if preset is loaded, add Demolition and Grading to reconcile to $50,000 if user wants standard Draw 4
-    if (drawNumber === 4 && Object.keys(preset).length > 0) {
-      if (!preset["2.04"]) preset["2.04"] = "5000";
-      if (!preset["2.05"]) preset["2.05"] = "5500";
-    }
     setTaskAmounts(preset);
   };
 
