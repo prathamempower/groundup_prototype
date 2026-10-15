@@ -187,31 +187,7 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
 
 
 
-      {activeTab === "PROJECTED_PROFIT" && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-6 py-3.5 border-b border-slate-100 bg-white">
-          <div className="rounded-lg border border-emerald-100 bg-emerald-50/40 px-3.5 py-2">
-            <span className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wider block">Estimated Profit</span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-mono text-emerald-900">$5.10M</span>
-              <span className="text-[11px] font-medium text-emerald-700">18.4% Return</span>
-            </div>
-          </div>
-          <div className="rounded-lg border border-slate-200/80 bg-slate-50/60 px-3.5 py-2">
-            <span className="text-[11px] font-semibold text-slate-700 uppercase tracking-wider block">Original Planned Profit</span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-mono text-slate-900">$6.10M</span>
-              <span className="text-[11px] font-medium text-slate-500">22.0% Initial Target</span>
-            </div>
-          </div>
-          <div className="rounded-lg border border-amber-100 bg-amber-50/40 px-3.5 py-2">
-            <span className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider block">Profit Variance</span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-mono text-amber-900">-$1.00M</span>
-              <span className="text-[11px] font-medium text-amber-700">From added scope & time</span>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Chart Canvas Area */}
       <div className="p-6">
