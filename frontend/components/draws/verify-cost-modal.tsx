@@ -45,7 +45,7 @@ export function VerifyCostModal({
       onSuccess();
       onOpenChange(false);
     } catch (err: unknown) {
-      setErrorMsg((err as Error).message || "Failed to record CFO cost verification.");
+      setErrorMsg((err as Error).message || "Failed to record cost verification.");
     } finally {
       setIsSubmitting(false);
     }
@@ -60,7 +60,7 @@ export function VerifyCostModal({
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
-              <ModalTitle>CFO Cost & Disbursement Verification</ModalTitle>
+              <ModalTitle>Executive Cost & Disbursement Verification</ModalTitle>
               <p className="text-caption text-text-muted mt-0.5">
                 Draw #{draw.draw_number} • Financial validation of invoices and prior bank clearance
               </p>

@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { NewUserIntakePage } from "@/components/onboarding/NewUserIntakePage";
-import { WorkspaceReadyScreen, ProjectReportData } from "@/components/onboarding/WorkspaceReadyScreen";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthenticatedUser } from "@/lib/types";
 
@@ -15,16 +14,20 @@ export default function OnboardingRoutePage() {
     name: "",
     email: "",
     company: "",
-    role: "Developer / Owner",
+    role: "OWNER",
     isNewUser: true,
     authProvider: "email",
   });
+
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   React.useEffect(() => {
     try {
       const stored = localStorage.getItem("groundup_user");
       if (stored) {
-        setCurrentUser(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        parsed.role = "OWNER";
+        setCurrentUser(parsed);
         return;
       }
     } catch {}
@@ -38,7 +41,7 @@ export default function OnboardingRoutePage() {
           name: prefill?.name || "",
           email: prefill?.email || "",
           company: prefill?.company || "",
-          role: prefill?.role || "Developer / Owner",
+          role: "OWNER",
           isNewUser: true,
           authProvider: "email",
         });
@@ -46,49 +49,42 @@ export default function OnboardingRoutePage() {
     } catch {}
   }, []);
 
-  const [completedProject, setCompletedProject] = useState<{
-    id: string;
-    name: string;
-    data: ProjectReportData;
-  } | null>(null);
-
   const handleReturnToLanding = () => {
     router.push("/");
   };
 
-  const handleOnboardingComplete = (projectId: string, reportData: unknown) => {
+  const handleOnboardingComplete = (projectId: string, _reportData: unknown) => {
+    setIsRedirecting(true);
+    const projectData = (_reportData as any) || {};
     const updatedUser: AuthenticatedUser = {
-      ...currentUser,
+      id: currentUser.id && currentUser.id !== "usr-initial" ? currentUser.id : `user-${Date.now()}`,
+      name: currentUser.name || "Marcus Vance",
+      email: currentUser.email || "m.vance@vancedev.com",
+      company: currentUser.company || projectData?.organization_name || "Vance Development",
+      role: "OWNER",
       isNewUser: false,
+      authProvider: "email",
     };
     setCurrentUser(updatedUser);
     try {
       localStorage.setItem("groundup_user", JSON.stringify(updatedUser));
+      localStorage.setItem("groundup_active_auth_email", updatedUser.email);
       localStorage.setItem("groundup_session_seen", "1");
       localStorage.setItem("groundup_last_project_id", projectId);
       localStorage.setItem("groundup_active_project_id", projectId);
     } catch {}
 
-    const projectData = (reportData as ProjectReportData) || {};
-    setCompletedProject({
-      id: projectId,
-      name: projectData?.name || "New Project Workspace",
-      data: projectData,
-    });
+    // Direct automatic jump to project portfolio
+    router.push("/projects");
   };
 
-  if (completedProject) {
+  if (isRedirecting) {
     return (
-      <ErrorBoundary onReset={handleReturnToLanding}>
-        <WorkspaceReadyScreen
-          userName={currentUser.name}
-          userRole={currentUser.role}
-          projectName={completedProject.name}
-          projectData={completedProject.data}
-          onRestartOnboarding={() => setCompletedProject(null)}
-          onReturnToLanding={handleReturnToLanding}
-        />
-      </ErrorBoundary>
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-3 border-blue-600 border-t-transparent mb-4" />
+        <h2 className="text-base font-semibold text-slate-900">Setting up your portfolio...</h2>
+        <p className="text-xs text-slate-500 mt-1">Directing you to your project portfolio</p>
+      </div>
     );
   }
 

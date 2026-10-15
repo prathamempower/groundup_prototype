@@ -42,7 +42,7 @@ export function EditAssumptionsModal({
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const isAuthorized = userRole === "OWNER" || userRole === "CFO";
+  const isAuthorized = userRole === "OWNER";
 
   const [projectedRevenueCents, setProjectedRevenueCents] = useState<number>(currentGdvCents);
   const [targetIrr, setTargetIrr] = useState<number>(currentIrrPct);

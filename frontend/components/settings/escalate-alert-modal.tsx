@@ -90,9 +90,9 @@ export function EscalateAlertModal({
               className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary focus:border-danger focus:outline-hidden"
             >
               <option value="Marcus Vance (Owner)">Marcus Vance (Managing Principal / Owner)</option>
-              <option value="Sarah Lin (CFO)">Sarah Lin (Head of Project Finance / CFO)</option>
-              <option value="David Ross (PM)">David Ross (Senior Project Manager)</option>
-              <option value="Strategic Advisory Board">Strategic Advisory Board & LP Committee</option>
+              <option value="Sarah Lin (Co-Owner)">Sarah Lin (Managing Partner / Co-Owner)</option>
+              <option value="David Ross (Co-Owner)">David Ross (Executive Partner / Co-Owner)</option>
+              <option value="Strategic Advisory Board">Strategic Advisory Board & Ownership Committee</option>
             </select>
           </div>
 

@@ -1,4 +1,4 @@
-export type UserRole = "OWNER" | "CFO" | "PM" | "GC" | "INVESTOR";
+export type UserRole = "OWNER";
 
 export interface UserProfile {
   id: string;
@@ -44,86 +44,6 @@ export const USER_ROLES: Record<string, UserContext> = {
     roleTitle: 'Project Owner',
     roleDescription: 'Highest executive authority with full portfolio, pro forma, draw, and audit control.',
     badgeColor: 'bg-slate-900 text-white',
-  },
-  DEVELOPER: {
-    id: 'user-dev-lead',
-    name: 'David Vance',
-    role: 'DEVELOPER',
-    roleTitle: 'Developer',
-    roleDescription: 'Underwriting pro forma, municipal entitlements, budget lines, and project milestones.',
-    badgeColor: 'bg-blue-900 text-white',
-  },
-  FINANCE_LEAD: {
-    id: 'user-fin-1',
-    name: 'Sarah Jenkins',
-    role: 'FINANCE_LEAD',
-    roleTitle: 'Finance Lead',
-    roleDescription: 'Financial ledger: matches expenses to budget lines, draw compilation, and cash flow governance.',
-    badgeColor: 'bg-emerald-800 text-white',
-  },
-  ACCOUNTANT: {
-    id: 'user-acct-1',
-    name: 'Elena Rostova',
-    role: 'ACCOUNTANT',
-    roleTitle: 'Accountant',
-    roleDescription: 'Expense ledger, invoice intake, lien waiver compliance, and credit card reconciliation.',
-    badgeColor: 'bg-teal-800 text-white',
-  },
-  PM: {
-    id: 'user-pm-1',
-    name: 'Marcus Vance',
-    role: 'PM',
-    roleTitle: 'Project Manager',
-    roleDescription: 'Field and Schedule: milestone progress, municipal inspections, root-cause delay attribution.',
-    badgeColor: 'bg-sky-800 text-white',
-  },
-  GC: {
-    id: 'user-gc-1',
-    name: 'Kunal Shah',
-    role: 'GC',
-    roleTitle: 'General Contractor',
-    roleDescription: 'Milestone claims, change order requests, worker logs, material receipts, and photo proof.',
-    badgeColor: 'bg-indigo-700 text-white',
-  },
-  INVESTOR: {
-    id: 'user-investor-1',
-    name: 'Krutarth Shah',
-    role: 'INVESTOR',
-    roleTitle: 'Investor',
-    roleDescription: 'Read-only transparency: capital deployed, projected ROI vs baseline, next funding events, narrative updates.',
-    badgeColor: 'bg-violet-800 text-white',
-  },
-  PARTNER: {
-    id: 'user-partner-1',
-    name: 'Sanjay Patel',
-    role: 'PARTNER',
-    roleTitle: 'Partner',
-    roleDescription: 'Co-sponsor equity visibility, milestone progress, risk exposure, and executive updates.',
-    badgeColor: 'bg-purple-800 text-white',
-  },
-  ADMIN: {
-    id: 'user-admin-1',
-    name: 'Workspace Administrator',
-    role: 'ADMIN',
-    roleTitle: 'Admin',
-    roleDescription: 'Workspace administration, team roles, integration credentials, and audit inspection.',
-    badgeColor: 'bg-slate-800 text-white',
-  },
-  DEVELOPER_OWNER: {
-    id: 'user-dev-1',
-    name: 'Hardik Parikh',
-    role: 'DEVELOPER_OWNER',
-    roleTitle: 'Project Owner',
-    roleDescription: 'Full control: portfolio economics, pro forma ROI, cash gap, change order approvals, draw packets.',
-    badgeColor: 'bg-slate-900 text-white',
-  },
-  CFO: {
-    id: 'user-cfo-1',
-    name: 'Sarah Jenkins',
-    role: 'CFO',
-    roleTitle: 'Finance Lead',
-    roleDescription: 'Financial ledger: matches expenses to budget lines, Amex card feeds, contingency absorption, draw reconciliation.',
-    badgeColor: 'bg-emerald-800 text-white',
   },
 };
 
@@ -1264,7 +1184,7 @@ export interface GCSubmissionEvidence {
 }
 
 export interface GCSubmissionReview {
-  role: "PM" | "CFO" | "OWNER";
+  role: "OWNER" | string;
   reviewer_name?: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
   reviewed_at?: string;
@@ -1334,7 +1254,7 @@ export interface CreateGCSubmissionPayload {
 }
 
 export interface ReviewGCSubmissionPayload {
-  role: "PM" | "CFO" | "OWNER";
+  role: "OWNER";
   decision: "APPROVED" | "REJECTED";
   comments?: string;
 }

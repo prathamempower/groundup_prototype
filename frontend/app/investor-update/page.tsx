@@ -45,7 +45,7 @@ export default function InvestorUpdatePage() {
   });
 
   const currentUser = meData?.data;
-  const isInvestorRole = currentUser?.role === "INVESTOR";
+  const isInvestorRole = false;
   const snapshots = updatesData?.data || [];
 
   // For investors, filter to published and withdrawn snapshots

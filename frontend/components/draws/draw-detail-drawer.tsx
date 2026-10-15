@@ -96,7 +96,7 @@ export function DrawDetailDrawer({
           document_name: payAppDoc.original_filename,
           page_number: 1,
           row_number: 6,
-          reviewer: "David Ross (PM)",
+          reviewer: "David Ross (Co-Owner)",
           reviewed_at: payAppDoc.uploaded_at,
           extraction_version: "v1.0",
         },
@@ -110,7 +110,7 @@ export function DrawDetailDrawer({
           document_name: inspDoc.original_filename,
           page_number: 1,
           row_number: 12,
-          reviewer: "David Ross (PM)",
+          reviewer: "David Ross (Co-Owner)",
           reviewed_at: inspDoc.uploaded_at,
           extraction_version: "v1.0",
         },
@@ -123,7 +123,7 @@ export function DrawDetailDrawer({
           document_id: advanceNoticeDoc.id,
           document_name: advanceNoticeDoc.original_filename,
           page_number: 1,
-          reviewer: "Sarah Lin (CFO)",
+          reviewer: "Sarah Lin (Co-Owner)",
           reviewed_at: advanceNoticeDoc.uploaded_at,
           extraction_version: "v1.0",
         },
@@ -137,7 +137,7 @@ export function DrawDetailDrawer({
           document_name: bankWireDoc.original_filename,
           page_number: 1,
           row_number: 14,
-          reviewer: "Sarah Lin (CFO)",
+          reviewer: "Sarah Lin (Co-Owner)",
           reviewed_at: bankWireDoc.uploaded_at,
           extraction_version: "v1.0",
         },
@@ -273,7 +273,7 @@ export function DrawDetailDrawer({
                     className="flex items-center gap-1.5"
                   >
                     <ClipboardCheck className="h-3.5 w-3.5" />
-                    {activeDraw.pm_verification?.inspection_passed ? "Work Certified" : "Verify Work (PM)"}
+                    {activeDraw.pm_verification?.inspection_passed ? "Work Certified" : "Verify Work"}
                   </Button>
                   <Button
                     variant="outline"
@@ -282,7 +282,7 @@ export function DrawDetailDrawer({
                     className="flex items-center gap-1.5"
                   >
                     <ShieldCheck className="h-3.5 w-3.5" />
-                    {activeDraw.cfo_verification?.costs_verified ? "Cost Certified" : "Verify Cost (CFO)"}
+                    {activeDraw.cfo_verification?.costs_verified ? "Cost Certified" : "Verify Cost"}
                   </Button>
                   <Button
                     variant="primary"

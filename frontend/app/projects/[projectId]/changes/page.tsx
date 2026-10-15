@@ -355,7 +355,7 @@ export default function ChangesAndApprovalsPage() {
                           </span>
                         </td>
                         <td className="py-2.5 px-3 text-right">
-                          {isPending && (userRole === "OWNER" || userRole === "CFO") ? (
+                          {isPending && userRole === "OWNER" ? (
                             <Button
                               size="sm"
                               variant="outline"

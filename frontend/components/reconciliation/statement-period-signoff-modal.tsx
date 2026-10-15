@@ -58,7 +58,7 @@ export function StatementPeriodSignoffModal({
 
   const handleSubmit = async () => {
     if (!allControlsPassed && !waiverReason.trim()) {
-      setErrorMsg("A CFO waiver reason is strictly required when signing off a period with open control exceptions.");
+      setErrorMsg("An executive waiver reason is strictly required when signing off a period with open control exceptions.");
       return;
     }
 
@@ -84,7 +84,7 @@ export function StatementPeriodSignoffModal({
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent maxWidth="lg">
         <ModalHeader>
-          <ModalTitle>CFO Statement Period Reconciliation Sign-Off</ModalTitle>
+          <ModalTitle>Executive Statement Period Reconciliation Sign-Off</ModalTitle>
           <ModalDescription>
             Verify coverage controls and mathematical balance before locking monthly statement records.
           </ModalDescription>
@@ -198,7 +198,7 @@ export function StatementPeriodSignoffModal({
               />
               <div>
                 <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
-                  CFO Waiver Rationale (Required)
+                  Executive Waiver Rationale (Required)
                 </label>
                 <Textarea
                   placeholder="Explain the variance or why statement gap is permitted (e.g. pending month-end interest posting adjustment)..."

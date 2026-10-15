@@ -67,9 +67,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         )}
 
         {/* Clean, perfectly structured enterprise card */}
-        <div className="rounded-xl border border-slate-200/80 bg-white p-7 sm:p-9 shadow-overlay">
-          {children}
-        </div>
+        {pathname === "/auth/login" || pathname === "/auth/sign-up" ? (
+          children
+        ) : (
+          <div className="rounded-xl border border-slate-200/80 bg-white p-7 sm:p-9 shadow-overlay">
+            {children}
+          </div>
+        )}
       </div>
     </main>
   );

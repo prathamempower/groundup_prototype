@@ -303,7 +303,7 @@ export default function ReconciliationPage() {
       id: "rq-6",
       date: getRealDate(5),
       account: "Business card · 1108",
-      description: "Card payment — statement settlement",
+      description: "Card payment - statement settlement",
       type: "Bank transaction",
       direction: "out",
       amount: "-$1,850.00",
@@ -348,7 +348,7 @@ export default function ReconciliationPage() {
       subtitle: "Required evidence not attached",
       relatedTxn: "Nilson Mocalos · $155.00",
       severity: "High",
-      owner: "CFO",
+      owner: "Owner",
       age: "4 days",
       status: "Open",
     },
@@ -358,13 +358,11 @@ export default function ReconciliationPage() {
       subtitle: "Same vendor, date, and amount",
       relatedTxn: "Nilson Mocalos · $1,280.00",
       severity: "Medium",
-      owner: "CFO",
+      owner: "Owner",
       age: "2 days",
       status: "Open",
     },
   ];
-
-
 
   // Stateful review items list with owner resolution support
   const [reviewItems, setReviewItems] = useState<ReviewItemData[]>(defaultReviewItems);

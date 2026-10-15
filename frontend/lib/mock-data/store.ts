@@ -114,7 +114,7 @@ interface MockDbState {
   importBatches: Record<string, ImportBatch[]>;
 }
 
-const STORAGE_KEY = "groundup_mock_db_v2";
+const STORAGE_KEY = "groundup_mock_db_v4";
 
 export function deduplicateProjects(projects: Project[]): Project[] {
   if (!Array.isArray(projects)) return [];
@@ -160,6 +160,22 @@ class MockStore {
                 (d: any) => d.id !== "doc-broadway-sov" && d.original_filename !== "73 Broadway.xlsx"
               );
             }
+            // Strictly enforce OWNER role on every user, membership, and project
+            if (Array.isArray(parsed.users)) {
+              parsed.users.forEach((u: any) => {
+                u.role = "OWNER";
+                u.title = "Owner";
+                if (Array.isArray(u.project_memberships)) {
+                  u.project_memberships.forEach((m: any) => {
+                    m.role = "OWNER";
+                  });
+                }
+              });
+            }
+            parsed.projects.forEach((p: any) => {
+              p.role_on_project = "OWNER";
+            });
+            parsed.currentUserId = "user-marcus";
             try {
               window.localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
             } catch {}
@@ -214,7 +230,7 @@ class MockStore {
           project_name: "73 Broadway",
           organization_name: "Vance Development LLC",
           email: "estimator@apexconstruction.com",
-          role: "GC",
+          role: "OWNER",
           scope: "PROJECT",
           invited_by: "Marcus Vance",
           expires_at: new Date(Date.now() + 7 * 86400000).toISOString(),
@@ -239,8 +255,17 @@ class MockStore {
   // Users & Auth
   // -------------------------------------------------------------
   getCurrentUser(): UserProfile {
-    const user = this.state.users.find((u) => u.id === this.state.currentUserId);
-    return user || this.state.users[0];
+    const user = this.state.users.find((u) => u.id === this.state.currentUserId) || this.state.users[0];
+    if (user) {
+      user.role = "OWNER";
+      user.title = "Owner";
+      if (Array.isArray(user.project_memberships)) {
+        user.project_memberships.forEach((m) => {
+          m.role = "OWNER";
+        });
+      }
+    }
+    return user;
   }
 
   setCurrentUser(userId: string | null): void {
@@ -266,14 +291,14 @@ class MockStore {
       organization_id: userData.organization_id || "org-vance-dev",
       name,
       email: userData.email || `user-${Date.now()}@example.com`,
-      role: userData.role || "OWNER",
-      title: userData.title || "Principal",
+      role: "OWNER",
+      title: "Owner",
       company: userData.company || "Development Firm",
       avatarInitials: initials,
       is_active: true,
       project_memberships: userData.project_memberships || this.state.projects.map((p) => ({
         project_id: p.id,
-        role: userData.role || "OWNER",
+        role: "OWNER",
       })),
       permissions: ["all"],
     };
@@ -288,30 +313,12 @@ class MockStore {
   // Projects
   // -------------------------------------------------------------
   getProjects(): Project[] {
-    const currentUser = this.getCurrentUser();
-    let rawList: Project[] = [];
-
-    // If user is Kunal, strict project isolation applies!
-    if (currentUser?.email === "kunal@builderscapital.com") {
-      const allowedIds = currentUser.project_memberships.map((m) => m.project_id);
-      rawList = this.state.projects
-        .filter((p) => allowedIds.includes(p.id))
-        .map((p) => {
-          const mem = currentUser.project_memberships.find((m) => m.project_id === p.id);
-          return {
-            ...p,
-            role_on_project: (mem?.role as UserRole) || p.role_on_project,
-          };
-        });
-    } else {
-      rawList = this.state.projects.map((p) => {
-        const mem = currentUser?.project_memberships?.find((m) => m.project_id === p.id);
-        return {
-          ...p,
-          role_on_project: (mem?.role as UserRole) || p.role_on_project || currentUser?.role || "OWNER",
-        };
-      });
-    }
+    const rawList = this.state.projects.map((p) => {
+      return {
+        ...p,
+        role_on_project: "OWNER" as UserRole,
+      };
+    });
 
     return deduplicateProjects(rawList);
   }
@@ -1937,7 +1944,7 @@ class MockStore {
     return newSub;
   }
 
-  reviewGCSubmission(id: string, payload: { role: "PM" | "CFO" | "OWNER"; decision: "APPROVED" | "REJECTED"; comments?: string }): GCSubmission {
+  reviewGCSubmission(id: string, payload: { role: "OWNER" | string; decision: "APPROVED" | "REJECTED"; comments?: string }): GCSubmission {
     const sub = this.getGCSubmissionById(id);
     if (sub) {
       sub.status = payload.decision === "APPROVED" ? "APPROVED" : "REJECTED";

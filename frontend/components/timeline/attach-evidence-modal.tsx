@@ -199,7 +199,7 @@ export function AttachEvidenceModal({
                   className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="VERIFIED">Verified & Certified</option>
-                  <option value="PENDING_REVIEW">Pending Lender / PM Review</option>
+                  <option value="PENDING_REVIEW">Pending Lender / Owner Review</option>
                   <option value="DISPUTED">Disputed Discrepancy</option>
                 </select>
               </FormField>
