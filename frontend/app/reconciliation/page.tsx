@@ -69,7 +69,7 @@ export default function ReconciliationPage() {
   // 4: Transfers
   // 5: Imports
   const [activeTab, setActiveTab] = useState<
-    "queue" | "statement-coverage" | "exceptions" | "imports"
+    "queue" | "statement-coverage" | "exceptions"
   >("queue");
 
   // Filters and search for Review Queue
@@ -363,57 +363,7 @@ export default function ReconciliationPage() {
     },
   ];
 
-  // Import History items (Screenshot 5)
-  const importHistoryList = [
-    {
-      id: "imp-1",
-      file: "operating-september.csv",
-      subtitle: "Statement · Sep 2026",
-      sourceType: "CSV",
-      rowsImported: 42,
-      duplicatesSkipped: 1,
-      checkStatus: "Passed · $0.00 diff",
-      checkVariant: "passed",
-      importedBy: "CFO",
-      importedWhen: "Oct 2, 2026, 10:14 AM",
-    },
-    {
-      id: "imp-2",
-      file: "card-september.xlsx",
-      subtitle: "Card activity · Sep 2026",
-      sourceType: "XLSX",
-      rowsImported: 28,
-      duplicatesSkipped: 2,
-      checkStatus: "Passed · $0.00 diff",
-      checkVariant: "passed",
-      importedBy: "CFO",
-      importedWhen: "Oct 3, 2026, 9:22 AM",
-    },
-    {
-      id: "imp-3",
-      file: "draw-notice-03.pdf",
-      subtitle: "Funding support · Sep 2026",
-      sourceType: "PDF",
-      rowsImported: 1,
-      duplicatesSkipped: 0,
-      checkStatus: "Manual review",
-      checkVariant: "manual",
-      importedBy: "Owner",
-      importedWhen: "Oct 4, 2026, 2:06 PM",
-    },
-    {
-      id: "imp-4",
-      file: "operating-august.csv",
-      subtitle: "Statement · Aug 2026",
-      sourceType: "CSV",
-      rowsImported: 37,
-      duplicatesSkipped: 0,
-      checkStatus: "Passed · $0.00 diff",
-      checkVariant: "passed",
-      importedBy: "CFO",
-      importedWhen: "Sep 2, 2026, 11:05 AM",
-    },
-  ];
+
 
   // Stateful review items list with owner resolution support
   const [reviewItems, setReviewItems] = useState<ReviewItemData[]>(defaultReviewItems);
@@ -722,17 +672,6 @@ export default function ReconciliationPage() {
             >
               <span>Evidence and exceptions</span>
               <span className="text-[10px] text-slate-400 font-mono">2</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("imports")}
-              className={`flex items-center gap-1.5 pb-2.5 transition-colors border-b-2 -mb-px ${
-                activeTab === "imports"
-                  ? "border-slate-900 text-slate-900 font-bold"
-                  : "border-transparent text-slate-500 hover:text-slate-800"
-              }`}
-            >
-              <span>Imports</span>
             </button>
           </nav>
         </div>
@@ -1159,68 +1098,7 @@ export default function ReconciliationPage() {
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* TAB 4: IMPORTS (Screenshot 5)                                             */}
-        {/* ========================================================================= */}
-        {activeTab === "imports" && (
-          <div className="space-y-3.5">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900">Import history</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Every import includes row counts and a control-total check.
-              </p>
-            </div>
 
-            <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    <th className="px-4 py-2.5">File</th>
-                    <th className="px-4 py-2.5">Source Type</th>
-                    <th className="px-4 py-2.5">Rows Imported</th>
-                    <th className="px-4 py-2.5">Duplicates Skipped</th>
-                    <th className="px-4 py-2.5">Control-Total Check</th>
-                    <th className="px-4 py-2.5 text-right">Imported By / When</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {importHistoryList.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50/60">
-                      <td className="px-4 py-3.5">
-                        <div className="font-bold text-slate-900">{item.file}</div>
-                        <div className="text-[10px] text-slate-400 mt-0.5">{item.subtitle}</div>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <span className="font-mono text-slate-600 font-semibold">{item.sourceType}</span>
-                      </td>
-                      <td className="px-4 py-3.5 font-mono text-slate-800 font-semibold">
-                        {item.rowsImported}
-                      </td>
-                      <td className="px-4 py-3.5 font-mono text-slate-600">
-                        {item.duplicatesSkipped}
-                      </td>
-                      <td className="px-4 py-3.5">
-                        {item.checkVariant === "passed" ? (
-                          <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-bold border border-emerald-200">
-                            {item.checkStatus}
-                          </span>
-                        ) : (
-                          <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-bold border border-amber-200">
-                            {item.checkStatus}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3.5 text-right">
-                        <div className="font-semibold text-slate-900">{item.importedBy}</div>
-                        <div className="text-[10px] text-slate-400 mt-0.5">{item.importedWhen}</div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* MODALS */}
