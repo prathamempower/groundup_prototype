@@ -1,0 +1,17 @@
+# Vercel deployment ignore file
+archive/
+temp/
+tmp/
+docs/
+.agent/
+test-results/
+qa/
+Datasets*/
+
+# Frontend local caches & test results
+frontend/.next-dev/
+frontend/test-results/
+frontend/playwright-report/
+frontend/screenshots/
+frontend/tests/
+frontend/coverage/
