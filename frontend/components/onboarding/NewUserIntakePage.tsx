@@ -846,8 +846,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
     saveAnswer('primaryFocus', primaryFocus);
     saveAnswer('primaryChallenge', primaryFocus);
     saveAnswer('secondaryFocuses', secondaryFocuses);
-    saveAnswer('secondaryChallenges', secondaryFocuses);
-    triggerStepTransition(2, 'Configuring organization...', 'Setting up developer entity records');
+    triggerStepTransition(2, 'Setting up company details...', 'Configuring developer workspace');
   };
 
   const toggleSecondaryChallenge = (id: string) => {
@@ -868,7 +867,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
       website: website.trim() || undefined,
     });
     if (!validation.success) {
-      const msg = validation.error.errors[0]?.message || 'Please enter your organization name.';
+      const msg = validation.error.errors[0]?.message || 'Please enter your company name.';
       setOrgError(msg);
       showToast('error', msg);
       return;
@@ -1216,11 +1215,11 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
   // Step Title Map for top indicator (5 interactive steps + provisioning)
   const STEP_TITLES = [
     '',
-    'Project Details',
-    'Organization',
-    'Project Setup',
-    'Project Records',
-    'Team Access',
+    'Project Phase',
+    'Company Details',
+    'First Project',
+    'Documents',
+    'Team',
     'Workspace Setup'
   ];
 
@@ -1356,10 +1355,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                           }`}>
                           <HardHat className="w-4 h-4" />
                         </div>
-                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${projectStatus === 'active' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-600'
-                          }`}>
-                          Active Jobsite
-                        </span>
                       </div>
                       <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                         Active Construction
@@ -1408,10 +1403,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                           }`}>
                           <Building2 className="w-4 h-4" />
                         </div>
-                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${projectStatus === 'new' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-600'
-                          }`}>
-                          Pre-Development
-                        </span>
                       </div>
                       <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                         Planning & Pre-Development
@@ -1576,18 +1567,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                 >
                   <span>Continue</span>
                   <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-
-                <button
-                  id="btn-skip-organization"
-                  type="button"
-                  onClick={() => {
-                    if (!orgName.trim()) setOrgName('Vance Development');
-                    triggerStepTransition(3, 'Setting up first project...', 'Configuring project parameters');
-                  }}
-                  className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer text-center"
-                >
-                  Skip for now
                 </button>
               </div>
             </div>
@@ -2367,9 +2346,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                 >
                   Setting up your workspace
                 </TextEffect>
-                <p className="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
-                  Configuring organization multi-tenancy, CSI MasterFormat cost code ledger, and automated lender draw engines.
-                </p>
               </div>
 
               {/* Architectural Linear Calibration Gauge */}
@@ -2382,11 +2358,11 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                           setupStages.savingOrg ? 25 : 10
                   }
                   currentStage={
-                    setupStages.finalizing ? 'Finalizing security keys and launching workspace…' :
-                      setupStages.preparingDashboard ? 'Calibrating financial ledger and focus modules…' :
-                        setupStages.creatingProject ? `Provisioning ${projectName || 'project'} ledger records…` :
-                          setupStages.savingOrg ? `Configuring ${orgName || 'organization'} multi-tenant workspace…` :
-                            'Initializing relational ledger database…'
+                    setupStages.finalizing ? 'Finalizing security keys and launching workspace...' :
+                      setupStages.preparingDashboard ? 'Calibrating financial ledger and focus modules...' :
+                        setupStages.creatingProject ? `Provisioning ${projectName || 'project'} ledger records...` :
+                          setupStages.savingOrg ? `Configuring ${orgName || 'company'} workspace...` :
+                            'Initializing relational ledger database...'
                   }
                 />
               </div>
@@ -2407,8 +2383,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                       <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
                     )}
                     <div>
-                      <span className="font-bold text-slate-800 block text-xs">Organization Isolation</span>
-                      <span className="text-[10px] text-slate-500 font-mono">SYS-01 · Multi-Tenant Row Security</span>
+                      <span className="font-bold text-slate-800 block text-xs">Company Workspace</span>
+                      <span className="text-[10px] text-slate-500 font-mono">SYS-01 · Multi-Tenant Security</span>
                     </div>
                   </div>
                   <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${setupStages.savingOrg ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-blue-50 text-blue-700 border border-blue-200/60'
