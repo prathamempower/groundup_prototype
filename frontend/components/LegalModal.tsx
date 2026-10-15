@@ -4,8 +4,9 @@
 
 'use client';
 
-import React, { useState } from 'react';
-import { X, ShieldCheck, FileText, Lock, Building, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { X, ShieldCheck, FileText, Lock, Building, CheckCircle2, ExternalLink } from 'lucide-react';
 
 interface LegalModalProps {
   isOpen: boolean;
@@ -15,6 +16,10 @@ interface LegalModalProps {
 
 export function LegalModal({ isOpen, initialTab = 'terms', onClose }: LegalModalProps) {
   const [activeTab, setActiveTab] = useState<'terms' | 'privacy'>(initialTab);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab, isOpen]);
 
   if (!isOpen) return null;
 
@@ -184,9 +189,19 @@ export function LegalModal({ isOpen, initialTab = 'terms', onClose }: LegalModal
 
         {/* Footer */}
         <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Strict Developer Security &amp; Tenant Isolation</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Strict Developer Security &amp; Tenant Isolation</span>
+            </div>
+            <Link
+              href={activeTab === 'terms' ? '/terms' : '/privacy'}
+              onClick={onClose}
+              className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+            >
+              <span>Open full page</span>
+              <ExternalLink className="size-3" />
+            </Link>
           </div>
           <button
             type="button"

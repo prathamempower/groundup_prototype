@@ -41,7 +41,14 @@ export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const isPublicRoute = pathname === "/" || pathname === "/onboarding" || pathname.startsWith("/onboarding");
+  const isPublicRoute = 
+    pathname === "/" || 
+    pathname === "/terms" || 
+    pathname === "/privacy" || 
+    pathname === "/signup" || 
+    pathname === "/login" || 
+    pathname === "/onboarding" || 
+    pathname.startsWith("/onboarding");
 
   const {
     data: session,

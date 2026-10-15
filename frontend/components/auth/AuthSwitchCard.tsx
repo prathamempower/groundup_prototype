@@ -19,6 +19,7 @@ import {
 import { authAdapter } from '@/lib/api/adapters/auth-adapter';
 import { getDefaultRouteForRole } from '@/lib/navigation';
 import { BrandLogo } from '@/components/ui/brand-logo';
+import { LegalModal } from '@/components/LegalModal';
 
 export interface AuthSwitchCardProps {
   initialMode?: 'login' | 'signup';
@@ -31,6 +32,15 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
 
   // Mode: false = login, true = signup
   const [isSignUp, setIsSignUp] = useState(initialMode === 'signup');
+
+  // Legal Modal State
+  const [isLegalOpen, setIsLegalOpen] = useState(false);
+  const [legalTab, setLegalTab] = useState<'terms' | 'privacy'>('terms');
+
+  const openLegal = (tab: 'terms' | 'privacy') => {
+    setLegalTab(tab);
+    setIsLegalOpen(true);
+  };
 
   // Synchronize mode with pathname dynamically
   useEffect(() => {
@@ -248,9 +258,9 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
       </div>
 
       {/* ── 3D Flip Card Container ─────────────────────────────────────────── */}
-      <div className={`w-full [perspective:1200px] transition-[min-height] duration-500 ${isSignUp ? 'min-h-[580px]' : 'min-h-[460px]'}`}>
+      <div className="w-full [perspective:1200px]">
         <div 
-          className={`relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] ${
+          className={`relative w-full transition-transform duration-700 [transform-style:preserve-3d] ${
             isSignUp ? '[transform:rotateY(180deg)]' : '[transform:rotateY(0deg)]'
           }`}
         >
@@ -259,13 +269,13 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
               FRONT FACE: LOG IN
              ─────────────────────────────────────────────────────────────────── */}
           <div 
-            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-7 sm:p-8 shadow-overlay [backface-visibility:hidden] flex flex-col justify-center space-y-4 ${
-              isSignUp ? 'pointer-events-none' : 'pointer-events-auto'
+            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-overlay [backface-visibility:hidden] flex flex-col justify-start space-y-3.5 ${
+              isSignUp ? 'absolute inset-0 pointer-events-none' : 'relative pointer-events-auto'
             }`}
           >
             {/* Brand Header */}
-            <div className="text-center space-y-1 mb-2">
-              <div className="flex justify-center mb-1.5">
+            <div className="text-center space-y-1 mb-1.5">
+              <div className="flex justify-center mb-1">
                 <BrandLogo size="lg" />
               </div>
               <h1 className="text-xl font-bold tracking-tight text-slate-900">
@@ -280,7 +290,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             {loginError && (
               <div
                 role="alert"
-                className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700 flex items-center gap-2"
+                className="mb-3 rounded-lg border border-red-200 bg-red-50 p-2.5 text-xs font-medium text-red-700 flex items-center gap-2"
               >
                 <AlertCircle className="size-4 shrink-0 text-red-600" />
                 <span>{loginError}</span>
@@ -288,7 +298,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             )}
 
             {/* Log In Form */}
-            <form onSubmit={handleLoginSubmit} noValidate className="space-y-4">
+            <form onSubmit={handleLoginSubmit} noValidate className="space-y-3.5">
               <div className="space-y-1.5">
                 <label
                   htmlFor="login-email"
@@ -352,7 +362,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
               <button
                 type="submit"
                 disabled={signInMutation.isPending}
-                className="mt-2 h-10 w-full rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-900/20 disabled:opacity-60 flex items-center justify-center cursor-pointer"
+                className="mt-1 h-10 w-full rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-900/20 disabled:opacity-60 flex items-center justify-center cursor-pointer"
               >
                 {signInMutation.isPending ? 'Signing in…' : 'Sign in'}
               </button>
@@ -360,27 +370,22 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
               {/* Terms of Service & Privacy Policy Notice */}
               <p className="text-[11px] leading-relaxed text-slate-500 text-center pt-1">
                 By continuing, you agree to the GroundUp{' '}
-                <Link href="/terms" className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600">
+                <button
+                  type="button"
+                  onClick={() => openLegal('terms')}
+                  className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600 cursor-pointer bg-transparent border-none p-0 inline"
+                >
                   Terms of Service
-                </Link>{' '}
+                </button>{' '}
                 and{' '}
-                <Link href="/privacy" className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600">
+                <button
+                  type="button"
+                  onClick={() => openLegal('privacy')}
+                  className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600 cursor-pointer bg-transparent border-none p-0 inline"
+                >
                   Privacy Policy
-                </Link>.
+                </button>.
               </p>
-
-              <div className="text-center pt-1">
-                <span className="text-xs text-slate-500">
-                  Don&apos;t have an account?{' '}
-                  <button
-                    type="button"
-                    onClick={() => handleToggle(true)}
-                    className="font-bold text-slate-900 hover:text-blue-600 hover:underline cursor-pointer bg-transparent border-none p-0 inline"
-                  >
-                    Sign up
-                  </button>
-                </span>
-              </div>
             </form>
           </div>
 
@@ -388,25 +393,28 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
               BACK FACE: SIGN UP (STREAMLINED 2-STAGE PROGRESSION)
              ─────────────────────────────────────────────────────────────────── */}
           <div 
-            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-overlay absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-center overflow-y-auto ${
-              !isSignUp ? 'pointer-events-none' : 'pointer-events-auto'
+            className={`w-full rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-overlay [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-start ${
+              !isSignUp ? 'absolute inset-0 pointer-events-none' : 'relative pointer-events-auto'
             }`}
           >
             {/* Brand Header */}
-            <div className="text-center space-y-1 mb-3">
+            <div className="text-center space-y-0.5 mb-2.5">
               <div className="flex justify-center mb-1">
                 <BrandLogo size="lg" />
               </div>
               <h2 className="text-xl font-bold tracking-tight text-slate-900">
-                Create your workspace
+                Create your account
               </h2>
+              <p className="text-xs text-slate-500">
+                Get started with your enterprise workspace
+              </p>
             </div>
 
             {/* Error Notice */}
             {signUpError && (
               <div
                 role="alert"
-                className="mb-3 rounded-lg border border-red-200 bg-red-50 p-2.5 text-xs font-medium text-red-700 flex items-center gap-2"
+                className="mb-2.5 rounded-lg border border-red-200 bg-red-50 p-2 text-xs font-medium text-red-700 flex items-center gap-2"
               >
                 <AlertCircle className="size-4 shrink-0 text-red-600" />
                 <span>{signUpError}</span>
@@ -415,7 +423,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
 
             {/* ── STAGE 1: GOOGLE FIRST, IDENTITY, HANDLE, DOB & EMAIL ──────── */}
             {signUpStep === 1 && (
-              <form onSubmit={handleSignUpStep1Next} className="space-y-3">
+              <form onSubmit={handleSignUpStep1Next} className="space-y-2.5">
                 {/* 1. Continue with Google OAuth Button (At the Top for Best UX) */}
                 <button
                   type="button"
@@ -447,7 +455,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 </button>
 
                 {/* 2. OR Divider */}
-                <div className="relative my-2 text-center">
+                <div className="relative my-1 text-center">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-slate-200"></div>
                   </div>
@@ -623,27 +631,22 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 {/* Terms of Service & Privacy Policy Notice */}
                 <p className="text-[11px] leading-relaxed text-slate-500 text-center pt-1">
                   By continuing, you agree to the GroundUp{' '}
-                  <Link href="/terms" className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600">
+                  <button
+                    type="button"
+                    onClick={() => openLegal('terms')}
+                    className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600 cursor-pointer bg-transparent border-none p-0 inline"
+                  >
                     Terms of Service
-                  </Link>{' '}
+                  </button>{' '}
                   and{' '}
-                  <Link href="/privacy" className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600">
+                  <button
+                    type="button"
+                    onClick={() => openLegal('privacy')}
+                    className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600 cursor-pointer bg-transparent border-none p-0 inline"
+                  >
                     Privacy Policy
-                  </Link>.
+                  </button>.
                 </p>
-
-                <div className="text-center pt-1">
-                  <span className="text-xs text-slate-500">
-                    Already have an account?{' '}
-                    <button
-                      type="button"
-                      onClick={() => handleToggle(false)}
-                      className="font-bold text-slate-900 hover:text-blue-600 hover:underline cursor-pointer bg-transparent border-none p-0 inline"
-                    >
-                      Log in
-                    </button>
-                  </span>
-                </div>
               </form>
             )}
 
@@ -741,13 +744,21 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 {/* Terms of Service & Privacy Policy Notice AT THE VERY LAST */}
                 <p className="text-[11px] leading-relaxed text-slate-500 text-center pt-1">
                   By continuing, you agree to the GroundUp{' '}
-                  <Link href="/terms" className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600">
+                  <button
+                    type="button"
+                    onClick={() => openLegal('terms')}
+                    className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600 cursor-pointer bg-transparent border-none p-0 inline"
+                  >
                     Terms of Service
-                  </Link>{' '}
+                  </button>{' '}
                   and{' '}
-                  <Link href="/privacy" className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600">
+                  <button
+                    type="button"
+                    onClick={() => openLegal('privacy')}
+                    className="font-semibold text-slate-800 underline underline-offset-2 hover:text-blue-600 cursor-pointer bg-transparent border-none p-0 inline"
+                  >
                     Privacy Policy
-                  </Link>.
+                  </button>.
                 </p>
               </form>
             )}
@@ -755,6 +766,12 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
 
         </div>
       </div>
+
+      <LegalModal
+        isOpen={isLegalOpen}
+        initialTab={legalTab}
+        onClose={() => setIsLegalOpen(false)}
+      />
     </div>
   );
 }

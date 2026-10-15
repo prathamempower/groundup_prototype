@@ -198,22 +198,28 @@ export function SiteFooter({ onStartOnboarding }: SiteFooterProps) {
                   <span>10% Retainage (AIA A201)</span>
                 </li>
                 <li className="pt-1">
-                  <button
-                    type="button"
-                    onClick={() => openLegal('privacy')}
-                    className="hover:text-slate-900 transition-colors cursor-pointer bg-transparent border-none p-0 text-sm text-slate-600 text-left"
+                  <Link
+                    href="/privacy"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openLegal('privacy');
+                    }}
+                    className="hover:text-slate-900 transition-colors cursor-pointer text-sm text-slate-600 text-left inline-block"
                   >
                     Privacy Policy
-                  </button>
+                  </Link>
                 </li>
                 <li>
-                  <button
-                    type="button"
-                    onClick={() => openLegal('terms')}
-                    className="hover:text-slate-900 transition-colors cursor-pointer bg-transparent border-none p-0 text-sm text-slate-600 text-left"
+                  <Link
+                    href="/terms"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openLegal('terms');
+                    }}
+                    className="hover:text-slate-900 transition-colors cursor-pointer text-sm text-slate-600 text-left inline-block"
                   >
                     Terms of Service
-                  </button>
+                  </Link>
                 </li>
               </ul>
             </div>
