@@ -373,9 +373,6 @@ export default function ProjectSettingsPage() {
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
               <span>{project.name}</span>
-              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                Active Jobsite
-              </span>
             </h1>
           </div>
 
@@ -425,11 +422,10 @@ export default function ProjectSettingsPage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id as SettingsTab)}
-                className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition whitespace-nowrap cursor-pointer ${
-                  isSelected
+                className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition whitespace-nowrap cursor-pointer ${isSelected
                     ? "border-slate-900 text-slate-900 bg-white/60"
                     : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
-                }`}
+                  }`}
               >
                 <Icon className={`w-3.5 h-3.5 ${isSelected ? "text-slate-900" : "text-slate-400"}`} />
                 <span>{tab.label}</span>
@@ -516,11 +512,10 @@ export default function ProjectSettingsPage() {
                         key={opt.id}
                         type="button"
                         onClick={() => setLifecycleStage(opt.id)}
-                        className={`p-3.5 rounded-xl border text-left transition cursor-pointer ${
-                          isSelected
+                        className={`p-3.5 rounded-xl border text-left transition cursor-pointer ${isSelected
                             ? "bg-slate-900 border-slate-900 text-white shadow-xs"
                             : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/70"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center justify-between gap-1 mb-1">
                           <span className={`text-xs font-bold ${isSelected ? "text-white" : "text-slate-900"}`}>
@@ -626,11 +621,10 @@ export default function ProjectSettingsPage() {
                         key={opt.val}
                         type="button"
                         onClick={() => setIsAcquired(opt.val)}
-                        className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${
-                          isAcquired === opt.val
+                        className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${isAcquired === opt.val
                             ? "border-slate-900 bg-slate-900 text-white shadow-xs"
                             : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
-                        }`}
+                          }`}
                       >
                         <span className="block text-xs font-bold">{opt.label}</span>
                         <span className={`mt-0.5 block text-[11px] ${isAcquired === opt.val ? "text-slate-300" : "text-slate-500"}`}>
@@ -654,11 +648,10 @@ export default function ProjectSettingsPage() {
                         key={opt.val}
                         type="button"
                         onClick={() => setHasConstructionLoan(opt.val)}
-                        className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${
-                          hasConstructionLoan === opt.val
+                        className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${hasConstructionLoan === opt.val
                             ? "border-slate-900 bg-slate-900 text-white shadow-xs"
                             : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
-                        }`}
+                          }`}
                       >
                         <span className="block text-xs font-bold">{opt.label}</span>
                         <span className={`mt-0.5 block text-[11px] ${hasConstructionLoan === opt.val ? "text-slate-300" : "text-slate-500"}`}>
@@ -729,20 +722,18 @@ export default function ProjectSettingsPage() {
                         key={m.id}
                         type="button"
                         onClick={() => setContractModel(m.id)}
-                        className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${
-                          isSelected
+                        className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${isSelected
                             ? "border-slate-900 bg-slate-900 text-white shadow-xs"
                             : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center justify-between gap-1.5">
                           <span className={`font-bold text-xs ${isSelected ? "text-white" : "text-slate-900"}`}>
                             {m.title}
                           </span>
                           <span
-                            className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                              isSelected ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
-                            }`}
+                            className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+                              }`}
                           >
                             {m.badge}
                           </span>
@@ -786,20 +777,18 @@ export default function ProjectSettingsPage() {
                         key={opt.val}
                         type="button"
                         onClick={() => setOperatingAccountModel(opt.val as any)}
-                        className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${
-                          isSelected
+                        className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${isSelected
                             ? "border-slate-900 bg-slate-900 text-white shadow-xs"
                             : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center justify-between gap-1.5">
                           <span className={`font-bold text-xs ${isSelected ? "text-white" : "text-slate-900"}`}>
                             {opt.title}
                           </span>
                           <span
-                            className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                              isSelected ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
-                            }`}
+                            className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+                              }`}
                           >
                             {opt.badge}
                           </span>
