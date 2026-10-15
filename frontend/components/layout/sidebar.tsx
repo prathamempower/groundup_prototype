@@ -112,7 +112,6 @@ export function Sidebar({
     .map((id) => visibleNavItems.find((i) => i.id === id))
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
 
-  const bottomNavItems = visibleNavItems.filter((i) => i.id === "settings");
 
   const getProjectThumbnail = (proj?: Project | null) => {
     if (!proj) return "/projects/woodlawn-new.jpg";
@@ -355,41 +354,7 @@ export function Sidebar({
           })}
         </nav>
 
-        {/* Sidebar Footer: Settings & Portfolio Link */}
-        <div className="p-3 border-t border-slate-200/70 bg-white space-y-0.5">
-          {bottomNavItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            const Icon = item.icon;
 
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                onClick={onCloseMobile}
-                title={collapsed ? item.label : undefined}
-                className={`group relative flex items-center rounded-lg text-xs transition-all duration-150 ${
-                  collapsed
-                    ? "h-9 w-9 mx-auto justify-center"
-                    : "gap-2.5 px-3 py-2"
-                } ${
-                  isActive
-                    ? "bg-white text-blue-600 font-bold shadow-2xs border border-slate-200/80"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium"
-                }`}
-              >
-                {isActive && !collapsed && (
-                  <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-sm bg-blue-600" />
-                )}
-                <Icon
-                  className={`h-4 w-4 shrink-0 transition-colors ${
-                    isActive ? "text-blue-600 stroke-[2.25]" : "text-slate-400 group-hover:text-slate-600 stroke-[1.75]"
-                  }`}
-                />
-                {!collapsed && <span className="truncate">{item.label}</span>}
-              </Link>
-            );
-          })}
-        </div>
       </aside>
     </>
   );

@@ -589,26 +589,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
                     )}
                   </div>
                 </div>
-                  <button
-                    onClick={() => {
-                      setIsUserDropdownOpen(false);
-                      router.push("/account");
-                    }}
-                    className="flex w-full items-center rounded px-2 py-2 text-left text-body text-text-primary hover:bg-subtle"
-                  >
-                    Account settings
-                  </button>
-                  {currentUser?.role === "OWNER" && (
-                    <button
-                      onClick={() => {
-                        setIsUserDropdownOpen(false);
-                        router.push("/settings");
-                      }}
-                      className="flex w-full items-center rounded px-2 py-2 text-left text-body text-text-primary hover:bg-subtle"
-                    >
-                      Organization settings and team
-                    </button>
-                  )}
+
                 {signOutMutation.error instanceof Error && (
                   <p role="alert" className="px-2 py-1 text-caption text-danger">{signOutMutation.error.message}</p>
                 )}
