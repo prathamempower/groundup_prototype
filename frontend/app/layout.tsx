@@ -5,7 +5,10 @@ import { AppProviders } from "@/components/providers/app-providers";
 import { AppShell } from "@/components/layout/app-shell";
 
 export const metadata: Metadata = {
-  title: "GroundUp — Development Financial Control",
+  title: {
+    default: "GroundUp AI",
+    template: "%s | GroundUp AI",
+  },
   description:
     "Source-led financial control layer for real estate developers, owners, and capital partners.",
   icons: {
