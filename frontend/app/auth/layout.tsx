@@ -23,7 +23,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (data?.user) {
-      if (pathname === "/auth/sign-up") {
+      if (pathname === "/auth/sign-up" || pathname === "/auth/signup" || pathname === "/signup") {
         const completedSignup = window.sessionStorage.getItem("groundup_signup_completed") === "1";
         if (completedSignup) {
           router.replace(getDefaultRouteForRole(data.user.role));
@@ -54,6 +54,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     );
   }
 
+  const isSwitchCardPage = 
+    pathname === "/auth/login" || 
+    pathname === "/auth/sign-up" || 
+    pathname === "/auth/signup" || 
+    pathname === "/signup" || 
+    pathname === "/login";
+
   return (
     <main className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-[440px]">
@@ -67,7 +74,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         )}
 
         {/* Clean, perfectly structured enterprise card */}
-        {pathname === "/auth/login" || pathname === "/auth/sign-up" ? (
+        {isSwitchCardPage ? (
           children
         ) : (
           <div className="rounded-xl border border-slate-200/80 bg-white p-7 sm:p-9 shadow-overlay">

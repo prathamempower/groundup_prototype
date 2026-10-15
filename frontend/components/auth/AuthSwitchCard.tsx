@@ -186,7 +186,10 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
       {/* ── Uiverse-Inspired 3D Toggle Switch ───────────────────────────────── */}
       <div className="mb-6 flex items-center justify-center gap-4 select-none">
         <span 
-          onClick={() => setIsSignUp(false)}
+          onClick={() => {
+            setIsSignUp(false);
+            router.replace('/auth/login');
+          }}
           className={`text-xs font-bold transition-all cursor-pointer ${
             !isSignUp 
               ? 'text-slate-900 border-b-2 border-slate-900 pb-0.5' 
@@ -205,7 +208,11 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             id="auth-card-toggle"
             type="checkbox"
             checked={isSignUp}
-            onChange={(e) => setIsSignUp(e.target.checked)}
+            onChange={(e) => {
+              const nextSignUp = e.target.checked;
+              setIsSignUp(nextSignUp);
+              router.replace(nextSignUp ? '/auth/sign-up' : '/auth/login');
+            }}
             className="sr-only"
             aria-label="Toggle between Log in and Sign up"
           />
@@ -217,7 +224,10 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
         </label>
 
         <span 
-          onClick={() => setIsSignUp(true)}
+          onClick={() => {
+            setIsSignUp(true);
+            router.replace('/auth/sign-up');
+          }}
           className={`text-xs font-bold transition-all cursor-pointer ${
             isSignUp 
               ? 'text-slate-900 border-b-2 border-slate-900 pb-0.5' 

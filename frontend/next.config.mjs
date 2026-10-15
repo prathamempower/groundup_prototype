@@ -11,6 +11,20 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  async redirects() {
+    return [
+      {
+        source: "/auth/signup",
+        destination: "/auth/sign-up",
+        permanent: false,
+      },
+      {
+        source: "/signup",
+        destination: "/auth/sign-up",
+        permanent: false,
+      },
+    ];
+  },
   async rewrites() {
     const apiProxyUrl = process.env.API_PROXY_URL || "http://127.0.0.1:8000";
     return [

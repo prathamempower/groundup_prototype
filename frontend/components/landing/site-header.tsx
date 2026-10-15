@@ -191,14 +191,13 @@ export function SiteHeader({ onStartOnboarding, onAuthenticate }: SiteHeaderProp
                 Log In
               </Link>
             )}
-            <button
-              type="button"
-              onClick={onStartOnboarding}
-              className="btn-micro inline-flex items-center gap-1 sm:gap-1.5 rounded-xl border border-foreground/15 bg-primary px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-primary-foreground hover:bg-primary/90 shadow-sm cursor-pointer whitespace-nowrap"
+            <Link
+              href="/auth/sign-up"
+              className="btn-micro inline-flex items-center gap-1 sm:gap-1.5 rounded-xl border border-foreground/15 bg-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-primary-foreground hover:bg-primary/90 shadow-sm cursor-pointer whitespace-nowrap"
             >
-              <span><span className="hidden sm:inline">Sign Up</span><span className="sm:hidden">Start project</span></span>
-              <ArrowRight className="size-3.5 hidden sm:inline-block" aria-hidden="true" />
-            </button>
+              <span>Sign Up</span>
+              <ArrowRight className="size-3.5 inline-block" aria-hidden="true" />
+            </Link>
 
             {/* Mobile Menu Trigger */}
             <button
@@ -261,17 +260,14 @@ export function SiteHeader({ onStartOnboarding, onAuthenticate }: SiteHeaderProp
                   <span>Log In</span>
                 </Link>
               )}
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onStartOnboarding();
-                }}
+              <Link
+                href="/auth/sign-up"
+                onClick={() => setMobileMenuOpen(false)}
                 className="w-full py-2.5 px-3 rounded-xl bg-primary text-primary-foreground text-xs font-bold text-center hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
               >
-                <span>Start your project</span>
+                <span>Sign Up</span>
                 <ArrowRight className="size-3.5" aria-hidden="true" />
-              </button>
+              </Link>
             </div>
           </div>
         )}

@@ -172,7 +172,12 @@ export function SiteFooter({ onStartOnboarding }: SiteFooterProps) {
                 </li>
                 <li>
                   <Link href="/auth/login" className="hover:text-slate-900 transition-colors">
-                    Sign In
+                    Log In
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/auth/sign-up" className="hover:text-slate-900 transition-colors">
+                    Sign Up
                   </Link>
                 </li>
               </ul>
