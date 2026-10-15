@@ -54,7 +54,7 @@ import {
   RequestExportPayload,
 } from "@/lib/types";
 import { mockStore } from "@/lib/mock-data/store";
-import { normalizeUserProfile } from "./adapters/auth-adapter";
+import { normalizeUserProfile, authAdapter } from "./adapters/auth-adapter";
 
 export * from "./errors";
 export * from "./adapters/auth-adapter";
@@ -91,8 +91,15 @@ function wrap<T>(data: T, warnings?: string[]): ApiResponse<T> {
 export const api = {
   identity: {
     getMe: async () => {
-      const user = mockStore.getCurrentUser();
-      return wrap(normalizeUserProfile(user as any));
+      const session = await authAdapter.getSession();
+      if (!session?.user) {
+        throw new ApiError(401, {
+          code: "UNAUTHORIZED",
+          message: "No active user session",
+          request_id: "req_auth_none",
+        });
+      }
+      return wrap(session.user);
     },
   },
 

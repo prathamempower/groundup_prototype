@@ -157,11 +157,7 @@ export class MockAuthAdapter implements AuthAdapter {
 
   async getSession(): Promise<AuthSession | null> {
     if (typeof window === "undefined") {
-      const user = mockStore.getCurrentUser();
-      return {
-        user: normalizeUserProfile(user),
-        expiresAt: new Date(Date.now() + SESSION_DURATION_MS).toISOString(),
-      };
+      return null;
     }
 
     const activeEmail = window.localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY);

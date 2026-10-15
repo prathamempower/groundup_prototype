@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" width="64" height="64" fill="none">
+  <!-- High-contrast rounded container -->
+  <rect width="72" height="72" rx="16" fill="#041f39" stroke="#0075ff" stroke-width="1.5" />
+  
+  <!-- Stylized Hexagonal G Foundation (Crisp White for tab readability) -->
+  <path
+    fill="#ffffff"
+    fill-rule="evenodd"
+    d="M 36 12 L 7 27 L 7 55 L 30 68 L 49 57 L 49 39 L 27 39 L 27 45 L 41 45 L 41 52 L 30 58 L 16 50 L 16 32 L 36 22 Z"
+  />
+
+  <!-- Skyscraper Tower 1 (Electric Blue) -->
+  <path
+    fill="#0075ff"
+    d="M 41 9 L 52 4 L 52 35 L 41 30 Z"
+  />
+
+  <!-- Skyscraper Tower 2 (Electric Blue) -->
+  <path
+    fill="#0075ff"
+    d="M 56 12 L 65 17 L 65 55 L 56 60 Z"
+  />
+</svg>

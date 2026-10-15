@@ -30,45 +30,45 @@ import { Button } from "@/components/ui/button";
 const specialAnswers: Array<{ value: Exclude<SpecialAnswerType, "STANDARD">; label: string; desc: string }> = [
   {
     value: "UNKNOWN",
-    label: "I don’t know yet",
-    desc: "Creates an accountable follow-up task instead of assuming an answer.",
+    label: "I'll add this later",
+    desc: "Saves this step as an open task on your checklist.",
   },
   {
     value: "NOT_YET_AVAILABLE",
-    label: "Not available yet",
-    desc: "Flags this dependency as pending and unblocks unrelated steps.",
+    label: "Pending documents",
+    desc: "Flags this item as pending and continues setup.",
   },
   {
     value: "NOT_APPLICABLE",
     label: "Not applicable",
-    desc: "Explicitly marks this area as out of scope for this project.",
+    desc: "Excludes this requirement from this project.",
   },
 ];
 
 const roleDescriptions: Record<string, { title: string; mission: string; badge: string }> = {
   OWNER: {
     title: "Project Sponsor / Owner",
-    mission: "Establish legal identity, financing, GC governance, and approve high-risk project configurations.",
+    mission: "Set up legal entities, financing terms, contractor rules, and key approval limits.",
     badge: "Owner Authority",
   },
   CFO: {
     title: "Chief Financial Officer / Accounting",
-    mission: "Establish bank accounts, baseline reconciliation cutoff, and budget-to-chart-of-accounts mapping.",
+    mission: "Link bank accounts, set reconciliation schedules, and map budget lines to your chart of accounts.",
     badge: "Financial Control",
   },
   PM: {
     title: "Project Manager",
-    mission: "Lock the milestone schedule, permit tracking authorities, and field verification evidence rules.",
+    mission: "Confirm project schedules, permit milestones, and site inspection sign-offs.",
     badge: "Field Operations",
   },
   GC: {
     title: "General Contractor",
-    mission: "Configure compliant monthly payment application format, retainage expectations, and lien waiver policies.",
+    mission: "Set up pay application formats, retainage terms, and lien waiver submission rules.",
     badge: "Trade Billing",
   },
   INVESTOR: {
     title: "Equity Investor / LP",
-    mission: "Set up read-only update distribution preferences, reporting digests, and year-end tax contacts.",
+    mission: "Manage investor reporting schedules, monthly digests, and K-1 tax contacts.",
     badge: "Investor Access",
   },
 };

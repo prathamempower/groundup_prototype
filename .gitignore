@@ -1,75 +1,139 @@
-# Dependencies
+# ==========================================
+# GroundUp AI - .gitignore
+# ==========================================
+
+# --- Node & Dependencies ---
 node_modules/
 **/node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
 
-# Next.js build output
+# --- Debug & Package Manager Logs ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# --- Next.js & Frontend Build Outputs ---
 .next/
-.next*/
 **/.next/
-**/.next*/
+.next-dev/
+**/.next-dev/
 out/
 build/
+dist/
+*.tsbuildinfo
+**/*.tsbuildinfo
+next-env.d.ts.bak
 
-# Python & Virtual Environments
+# --- Vercel ---
+.vercel/
+.vercel
+**/.vercel/
+
+# --- Environment & Secret Variables ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+.env.backup
+**/.env
+**/.env.local
+**/.env.*.local
+*.pem
+# Keep template/example env files
+!.env.example
+!.env.template
+!frontend/.env.example
+
+# --- Temporary & Scratch Directories ---
+temp/
+tmp/
+**/temp/
+**/tmp/
+*.tmp
+
+# --- Testing, QA & Screenshots ---
+coverage/
+**/coverage/
+.nyc_output/
+playwright-report/
+**/playwright-report/
+test-results/
+**/test-results/
+blob-report/
+playwright/.cache/
+**/screenshots/
+qa/screenshots/
+archive/qa/
+
+# --- Python & Virtual Environments (Backend) ---
 venv/
 .venv/
-*/venv/
-*/.venv/
+env/
+ENV/
 **/venv/
 **/.venv/
-backend/venv/
-backend/.venv/
 __pycache__/
 **/__pycache__/
 *.py[cod]
 *$py.class
+*.so
 .pytest_cache/
 **/.pytest_cache/
 .mypy_cache/
 **/.mypy_cache/
 .ruff_cache/
 **/.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
 
-# Test & QA outputs
-coverage/
-playwright-report/
-test-results/
-qa/screenshots/
-*.png
-*.jpg
-*.jpeg
-
-# Local environment & secrets
-.env
-.env.*
-!.env.example
-
-# Local storage & databases
+# --- Databases & Local Storage ---
 storage_data/
 **/storage_data/
 *.sqlite
 *.sqlite3
 *.db
+*.db-journal
+*.db-wal
 
-# Large Datasets and raw binary documents
+# --- Heavy Datasets & Raw Archive Data (Large Files) ---
 Datasets (Incomplete yet)/
 Datasets*/
-*.pdf
-*.zip
+archive/datasets/
 *.tar.gz
 *.tar
+*.zip
+*.7z
 
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
-
-# TypeScript build cache
-*.tsbuildinfo
-
-# Operating system and editor files
+# --- Operating System & Editor Files ---
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
-.vscode/
+desktop.ini
+
+# Editors
 .idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
