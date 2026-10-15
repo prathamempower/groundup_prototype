@@ -11,6 +11,7 @@ export { StatusLadder } from './status-ladder';
 export { MoneyOverTime } from './money-over-time';
 export { AttentionQueue } from './attention-queue';
 export { Positioning } from './positioning';
+export { FaqSection } from './faq-section';
 export { CompetitorComparison } from './competitor-comparison';
 export { StickyReveal } from './sticky-reveal';
 export { FinalCta } from './final-cta';

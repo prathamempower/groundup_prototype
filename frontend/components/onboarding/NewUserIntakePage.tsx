@@ -1376,97 +1376,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
     }
   };
 
-  // ── Fill Demo Values Helper (Step-Specific) ───────────────────────────────
-  const handleFillDemo = (step: number) => {
-    switch (step) {
-      case 1:
-        setWorkEmail('alex.morgan@vancedevelopment.com');
-        setIsEmailVerified(true);
-        setShowEmailOtpDrawer(false);
-        setEmailError(null);
-        showToast('info', 'Demo work email populated and verified.', 'Demo Data');
-        break;
-      case 2:
-        setFirstName('Alex');
-        setLastName('Morgan');
-        setUsername('alex_morgan');
-        setUsernameAvailable(true);
-        setDob('1990-05-14');
-        setPassword('GroundUp2026!');
-        setCountryCode('+1');
-        setPhoneNumber('2015550198');
-        setIsPhoneVerified(true);
-        setShowOtpSection(false);
-        setAccountError(null);
-        setPhoneError(null);
-        setOtpError(null);
-        setDobError(null);
-        showToast('info', 'Demo developer profile loaded with verified credentials.', 'Demo Profile');
-        break;
-      case 3:
-        setProjectStatus('active');
-        setPrimaryFocus('draw_delays');
-        showToast('info', 'Calibrated active construction project status.', 'Project Status');
-        break;
-      case 4:
-        setOrgName('Gotham Development Partners');
-        setOrgSize('Medium');
-        setEmployeeCount(6);
-        setWebsite('https://gothamdev.com');
-        setOrgError(null);
-        showToast('info', 'Gotham Development Partners details loaded.', 'Organization');
-        break;
-      case 5:
-        setShowGovDetails(true);
-        if (projectStatus === 'active') {
-          setProjectName('73 Broadway Mixed-Use');
-          setProjectEntity('73 Broadway Partners LLC');
-          setProjectAddress('73 Broadway, Jersey City, NJ 07306');
-          setAssetType('MIXED_USE');
-          setProjectStage('Under construction');
-          setStartedAt('2024-06-01');
-          setTargetDate('2027-04-30');
-          setIsAcquired('true');
-          setAcquisitionFunding('ACQUISITION_LOAN');
-          setHasConstructionLoan('true');
-          setLenderName('Pacific Western Bank');
-          setContractModel('COST_PLUS');
-          setOperatingAccountModel('DEDICATED');
-          showToast('info', '73 Broadway active project profile populated.', 'Project Asset');
-        } else {
-          setProjectName('161 Woodlawn Development');
-          setProjectEntity('161 Woodlawn Partners LLC');
-          setProjectAddress('161 Woodlawn Ave, Ridgewood, NJ 07450');
-          setAssetType('MULTIFAMILY');
-          setProjectStage('Conception, design & planning');
-          setStartedAt('2025-01-15');
-          setTargetDate('2027-11-15');
-          setIsAcquired('false');
-          setAcquisitionFunding('ACQUISITION_LOAN');
-          setHasConstructionLoan('true');
-          setLenderName('Citizens Commercial Bank');
-          setContractModel('GMP');
-          setOperatingAccountModel('DEDICATED');
-          showToast('info', '161 Woodlawn development pro forma populated.', 'Project Asset');
-        }
-        setProjectError(null);
-        break;
-      case 6:
-        setSelectedDocTypes(['Budget or cost spreadsheet', 'Loan and draw documents']);
-        if (documentsList.length === 0) {
-          handleLoadSampleSOV();
-        }
-        break;
-      case 7:
-        setTeamList([
-          { email: 'sarah.lin@gothamdev.com', role: 'OWNER' },
-          { email: 'marcus.vance@gothamdev.com', role: 'PARTNER' },
-        ]);
-        setInviteError(null);
-        showToast('info', 'Added Co-Owner and Development Partner to collaborator access queue.', 'Collaborators');
-        break;
-    }
-  };
+
 
   // Step Title Map for top indicator
   const STEP_TITLES = [
@@ -1583,16 +1493,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     Bring your project costs, construction progress, and funding into one clear view.
                   </p>
                 </div>
-                <button
-                  id="btn-fill-demo"
-                  type="button"
-                  onClick={() => handleFillDemo(1)}
-                  className="text-xs text-slate-700 hover:text-slate-900 font-semibold inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 cursor-pointer shrink-0 transition"
-                  title="Populate demo work email"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-slate-600" />
-                  <span>Demo email</span>
-                </button>
               </div>
 
               {/* Google SSO Button */}
@@ -1668,23 +1568,9 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                 {/* Email OTP Verification Drawer */}
                 {showEmailOtpDrawer && !isEmailVerified && (
                   <div className="p-3.5 bg-indigo-50/60 border border-indigo-100 rounded-2xl space-y-3 animate-in fade-in duration-200">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-                        <KeyRound className="w-3.5 h-3.5 text-indigo-600" />
-                        <span>Enter 6-digit confirmation code</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEmailOtpCode(['1', '2', '3', '4', '5', '6']);
-                          handleVerifyEmailOtp('123456');
-                        }}
-                        className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer flex items-center gap-1"
-                        title="Auto-fill verified demo email code"
-                      >
-                        <Sparkles className="w-3 h-3 text-indigo-500" />
-                        <span>Demo code: 123456</span>
-                      </button>
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                      <KeyRound className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Enter 6-digit confirmation code</span>
                     </div>
 
                     <div className="flex items-center justify-between gap-1.5 max-w-xs mx-auto">
@@ -1804,15 +1690,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     Signing up as <span className="font-semibold text-slate-800">{workEmail}</span> &bull; <span className="font-semibold text-slate-700">Project Owner</span>
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleFillDemo(2)}
-                  className="text-xs text-slate-700 hover:text-slate-900 font-semibold inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 cursor-pointer shrink-0 transition"
-                  title="Populate demo name, username, DOB and phone"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-slate-600" />
-                  <span>Demo profile</span>
-                </button>
               </div>
 
               <form
@@ -2003,23 +1880,9 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   {/* Interactive 6-Digit SMS OTP Drawer */}
                   {showOtpSection && !isPhoneVerified && (
                     <div className="p-3 bg-indigo-50/60 border border-indigo-100 rounded-2xl space-y-2.5 mt-2 animate-in fade-in duration-200">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-                          <KeyRound className="w-3.5 h-3.5 text-indigo-600" />
-                          <span>Enter 6-digit SMS code</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setOtpCode(['1', '2', '3', '4', '5', '6']);
-                            handleVerifyPhoneOtp('123456');
-                          }}
-                          className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer flex items-center gap-1"
-                          title="Auto-fill verified demo OTP"
-                        >
-                          <Sparkles className="w-3 h-3 text-indigo-500" />
-                          <span>Demo code: 123456</span>
-                        </button>
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                        <KeyRound className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>Enter 6-digit SMS code</span>
                       </div>
 
                       <div className="flex items-center justify-between gap-1.5 max-w-xs mx-auto">
@@ -2147,15 +2010,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     Select your project phase to calibrate cost codes, draw schedules, and workflow.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleFillDemo(3)}
-                  className="text-xs text-slate-700 hover:text-slate-900 font-semibold inline-flex items-center gap-1 cursor-pointer shrink-0 mt-1"
-                  title="Fill recommended project status"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-slate-600" />
-                  <span>Demo status</span>
-                </button>
               </div>
 
               <div className="space-y-3.5 pt-1">
@@ -2300,15 +2154,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     We customize your cost codes, approval limits, and portfolio reporting to your operation scale.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleFillDemo(4)}
-                  className="text-xs text-emerald-700 hover:text-emerald-900 font-semibold inline-flex items-center gap-1 cursor-pointer shrink-0 mt-1"
-                  title="Fill demo organization"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Demo org</span>
-                </button>
               </div>
 
               <div className="space-y-4">
@@ -2526,22 +2371,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     {projectSubStep === 2 && 'Project Capital & Debt Structure'}
                     {projectSubStep === 3 && 'Contract Model & Operating Account'}
                   </h1>
-                  <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-                    {projectSubStep === 1 && 'Set up your active jobsite, legal entity, and target timeline.'}
-                    {projectSubStep === 2 && 'Configure property acquisition terms, equity, and construction lending.'}
-                    {projectSubStep === 3 && 'Establish General Contractor billing mechanics and escrow controls.'}
-                  </p>
                 </div>
-                <button
-                  id="btn-fill-demo"
-                  type="button"
-                  onClick={() => handleFillDemo(5)}
-                  className="text-xs text-slate-700 hover:text-slate-900 font-semibold inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 cursor-pointer shrink-0 transition shadow-2xs"
-                  title="Load institutional demo project profile"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-slate-600" />
-                  <span>Demo project</span>
-                </button>
               </div>
 
               {/* Progress Indicator: 3 segments */}
@@ -2593,7 +2423,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
 
               {/* ────────────────── PART 1: IDENTITY & SCHEDULE ────────────────── */}
               {projectSubStep === 1 && (
-                <div className="space-y-4 animate-in fade-in duration-150">
+                <div className="space-y-4 animate-in fade-in duration-200">
                   {/* Project Name and Auto-derived Legal Entity */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div className="space-y-1.5">
@@ -2652,79 +2482,43 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     </div>
                   </div>
 
-                  {/* Project Asset Archetype */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-800">
-                      Project asset archetype
-                    </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {[
-                        { value: 'MULTIFAMILY', label: 'Multifamily', sub: 'Residential' },
-                        { value: 'SINGLE_FAMILY', label: 'Single Family', sub: 'Ground-Up' },
-                        { value: 'MIXED_USE', label: 'Mixed-Use', sub: 'Commercial' },
-                        { value: 'SUBDIVISION', label: 'Subdivision', sub: 'Land Dev' },
-                      ].map((type) => {
-                        const isSelected = assetType === type.value;
-                        return (
-                          <button
-                            key={type.value}
-                            type="button"
-                            onClick={() => setAssetType(type.value)}
-                            className={`rounded-xl border p-2.5 text-left transition cursor-pointer ${
-                              isSelected
-                                ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                                : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
-                            }`}
-                          >
-                            <span className="block text-xs font-bold leading-tight">{type.label}</span>
-                            <span className={`block text-[10px] mt-0.5 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
-                              {type.sub}
-                            </span>
-                          </button>
-                        );
-                      })}
+                  {/* Minimalist Dropdowns for Archetype and Stage */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {/* Project Asset Archetype */}
+                    <div className="space-y-1.5">
+                      <label htmlFor="select-asset-archetype" className="block text-xs font-bold text-slate-800">
+                        Project asset archetype
+                      </label>
+                      <select
+                        id="select-asset-archetype"
+                        value={assetType}
+                        onChange={(e) => setAssetType(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition cursor-pointer"
+                      >
+                        <option value="MULTIFAMILY">Multifamily</option>
+                        <option value="SINGLE_FAMILY">Single Family</option>
+                        <option value="MIXED_USE">Mixed-Use</option>
+                        <option value="SUBDIVISION">Subdivision</option>
+                      </select>
                     </div>
-                  </div>
 
-                  {/* Current Project Stage */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-800">
-                      Current project stage
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      {(projectStatus === 'active' ? ACTIVE_STAGE_CHOICES : NEW_STAGE_CHOICES).map((choice) => {
-                        const isSelected = projectStage === choice.id;
-                        return (
-                          <button
-                            key={choice.id}
-                            type="button"
-                            onClick={() => setProjectStage(choice.id)}
-                            className={`p-3.5 rounded-xl border text-left transition cursor-pointer ${
-                              isSelected
-                                ? 'bg-slate-900 border-slate-900 text-white shadow-xs'
-                                : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/70'
-                            }`}
-                          >
-                            <div className="flex items-start justify-between gap-1 mb-1">
-                              <span className={`text-xs font-bold leading-tight ${isSelected ? 'text-white' : 'text-slate-900'}`}>
-                                {choice.label}
-                              </span>
-                              <div className="shrink-0 mt-0.5">
-                                {isSelected ? (
-                                  <div className="w-4 h-4 rounded-full bg-white text-slate-900 flex items-center justify-center shadow-2xs">
-                                    <Check className="w-2.5 h-2.5 stroke-[3]" />
-                                  </div>
-                                ) : (
-                                  <div className="w-4 h-4 rounded-full border border-slate-300" />
-                                )}
-                              </div>
-                            </div>
-                            <p className={`text-[11px] leading-snug ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
-                              {choice.desc}
-                            </p>
-                          </button>
-                        );
-                      })}
+                    {/* Current Project Stage */}
+                    <div className="space-y-1.5">
+                      <label htmlFor="select-project-stage" className="block text-xs font-bold text-slate-800">
+                        Current project stage
+                      </label>
+                      <select
+                        id="select-project-stage"
+                        value={projectStage}
+                        onChange={(e) => setProjectStage(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition cursor-pointer"
+                      >
+                        {(projectStatus === 'active' ? ACTIVE_STAGE_CHOICES : NEW_STAGE_CHOICES).map((choice) => (
+                          <option key={choice.id} value={choice.id}>
+                            {choice.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
@@ -3080,15 +2874,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     Upload your budget spreadsheets, vendor bills, or bank draw packages. You can also skip this and add them later.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleFillDemo(6)}
-                  className="text-xs text-slate-700 hover:text-slate-900 font-semibold inline-flex items-center gap-1 cursor-pointer shrink-0 mt-1"
-                  title="Load sample Schedule of Values"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-slate-600" />
-                  <span>Sample files</span>
-                </button>
               </div>
 
               {/* Document Type Chips */}
@@ -3235,15 +3020,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     Invite your team and external partners. Each role gets dedicated permissions and filtered views.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleFillDemo(7)}
-                  className="text-xs text-emerald-700 hover:text-emerald-900 font-semibold inline-flex items-center gap-1 cursor-pointer shrink-0 mt-1"
-                  title="Fill sample collaborators"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Demo team</span>
-                </button>
               </div>
 
               {/* Add Collaborator Form */}
