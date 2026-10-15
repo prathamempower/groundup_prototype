@@ -191,6 +191,8 @@ export type LifecycleStage =
   | "CLOSED";
 
 export type ContractModel =
+  | "FIXED"
+  | "DAILY"
   | "OPEN_BOOK"
   | "COST_PLUS"
   | "FIXED_PRICE"
@@ -1198,7 +1200,7 @@ export interface GCSubmission {
   type: GCSubmissionType;
   title: string;
   description: string;
-  contract_model: "COST_PLUS" | "FIXED_PRICE" | "MILESTONE_BASED" | "PROFIT_SHARE" | "HYBRID" | "OPEN_BOOK";
+  contract_model: ContractModel;
   status: GCSubmissionStatus;
   submitted_at: string;
   submitted_by: string;

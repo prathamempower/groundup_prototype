@@ -57,7 +57,7 @@ export default function CreateProjectPage() {
   const [lenderName, setLenderName] = useState("");
 
   // Stage 3 (Contract & Governance)
-  const [contractModel, setContractModel] = useState<ContractModel>("COST_PLUS");
+  const [contractModel, setContractModel] = useState<ContractModel>("FIXED");
   const [hybridCustomDetails, setHybridCustomDetails] = useState("");
   const [operatingAccountModel, setOperatingAccountModel] = useState<"DEDICATED" | "SHARED">("DEDICATED");
 
@@ -655,43 +655,19 @@ export default function CreateProjectPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {[
                         {
-                          value: "COST_PLUS",
-                          badge: "Popular",
-                          title: "Cost-Plus with Fee Cap",
-                          desc: "Verified trade costs + capped GC markup fee.",
-                        },
-                        {
-                          value: "GMP",
-                          badge: "AIA G702",
-                          title: "Guaranteed Maximum Price",
-                          desc: "Capped total price; bills against itemized SOV.",
-                        },
-                        {
-                          value: "FIXED_PRICE",
+                          value: "FIXED",
                           badge: "Lump Sum",
-                          title: "Fixed Price",
-                          desc: "Disbursements tied strictly to % completion.",
+                          title: "Fixed",
+                          desc: "Predetermined contract amount; disbursements tied to completion milestones and draw inspections.",
                         },
                         {
-                          value: "MILESTONE_BASED",
-                          badge: "Staged",
-                          title: "Milestone-Based",
-                          desc: "Funded upon certified physical milestones.",
-                        },
-                        {
-                          value: "OPEN_BOOK",
-                          badge: "Direct Cost",
-                          title: "Open-Book Transparency",
-                          desc: "100% itemized invoices, payroll & receipts.",
-                        },
-                        {
-                          value: "HYBRID",
-                          badge: "Custom",
-                          title: "Hybrid / Split Scopes",
-                          desc: "Combine fixed & open-book scopes on one job.",
+                          value: "DAILY",
+                          badge: "Day Rate",
+                          title: "Daily",
+                          desc: "Contractor compensation billed on daily rates, actual work days, and verified time logs.",
                         },
                       ].map((m) => {
-                        const isSelected = contractModel === m.value;
+                        const isSelected = contractModel === m.value || (m.value === "FIXED" && contractModel !== "DAILY");
                         return (
                           <div
                             key={m.value}
@@ -723,23 +699,6 @@ export default function CreateProjectPage() {
                         );
                       })}
                     </div>
-
-                    {/* Smart Inline Specification for Hybrid Model */}
-                    {contractModel === "HYBRID" && (
-                      <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          Define Hybrid Scope Allocation *
-                        </label>
-                        <input
-                          type="text"
-                          autoFocus
-                          value={hybridCustomDetails}
-                          onChange={(e) => setHybridCustomDetails(e.target.value)}
-                          placeholder="e.g. Sitework & Foundation: Cost-Plus; Framing & Finishes: Fixed Lump Sum"
-                          className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                        />
-                      </div>
-                    )}
                   </div>
 
                   {/* Operating Account Model - Clean 2-Card Segment */}
@@ -950,7 +909,7 @@ export default function CreateProjectPage() {
                       </div>
                       <div>
                         <span className="text-slate-500 block text-[11px]">Contract Model:</span>
-                        <span className="font-semibold text-blue-600 mt-0.5 block">{contractModel}</span>
+                        <span className="font-semibold text-blue-600 mt-0.5 block">{contractModel === "DAILY" ? "Daily" : "Fixed"}</span>
                       </div>
                       <div>
                         <span className="text-slate-500 block text-[11px]">Operating Account:</span>

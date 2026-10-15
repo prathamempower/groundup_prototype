@@ -767,7 +767,7 @@ export const api = {
         project_entity: answers.projectEntity || `${answers.projectName || "73 Broadway"} LLC`,
         address: answers.projectAddress || "73 Broadway, Brooklyn, NY 11249",
         lifecycle_stage: (answers.projectStage as Project["lifecycle_stage"]) || "CONSTRUCTION",
-        contract_model: answers.contractModel || "COST_PLUS",
+        contract_model: answers.contractModel || "FIXED",
         loan_commitment: typeof answers.targetBudget === "number" ? String(answers.targetBudget) : "4200000",
       });
       return wrap({

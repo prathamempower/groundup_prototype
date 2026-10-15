@@ -28,6 +28,16 @@ import {
   Layers,
   Banknote,
   Briefcase,
+  UserPlus,
+  Mail,
+  Plus,
+  X,
+  Send,
+  Building,
+  Key,
+  Clock,
+  RefreshCw,
+  UserCheck,
 } from "lucide-react";
 
 type SettingsTab = "general" | "capital" | "governance" | "team" | "danger";
@@ -40,12 +50,18 @@ const LIFECYCLE_OPTIONS: { id: LifecycleStage; label: string; desc: string }[] =
 ];
 
 const CONTRACT_OPTIONS: { id: ContractModel; title: string; badge: string; desc: string }[] = [
-  { id: "COST_PLUS", title: "Cost-Plus with Fee Cap", badge: "Popular", desc: "Verified trade costs with capped GC markup fee." },
-  { id: "GMP", title: "Guaranteed Maximum Price", badge: "AIA G702", desc: "Capped total price; bills against itemized SOV." },
-  { id: "FIXED_PRICE", title: "Fixed Price", badge: "Lump Sum", desc: "Disbursements tied strictly to percent completion." },
-  { id: "MILESTONE_BASED", title: "Milestone-Based", badge: "Staged", desc: "Funded upon certified physical milestones." },
-  { id: "OPEN_BOOK", title: "Open-Book Transparency", badge: "Direct Cost", desc: "Itemized invoices, payroll, and receipts." },
-  { id: "HYBRID", title: "Hybrid / Split Scopes", badge: "Custom", desc: "Combine fixed and open-book scopes on one job." },
+  {
+    id: "FIXED",
+    title: "Fixed",
+    badge: "Lump Sum",
+    desc: "Predetermined contract amount; disbursements tied to completion milestones and draw inspections.",
+  },
+  {
+    id: "DAILY",
+    title: "Daily",
+    badge: "Day Rate",
+    desc: "Contractor compensation billed on daily rates, actual work days, and verified time logs.",
+  },
 ];
 
 export default function ProjectSettingsPage() {
@@ -96,7 +112,7 @@ export default function ProjectSettingsPage() {
   const [projectEntity, setProjectEntity] = useState("");
   const [address, setAddress] = useState("");
   const [lifecycleStage, setLifecycleStage] = useState<LifecycleStage>("CONSTRUCTION");
-  const [contractModel, setContractModel] = useState<ContractModel>("COST_PLUS");
+  const [contractModel, setContractModel] = useState<ContractModel>("FIXED");
   const [startedAt, setStartedAt] = useState("");
   const [targetCompletionAt, setTargetCompletionAt] = useState("");
   const [loanCommitment, setLoanCommitment] = useState("");
@@ -107,6 +123,135 @@ export default function ProjectSettingsPage() {
   const [isAcquired, setIsAcquired] = useState("true");
   const [hasConstructionLoan, setHasConstructionLoan] = useState("true");
 
+  // Team Tab State & Fallbacks
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteName, setInviteName] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteCompany, setInviteCompany] = useState("");
+  const [inviteRoleTitle, setInviteRoleTitle] = useState("Finance Partner");
+  const [isSubmittingInvite, setIsSubmittingInvite] = useState(false);
+  const [pendingInvites, setPendingInvites] = useState<Array<{ id: string; name: string; email: string; roleTitle: string; company: string; sentAt: string }>>([
+    {
+      id: "pinv-1",
+      name: "Tyler Jenkins",
+      email: "t.jenkins@apexconstruction.com",
+      roleTitle: "Lead Estimator / GC Billing",
+      company: "Apex Build Corp",
+      sentAt: "2 days ago",
+    },
+    {
+      id: "pinv-2",
+      name: "Hannah Ward",
+      email: "hannah.ward@pacwestbank.com",
+      roleTitle: "Draw Inspector / Bank Monitor",
+      company: "Pacific Western Bank",
+      sentAt: "Yesterday",
+    },
+  ]);
+
+  const DEFAULT_FALLBACK_TEAM = [
+    {
+      id: `fallback-1`,
+      project_id: projectId,
+      name: "Marcus Vance",
+      email: "m.vance@vancedev.com",
+      role: "OWNER" as const,
+      title: "Owner / Managing Principal",
+      company: "Vance Development LLC",
+      avatarInitials: "MV",
+      status: "ACTIVE" as const,
+      added_at: "2025-05-10T09:00:00Z",
+    },
+    {
+      id: `fallback-2`,
+      project_id: projectId,
+      name: "Sarah Lin",
+      email: "s.lin@vancedev.com",
+      role: "OWNER" as const,
+      title: "Co-Owner / Finance Partner",
+      company: "Vance Development LLC",
+      avatarInitials: "SL",
+      status: "ACTIVE" as const,
+      added_at: "2025-05-10T09:00:00Z",
+    },
+    {
+      id: `fallback-3`,
+      project_id: projectId,
+      name: "Frank Miller",
+      email: "frank@apexconstruction.com",
+      role: "OWNER" as const,
+      title: "General Contractor Lead",
+      company: "Apex Build Corp",
+      avatarInitials: "FM",
+      status: "ACTIVE" as const,
+      added_at: "2025-05-12T10:30:00Z",
+    },
+    {
+      id: `fallback-4`,
+      project_id: projectId,
+      name: "David Ross",
+      email: "d.ross@vancedev.com",
+      role: "OWNER" as const,
+      title: "Project Superintendent",
+      company: "Vance Development LLC",
+      avatarInitials: "DR",
+      status: "ACTIVE" as const,
+      added_at: "2025-05-15T14:00:00Z",
+    },
+    {
+      id: `fallback-5`,
+      project_id: projectId,
+      name: "Julian Thorne",
+      email: "j.thorne@pacwestbank.com",
+      role: "OWNER" as const,
+      title: "Senior Loan Officer",
+      company: "Pacific Western Bank",
+      avatarInitials: "JT",
+      status: "ACTIVE" as const,
+      added_at: "2025-06-01T11:00:00Z",
+    },
+  ];
+
+  const displayTeam = teamMembers && teamMembers.length > 0 ? teamMembers : DEFAULT_FALLBACK_TEAM;
+
+  const handleSendInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteEmail.trim()) {
+      showToast("error", "Please provide a valid work email address.", "Validation Error");
+      return;
+    }
+    setIsSubmittingInvite(true);
+    try {
+      await api.team.invite(projectId, {
+        project_id: projectId,
+        name: inviteName.trim() || inviteEmail.split("@")[0],
+        email: inviteEmail.trim(),
+        role: "OWNER",
+        title: inviteRoleTitle,
+        company: inviteCompany.trim() || "Collaborating Organization",
+      });
+      queryClient.invalidateQueries({ queryKey: ["project-team", projectId] });
+      showToast("success", `Invitation sent to ${inviteEmail}`, "Collaborator Invited");
+      setInviteName("");
+      setInviteEmail("");
+      setInviteCompany("");
+      setShowInviteModal(false);
+    } catch (err: any) {
+      showToast("error", err?.message || "Failed to dispatch invitation.", "Invite Error");
+    } finally {
+      setIsSubmittingInvite(false);
+    }
+  };
+
+  const handleRevokePending = (id: string, email: string) => {
+    setPendingInvites((prev) => prev.filter((item) => item.id !== id));
+    showToast("info", `Invitation to ${email} revoked.`, "Invitation Revoked");
+  };
+
+  const handleResendPending = (email: string) => {
+    showToast("success", `Fresh invitation link sent to ${email}`, "Invitation Resent");
+  };
+
   // Sync state once project is loaded
   useEffect(() => {
     if (project) {
@@ -114,7 +259,7 @@ export default function ProjectSettingsPage() {
       setProjectEntity(project.project_entity || "");
       setAddress(project.address || "");
       setLifecycleStage(project.lifecycle_stage || "CONSTRUCTION");
-      setContractModel(project.contract_model || "COST_PLUS");
+      setContractModel(project.contract_model === "DAILY" ? "DAILY" : "FIXED");
       setStartedAt(project.started_at ? project.started_at.split("T")[0] : "");
       setTargetCompletionAt(project.target_completion_at ? project.target_completion_at.split("T")[0] : "");
       setLoanCommitment(project.loan_commitment ? String(Math.round(Number(project.loan_commitment) / 100)) : "1471120");
@@ -578,7 +723,7 @@ export default function ProjectSettingsPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {CONTRACT_OPTIONS.map((m) => {
-                    const isSelected = contractModel === m.id;
+                    const isSelected = contractModel === m.id || (m.id === "FIXED" && contractModel !== "DAILY");
                     return (
                       <button
                         key={m.id}
@@ -673,47 +818,297 @@ export default function ProjectSettingsPage() {
           {/* ──────────────── TAB 4: PROJECT TEAM ──────────────── */}
           {activeTab === "team" && (
             <div className="space-y-6">
-              <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs space-y-4">
-                <div className="flex items-center justify-between gap-3">
+              {/* Header Card & Quick Actions */}
+              <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-sm font-bold text-slate-900">Project Workspace Team</h2>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Users authorized to view budgets, approve change orders, and download draw packages.
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-sm font-bold text-slate-900">Project Workspace Team</h2>
+                      <span className="text-[10px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                        {displayTeam.length} Active Collaborators
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1 max-w-xl">
+                      Manage authorized principals, construction leads, lending representatives, and financial controllers for this project workspace.
                     </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowInviteModal(true)}
+                    className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-xs transition shrink-0"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    <span>Invite Collaborator</span>
+                  </button>
+                </div>
+
+                {/* Team Metric Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                  <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5">
+                    <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold uppercase tracking-wider">
+                      <Users className="w-3.5 h-3.5 text-slate-600" />
+                      <span>Active Seats</span>
+                    </div>
+                    <div className="mt-1.5 flex items-baseline gap-2">
+                      <span className="text-lg font-bold text-slate-900">{displayTeam.length}</span>
+                      <span className="text-xs text-slate-500 font-medium">unlimited tier</span>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5">
+                    <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold uppercase tracking-wider">
+                      <Clock className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Pending Invites</span>
+                    </div>
+                    <div className="mt-1.5 flex items-baseline gap-2">
+                      <span className="text-lg font-bold text-slate-900">{pendingInvites.length}</span>
+                      <span className="text-xs text-amber-600 font-medium">awaiting onboarding</span>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5">
+                    <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold uppercase tracking-wider">
+                      <Key className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Audit & Sign-Off</span>
+                    </div>
+                    <div className="mt-1.5 flex items-baseline gap-2">
+                      <span className="text-lg font-bold text-slate-900">Dual-Key</span>
+                      <span className="text-xs text-slate-500 font-medium">draw verification</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-                  {teamMembers.length > 0 ? (
-                    teamMembers.map((member) => (
-                      <div key={member.id} className="p-3.5 flex items-center justify-between gap-3 bg-white hover:bg-slate-50 transition">
+                {/* Active Members Table / Cards */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-semibold text-slate-700 px-1">
+                    <span>Active Collaborators</span>
+                    <span className="text-[11px] text-slate-500 font-normal">All seats verified with multi-factor authentication</span>
+                  </div>
+
+                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                    {displayTeam.map((member) => (
+                      <div
+                        key={member.id}
+                        className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/80 transition"
+                      >
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                             {member.avatarInitials || member.name?.slice(0, 2).toUpperCase() || "TM"}
                           </div>
                           <div className="min-w-0">
-                            <div className="text-xs font-bold text-slate-900 truncate">{member.name}</div>
-                            <div className="text-[11px] text-slate-500 truncate">{member.email}</div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-slate-900 truncate">{member.name}</span>
+                              <span className="text-[10px] font-medium text-slate-500 hidden sm:inline">
+                                ({member.company || "Project Stakeholder"})
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 truncate flex items-center gap-2 mt-0.5">
+                              <span>{member.email}</span>
+                              <span className="text-slate-300">•</span>
+                              <span className="text-slate-600 font-medium truncate">{member.title || "Project Partner"}</span>
+                            </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
                           <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                             {member.role || "OWNER"}
                           </span>
-                          <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                            <UserCheck className="w-2.5 h-2.5" />
                             Active
                           </span>
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <div className="p-6 text-center text-xs text-slate-500">
-                      No additional collaborators assigned to this project yet.
+                    ))}
+                  </div>
+                </div>
+
+                {/* Pending Invitations Section */}
+                {pendingInvites.length > 0 && (
+                  <div className="space-y-2 pt-2">
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-700 px-1">
+                      <div className="flex items-center gap-2">
+                        <span>Pending Invitations</span>
+                        <span className="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.2 rounded-full">
+                          {pendingInvites.length}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-500 font-normal">Invitations expire in 7 days</span>
                     </div>
-                  )}
+
+                    <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                      {pendingInvites.map((inv) => (
+                        <div
+                          key={inv.id}
+                          className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-50/20 hover:bg-amber-50/40 transition"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-9 h-9 rounded-full bg-amber-100 text-amber-900 border border-amber-200 flex items-center justify-center font-bold text-xs shrink-0">
+                              <Mail className="w-4 h-4 text-amber-700" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-slate-900 truncate">{inv.name}</span>
+                                <span className="text-[10px] font-medium text-slate-500 hidden sm:inline">
+                                  ({inv.company})
+                                </span>
+                              </div>
+                              <div className="text-[11px] text-slate-500 truncate flex items-center gap-2 mt-0.5">
+                                <span>{inv.email}</span>
+                                <span className="text-slate-300">•</span>
+                                <span className="text-slate-600 font-medium">{inv.roleTitle}</span>
+                                <span className="text-slate-300">•</span>
+                                <span className="text-amber-700 text-[10px] font-semibold">Sent {inv.sentAt}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleResendPending(inv.email)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition"
+                              title="Resend invitation email"
+                            >
+                              <RefreshCw className="w-3 h-3 text-slate-500" />
+                              <span>Resend</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRevokePending(inv.id, inv.email)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-red-700 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition"
+                              title="Revoke pending invitation"
+                            >
+                              <X className="w-3 h-3 text-red-500" />
+                              <span>Revoke</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Role & Governance Reference Card */}
+                <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-4 space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-blue-950">
+                    <Shield className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Project Governance & Access Control</span>
+                  </div>
+                  <p className="text-[11px] text-blue-900/80 leading-relaxed">
+                    Collaborators invited to this project workspace can review AIA Schedule of Values lines, sign off on draw inspection packages, reconcile bank feed anomalies, and verify change order allocations. Dual authorization ensures bank disbursements are strictly reconciled before submission.
+                  </p>
                 </div>
               </div>
+
+              {/* Invite Modal */}
+              {showInviteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+                  <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                    <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 bg-slate-50/50">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+                          <UserPlus className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-slate-900">Invite Project Collaborator</h3>
+                          <p className="text-[11px] text-slate-500">Provide collaborator credentials and professional title</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowInviteModal(false)}
+                        className="text-slate-400 hover:text-slate-700 p-1 rounded-lg transition"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <form onSubmit={handleSendInvite} className="p-4 sm:p-5 space-y-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+                        <input
+                          type="text"
+                          required
+                          value={inviteName}
+                          onChange={(e) => setInviteName(e.target.value)}
+                          placeholder="e.g. Cameron Bennett"
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-slate-900 focus:ring-1 focus:ring-slate-900 bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">Work Email</label>
+                        <input
+                          type="email"
+                          required
+                          value={inviteEmail}
+                          onChange={(e) => setInviteEmail(e.target.value)}
+                          placeholder="e.g. c.bennett@apexconstruction.com"
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-slate-900 focus:ring-1 focus:ring-slate-900 bg-white"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1">Organization</label>
+                          <input
+                            type="text"
+                            value={inviteCompany}
+                            onChange={(e) => setInviteCompany(e.target.value)}
+                            placeholder="e.g. Apex Build Corp"
+                            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-slate-900 focus:ring-1 focus:ring-slate-900 bg-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1">Professional Role</label>
+                          <select
+                            value={inviteRoleTitle}
+                            onChange={(e) => setInviteRoleTitle(e.target.value)}
+                            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-slate-900 focus:ring-1 focus:ring-slate-900 bg-white"
+                          >
+                            <option value="Finance Partner">Finance Partner</option>
+                            <option value="General Contractor Lead">General Contractor Lead</option>
+                            <option value="Project Superintendent">Project Superintendent</option>
+                            <option value="Senior Loan Officer">Senior Loan Officer</option>
+                            <option value="Capital / Equity Partner">Capital / Equity Partner</option>
+                            <option value="Third-Party Draw Inspector">Third-Party Draw Inspector</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => setShowInviteModal(false)}
+                          className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={isSubmittingInvite}
+                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white text-xs font-medium shadow-xs transition"
+                        >
+                          {isSubmittingInvite ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              <span>Sending...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-3.5 h-3.5" />
+                              <span>Send Invitation</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

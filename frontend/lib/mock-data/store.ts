@@ -350,7 +350,7 @@ class MockStore {
       project_entity: projectData.project_entity || `${projectData.name || "New"} LLC`,
       address: projectData.address || "100 Construction Way",
       lifecycle_stage: projectData.lifecycle_stage || "PRE_CONSTRUCTION",
-      contract_model: projectData.contract_model || "COST_PLUS",
+      contract_model: projectData.contract_model || "FIXED",
       status: "ACTIVE",
       currency: "USD",
       loan_commitment: projectData.loan_commitment || "100000000",
@@ -1751,7 +1751,74 @@ class MockStore {
   }
 
   getTeamMembers(projectId: string): TeamMember[] {
-    return this.state.teamMembers[projectId] || [];
+    if (this.state.teamMembers[projectId] && this.state.teamMembers[projectId].length > 0) {
+      return this.state.teamMembers[projectId];
+    }
+    const defaultTeam: TeamMember[] = [
+      {
+        id: `tm-${projectId}-1`,
+        project_id: projectId,
+        name: "Marcus Vance",
+        email: "m.vance@vancedev.com",
+        role: "OWNER",
+        title: "Owner / Managing Principal",
+        company: "Vance Development LLC",
+        avatarInitials: "MV",
+        status: "ACTIVE",
+        added_at: "2025-05-10T09:00:00Z",
+      },
+      {
+        id: `tm-${projectId}-2`,
+        project_id: projectId,
+        name: "Sarah Lin",
+        email: "s.lin@vancedev.com",
+        role: "OWNER",
+        title: "Co-Owner / Finance Partner",
+        company: "Vance Development LLC",
+        avatarInitials: "SL",
+        status: "ACTIVE",
+        added_at: "2025-05-10T09:00:00Z",
+      },
+      {
+        id: `tm-${projectId}-3`,
+        project_id: projectId,
+        name: "Frank Miller",
+        email: "frank@apexconstruction.com",
+        role: "OWNER",
+        title: "General Contractor Lead",
+        company: "Apex Build Corp",
+        avatarInitials: "FM",
+        status: "ACTIVE",
+        added_at: "2025-05-12T10:30:00Z",
+      },
+      {
+        id: `tm-${projectId}-4`,
+        project_id: projectId,
+        name: "David Ross",
+        email: "d.ross@vancedev.com",
+        role: "OWNER",
+        title: "Project Superintendent",
+        company: "Vance Development LLC",
+        avatarInitials: "DR",
+        status: "ACTIVE",
+        added_at: "2025-05-15T14:00:00Z",
+      },
+      {
+        id: `tm-${projectId}-5`,
+        project_id: projectId,
+        name: "Julian Thorne",
+        email: "j.thorne@pacwestbank.com",
+        role: "OWNER",
+        title: "Senior Loan Officer",
+        company: "Pacific Western Bank",
+        avatarInitials: "JT",
+        status: "ACTIVE",
+        added_at: "2025-06-01T11:00:00Z",
+      },
+    ];
+    this.state.teamMembers[projectId] = defaultTeam;
+    this.save();
+    return defaultTeam;
   }
 
   inviteTeamMember(projectId: string, payload: { email: string; role: UserRole; name?: string }): ProjectInvitation {
@@ -1953,7 +2020,7 @@ class MockStore {
       type: payload.type,
       title: payload.title,
       description: payload.description || "",
-      contract_model: "COST_PLUS",
+      contract_model: "FIXED",
       status: "SUBMITTED",
       submitted_at: new Date().toISOString(),
       submitted_by: this.getCurrentUser().name,

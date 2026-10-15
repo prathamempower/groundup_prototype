@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       address: projectAddress,
       lifecycle_stage: projectStage,
       asset_type: answers.assetType || 'MULTIFAMILY',
-      contract_model: answers.contractModel || 'COST_PLUS',
+      contract_model: answers.contractModel || 'FIXED',
       operating_account_model: answers.operatingAccountModel || 'DEDICATED',
       is_acquired: answers.isAcquired || 'true',
       acquisition_funding: answers.acquisitionFunding || 'ACQUISITION_LOAN',

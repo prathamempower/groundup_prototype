@@ -134,7 +134,7 @@ export const step5ProjectSchema = z.object({
   acquisitionFunding: z.enum(["CASH_EQUITY", "ACQUISITION_LOAN", "SELLER_FINANCING", "OTHER"]).default("ACQUISITION_LOAN"),
   hasConstructionLoan: z.enum(["true", "false"]).default("true"),
   lenderName: z.string().optional(),
-  contractModel: z.enum(["COST_PLUS", "GMP", "FIXED_PRICE", "MILESTONE_BASED", "OPEN_BOOK", "HYBRID"]).default("COST_PLUS"),
+  contractModel: z.enum(["FIXED", "DAILY", "COST_PLUS", "GMP", "FIXED_PRICE", "MILESTONE_BASED", "OPEN_BOOK", "HYBRID"]).default("FIXED"),
   hybridCustomDetails: z.string().optional(),
   operatingAccountModel: z.enum(["DEDICATED", "SHARED"]).default("DEDICATED"),
 });
