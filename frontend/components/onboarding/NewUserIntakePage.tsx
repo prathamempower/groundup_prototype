@@ -1493,36 +1493,36 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
           {/* ──────────────────────────────────────────────────────────── */}
           {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1.5">
-                  <TextEffect
-                    as="h1"
-                    preset="fade-in-blur"
-                    per="word"
-                    className="text-2xl font-bold text-slate-900 tracking-tight"
-                  >
-                    Tell us about your organization
-                  </TextEffect>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    We customize your cost codes, approval limits, and portfolio reporting to your operation scale.
-                  </p>
-                </div>
+              <div className="space-y-1">
+                <TextEffect
+                  as="h1"
+                  preset="fade-in-blur"
+                  per="word"
+                  className="text-2xl font-bold text-slate-900 tracking-tight"
+                >
+                  Company details
+                </TextEffect>
+                <p className="text-xs text-slate-600">
+                  Help us set up your workspace.
+                </p>
               </div>
 
               <div className="space-y-4">
+                {/* Company Name */}
                 <div className="space-y-1.5">
-                  <label htmlFor="input-org-name" className="block text-xs font-bold text-slate-800">
-                    Organization name <span className="text-red-500">*</span>
+                  <label htmlFor="input-org-name" className="block text-xs font-semibold text-slate-800">
+                    Company name <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="input-org-name"
                     type="text"
+                    autoFocus
                     value={orgName}
                     onChange={(e) => {
                       setOrgName(e.target.value);
                       if (orgError) setOrgError(null);
                     }}
-                    placeholder="e.g. Gotham Development Partners"
+                    placeholder="e.g. Vance Development"
                     className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 transition ${orgError ? 'border-red-400 focus:ring-red-500' : 'border-slate-200 focus:ring-slate-900'
                       }`}
                   />
@@ -1534,48 +1534,39 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   )}
                 </div>
 
-                {/* Operation Scale & Project Volume */}
+                {/* Active Projects Selection */}
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-xs font-bold text-slate-800">
-                      Organization scale &amp; project volume
-                    </label>
-                    <span className="text-[11px] text-slate-400">Active project pipeline</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                    {ORG_SIZE_TIERS.map(tier => {
+                  <label className="block text-xs font-semibold text-slate-800">
+                    How many active projects do you have?
+                  </label>
+                  <div className="grid grid-cols-3 gap-2.5">
+                    {[
+                      { id: 'Small' as const, label: '1 to 3 projects', count: 3, team: '1-5' as const },
+                      { id: 'Medium' as const, label: '4 to 10 projects', count: 12, team: '5+' as const },
+                      { id: 'Large' as const, label: '10+ projects', count: 50, team: '50+' as const },
+                    ].map((tier) => {
                       const isSelected = orgSize === tier.id;
                       return (
                         <button
                           key={tier.id}
                           id={`org-size-${tier.id.toLowerCase()}`}
                           type="button"
-                          onClick={() => setOrgSize(tier.id)}
-                          className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${isSelected
-                            ? 'bg-slate-50 border-slate-900 ring-1 ring-slate-900/10 text-slate-900 shadow-2xs'
-                            : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
+                          onClick={() => {
+                            setOrgSize(tier.id);
+                            setTeamSizeChoice(tier.team);
+                            setEmployeeCount(tier.count);
+                          }}
+                          className={`p-3.5 rounded-xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 ${isSelected
+                            ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                            : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                             }`}
                         >
-                          <div>
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-bold text-slate-900">{tier.label}</span>
-                              <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold ${isSelected ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
-                                }`}>
-                                {tier.id}
-                              </span>
-                            </div>
-                            <span className="text-[11px] font-semibold block text-slate-900">
-                              {tier.projects}
-                            </span>
-                            <p className="text-[10px] mt-1 leading-snug text-slate-500">
-                              {tier.desc}
-                            </p>
-                          </div>
+                          <span className="text-xs font-bold">{tier.label}</span>
                           {isSelected && (
-                            <div className="mt-2 flex items-center gap-1 text-[10px] text-slate-900 font-bold">
+                            <span className="text-[10px] text-slate-200 font-medium flex items-center gap-1 mt-0.5">
                               <Check className="w-3 h-3 stroke-[2.5]" />
-                              <span>Selected</span>
-                            </div>
+                              Selected
+                            </span>
                           )}
                         </button>
                       );
@@ -1583,95 +1574,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   </div>
                 </div>
 
-                {/* Core team size choice options */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-xs font-bold text-slate-800">
-                      Core team size
-                    </label>
-                    <span className="text-[11px] text-slate-400">Development, finance &amp; site leads</span>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                    {[
-                      { id: '1-5', label: '1 to 5', value: 5, desc: 'Core team' },
-                      { id: '5+', label: '5+', value: 12, desc: 'Growing team' },
-                      { id: '50+', label: '50+', value: 50, desc: 'Mid-size firm' },
-                      { id: '100+', label: '100+', value: 100, desc: 'Enterprise' },
-                      { id: 'custom', label: 'Custom', value: employeeCount, desc: 'Specific count' },
-                    ].map(opt => {
-                      const isSelected = teamSizeChoice === opt.id;
-                      return (
-                        <button
-                          key={opt.id}
-                          id={`btn-team-size-${opt.id}`}
-                          type="button"
-                          onClick={() => {
-                            setTeamSizeChoice(opt.id as any);
-                            if (opt.id !== 'custom') {
-                              setEmployeeCount(opt.value);
-                            }
-                          }}
-                          className={`p-2.5 rounded-xl border text-center transition cursor-pointer flex flex-col items-center justify-center ${isSelected
-                            ? 'bg-slate-50 border-slate-900 ring-1 ring-slate-900/10 text-slate-900 font-bold shadow-2xs'
-                            : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
-                            }`}
-                        >
-                          <span className="text-xs font-bold text-slate-900">{opt.label}</span>
-                          <span className={`text-[10px] mt-0.5 ${isSelected ? 'text-slate-800 font-medium' : 'text-slate-400'}`}>
-                            {opt.desc}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Active Team Size Count & Fine-Tuning Stepper (revealed only for Custom specific count) */}
-                  {teamSizeChoice === 'custom' && (
-                    <div className="mt-2.5 p-3 bg-slate-50/90 rounded-xl border border-slate-300 flex items-center justify-between gap-3 animate-in fade-in duration-200">
-                      <div className="text-xs">
-                        <span className="font-semibold text-slate-800">Enter your specific team size: </span>
-                        <span className="font-mono text-slate-900 font-bold">{employeeCount} members</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          title="Decrease employee count"
-                          onClick={() => {
-                            setEmployeeCount(c => Math.max(1, c - 1));
-                          }}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 transition cursor-pointer text-xs shadow-2xs"
-                        >
-                          <Minus className="w-3.5 h-3.5" />
-                        </button>
-                        <input
-                          id="input-employee-count"
-                          type="number"
-                          min={1}
-                          value={employeeCount}
-                          onChange={(e) => {
-                            const val = parseInt(e.target.value, 10);
-                            setEmployeeCount(isNaN(val) || val < 1 ? 1 : val);
-                          }}
-                          className="w-16 text-center py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                        />
-                        <button
-                          type="button"
-                          title="Increase employee count"
-                          onClick={() => {
-                            setEmployeeCount(c => c + 1);
-                          }}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 transition cursor-pointer text-xs shadow-2xs"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
+                {/* Website */}
                 <div className="space-y-1.5">
-                  <label htmlFor="input-website" className="block text-xs font-bold text-slate-800">
-                    Company website <span className="text-slate-400 font-normal">(optional)</span>
+                  <label htmlFor="input-website" className="block text-xs font-semibold text-slate-800">
+                    Website <span className="text-slate-400 font-normal">(optional)</span>
                   </label>
                   <div className="relative">
                     <Globe className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -1680,20 +1586,21 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                       type="text"
                       value={website}
                       onChange={(e) => setWebsite(e.target.value)}
-                      placeholder="e.g. https://gothamdev.com"
+                      placeholder="https://yourcompany.com"
                       className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900"
                     />
                   </div>
                 </div>
               </div>
 
+              {/* Action Button */}
               <button
                 id="btn-onboarding-next"
                 type="button"
                 onClick={handleCreateOrganization}
                 className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
               >
-                <span>Create organization</span>
+                <span>Continue</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>

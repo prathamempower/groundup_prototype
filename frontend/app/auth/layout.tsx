@@ -56,10 +56,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="absolute top-4 left-4 sm:top-6 sm:left-8 z-20">
         <Link
           href="/"
-          className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200/90 bg-white/90 backdrop-blur-md text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-white shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+          className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200/80 bg-white/80 backdrop-blur-md text-xs font-medium text-slate-600 hover:text-slate-950 hover:bg-white shadow-2xs hover:shadow-xs transition-all cursor-pointer"
           aria-label="Return to GroundUp home page"
         >
-          <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5 text-slate-500 group-hover:text-slate-900" />
+          <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5 text-slate-400 group-hover:text-slate-800" />
           <span>Back to Home</span>
         </Link>
       </div>

@@ -15,7 +15,11 @@ import {
   Calendar,
   ShieldCheck,
   AlertCircle,
-  X
+  X,
+  Mail,
+  Lock,
+  User,
+  AtSign
 } from 'lucide-react';
 import { authAdapter } from '@/lib/api/adapters/auth-adapter';
 import { getDefaultRouteForRole } from '@/lib/navigation';
@@ -217,12 +221,12 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
       <div
         role="tablist"
         aria-label="Authentication mode selection"
-        className="mb-2 w-full max-w-[240px] p-1 bg-slate-200/70 backdrop-blur-md border border-white/80 rounded-xl flex items-center relative select-none shadow-2xs"
+        className="mb-4 w-full max-w-[220px] p-1 bg-slate-200/60 backdrop-blur-xl border border-white/80 rounded-full flex items-center relative select-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]"
       >
-        {/* Sliding Physical Spring Background Pill */}
+        {/* Sliding Apple Pro Thumb */}
         <div
           aria-hidden="true"
-          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-lg shadow-sm border border-slate-200/80 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none ${isSignUp
+          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-full shadow-[0_2px_6px_rgba(15,23,42,0.08),0_1px_2px_rgba(0,0,0,0.04)] border border-slate-900/[0.04] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none ${isSignUp
             ? 'left-[calc(50%+2px)]'
             : 'left-1'
             }`}
@@ -235,7 +239,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
           aria-selected={!isSignUp}
           aria-controls="auth-login-panel"
           onClick={() => handleToggle(false)}
-          className={`relative z-10 w-1/2 py-1.5 text-xs font-semibold text-center transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-lg ${!isSignUp
+          className={`relative z-10 w-1/2 py-1.5 text-xs font-semibold text-center transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-full ${!isSignUp
             ? 'text-slate-950 font-bold'
             : 'text-slate-500 hover:text-slate-800'
             }`}
@@ -250,7 +254,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
           aria-selected={isSignUp}
           aria-controls="auth-signup-panel"
           onClick={() => handleToggle(true)}
-          className={`relative z-10 w-1/2 py-1.5 text-xs font-semibold text-center transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-lg ${isSignUp
+          className={`relative z-10 w-1/2 py-1.5 text-xs font-semibold text-center transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30 rounded-full ${isSignUp
             ? 'text-slate-950 font-bold'
             : 'text-slate-500 hover:text-slate-800'
             }`}
@@ -273,13 +277,13 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             id="auth-login-panel"
             role="tabpanel"
             aria-labelledby="auth-login-tab"
-            className={`w-full rounded-2xl border border-white/80 bg-white/95 backdrop-blur-xl p-5 sm:p-6 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.08),0_1px_3px_rgba(0,0,0,0.03)] [backface-visibility:hidden] flex flex-col justify-start space-y-3 ${isSignUp ? 'absolute inset-0 pointer-events-none opacity-0 invisible' : 'relative pointer-events-auto opacity-100 visible'
+            className={`w-full rounded-3xl border border-slate-200/80 bg-white/95 backdrop-blur-2xl p-6 sm:p-7 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.08),0_1px_3px_rgba(0,0,0,0.02),inset_0_1px_0_rgba(255,255,255,0.9)] [backface-visibility:hidden] flex flex-col justify-start space-y-4 ${isSignUp ? 'absolute inset-0 pointer-events-none opacity-0 invisible' : 'relative pointer-events-auto opacity-100 visible'
               }`}
           >
             {/* Exit to Home Close Button */}
             <Link
               href="/"
-              className="absolute top-3.5 right-3.5 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-20 cursor-pointer"
+              className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-20 cursor-pointer"
               aria-label="Exit to landing page"
               title="Exit to home"
             >
@@ -287,17 +291,17 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             </Link>
 
             {/* Brand Header */}
-            <div className="text-center space-y-0.5 mb-1">
-              <div className="flex justify-center mb-0.5">
+            <div className="text-center space-y-1 mb-1">
+              <div className="flex justify-center mb-1">
                 <Link href="/" className="inline-block hover:opacity-90 transition-opacity" aria-label="Return to GroundUp home">
                   <BrandLogo size="md" />
                 </Link>
               </div>
-              <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
+              <h1 className="text-xl sm:text-[22px] font-bold tracking-tight text-slate-950">
                 Welcome back
               </h1>
-              <p className="text-xs text-slate-500">
-                Log in to your account
+              <p className="text-xs text-slate-500 font-normal">
+                Log in to access your construction workspace
               </p>
             </div>
 
@@ -305,7 +309,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             {loginError && (
               <div
                 role="alert"
-                className="mb-3 rounded-lg border border-red-200 bg-red-50 p-2.5 text-xs font-medium text-red-700 flex items-center gap-2"
+                className="mb-2 rounded-xl border border-red-200 bg-red-50/90 p-2.5 text-xs font-medium text-red-700 flex items-center gap-2"
               >
                 <AlertCircle className="size-4 shrink-0 text-red-600" />
                 <span>{loginError}</span>
@@ -313,31 +317,34 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             )}
 
             {/* Log In Form */}
-            <form onSubmit={handleLoginSubmit} noValidate className="space-y-3.5">
+            <form onSubmit={handleLoginSubmit} noValidate className="space-y-4">
               <div className="space-y-1.5">
                 <label
                   htmlFor="login-email"
-                  className="block text-xs font-semibold text-slate-700"
+                  className="block text-xs font-medium text-slate-700"
                 >
                   Work email
                 </label>
-                <input
-                  id="login-email"
-                  type="email"
-                  autoComplete="username"
-                  required
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-3 focus:ring-blue-600/15"
-                  placeholder="name@company.com"
-                />
+                <div className="relative group">
+                  <Mail className="size-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors group-focus-within:text-blue-600" />
+                  <input
+                    id="login-email"
+                    type="email"
+                    autoComplete="username"
+                    required
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    className="h-11 w-full rounded-xl border border-slate-200/90 bg-slate-50/50 pl-10 pr-3.5 text-sm text-slate-900 transition-all placeholder:text-slate-400 hover:bg-white hover:border-slate-300 focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                    placeholder="name@company.com"
+                  />
+                </div>
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label
                     htmlFor="login-password"
-                    className="block text-xs font-semibold text-slate-700"
+                    className="block text-xs font-medium text-slate-700"
                   >
                     Password
                   </label>
@@ -348,7 +355,8 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                     Forgot password?
                   </Link>
                 </div>
-                <div className="relative">
+                <div className="relative group">
+                  <Lock className="size-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors group-focus-within:text-blue-600" />
                   <input
                     id="login-password"
                     type={showLoginPassword ? 'text' : 'password'}
@@ -356,7 +364,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                     required
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
-                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3.5 pr-10 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-3 focus:ring-blue-600/15"
+                    className="h-11 w-full rounded-xl border border-slate-200/90 bg-slate-50/50 pl-10 pr-10 text-sm text-slate-900 transition-all placeholder:text-slate-400 hover:bg-white hover:border-slate-300 focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
                     placeholder="••••••••••••"
                   />
                   <button
@@ -377,7 +385,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
               <button
                 type="submit"
                 disabled={signInMutation.isPending}
-                className="mt-1 h-10 w-full rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-900/20 disabled:opacity-60 flex items-center justify-center cursor-pointer"
+                className="mt-1 h-11 w-full rounded-xl bg-slate-950 hover:bg-slate-900 active:scale-[0.99] text-white text-sm font-semibold shadow-[0_2px_8px_-2px_rgba(15,23,42,0.2),inset_0_1px_0_rgba(255,255,255,0.12)] transition-all focus:outline-none focus:ring-4 focus:ring-slate-900/15 disabled:opacity-60 flex items-center justify-center cursor-pointer"
               >
                 {signInMutation.isPending ? 'Logging in…' : 'Log In'}
               </button>
@@ -411,13 +419,13 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             id="auth-signup-panel"
             role="tabpanel"
             aria-labelledby="auth-signup-tab"
-            className={`w-full rounded-2xl border border-white/80 bg-white/95 backdrop-blur-xl p-5 sm:p-6 shadow-[0_12px_40px_-8px_rgba(15,23,42,0.08),0_1px_3px_rgba(0,0,0,0.03)] [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-start ${!isSignUp ? 'absolute inset-0 pointer-events-none opacity-0 invisible' : 'relative pointer-events-auto opacity-100 visible'
+            className={`w-full rounded-3xl border border-slate-200/80 bg-white/95 backdrop-blur-2xl p-6 sm:p-7 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.08),0_1px_3px_rgba(0,0,0,0.02),inset_0_1px_0_rgba(255,255,255,0.9)] [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-start ${!isSignUp ? 'absolute inset-0 pointer-events-none opacity-0 invisible' : 'relative pointer-events-auto opacity-100 visible'
               }`}
           >
             {/* Exit to Home Close Button */}
             <Link
               href="/"
-              className="absolute top-3.5 right-3.5 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-20 cursor-pointer"
+              className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-20 cursor-pointer"
               aria-label="Exit to landing page"
               title="Exit to home"
             >
@@ -425,22 +433,25 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             </Link>
 
             {/* Brand Header */}
-            <div className="text-center space-y-0.5 mb-1.5">
-              <div className="flex justify-center mb-0.5">
+            <div className="text-center space-y-1 mb-2">
+              <div className="flex justify-center mb-1">
                 <Link href="/" className="inline-block hover:opacity-90 transition-opacity" aria-label="Return to GroundUp home">
                   <BrandLogo size="md" />
                 </Link>
               </div>
-              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
+              <h2 className="text-xl sm:text-[22px] font-bold tracking-tight text-slate-950">
                 Create your account
               </h2>
+              <p className="text-xs text-slate-500 font-normal">
+                Start managing your projects
+              </p>
             </div>
 
             {/* Error Notice */}
             {signUpError && (
               <div
                 role="alert"
-                className="mb-2.5 rounded-lg border border-red-200 bg-red-50 p-2 text-xs font-medium text-red-700 flex items-center gap-2"
+                className="mb-2 rounded-xl border border-red-200 bg-red-50/90 p-2.5 text-xs font-medium text-red-700 flex items-center gap-2"
               >
                 <AlertCircle className="size-4 shrink-0 text-red-600" />
                 <span>{signUpError}</span>
@@ -469,7 +480,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                     } catch { }
                     router.push('/onboarding');
                   }}
-                  className="w-full h-10 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold flex items-center justify-center gap-2.5 transition-colors cursor-pointer shadow-2xs"
+                  className="w-full h-11 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50/80 active:scale-[0.99] text-slate-700 text-sm font-medium flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-2xs hover:border-slate-300"
                 >
                   <svg className="size-4" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -481,12 +492,12 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 </button>
 
                 {/* 2. OR Divider */}
-                <div className="relative my-1 text-center">
+                <div className="relative my-0.5 text-center">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-200"></div>
+                    <div className="w-full border-t border-slate-200/80"></div>
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="bg-white px-2.5 text-[11px] uppercase font-semibold text-slate-400 tracking-wider">
+                    <span className="bg-white/95 px-2.5 text-[11px] uppercase font-semibold text-slate-400 tracking-wider">
                       or sign up with email
                     </span>
                   </div>
@@ -495,39 +506,45 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 {/* 3. First Name & Last Name */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <label htmlFor="signup-first-name" className="block text-xs font-semibold text-slate-700">
+                    <label htmlFor="signup-first-name" className="block text-xs font-medium text-slate-700">
                       First name <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      id="signup-first-name"
-                      type="text"
-                      required
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      placeholder="Alex"
-                      className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-3 focus:ring-blue-600/15"
-                    />
+                    <div className="relative group">
+                      <User className="size-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors group-focus-within:text-blue-600" />
+                      <input
+                        id="signup-first-name"
+                        type="text"
+                        required
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="Alex"
+                        className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/50 pl-9 pr-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 hover:bg-white hover:border-slate-300 focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                      />
+                    </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label htmlFor="signup-last-name" className="block text-xs font-semibold text-slate-700">
+                    <label htmlFor="signup-last-name" className="block text-xs font-medium text-slate-700">
                       Last name <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      id="signup-last-name"
-                      type="text"
-                      required
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      placeholder="Vance"
-                      className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-3 focus:ring-blue-600/15"
-                    />
+                    <div className="relative group">
+                      <User className="size-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors group-focus-within:text-blue-600" />
+                      <input
+                        id="signup-last-name"
+                        type="text"
+                        required
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Vance"
+                        className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/50 pl-9 pr-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 hover:bg-white hover:border-slate-300 focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 {/* 4. Username & Availability Badge */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label htmlFor="signup-username" className="block text-xs font-semibold text-slate-700">
+                    <label htmlFor="signup-username" className="block text-xs font-medium text-slate-700">
                       Username <span className="text-red-500">*</span>
                     </label>
                     {isUsernameValid && (
@@ -537,7 +554,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                       </span>
                     )}
                   </div>
-                  <div className="relative">
+                  <div className="relative group">
                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400 select-none pointer-events-none">
                       groundup.ai/
                     </span>
@@ -548,7 +565,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                       value={username}
                       onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
                       placeholder="alexvance"
-                      className="h-10 w-full rounded-lg border border-slate-300 bg-white pl-[102px] pr-3.5 text-sm font-mono text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-3 focus:ring-blue-600/15"
+                      className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/50 pl-[98px] pr-3.5 text-sm font-mono text-slate-900 transition-all placeholder:text-slate-400 hover:bg-white hover:border-slate-300 focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
                     />
                   </div>
                 </div>
@@ -556,13 +573,13 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 {/* 5. DOB with 18+ Calendar Validation */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label htmlFor="signup-dob" className="block text-xs font-semibold text-slate-700">
+                    <label htmlFor="signup-dob" className="block text-xs font-medium text-slate-700">
                       Date of birth <span className="text-red-500">*</span>
                     </label>
-                    <span className="text-xs text-slate-400 font-medium">Must be 18+</span>
+                    <span className="text-[11px] text-slate-400 font-medium">Must be 18+</span>
                   </div>
-                  <div className="relative">
-                    <Calendar className="size-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <div className="relative group">
+                    <Calendar className="size-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors group-focus-within:text-blue-600" />
                     <input
                       id="signup-dob"
                       type="date"
@@ -570,7 +587,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                       required
                       value={dob}
                       onChange={(e) => setDob(e.target.value)}
-                      className="h-10 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-3.5 text-sm text-slate-900 shadow-2xs transition-colors focus:border-blue-600 focus:outline-none focus:ring-3 focus:ring-blue-600/15"
+                      className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/50 pl-10 pr-3.5 text-sm text-slate-900 transition-all focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
                     />
                   </div>
                 </div>
@@ -578,7 +595,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 {/* 6. Work Email & Verification */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label htmlFor="signup-email" className="block text-xs font-semibold text-slate-700">
+                    <label htmlFor="signup-email" className="block text-xs font-medium text-slate-700">
                       Work email <span className="text-red-500">*</span>
                     </label>
                     {isEmailVerified && (
@@ -589,21 +606,24 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                     )}
                   </div>
                   <div className="flex gap-2">
-                    <input
-                      id="signup-email"
-                      type="email"
-                      required
-                      disabled={isEmailVerified}
-                      value={signUpEmail}
-                      onChange={(e) => setSignUpEmail(e.target.value)}
-                      placeholder="alex@vancedevelopment.com"
-                      className="h-10 flex-1 rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-3 focus:ring-blue-600/15 disabled:bg-slate-50 disabled:text-slate-600"
-                    />
+                    <div className="relative flex-1 group">
+                      <Mail className="size-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors group-focus-within:text-blue-600" />
+                      <input
+                        id="signup-email"
+                        type="email"
+                        required
+                        disabled={isEmailVerified}
+                        value={signUpEmail}
+                        onChange={(e) => setSignUpEmail(e.target.value)}
+                        placeholder="alex@vancedevelopment.com"
+                        className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/50 pl-10 pr-3.5 text-sm text-slate-900 transition-all placeholder:text-slate-400 hover:bg-white hover:border-slate-300 focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 disabled:bg-slate-100/60 disabled:text-slate-600 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                      />
+                    </div>
                     {!isEmailVerified && (
                       <button
                         type="button"
                         onClick={handleSendOtp}
-                        className="h-10 px-3.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition-colors cursor-pointer shrink-0"
+                        className="h-10 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-800 text-xs font-semibold transition-all cursor-pointer shrink-0"
                       >
                         {isOtpSent ? 'Resend' : 'Send Code'}
                       </button>
@@ -648,7 +668,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 {/* Continue to Password Stage Button */}
                 <button
                   type="submit"
-                  className="w-full h-10 rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-900/20 disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer mt-1"
+                  className="w-full h-11 rounded-xl bg-slate-950 hover:bg-slate-900 active:scale-[0.99] text-white text-sm font-semibold shadow-[0_2px_8px_-2px_rgba(15,23,42,0.2),inset_0_1px_0_rgba(255,255,255,0.12)] transition-all focus:outline-none focus:ring-4 focus:ring-slate-900/15 disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer mt-1"
                 >
                   <span>Next: Create Password</span>
                   <ArrowRight className="size-4" />
@@ -681,12 +701,13 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
               <form onSubmit={handleSignUpComplete} className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label htmlFor="signup-password" className="block text-xs font-semibold text-slate-700">
+                    <label htmlFor="signup-password" className="block text-xs font-medium text-slate-700">
                       Create password <span className="text-red-500">*</span>
                     </label>
                     <span className="text-[10px] text-slate-400">Min 12 characters</span>
                   </div>
-                  <div className="relative">
+                  <div className="relative group">
+                    <Lock className="size-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors group-focus-within:text-blue-600" />
                     <input
                       id="signup-password"
                       type={showSignUpPassword ? 'text' : 'password'}
@@ -694,13 +715,13 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                       value={signUpPassword}
                       onChange={(e) => setSignUpPassword(e.target.value)}
                       placeholder="••••••••••••"
-                      className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3.5 pr-10 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
+                      className="h-11 w-full rounded-xl border border-slate-200/90 bg-slate-50/50 pl-10 pr-10 text-sm text-slate-900 transition-all placeholder:text-slate-400 hover:bg-white hover:border-slate-300 focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowSignUpPassword((v) => !v)}
                       aria-label={showSignUpPassword ? 'Hide password' : 'Show password'}
-                      className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                      className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                     >
                       {showSignUpPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
@@ -726,7 +747,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 </div>
 
                 {/* Password Criteria Checklist */}
-                <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3 text-[11px] space-y-1 text-slate-600">
+                <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3 text-[11px] space-y-1.5 text-slate-600">
                   <div className="flex items-center gap-1.5">
                     <div className={`size-3.5 rounded-full flex items-center justify-center ${signUpPassword.length >= 12 ? 'bg-emerald-600 text-white' : 'border border-slate-300'}`}>
                       {signUpPassword.length >= 12 && <Check className="size-2.5 stroke-[3]" />}
@@ -752,21 +773,21 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                   <button
                     type="button"
                     onClick={() => setSignUpStep(1)}
-                    className="h-10 px-4 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
+                    className="h-11 px-4 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
                   >
                     <ArrowLeft className="size-4" />
                     <span>Back</span>
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 h-10 rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-900/20 flex items-center justify-center gap-2 cursor-pointer"
+                    className="flex-1 h-11 rounded-xl bg-slate-950 hover:bg-slate-900 active:scale-[0.99] text-white text-sm font-semibold shadow-[0_2px_8px_-2px_rgba(15,23,42,0.2),inset_0_1px_0_rgba(255,255,255,0.12)] transition-all focus:outline-none focus:ring-4 focus:ring-slate-900/15 flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Create Account</span>
                     <ArrowRight className="size-4" />
                   </button>
                 </div>
 
-                {/* Terms of Service & Privacy Policy Notice AT THE VERY LAST */}
+                {/* Terms of Service & Privacy Policy Notice */}
                 <p className="text-[11px] leading-relaxed text-slate-500 text-center pt-1">
                   By continuing, you agree to the GroundUp{' '}
                   <button
