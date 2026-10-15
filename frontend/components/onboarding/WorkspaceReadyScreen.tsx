@@ -339,7 +339,7 @@ export function WorkspaceReadyScreen({
         className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between"
       >
         <div className="flex items-center gap-3">
-          <Logo onClick={onReturnToLanding} />
+          <Logo theme="light" onClick={onReturnToLanding} />
           <div className="h-4 w-px bg-slate-200 hidden sm:block" />
           <div className="hidden sm:flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />

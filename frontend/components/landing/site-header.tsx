@@ -144,7 +144,7 @@ export function SiteHeader({ onStartOnboarding, onAuthenticate }: SiteHeaderProp
         <div className="mx-auto flex max-w-7xl 2xl:max-w-screen-2xl items-center justify-between gap-2 sm:gap-4 px-3 sm:px-6 lg:px-8 2xl:px-12">
           {/* Brand Logo */}
           <div className="flex items-center shrink-0">
-            <Logo onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
+            <Logo theme="light" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
           </div>
 
           {/* Desktop Navigation Links */}
