@@ -135,15 +135,15 @@ export function ProductFilm({ onStartOnboarding }: ProductFilmProps) {
         <div className="mx-auto max-w-3xl text-center mb-10 lg:mb-14">
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/70 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
             <Film className="size-3.5 text-foreground" aria-hidden="true" />
-            <span>Product demonstration: 30-second architectural overview</span>
+            <span>30-Second Overview</span>
           </div>
           <h2 id="product-film-heading" className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             <MaskedText as="span">
-              From scattered documents to financial intelligence.
+              From scattered paperwork to complete financial control.
             </MaskedText>
           </h2>
           <p className="mt-3 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            Watch GroundUp ingest construction paperwork, extract line items, enforce 10% retainage withholdings, and synchronize budget, spend, physical progress, and bank draws in real time.
+            See how GroundUp extracts invoice line items, enforces 10% retainage, and keeps your budget, bills, municipal inspections, and bank loan draws synchronized.
           </p>
         </div>
 

@@ -17,7 +17,6 @@ import {
   CompetitorComparison,
   StickyReveal,
   FaqSection,
-  FinalCta,
   SiteFooter,
 } from './index';
 
@@ -52,7 +51,6 @@ export function LandingPage({ onAuthenticate = () => {}, onStartOnboarding }: La
         <AttentionQueue />
         <StickyReveal />
         <FaqSection onStartOnboarding={() => onStartOnboarding()} />
-        <FinalCta onStartOnboarding={() => onStartOnboarding()} />
       </main>
       <SiteFooter onStartOnboarding={() => onStartOnboarding()} />
     </div>

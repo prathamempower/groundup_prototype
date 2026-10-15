@@ -506,9 +506,8 @@ export function CompetitorComparison({ onStartOnboarding }: CompetitorComparison
                               {c.name}
                             </span>
                             {c.isGroundUp && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
-                                <Sparkles className="size-2.5" />
-                                <span>Owner OS</span>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
+                                For Developers
                               </span>
                             )}
                           </div>

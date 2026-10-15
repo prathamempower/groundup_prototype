@@ -41,7 +41,7 @@ export function RecordsStory() {
           </p>
           <h2 id="flow-heading" className="mt-2 text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
             <MaskedText as="span">
-              From raw project paperwork to verified construction capital control.
+              From raw project paperwork to clear financial control.
             </MaskedText>
           </h2>
         </div>

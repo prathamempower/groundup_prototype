@@ -310,9 +310,16 @@ const DOC_TYPE_CHOICES = [
   'Not ready yet (I will upload documents later)'
 ];
 
-const ROLE_OPTIONS: Array<{ role: OnboardingRole; label: string; desc: string }> = [
-  { role: 'OWNER', label: 'Co-Owner / Principal', desc: 'Full portfolio, pro forma, draw packages, and audit ledger authority' },
-  { role: 'PARTNER', label: 'Co-Sponsor Equity Partner', desc: 'Executive capital position, milestone progress, and distribution updates' },
+const ROLE_OPTIONS: Array<{ role: OnboardingRole; label: string }> = [
+  { role: 'OWNER', label: 'Project Owner / Principal' },
+  { role: 'PARTNER', label: 'Co-Sponsor Equity Partner' },
+  { role: 'GC', label: 'General Contractor' },
+  { role: 'OWNERS_REP', label: "Owner's Representative" },
+  { role: 'ARCHITECT', label: 'Inspecting Architect' },
+  { role: 'CFO', label: 'Finance Controller' },
+  { role: 'SUBCONTRACTOR', label: 'Subcontractor Lead' },
+  { role: 'MUNICIPAL_INSPECTOR', label: 'Municipal Building Inspector' },
+  { role: 'LENDER_INSPECTOR', label: 'Bank Loan Officer / Inspector' },
 ];
 
 function ActiveJobsiteSvg({ active }: { active: boolean }) {
@@ -546,36 +553,38 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
     }
   }, [username]);
 
-  // Screen 3: Project Portfolio Status ("Do you have an active project or are you new to construction?")
+  // Screen 1: Project Portfolio Status ("Do you have an active project or are you new to construction?")
   const [projectStatus, setProjectStatus] = useState<'active' | 'new'>('active');
   const [primaryFocus, setPrimaryFocus] = useState<string>('draw_delays');
-  const [secondaryFocuses, setSecondaryFocuses] = useState<string[]>([]);
+  const [secondaryFocuses, setSecondaryFocuses] = useState<string[]>(['budget_overruns', 'records_dont_match']);
 
-  // Screen 4: Organization
-  const [orgName, setOrgName] = useState<string>(user.company && user.company !== 'New Venture Development' ? user.company : '');
+  // Screen 2: Organization Details
+  const [orgName, setOrgName] = useState<string>(
+    user.company && user.company !== 'New Venture Development' ? user.company : 'Vance Development Partners'
+  );
   const [orgSize, setOrgSize] = useState<'Small' | 'Medium' | 'Large'>('Small');
   const [teamSizeChoice, setTeamSizeChoice] = useState<'1-5' | '5+' | '50+' | '100+' | 'custom'>('1-5');
-  const [employeeCount, setEmployeeCount] = useState<number>(3);
-  const [website, setWebsite] = useState<string>('');
+  const [employeeCount, setEmployeeCount] = useState<number>(4);
+  const [website, setWebsite] = useState<string>('https://vancedevelopment.com');
 
-  // Screen 5: Project & Prompt State (Elevated Multi-Phase Institutional Setup)
+  // Screen 3: Project Setup (Identity, Capital & Debt, Contract Governance)
   const [isProjectFormOpen, setIsProjectFormOpen] = useState<boolean>(true);
   const [projectSubStep, setProjectSubStep] = useState<1 | 2 | 3>(1);
   const [showGovDetails, setShowGovDetails] = useState<boolean>(false);
   const [skippedProject, setSkippedProject] = useState<boolean>(false);
-  const [projectName, setProjectName] = useState<string>('');
-  const [projectEntity, setProjectEntity] = useState<string>('');
+  const [projectName, setProjectName] = useState<string>('73 Broadway');
+  const [projectEntity, setProjectEntity] = useState<string>('73 Broadway Development LLC');
   const [assetType, setAssetType] = useState<string>('MULTIFAMILY');
-  const [projectAddress, setProjectAddress] = useState<string>('');
+  const [projectAddress, setProjectAddress] = useState<string>('73 Broadway, Brooklyn, NY 11249');
   const [projectStage, setProjectStage] = useState<string>('Under construction');
-  const [startedAt, setStartedAt] = useState<string>('');
-  const [targetDate, setTargetDate] = useState<string>('');
+  const [startedAt, setStartedAt] = useState<string>('2024-03-01');
+  const [targetDate, setTargetDate] = useState<string>('2025-12-15');
 
   // Acquisition & Senior Debt Structure
   const [isAcquired, setIsAcquired] = useState<'true' | 'false'>('true');
   const [acquisitionFunding, setAcquisitionFunding] = useState<string>('ACQUISITION_LOAN');
   const [hasConstructionLoan, setHasConstructionLoan] = useState<'true' | 'false'>('true');
-  const [lenderName, setLenderName] = useState<string>('');
+  const [lenderName, setLenderName] = useState<string>('Columbia Bank');
 
   // General Contractor Contract & Operating Bank Account Governance
   const [contractModel, setContractModel] = useState<ContractModel>('COST_PLUS');
@@ -589,16 +598,49 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
   const [showDuplicateModal, setShowDuplicateModal] = useState<boolean>(false);
   const [isCheckingDuplicates, setIsCheckingDuplicates] = useState<boolean>(false);
 
-  // Screen 6: Records
-  const [selectedDocTypes, setSelectedDocTypes] = useState<string[]>(['Budget or cost spreadsheet']);
-  const [documentsList, setDocumentsList] = useState<IntakeDocument[]>([]);
+  // Screen 4: Project Records
+  const [selectedDocTypes, setSelectedDocTypes] = useState<string[]>([
+    'AIA Document G702 / G703 Application for Payment',
+    'Master Schedule of Values (SOV) Spreadsheet',
+    'Senior Construction Loan Agreement & Notes'
+  ]);
+  const [documentsList, setDocumentsList] = useState<IntakeDocument[]>([
+    {
+      id: 'doc-prefill-1',
+      name: '73_Broadway_AIA_G702_Draw_03.pdf',
+      size: 1420000,
+      type: 'application/pdf',
+      status: 'ready',
+      category: 'Pay Application'
+    },
+    {
+      id: 'doc-prefill-2',
+      name: '73_Broadway_Master_SOV_Budget.xlsx',
+      size: 485000,
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      status: 'ready',
+      category: 'Budget'
+    },
+    {
+      id: 'doc-prefill-3',
+      name: 'Columbia_Bank_Construction_Loan_Agreement.pdf',
+      size: 2850000,
+      type: 'application/pdf',
+      status: 'ready',
+      category: 'Loan Agreement'
+    }
+  ]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Screen 7: Collaborators
+  // Screen 5: Collaborator & Team Access
   const [inviteEmail, setInviteEmail] = useState<string>('');
   const [inviteRole, setInviteRole] = useState<OnboardingRole>('OWNER');
-  const [teamList, setTeamList] = useState<TeamMemberInvite[]>([]);
+  const [teamList, setTeamList] = useState<TeamMemberInvite[]>([
+    { email: 'd.vance@vancedevelopment.com', role: 'OWNER' },
+    { email: 'm.chen@apex-builders-gc.com', role: 'GC' },
+    { email: 'sarah.jenkins@columbiabank.com', role: 'LENDER_INSPECTOR' }
+  ]);
 
   // Validation errors
   const [emailError, setEmailError] = useState<string | null>(null);
@@ -1157,7 +1199,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
 
     if (added.length > 0) {
       setDocumentsList(prev => [...prev, ...added]);
-      showToast('success', `Added ${added.length} file(s) for cryptographic indexing.`);
+      showToast('success', `Added ${added.length} file(s) to project records.`);
     }
   };
 
@@ -3052,11 +3094,11 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     id="select-invite-role"
                     value={inviteRole}
                     onChange={(e) => setInviteRole(e.target.value as OnboardingRole)}
-                    className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 cursor-pointer"
                   >
                     {ROLE_OPTIONS.map(r => (
                       <option key={r.role} value={r.role}>
-                        {r.label} ({r.desc})
+                        {r.label}
                       </option>
                     ))}
                   </select>

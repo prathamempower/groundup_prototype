@@ -39,15 +39,15 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
 
   // ── Sign Up Multi-Step State ─────────────────────────────────────────────────
   const [signUpStep, setSignUpStep] = useState<1 | 2>(1);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [username, setUsername] = useState('');
-  const [dob, setDob] = useState('');
-  const [signUpEmail, setSignUpEmail] = useState('');
+  const [firstName, setFirstName] = useState('Alex');
+  const [lastName, setLastName] = useState('Vance');
+  const [username, setUsername] = useState('alexvance');
+  const [dob, setDob] = useState('1992-06-18');
+  const [signUpEmail, setSignUpEmail] = useState('alex@vancedevelopment.com');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [signUpPassword, setSignUpPassword] = useState('');
+  const [isEmailVerified, setIsEmailVerified] = useState(true);
+  const [signUpPassword, setSignUpPassword] = useState('GroundUp2026!Secure');
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   const [signUpError, setSignUpError] = useState('');
 
@@ -253,7 +253,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 Welcome back
               </h1>
               <p className="text-xs text-slate-500">
-                Sign in to your GroundUp workspace
+                Sign in to your account
               </p>
             </div>
 
@@ -338,22 +338,10 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 {signInMutation.isPending ? 'Signing in…' : 'Sign in'}
               </button>
             </form>
-
-            {/* Bottom Flip Link */}
-            <div className="mt-6 pt-4 text-center text-xs text-slate-500 border-t border-slate-100">
-              Don&apos;t have an account?{' '}
-              <button
-                type="button"
-                onClick={() => setIsSignUp(true)}
-                className="font-semibold text-slate-900 hover:text-blue-600 hover:underline cursor-pointer"
-              >
-                Sign up
-              </button>
-            </div>
           </div>
 
           {/* ───────────────────────────────────────────────────────────────────
-              BACK FACE: SIGN UP (2-STEP PROGRESSION)
+              BACK FACE: SIGN UP (STREAMLINED 2-STAGE PROGRESSION)
              ─────────────────────────────────────────────────────────────────── */}
           <div 
             className={`w-full min-h-[580px] rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-overlay absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-between ${
@@ -361,35 +349,72 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
             }`}
           >
             {/* Brand Header */}
-            <div className="text-center space-y-1.5 mb-5">
+            <div className="text-center space-y-1 mb-4">
               <div className="flex justify-center mb-1">
                 <BrandLogo size="md" />
               </div>
-              <div className="flex items-center justify-center gap-2">
-                <h2 className="text-xl font-bold tracking-tight text-slate-900">
-                  Create your workspace
-                </h2>
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700">
-                  Step {signUpStep} of 2
-                </span>
-              </div>
+              <h2 className="text-xl font-bold tracking-tight text-slate-900">
+                Create your account
+              </h2>
             </div>
 
             {/* Error Notice */}
             {signUpError && (
               <div
                 role="alert"
-                className="mb-3.5 rounded-lg border border-red-200 bg-red-50 p-2.5 text-xs font-medium text-red-700 flex items-center gap-2"
+                className="mb-3 rounded-lg border border-red-200 bg-red-50 p-2.5 text-xs font-medium text-red-700 flex items-center gap-2"
               >
                 <AlertCircle className="size-4 shrink-0 text-red-600" />
                 <span>{signUpError}</span>
               </div>
             )}
 
-            {/* ── STEP 1: IDENTITY, HANDLE, DOB & VERIFIED EMAIL ────────────── */}
+            {/* ── STAGE 1: GOOGLE FIRST, IDENTITY, HANDLE, DOB & EMAIL ──────── */}
             {signUpStep === 1 && (
-              <form onSubmit={handleSignUpStep1Next} className="space-y-3.5">
-                {/* First Name & Last Name */}
+              <form onSubmit={handleSignUpStep1Next} className="space-y-3">
+                {/* 1. Continue with Google OAuth Button (At the Top for Best UX) */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFirstName('Alex');
+                    setLastName('Vance');
+                    setUsername('alexvance');
+                    setDob('1992-06-18');
+                    setSignUpEmail('alex@vancedevelopment.com');
+                    setIsEmailVerified(true);
+                    try {
+                      localStorage.setItem('groundup_onboarding_prefill', JSON.stringify({
+                        name: 'Alex Vance',
+                        email: 'alex@vancedevelopment.com',
+                        username: 'alexvance',
+                      }));
+                    } catch {}
+                    router.push('/onboarding');
+                  }}
+                  className="w-full h-9 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs"
+                >
+                  <svg className="size-3.5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                  </svg>
+                  <span>Continue with Google</span>
+                </button>
+
+                {/* 2. OR Divider */}
+                <div className="relative my-2 text-center">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-200"></div>
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-white px-2.5 text-[10px] uppercase font-semibold text-slate-400 tracking-wider">
+                      or sign up with email
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3. First Name & Last Name */}
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="space-y-1">
                     <label htmlFor="signup-first-name" className="block text-[11px] font-semibold text-slate-700">
@@ -421,11 +446,11 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                   </div>
                 </div>
 
-                {/* Workspace Username & Availability Badge */}
+                {/* 4. Username & Availability Badge */}
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <label htmlFor="signup-username" className="block text-[11px] font-semibold text-slate-700">
-                      Workspace handle <span className="text-red-500">*</span>
+                      Username <span className="text-red-500">*</span>
                     </label>
                     {isUsernameValid && (
                       <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
@@ -450,7 +475,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                   </div>
                 </div>
 
-                {/* DOB with 18+ Calendar Validation */}
+                {/* 5. DOB with 18+ Calendar Validation */}
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <label htmlFor="signup-dob" className="block text-[11px] font-semibold text-slate-700">
@@ -472,8 +497,8 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                   </div>
                 </div>
 
-                {/* Work Email & Animated OTP Verification Flow */}
-                <div className="space-y-1.5">
+                {/* 6. Work Email & Verification */}
+                <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <label htmlFor="signup-email" className="block text-[11px] font-semibold text-slate-700">
                       Work email <span className="text-red-500">*</span>
@@ -494,7 +519,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                       value={signUpEmail}
                       onChange={(e) => setSignUpEmail(e.target.value)}
                       placeholder="alex@vancedevelopment.com"
-                      className="h-9 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15 disabled:bg-slate-50 disabled:text-slate-500"
+                      className="h-9 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15 disabled:bg-slate-50 disabled:text-slate-600"
                     />
                     {!isEmailVerified && (
                       <button
@@ -510,7 +535,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
 
                 {/* Animated 6-digit OTP Input */}
                 {isOtpSent && !isEmailVerified && (
-                  <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-3 space-y-2 animate-in fade-in duration-200">
+                  <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-2.5 space-y-2 animate-in fade-in duration-200">
                     <p className="text-[11px] font-semibold text-blue-900 text-center">
                       Enter the 6-digit verification code sent to your email
                     </p>
@@ -542,47 +567,24 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                   </div>
                 )}
 
-                {/* Continue with Google OAuth Button */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFirstName('Alex');
-                    setLastName('Morgan');
-                    setUsername('alexmorgan');
-                    setDob(maxDobDate);
-                    setSignUpEmail('alex.morgan@vancedev.com');
-                    setIsEmailVerified(true);
-                    setSignUpStep(2);
-                  }}
-                  className="w-full h-9 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs mt-1"
-                >
-                  <svg className="size-3.5" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-                  </svg>
-                  <span>Continue with Google</span>
-                </button>
-
-                {/* Continue to Step 2 Button */}
+                {/* Continue to Password Stage Button */}
                 <button
                   type="submit"
-                  className="w-full h-10 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer mt-2"
+                  className="w-full h-10 rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-semibold shadow-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer mt-2"
                 >
-                  <span>Continue to Security</span>
+                  <span>Next: Create Password</span>
                   <ArrowRight className="size-3.5" />
                 </button>
               </form>
             )}
 
-            {/* ── STEP 2: 12-CHAR PASSWORD & TERMS ACCEPTANCE ────────────────── */}
+            {/* ── STAGE 2: PASSWORD & TERMS ACCEPTANCE (SMOOTH SLIDE) ── */}
             {signUpStep === 2 && (
-              <form onSubmit={handleSignUpComplete} className="space-y-4 animate-in fade-in duration-200">
+              <form onSubmit={handleSignUpComplete} className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <label htmlFor="signup-password" className="block text-xs font-semibold text-slate-700">
-                      Create master password <span className="text-red-500">*</span>
+                      Create password <span className="text-red-500">*</span>
                     </label>
                     <span className="text-[10px] text-slate-400">Min 12 characters</span>
                   </div>
@@ -680,18 +682,6 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 </div>
               </form>
             )}
-
-            {/* Bottom Flip Link */}
-            <div className="mt-5 pt-3.5 text-center text-xs text-slate-500 border-t border-slate-100">
-              Already have an account?{' '}
-              <button
-                type="button"
-                onClick={() => setIsSignUp(false)}
-                className="font-semibold text-slate-900 hover:text-blue-600 hover:underline cursor-pointer"
-              >
-                Log in
-              </button>
-            </div>
           </div>
 
         </div>

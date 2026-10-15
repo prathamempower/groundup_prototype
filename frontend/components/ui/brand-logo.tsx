@@ -91,7 +91,7 @@ export function BrandLogo({
         href={href}
         onClick={onClick}
         className="group inline-flex items-center cursor-pointer min-w-0"
-        title="GroundUp — Workspace"
+        title="GroundUp Workspace"
       >
         {content}
       </Link>

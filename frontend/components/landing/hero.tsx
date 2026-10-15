@@ -138,7 +138,7 @@ export function Hero({ onStartOnboarding }: HeroProps) {
 
             <Reveal delay={120} direction="up">
               <p className="text-[0.9375rem] text-muted-foreground leading-[1.7] max-w-[440px]">
-                Reconcile investor equity and bank construction loans against actual trade spend. Forward invoices, HUD settlement statements, and bank records directly to your project inbox to assemble lender-ready draw packages, enforce statutory lien waivers, and forecast municipal inspection delays with data-backed financial carry modeling.
+                GroundUp reconciles your construction loan, baseline budget, and trade invoices in real time. Assemble bank-ready draw packages, track inspection milestones, and protect your project contingency without spreadsheet delays.
               </p>
             </Reveal>
 

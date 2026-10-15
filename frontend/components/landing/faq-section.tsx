@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, HelpCircle, ArrowRight, Sparkles } from 'lucide-react';
+import { ChevronDown, HelpCircle, ArrowRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Reveal } from '../reveal';
 import { MaskedText } from '../ui/masked-text';

@@ -151,11 +151,10 @@ export function LegalModal({ isOpen, initialTab = 'terms', onClose }: LegalModal
 
               <div>
                 <h3 className="text-sm font-bold text-slate-900 mb-1.5">
-                  2. Cryptographic Document Ingestion
+                  2. Tamper-Proof Document Tracking
                 </h3>
                 <p>
-                  Universal document uploads (PDF, spreadsheets, images, archives) execute in isolated sandboxes
-                  with SHA-256 cryptographic hashing to verify chain of custody, detect duplicate invoices, and prevent tampering.
+                  Universal document uploads (PDF, spreadsheets, images, archives) are processed with a permanent digital audit trail to verify chain of custody, detect duplicate invoices, and prevent tampering.
                 </p>
               </div>
 
