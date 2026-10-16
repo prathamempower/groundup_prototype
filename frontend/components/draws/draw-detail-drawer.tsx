@@ -297,17 +297,7 @@ export function DrawDetailDrawer({
                 </>
               )}
 
-              {(activeDraw.status === "SUBMITTED" || activeDraw.status === "UNDER_REVIEW") && (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={onRecordDecision}
-                  className="flex items-center gap-1.5"
-                >
-                  <Building2 className="h-3.5 w-3.5" />
-                  Record Lender Decision
-                </Button>
-              )}
+
 
               {isShortFunded && (
                 <Button

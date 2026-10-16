@@ -207,21 +207,6 @@ export default function DrawDetailPage() {
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 shrink-0">
-          {(activeDraw.status === "SUBMITTED" || activeDraw.status === "UNDER_REVIEW") && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setIsRecordDecisionOpen(true)}
-              className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5"
-            >
-              <Building2 className="h-3.5 w-3.5" />
-              <span>Record Lender Decision</span>
-            </Button>
-          )}
-
-
-
-
         </div>
       </div>
 
