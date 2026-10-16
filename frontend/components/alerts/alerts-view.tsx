@@ -20,6 +20,7 @@ import {
   AlertOctagon,
   Info,
   SlidersHorizontal,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -558,16 +559,17 @@ export function AlertsView({
 
               {/* Modal Footer */}
               <div className="border-t border-border bg-subtle/40 px-4 sm:px-6 py-3 sm:py-4 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3">
-                {selectedAlert.actionHref === "/timeline" ? (
+                {selectedAlert.actionHref === "/timeline" || selectedAlert.actionHref === "/budget" ? (
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     disabled
                     className="text-xs h-8 text-muted-foreground border-border gap-1.5 opacity-60 cursor-not-allowed font-medium select-none w-full sm:w-auto"
-                    title="Milestone schedule is currently frozen"
+                    title={selectedAlert.actionHref === "/timeline" ? "Milestone schedule is currently frozen" : "Project Economics & Budget is locked"}
                   >
-                    <span>Schedule Frozen</span>
+                    <Lock className="h-3 w-3" />
+                    <span>{selectedAlert.actionHref === "/timeline" ? "Schedule Frozen" : "Budget Locked"}</span>
                   </Button>
                 ) : (
                   <Button

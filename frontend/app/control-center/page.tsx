@@ -20,6 +20,7 @@ import {
   CalendarClock,
   ArrowUpRight,
   FileText,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ControlCenterAnalytics } from "@/components/control-center/analytics-charts";
@@ -448,14 +449,16 @@ export default function ControlCenterPage() {
                   CSI Category allocations, verified spend, and variances
                 </p>
               </div>
-              <Link
-                href={currentProjectId ? `/projects/${currentProjectId}/budget` : "/projects"}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 py-1 px-2 rounded-md hover:bg-blue-50 transition-colors"
-                title="View full project budget ledger"
+              <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 bg-slate-50 border border-slate-200/90 py-1 px-2.5 rounded-md cursor-not-allowed select-none opacity-80"
+                title="Budget Details locked (Project Economics is hidden)"
               >
+                <Lock className="h-3 w-3 text-slate-400 shrink-0" />
                 <span>Budget Details</span>
-                <ArrowRight className="h-3 w-3" />
-              </Link>
+              </button>
             </div>
 
             {/* Mobile View: High-clarity responsive cards (No squished columns) */}

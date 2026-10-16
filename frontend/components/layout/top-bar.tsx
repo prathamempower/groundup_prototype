@@ -339,7 +339,7 @@ export function TopBar({
                         onClick={() => {
                           setIsTasksOpen(false);
                           if (currentProjectId) {
-                            router.push(`/projects/${currentProjectId}/budget`);
+                            router.push(`/projects/${currentProjectId}/control-center`);
                           } else {
                             router.push("/projects");
                           }

@@ -734,7 +734,7 @@ export default function ReconciliationPage() {
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="flex-1 min-w-[120px] sm:flex-none rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none"
                 >
-                  <option value="ALL">All statuses</option>
+                  <option value="ALL">All Status</option>
                   <option value="PENDING">Pending action</option>
                   <option value="RESOLVED">Resolved</option>
                 </select>

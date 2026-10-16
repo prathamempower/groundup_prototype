@@ -81,12 +81,12 @@ export default function NotFound() {
             </Link>
 
             <Link
-              href="/budget"
+              href="/reconciliation"
               className="group flex items-center justify-between rounded-lg border border-transparent p-2.5 hover:border-slate-200 hover:bg-slate-50 transition"
             >
               <div className="flex items-center gap-2.5">
                 <Search className="h-4 w-4 text-slate-400 group-hover:text-slate-900" />
-                <span className="font-medium text-slate-700 group-hover:text-slate-900">Budget Worksheets</span>
+                <span className="font-medium text-slate-700 group-hover:text-slate-900">Reconciliation Ledger</span>
               </div>
               <ArrowLeft className="h-3.5 w-3.5 text-slate-400 rotate-180 opacity-0 group-hover:opacity-100 transition" />
             </Link>
