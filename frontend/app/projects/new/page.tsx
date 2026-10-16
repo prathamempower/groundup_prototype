@@ -32,6 +32,8 @@ import {
   Coins,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/ui/brand-logo";
+import { GroundUpMark } from "@/components/brand/GroundUpBrand";
 
 // High-frequency US real estate market postal lookup dictionary
 const KNOWN_ZIPS: Record<string, { city: string; state: string; county?: string }> = {
@@ -327,14 +329,7 @@ export default function CreateProjectPage() {
         {/* Mobile Navigation Header (< lg screens) */}
         <header className="lg:hidden bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 py-3 sm:px-6 sticky top-0 z-30">
           <div className="flex items-center justify-between mb-2.5">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white shadow-2xs">
-                <Building2 className="h-4 w-4" />
-              </div>
-              <span className="text-sm font-bold tracking-tight text-slate-900">
-                GroundUp
-              </span>
-            </div>
+            <BrandLogo href="/projects" size="sm" />
             <button
               type="button"
               onClick={() => router.push("/projects")}
@@ -369,13 +364,8 @@ export default function CreateProjectPage() {
           <aside className="hidden lg:flex lg:col-span-4 bg-[#F8FAFC] border-r border-slate-200/80 p-5 sm:p-8 flex-col justify-between">
             <div className="space-y-8">
               {/* Brand Header */}
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-xs">
-                  <Building2 className="h-5 w-5" />
-                </div>
-                <span className="text-lg font-bold tracking-tight text-slate-900">
-                  GroundUp
-                </span>
+              <div className="flex items-center">
+                <BrandLogo href="/projects" size="md" />
               </div>
 
               {/* Progress Steps */}
@@ -433,12 +423,8 @@ export default function CreateProjectPage() {
           {/* Right Main Content Area */}
           <main className="lg:col-span-8 p-5 sm:p-8 lg:p-12 flex flex-col justify-between bg-white">
             <div>
-              {/* Centered / Header Icon Badge (Desktop only) */}
-              <div className="mb-6 hidden lg:block">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm ring-4 ring-slate-100">
-                  <Building2 className="h-5 w-5" />
-                </div>
-              </div>
+              {/* Preserved Desktop Spacing */}
+              <div className="hidden lg:block h-11 mb-6" aria-hidden="true" />
 
               {errorMessage && (
                 <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-red-700 flex items-center gap-2.5 shadow-2xs">
@@ -930,12 +916,10 @@ export default function CreateProjectPage() {
                           {
                             val: "true",
                             label: "Yes, Deed Closed & Recorded",
-                            desc: "Recorded deed and settlement statement (HUD-1) in place.",
                           },
                           {
                             val: "false",
                             label: "No, Under Purchase Contract",
-                            desc: "Contract executed, pending closing and diligence.",
                           },
                         ].map((opt) => {
                           const isSelected = isAcquired === opt.val;
@@ -944,16 +928,16 @@ export default function CreateProjectPage() {
                               key={opt.val}
                               type="button"
                               onClick={() => setIsAcquired(opt.val as any)}
-                              className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${isSelected
-                                ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
-                                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                                }`}
+                              className={`rounded-xl border p-3.5 text-left transition-all cursor-pointer ${
+                                isSelected
+                                  ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
+                                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                              }`}
                             >
                               <div className="flex items-center justify-between">
                                 <span className="block text-sm font-semibold text-slate-900">{opt.label}</span>
                                 {isSelected && <Check className="h-4 w-4 text-blue-600 stroke-[2.5]" />}
                               </div>
-                              <span className="mt-1 block text-xs text-slate-500">{opt.desc}</span>
                             </button>
                           );
                         })}
@@ -967,10 +951,10 @@ export default function CreateProjectPage() {
                       </label>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                         {[
-                          { value: "CASH_EQUITY", label: "Cash Equity", sub: "Sponsor Equity" },
-                          { value: "ACQUISITION_LOAN", label: "Bridge Loan", sub: "Senior Debt" },
-                          { value: "SELLER_FINANCING", label: "Seller Note", sub: "Carryback" },
-                          { value: "OTHER", label: "Other", sub: "Custom Note" },
+                          { value: "CASH_EQUITY", label: "Cash Equity" },
+                          { value: "ACQUISITION_LOAN", label: "Bridge Loan" },
+                          { value: "SELLER_FINANCING", label: "Seller Note" },
+                          { value: "OTHER", label: "Other" },
                         ].map((item) => {
                           const isSelected = acquisitionFunding === item.value;
                           return (
@@ -978,18 +962,13 @@ export default function CreateProjectPage() {
                               key={item.value}
                               type="button"
                               onClick={() => setAcquisitionFunding(item.value)}
-                              className={`rounded-xl border p-3.5 text-left transition-all cursor-pointer ${isSelected
-                                ? "border-slate-900 bg-slate-900 text-white shadow-xs"
-                                : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
-                                }`}
+                              className={`rounded-xl border p-3 text-center sm:text-left transition-all cursor-pointer ${
+                                isSelected
+                                  ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                                  : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
+                              }`}
                             >
-                              <span className="block text-xs font-bold leading-tight">{item.label}</span>
-                              <span
-                                className={`block text-[11px] mt-0.5 ${isSelected ? "text-slate-300" : "text-slate-500"
-                                  }`}
-                              >
-                                {item.sub}
-                              </span>
+                              <span className="block text-xs font-semibold leading-tight">{item.label}</span>
                             </button>
                           );
                         })}
@@ -1021,12 +1000,10 @@ export default function CreateProjectPage() {
                           {
                             val: "true",
                             label: "Construction Loan in Place",
-                            desc: "Disbursements routed via monthly lender draw inspections.",
                           },
                           {
                             val: "false",
                             label: "100% Sponsor Self-Funded",
-                            desc: "Funded directly from sponsor and equity capital accounts.",
                           },
                         ].map((opt) => {
                           const isSelected = hasConstructionLoan === opt.val;
@@ -1035,16 +1012,16 @@ export default function CreateProjectPage() {
                               key={opt.val}
                               type="button"
                               onClick={() => setHasConstructionLoan(opt.val as any)}
-                              className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${isSelected
-                                ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
-                                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                                }`}
+                              className={`rounded-xl border p-3.5 text-left transition-all cursor-pointer ${
+                                isSelected
+                                  ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
+                                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                              }`}
                             >
                               <div className="flex items-center justify-between">
                                 <span className="block text-sm font-semibold text-slate-900">{opt.label}</span>
                                 {isSelected && <Check className="h-4 w-4 text-blue-600 stroke-[2.5]" />}
                               </div>
-                              <span className="mt-1 block text-xs text-slate-500">{opt.desc}</span>
                             </button>
                           );
                         })}
@@ -1063,9 +1040,6 @@ export default function CreateProjectPage() {
                           placeholder="e.g. Columbia Bank"
                           className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                         />
-                        <p className="text-[11px] text-slate-400 mt-1">
-                          Senior commercial lender funding monthly draw disbursements.
-                        </p>
                       </div>
                     )}
                   </div>
