@@ -574,8 +574,8 @@ export default function ReconciliationPage() {
 
         </div>
 
-        {/* 4 KPI Metric Cards Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {/* 3 KPI Metric Cards Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           {/* Card 1: Unmatched transactions */}
           <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
             <span className="text-[11px] font-semibold text-slate-500 block">
@@ -612,19 +612,6 @@ export default function ReconciliationPage() {
             </div>
             <p className="mt-1 text-[11px] text-slate-400">
               Cleared deposits not linked to a draw
-            </p>
-          </div>
-
-          {/* Card 4: Periods signed off */}
-          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
-            <span className="text-[11px] font-semibold text-slate-500 block">
-              Periods signed off
-            </span>
-            <div className="mt-2 text-xl font-bold text-slate-900 tabular-nums">
-              0 of 2
-            </div>
-            <p className="mt-1 text-[11px] text-slate-400">
-              Statement periods completed
             </p>
           </div>
         </div>
