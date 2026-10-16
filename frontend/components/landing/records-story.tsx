@@ -37,7 +37,7 @@ export function RecordsStory() {
         {/* Section Header */}
         <div className="mb-10 sm:mb-12">
           <p className="text-xs sm:text-sm font-mono font-bold tracking-widest text-muted-foreground uppercase">
-            From Scattered Documents to Financial Clarity
+            Five Connected Steps: Intake to Cleared Draw
           </p>
           <h2 id="flow-heading" className="mt-2 text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
             <MaskedText as="span">
@@ -89,10 +89,10 @@ export function RecordsStory() {
                 2
               </div>
               <h3 className="font-bold text-sm text-foreground">
-                Budget &amp; loan parsing
+                Budget &amp; contract matching
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Parse line items, loan amortization notes, and CSI cost codes, linking each transaction to your pro forma ledger.
+                Extract line items, retainage withholdings, and CSI cost codes, matching every trade bill to your approved project budget.
               </p>
             </div>
 
@@ -171,10 +171,10 @@ export function RecordsStory() {
                 4
               </div>
               <h3 className="font-bold text-sm text-foreground">
-                The Four Truths
+                The Four Synchronized Truths
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Synchronize investor equity and bank loan funding with actual incurred spend and physical site milestones.
+                Keep your budget, trade invoices, municipal inspections, and bank loan draws synchronized across every phase of construction.
               </p>
             </div>
 
@@ -209,10 +209,10 @@ export function RecordsStory() {
                 5
               </div>
               <h3 className="font-bold text-sm text-foreground">
-                Packet builder &amp; forecast
+                Draw assembly &amp; carry forecast
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Build lender-ready AIA G702 packages collaboratively. Forecast municipal inspection delays and daily debt carry burn.
+                Assemble bank-ready AIA G702 and G703 packages with verified lien waivers. Forecast inspection delays and daily debt service carry.
               </p>
             </div>
 

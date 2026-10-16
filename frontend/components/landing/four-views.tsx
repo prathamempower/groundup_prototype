@@ -14,15 +14,14 @@ export function FourViews() {
             <p className="text-xs sm:text-sm font-semibold tracking-wide uppercase text-muted-foreground">Draws and invoices</p>
             <h2 id="verification-heading" className="mt-3 text-fluid-title font-bold tracking-tight text-balance text-foreground">
               <MaskedText as="span">
-                Requested is not approved. Approved is not received.
+                Clear verification from invoice to cleared bank wire.
               </MaskedText>
             </h2>
             <p className="mt-4 text-fluid-subtitle leading-relaxed text-pretty text-muted-foreground">
-              A draw request, a lender approval, and cleared bank funds are three different facts. An invoice and proof of
-              payment are two more. GroundUp tracks each stage separately and only counts money once it is verified.
+              A submitted draw request, an approved pay application, and cleared bank funds each represent a different milestone. GroundUp separates each stage clearly and only counts capital once verified by your bank and inspection cards.
             </p>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              Step through the stages or watch the auto-advance cycle to see what GroundUp counts at each milestone.
+              Select any stage below to inspect how GroundUp verifies and accounts for project capital at each milestone.
             </p>
           </Reveal>
           <Reveal delay={120}>

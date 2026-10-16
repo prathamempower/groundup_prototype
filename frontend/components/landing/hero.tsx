@@ -12,11 +12,11 @@ export interface HeroProps {
 }
 
 const ROTATING_PAIN_POINTS = [
-  'Spreadsheet Delays.',
-  'Lien Waiver Risks.',
-  'Unverified Draws.',
-  'Interest Carry Surprises.',
-  'Paperwork Blindspots.'
+  'Spreadsheet Errors.',
+  'Lien Waiver Gaps.',
+  'Delayed Bank Draws.',
+  'Surprise Interest Carry.',
+  'Budget Blindspots.'
 ];
 
 export function Hero({ onStartOnboarding }: HeroProps) {
@@ -138,7 +138,7 @@ export function Hero({ onStartOnboarding }: HeroProps) {
 
             <Reveal delay={120} direction="up">
               <p className="text-[0.9375rem] text-muted-foreground leading-[1.7] max-w-[440px]">
-                GroundUp reconciles your construction loan, baseline budget, and trade invoices in real time. Assemble bank-ready draw packages, track inspection milestones, and protect your project contingency without spreadsheet delays.
+                GroundUp reconciles your construction loan, baseline budget, and trade invoices into one synchronized ledger. Assemble bank-ready draw packages, track municipal inspection cards, and protect your project contingency without spreadsheet delays.
               </p>
             </Reveal>
 

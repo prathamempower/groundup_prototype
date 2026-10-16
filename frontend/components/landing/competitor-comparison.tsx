@@ -60,7 +60,7 @@ const SPEED_BENCHMARKS: SpeedBenchmark[] = [
     label: '14 Days (336 Hours)', 
     relativeScale: 67, 
     accentColor: '#64748b',
-    sublabel: '84x longer manual compile across subcontractor spreadsheets'
+    sublabel: 'Manual spreadsheet assembly across subcontractor billings'
   },
   { 
     id: 'buildertrend', 
@@ -69,7 +69,7 @@ const SPEED_BENCHMARKS: SpeedBenchmark[] = [
     label: '21 Days (504 Hours)', 
     relativeScale: 100, 
     accentColor: '#94a3b8',
-    sublabel: '126x longer residential homeowner cycle'
+    sublabel: 'Residential workflow without commercial bank draw packages'
   },
   { 
     id: 'projul', 
@@ -114,13 +114,13 @@ const COMPETITORS: CompetitorProfile[] = [
     ownerAlignment: 98,
     turnaroundLabel: '4 Hours',
     costModelSummary: 'Flat asset plan',
-    volumeTaxPercentage: '0% Loan Tax',
+    volumeTaxPercentage: 'No Volume Fees',
     duplicateProtectionStatus: 'automated',
     inspectionTruthStatus: 'municipal',
     lienWaiverStatus: 'statutory_automated',
     citationLabel: 'Interactive Platform Architecture Explorer',
     citationUrl: 'https://groundupdoc.vercel.app/',
-    coreDifferentiator: 'Eliminates construction loan volume taxes and cuts draw turnaround from weeks to hours with bank-verified backup.',
+    coreDifferentiator: 'Eliminates construction loan volume fees and cuts draw turnaround from weeks to hours with bank-verified backup.',
     isGroundUp: true,
   },
   {
@@ -133,13 +133,13 @@ const COMPETITORS: CompetitorProfile[] = [
     ownerAlignment: 34,
     turnaroundLabel: '14 Days',
     costModelSummary: '0.20% to 0.40% construction volume',
-    volumeTaxPercentage: '$12k to $60k+/yr tax',
+    volumeTaxPercentage: '$12k to $60k+/yr fee',
     duplicateProtectionStatus: 'manual',
     inspectionTruthStatus: 'contractor_logs',
     lienWaiverStatus: 'manual_pdf',
     citationLabel: 'SEC Form 10-K Annual Filing (NYSE: PCOR)',
     citationUrl: 'https://www.sec.gov/edgar/browse/?CIK=0001611052',
-    coreDifferentiator: 'Built for jobsite superintendents, RFIs, and submittals, imposing volume penalties on your total construction loan.',
+    coreDifferentiator: 'Built for jobsite superintendents, RFIs, and submittals, imposing volume fees on your total construction loan.',
   },
   {
     id: 'buildertrend',
@@ -150,8 +150,8 @@ const COMPETITORS: CompetitorProfile[] = [
     ticker: 'Bain Capital Portfolio',
     ownerAlignment: 42,
     turnaroundLabel: '21 Days',
-    costModelSummary: '$499 to $1,499/mo + seat taxes',
-    volumeTaxPercentage: 'Seat markups',
+    costModelSummary: '$499 to $1,499/mo + seat fees',
+    volumeTaxPercentage: 'Per-seat markups',
     duplicateProtectionStatus: 'manual',
     inspectionTruthStatus: 'punch_lists',
     lienWaiverStatus: 'manual_pdf',
@@ -169,7 +169,7 @@ const COMPETITORS: CompetitorProfile[] = [
     ownerAlignment: 28,
     turnaroundLabel: 'No Engine',
     costModelSummary: '$199 to $499/mo tiered by crew size',
-    volumeTaxPercentage: 'Crew fees',
+    volumeTaxPercentage: 'Crew size fees',
     duplicateProtectionStatus: 'none',
     inspectionTruthStatus: 'timecards',
     lienWaiverStatus: 'none',
@@ -199,11 +199,11 @@ const MATRIX_FEATURES: MatrixFeatureRow[] = [
     projul: { label: 'Trade Subcontractor', highlight: false },
   },
   {
-    dimension: 'Pricing Penalty',
+    dimension: 'Pricing Structure',
     metricDetail: 'Fee model on active construction debt',
-    groundup: { label: '0% Volume Tax (Flat Plan)', highlight: true },
-    procore: { label: '0.20% to 0.40% Loan Tax', highlight: false },
-    buildertrend: { label: 'Monthly Base + Per-Seat Tax', highlight: false },
+    groundup: { label: 'No Volume Fees (Flat Plan)', highlight: true },
+    procore: { label: '0.20% to 0.40% Loan Volume Fee', highlight: false },
+    buildertrend: { label: 'Monthly Base + Per-Seat Fees', highlight: false },
     projul: { label: 'Tiered Field Crew Fee', highlight: false },
   },
   {
@@ -557,7 +557,7 @@ export function CompetitorComparison({ onStartOnboarding }: CompetitorComparison
                         <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-muted/40 border border-border/60">
                           <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
                             <DollarSign className="size-3 text-muted-foreground" />
-                            <span>Volume Tax</span>
+                            <span>Volume Fee</span>
                           </span>
                           <span className={cn(
                             'font-bold text-[11px]',
@@ -633,7 +633,7 @@ export function CompetitorComparison({ onStartOnboarding }: CompetitorComparison
                 </div>
                 <div>
                   <h3 className="font-bold text-foreground text-sm sm:text-base">
-                    Zero Volume Taxes. Automated Draw Packet Builder. Full Owner Ledger Control.
+                    Zero Volume Fees. Automated Draw Packet Builder. Full Owner Ledger Control.
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     GroundUp operates as your developer command center without requiring your general contractor or lender to switch software.
@@ -751,7 +751,7 @@ export function CompetitorComparison({ onStartOnboarding }: CompetitorComparison
                   <DollarSign className="size-5" />
                 </div>
                 <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-foreground">0% Construction Volume Tax</h4>
+                  <h4 className="text-xs sm:text-sm font-bold text-foreground">0% Construction Volume Fees</h4>
                   <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                     Avoid paying a 0.20% to 0.40% recurring fee on your total construction loan. Simple, predictable asset plans without minimum lock-in.
                   </p>
@@ -830,7 +830,7 @@ export function CompetitorComparison({ onStartOnboarding }: CompetitorComparison
                     </span>
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Calculates idle loan interest carry burned during draw review delays, plus avoidable enterprise volume tax fees.
+                    Calculates idle loan interest carry burned during draw review delays, plus avoidable enterprise volume fees.
                   </p>
                 </div>
 
@@ -875,7 +875,7 @@ export function CompetitorComparison({ onStartOnboarding }: CompetitorComparison
                 {/* Legacy Volume Tax Fee */}
                 <div className="rounded-xl border border-rose-500/30 bg-rose-50/40 dark:bg-rose-950/20 p-5 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-rose-900 dark:text-rose-200">Contractor App Volume Tax</span>
+                    <span className="font-bold text-rose-900 dark:text-rose-200">Contractor App Volume Fee</span>
                     <span className="font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-800 dark:text-rose-300 text-[10px] uppercase">
                       Avoidable Fee
                     </span>
@@ -901,7 +901,7 @@ export function CompetitorComparison({ onStartOnboarding }: CompetitorComparison
                     ${totalCashPreserved.toLocaleString()}
                   </div>
                   <p className="text-[11px] text-emerald-950/80 dark:text-emerald-200/80 leading-relaxed font-medium">
-                    Automated bank draw package assembly eliminates weeks of idle interest carry, and flat asset pricing eliminates the construction volume tax entirely.
+                    Automated bank draw package assembly eliminates weeks of idle interest carry, and flat asset pricing eliminates the construction volume fee entirely.
                   </p>
                 </div>
               </div>
