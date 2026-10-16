@@ -243,7 +243,11 @@ export function AppShell({ children }: AppShellProps) {
       {/* Main Column */}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         {/* Top Bar */}
-        <TopBar onToggleSidebar={() => setMobileOpen(!mobileOpen)} />
+        <TopBar
+          onToggleSidebar={() => setMobileOpen(!mobileOpen)}
+          hasSidebar={isInsideWorkspace}
+          isSidebarCollapsed={collapsed}
+        />
 
         {/* Page Content / Route Guard */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 w-full">

@@ -24,6 +24,12 @@ import {
   Table as TableIcon,
   Wallet,
   Activity,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Layers,
+  Sparkles,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -43,7 +49,6 @@ interface ProjectFinancialComparisonProps {
 }
 
 type TabDimension = "ALL" | "PROFITABILITY" | "CAPITAL" | "HEALTH";
-type CompareViewMode = "SCORECARDS" | "MATRIX";
 
 const toNum = (val?: string | number | null): number => {
   if (val === null || val === undefined) return 0;
@@ -71,6 +76,41 @@ const getProjectThumbnail = (proj: Project) => {
   return "/projects/woodlawn-new.jpg";
 };
 
+const getHealthInfo = (health?: string) => {
+  switch (health) {
+    case "HEALTHY":
+      return {
+        label: "On Track",
+        dotColor: "bg-emerald-500",
+        badgeClass: "bg-emerald-50/80 text-emerald-800 border-emerald-200/60",
+      };
+    case "AT_RISK":
+      return {
+        label: "At Risk",
+        dotColor: "bg-amber-500",
+        badgeClass: "bg-amber-50/80 text-amber-800 border-amber-200/60",
+      };
+    case "CRITICAL":
+    default:
+      return {
+        label: "Critical",
+        dotColor: "bg-rose-500",
+        badgeClass: "bg-rose-50/80 text-rose-800 border-rose-200/60",
+      };
+  }
+};
+
+const getStageLabel = (stage?: string) => {
+  if (!stage) return "Planning";
+  const s = stage.toLowerCase();
+  if (s.includes("conception") || s.includes("design")) return "Design & Planning";
+  if (s.includes("pre_con") || s.includes("pre_construction")) return "Pre-Construction";
+  if (s.includes("construction") || s.includes("active")) return "Active Construction";
+  if (s.includes("completion") || s.includes("closeout")) return "Closeout & TCO";
+  if (s.includes("acquisition")) return "Acquisition Diligence";
+  return stage.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
 export function ProjectFinancialComparison({
   projects,
   globalRole = "OWNER",
@@ -81,11 +121,18 @@ export function ProjectFinancialComparison({
     projects.slice(0, 4).map((p) => p.id)
   );
 
-  const [compareViewMode, setCompareViewMode] = useState<CompareViewMode>("SCORECARDS");
   const [activeTab, setActiveTab] = useState<TabDimension>("ALL");
+  const [hoveredProjectId, setHoveredProjectId] = useState<string | null>(null);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    PROFITABILITY: true,
+    CAPITAL: true,
+    HEALTH: true,
+  });
   const [showChart, setShowChart] = useState(true);
   const [projectSearch, setProjectSearch] = useState("");
   const [stageFilter, setStageFilter] = useState("ALL");
+  const [activeMobileProjectIndex, setActiveMobileProjectIndex] = useState(0);
+  const [compareViewMode, setCompareViewMode] = useState<"SCORECARDS" | "MATRIX">("SCORECARDS");
 
   // Fetch economics in parallel for all projects
   const economicsQueries = useQueries({
@@ -236,6 +283,63 @@ export function ProjectFinancialComparison({
     return { bestMarginProj, highestProfitProj };
   }, [comparedProjects, economicsMap]);
 
+  // Proportional benchmarking maximums for sparkline bars
+  const maxProfit = useMemo(() => {
+    return Math.max(
+      ...comparedProjects.map((p) => {
+        const econ = economicsMap.get(p.id);
+        return toNum(econ?.net_profit) || p.forecast_profit || 0;
+      }),
+      1
+    );
+  }, [comparedProjects, economicsMap]);
+
+  const maxMargin = useMemo(() => {
+    return Math.max(
+      ...comparedProjects.map((p) => {
+        const econ = economicsMap.get(p.id);
+        const gdv =
+          toNum(econ?.gross_development_value) ||
+          (p.forecast_profit ? p.forecast_profit + toNum(p.loan_commitment) : 1);
+        const profit = toNum(econ?.net_profit) || p.forecast_profit || 0;
+        return gdv > 0 ? (profit / gdv) * 100 : 0;
+      }),
+      1
+    );
+  }, [comparedProjects, economicsMap]);
+
+  const maxDebtDrawn = useMemo(() => {
+    return Math.max(
+      ...comparedProjects.map((p) => {
+        const econ = economicsMap.get(p.id);
+        return toNum(econ?.senior_debt_drawn) || 1;
+      }),
+      1
+    );
+  }, [comparedProjects, economicsMap]);
+
+  const healthStats = useMemo(() => {
+    let healthy = 0;
+    let atRisk = 0;
+    let critical = 0;
+    let progressSum = 0;
+
+    comparedProjects.forEach((p) => {
+      const h = p.health_status || "HEALTHY";
+      if (h === "HEALTHY") healthy++;
+      else if (h === "AT_RISK") atRisk++;
+      else critical++;
+
+      progressSum += p.progress_pct ?? (p.status === "COMPLETED" ? 100 : 45);
+    });
+
+    const avgProgress =
+      comparedProjects.length > 0
+        ? Math.round(progressSum / comparedProjects.length)
+        : 0;
+    return { healthy, atRisk, critical, avgProgress };
+  }, [comparedProjects]);
+
   // Data for Chart View
   const chartData = useMemo(() => {
     return comparedProjects.map((p) => {
@@ -260,7 +364,7 @@ export function ProjectFinancialComparison({
     });
   }, [comparedProjects, economicsMap]);
 
-  // CSV Export
+  // CSV Export - Safe Blob download without triggering router navigation
   const handleExportCSV = () => {
     const headers = [
       "Project Name",
@@ -287,27 +391,35 @@ export function ProjectFinancialComparison({
       const progress = p.progress_pct ?? 0;
 
       return [
-        `"${p.name}"`,
-        p.lifecycle_stage,
+        `"${p.name.replace(/"/g, '""')}"`,
+        `"${p.lifecycle_stage}"`,
         gdv,
         cost,
         profit,
-        `${margin}%`,
+        `"${margin}%"`,
         commitment,
         debtDrawn,
-        health,
-        `${progress}%`,
+        `"${health}"`,
+        `"${progress}%"`,
       ].join(",");
     });
 
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
-    const encodedUri = encodeURI(csvContent);
+    const csvContent = [headers.join(","), ...rows].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
+    link.href = url;
     link.setAttribute("download", `GroundUp_Financial_Comparison_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.display = "none";
+    link.addEventListener("click", (e) => e.stopPropagation());
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    setTimeout(() => {
+      if (document.body.contains(link)) {
+        document.body.removeChild(link);
+      }
+      URL.revokeObjectURL(url);
+    }, 200);
   };
 
   return (
@@ -335,6 +447,7 @@ export function ProjectFinancialComparison({
           <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
             {projects.length > 4 && (
               <button
+                type="button"
                 onClick={selectTop4}
                 className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
                 title="Select first 4 projects for clean standard comparison"
@@ -344,6 +457,7 @@ export function ProjectFinancialComparison({
             )}
             {selectedIds.length < projects.length ? (
               <button
+                type="button"
                 onClick={selectAll}
                 className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
               >
@@ -351,6 +465,7 @@ export function ProjectFinancialComparison({
               </button>
             ) : (
               <button
+                type="button"
                 onClick={clearNonFirst}
                 className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
               >
@@ -358,6 +473,7 @@ export function ProjectFinancialComparison({
               </button>
             )}
             <button
+              type="button"
               onClick={() => setShowChart(!showChart)}
               className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
                 showChart
@@ -369,8 +485,13 @@ export function ProjectFinancialComparison({
               <span>{showChart ? "Hide Chart" : "Show Chart"}</span>
             </button>
             <button
-              onClick={handleExportCSV}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-slate-900 transition-colors"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleExportCSV();
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer"
             >
               <Download className="h-3.5 w-3.5 text-slate-400" />
               <span>Export CSV</span>
@@ -567,560 +688,627 @@ export function ProjectFinancialComparison({
           </div>
         </div>
       )}
-      {/* 4. Multi-Project Comparison Section (Scorecards & Matrix Views) */}
+      {/* 4. Interactive Comparative Ledger (Apple-Inspired Executive Multi-Project Deck) */}
       <div className="space-y-4">
-        {/* Section Header with View Mode Switcher */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
-          <div>
-            <h3 className="text-sm font-bold text-slate-900">
-              Project Performance Comparison
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Unified financial returns, capital stack, and physical site milestones across {comparedProjects.length} projects.
-            </p>
+        {/* Ledger Control Center Header */}
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                  <Layers className="h-4 w-4" />
+                </div>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
+                  Executive Comparative Ledger
+                </h3>
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-700 px-2.5 py-0.5 text-[11px] font-bold border border-slate-200">
+                  {comparedProjects.length} Projects Active
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                Synchronized cross-project benchmarking across profit returns, capital debt facilities, and physical milestone execution.
+              </p>
+            </div>
+
+            {/* Segmented Dimension Filter Tabs */}
+            <div className="inline-flex items-center rounded-xl bg-slate-100 p-1 text-xs font-semibold border border-slate-200/70 overflow-x-auto max-w-full">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("ALL");
+                  setExpandedGroups({ PROFITABILITY: true, CAPITAL: true, HEALTH: true });
+                }}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                  activeTab === "ALL"
+                    ? "bg-white text-slate-900 shadow-2xs font-bold"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <Layers className="h-3.5 w-3.5" />
+                <span>All Metrics</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("PROFITABILITY");
+                  setExpandedGroups((prev) => ({ ...prev, PROFITABILITY: true }));
+                }}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                  activeTab === "PROFITABILITY"
+                    ? "bg-white text-emerald-800 shadow-2xs font-bold"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
+                <span>Profitability &amp; Returns</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("CAPITAL");
+                  setExpandedGroups((prev) => ({ ...prev, CAPITAL: true }));
+                }}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                  activeTab === "CAPITAL"
+                    ? "bg-white text-amber-800 shadow-2xs font-bold"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <Wallet className="h-3.5 w-3.5 text-amber-600" />
+                <span>Capital Stack &amp; Loans</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("HEALTH");
+                  setExpandedGroups((prev) => ({ ...prev, HEALTH: true }));
+                }}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                  activeTab === "HEALTH"
+                    ? "bg-white text-blue-800 shadow-2xs font-bold"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <Activity className="h-3.5 w-3.5 text-blue-600" />
+                <span>Project Health &amp; Progress</span>
+              </button>
+            </div>
           </div>
 
-          <div className="inline-flex items-center rounded-xl bg-slate-100 p-1 text-xs font-semibold self-start sm:self-auto border border-slate-200/60">
-            <button
-              onClick={() => setCompareViewMode("SCORECARDS")}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-all cursor-pointer ${
-                compareViewMode === "SCORECARDS"
-                  ? "bg-white text-slate-900 shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <LayoutGrid className="h-3.5 w-3.5" />
-              <span>Project Scorecards</span>
-            </button>
-            <button
-              onClick={() => setCompareViewMode("MATRIX")}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-all cursor-pointer ${
-                compareViewMode === "MATRIX"
-                  ? "bg-white text-slate-900 shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <TableIcon className="h-3.5 w-3.5" />
-              <span>Matrix Table</span>
-            </button>
+          {/* Synchronized Project Quick Legend */}
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 flex-wrap gap-2 text-xs text-slate-500">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                Hover to focus:
+              </span>
+              {comparedProjects.map((p) => {
+                const isHovered = hoveredProjectId === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onMouseEnter={() => setHoveredProjectId(p.id)}
+                    onMouseLeave={() => setHoveredProjectId(null)}
+                    onClick={() => onOpenWorkspace(p)}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                      isHovered
+                        ? "bg-blue-600 text-white font-semibold shadow-xs"
+                        : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/80"
+                    }`}
+                  >
+                    <span className="truncate max-w-[130px]">{p.name}</span>
+                    <ArrowRight className={`h-3 w-3 ${isHovered ? "text-white" : "text-slate-400"}`} />
+                  </button>
+                );
+              })}
+            </div>
+
+            {activeTab === "ALL" && (
+              <button
+                type="button"
+                onClick={() => {
+                  const allExpanded = Object.values(expandedGroups).every(Boolean);
+                  setExpandedGroups({
+                    PROFITABILITY: !allExpanded,
+                    CAPITAL: !allExpanded,
+                    HEALTH: !allExpanded,
+                  });
+                }}
+                className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+              >
+                {Object.values(expandedGroups).every(Boolean) ? "Collapse All Groups" : "Expand All Groups"}
+              </button>
+            )}
           </div>
         </div>
 
-        {/* View 1: Low-Cognitive Project Scorecards (All-in-One at a Glance) */}
-        {compareViewMode === "SCORECARDS" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-            {comparedProjects.map((p) => {
-              const econ = economicsMap.get(p.id);
-              const gdv = toNum(econ?.gross_development_value) || (p.forecast_profit ? p.forecast_profit + toNum(p.loan_commitment) : 0);
-              const cost = toNum(econ?.total_cost) || toNum(p.loan_commitment);
-              const profit = toNum(econ?.net_profit) || p.forecast_profit || 0;
-              const margin = gdv > 0 ? (profit / gdv) * 100 : 0;
-              const roc = econ?.return_on_cost_pct ?? (cost > 0 ? (profit / cost) * 100 : 0);
-              const commitment = toNum(p.loan_commitment) || toNum(econ?.senior_debt_balance);
-              const debtDrawn = toNum(econ?.senior_debt_drawn);
-              const ltc = cost > 0 ? (debtDrawn / cost) * 100 : 0;
-              const debtDrawnPct = commitment > 0 ? Math.min(100, (debtDrawn / commitment) * 100) : 0;
-              const em = econ?.equity_multiple ?? 1.85;
-              const progress = p.progress_pct ?? (p.status === "COMPLETED" ? 100 : 45);
-              const health = p.health_status || "HEALTHY";
-              const isLeader = insights?.bestMarginProj?.project.id === p.id;
-              const costPct = gdv > 0 ? Math.min(100, Math.round((cost / gdv) * 100)) : 60;
-              const profitPct = Math.max(0, 100 - costPct);
-
-              return (
-                <div
-                  key={p.id}
-                  className="rounded-2xl border border-slate-200/90 bg-white shadow-2xs hover:shadow-md transition-shadow flex flex-col justify-between overflow-hidden"
-                >
-                  {/* Project Top Identity Banner */}
-                  <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/60">
-                    <div className="flex items-start gap-3">
-                      <div className="relative h-12 w-12 rounded-xl overflow-hidden shrink-0 border border-slate-200">
-                        <Image
-                          src={getProjectThumbnail(p)}
-                          alt={p.name}
-                          fill
-                          className="object-cover"
-                          sizes="48px"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <h4 className="font-bold text-slate-900 text-sm truncate">{p.name}</h4>
-                          {isLeader && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-bold">
-                              <Award className="h-2.5 w-2.5" />
-                              Top Margin
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-500 truncate mt-0.5">{p.address}</p>
-                        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                          <span className="inline-flex rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 capitalize">
-                            {p.lifecycle_stage.toLowerCase().includes("conception") ? "Design & Planning" : p.lifecycle_stage.replace(/_/g, " ")}
-                          </span>
-                          <span
-                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                              health === "HEALTHY"
-                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                : health === "AT_RISK"
-                                ? "bg-amber-50 text-amber-700 border border-amber-200"
-                                : "bg-rose-50 text-rose-700 border border-rose-200"
-                            }`}
-                          >
-                            <span
-                              className={`h-1.5 w-1.5 rounded-full ${
-                                health === "HEALTHY"
-                                  ? "bg-emerald-600"
-                                  : health === "AT_RISK"
-                                  ? "bg-amber-600"
-                                  : "bg-rose-600"
-                              }`}
-                            />
-                            {health}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 3 Unified Information Blocks (Zero Tab Switching) */}
-                  <div className="p-4 sm:p-5 space-y-3.5">
-                    {/* Dimension 1: Profitability & Returns */}
-                    <div className="rounded-xl border border-emerald-100 bg-emerald-50/30 p-3 sm:p-3.5 space-y-2.5">
-                      <div className="flex items-center justify-between text-xs font-bold text-emerald-950">
-                        <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-emerald-800">
-                          <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
-                          Returns &amp; Margin
-                        </span>
-                        <span className="text-xs font-extrabold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-md">
-                          {margin.toFixed(1)}% Net Margin
-                        </span>
-                      </div>
-
-                      <div className="flex items-baseline justify-between pt-1">
-                        <span className="text-xs text-slate-600 font-medium">Forecast Net Profit</span>
-                        <span className="text-base font-extrabold text-emerald-700 tabular-nums">
-                          {formatMoney(profit)}
-                        </span>
-                      </div>
-
-                      {/* Mini Visual Split Bar (Cost vs Profit) */}
-                      <div>
-                        <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden flex">
-                          <div
-                            className="h-full bg-slate-400 transition-all"
-                            style={{ width: `${costPct}%` }}
-                            title={`Cost: ${costPct}% of GDV`}
-                          />
-                          <div
-                            className="h-full bg-emerald-500 transition-all"
-                            style={{ width: `${profitPct}%` }}
-                            title={`Net Profit: ${profitPct}% of GDV`}
-                          />
-                        </div>
-                        <div className="flex justify-between text-[10px] text-slate-500 mt-1">
-                          <span>Cost: <strong className="font-semibold text-slate-700">{formatMoney(cost)}</strong></span>
-                          <span>GDV: <strong className="font-semibold text-slate-700">{formatMoney(gdv)}</strong></span>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-between text-[11px] pt-1.5 border-t border-emerald-100/70">
-                        <span className="text-slate-500">Return on Cost (ROC)</span>
-                        <span className="font-bold text-slate-900 tabular-nums">{roc !== undefined ? `${roc.toFixed(1)}%` : "-"}</span>
-                      </div>
-                    </div>
-
-                    {/* Dimension 2: Capital Stack & Debt */}
-                    <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 sm:p-3.5 space-y-2.5">
-                      <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-                        <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-slate-600">
-                          <Wallet className="h-3.5 w-3.5 text-slate-500" />
-                          Capital Stack &amp; Loans
-                        </span>
-                        <span className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded-md">
-                          {ltc.toFixed(1)}% LTC
-                        </span>
-                      </div>
-
-                      <div className="flex items-baseline justify-between pt-1">
-                        <span className="text-xs text-slate-600 font-medium">Debt Drawn to Date</span>
-                        <span className="text-sm font-bold text-amber-700 tabular-nums">
-                          {formatMoney(debtDrawn)}
-                        </span>
-                      </div>
-
-                      {/* Debt Drawn Progress Bar */}
-                      <div>
-                        <div className="h-1.5 w-full rounded-full bg-slate-200 overflow-hidden">
-                          <div
-                            className="h-full bg-amber-500 rounded-full transition-all"
-                            style={{ width: `${debtDrawnPct}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-[10px] text-slate-500 mt-1">
-                          <span>Facility: <strong className="font-semibold text-slate-700">{commitment > 0 ? formatMoney(commitment) : "-"}</strong></span>
-                          <span>{debtDrawnPct.toFixed(0)}% Drawn</span>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-between text-[11px] pt-1.5 border-t border-slate-200/70">
-                        <span className="text-slate-500">Target Equity Multiple</span>
-                        <span className="font-bold text-slate-900 tabular-nums">{em.toFixed(2)}x</span>
-                      </div>
-                    </div>
-
-                    {/* Dimension 3: Physical Site Progress */}
-                    <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-3.5 space-y-2">
-                      <div className="flex items-center justify-between text-[11px] uppercase tracking-wider font-bold text-slate-600">
-                        <span className="flex items-center gap-1.5">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-blue-600" />
-                          Physical Completion
-                        </span>
-                        <span className="font-extrabold text-blue-600 tabular-nums">{progress}%</span>
-                      </div>
-                      <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
-                        <div className="h-full bg-blue-600 rounded-full transition-all" style={{ width: `${progress}%` }} />
-                      </div>
-                      <div className="flex items-center justify-between text-[11px] pt-1">
-                        <span className="text-slate-500">Next Milestone</span>
-                        <span className="font-medium text-slate-800 truncate max-w-[170px]">
-                          {p.next_milestone || "Handover & Final Audit"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Card Direct Action */}
-                  <div className="p-4 sm:p-5 pt-0">
-                    <button
-                      onClick={() => onOpenWorkspace(p)}
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white py-2.5 text-xs font-semibold shadow-xs transition-all cursor-pointer"
-                    >
-                      <span>Open Project Workspace</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
+        {/* Dimension 1: Profitability & Returns Ledger */}
+        {(activeTab === "ALL" || activeTab === "PROFITABILITY") && (
+          <div className="rounded-2xl border border-emerald-200/80 bg-white shadow-2xs overflow-hidden transition-all">
+            {/* Dimension Card Header */}
+            <div
+              onClick={() =>
+                setExpandedGroups((prev) => ({
+                  ...prev,
+                  PROFITABILITY: !prev.PROFITABILITY,
+                }))
+              }
+              className="p-4 sm:p-5 bg-gradient-to-r from-emerald-50/70 via-white to-white border-b border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-emerald-50/90 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-2xs shrink-0">
+                  <TrendingUp className="h-5 w-5" />
                 </div>
-              );
-            })}
-          </div>
-        ) : (
-          /* View 2: Multi-Dimension Matrix Table with All Dimensions View */
-          <div className="rounded-2xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden">
-            {/* Dimension Switcher Filter Strip */}
-            <div className="flex items-center border-b border-slate-200 bg-slate-50/70 px-4 sm:px-5 pt-2.5 gap-2 sm:gap-4 overflow-x-auto no-scrollbar whitespace-nowrap">
-              <button
-                onClick={() => setActiveTab("ALL")}
-                className={`pb-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer shrink-0 ${
-                  activeTab === "ALL"
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                All Metrics
-              </button>
-              <button
-                onClick={() => setActiveTab("PROFITABILITY")}
-                className={`pb-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer shrink-0 ${
-                  activeTab === "PROFITABILITY"
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                Profitability &amp; Returns
-              </button>
-              <button
-                onClick={() => setActiveTab("CAPITAL")}
-                className={`pb-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer shrink-0 ${
-                  activeTab === "CAPITAL"
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                Capital Stack &amp; Loans
-              </button>
-              <button
-                onClick={() => setActiveTab("HEALTH")}
-                className={`pb-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer shrink-0 ${
-                  activeTab === "HEALTH"
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                Project Health &amp; Progress
-              </button>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900">
+                      Profitability &amp; Returns
+                    </h4>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-bold">
+                      <Sparkles className="h-3 w-3 text-emerald-700" />
+                      Yield Benchmark
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Net profit forecast, gross development value (GDV) margins, and return on invested development capital.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                <div className="hidden md:flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-xs font-bold text-emerald-800 tabular-nums">
+                    Combined Margin: {aggregatedStats.portfolioMarginPct.toFixed(1)}%
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-slate-50 border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 tabular-nums">
+                    Combined Profit: {formatMoney(aggregatedStats.totalProfit)}
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-slate-50 border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 tabular-nums">
+                    Avg ROC: {aggregatedStats.avgROC.toFixed(1)}%
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                  aria-label={expandedGroups.PROFITABILITY ? "Collapse group" : "Expand group"}
+                >
+                  {expandedGroups.PROFITABILITY ? (
+                    <ChevronUp className="h-5 w-5" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
             </div>
 
-            {/* Matrix Table */}
-            <div className="overflow-x-auto relative">
-              <table className="w-full min-w-[760px] text-left text-xs border-separate border-spacing-0">
-                <thead>
-                  <tr>
-                    <th className="sticky left-0 z-20 bg-slate-50 px-4 sm:px-5 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 w-52 min-w-[210px] max-w-[210px] sm:w-60 sm:min-w-[240px] sm:max-w-[240px] border-b border-slate-200 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
-                      Metric
-                    </th>
-                    {comparedProjects.map((p) => (
-                      <th key={p.id} className="px-4 sm:px-5 py-3.5 text-right min-w-[180px] border-b border-slate-200 bg-slate-50/60">
-                        <div className="flex items-center justify-end gap-2">
-                          <div className="relative h-6 w-6 rounded-md overflow-hidden shrink-0 border border-slate-200">
+            {/* Dimension Rows */}
+            {expandedGroups.PROFITABILITY && (
+              <div className="p-4 sm:p-5 space-y-3">
+                {comparedProjects.map((p) => {
+                  const econ = economicsMap.get(p.id);
+                  const gdv =
+                    toNum(econ?.gross_development_value) ||
+                    (p.forecast_profit ? p.forecast_profit + toNum(p.loan_commitment) : 0);
+                  const cost = toNum(econ?.total_cost) || toNum(p.loan_commitment);
+                  const profit = toNum(econ?.net_profit) || p.forecast_profit || 0;
+                  const margin = gdv > 0 ? (profit / gdv) * 100 : 0;
+                  const roc =
+                    econ?.return_on_cost_pct ?? (cost > 0 ? (profit / cost) * 100 : 0);
+                  const isLeader = insights?.bestMarginProj?.project.id === p.id;
+                  const isHovered = hoveredProjectId === p.id;
+                  const deltaMargin = margin - aggregatedStats.portfolioMarginPct;
+                  const profitBarWidth = Math.max(10, Math.round((profit / maxProfit) * 100));
+
+                  const stageLabel = p.lifecycle_stage.toLowerCase().includes("conception")
+                    ? "Design & Planning"
+                    : p.lifecycle_stage.replace(/_/g, " ");
+
+                  return (
+                    <div
+                      key={p.id}
+                      onMouseEnter={() => setHoveredProjectId(p.id)}
+                      onMouseLeave={() => setHoveredProjectId(null)}
+                      onClick={() => onOpenWorkspace(p)}
+                      className={`group p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer ${
+                        isHovered
+                          ? "bg-emerald-50/70 border-emerald-300 ring-2 ring-emerald-400/30 shadow-xs"
+                          : hoveredProjectId
+                          ? "opacity-75 border-slate-200/70 bg-white"
+                          : "border-slate-200/80 bg-white hover:border-emerald-200 hover:bg-emerald-50/30"
+                      }`}
+                    >
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                        {/* Project Identity */}
+                        <div className="flex items-center gap-3 min-w-[220px] max-w-sm">
+                          <div className="relative h-10 w-10 rounded-xl overflow-hidden shrink-0 border border-slate-200">
                             <Image
                               src={getProjectThumbnail(p)}
                               alt={p.name}
                               fill
                               className="object-cover"
-                              sizes="24px"
+                              sizes="40px"
                             />
                           </div>
-                          <div className="font-bold text-slate-900 text-xs truncate max-w-[140px]">{p.name}</div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h5 className="text-sm font-bold text-slate-900 truncate group-hover:text-emerald-900 transition-colors">
+                                {p.name}
+                              </h5>
+                              {isLeader && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-bold shrink-0">
+                                  <Award className="h-2.5 w-2.5" />
+                                  Top Margin
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-0.5 text-xs text-slate-500">
+                              <span className="capitalize text-slate-600 font-medium">
+                                {stageLabel}
+                              </span>
+                              <span>•</span>
+                              <span className="truncate">{p.address}</span>
+                            </div>
+                          </div>
                         </div>
-                      </th>
-                    ))}
-                    <th className="px-4 sm:px-5 py-3.5 text-right font-bold uppercase tracking-wider text-[11px] text-slate-700 bg-slate-100/80 min-w-[150px] border-b border-slate-200">
-                      Total / Avg
-                    </th>
-                  </tr>
-                </thead>
 
-                <tbody className="text-slate-700">
-                  {/* Category 1: Returns & Profitability */}
-                  {(activeTab === "ALL" || activeTab === "PROFITABILITY") && (
-                    <>
-                      {activeTab === "ALL" && (
-                        <tr>
-                          <td
-                            colSpan={comparedProjects.length + 2}
-                            className="bg-emerald-50/60 px-4 sm:px-5 py-2 font-bold text-emerald-900 text-[10px] uppercase tracking-wider border-b border-emerald-100"
-                          >
-                            Returns &amp; Profitability
-                          </td>
-                        </tr>
-                      )}
-                      <tr className="hover:bg-slate-50/60 transition-colors">
-                        <td className="sticky left-0 z-10 bg-white px-4 sm:px-5 py-3.5 font-semibold text-slate-900 w-52 min-w-[210px] max-w-[210px] sm:w-60 sm:min-w-[240px] sm:max-w-[240px] border-b border-slate-100 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] align-middle">
-                          <div>Gross Development Value (GDV)</div>
-                          <div className="text-[10px] text-slate-400 font-normal">Projected sales value</div>
-                        </td>
-                        {comparedProjects.map((p) => {
-                          const econ = economicsMap.get(p.id);
-                          const gdv = toNum(econ?.gross_development_value);
-                          return (
-                            <td key={p.id} className="px-4 sm:px-5 py-3.5 text-right font-bold text-slate-900 tabular-nums border-b border-slate-100 align-middle">
-                              {formatMoney(gdv)}
-                            </td>
-                          );
-                        })}
-                        <td className="px-4 sm:px-5 py-3.5 text-right font-extrabold text-slate-900 bg-slate-50/50 tabular-nums border-b border-slate-100 align-middle">
-                          {formatMoney(aggregatedStats.totalGDV)}
-                        </td>
-                      </tr>
-
-                      <tr className="hover:bg-slate-50/60 transition-colors">
-                        <td className="sticky left-0 z-10 bg-white px-4 sm:px-5 py-3.5 font-semibold text-slate-900 w-52 min-w-[210px] max-w-[210px] sm:w-60 sm:min-w-[240px] sm:max-w-[240px] border-b border-slate-100 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] align-middle">
-                          <div>Budgeted Cost</div>
-                          <div className="text-[10px] text-slate-400 font-normal">Hard, soft, and contingency</div>
-                        </td>
-                        {comparedProjects.map((p) => {
-                          const econ = economicsMap.get(p.id);
-                          const cost = toNum(econ?.total_cost);
-                          return (
-                            <td key={p.id} className="px-4 sm:px-5 py-3.5 text-right font-medium text-slate-700 tabular-nums border-b border-slate-100 align-middle">
-                              {formatMoney(cost)}
-                            </td>
-                          );
-                        })}
-                        <td className="px-4 sm:px-5 py-3.5 text-right font-bold text-slate-800 bg-slate-50/50 tabular-nums border-b border-slate-100 align-middle">
-                          {formatMoney(aggregatedStats.totalCost)}
-                        </td>
-                      </tr>
-
-                      <tr className="hover:bg-slate-50/60 transition-colors bg-emerald-50/20">
-                        <td className="sticky left-0 z-10 bg-emerald-50 px-4 sm:px-5 py-3.5 font-bold text-slate-900 w-52 min-w-[210px] max-w-[210px] sm:w-60 sm:min-w-[240px] sm:max-w-[240px] border-b border-emerald-100 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] align-middle">
-                          <div>Forecast Net Profit</div>
-                          <div className="text-[10px] text-emerald-700 font-normal">Revenue minus budgeted cost</div>
-                        </td>
-                        {comparedProjects.map((p) => {
-                          const econ = economicsMap.get(p.id);
-                          const profit = toNum(econ?.net_profit) || p.forecast_profit || 0;
-                          return (
-                            <td key={p.id} className="px-4 sm:px-5 py-3.5 text-right font-extrabold text-emerald-600 tabular-nums text-sm border-b border-emerald-100 bg-emerald-50/20 align-middle">
+                        {/* Proportional Benchmark Sparkline Bar */}
+                        <div className="flex-1 max-w-md w-full py-1">
+                          <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 mb-1">
+                            <span className="text-slate-500">Profit Distribution</span>
+                            <span className="tabular-nums font-bold text-slate-800">
                               {formatMoney(profit)}
-                            </td>
-                          );
-                        })}
-                        <td className="px-4 sm:px-5 py-3.5 text-right font-extrabold text-emerald-700 bg-emerald-100/40 tabular-nums text-sm border-b border-emerald-100 align-middle">
-                          {formatMoney(aggregatedStats.totalProfit)}
-                        </td>
-                      </tr>
+                            </span>
+                          </div>
+                          <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden relative">
+                            <div
+                              className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-300"
+                              style={{ width: `${profitBarWidth}%` }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1">
+                            <span>Cost: {formatMoney(cost)}</span>
+                            <span>GDV: {formatMoney(gdv)}</span>
+                          </div>
+                        </div>
 
-                      <tr className="hover:bg-slate-50/60 transition-colors">
-                        <td className="sticky left-0 z-10 bg-white px-4 sm:px-5 py-3.5 font-semibold text-slate-900 w-52 min-w-[210px] max-w-[210px] sm:w-60 sm:min-w-[240px] sm:max-w-[240px] border-b border-slate-100 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] align-middle">
-                          <div>Net Margin %</div>
-                          <div className="text-[10px] text-slate-400 font-normal">Profit divided by GDV</div>
-                        </td>
-                        {comparedProjects.map((p) => {
-                          const econ = economicsMap.get(p.id);
-                          const gdv = toNum(econ?.gross_development_value) || 1;
-                          const profit = toNum(econ?.net_profit) || p.forecast_profit || 0;
-                          const margin = (profit / gdv) * 100;
-                          const isLeader = insights?.bestMarginProj?.project.id === p.id;
-                          return (
-                            <td key={p.id} className="px-4 sm:px-5 py-3.5 text-right font-bold tabular-nums border-b border-slate-100 align-middle">
-                              <span className={`inline-flex items-center gap-1.5 ${margin >= 20 ? "text-emerald-600" : "text-slate-800"}`}>
-                                {margin.toFixed(1)}%
-                                {isLeader && (
-                                  <span className="rounded bg-emerald-100 text-emerald-800 px-1.5 py-0.5 text-[9px] font-bold">
-                                    Top
-                                  </span>
-                                )}
-                              </span>
-                            </td>
-                          );
-                        })}
-                        <td className="px-4 sm:px-5 py-3.5 text-right font-bold text-slate-900 bg-slate-50/50 tabular-nums border-b border-slate-100 align-middle">
-                          {aggregatedStats.portfolioMarginPct.toFixed(1)}%
-                        </td>
-                      </tr>
+                        {/* Key Metrics Chips & Action */}
+                        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap justify-between lg:justify-end shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                          <div className="text-right">
+                            <div className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-xs font-bold text-emerald-800 tabular-nums">
+                              {margin.toFixed(1)}% Margin
+                            </div>
+                            <div className="text-[10px] text-slate-500 mt-0.5 tabular-nums">
+                              {deltaMargin >= 0 ? `+${deltaMargin.toFixed(1)}%` : `${deltaMargin.toFixed(1)}%`} vs avg
+                            </div>
+                          </div>
 
-                      <tr className="hover:bg-slate-50/60 transition-colors">
-                        <td className="sticky left-0 z-10 bg-white px-4 sm:px-5 py-3.5 font-semibold text-slate-900 w-52 min-w-[210px] max-w-[210px] sm:w-60 sm:min-w-[240px] sm:max-w-[240px] border-b border-slate-100 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] align-middle">
-                          <div>Return on Cost (ROC)</div>
-                          <div className="text-[10px] text-slate-400 font-normal">Profit divided by total cost</div>
-                        </td>
-                        {comparedProjects.map((p) => {
-                          const econ = economicsMap.get(p.id);
-                          const roc = econ?.return_on_cost_pct;
-                          return (
-                            <td key={p.id} className="px-4 sm:px-5 py-3.5 text-right font-bold text-blue-600 tabular-nums border-b border-slate-100 align-middle">
-                              {roc !== undefined ? `${roc.toFixed(1)}%` : "-"}
-                            </td>
-                          );
-                        })}
-                        <td className="px-4 sm:px-5 py-3.5 text-right font-bold text-blue-700 bg-slate-50/50 tabular-nums border-b border-slate-100 align-middle">
-                          {aggregatedStats.avgROC.toFixed(1)}%
-                        </td>
-                      </tr>
-                    </>
-                  )}
+                          <div className="text-right">
+                            <div className="inline-flex items-center gap-1 rounded-lg bg-slate-50 border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 tabular-nums">
+                              {roc.toFixed(1)}% ROC
+                            </div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">
+                              Return on Cost
+                            </div>
+                          </div>
 
-                  {/* Category 2: Capital Stack & Financing */}
-                  {(activeTab === "ALL" || activeTab === "CAPITAL") && (
-                    <>
-                      {activeTab === "ALL" && (
-                        <tr>
-                          <td
-                            colSpan={comparedProjects.length + 2}
-                            className="bg-amber-50/60 px-4 sm:px-5 py-2 font-bold text-amber-900 text-[10px] uppercase tracking-wider border-b border-amber-100"
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenWorkspace(p);
+                            }}
+                            className="inline-flex items-center gap-1 rounded-lg bg-slate-900 group-hover:bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition-colors shrink-0 cursor-pointer"
                           >
-                            Capital Stack &amp; Loans
-                          </td>
-                        </tr>
-                      )}
-                      <tr className="hover:bg-slate-50/60 transition-colors">
-                        <td className="sticky left-0 z-10 bg-white px-4 sm:px-5 py-3.5 font-semibold text-slate-900 w-52 min-w-[210px] max-w-[210px] sm:w-60 sm:min-w-[240px] sm:max-w-[240px] border-b border-slate-100 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] align-middle">
-                          <div>Construction Loan Facility</div>
-                          <div className="text-[10px] text-slate-400 font-normal">Approved lender loan commitment</div>
-                        </td>
-                        {comparedProjects.map((p) => {
-                          const commitment = toNum(p.loan_commitment);
-                          return (
-                            <td key={p.id} className="px-4 sm:px-5 py-3.5 text-right font-medium text-slate-800 tabular-nums border-b border-slate-100 align-middle">
-                              {commitment > 0 ? formatMoney(commitment) : "-"}
-                            </td>
-                          );
-                        })}
-                        <td className="px-4 sm:px-5 py-3.5 text-right font-bold text-slate-900 bg-slate-50/50 tabular-nums border-b border-slate-100 align-middle">
-                          {formatMoney(aggregatedStats.totalDebtFacility)}
-                        </td>
-                      </tr>
+                            <span>Open</span>
+                            <ArrowRight className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
-                      <tr className="hover:bg-slate-50/60 transition-colors">
-                        <td className="sticky left-0 z-10 bg-white px-4 sm:px-5 py-3.5 font-semibold text-slate-900 w-52 min-w-[210px] max-w-[210px] sm:w-60 sm:min-w-[240px] sm:max-w-[240px] border-b border-slate-100 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] align-middle">
-                          <div>Debt Drawn</div>
-                          <div className="text-[10px] text-slate-400 font-normal">Loan balance disbursed to date</div>
-                        </td>
-                        {comparedProjects.map((p) => {
-                          const econ = economicsMap.get(p.id);
-                          const drawn = toNum(econ?.senior_debt_drawn);
-                          return (
-                            <td key={p.id} className="px-4 sm:px-5 py-3.5 text-right font-bold text-amber-600 tabular-nums border-b border-slate-100 align-middle">
-                              {formatMoney(drawn)}
-                            </td>
-                          );
-                        })}
-                        <td className="px-4 sm:px-5 py-3.5 text-right font-bold text-amber-700 bg-slate-50/50 tabular-nums border-b border-slate-100 align-middle">
-                          {formatMoney(aggregatedStats.totalDebtDrawn)}
-                        </td>
-                      </tr>
+        {/* Dimension 2: Capital Stack & Debt Facilities Ledger */}
+        {(activeTab === "ALL" || activeTab === "CAPITAL") && (
+          <div className="rounded-2xl border border-amber-200/80 bg-white shadow-2xs overflow-hidden transition-all">
+            {/* Dimension Card Header */}
+            <div
+              onClick={() =>
+                setExpandedGroups((prev) => ({
+                  ...prev,
+                  CAPITAL: !prev.CAPITAL,
+                }))
+              }
+              className="p-4 sm:p-5 bg-gradient-to-r from-amber-50/70 via-white to-white border-b border-amber-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-amber-50/90 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white shadow-2xs shrink-0">
+                  <Wallet className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900">
+                      Capital Stack &amp; Loans
+                    </h4>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-bold">
+                      <Sparkles className="h-3 w-3 text-amber-700" />
+                      Senior Debt Facility
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Senior debt draws, facility commitments, loan-to-cost (LTC) leverage, and forecast equity multiples.
+                  </p>
+                </div>
+              </div>
 
-                      <tr className="hover:bg-slate-50/60 transition-colors">
-                        <td className="sticky left-0 z-10 bg-white px-4 sm:px-5 py-3.5 font-semibold text-slate-900 w-52 min-w-[210px] max-w-[210px] sm:w-60 sm:min-w-[240px] sm:max-w-[240px] border-b border-slate-100 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] align-middle">
-                          <div>Loan-to-Cost (LTC)</div>
-                          <div className="text-[10px] text-slate-400 font-normal">Drawn debt divided by total cost</div>
-                        </td>
-                        {comparedProjects.map((p) => {
-                          const econ = economicsMap.get(p.id);
-                          const cost = toNum(econ?.total_cost) || 1;
-                          const debt = toNum(econ?.senior_debt_drawn);
-                          const ltc = (debt / cost) * 100;
-                          return (
-                            <td key={p.id} className="px-4 sm:px-5 py-3.5 text-right font-bold tabular-nums border-b border-slate-100 align-middle">
-                              <span className={ltc > 65 ? "text-amber-600" : "text-slate-800"}>
-                                {ltc.toFixed(1)}%
-                              </span>
-                            </td>
-                          );
-                        })}
-                        <td className="px-4 sm:px-5 py-3.5 text-right font-bold text-slate-900 bg-slate-50/50 tabular-nums border-b border-slate-100 align-middle">
-                          {aggregatedStats.portfolioLeveragePct.toFixed(1)}%
-                        </td>
-                      </tr>
-
-                      <tr className="hover:bg-slate-50/60 transition-colors">
-                        <td className="sticky left-0 z-10 bg-white px-4 sm:px-5 py-3.5 font-semibold text-slate-900 w-52 min-w-[210px] max-w-[210px] sm:w-60 sm:min-w-[240px] sm:max-w-[240px] border-b border-slate-100 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] align-middle">
-                          <div>Target Equity Multiple</div>
-                          <div className="text-[10px] text-slate-400 font-normal">Projected return on invested equity</div>
-                        </td>
-                        {comparedProjects.map((p) => {
-                          const econ = economicsMap.get(p.id);
-                          const em = econ?.equity_multiple;
-                          return (
-                            <td key={p.id} className="px-4 sm:px-5 py-3.5 text-right font-semibold text-slate-800 tabular-nums border-b border-slate-100 align-middle">
-                              {em !== undefined ? `${em.toFixed(2)}x` : "1.85x"}
-                            </td>
-                          );
-                        })}
-                        <td className="px-4 sm:px-5 py-3.5 text-right font-semibold text-slate-600 bg-slate-50/50 tabular-nums border-b border-slate-100 align-middle">
-                          Target &gt; 1.8x
-                        </td>
-                      </tr>
-                    </>
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                <div className="hidden md:flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 border border-amber-200 px-2.5 py-1 text-xs font-bold text-amber-800 tabular-nums">
+                    Total Drawn: {formatMoney(aggregatedStats.totalDebtDrawn)}
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-slate-50 border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 tabular-nums">
+                    Total Facility: {formatMoney(aggregatedStats.totalDebtFacility)}
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-slate-50 border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 tabular-nums">
+                    Funded: {aggregatedStats.portfolioLeveragePct.toFixed(1)}% of Cost
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                  aria-label={expandedGroups.CAPITAL ? "Collapse group" : "Expand group"}
+                >
+                  {expandedGroups.CAPITAL ? (
+                    <ChevronUp className="h-5 w-5" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5" />
                   )}
+                </button>
+              </div>
+            </div>
 
-                  {/* Category 3: Project Health & Progress */}
-                  {(activeTab === "ALL" || activeTab === "HEALTH") && (
-                    <>
-                      {activeTab === "ALL" && (
-                        <tr>
-                          <td
-                            colSpan={comparedProjects.length + 2}
-                            className="bg-blue-50/60 px-4 sm:px-5 py-2 font-bold text-blue-900 text-[10px] uppercase tracking-wider border-b border-blue-100"
+            {/* Dimension Rows */}
+            {expandedGroups.CAPITAL && (
+              <div className="p-4 sm:p-5 space-y-3">
+                {comparedProjects.map((p) => {
+                  const econ = economicsMap.get(p.id);
+                  const cost = toNum(econ?.total_cost) || toNum(p.loan_commitment);
+                  const commitment =
+                    toNum(p.loan_commitment) || toNum(econ?.senior_debt_balance);
+                  const debtDrawn = toNum(econ?.senior_debt_drawn);
+                  const ltc = cost > 0 ? (debtDrawn / cost) * 100 : 0;
+                  const debtDrawnPct =
+                    commitment > 0 ? Math.min(100, (debtDrawn / commitment) * 100) : 0;
+                  const em = econ?.equity_multiple ?? 1.85;
+                  const isHovered = hoveredProjectId === p.id;
+                  const drawnBarWidth = Math.max(8, Math.round(debtDrawnPct));
+
+                  const stageLabel = p.lifecycle_stage.toLowerCase().includes("conception")
+                    ? "Design & Planning"
+                    : p.lifecycle_stage.replace(/_/g, " ");
+
+                  return (
+                    <div
+                      key={p.id}
+                      onMouseEnter={() => setHoveredProjectId(p.id)}
+                      onMouseLeave={() => setHoveredProjectId(null)}
+                      onClick={() => onOpenWorkspace(p)}
+                      className={`group p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer ${
+                        isHovered
+                          ? "bg-amber-50/70 border-amber-300 ring-2 ring-amber-400/30 shadow-xs"
+                          : hoveredProjectId
+                          ? "opacity-75 border-slate-200/70 bg-white"
+                          : "border-slate-200/80 bg-white hover:border-amber-200 hover:bg-amber-50/30"
+                      }`}
+                    >
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                        {/* Project Identity */}
+                        <div className="flex items-center gap-3 min-w-[220px] max-w-sm">
+                          <div className="relative h-10 w-10 rounded-xl overflow-hidden shrink-0 border border-slate-200">
+                            <Image
+                              src={getProjectThumbnail(p)}
+                              alt={p.name}
+                              fill
+                              className="object-cover"
+                              sizes="40px"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <h5 className="text-sm font-bold text-slate-900 truncate group-hover:text-amber-900 transition-colors">
+                              {p.name}
+                            </h5>
+                            <div className="flex items-center gap-1.5 mt-0.5 text-xs text-slate-500">
+                              <span className="capitalize text-slate-600 font-medium">
+                                {stageLabel}
+                              </span>
+                              <span>•</span>
+                              <span className="truncate">Facility: {formatMoney(commitment)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Proportional Draw Sparkline Bar */}
+                        <div className="flex-1 max-w-md w-full py-1">
+                          <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 mb-1">
+                            <span className="text-slate-500">Facility Draw Status</span>
+                            <span className="tabular-nums font-bold text-amber-900">
+                              {formatMoney(debtDrawn)} ({debtDrawnPct.toFixed(0)}% Drawn)
+                            </span>
+                          </div>
+                          <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden relative">
+                            <div
+                              className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-300"
+                              style={{ width: `${drawnBarWidth}%` }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1">
+                            <span>Available: {formatMoney(Math.max(0, commitment - debtDrawn))}</span>
+                            <span>Total Facility: {formatMoney(commitment)}</span>
+                          </div>
+                        </div>
+
+                        {/* Key Metrics Chips & Action */}
+                        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap justify-between lg:justify-end shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                          <div className="text-right">
+                            <div className="inline-flex items-center gap-1 rounded-lg bg-amber-50 border border-amber-200/80 px-2.5 py-1 text-xs font-bold text-amber-800 tabular-nums">
+                              {ltc.toFixed(1)}% LTC
+                            </div>
+                            <div className="text-[10px] text-slate-500 mt-0.5">
+                              Loan-to-Cost
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            <div className="inline-flex items-center gap-1 rounded-lg bg-slate-50 border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 tabular-nums">
+                              {em.toFixed(2)}x EM
+                            </div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">
+                              Target Multiple
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenWorkspace(p);
+                            }}
+                            className="inline-flex items-center gap-1 rounded-lg bg-slate-900 group-hover:bg-amber-700 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition-colors shrink-0 cursor-pointer"
                           >
-                            Project Health &amp; Execution
-                          </td>
-                        </tr>
-                      )}
-                      <tr className="hover:bg-slate-50/60 transition-colors">
-                        <td className="sticky left-0 z-10 bg-white px-4 sm:px-5 py-3.5 font-semibold text-slate-900 w-52 min-w-[210px] max-w-[210px] sm:w-60 sm:min-w-[240px] sm:max-w-[240px] border-b border-slate-100 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] align-middle">
-                          <div>Project Health</div>
-                          <div className="text-[10px] text-slate-400 font-normal">Current risk status</div>
-                        </td>
-                        {comparedProjects.map((p) => {
-                          const health = p.health_status || "HEALTHY";
-                          return (
-                            <td key={p.id} className="px-4 sm:px-5 py-3.5 text-right border-b border-slate-100 align-middle">
+                            <span>Open</span>
+                            <ArrowRight className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Dimension 3: Project Health & Milestones Ledger */}
+        {(activeTab === "ALL" || activeTab === "HEALTH") && (
+          <div className="rounded-2xl border border-blue-200/80 bg-white shadow-2xs overflow-hidden transition-all">
+            {/* Dimension Card Header */}
+            <div
+              onClick={() =>
+                setExpandedGroups((prev) => ({
+                  ...prev,
+                  HEALTH: !prev.HEALTH,
+                }))
+              }
+              className="p-4 sm:p-5 bg-gradient-to-r from-blue-50/70 via-white to-white border-b border-blue-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-blue-50/90 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-2xs shrink-0">
+                  <Activity className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900">
+                      Project Health &amp; Progress
+                    </h4>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-[10px] font-bold">
+                      <Sparkles className="h-3 w-3 text-blue-700" />
+                      Physical Site Milestones
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Municipal inspections, architectural physical completion, and jurisdictional milestone clearance.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                <div className="hidden md:flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-xs font-bold text-emerald-800 tabular-nums">
+                    Healthy: {healthStats.healthy}
+                  </span>
+                  {healthStats.atRisk > 0 && (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 border border-amber-200 px-2.5 py-1 text-xs font-bold text-amber-800 tabular-nums">
+                      At Risk: {healthStats.atRisk}
+                    </span>
+                  )}
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 border border-blue-200 px-2.5 py-1 text-xs font-semibold text-blue-700 tabular-nums">
+                    Avg Completion: {healthStats.avgProgress}%
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                  aria-label={expandedGroups.HEALTH ? "Collapse group" : "Expand group"}
+                >
+                  {expandedGroups.HEALTH ? (
+                    <ChevronUp className="h-5 w-5" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Dimension Rows */}
+            {expandedGroups.HEALTH && (
+              <div className="p-4 sm:p-5 space-y-3">
+                {comparedProjects.map((p) => {
+                  const progress = p.progress_pct ?? (p.status === "COMPLETED" ? 100 : 45);
+                  const health = p.health_status || "HEALTHY";
+                  const isHovered = hoveredProjectId === p.id;
+                  const progressBarWidth = Math.max(6, Math.min(100, progress));
+
+                  const stageLabel = p.lifecycle_stage.toLowerCase().includes("conception")
+                    ? "Design & Planning"
+                    : p.lifecycle_stage.replace(/_/g, " ");
+
+                  const nextMilestone =
+                    p.status === "COMPLETED"
+                      ? "Handover & Investor Waterfall"
+                      : p.lifecycle_stage === "PRE_CONSTRUCTION"
+                      ? "Site Clearing & Soil Permitting"
+                      : "Structural Steel & Framing";
+
+                  return (
+                    <div
+                      key={p.id}
+                      onMouseEnter={() => setHoveredProjectId(p.id)}
+                      onMouseLeave={() => setHoveredProjectId(null)}
+                      onClick={() => onOpenWorkspace(p)}
+                      className={`group p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer ${
+                        isHovered
+                          ? "bg-blue-50/70 border-blue-300 ring-2 ring-blue-400/30 shadow-xs"
+                          : hoveredProjectId
+                          ? "opacity-75 border-slate-200/70 bg-white"
+                          : "border-slate-200/80 bg-white hover:border-blue-200 hover:bg-blue-50/30"
+                      }`}
+                    >
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                        {/* Project Identity */}
+                        <div className="flex items-center gap-3 min-w-[220px] max-w-sm">
+                          <div className="relative h-10 w-10 rounded-xl overflow-hidden shrink-0 border border-slate-200">
+                            <Image
+                              src={getProjectThumbnail(p)}
+                              alt={p.name}
+                              fill
+                              className="object-cover"
+                              sizes="40px"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h5 className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-900 transition-colors">
+                                {p.name}
+                              </h5>
                               <span
-                                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                                   health === "HEALTHY"
                                     ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                                     : health === "AT_RISK"
@@ -1139,89 +1327,74 @@ export function ProjectFinancialComparison({
                                 />
                                 {health}
                               </span>
-                            </td>
-                          );
-                        })}
-                        <td className="px-4 sm:px-5 py-3.5 text-right text-slate-400 bg-slate-50/50 border-b border-slate-100 align-middle">-</td>
-                      </tr>
-
-                      <tr className="hover:bg-slate-50/60 transition-colors">
-                        <td className="sticky left-0 z-10 bg-white px-4 sm:px-5 py-3.5 font-semibold text-slate-900 w-52 min-w-[210px] max-w-[210px] sm:w-60 sm:min-w-[240px] sm:max-w-[240px] border-b border-slate-100 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] align-middle">
-                          <div>Physical Completion</div>
-                          <div className="text-[10px] text-slate-400 font-normal">Verified progress percentage</div>
-                        </td>
-                        {comparedProjects.map((p) => {
-                          const pct = p.progress_pct ?? (p.status === "COMPLETED" ? 100 : 45);
-                          return (
-                            <td key={p.id} className="px-4 sm:px-5 py-3.5 text-right font-bold text-slate-800 tabular-nums border-b border-slate-100 align-middle">
-                              <div className="flex items-center justify-end gap-2">
-                                <div className="w-16 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                                  <div className="h-full bg-blue-600 rounded-full" style={{ width: `${pct}%` }} />
-                                </div>
-                                <span>{pct}%</span>
-                              </div>
-                            </td>
-                          );
-                        })}
-                        <td className="px-4 sm:px-5 py-3.5 text-right font-semibold text-slate-700 bg-slate-50/50 border-b border-slate-100 align-middle">
-                          Avg:{" "}
-                          {(
-                            comparedProjects.reduce(
-                              (acc, p) => acc + (p.progress_pct ?? (p.status === "COMPLETED" ? 100 : 45)),
-                              0
-                            ) / comparedProjects.length
-                          ).toFixed(0)}
-                          %
-                        </td>
-                      </tr>
-
-                      <tr className="hover:bg-slate-50/60 transition-colors">
-                        <td className="sticky left-0 z-10 bg-white px-4 sm:px-5 py-3.5 font-semibold text-slate-900 w-52 min-w-[210px] max-w-[210px] sm:w-60 sm:min-w-[240px] sm:max-w-[240px] border-b border-slate-100 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] align-middle">
-                          <div>Lifecycle Stage</div>
-                          <div className="text-[10px] text-slate-400 font-normal">Current development phase</div>
-                        </td>
-                        {comparedProjects.map((p) => {
-                          const stageLabel = p.lifecycle_stage
-                            .toLowerCase()
-                            .includes("conception")
-                            ? "Design & Planning"
-                            : p.lifecycle_stage.replace(/_/g, " ");
-                          return (
-                            <td key={p.id} className="px-4 sm:px-5 py-3.5 text-right border-b border-slate-100 align-middle">
-                              <span className="inline-flex rounded-md border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 capitalize">
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-0.5 text-xs text-slate-500">
+                              <span className="capitalize text-slate-600 font-medium">
                                 {stageLabel}
                               </span>
-                            </td>
-                          );
-                        })}
-                        <td className="px-4 sm:px-5 py-3.5 text-right text-slate-400 bg-slate-50/50 border-b border-slate-100 align-middle">-</td>
-                      </tr>
-                    </>
-                  )}
-                </tbody>
+                              <span>•</span>
+                              <span className="truncate">{p.address}</span>
+                            </div>
+                          </div>
+                        </div>
 
-                {/* Direct Action Footer */}
-                <tfoot>
-                  <tr>
-                    <td className="sticky left-0 z-10 bg-slate-50 px-4 sm:px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider w-52 min-w-[210px] max-w-[210px] sm:w-60 sm:min-w-[240px] sm:max-w-[240px] border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] border-t border-slate-200 align-middle">
-                      Action
-                    </td>
-                    {comparedProjects.map((p) => (
-                      <td key={p.id} className="px-4 sm:px-5 py-3.5 text-right border-t border-slate-200 bg-slate-50/40 align-middle">
-                        <button
-                          onClick={() => onOpenWorkspace(p)}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 transition-colors cursor-pointer"
-                        >
-                          <span>Open Project</span>
-                          <ArrowRight className="h-3.5 w-3.5" />
-                        </button>
-                      </td>
-                    ))}
-                    <td className="px-4 sm:px-5 py-3.5 bg-slate-50/60 border-t border-slate-200 align-middle"></td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+                        {/* Proportional Completion Progress Bar */}
+                        <div className="flex-1 max-w-md w-full py-1">
+                          <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 mb-1">
+                            <span className="text-slate-500">Physical Site Progress</span>
+                            <span className="tabular-nums font-bold text-blue-900">
+                              {progress}% Complete
+                            </span>
+                          </div>
+                          <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden relative">
+                            <div
+                              className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-300"
+                              style={{ width: `${progressBarWidth}%` }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1">
+                            <span className="truncate">Active Milestone: {nextMilestone}</span>
+                          </div>
+                        </div>
+
+                        {/* Key Metrics Chips & Action */}
+                        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap justify-between lg:justify-end shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                          <div className="text-right">
+                            <div className="inline-flex items-center gap-1 rounded-lg bg-blue-50 border border-blue-200/80 px-2.5 py-1 text-xs font-bold text-blue-800 tabular-nums">
+                              {progress}% Physical
+                            </div>
+                            <div className="text-[10px] text-slate-500 mt-0.5">
+                              Certified Completion
+                            </div>
+                          </div>
+
+                          <div className="text-right max-w-[160px]">
+                            <div className="inline-flex items-center gap-1 rounded-lg bg-slate-50 border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 truncate">
+                              {nextMilestone}
+                            </div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">
+                              Next Milestone
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenWorkspace(p);
+                            }}
+                            className="inline-flex items-center gap-1 rounded-lg bg-slate-900 group-hover:bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition-colors shrink-0 cursor-pointer"
+                          >
+                            <span>Open</span>
+                            <ArrowRight className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -19,8 +19,103 @@ import {
   FileCheck,
   CopyCheck,
   Check,
+  CheckCircle2,
+  MapPin,
+  UploadCloud,
+  FileText,
+  X,
+  Loader2,
+  Briefcase,
+  HardHat,
+  FileUp,
+  Shield,
+  Coins,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+// High-frequency US real estate market postal lookup dictionary
+const KNOWN_ZIPS: Record<string, { city: string; state: string; county?: string }> = {
+  // New Jersey
+  "07302": { city: "Jersey City", state: "NJ", county: "Hudson County" },
+  "07304": { city: "Jersey City", state: "NJ", county: "Hudson County" },
+  "07305": { city: "Jersey City", state: "NJ", county: "Hudson County" },
+  "07306": { city: "Jersey City", state: "NJ", county: "Hudson County" },
+  "07307": { city: "Jersey City", state: "NJ", county: "Hudson County" },
+  "07030": { city: "Hoboken", state: "NJ", county: "Hudson County" },
+  "07102": { city: "Newark", state: "NJ", county: "Essex County" },
+  "08701": { city: "Lakewood", state: "NJ", county: "Ocean County" },
+  // New York
+  "10001": { city: "New York", state: "NY", county: "New York County" },
+  "10011": { city: "New York", state: "NY", county: "New York County" },
+  "11201": { city: "Brooklyn", state: "NY", county: "Kings County" },
+  "11211": { city: "Brooklyn", state: "NY", county: "Kings County" },
+  "11101": { city: "Long Island City", state: "NY", county: "Queens County" },
+  // Florida
+  "33101": { city: "Miami", state: "FL", county: "Miami-Dade County" },
+  "33139": { city: "Miami Beach", state: "FL", county: "Miami-Dade County" },
+  // California
+  "90001": { city: "Los Angeles", state: "CA", county: "Los Angeles County" },
+  "90210": { city: "Beverly Hills", state: "CA", county: "Los Angeles County" },
+  "94102": { city: "San Francisco", state: "CA", county: "San Francisco County" },
+  // Texas
+  "75201": { city: "Dallas", state: "TX", county: "Dallas County" },
+  "77002": { city: "Houston", state: "TX", county: "Harris County" },
+  "78701": { city: "Austin", state: "TX", county: "Travis County" },
+};
+
+const US_STATES = [
+  { code: "NJ", name: "New Jersey" },
+  { code: "NY", name: "New York" },
+  { code: "CA", name: "California" },
+  { code: "FL", name: "Florida" },
+  { code: "TX", name: "Texas" },
+  { code: "AL", name: "Alabama" },
+  { code: "AK", name: "Alaska" },
+  { code: "AZ", name: "Arizona" },
+  { code: "AR", name: "Arkansas" },
+  { code: "CO", name: "Colorado" },
+  { code: "CT", name: "Connecticut" },
+  { code: "DE", name: "Delaware" },
+  { code: "GA", name: "Georgia" },
+  { code: "HI", name: "Hawaii" },
+  { code: "ID", name: "Idaho" },
+  { code: "IL", name: "Illinois" },
+  { code: "IN", name: "Indiana" },
+  { code: "IA", name: "Iowa" },
+  { code: "KS", name: "Kansas" },
+  { code: "KY", name: "Kentucky" },
+  { code: "LA", name: "Louisiana" },
+  { code: "ME", name: "Maine" },
+  { code: "MD", name: "Maryland" },
+  { code: "MA", name: "Massachusetts" },
+  { code: "MI", name: "Michigan" },
+  { code: "MN", name: "Minnesota" },
+  { code: "MS", name: "Mississippi" },
+  { code: "MO", name: "Missouri" },
+  { code: "MT", name: "Montana" },
+  { code: "NE", name: "Nebraska" },
+  { code: "NV", name: "Nevada" },
+  { code: "NH", name: "New Hampshire" },
+  { code: "NM", name: "New Mexico" },
+  { code: "NC", name: "North Carolina" },
+  { code: "ND", name: "North Dakota" },
+  { code: "OH", name: "Ohio" },
+  { code: "OK", name: "Oklahoma" },
+  { code: "OR", name: "Oregon" },
+  { code: "PA", name: "Pennsylvania" },
+  { code: "RI", name: "Rhode Island" },
+  { code: "SC", name: "South Carolina" },
+  { code: "SD", name: "South Dakota" },
+  { code: "TN", name: "Tennessee" },
+  { code: "UT", name: "Utah" },
+  { code: "VT", name: "Vermont" },
+  { code: "VA", name: "Virginia" },
+  { code: "WA", name: "Washington" },
+  { code: "WV", name: "West Virginia" },
+  { code: "WI", name: "Wisconsin" },
+  { code: "WY", name: "Wyoming" },
+  { code: "DC", name: "District of Columbia" },
+];
 
 export default function CreateProjectPage() {
   const router = useRouter();
@@ -41,10 +136,19 @@ export default function CreateProjectPage() {
   >([]);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
 
-  // Form State: Stage 1 (Identity)
+  // Form State: Stage 1 (Identity & Granular Location)
   const [name, setName] = useState("");
   const [projectEntity, setProjectEntity] = useState("");
   const [address, setAddress] = useState("");
+  const [streetAddress, setStreetAddress] = useState("");
+  const [unitSuite, setUnitSuite] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [city, setCity] = useState("");
+  const [stateCode, setStateCode] = useState("NJ");
+  const [country, setCountry] = useState("United States");
+  const [zipStatus, setZipStatus] = useState<"idle" | "loading" | "valid" | "unrecognized">("idle");
+  const [zipMessage, setZipMessage] = useState("");
+
   const [lifecycleStage, setLifecycleStage] = useState<LifecycleStage>("PRE_CONSTRUCTION");
   const [projectType, setProjectType] = useState("MULTIFAMILY");
   const [startedAt, setStartedAt] = useState("");
@@ -56,7 +160,7 @@ export default function CreateProjectPage() {
   const [hasConstructionLoan, setHasConstructionLoan] = useState<"true" | "false">("true");
   const [lenderName, setLenderName] = useState("");
 
-  // Stage 3 (Contract & Governance)
+  // Stage 3 (Contract & Operating)
   const [contractModel, setContractModel] = useState<ContractModel>("FIXED");
   const [hybridCustomDetails, setHybridCustomDetails] = useState("");
   const [operatingAccountModel, setOperatingAccountModel] = useState<"DEDICATED" | "SHARED">("DEDICATED");
@@ -65,6 +169,94 @@ export default function CreateProjectPage() {
   const [cfoEmail, setCfoEmail] = useState("");
   const [pmEmail, setPmEmail] = useState("");
   const [gcEmail, setGcEmail] = useState("");
+
+  // Stage 5 (Source Documents Attachments)
+  const [uploadedFiles, setUploadedFiles] = useState<{
+    deed?: File;
+    gcContract?: File;
+    loanAgreement?: File;
+    permitSet?: File;
+  }>({});
+
+  // Helper to sync granular address inputs into unified address string
+  const updateAddressString = (
+    st: string,
+    unit: string,
+    c: string,
+    s: string,
+    z: string,
+    cName: string
+  ) => {
+    const parts: string[] = [];
+    const line1 = [st.trim(), unit.trim()].filter(Boolean).join(", ");
+    if (line1) parts.push(line1);
+    if (c.trim()) parts.push(c.trim());
+    if (s.trim() || z.trim()) {
+      parts.push([s.trim(), z.trim()].filter(Boolean).join(" "));
+    }
+    if (cName.trim() && cName !== "United States") {
+      parts.push(cName.trim());
+    }
+    const full = parts.join(", ");
+    setAddress(full);
+    return full;
+  };
+
+  // Smart ZIP code postal resolution
+  const handleZipCodeChange = async (val: string) => {
+    const cleaned = val.replace(/\D/g, "").slice(0, 5);
+    setZipCode(cleaned);
+
+    if (cleaned.length < 5) {
+      setZipStatus("idle");
+      setZipMessage("");
+      updateAddressString(streetAddress, unitSuite, city, stateCode, cleaned, country);
+      return;
+    }
+
+    // 1. Instant check against high-frequency real estate markets
+    if (KNOWN_ZIPS[cleaned]) {
+      const match = KNOWN_ZIPS[cleaned];
+      setCity(match.city);
+      setStateCode(match.state);
+      setCountry("United States");
+      setZipStatus("valid");
+      setZipMessage(`${match.city}, ${match.state}${match.county ? ` (${match.county})` : ""}`);
+      updateAddressString(streetAddress, unitSuite, match.city, match.state, cleaned, "United States");
+      return;
+    }
+
+    // 2. Fallback to postal API
+    setZipStatus("loading");
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 2000);
+      const res = await fetch(`https://api.zippopotam.us/us/${cleaned}`, { signal: ctrl.signal });
+      clearTimeout(timer);
+      if (res.ok) {
+        const data = await res.json();
+        const place = data.places?.[0];
+        if (place) {
+          const detectedCity = place["place name"];
+          const detectedState = place["state abbreviation"];
+          setCity(detectedCity);
+          setStateCode(detectedState);
+          setCountry("United States");
+          setZipStatus("valid");
+          setZipMessage(`${detectedCity}, ${detectedState}`);
+          updateAddressString(streetAddress, unitSuite, detectedCity, detectedState, cleaned, "United States");
+          return;
+        }
+      }
+      setZipStatus("unrecognized");
+      setZipMessage("Unrecognized ZIP code. Please enter city and state manually.");
+      updateAddressString(streetAddress, unitSuite, city, stateCode, cleaned, country);
+    } catch {
+      setZipStatus("unrecognized");
+      setZipMessage("Unrecognized ZIP code. Please enter city and state manually.");
+      updateAddressString(streetAddress, unitSuite, city, stateCode, cleaned, country);
+    }
+  };
 
   useEffect(() => {
     if (isFirstRun && typeof window !== "undefined") {
@@ -350,14 +542,14 @@ export default function CreateProjectPage() {
                             type="text"
                             autoFocus
                             value={name}
-                            onChange={(e) => {
-                              setName(e.target.value);
-                              if (!projectEntity) setProjectEntity(`${e.target.value} Partners LLC`);
-                            }}
+                            onChange={(e) => setName(e.target.value)}
                             placeholder="e.g. 161 Woodlawn Avenue"
                             required
                             className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                           />
+                          <p className="text-[11px] text-slate-400 mt-1">
+                            The human-friendly name displayed across draw packages and reports.
+                          </p>
                         </div>
 
                         <div>
@@ -372,41 +564,199 @@ export default function CreateProjectPage() {
                             required
                             className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                           />
+                          <p className="text-[11px] text-slate-400 mt-1">
+                            Dedicated corporate entity holding the property deed and bank account.
+                          </p>
                         </div>
                       </>
                     )}
 
-                    {/* Sub-step 2: Street Address */}
+                    {/* Sub-step 2: Granular Property Location & Smart ZIP Code Auto-Detection */}
                     {stage1Step === 2 && (
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                          Street Address & Municipality <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          autoFocus
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
-                          placeholder="e.g. 161 Woodlawn Ave, Jersey City, NJ"
-                          required
-                          className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                        />
+                      <div className="space-y-4">
+                        {/* Street Address & Unit */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div className="sm:col-span-2">
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Street Address <span className="text-red-500">*</span>
+                            </label>
+                            <div className="relative">
+                              <MapPin className="h-4 w-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+                              <input
+                                type="text"
+                                autoFocus
+                                value={streetAddress}
+                                onChange={(e) => {
+                                  setStreetAddress(e.target.value);
+                                  updateAddressString(e.target.value, unitSuite, city, stateCode, zipCode, country);
+                                }}
+                                placeholder="e.g. 161 Woodlawn Ave"
+                                required
+                                className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Unit / Suite / Bldg <span className="text-slate-400 font-normal">(Optional)</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={unitSuite}
+                              onChange={(e) => {
+                                setUnitSuite(e.target.value);
+                                updateAddressString(streetAddress, e.target.value, city, stateCode, zipCode, country);
+                              }}
+                              placeholder="e.g. Suite 200"
+                              className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
+                            />
+                          </div>
+                        </div>
+
+                        {/* ZIP Code & City */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <label className="block text-xs font-semibold text-slate-700">
+                                ZIP / Postal Code <span className="text-red-500">*</span>
+                              </label>
+                              {zipStatus === "loading" && (
+                                <span className="inline-flex items-center gap-1 text-[11px] text-blue-600 font-medium">
+                                  <Loader2 className="h-3 w-3 animate-spin" /> Detecting...
+                                </span>
+                              )}
+                              {zipStatus === "valid" && (
+                                <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                                  <CheckCircle2 className="h-3 w-3 text-emerald-600" /> Auto-detected
+                                </span>
+                              )}
+                            </div>
+                            <input
+                              type="text"
+                              maxLength={5}
+                              value={zipCode}
+                              onChange={(e) => handleZipCodeChange(e.target.value)}
+                              placeholder="e.g. 07305"
+                              required
+                              className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 font-mono tracking-wide"
+                            />
+                            {zipMessage && (
+                              <p
+                                className={`text-[11px] mt-1.5 flex items-center gap-1 ${
+                                  zipStatus === "valid"
+                                    ? "text-emerald-700 font-medium"
+                                    : "text-amber-700"
+                                }`}
+                              >
+                                {zipMessage}
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              City / Municipality <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={city}
+                              onChange={(e) => {
+                                setCity(e.target.value);
+                                updateAddressString(streetAddress, unitSuite, e.target.value, stateCode, zipCode, country);
+                              }}
+                              placeholder="e.g. Jersey City"
+                              required
+                              className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
+                            />
+                          </div>
+                        </div>
+
+                        {/* State & Country */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              State / Territory <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                              value={stateCode}
+                              onChange={(e) => {
+                                setStateCode(e.target.value);
+                                updateAddressString(streetAddress, unitSuite, city, e.target.value, zipCode, country);
+                              }}
+                              className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 shadow-2xs transition-colors hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 cursor-pointer"
+                            >
+                              {US_STATES.map((st) => (
+                                <option key={st.code} value={st.code}>
+                                  {st.name} ({st.code})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Country
+                            </label>
+                            <input
+                              type="text"
+                              value={country}
+                              onChange={(e) => {
+                                setCountry(e.target.value);
+                                updateAddressString(streetAddress, unitSuite, city, stateCode, zipCode, e.target.value);
+                              }}
+                              className="h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 text-sm text-slate-700 shadow-2xs focus:outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Live Unified Address Preview */}
+                        {address && (
+                          <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 flex items-start gap-2.5">
+                            <MapPin className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+                            <div className="min-w-0">
+                              <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400 block">
+                                Unified Site Location
+                              </span>
+                              <p className="text-xs font-semibold text-slate-800 truncate mt-0.5">
+                                {address}
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
 
                     {/* Sub-step 3: Asset Type, Lifecycle & Dates */}
                     {stage1Step === 3 && (
-                      <>
-                        {/* Project Asset Type - Small Cards */}
+                      <div className="space-y-5">
+                        {/* Project Asset Type */}
                         <div>
                           <label className="block text-xs font-semibold text-slate-700 mb-2">
                             Project Asset Type
                           </label>
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                             {[
-                              { value: "MULTIFAMILY", label: "Multifamily", sub: "Residential" },
-                              { value: "SINGLE_FAMILY", label: "Single Family", sub: "Ground-Up" },
-                              { value: "MIXED_USE", label: "Mixed-Use", sub: "Commercial" },
+                              {
+                                value: "MULTIFAMILY",
+                                label: "Multifamily",
+                                sub: "Apartments & Condos",
+                              },
+                              {
+                                value: "SINGLE_FAMILY",
+                                label: "Single Family",
+                                sub: "Detached Ground-Up",
+                              },
+                              {
+                                value: "MIXED_USE",
+                                label: "Mixed-Use",
+                                sub: "Retail + Residential",
+                              },
+                              {
+                                value: "COMMERCIAL",
+                                label: "Commercial",
+                                sub: "Industrial & Office",
+                              },
                             ].map((type) => {
                               const isSelected = projectType === type.value;
                               return (
@@ -414,14 +764,18 @@ export default function CreateProjectPage() {
                                   key={type.value}
                                   type="button"
                                   onClick={() => setProjectType(type.value)}
-                                  className={`rounded-xl border p-3 text-left transition-all cursor-pointer ${
+                                  className={`rounded-xl border p-3.5 text-left transition-all cursor-pointer ${
                                     isSelected
                                       ? "border-slate-900 bg-slate-900 text-white shadow-xs"
                                       : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
                                   }`}
                                 >
                                   <span className="block text-xs font-bold leading-tight">{type.label}</span>
-                                  <span className={`block text-[11px] mt-0.5 ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
+                                  <span
+                                    className={`block text-[11px] mt-1 ${
+                                      isSelected ? "text-slate-300" : "text-slate-500"
+                                    }`}
+                                  >
                                     {type.sub}
                                   </span>
                                 </button>
@@ -430,17 +784,33 @@ export default function CreateProjectPage() {
                           </div>
                         </div>
 
-                        {/* Lifecycle Stage - Small Cards */}
+                        {/* Lifecycle Stage */}
                         <div>
                           <label className="block text-xs font-semibold text-slate-700 mb-2">
                             Lifecycle Stage
                           </label>
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                             {[
-                              { value: "PRE_CONSTRUCTION", label: "Pre-Con", sub: "Permitting" },
-                              { value: "CONSTRUCTION", label: "Active", sub: "Construction" },
-                              { value: "ACQUISITION", label: "Acquisition", sub: "Diligence" },
-                              { value: "COMPLETION", label: "Completion", sub: "Closeout" },
+                              {
+                                value: "PRE_CONSTRUCTION",
+                                label: "Pre-Construction",
+                                sub: "Permits & Plans",
+                              },
+                              {
+                                value: "CONSTRUCTION",
+                                label: "Under Construction",
+                                sub: "Active Field Execution",
+                              },
+                              {
+                                value: "ACQUISITION",
+                                label: "Acquisition",
+                                sub: "Under Contract / Diligence",
+                              },
+                              {
+                                value: "COMPLETION",
+                                label: "Closeout",
+                                sub: "TCO & Disposition",
+                              },
                             ].map((stageItem) => {
                               const isSelected = lifecycleStage === stageItem.value;
                               return (
@@ -448,14 +818,18 @@ export default function CreateProjectPage() {
                                   key={stageItem.value}
                                   type="button"
                                   onClick={() => setLifecycleStage(stageItem.value as LifecycleStage)}
-                                  className={`rounded-xl border p-3 text-left transition-all cursor-pointer ${
+                                  className={`rounded-xl border p-3.5 text-left transition-all cursor-pointer ${
                                     isSelected
                                       ? "border-slate-900 bg-slate-900 text-white shadow-xs"
                                       : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
                                   }`}
                                 >
                                   <span className="block text-xs font-bold leading-tight">{stageItem.label}</span>
-                                  <span className={`block text-[11px] mt-0.5 ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
+                                  <span
+                                    className={`block text-[11px] mt-1 ${
+                                      isSelected ? "text-slate-300" : "text-slate-500"
+                                    }`}
+                                  >
                                     {stageItem.sub}
                                   </span>
                                 </button>
@@ -464,7 +838,7 @@ export default function CreateProjectPage() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                           <div>
                             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                               Target Construction Start
@@ -475,6 +849,7 @@ export default function CreateProjectPage() {
                               onChange={(e) => setStartedAt(e.target.value)}
                               className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs transition-colors hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                             />
+                            <p className="text-[11px] text-slate-400 mt-1">Groundbreaking or permit issuance date</p>
                           </div>
                           <div>
                             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
@@ -486,9 +861,10 @@ export default function CreateProjectPage() {
                               onChange={(e) => setTargetCompletionAt(e.target.value)}
                               className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs transition-colors hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                             />
+                            <p className="text-[11px] text-slate-400 mt-1">Expected Certificate of Occupancy (CO)</p>
                           </div>
                         </div>
-                      </>
+                      </div>
                     )}
                   </div>
 
@@ -514,12 +890,15 @@ export default function CreateProjectPage() {
                         variant="primary"
                         onClick={() => {
                           if (stage1Step === 1 && !name.trim()) {
-                            setErrorMessage("Please enter a project name to continue.");
+                            setErrorMessage("Please enter a project display name to continue.");
                             return;
                           }
-                          if (stage1Step === 2 && !address.trim()) {
-                            setErrorMessage("Please enter the property street address.");
-                            return;
+                          if (stage1Step === 2) {
+                            if (!streetAddress.trim() || !city.trim() || !zipCode.trim()) {
+                              setErrorMessage("Please enter street address, city, and ZIP code.");
+                              return;
+                            }
+                            updateAddressString(streetAddress, unitSuite, city, stateCode, zipCode, country);
                           }
                           setErrorMessage("");
                           setStage1Step((s) => (s + 1) as any);
@@ -534,9 +913,16 @@ export default function CreateProjectPage() {
                         variant="primary"
                         loading={duplicateCheckMutation.isPending}
                         onClick={() => {
-                          if (!name.trim() || !address.trim()) {
-                            setErrorMessage("Please complete the required project name and address.");
+                          if (!name.trim()) {
+                            setErrorMessage("Please complete the required project name.");
                             return;
+                          }
+                          if (!address.trim()) {
+                            const generated = updateAddressString(streetAddress, unitSuite, city, stateCode, zipCode, country);
+                            if (!generated.trim()) {
+                              setErrorMessage("Please complete the property location.");
+                              return;
+                            }
                           }
                           setErrorMessage("");
                           duplicateCheckMutation.mutate();
@@ -550,7 +936,7 @@ export default function CreateProjectPage() {
                 </div>
               )}
 
-              {/* Stage 2: Acquisition, Capital & Debt */}
+              {/* Stage 2: Acquisition & Debt Structure */}
               {stage === 2 && (
                 <div className="space-y-6">
                   <div>
@@ -559,37 +945,53 @@ export default function CreateProjectPage() {
                       Acquisition & Debt Structure
                     </h2>
                     <p className="mt-1 text-xs text-slate-500">
-                      Specify property acquisition status and active construction financing.
+                      Specify property acquisition status, equity source, and construction financing.
                     </p>
                   </div>
 
                   <div className="space-y-5 pt-1">
+                    {/* Acquisition Status */}
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-2">
-                        Has Property Been Formally Acquired?
+                        Property Acquisition Status
                       </label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {[
-                          { val: "true", label: "Yes, Title / Deed Closed", desc: "Settlement statement recorded." },
-                          { val: "false", label: "No, Under Diligence", desc: "Contract pending closing." },
-                        ].map((opt) => (
-                          <button
-                            key={opt.val}
-                            type="button"
-                            onClick={() => setIsAcquired(opt.val as any)}
-                            className={`rounded-xl border p-4 text-left transition-all ${
-                              isAcquired === opt.val
-                                ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
-                                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                            }`}
-                          >
-                            <span className="block text-sm font-semibold text-slate-900">{opt.label}</span>
-                            <span className="mt-0.5 block text-xs text-slate-500">{opt.desc}</span>
-                          </button>
-                        ))}
+                          {
+                            val: "true",
+                            label: "Yes, Deed Closed & Recorded",
+                            desc: "Recorded deed and settlement statement (HUD-1) in place.",
+                          },
+                          {
+                            val: "false",
+                            label: "No, Under Purchase Contract",
+                            desc: "Contract executed, pending closing and diligence.",
+                          },
+                        ].map((opt) => {
+                          const isSelected = isAcquired === opt.val;
+                          return (
+                            <button
+                              key={opt.val}
+                              type="button"
+                              onClick={() => setIsAcquired(opt.val as any)}
+                              className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${
+                                isSelected
+                                  ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
+                                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="block text-sm font-semibold text-slate-900">{opt.label}</span>
+                                {isSelected && <Check className="h-4 w-4 text-blue-600 stroke-[2.5]" />}
+                              </div>
+                              <span className="mt-1 block text-xs text-slate-500">{opt.desc}</span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
+                    {/* Acquisition Funding Source */}
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-2">
                         Acquisition Funding Source
@@ -607,14 +1009,18 @@ export default function CreateProjectPage() {
                               key={item.value}
                               type="button"
                               onClick={() => setAcquisitionFunding(item.value)}
-                              className={`rounded-xl border p-3 text-left transition-all cursor-pointer ${
+                              className={`rounded-xl border p-3.5 text-left transition-all cursor-pointer ${
                                 isSelected
                                   ? "border-slate-900 bg-slate-900 text-white shadow-xs"
                                   : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
                               }`}
                             >
                               <span className="block text-xs font-bold leading-tight">{item.label}</span>
-                              <span className={`block text-[11px] mt-0.5 ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
+                              <span
+                                className={`block text-[11px] mt-0.5 ${
+                                  isSelected ? "text-slate-300" : "text-slate-500"
+                                }`}
+                              >
                                 {item.sub}
                               </span>
                             </button>
@@ -625,68 +1031,95 @@ export default function CreateProjectPage() {
                       {acquisitionFunding === "OTHER" && (
                         <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
                           <label className="block text-xs font-semibold text-slate-700 mb-1">
-                            Specify Custom Funding Structure *
+                            Specify Custom Funding Source
                           </label>
                           <input
                             type="text"
-                            placeholder="e.g. Mezzanine note, PACE equity, or land contribution"
+                            placeholder="e.g. Mezzanine debt, PACE financing, or land equity contribution"
                             value={lenderName}
                             onChange={(e) => setLenderName(e.target.value)}
-                            required
                             className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                           />
                         </div>
                       )}
                     </div>
 
+                    {/* Construction Loan Status */}
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-2">
-                        Active or Planned Construction Loan?
+                        Active or Planned Construction Loan
                       </label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {[
-                          { val: "true", label: "Construction Loan in Place", desc: "Disbursements routed via draw inspections." },
-                          { val: "false", label: "All-Equity Self-Funded", desc: "Funded directly from sponsor / equity accounts." },
-                        ].map((opt) => (
-                          <button
-                            key={opt.val}
-                            type="button"
-                            onClick={() => setHasConstructionLoan(opt.val as any)}
-                            className={`rounded-xl border p-4 text-left transition-all ${
-                              hasConstructionLoan === opt.val
-                                ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
-                                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                            }`}
-                          >
-                            <span className="block text-sm font-semibold text-slate-900">{opt.label}</span>
-                            <span className="mt-0.5 block text-xs text-slate-500">{opt.desc}</span>
-                          </button>
-                        ))}
+                          {
+                            val: "true",
+                            label: "Construction Loan in Place",
+                            desc: "Disbursements routed via monthly lender draw inspections.",
+                          },
+                          {
+                            val: "false",
+                            label: "100% Sponsor Self-Funded",
+                            desc: "Funded directly from sponsor and equity capital accounts.",
+                          },
+                        ].map((opt) => {
+                          const isSelected = hasConstructionLoan === opt.val;
+                          return (
+                            <button
+                              key={opt.val}
+                              type="button"
+                              onClick={() => setHasConstructionLoan(opt.val as any)}
+                              className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${
+                                isSelected
+                                  ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
+                                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="block text-sm font-semibold text-slate-900">{opt.label}</span>
+                                {isSelected && <Check className="h-4 w-4 text-blue-600 stroke-[2.5]" />}
+                              </div>
+                              <span className="mt-1 block text-xs text-slate-500">{opt.desc}</span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
                     {hasConstructionLoan === "true" && (
                       <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                          Primary Construction Lender Name (Optional)
+                          Primary Construction Lender Name <span className="text-slate-400 font-normal">(Optional)</span>
                         </label>
                         <input
                           type="text"
                           value={lenderName}
                           onChange={(e) => setLenderName(e.target.value)}
-                          placeholder="e.g. Pacific Western Bank"
+                          placeholder="e.g. Columbia Bank"
                           className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                         />
+                        <p className="text-[11px] text-slate-400 mt-1">
+                          Senior commercial lender funding monthly draw disbursements.
+                        </p>
                       </div>
                     )}
                   </div>
 
                   <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
-                    <Button type="button" variant="secondary" onClick={() => setStage(1)} className="rounded-full px-5 py-2.5 text-xs font-semibold">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setStage(1)}
+                      className="rounded-full px-5 py-2.5 text-xs font-semibold"
+                    >
                       <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
                     </Button>
-                    <Button type="button" variant="primary" onClick={() => setStage(3)} className="rounded-full px-6 py-2.5 text-xs font-semibold shadow-sm">
-                      Next: Contract & Governance <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                    <Button
+                      type="button"
+                      variant="primary"
+                      onClick={() => setStage(3)}
+                      className="rounded-full px-6 py-2.5 text-xs font-semibold shadow-sm"
+                    >
+                      Next: Contract & Operating <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
@@ -705,7 +1138,7 @@ export default function CreateProjectPage() {
                     </p>
                   </div>
 
-                  {/* Contract Model - 2 Column Clean SaaS Grid */}
+                  {/* Contract Model */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-2">
                       General Contractor Contract Model
@@ -714,18 +1147,19 @@ export default function CreateProjectPage() {
                       {[
                         {
                           value: "FIXED",
-                          badge: "Lump Sum",
-                          title: "Fixed",
-                          desc: "Predetermined contract amount; disbursements tied to completion milestones and draw inspections.",
+                          badge: "Standard GMP",
+                          title: "Fixed Price (GMP / Lump Sum)",
+                          desc: "Locked contract value with standard 10% AIA A201 retainage withheld per draw inspection.",
                         },
                         {
                           value: "DAILY",
-                          badge: "Day Rate",
-                          title: "Daily",
-                          desc: "Contractor compensation billed on daily rates, actual work days, and verified time logs.",
+                          badge: "Time & Materials",
+                          title: "Day Rate (Cost-Plus)",
+                          desc: "Billed on verified daily labor, actual subcontractor hours, and material invoices.",
                         },
                       ].map((m) => {
-                        const isSelected = contractModel === m.value || (m.value === "FIXED" && contractModel !== "DAILY");
+                        const isSelected =
+                          contractModel === m.value || (m.value === "FIXED" && contractModel !== "DAILY");
                         return (
                           <div
                             key={m.value}
@@ -737,29 +1171,23 @@ export default function CreateProjectPage() {
                             }`}
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <span className="font-semibold text-sm text-slate-900">
-                                {m.title}
-                              </span>
+                              <span className="font-semibold text-sm text-slate-900">{m.title}</span>
                               <span
                                 className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                                  isSelected
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-slate-100 text-slate-600"
+                                  isSelected ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600"
                                 }`}
                               >
                                 {m.badge}
                               </span>
                             </div>
-                            <p className="mt-1 text-xs text-slate-500 leading-normal">
-                              {m.desc}
-                            </p>
+                            <p className="mt-1.5 text-xs text-slate-500 leading-normal">{m.desc}</p>
                           </div>
                         );
                       })}
                     </div>
                   </div>
 
-                  {/* Operating Account Model - Clean 2-Card Segment */}
+                  {/* Operating Account Model */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-2">
                       Operating Bank Account Model
@@ -769,14 +1197,14 @@ export default function CreateProjectPage() {
                         {
                           val: "DEDICATED",
                           badge: "Recommended",
-                          title: "Dedicated Account",
-                          desc: "Single entity LLC account with 1:1 transaction matching.",
+                          title: "Dedicated Project Account",
+                          desc: "Separate single-entity LLC bank account with 1:1 transaction matching and automated wire reconciliation.",
                         },
                         {
                           val: "SHARED",
-                          badge: "Transfer Controls",
-                          title: "Shared / Commingled",
-                          desc: "Master account requiring strict inter-project transfer rules.",
+                          badge: "Multi-Asset",
+                          title: "Central Operating Account",
+                          desc: "Master operating account requiring strict inter-project transfer rules and cost code tagging.",
                         },
                       ].map((opt) => {
                         const isSelected = operatingAccountModel === opt.val;
@@ -791,22 +1219,16 @@ export default function CreateProjectPage() {
                             }`}
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <span className="font-semibold text-sm text-slate-900">
-                                {opt.title}
-                              </span>
+                              <span className="font-semibold text-sm text-slate-900">{opt.title}</span>
                               <span
                                 className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                                  isSelected
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-slate-100 text-slate-600"
+                                  isSelected ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600"
                                 }`}
                               >
                                 {opt.badge}
                               </span>
                             </div>
-                            <p className="mt-1 text-xs text-slate-500 leading-normal">
-                              {opt.desc}
-                            </p>
+                            <p className="mt-1.5 text-xs text-slate-500 leading-normal">{opt.desc}</p>
                           </div>
                         );
                       })}
@@ -814,64 +1236,147 @@ export default function CreateProjectPage() {
                   </div>
 
                   <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
-                    <Button type="button" variant="secondary" onClick={() => setStage(2)} className="rounded-full px-5 py-2.5 text-xs font-semibold">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setStage(2)}
+                      className="rounded-full px-5 py-2.5 text-xs font-semibold"
+                    >
                       <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
                     </Button>
-                    <Button type="button" variant="primary" onClick={() => setStage(4)} className="rounded-full px-6 py-2.5 text-xs font-semibold shadow-sm">
-                      Next: Team Delegation <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                    <Button
+                      type="button"
+                      variant="primary"
+                      onClick={() => setStage(4)}
+                      className="rounded-full px-6 py-2.5 text-xs font-semibold shadow-sm"
+                    >
+                      Next: Team & Delegation <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
               )}
 
-              {/* Stage 4: Team, Parties & Delegation */}
+              {/* Stage 4: Team & Role Delegation */}
               {stage === 4 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                      <Users className="h-5 w-5 text-blue-600" />
-                      Team & Role Delegation
-                    </h2>
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                        <Users className="h-5 w-5 text-blue-600" />
+                        Team & Role Delegation
+                      </h2>
+                      <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
+                        Optional Seats
+                      </span>
+                    </div>
                     <p className="mt-1 text-xs text-slate-500">
-                      Invite principals, co-owners, or development partners to this project.
+                      Assign project roles now, or skip and invite collaborators anytime from Project Settings.
                     </p>
                   </div>
 
                   <div className="space-y-3.5 pt-1">
-                    <div className="rounded-xl border border-slate-200 p-4.5 bg-white shadow-2xs hover:border-slate-300 transition-colors">
-                      <span className="text-xs font-bold text-slate-900 block mb-1">
-                        Co-Owner / Principal Developer
-                      </span>
+                    {/* Finance Controller / Co-Owner */}
+                    <div className="rounded-xl border border-slate-200 p-4 bg-white shadow-2xs hover:border-slate-300 transition-colors">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="h-4 w-4 text-blue-600" />
+                          <span className="text-xs font-bold text-slate-900">
+                            Finance Controller / Co-Owner
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-semibold uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                          Draws & Accounting
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mb-2">
+                        Oversees pay applications, bank wire reconciliation, and project P&L.
+                      </p>
                       <input
                         type="email"
                         value={cfoEmail}
                         onChange={(e) => setCfoEmail(e.target.value)}
-                        placeholder="partner@developmentpartners.com"
-                        className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
+                        placeholder="controller@yourdevelopmentgroup.com"
+                        className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                       />
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 p-4.5 bg-white shadow-2xs hover:border-slate-300 transition-colors">
-                      <span className="text-xs font-bold text-slate-900 block mb-1">
-                        Executive Partner / Co-Sponsor
-                      </span>
+                    {/* Project Manager / Field Superintendent */}
+                    <div className="rounded-xl border border-slate-200 p-4 bg-white shadow-2xs hover:border-slate-300 transition-colors">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <HardHat className="h-4 w-4 text-amber-600" />
+                          <span className="text-xs font-bold text-slate-900">
+                            Project Manager / Field Superintendent
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-semibold uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                          Site & Inspections
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mb-2">
+                        Uploads site milestones, daily field logs, and municipal inspection cards.
+                      </p>
                       <input
                         type="email"
                         value={pmEmail}
                         onChange={(e) => setPmEmail(e.target.value)}
-                        placeholder="sponsor@fieldbuilders.com"
-                        className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
+                        placeholder="super@fieldoperations.com"
+                        className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
+                      />
+                    </div>
+
+                    {/* General Contractor Principal */}
+                    <div className="rounded-xl border border-slate-200 p-4 bg-white shadow-2xs hover:border-slate-300 transition-colors">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4 text-emerald-600" />
+                          <span className="text-xs font-bold text-slate-900">
+                            General Contractor Principal
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-semibold uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                          Trades & Invoices
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mb-2">
+                        Submits trade invoices, monthly AIA G702 drafts, and statutory lien waivers.
+                      </p>
+                      <input
+                        type="email"
+                        value={gcEmail}
+                        onChange={(e) => setGcEmail(e.target.value)}
+                        placeholder="principal@generalcontractor.com"
+                        className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                       />
                     </div>
                   </div>
 
                   <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
-                    <Button type="button" variant="secondary" onClick={() => setStage(3)} className="rounded-full px-5 py-2.5 text-xs font-semibold">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setStage(3)}
+                      className="rounded-full px-5 py-2.5 text-xs font-semibold"
+                    >
                       <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
                     </Button>
-                    <Button type="button" variant="primary" onClick={() => setStage(5)} className="rounded-full px-6 py-2.5 text-xs font-semibold shadow-sm">
-                      Next: Source Documents <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                    </Button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setStage(5)}
+                        className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors px-3 py-2 cursor-pointer"
+                      >
+                        Skip for now
+                      </button>
+                      <Button
+                        type="button"
+                        variant="primary"
+                        onClick={() => setStage(5)}
+                        className="rounded-full px-6 py-2.5 text-xs font-semibold shadow-sm"
+                      >
+                        Next: Source Documents <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -880,60 +1385,153 @@ export default function CreateProjectPage() {
               {stage === 5 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                      <FileCheck className="h-5 w-5 text-blue-600" />
-                      Source Documents Checklist
-                    </h2>
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                        <FileCheck className="h-5 w-5 text-blue-600" />
+                        Source Documents Checklist
+                      </h2>
+                      <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
+                        Optional Ingestion
+                      </span>
+                    </div>
                     <p className="mt-1 text-xs text-slate-500">
-                      Assembled source document requirements based on your project configuration.
+                      Attach initial documents to start automated file matching, or skip and upload later in your workspace.
                     </p>
                   </div>
 
-                  <div className="space-y-3 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
                     {[
                       {
-                        doc: "Executed Deed / Acquisition Settlement Statement",
-                        gate: "Acquisition Verification",
-                        status: isAcquired === "true" ? "Required for Title Gate" : "Pending Diligence",
+                        key: "deed" as const,
+                        title: "Acquisition Deed or HUD-1",
+                        sub: "Validates purchase price and title recording.",
+                        tag: isAcquired === "true" ? "Title Gate" : "Diligence",
                       },
                       {
-                        doc: "General Contractor Executed Agreement & SOV",
-                        gate: "Budget Lock Gate",
-                        status: "Required before First Draw",
+                        key: "gcContract" as const,
+                        title: "GC Agreement & SOV",
+                        sub: "Establishes Schedule of Values & CSI cost codes.",
+                        tag: "Budget Lock Gate",
                       },
                       {
-                        doc: "Construction Loan Agreement",
-                        gate: "Draw Gate",
-                        status: hasConstructionLoan === "true" ? "Required" : "N/A All-Equity",
+                        key: "loanAgreement" as const,
+                        title: "Construction Loan Agreement",
+                        sub:
+                          hasConstructionLoan === "true"
+                            ? "Sets draw disbursement rules & interest carry formula."
+                            : "Optional for self-funded projects.",
+                        tag: hasConstructionLoan === "true" ? "Senior Draw Gate" : "Optional",
                       },
                       {
-                        doc: "Municipal Building Permit Set",
-                        gate: "Permit Gate",
-                        status: "Pending Municipal Review",
+                        key: "permitSet" as const,
+                        title: "Building Permit & Plans",
+                        sub: "Enables municipal milestone gates to Certificate of Occupancy.",
+                        tag: "Permit Gate",
                       },
-                    ].map((row, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 text-xs shadow-2xs hover:border-slate-300 transition-colors"
-                      >
-                        <div>
-                          <span className="font-semibold text-slate-900 block">{row.doc}</span>
-                          <span className="text-slate-500 text-[11px] mt-0.5 block">Gate: {row.gate}</span>
+                    ].map((item) => {
+                      const file = uploadedFiles[item.key];
+                      return (
+                        <div
+                          key={item.key}
+                          className={`rounded-xl border p-4 transition-all ${
+                            file
+                              ? "border-emerald-300 bg-emerald-50/30"
+                              : "border-slate-200 bg-white hover:border-slate-300"
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2 mb-1.5">
+                            <div>
+                              <span className="font-semibold text-xs text-slate-900 block">{item.title}</span>
+                              <span className="text-[11px] text-slate-500 mt-0.5 block">{item.sub}</span>
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded shrink-0">
+                              {item.tag}
+                            </span>
+                          </div>
+
+                          <div className="mt-3 pt-2.5 border-t border-slate-100">
+                            {file ? (
+                              <div className="flex items-center justify-between text-xs bg-white rounded-lg p-2 border border-emerald-200">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <FileCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+                                  <span className="font-medium text-slate-800 truncate text-[11px]">
+                                    {file.name}
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setUploadedFiles((prev) => {
+                                      const next = { ...prev };
+                                      delete next[item.key];
+                                      return next;
+                                    })
+                                  }
+                                  className="text-slate-400 hover:text-red-600 p-1 transition-colors"
+                                  title="Remove attached file"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            ) : (
+                              <label className="flex items-center justify-center gap-2 w-full py-2 px-3 border border-dashed border-slate-300 hover:border-blue-500 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 bg-slate-50/50 hover:bg-blue-50/30 transition-all cursor-pointer">
+                                <FileUp className="h-3.5 w-3.5" />
+                                <span>Choose PDF or Document</span>
+                                <input
+                                  type="file"
+                                  accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const picked = e.target.files?.[0];
+                                    if (picked) {
+                                      setUploadedFiles((prev) => ({
+                                        ...prev,
+                                        [item.key]: picked,
+                                      }));
+                                    }
+                                  }}
+                                />
+                              </label>
+                            )}
+                          </div>
                         </div>
-                        <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-700">
-                          {row.status}
-                        </span>
-                      </div>
-                    ))}
+                      );
+                    })}
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 text-xs text-slate-600 flex items-start gap-2.5">
+                    <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      Files are processed with a permanent digital audit trail. Invoices and lien waivers can be dragged directly into the workspace at any time.
+                    </p>
                   </div>
 
                   <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
-                    <Button type="button" variant="secondary" onClick={() => setStage(4)} className="rounded-full px-5 py-2.5 text-xs font-semibold">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setStage(4)}
+                      className="rounded-full px-5 py-2.5 text-xs font-semibold"
+                    >
                       <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
                     </Button>
-                    <Button type="button" variant="primary" onClick={() => setStage(6)} className="rounded-full px-6 py-2.5 text-xs font-semibold shadow-sm">
-                      Next: Review & Launch <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                    </Button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setStage(6)}
+                        className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors px-3 py-2 cursor-pointer"
+                      >
+                        Skip and upload later
+                      </button>
+                      <Button
+                        type="button"
+                        variant="primary"
+                        onClick={() => setStage(6)}
+                        className="rounded-full px-6 py-2.5 text-xs font-semibold shadow-sm"
+                      >
+                        Next: Review & Launch <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -947,59 +1545,110 @@ export default function CreateProjectPage() {
                       Review & Confirm Setup
                     </h2>
                     <p className="mt-1 text-xs text-slate-500">
-                      Verify configuration values before provisioning the project workspace.
+                      Verify project parameters before generating your construction workspace.
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-5 space-y-4 text-xs">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                      <div>
-                        <span className="text-slate-500 block text-[11px]">Project Name:</span>
-                        <span className="font-bold text-slate-900 text-sm mt-0.5 block">{name || "-"}</span>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 space-y-4 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {/* Project Identity */}
+                      <div className="bg-white rounded-xl p-3 border border-slate-200/70">
+                        <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
+                          Project Identity
+                        </span>
+                        <span className="font-bold text-slate-900 text-sm mt-1 block truncate">
+                          {name || "Untitled Project"}
+                        </span>
+                        <span className="text-slate-600 text-xs mt-0.5 block truncate">
+                          {projectEntity || "Entity Pending"}
+                        </span>
+                        <span className="text-slate-400 text-[11px] mt-1 block truncate">
+                          {address || "Site address unassigned"}
+                        </span>
                       </div>
-                      <div>
-                        <span className="text-slate-500 block text-[11px]">Legal Entity:</span>
-                        <span className="font-semibold text-slate-900 mt-0.5 block">{projectEntity || "-"}</span>
+
+                      {/* Capital & Debt */}
+                      <div className="bg-white rounded-xl p-3 border border-slate-200/70">
+                        <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
+                          Financing Structure
+                        </span>
+                        <span className="font-bold text-slate-900 text-sm mt-1 block">
+                          {hasConstructionLoan === "true"
+                            ? lenderName
+                              ? `Loan: ${lenderName}`
+                              : "Senior Construction Loan"
+                            : "100% Sponsor Self-Funded"}
+                        </span>
+                        <span className="text-slate-600 text-xs mt-0.5 block">
+                          Funding: {acquisitionFunding.replace("_", " ")}
+                        </span>
+                        <span className="text-slate-400 text-[11px] mt-1 block">
+                          Deed: {isAcquired === "true" ? "Recorded & Closed" : "Under Contract"}
+                        </span>
                       </div>
-                      <div>
-                        <span className="text-slate-500 block text-[11px]">Address:</span>
-                        <span className="text-slate-700 mt-0.5 block">{address || "-"}</span>
+
+                      {/* Contract & Governance */}
+                      <div className="bg-white rounded-xl p-3 border border-slate-200/70">
+                        <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
+                          Contract & Accounts
+                        </span>
+                        <span className="font-bold text-slate-900 text-sm mt-1 block">
+                          {contractModel === "FIXED" ? "Fixed Price (GMP)" : "Day Rate"}
+                        </span>
+                        <span className="text-slate-600 text-xs mt-0.5 block">
+                          10% AIA Retainage Enforced
+                        </span>
+                        <span className="text-slate-400 text-[11px] mt-1 block">
+                          {operatingAccountModel === "DEDICATED" ? "Dedicated Account" : "Central Account"}
+                        </span>
                       </div>
-                      <div>
-                        <span className="text-slate-500 block text-[11px]">Contract Model:</span>
-                        <span className="font-semibold text-blue-600 mt-0.5 block">{contractModel === "DAILY" ? "Daily" : "Fixed"}</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <div className="flex items-center justify-between bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/70">
+                        <span className="text-slate-500 font-medium">Invited Collaborators:</span>
+                        <span className="font-semibold text-slate-800">
+                          {[cfoEmail, pmEmail, gcEmail].filter(Boolean).length > 0
+                            ? `${[cfoEmail, pmEmail, gcEmail].filter(Boolean).length} team seats assigned`
+                            : "Owner only (Invite anytime)"}
+                        </span>
                       </div>
-                      <div>
-                        <span className="text-slate-500 block text-[11px]">Operating Account:</span>
-                        <span className="font-medium text-slate-900 mt-0.5 block">{operatingAccountModel}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-500 block text-[11px]">Initial Status:</span>
-                        <span className="font-semibold text-amber-700 mt-0.5 block">Setup Incomplete</span>
+                      <div className="flex items-center justify-between bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/70">
+                        <span className="text-slate-500 font-medium">Initial Source Documents:</span>
+                        <span className="font-semibold text-slate-800">
+                          {Object.values(uploadedFiles).filter(Boolean).length > 0
+                            ? `${Object.values(uploadedFiles).filter(Boolean).length} document(s) attached`
+                            : "Upload in workspace"}
+                        </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200 bg-white p-5 text-xs text-slate-600 space-y-2 shadow-2xs">
-                    <p className="font-bold text-slate-900">What happens when you launch:</p>
-                    <div className="space-y-1.5 text-slate-500">
-                      <p className="flex items-center gap-2">
-                        <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                        Project workspace will be generated in <code>SETUP_INCOMPLETE</code> status.
-                      </p>
-                      <p className="flex items-center gap-2">
-                        <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                        Initial verification checklist will be configured for your review.
-                      </p>
-                      <p className="flex items-center gap-2">
-                        <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                        You will be routed to the Project Readiness Hub to monitor gate unlock states.
-                      </p>
+                  <div className="rounded-xl border border-slate-200 bg-white p-4.5 text-xs text-slate-600 space-y-2.5 shadow-2xs">
+                    <p className="font-bold text-slate-900">Workspace Activation Deliverables:</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-slate-600 text-[11px]">
+                      <div className="flex items-start gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                        <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                        <span>CSI MasterFormat trade budget accounts initialized</span>
+                      </div>
+                      <div className="flex items-start gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                        <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                        <span>Draw packages pre-formatted for bank-ready AIA G702 / G703</span>
+                      </div>
+                      <div className="flex items-start gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                        <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                        <span>Standard 10% retainage withholdings and statutory lien releases</span>
+                      </div>
                     </div>
                   </div>
 
                   <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
-                    <Button type="button" variant="secondary" onClick={() => setStage(5)} className="rounded-full px-5 py-2.5 text-xs font-semibold">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setStage(5)}
+                      className="rounded-full px-5 py-2.5 text-xs font-semibold"
+                    >
                       <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
                     </Button>
                     <Button

@@ -41,9 +41,15 @@ import { useSignOut } from "@/lib/hooks/use-sign-out";
 
 interface TopBarProps {
   onToggleSidebar: () => void;
+  hasSidebar?: boolean;
+  isSidebarCollapsed?: boolean;
 }
 
-export function TopBar({ onToggleSidebar }: TopBarProps) {
+export function TopBar({
+  onToggleSidebar,
+  hasSidebar,
+  isSidebarCollapsed = false,
+}: TopBarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const queryClient = useQueryClient();
@@ -89,6 +95,14 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
 
   const currentProjectId = currentProject?.id || routeProjectId || null;
   const { signOut, isSigningOut, SignOutOverlay } = useSignOut();
+
+  // Adaptive logo display:
+  // - On mobile (< md): Sidebar is off-canvas, so TopBar must always show the logo.
+  // - On desktop (>= md):
+  //   * If sidebar is mounted and expanded: Sidebar already displays the GroundUp logo, so hide it in TopBar to prevent duplicate logos.
+  //   * If sidebar is collapsed or not mounted: TopBar displays the GroundUp logo.
+  const effectiveHasSidebar = hasSidebar ?? Boolean(routeProjectId);
+  const showLogoOnDesktop = !effectiveHasSidebar || isSidebarCollapsed;
 
   const switchProjectMutation = useMutation({
     mutationFn: (projectId: string) => api.projects.switchProject(projectId),
@@ -232,10 +246,28 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
             </Link>
           ) : null}
 
-          {/* GroundUp Logo with Wordmark Text (Visible on all screens, no duplicate labels) */}
-          <div className="flex items-center shrink-0">
-            <BrandLogo size="sm" href="/projects" showWordmark={true} iconOnly={false} showSubtitle={false} />
+          {/* GroundUp Logo: Adaptive display to prevent duplicate logos when desktop sidebar is expanded */}
+          <div
+            className={`items-center shrink-0 ${
+              showLogoOnDesktop ? "flex" : "flex md:hidden"
+            }`}
+          >
+            <BrandLogo
+              size="sm"
+              href="/projects"
+              showWordmark={true}
+              iconOnly={false}
+              showSubtitle={false}
+            />
           </div>
+
+          {/* Project Breadcrumb on desktop when sidebar is active */}
+          {routeProjectId && currentProject?.name && (
+            <div className="hidden md:flex items-center gap-2 text-xs font-semibold text-slate-700 truncate max-w-[240px]">
+              <span className="text-slate-300 font-normal">/</span>
+              <span className="truncate">{currentProject.name}</span>
+            </div>
+          )}
         </div>
 
         {/* Right: Tasks, Inbox, Notifications & User Menu */}

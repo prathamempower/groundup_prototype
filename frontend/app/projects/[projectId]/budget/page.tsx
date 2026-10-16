@@ -488,14 +488,22 @@ export default function ProjectEconomicsAndBudgetPage() {
       ["Construction Total", "$1,019,220.00", "$1,306,934.73", "+$287,714.73", "+28%"],
     ];
 
-    const csvContent = "data:text/csv;charset=utf-8," + rows.map((e) => e.join(",")).join("\n");
-    const encodedUri = encodeURI(csvContent);
+    const csvData = rows.map((e) => e.join(",")).join("\r\n");
+    const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
+    link.href = url;
     link.setAttribute("download", `Project_Economics_${projectName.replace(/\s+/g, "_")}.csv`);
+    link.style.display = "none";
+    link.addEventListener("click", (e) => e.stopPropagation());
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    setTimeout(() => {
+      if (document.body.contains(link)) {
+        document.body.removeChild(link);
+      }
+      URL.revokeObjectURL(url);
+    }, 200);
 
     toast({
       title: "Export Successful",
