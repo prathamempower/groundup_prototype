@@ -121,13 +121,13 @@ const SHOWCASE_ROWS = [
     scopeName: "Exterior Enclosure & Roofing",
     drawRefId: "DRW-2026-004",
     date: "Oct 18, 2026",
-    requestedAmt: "Pending Build",
-    statusLabel: "Ready to Build",
+    requestedAmt: "$92,400.00",
+    statusLabel: "Ready to Request",
     statusType: "PENDING",
-    actionLabel: "Build Packet",
+    actionLabel: "Request Draw #4",
     actionType: "PRIMARY",
     drawNumber: 4,
-    disbursed: "-",
+    disbursed: "Pending",
     reconciledPct: 0,
   },
   {
@@ -141,7 +141,7 @@ const SHOWCASE_ROWS = [
     requestedAmt: "$84,000.00",
     statusLabel: "Active Spending",
     statusType: "ACTIVE",
-    actionLabel: "Review",
+    actionLabel: "View Details",
     actionType: "OUTLINE",
     drawNumber: 3,
     disbursed: "$84,000.00",
@@ -156,9 +156,9 @@ const SHOWCASE_ROWS = [
     drawRefId: "DRW-2026-002",
     date: "Mar 04, 2026",
     requestedAmt: "$68,200.00",
-    statusLabel: "Funded & Settled",
+    statusLabel: "Funded",
     statusType: "FUNDED",
-    actionLabel: "Details",
+    actionLabel: "View Details",
     actionType: "OUTLINE",
     drawNumber: 2,
     disbursed: "$68,200.00",
@@ -173,9 +173,9 @@ const SHOWCASE_ROWS = [
     drawRefId: "DRW-2026-001",
     date: "Jan 12, 2026",
     requestedAmt: "$50,000.00",
-    statusLabel: "Funded & Settled",
+    statusLabel: "Funded",
     statusType: "FUNDED",
-    actionLabel: "Details",
+    actionLabel: "View Details",
     actionType: "OUTLINE",
     drawNumber: 1,
     disbursed: "$50,000.00",
@@ -190,7 +190,7 @@ const SHOWCASE_ROWS = [
     drawRefId: "DRW-2026-003-REV",
     date: "May 25, 2026",
     requestedAmt: "$6,200.00",
-    statusLabel: "Missing PE Stamp",
+    statusLabel: "Action Required",
     statusType: "REJECTED",
     actionLabel: "Resolve",
     actionType: "DANGER_OUTLINE",
@@ -294,12 +294,12 @@ export default function DrawsPage() {
         prev.map((node) =>
           node.drawNumber === data.drawNumber
             ? {
-                ...node,
-                hasPacketBuilt: true,
-                amount: data.formattedAmount,
-                status: "PENDING_REVIEW",
-                date: "Submitted",
-              }
+              ...node,
+              hasPacketBuilt: true,
+              amount: data.formattedAmount,
+              status: "PENDING_REVIEW",
+              date: "Submitted",
+            }
             : node
         )
       );
@@ -308,12 +308,12 @@ export default function DrawsPage() {
         prev.map((row) =>
           row.drawNumber === data.drawNumber
             ? {
-                ...row,
-                requestedAmt: data.formattedAmount,
-                statusLabel: "In Lender Review",
-                actionLabel: "Review",
-                actionType: "OUTLINE",
-              }
+              ...row,
+              requestedAmt: data.formattedAmount,
+              statusLabel: "In Lender Review",
+              actionLabel: "Review",
+              actionType: "OUTLINE",
+            }
             : row
         )
       );
@@ -390,12 +390,12 @@ export default function DrawsPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* 1. Clean Enterprise Header */}
-      <div className="border-b border-border bg-white px-6 py-4">
+      {/* 1. Header */}
+      <div className="border-b border-slate-200/80 bg-white px-6 py-4">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-0.5">
-            <h1 className="text-lg font-bold text-foreground">
-              Draw Requests & Spending Verification
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">
+              Draw Requests
             </h1>
           </div>
 
@@ -411,9 +411,9 @@ export default function DrawsPage() {
                   setIsBuildDrawPacketOpen(true);
                 }
               }}
-              className="h-8 text-xs font-medium"
+              className="h-9 px-4 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white shadow-2xs"
             >
-              <Plus className="h-3.5 w-3.5 mr-1" />
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
               New Draw Request
             </Button>
           </div>
@@ -421,93 +421,87 @@ export default function DrawsPage() {
       </div>
 
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5 sm:space-y-6 min-w-0">
-        {/* 2. Compact 4 KPI Metric Row with Easy Plain English */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-          <div className="rounded-xl border border-border bg-white p-4 shadow-2xs">
-            <span className="text-[11px] font-semibold text-muted-foreground block">
-              Total Loan Approved
+        {/* 2. 4 Clean KPI Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">
+              Facility Commitment
             </span>
-            <div className="text-xl font-bold text-foreground font-mono mt-1">
+            <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5">
               $824,450.00
             </div>
-            <span className="text-[11px] text-muted-foreground mt-1 block">
-              Committed bank construction credit
+            <span className="text-xs text-slate-500 mt-1 block">
+              Approved construction loan
             </span>
           </div>
 
-          <div className="rounded-xl border border-border bg-white p-4 shadow-2xs">
-            <span className="text-[11px] font-semibold text-muted-foreground block">
-              Total Paid Out by Bank
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">
+              Drawn to Date
             </span>
-            <div className="text-xl font-bold text-foreground font-mono mt-1">
+            <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5">
               $202,200.00
             </div>
-            <span className="text-[11px] text-emerald-600 font-medium mt-1 block">
-              24.5% of total loan released
+            <span className="text-xs font-medium text-emerald-700 mt-1 block">
+              24.5% of commitment funded
             </span>
           </div>
 
-          <div className="rounded-xl border border-border bg-white p-4 shadow-2xs">
-            <span className="text-[11px] font-semibold text-muted-foreground block">
-              Draw #3 Money Spent
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">
+              Active Draw Spending
             </span>
-            <div className="text-xl font-bold text-foreground font-mono mt-1">
+            <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5">
               $78,960.00
             </div>
-            <span className="text-[11px] text-teal-600 font-medium mt-1 block">
-              94.0% verified paid to trades ($5,040 left)
+            <span className="text-xs font-medium text-slate-700 mt-1 block">
+              94% paid to trades ($5,040 remaining)
             </span>
           </div>
 
-          <div className="rounded-xl border border-border bg-white p-4 shadow-2xs">
-            <span className="text-[11px] font-semibold text-muted-foreground block">
-              Next Step
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">
+              Next Draw
             </span>
-            <div className="text-xl font-bold text-foreground font-mono mt-1">
+            <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5">
               Draw #4 Ready
             </div>
-            <span className="text-[11px] text-muted-foreground mt-1 block">
-              Ready to compile & submit payment packet
+            <span className="text-xs text-slate-500 mt-1 block">
+              Ready for lender submission
             </span>
           </div>
         </div>
 
-        {/* 3. Visual Draw Progression Pipeline (Responsive, Polished & Scalable) */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-xs transition-shadow hover:shadow-sm">
-          {/* Header & Legend - Responsive Layout */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-100">
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100 shadow-2xs">
-                <SlidersHorizontal className="h-4 w-4" />
+        {/* 3. Visual Draw Timeline */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-xs">
+          {/* Header & Legend */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-slate-100">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200/60 shadow-2xs">
+                <SlidersHorizontal className="h-3.5 w-3.5" />
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2.5">
-                <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                  Draw Progression Pipeline & Dual-Statement Verification
-                </h3>
-                <span className="hidden sm:inline text-slate-300">|</span>
-                <span className="inline-flex items-center w-fit rounded-full bg-blue-50 text-blue-700 border border-blue-200/60 px-2.5 py-0.5 text-[11px] font-semibold font-mono">
-                  Sequential Draw 1 → Draw 5
-                </span>
-              </div>
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                Draw Timeline
+              </h3>
             </div>
 
-            {/* Status Legend - Compact & Responsive */}
-            <div className="flex items-center flex-wrap gap-2.5 sm:gap-4 text-[11px] sm:text-xs font-medium text-slate-600">
-              <div className="flex items-center gap-1.5 bg-slate-50 sm:bg-transparent px-2 sm:px-0 py-1 sm:py-0 rounded-md">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100" />
-                <span className="text-slate-700">100% Reconciled</span>
+            {/* Status Legend */}
+            <div className="flex items-center flex-wrap gap-3 sm:gap-4 text-xs font-medium text-slate-600">
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-slate-900" />
+                <span className="text-slate-700">Completed</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-slate-50 sm:bg-transparent px-2 sm:px-0 py-1 sm:py-0 rounded-md">
-                <span className="h-2 w-2 rounded-full bg-teal-400 ring-2 ring-teal-100" />
-                <span className="text-slate-700">Active Spending</span>
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-blue-600" />
+                <span className="text-slate-700">Active</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-slate-50 sm:bg-transparent px-2 sm:px-0 py-1 sm:py-0 rounded-md">
-                <span className="h-2 w-2 rounded-full bg-amber-500 ring-2 ring-amber-100" />
-                <span className="text-slate-700">Pending Review</span>
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-amber-500" />
+                <span className="text-slate-700">Ready to Request</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-slate-50 sm:bg-transparent px-2 sm:px-0 py-1 sm:py-0 rounded-md">
-                <span className="h-2 w-2 rounded-full bg-slate-300 ring-2 ring-slate-100" />
-                <span className="text-slate-700">Queued</span>
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-slate-300" />
+                <span className="text-slate-500">Upcoming</span>
               </div>
             </div>
           </div>
@@ -518,11 +512,11 @@ export default function DrawsPage() {
               {/* Stepper Track with Connected Line Segments */}
               <div className="grid grid-cols-5 relative">
                 {/* Continuous Background Track */}
-                <div className="absolute top-[22px] left-[10%] right-[10%] h-[3px] bg-slate-100 rounded-full z-0 pointer-events-none" />
+                <div className="absolute top-[20px] left-[10%] right-[10%] h-[2px] bg-slate-200 rounded-full z-0 pointer-events-none" />
                 {/* Active Progress Line (From D1 through D3) */}
-                <div className="absolute top-[22px] left-[10%] w-[50%] h-[3px] bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-400 rounded-full z-0 pointer-events-none shadow-xs" />
+                <div className="absolute top-[20px] left-[10%] w-[50%] h-[2px] bg-slate-900 rounded-full z-0 pointer-events-none" />
 
-                {/* Node 1: Draw #1 (100% Reconciled) */}
+                {/* Node 1: Draw #1 */}
                 <div
                   className="flex flex-col items-center cursor-pointer group px-2 select-none"
                   onClick={() => {
@@ -533,32 +527,28 @@ export default function DrawsPage() {
                   }}
                 >
                   <div className="relative z-10">
-                    <div className="h-11 w-11 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm ring-4 ring-white group-hover:ring-emerald-50 group-hover:scale-105 transition-all duration-200">
-                      <Check className="h-5 w-5 stroke-[2.5]" />
+                    <div className="h-10 w-10 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-xs ring-4 ring-white group-hover:scale-105 transition-transform duration-150">
+                      <Check className="h-4 w-4 stroke-[3]" />
                     </div>
-                    <span className="absolute -top-1 -right-1 rounded-full bg-slate-900 text-white text-[9px] font-mono px-1.5 py-0.2 font-bold shadow-xs">
-                      D1
-                    </span>
                   </div>
 
-                  <div className="text-center mt-3 space-y-1 w-full max-w-[120px]">
-                    <div className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                  <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
+                    <div className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
                       Draw #1
                     </div>
                     <div className="text-sm font-bold font-mono tracking-tight text-slate-900">
                       $50,000
                     </div>
-                    <div className="text-[11px] font-semibold text-emerald-600">
-                      100% Spent
+                    <div className="text-[11px] font-medium text-slate-500">
+                      100% Disbursed
                     </div>
-                    <div className="w-12 h-1 bg-emerald-500 rounded-full mx-auto" />
-                    <div className="text-[10px] text-slate-400 font-medium">
+                    <div className="text-[11px] text-slate-400 font-medium pt-0.5">
                       Jan 12
                     </div>
                   </div>
                 </div>
 
-                {/* Node 2: Draw #2 (100% Reconciled) */}
+                {/* Node 2: Draw #2 */}
                 <div
                   className="flex flex-col items-center cursor-pointer group px-2 select-none"
                   onClick={() => {
@@ -569,32 +559,28 @@ export default function DrawsPage() {
                   }}
                 >
                   <div className="relative z-10">
-                    <div className="h-11 w-11 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm ring-4 ring-white group-hover:ring-emerald-50 group-hover:scale-105 transition-all duration-200">
-                      <Check className="h-5 w-5 stroke-[2.5]" />
+                    <div className="h-10 w-10 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-xs ring-4 ring-white group-hover:scale-105 transition-transform duration-150">
+                      <Check className="h-4 w-4 stroke-[3]" />
                     </div>
-                    <span className="absolute -top-1 -right-1 rounded-full bg-slate-900 text-white text-[9px] font-mono px-1.5 py-0.2 font-bold shadow-xs">
-                      D2
-                    </span>
                   </div>
 
-                  <div className="text-center mt-3 space-y-1 w-full max-w-[120px]">
-                    <div className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                  <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
+                    <div className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
                       Draw #2
                     </div>
                     <div className="text-sm font-bold font-mono tracking-tight text-slate-900">
                       $68,200
                     </div>
-                    <div className="text-[11px] font-semibold text-emerald-600">
-                      100% Spent
+                    <div className="text-[11px] font-medium text-slate-500">
+                      100% Disbursed
                     </div>
-                    <div className="w-12 h-1 bg-emerald-500 rounded-full mx-auto" />
-                    <div className="text-[10px] text-slate-400 font-medium">
+                    <div className="text-[11px] text-slate-400 font-medium pt-0.5">
                       Mar 04
                     </div>
                   </div>
                 </div>
 
-                {/* Node 3: Draw #3 (Active Spending) */}
+                {/* Node 3: Draw #3 (Active) */}
                 <div
                   className="flex flex-col items-center cursor-pointer group px-2 select-none"
                   onClick={() => {
@@ -605,39 +591,28 @@ export default function DrawsPage() {
                   }}
                 >
                   <div className="relative z-10">
-                    <div className="h-11 w-11 rounded-full bg-teal-50 border-2 border-teal-400 ring-4 ring-teal-100/70 flex items-center justify-center shadow-sm group-hover:scale-105 transition-all duration-200">
-                      <div className="h-7 w-7 rounded-full bg-teal-400 text-white flex items-center justify-center shadow-2xs">
-                        <Zap className="h-4 w-4 fill-white stroke-[1.5]" />
-                      </div>
+                    <div className="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-xs ring-4 ring-blue-100/80 group-hover:scale-105 transition-transform duration-150">
+                      <Zap className="h-4 w-4 fill-white stroke-[1.5]" />
                     </div>
-                    <span className="absolute -top-1 -right-1 rounded-full bg-slate-900 text-white text-[9px] font-mono px-1.5 py-0.2 font-bold shadow-xs">
-                      D3
-                    </span>
                   </div>
 
-                  <div className="text-center mt-3 space-y-1 w-full max-w-[120px]">
-                    <div className="flex items-center justify-center gap-1.5">
-                      <span className="text-xs font-bold text-blue-600 group-hover:underline">
-                        Draw #3
-                      </span>
-                      <span className="rounded-full bg-teal-50 border border-teal-200/80 text-teal-700 text-[10px] font-semibold px-1.5 py-0.2">
-                        Active
-                      </span>
+                  <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
+                    <div className="text-xs font-bold text-blue-600 group-hover:underline">
+                      Draw #3 (Active)
                     </div>
                     <div className="text-sm font-bold font-mono tracking-tight text-slate-900">
                       $84,000
                     </div>
-                    <div className="text-[11px] font-semibold text-teal-600">
-                      94% Spent
+                    <div className="text-[11px] font-semibold text-blue-700">
+                      94% Disbursed
                     </div>
-                    <div className="w-12 h-1 bg-teal-400 rounded-full mx-auto" />
-                    <div className="text-[10px] text-slate-400 font-medium">
+                    <div className="text-[11px] text-slate-400 font-medium pt-0.5">
                       May 19
                     </div>
                   </div>
                 </div>
 
-                {/* Node 4: Draw #4 (Next / Pending Review) */}
+                {/* Node 4: Draw #4 (Next) */}
                 <div
                   className="flex flex-col items-center cursor-pointer group px-2 select-none"
                   onClick={() => {
@@ -651,36 +626,25 @@ export default function DrawsPage() {
                   }}
                 >
                   <div className="relative z-10">
-                    <div className="h-11 w-11 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-sm ring-4 ring-white group-hover:ring-amber-50 group-hover:scale-105 transition-all duration-200">
-                      <Plus className="h-5 w-5 stroke-[2.5]" />
+                    <div className="h-10 w-10 rounded-full bg-white border-2 border-slate-400 text-slate-700 flex items-center justify-center shadow-xs ring-4 ring-white group-hover:scale-105 group-hover:border-slate-900 group-hover:text-slate-900 transition-all duration-150">
+                      <Plus className="h-4 w-4 stroke-[2.5]" />
                     </div>
-                    <span className="absolute -top-1 -right-1 rounded-full bg-slate-900 text-white text-[9px] font-mono px-1.5 py-0.2 font-bold shadow-xs">
-                      D4
-                    </span>
                   </div>
 
-                  <div className="text-center mt-3 space-y-1 w-full max-w-[120px]">
-                    <div className="flex items-center justify-center gap-1.5">
-                      <span className="text-xs font-bold text-slate-800 group-hover:text-amber-700 transition-colors">
-                        Draw #4
-                      </span>
-                      <span className="rounded-full bg-amber-50 border border-amber-200/80 text-amber-700 text-[10px] font-semibold px-1.5 py-0.2">
-                        Next
-                      </span>
+                  <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
+                    <div className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                      Draw #4
                     </div>
-                    <div>
-                      <span className="inline-block rounded-full bg-amber-50/80 border border-amber-200/70 text-amber-800 px-2 py-0.5 text-[10px] font-semibold font-mono">
-                        Amount TBD
-                      </span>
+                    <div className="text-xs font-semibold text-amber-700">
+                      Ready to Request
                     </div>
-                    <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto" />
-                    <div className="text-[10px] text-slate-400 font-medium">
-                      Pending
+                    <div className="text-[11px] text-slate-400 font-medium pt-0.5">
+                      Oct 18
                     </div>
                   </div>
                 </div>
 
-                {/* Node 5: Draw #5 (Queued) */}
+                {/* Node 5: Draw #5 (Upcoming) */}
                 <div
                   className="flex flex-col items-center cursor-pointer group px-2 select-none"
                   onClick={() => {
@@ -694,31 +658,17 @@ export default function DrawsPage() {
                   }}
                 >
                   <div className="relative z-10">
-                    <div className="h-11 w-11 rounded-full bg-slate-100 text-slate-400 border-2 border-slate-200 flex items-center justify-center ring-4 ring-white group-hover:ring-slate-100 group-hover:scale-105 transition-all duration-200">
-                      <Plus className="h-4.5 w-4.5 stroke-[2]" />
+                    <div className="h-10 w-10 rounded-full bg-slate-50 border-2 border-dashed border-slate-300 text-slate-400 flex items-center justify-center ring-4 ring-white group-hover:scale-105 transition-transform duration-150">
+                      <Plus className="h-4 w-4 stroke-[1.5]" />
                     </div>
-                    <span className="absolute -top-1 -right-1 rounded-full bg-slate-900 text-white text-[9px] font-mono px-1.5 py-0.2 font-bold shadow-xs">
-                      D5
-                    </span>
                   </div>
 
-                  <div className="text-center mt-3 space-y-1 w-full max-w-[120px]">
-                    <div className="flex items-center justify-center gap-1.5">
-                      <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900 transition-colors">
-                        Draw #5
-                      </span>
-                      <span className="rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-semibold px-1.5 py-0.2">
-                        Queued
-                      </span>
+                  <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
+                    <div className="text-xs font-bold text-slate-500">
+                      Draw #5
                     </div>
-                    <div>
-                      <span className="inline-block rounded-full bg-slate-50 border border-slate-200 text-slate-600 px-2 py-0.5 text-[10px] font-semibold font-mono">
-                        Amount TBD
-                      </span>
-                    </div>
-                    <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto" />
-                    <div className="text-[10px] text-slate-400 font-medium">
-                      Future
+                    <div className="text-[11px] text-slate-400 font-medium">
+                      Scheduled
                     </div>
                   </div>
                 </div>
@@ -727,35 +677,35 @@ export default function DrawsPage() {
           </div>
         </div>
 
-        {/* 4. Controls: View Switcher (Register vs SOV Matrix) & Filter Tabs */}
+        {/* 4. Controls: View Switcher (Register vs SOV) & Filter Pills */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           {/* Segmented View Switcher */}
-          <div className="flex rounded-lg bg-slate-100 p-0.5 border border-slate-200 w-full sm:w-fit overflow-x-auto scrollbar-none">
+          <div className="flex rounded-xl bg-slate-100 p-0.5 border border-slate-200/80 w-full sm:w-fit overflow-x-auto scrollbar-none">
             <button
               type="button"
               onClick={() => setMainView("REGISTER")}
               className={cn(
-                "px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shrink-0",
+                "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shrink-0",
                 mainView === "REGISTER"
                   ? "bg-white text-slate-900 shadow-xs font-semibold"
                   : "text-slate-600 hover:text-slate-900"
               )}
             >
               <Layers className="h-3.5 w-3.5" />
-              <span>Draws History</span>
+              <span>Draws Register</span>
             </button>
             <button
               type="button"
               onClick={() => setMainView("EXCEL_MATRIX")}
               className={cn(
-                "px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shrink-0",
+                "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shrink-0",
                 mainView === "EXCEL_MATRIX"
                   ? "bg-white text-slate-900 shadow-xs font-semibold"
                   : "text-slate-600 hover:text-slate-900"
               )}
             >
               <FileSpreadsheet className="h-3.5 w-3.5" />
-              <span>Budget Lines (Schedule of Values)</span>
+              <span>Schedule of Values (SOV)</span>
             </button>
           </div>
 
@@ -765,8 +715,8 @@ export default function DrawsPage() {
               {(
                 [
                   { key: "ALL", label: "All Draws" },
-                  { key: "ACTIVE", label: "Actively Spending" },
-                  { key: "FUNDED", label: "Paid by Bank" },
+                  { key: "ACTIVE", label: "Active" },
+                  { key: "FUNDED", label: "Funded" },
                   { key: "DISCREPANCY", label: "Needs Attention" },
                 ] as const
               ).map(({ key, label }) => (
@@ -775,9 +725,9 @@ export default function DrawsPage() {
                   type="button"
                   onClick={() => setFilterTab(key as FilterTab)}
                   className={cn(
-                    "px-2.5 py-1 text-xs rounded-md transition-colors font-medium cursor-pointer shrink-0",
+                    "px-3 py-1 text-xs rounded-lg transition-colors font-medium cursor-pointer shrink-0",
                     filterTab === key
-                      ? "bg-slate-900 text-white font-semibold"
+                      ? "bg-slate-900 text-white font-semibold shadow-2xs"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   )}
                 >
@@ -788,7 +738,7 @@ export default function DrawsPage() {
           )}
         </div>
 
-        {/* 5. Main View: Clean Table or SOV Matrix */}
+        {/* 5. Main View: Draws Register or SOV Matrix */}
         {mainView === "EXCEL_MATRIX" ? (
           <ExcelSovMatrix
             onSelectDraw={(num) => {
@@ -801,16 +751,16 @@ export default function DrawsPage() {
             }}
           />
         ) : (
-          <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
+          <div className="rounded-2xl border border-slate-200/80 bg-white overflow-hidden shadow-xs">
             <div className="overflow-x-auto custom-scrollbar">
               <table className="w-full min-w-[760px] text-left text-xs">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-[11px]">
+                <thead className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-semibold text-[11px] uppercase tracking-wider">
                   <tr>
-                    <th className="py-3 px-4">Draw #</th>
-                    <th className="py-3 px-4">Work Scope</th>
-                    <th className="py-3 px-4">Inspection Date</th>
-                    <th className="py-3 px-4 text-right">Requested from Bank</th>
-                    <th className="py-3 px-4 text-right">Paid by Bank</th>
+                    <th className="py-3 px-4">Draw</th>
+                    <th className="py-3 px-4">Scope</th>
+                    <th className="py-3 px-4">Date</th>
+                    <th className="py-3 px-4 text-right">Requested</th>
+                    <th className="py-3 px-4 text-right">Disbursed</th>
                     <th className="py-3 px-4">Status</th>
                     <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
@@ -819,13 +769,13 @@ export default function DrawsPage() {
                   {isDrawsLoading ? (
                     Array.from({ length: 4 }).map((_, idx) => (
                       <tr key={`skel-${idx}`} className="animate-pulse">
-                        <td className="py-3 px-4"><Skeleton className="h-4 w-20" /></td>
-                        <td className="py-3 px-4"><Skeleton className="h-4 w-40" /></td>
-                        <td className="py-3 px-4"><Skeleton className="h-4 w-24" /></td>
-                        <td className="py-3 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
-                        <td className="py-3 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
-                        <td className="py-3 px-4"><Skeleton className="h-4 w-20" /></td>
-                        <td className="py-3 px-4 text-right"><Skeleton className="h-6 w-16 ml-auto" /></td>
+                        <td className="py-3.5 px-4"><Skeleton className="h-4 w-20" /></td>
+                        <td className="py-3.5 px-4"><Skeleton className="h-4 w-40" /></td>
+                        <td className="py-3.5 px-4"><Skeleton className="h-4 w-24" /></td>
+                        <td className="py-3.5 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
+                        <td className="py-3.5 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
+                        <td className="py-3.5 px-4"><Skeleton className="h-4 w-20" /></td>
+                        <td className="py-3.5 px-4 text-right"><Skeleton className="h-6 w-16 ml-auto" /></td>
                       </tr>
                     ))
                   ) : filteredShowcaseRows.map((row) => (
@@ -840,58 +790,58 @@ export default function DrawsPage() {
                       }}
                       className="hover:bg-slate-50/70 transition-colors cursor-pointer"
                     >
-                      {/* Ref */}
-                      <td className="py-3 px-4 font-mono font-medium text-xs">
+                      {/* Draw Ref */}
+                      <td className="py-3.5 px-4 font-mono font-medium text-xs">
                         <div className="font-bold text-slate-900">{row.title}</div>
                         <span className="text-[11px] text-slate-400">{row.drawRefId}</span>
                       </td>
 
                       {/* Scope */}
-                      <td className="py-3 px-4 text-slate-800 font-medium">
+                      <td className="py-3.5 px-4 text-slate-800 font-medium">
                         {row.scopeName}
                       </td>
 
                       {/* Date */}
-                      <td className="py-3 px-4 text-slate-500 font-medium">
+                      <td className="py-3.5 px-4 text-slate-500 font-medium">
                         {row.date}
                       </td>
 
                       {/* Requested */}
-                      <td className="py-3 px-4 font-mono font-bold text-right text-slate-900">
+                      <td className="py-3.5 px-4 font-mono font-bold text-right text-slate-900">
                         {row.requestedAmt}
                       </td>
 
-                      {/* Funded */}
-                      <td className="py-3 px-4 font-mono text-right text-slate-600 font-medium">
+                      {/* Disbursed */}
+                      <td className="py-3.5 px-4 font-mono text-right text-slate-600 font-medium">
                         {row.disbursed}
                       </td>
 
                       {/* Status badge */}
-                      <td className="py-3 px-4">
+                      <td className="py-3.5 px-4">
                         {row.statusType === "FUNDED" && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                            Paid by Bank
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-800 border border-slate-200/80">
+                            Funded
                           </span>
                         )}
                         {row.statusType === "ACTIVE" && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-teal-50 text-teal-800 border border-teal-200">
-                            Actively Spending ({row.reconciledPct}%)
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200/60">
+                            Active ({row.reconciledPct}%)
                           </span>
                         )}
                         {row.statusType === "PENDING" && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200/60">
                             Ready to Request
                           </span>
                         )}
                         {row.statusType === "REJECTED" && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-200">
-                            Needs Attention
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200/60">
+                            Action Required
                           </span>
                         )}
                       </td>
 
                       {/* Action */}
-                      <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                      <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                         {row.actionType === "PRIMARY" ? (
                           <Button
                             variant="primary"
@@ -905,7 +855,7 @@ export default function DrawsPage() {
                                 setIsBuildDrawPacketOpen(true);
                               }
                             }}
-                            className="h-7 text-xs font-semibold px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+                            className="h-7 text-xs font-semibold px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-2xs"
                           >
                             Request Draw #4
                           </Button>
@@ -921,9 +871,9 @@ export default function DrawsPage() {
                               setSelectedDraw(matchingDraw);
                               setIsResubmitRevisionOpen(true);
                             }}
-                            className="h-7 text-xs font-semibold px-2.5 text-rose-700 border-rose-200 hover:bg-rose-50"
+                            className="h-7 text-xs font-semibold px-3 text-rose-700 border-rose-200 bg-rose-50/50 hover:bg-rose-100/50 rounded-lg shadow-2xs"
                           >
-                            Fix & Resubmit
+                            Resolve
                           </Button>
                         ) : (
                           <Button
@@ -936,7 +886,7 @@ export default function DrawsPage() {
                                 buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
                               handleOpenDetail(matchingDraw);
                             }}
-                            className="h-7 text-xs font-medium px-2.5 text-slate-700 hover:bg-slate-100"
+                            className="h-7 text-xs font-medium px-3 text-slate-700 border-slate-200 bg-white hover:bg-slate-50 rounded-lg shadow-2xs"
                           >
                             View Details
                           </Button>

@@ -175,6 +175,19 @@ export function Sidebar({
     return "/projects/woodlawn-new.jpg";
   };
 
+  const formatStageLabel = (stage?: string) => {
+    if (!stage) return "Active Construction";
+    const s = stage.toLowerCase();
+    if (s.includes("conception") || s.includes("design") || s.includes("planning")) return "Design & Planning";
+    if (s.includes("pre_con") || s.includes("pre_construction")) return "Pre-Construction";
+    if (s.includes("under_con") || s.includes("construction") || s.includes("active")) return "Active Construction";
+    if (s.includes("completion") || s.includes("closeout") || s.includes("closed") || s.includes("disposition")) return "Closeout & TCO";
+    if (s.includes("acquisition")) return "Acquisition Diligence";
+    return s
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
   return (
     <>
       {/* Mobile Backdrop */}
@@ -188,9 +201,8 @@ export function Sidebar({
 
       {/* Sidebar container */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-slate-50 border-r border-slate-200/80 transition-transform duration-200 ease-in-out md:static md:z-30 md:transition-all max-w-[85vw] ${
-          collapsed ? "w-[72px]" : "w-[280px] md:w-[260px]"
-        } ${mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0"}`}
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-slate-50 border-r border-slate-200/80 transition-transform duration-200 ease-in-out md:static md:z-30 md:transition-all max-w-[85vw] ${collapsed ? "w-[72px]" : "w-[280px] md:w-[260px]"
+          } ${mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0"}`}
       >
         {/* Top Header: Brand Logo & Collapse / Close Toggle */}
         <div className="flex h-14 items-center justify-between px-3.5 border-b border-slate-200/70 bg-white shrink-0">
@@ -266,13 +278,9 @@ export function Sidebar({
                     {activeProject?.address || "Jersey City, NJ"}
                   </span>
 
-                  <div className="mt-1 flex items-center text-[10px] text-slate-400 font-medium">
-                    <span className="font-semibold text-slate-600 capitalize">
-                      {effectiveRole.toLowerCase()}
-                    </span>
-                    <span className="mx-1 text-slate-300">•</span>
-                    <span className="truncate text-slate-500">
-                      {meData?.data?.name || "Marcus Vance"}
+                  <div className="mt-1 flex items-center">
+                    <span className="inline-flex items-center rounded border border-slate-200/80 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                      {formatStageLabel(activeProject?.lifecycle_stage)}
                     </span>
                   </div>
                 </div>
@@ -305,9 +313,8 @@ export function Sidebar({
 
         {/* Navigation list */}
         <nav
-          className={`flex-1 flex flex-col justify-between overflow-y-auto py-3 bg-slate-50 ${
-            collapsed ? "px-2" : "px-3"
-          }`}
+          className={`flex-1 flex flex-col justify-between overflow-y-auto py-3 bg-slate-50 ${collapsed ? "px-2" : "px-3"
+            }`}
           aria-label="Project Workspace Navigation"
         >
           {/* Main Operational Navigation Items */}
@@ -330,15 +337,13 @@ export function Sidebar({
                     href={item.href}
                     onClick={onCloseMobile}
                     title={collapsed ? item.label : undefined}
-                    className={`group relative flex items-center rounded-lg text-xs transition-all duration-150 ${
-                      collapsed
+                    className={`group relative flex items-center rounded-lg text-xs transition-all duration-150 ${collapsed
                         ? "h-9 w-9 mx-auto justify-center"
                         : "gap-2.5 px-3 py-2.5 sm:py-2"
-                    } ${
-                      isActive
+                      } ${isActive
                         ? "bg-white text-blue-600 font-bold shadow-2xs border border-slate-200/80"
                         : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-medium"
-                    }`}
+                      }`}
                   >
                     {/* Active Indicator Accent Bar */}
                     {isActive && !collapsed && (
@@ -346,11 +351,10 @@ export function Sidebar({
                     )}
 
                     <Icon
-                      className={`h-4 w-4 shrink-0 transition-colors ${
-                        isActive
+                      className={`h-4 w-4 shrink-0 transition-colors ${isActive
                           ? "text-blue-600 stroke-[2.25]"
                           : "text-slate-400 group-hover:text-slate-600 stroke-[1.75]"
-                      }`}
+                        }`}
                     />
 
                     {!collapsed && (
@@ -358,11 +362,10 @@ export function Sidebar({
                         <span className="truncate">{item.label}</span>
                         {badgeCount > 0 && (
                           <span
-                            className={`ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums ${
-                              isAlert
+                            className={`ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums ${isAlert
                                 ? "bg-rose-500 text-white"
                                 : "bg-slate-200/80 text-slate-700"
-                            }`}
+                              }`}
                           >
                             {badgeCount}
                           </span>
@@ -373,9 +376,8 @@ export function Sidebar({
                     {/* Collapsed view indicator dot */}
                     {collapsed && badgeCount > 0 && (
                       <span
-                        className={`absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full ring-2 ring-white ${
-                          isAlert ? "bg-rose-500" : "bg-blue-600"
-                        }`}
+                        className={`absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full ring-2 ring-white ${isAlert ? "bg-rose-500" : "bg-blue-600"
+                          }`}
                       />
                     )}
                   </Link>
@@ -396,15 +398,13 @@ export function Sidebar({
                   href={settingsItem.href}
                   onClick={onCloseMobile}
                   title={collapsed ? settingsItem.label : undefined}
-                  className={`group relative flex items-center rounded-lg text-xs transition-all duration-150 ${
-                    collapsed
+                  className={`group relative flex items-center rounded-lg text-xs transition-all duration-150 ${collapsed
                       ? "h-9 w-9 mx-auto justify-center"
                       : "gap-2.5 px-3 py-2.5 sm:py-2"
-                  } ${
-                    isActive
+                    } ${isActive
                       ? "bg-white text-blue-600 font-bold shadow-2xs border border-slate-200/80"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-medium"
-                  }`}
+                    }`}
                 >
                   {/* Active Indicator Accent Bar */}
                   {isActive && !collapsed && (
@@ -412,11 +412,10 @@ export function Sidebar({
                   )}
 
                   <Icon
-                    className={`h-4 w-4 shrink-0 transition-colors ${
-                      isActive
+                    className={`h-4 w-4 shrink-0 transition-colors ${isActive
                         ? "text-blue-600 stroke-[2.25]"
                         : "text-slate-400 group-hover:text-slate-600 stroke-[1.75]"
-                    }`}
+                      }`}
                   />
 
                   {!collapsed && (
@@ -435,9 +434,8 @@ export function Sidebar({
           <button
             onClick={() => signOut()}
             disabled={isSigningOut}
-            className={`w-full flex items-center rounded-lg text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all p-2 ${
-              collapsed ? "justify-center" : "gap-2.5 px-3"
-            } disabled:opacity-50 cursor-pointer group`}
+            className={`w-full flex items-center rounded-lg text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all p-2 ${collapsed ? "justify-center" : "gap-2.5 px-3"
+              } disabled:opacity-50 cursor-pointer group`}
             title="Sign out of GroundUp"
             aria-label="Sign out"
           >
