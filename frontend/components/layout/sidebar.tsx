@@ -17,6 +17,7 @@ import {
   ArrowLeft,
   ChevronsUpDown,
   LogOut,
+  X,
 } from "lucide-react";
 import { UserRole, Project } from "@/lib/types";
 import { BrandLogo } from "@/components/ui/brand-logo";
@@ -45,6 +46,30 @@ export function Sidebar({
   React.useEffect(() => {
     setThumbnailError(false);
   }, [workspaceProjectId]);
+
+  // Handle ESC key press to close mobile sidebar
+  React.useEffect(() => {
+    if (!mobileOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onCloseMobile();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [mobileOpen, onCloseMobile]);
+
+  // Lock body scroll when mobile sidebar drawer is open
+  React.useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   const { signOut, isSigningOut, SignOutOverlay } = useSignOut();
 
@@ -147,21 +172,23 @@ export function Sidebar({
       {mobileOpen && (
         <div
           onClick={onCloseMobile}
-          className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-xs md:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-xs md:hidden animate-in fade-in duration-200"
+          aria-hidden="true"
         />
       )}
 
       {/* Sidebar container */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-slate-50/60 border-r border-slate-200/80 transition-all duration-200 ease-in-out md:static max-w-[85vw] ${
-          collapsed ? "w-[72px]" : "w-[260px]"
-        } ${mobileOpen ? "translate-x-0 shadow-overlay" : "-translate-x-full md:translate-x-0"}`}
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-slate-50 border-r border-slate-200/80 transition-transform duration-200 ease-in-out md:static md:z-30 md:transition-all max-w-[85vw] ${
+          collapsed ? "w-[72px]" : "w-[280px] md:w-[260px]"
+        } ${mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0"}`}
       >
-        {/* Top Header: Brand Logo & Collapse Toggle */}
-        <div className="flex h-14 items-center justify-between px-3.5 border-b border-slate-200/70 bg-white">
+        {/* Top Header: Brand Logo & Collapse / Close Toggle */}
+        <div className="flex h-14 items-center justify-between px-3.5 border-b border-slate-200/70 bg-white shrink-0">
           {!collapsed ? (
             <>
               <BrandLogo href="/projects" onClick={onCloseMobile} />
+              {/* Desktop collapse toggle */}
               <button
                 onClick={onToggleCollapse}
                 className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 border border-slate-200/60 shadow-2xs transition-all cursor-pointer shrink-0 active:scale-95"
@@ -169,6 +196,15 @@ export function Sidebar({
                 title="Collapse sidebar"
               >
                 <PanelLeftClose className="h-4 w-4" />
+              </button>
+              {/* Mobile close toggle */}
+              <button
+                onClick={onCloseMobile}
+                className="flex md:hidden h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200/80 shadow-2xs transition-all cursor-pointer shrink-0 active:scale-95"
+                aria-label="Close navigation sidebar"
+                title="Close sidebar"
+              >
+                <X className="h-4 w-4" />
               </button>
             </>
           ) : (
@@ -186,7 +222,7 @@ export function Sidebar({
         </div>
 
         {/* Focused Active Project Card */}
-        <div className="p-3 border-b border-slate-200/70 bg-white">
+        <div className="p-3 border-b border-slate-200/70 bg-white shrink-0">
           {!collapsed ? (
             <div className="rounded-xl border border-slate-200/90 bg-slate-50/70 p-2.5 transition-all shadow-2xs hover:border-slate-300">
               <div className="flex items-center gap-3">
@@ -260,7 +296,7 @@ export function Sidebar({
 
         {/* Navigation list */}
         <nav
-          className={`flex-1 flex flex-col justify-between overflow-y-auto py-3 ${
+          className={`flex-1 flex flex-col justify-between overflow-y-auto py-3 bg-slate-50 ${
             collapsed ? "px-2" : "px-3"
           }`}
           aria-label="Project Workspace Navigation"
@@ -288,11 +324,11 @@ export function Sidebar({
                     className={`group relative flex items-center rounded-lg text-xs transition-all duration-150 ${
                       collapsed
                         ? "h-9 w-9 mx-auto justify-center"
-                        : "gap-2.5 px-3 py-2"
+                        : "gap-2.5 px-3 py-2.5 sm:py-2"
                     } ${
                       isActive
                         ? "bg-white text-blue-600 font-bold shadow-2xs border border-slate-200/80"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-medium"
                     }`}
                   >
                     {/* Active Indicator Accent Bar */}
@@ -354,11 +390,11 @@ export function Sidebar({
                   className={`group relative flex items-center rounded-lg text-xs transition-all duration-150 ${
                     collapsed
                       ? "h-9 w-9 mx-auto justify-center"
-                      : "gap-2.5 px-3 py-2"
+                      : "gap-2.5 px-3 py-2.5 sm:py-2"
                   } ${
                     isActive
                       ? "bg-white text-blue-600 font-bold shadow-2xs border border-slate-200/80"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-medium"
                   }`}
                 >
                   {/* Active Indicator Accent Bar */}
@@ -386,7 +422,7 @@ export function Sidebar({
         </nav>
 
         {/* Footer: Sign Out */}
-        <div className="p-2.5 border-t border-slate-200/70 bg-white">
+        <div className="p-2.5 border-t border-slate-200/70 bg-white shrink-0">
           <button
             onClick={() => signOut()}
             disabled={isSigningOut}

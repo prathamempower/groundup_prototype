@@ -442,15 +442,16 @@ export default function BuildDrawPacketPage() {
       </div>
 
       {/* Main Builder Card */}
-      <div className="rounded-2xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden">
-        {/* Step Progression Bar */}
-        <div className="border-b border-slate-200 bg-slate-50/70 px-6 py-4">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 max-w-3xl mx-auto">
+      <div className="rounded-2xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden mb-12">
+        {/* Step Progression Bar - Fully Responsive */}
+        <div className="border-b border-slate-200 bg-slate-50/70 px-3 sm:px-6 py-3 sm:py-4">
+          {/* Responsive Stepper Row matching PC version exactly */}
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 max-w-3xl mx-auto overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 gap-2.5 sm:gap-4 py-1 px-1">
             {/* Step 1 */}
             <button
               type="button"
               onClick={() => setCurrentStep(1)}
-              className={`flex items-center gap-2 transition-colors cursor-pointer ${
+              className={`flex items-center gap-1.5 sm:gap-2 transition-colors cursor-pointer shrink-0 ${
                 currentStep === 1
                   ? "text-blue-600 font-bold"
                   : currentStep > 1
@@ -459,26 +460,26 @@ export default function BuildDrawPacketPage() {
               }`}
             >
               <span
-                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+                className={`flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full text-[11px] sm:text-xs font-bold ${
                   currentStep === 1
-                    ? "bg-blue-600 text-white shadow-2xs"
+                    ? "bg-blue-600 text-white shadow-2xs ring-2 ring-blue-100"
                     : currentStep > 1
                     ? "bg-emerald-600 text-white shadow-2xs"
                     : "bg-slate-200 text-slate-600"
                 }`}
               >
-                {currentStep > 1 ? <Check className="h-3.5 w-3.5 stroke-[3]" /> : "1"}
+                {currentStep > 1 ? <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 stroke-[3]" /> : "1"}
               </span>
-              <span>1. Header & Timeline</span>
+              <span className="whitespace-nowrap text-[11px] sm:text-xs">1. Header & Timeline</span>
             </button>
 
-            <ChevronRight className="h-4 w-4 text-slate-300" />
+            <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-300 shrink-0" />
 
             {/* Step 2 */}
             <button
               type="button"
               onClick={() => setCurrentStep(2)}
-              className={`flex items-center gap-2 transition-colors cursor-pointer ${
+              className={`flex items-center gap-1.5 sm:gap-2 transition-colors cursor-pointer shrink-0 ${
                 currentStep === 2
                   ? "text-blue-600 font-bold"
                   : currentStep > 2
@@ -487,26 +488,26 @@ export default function BuildDrawPacketPage() {
               }`}
             >
               <span
-                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+                className={`flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full text-[11px] sm:text-xs font-bold ${
                   currentStep === 2
-                    ? "bg-blue-600 text-white shadow-2xs"
+                    ? "bg-blue-600 text-white shadow-2xs ring-2 ring-blue-100"
                     : currentStep > 2
                     ? "bg-emerald-600 text-white shadow-2xs"
                     : "bg-slate-200 text-slate-600"
                 }`}
               >
-                {currentStep > 2 ? <Check className="h-3.5 w-3.5 stroke-[3]" /> : "2"}
+                {currentStep > 2 ? <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 stroke-[3]" /> : "2"}
               </span>
-              <span>2. SOV Line Items</span>
+              <span className="whitespace-nowrap text-[11px] sm:text-xs">2. SOV Line Items</span>
             </button>
 
-            <ChevronRight className="h-4 w-4 text-slate-300" />
+            <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-300 shrink-0" />
 
             {/* Step 3 */}
             <button
               type="button"
               onClick={() => setCurrentStep(3)}
-              className={`flex items-center gap-2 transition-colors cursor-pointer ${
+              className={`flex items-center gap-1.5 sm:gap-2 transition-colors cursor-pointer shrink-0 ${
                 currentStep === 3
                   ? "text-blue-600 font-bold"
                   : currentStep > 3
@@ -515,47 +516,47 @@ export default function BuildDrawPacketPage() {
               }`}
             >
               <span
-                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+                className={`flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full text-[11px] sm:text-xs font-bold ${
                   currentStep === 3
-                    ? "bg-blue-600 text-white shadow-2xs"
+                    ? "bg-blue-600 text-white shadow-2xs ring-2 ring-blue-100"
                     : currentStep > 3
                     ? "bg-emerald-600 text-white shadow-2xs"
                     : "bg-slate-200 text-slate-600"
                 }`}
               >
-                {currentStep > 3 ? <Check className="h-3.5 w-3.5 stroke-[3]" /> : "3"}
+                {currentStep > 3 ? <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 stroke-[3]" /> : "3"}
               </span>
-              <span>3. Visual Proof</span>
+              <span className="whitespace-nowrap text-[11px] sm:text-xs">3. Visual Proof</span>
             </button>
 
-            <ChevronRight className="h-4 w-4 text-slate-300" />
+            <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-300 shrink-0" />
 
             {/* Step 4 */}
             <button
               type="button"
               onClick={() => setCurrentStep(4)}
-              className={`flex items-center gap-2 transition-colors cursor-pointer ${
+              className={`flex items-center gap-1.5 sm:gap-2 transition-colors cursor-pointer shrink-0 ${
                 currentStep === 4
                   ? "text-blue-600 font-bold"
                   : "text-slate-400"
               }`}
             >
               <span
-                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+                className={`flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full text-[11px] sm:text-xs font-bold ${
                   currentStep === 4
-                    ? "bg-blue-600 text-white shadow-2xs"
+                    ? "bg-blue-600 text-white shadow-2xs ring-2 ring-blue-100"
                     : "bg-slate-200 text-slate-600"
                 }`}
               >
                 4
               </span>
-              <span>4. Signatures</span>
+              <span className="whitespace-nowrap text-[11px] sm:text-xs">4. Signatures</span>
             </button>
           </div>
         </div>
 
         {/* Step Body */}
-        <div className="p-6 sm:p-8">
+        <div className="p-4 sm:p-6 md:p-8">
           {/* STEP 1: HEADER & INSPECTION */}
           {currentStep === 1 && (
             <div className="space-y-6">
@@ -568,7 +569,7 @@ export default function BuildDrawPacketPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Draw Application Number
@@ -611,7 +612,7 @@ export default function BuildDrawPacketPage() {
               {/* Project Reference Card */}
               <div className="rounded-xl border border-blue-200/90 bg-blue-50/50 p-4 space-y-1 text-xs">
                 <div className="font-bold text-blue-950 flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-blue-600" />
+                  <Building2 className="h-4 w-4 text-blue-600 shrink-0" />
                   <span>Project Reference: {projectTitle}</span>
                 </div>
                 {projectAddress && (
@@ -640,15 +641,78 @@ export default function BuildDrawPacketPage() {
                   type="button"
                   variant="outline"
                   onClick={handleAddCustomLine}
-                  className="text-xs font-semibold gap-1.5 border-slate-300 bg-white shadow-2xs hover:bg-slate-50 shrink-0"
+                  className="text-xs font-semibold gap-1.5 border-slate-300 bg-white shadow-2xs hover:bg-slate-50 shrink-0 self-start sm:self-auto"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Add Line Item</span>
                 </Button>
               </div>
 
-              <div className="rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
-                <table className="w-full text-left text-xs">
+              {/* Mobile Cards View (< md) */}
+              <div className="md:hidden space-y-3">
+                {sovLines.map((line) => (
+                  <div
+                    key={line.id}
+                    className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs space-y-2.5"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-bold text-slate-900 text-xs">
+                        {line.codeAndDesc}
+                      </span>
+                      {sovLines.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveLine(line.id)}
+                          className="text-slate-400 hover:text-rose-600 p-1"
+                          title="Remove item"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-100">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-500 block">
+                          Approved Budget
+                        </span>
+                        <span className="font-semibold text-slate-700">
+                          {formatMoney(line.budgetCents)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-500 block">
+                          Previously Drawn
+                        </span>
+                        <span className="font-semibold text-slate-500">
+                          {formatMoney(line.previouslyDrawnCents)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                      <span className="text-xs font-bold text-slate-700">
+                        This Period Claim ($):
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-400 font-semibold text-xs">$</span>
+                        <input
+                          type="number"
+                          value={line.claimCents / 100}
+                          onChange={(e) =>
+                            handleUpdateLineClaim(line.id, Number(e.target.value) || 0)
+                          }
+                          className="w-32 text-right rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View (>= md) */}
+              <div className="hidden md:block rounded-xl border border-slate-200 overflow-x-auto shadow-2xs">
+                <table className="w-full text-left text-xs min-w-[580px]">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                     <tr>
                       <th className="py-3 px-4">SOV Code & Description</th>
@@ -702,24 +766,24 @@ export default function BuildDrawPacketPage() {
               </div>
 
               {/* Calculations Box */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4">
                   <span className="text-xs font-semibold text-slate-500 block">Gross Claimed Total</span>
-                  <span className="text-lg font-bold text-slate-900 mt-1 block">
+                  <span className="text-base sm:text-lg font-bold text-slate-900 mt-1 block">
                     {formatMoney(totalRequestedCents)}
                   </span>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4">
                   <span className="text-xs font-semibold text-slate-500 block">Standard Retainage (10%)</span>
-                  <span className="text-lg font-bold text-amber-700 mt-1 block">
+                  <span className="text-base sm:text-lg font-bold text-amber-700 mt-1 block">
                     -{formatMoney(retainageCents)}
                   </span>
                 </div>
 
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4">
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3.5 sm:p-4">
                   <span className="text-xs font-semibold text-emerald-800 block">Net Eligible Wire Disbursement</span>
-                  <span className="text-lg font-bold text-emerald-700 mt-1 block">
+                  <span className="text-base sm:text-lg font-bold text-emerald-700 mt-1 block">
                     {formatMoney(netPayableCents)}
                   </span>
                 </div>
@@ -958,29 +1022,34 @@ export default function BuildDrawPacketPage() {
         </div>
 
         {/* Footer Navigation Bar */}
-        <div className="bg-slate-50 border-t border-slate-200 px-6 sm:px-8 py-4 flex items-center justify-between">
+        <div className="bg-slate-50 border-t border-slate-200 px-4 sm:px-8 py-4 flex items-center justify-between mt-auto">
           <Button
             type="button"
             variant="ghost"
             disabled={currentStep === 1 || isSubmitting}
             onClick={handlePrevious}
-            className="text-xs font-semibold text-slate-700 hover:text-slate-900 border border-slate-200 bg-white px-4 py-2 rounded-lg"
+            className="text-xs font-semibold text-slate-700 hover:text-slate-900 border border-slate-200 bg-white px-4 py-2 rounded-lg disabled:opacity-40"
           >
             Previous
           </Button>
 
-          <Button
-            type="button"
-            onClick={handleNext}
-            disabled={isSubmitting || (currentStep === 4 && !certificationAgreed)}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-5 py-2 rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer"
-          >
-            {currentStep === 4 ? (
-              isSubmitting ? "Transmitting..." : "Submit to Lender"
-            ) : (
-              "Next Step"
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-medium text-slate-400 hidden sm:inline">
+              Step {currentStep} of 4
+            </span>
+            <Button
+              type="button"
+              onClick={handleNext}
+              disabled={isSubmitting || (currentStep === 4 && !certificationAgreed)}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-5 py-2 rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              {currentStep === 4 ? (
+                isSubmitting ? "Transmitting..." : "Submit to Lender"
+              ) : (
+                "Next Step"
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 

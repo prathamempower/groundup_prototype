@@ -195,8 +195,8 @@ export function RecordDecisionModal({
               <label className="text-caption font-semibold uppercase tracking-wider text-text-secondary block">
                 Line Item Decision Breakdown
               </label>
-              <div className="border border-border rounded-md overflow-hidden">
-                <table className="w-full text-left text-body-sm">
+              <div className="border border-border rounded-md overflow-x-auto custom-scrollbar">
+                <table className="w-full min-w-[460px] text-left text-body-sm">
                   <thead className="bg-subtle/60 text-caption font-semibold text-text-secondary border-b border-border">
                     <tr>
                       <th className="p-2.5">Code & Category</th>

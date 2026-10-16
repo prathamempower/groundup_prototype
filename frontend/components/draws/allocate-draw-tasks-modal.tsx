@@ -211,8 +211,8 @@ export function AllocateDrawTasksModal({
 
         {/* Task List Table */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          <div className="rounded-xl border border-slate-200 overflow-hidden bg-white shadow-2xs">
-            <table className="w-full text-left text-xs">
+          <div className="rounded-xl border border-slate-200 overflow-x-auto custom-scrollbar bg-white shadow-2xs">
+            <table className="w-full min-w-[560px] text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold sticky top-0 z-10">
                 <tr>
                   <th className="py-2.5 px-3 w-16">CSI Code</th>

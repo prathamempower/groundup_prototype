@@ -133,9 +133,6 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
             <h2 className="text-sm font-bold text-slate-900 tracking-tight">
               Financial Trajectory
             </h2>
-            <span className="text-[10px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200/70">
-              Interactive
-            </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
             {activeTab === "COST_VS_FUNDING" && "Spend, earned value progress, and draw funding cleared vs. approved plan."}

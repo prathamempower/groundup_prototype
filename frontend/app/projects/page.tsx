@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Project, UserRole } from "@/lib/types";
 import { getDefaultWorkspaceRoute } from "@/lib/navigation";
@@ -28,6 +28,8 @@ import {
   Briefcase,
   ChevronRight,
   BarChart3,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import { ProjectFinancialComparison } from "@/components/projects/financial-comparison";
 
@@ -35,11 +37,23 @@ const DEFAULT_GLOBAL_ROLE: UserRole = "OWNER";
 
 export default function ProjectsPortfolioPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<"CARD" | "TABLE" | "COMPARE">("CARD");
   const [searchQuery, setSearchQuery] = useState("");
   const [stageFilter, setStageFilter] = useState<string>("ALL");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [sortBy, setSortBy] = useState<"ACTIVITY" | "NAME" | "STAGE">("ACTIVITY");
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [deleteConfirmationInput, setDeleteConfirmationInput] = useState("");
+
+  const deleteProjectMutation = useMutation({
+    mutationFn: (projectId: string) => api.projects.delete(projectId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      setProjectToDelete(null);
+      setDeleteConfirmationInput("");
+    },
+  });
 
   const { data: meData } = useQuery({
     queryKey: ["me"],
@@ -509,18 +523,31 @@ export default function ProjectsPortfolioPage() {
 
                   {/* Body Content */}
                   <div className="p-4 space-y-3.5">
-                    {/* Stage & Role Badges */}
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600">
-                        {formatStageLabel(project.lifecycle_stage)}
-                      </span>
-                      <span className="inline-flex items-center rounded border border-blue-100 bg-blue-50/70 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
-                        Role: {effectiveRole}
-                      </span>
+                    {/* Stage & Role Badges & Delete Action */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                          {formatStageLabel(project.lifecycle_stage)}
+                        </span>
+                        <span className="inline-flex items-center rounded border border-blue-100 bg-blue-50/70 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
+                          Role: {effectiveRole}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setProjectToDelete(project);
+                        }}
+                        className="p-1.5 -my-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                        title="Delete project workspace"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="space-y-1">
+                    <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-[11px]">
                         <span className="font-semibold text-slate-500 uppercase tracking-wider text-[10px]">
                           Progress
@@ -651,6 +678,91 @@ export default function ProjectsPortfolioPage() {
                 })}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Clean Delete Confirmation Modal */}
+      {projectToDelete && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => {
+            setProjectToDelete(null);
+            setDeleteConfirmationInput("");
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Delete Project</h3>
+                <p className="text-xs text-slate-500">
+                  This action is permanent and cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-1">
+              <label className="block text-xs text-slate-600">
+                Type <span className="font-semibold text-slate-900 select-all">{projectToDelete.name}</span> to confirm:
+              </label>
+              <input
+                type="text"
+                autoFocus
+                value={deleteConfirmationInput}
+                onChange={(e) => setDeleteConfirmationInput(e.target.value)}
+                placeholder={projectToDelete.name}
+                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-colors"
+                onKeyDown={(e) => {
+                  if (
+                    e.key === "Enter" &&
+                    deleteConfirmationInput.trim() === projectToDelete.name.trim() &&
+                    !deleteProjectMutation.isPending
+                  ) {
+                    deleteProjectMutation.mutate(projectToDelete.id);
+                  }
+                }}
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setProjectToDelete(null);
+                  setDeleteConfirmationInput("");
+                }}
+                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold cursor-pointer transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={
+                  deleteProjectMutation.isPending ||
+                  deleteConfirmationInput.trim() !== projectToDelete.name.trim()
+                }
+                onClick={() => deleteProjectMutation.mutate(projectToDelete.id)}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white rounded-xl text-xs font-bold cursor-pointer transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-xs"
+              >
+                {deleteProjectMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Project</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

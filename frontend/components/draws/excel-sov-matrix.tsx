@@ -1,22 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { formatMoney } from "@/lib/format";
 import {
   EXCEL_DRAW_TASKS,
   EXCEL_DRAW_COLUMNS,
-  ExcelTaskScheduleItem,
 } from "@/lib/data/excel-draw-schedule";
 import {
   FileSpreadsheet,
   Search,
   ExternalLink,
-  CheckCircle2,
-  Calendar,
-  Layers,
   ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Zap,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface ExcelSovMatrixProps {
   onSelectDraw?: (drawNumber: number) => void;
@@ -24,6 +22,16 @@ interface ExcelSovMatrixProps {
 
 export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  // Drag-to-scroll state
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+  const [isDragging, setIsDragging] = useState(false);
+
   // Local editable amounts: taskNumber -> drawNumber -> cents
   const [taskDrawAmounts, setTaskDrawAmounts] = useState<Record<string, Record<number, number>>>(() => {
     const init: Record<string, Record<number, number>> = {};
@@ -32,6 +40,97 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
     });
     return init;
   });
+
+  const checkScrollState = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 10);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 10);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    checkScrollState();
+    el.addEventListener("scroll", checkScrollState, { passive: true });
+    window.addEventListener("resize", checkScrollState);
+    return () => {
+      el.removeEventListener("scroll", checkScrollState);
+      window.removeEventListener("resize", checkScrollState);
+    };
+  }, [checkScrollState]);
+
+  // Support Shift+Wheel for horizontal mouse wheel scrolling
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) > 0) return; // Native horizontal trackpad gesture
+      if (e.shiftKey) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+      }
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, []);
+
+  const handleScrollBy = (amount: number) => {
+    if (!scrollContainerRef.current) return;
+    scrollContainerRef.current.scrollBy({ left: amount, behavior: "smooth" });
+  };
+
+  const handleScrollToDraw = (drawNumber: number) => {
+    if (!scrollContainerRef.current) return;
+    if (drawNumber === 0) {
+      scrollContainerRef.current.scrollTo({ left: 0, behavior: "smooth" });
+      return;
+    }
+    // Number (~48px) + Description (~160px) + Scheduled Value (~95px) + Change Orders (~85px) = ~388px base
+    const baseOffset = 388;
+    const drawColWidth = 100;
+    const targetOffset = baseOffset + (drawNumber - 1) * drawColWidth - 60;
+    scrollContainerRef.current.scrollTo({ left: Math.max(0, targetOffset), behavior: "smooth" });
+  };
+
+  // Drag-to-scroll handlers (allows dragging with mouse on desktop)
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === "INPUT" ||
+      target.tagName === "BUTTON" ||
+      target.closest("button") ||
+      target.closest("input")
+    ) {
+      return;
+    }
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    isDraggingRef.current = true;
+    startXRef.current = e.pageX - el.offsetLeft;
+    scrollLeftRef.current = el.scrollLeft;
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current) return;
+    e.preventDefault();
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startXRef.current) * 1.5;
+    el.scrollLeft = scrollLeftRef.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    if (isDraggingRef.current) {
+      isDraggingRef.current = false;
+      setIsDragging(false);
+    }
+  };
 
   const filteredTasks = EXCEL_DRAW_TASKS.filter(
     (t) =>
@@ -70,64 +169,133 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
   };
 
   return (
-    <div className="rounded-xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden">
+    <div className="rounded-xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden flex flex-col">
       {/* Header Banner */}
-      <div className="px-5 py-4 border-b border-slate-200 bg-slate-50/70 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-2xs">
-            <FileSpreadsheet className="h-4 w-4" />
+      <div className="px-3.5 sm:px-5 py-3 sm:py-3.5 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3.5">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-2xs shrink-0">
+            <FileSpreadsheet className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </div>
-          <div>
-            <h3 className="text-sm font-bold text-slate-900">
-              Contractor Schedule of Values Matrix (Excel View)
+          <div className="min-w-0">
+            <h3 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+              Contractor Schedule of Values Matrix
             </h3>
-            <p className="text-[11px] text-slate-500">
-              Itemized construction tasks and draw amounts across all billing periods (Draws 1 through 9)
+            <p className="text-[10px] sm:text-[11px] text-slate-500 truncate hidden xs:block sm:block">
+              Itemized construction tasks and draw amounts (Draws 1–9)
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full md:w-auto">
-          <div className="relative flex-1 sm:flex-none">
-            <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search tasks..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 pr-3 py-1 text-xs bg-white border border-slate-200 rounded-md focus:outline-none focus:border-emerald-600 w-full sm:w-48"
-            />
-          </div>
-          <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md shrink-0">
-            {EXCEL_DRAW_TASKS.length} Tasks • 9 Draws Scheduled
-          </span>
+        <div className="relative w-full sm:w-56 shrink-0">
+          <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8 pr-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-md focus:outline-none focus:border-emerald-600 w-full"
+          />
         </div>
       </div>
 
-      {/* Spreadsheet Grid */}
-      <div className="overflow-x-auto max-h-[650px] relative">
-        <table className="w-full text-left text-xs border-collapse font-sans">
-          <thead className="bg-slate-100/90 text-slate-700 font-bold sticky top-0 z-20 border-b border-slate-300">
+      {/* Interactive Horizontal Navigation Bar */}
+      <div className="px-3 sm:px-5 py-2 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between gap-2 text-xs">
+        {/* Left Side: Jump to Draw Shortcuts */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 min-w-0">
+          <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 shrink-0">Jump:</span>
+          <button
+            type="button"
+            onClick={() => handleScrollToDraw(0)}
+            className="px-2 py-0.5 sm:py-1 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-[10px] sm:text-[11px] font-semibold text-slate-700 hover:text-slate-900 transition-colors shadow-2xs cursor-pointer shrink-0 active:scale-95"
+          >
+            Start
+          </button>
+          <button
+            type="button"
+            onClick={() => handleScrollToDraw(1)}
+            className="px-2 py-0.5 sm:py-1 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-[10px] sm:text-[11px] font-semibold text-slate-700 hover:text-slate-900 transition-colors shadow-2xs cursor-pointer shrink-0 active:scale-95"
+          >
+            Draws 1–3
+          </button>
+          <button
+            type="button"
+            onClick={() => handleScrollToDraw(4)}
+            className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-blue-50 hover:bg-blue-100 border border-blue-200 text-[10px] sm:text-[11px] font-bold text-blue-700 transition-colors shadow-2xs cursor-pointer flex items-center gap-1 shrink-0 active:scale-95"
+          >
+            <Zap className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-blue-600" />
+            <span>Draw 4 (Active)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleScrollToDraw(7)}
+            className="px-2 py-0.5 sm:py-1 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-[10px] sm:text-[11px] font-semibold text-slate-700 hover:text-slate-900 transition-colors shadow-2xs cursor-pointer shrink-0 active:scale-95"
+          >
+            Draws 5–9
+          </button>
+        </div>
+
+        {/* Right Side: Step Scroll Buttons */}
+        <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+          <button
+            type="button"
+            onClick={() => handleScrollBy(-260)}
+            disabled={!canScrollLeft}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-white border border-slate-200 text-[11px] sm:text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs transition-all cursor-pointer active:scale-95"
+            aria-label="Scroll table left"
+            title="Scroll left"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Left</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleScrollBy(260)}
+            disabled={!canScrollRight}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-white border border-slate-200 text-[11px] sm:text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs transition-all cursor-pointer active:scale-95"
+            aria-label="Scroll table right"
+            title="Scroll right"
+          >
+            <span className="hidden sm:inline">Right</span>
+            <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Spreadsheet Grid Container with Responsive Height & Smooth Horizontal Scroll */}
+      <div
+        ref={scrollContainerRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUpOrLeave}
+        onMouseLeave={handleMouseUpOrLeave}
+        className={`overflow-x-auto overflow-y-auto max-h-[500px] sm:max-h-[650px] relative custom-scrollbar overscroll-x-contain touch-pan-x ${
+          isDragging ? "cursor-grabbing select-none" : ""
+        }`}
+        tabIndex={0}
+        aria-label="Budget Lines Schedule of Values Spreadsheet"
+      >
+        <table className="min-w-[1340px] sm:min-w-[1460px] w-full text-left text-xs border-collapse font-sans">
+          <thead className="bg-slate-100 text-slate-700 font-bold sticky top-0 z-20 border-b border-slate-300">
             {/* Row 1: Headers */}
             <tr>
-              <th className="py-2.5 px-3 border-r border-slate-200 sticky left-0 z-30 bg-slate-100 min-w-[70px]">
+              <th className="py-2 sm:py-2.5 px-2 sm:px-3 border-r border-slate-200 min-w-[48px] w-[48px] sm:min-w-[64px] sm:w-[64px] bg-slate-100">
                 Number
               </th>
-              <th className="py-2.5 px-3 border-r border-slate-200 sticky left-[70px] z-30 bg-slate-100 min-w-[260px]">
+              <th className="py-2 sm:py-2.5 px-2.5 sm:px-3 border-r border-slate-200 min-w-[160px] sm:min-w-[240px] bg-slate-100">
                 Description
               </th>
-              <th className="py-2.5 px-3 text-right border-r border-slate-200 min-w-[120px]">
+              <th className="py-2 sm:py-2.5 px-2.5 sm:px-3 text-right border-r border-slate-200 min-w-[95px] sm:min-w-[120px] bg-slate-100">
                 Scheduled Value
               </th>
-              <th className="py-2.5 px-3 text-right border-r border-slate-200 min-w-[100px]">
+              <th className="py-2 sm:py-2.5 px-2.5 sm:px-3 text-right border-r border-slate-200 min-w-[85px] sm:min-w-[100px] bg-slate-100">
                 Change Orders
               </th>
               {EXCEL_DRAW_COLUMNS.map((col) => (
                 <th
                   key={col.drawNumber}
-                  className={`py-2 px-3 text-right border-r border-slate-200 min-w-[110px] ${
+                  className={`py-1.5 sm:py-2 px-2 sm:px-3 text-right border-r border-slate-200 min-w-[95px] sm:min-w-[105px] ${
                     col.drawNumber === 4
-                      ? "bg-blue-100/80 text-blue-900 font-extrabold"
+                      ? "bg-blue-100/90 text-blue-900 font-extrabold"
                       : "bg-slate-100"
                   }`}
                 >
@@ -138,7 +306,7 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
                         type="button"
                         onClick={() => onSelectDraw(col.drawNumber)}
                         title={`Inspect Draw #${col.drawNumber} in Workbench`}
-                        className="text-slate-400 hover:text-blue-600 transition-colors"
+                        className="text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
                       >
                         <ExternalLink className="h-3 w-3" />
                       </button>
@@ -151,24 +319,24 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
               ))}
             </tr>
 
-            {/* Row 2: On-Site Inspection Sub-header (Matches Image 3) */}
+            {/* Row 2: On-Site Inspection Sub-header */}
             <tr className="bg-slate-50 text-[11px] border-b border-slate-200 font-semibold text-slate-600">
-              <td className="py-1.5 px-3 border-r border-slate-200 sticky left-0 z-30 bg-slate-50 font-medium italic">
+              <td className="py-1.5 px-2 sm:px-3 border-r border-slate-200 font-medium italic bg-slate-50">
                 -
               </td>
-              <td className="py-1.5 px-3 border-r border-slate-200 sticky left-[70px] z-30 bg-slate-50 font-bold text-slate-900">
+              <td className="py-1.5 px-2.5 sm:px-3 border-r border-slate-200 font-bold text-slate-900 bg-slate-50">
                 On-Site Inspection?
               </td>
-              <td className="py-1.5 px-3 text-right border-r border-slate-200 text-slate-400">
+              <td className="py-1.5 px-2.5 sm:px-3 text-right border-r border-slate-200 text-slate-400 bg-slate-50">
                 -
               </td>
-              <td className="py-1.5 px-3 text-right border-r border-slate-200 text-slate-400">
+              <td className="py-1.5 px-2.5 sm:px-3 text-right border-r border-slate-200 text-slate-400 bg-slate-50">
                 -
               </td>
               {EXCEL_DRAW_COLUMNS.map((col) => (
                 <td
                   key={`insp-${col.drawNumber}`}
-                  className={`py-1.5 px-3 text-right border-r border-slate-200 font-bold ${
+                  className={`py-1.5 px-2 sm:px-3 text-right border-r border-slate-200 font-bold ${
                     col.drawNumber === 4 ? "bg-blue-50/80 text-blue-900" : ""
                   }`}
                 >
@@ -189,32 +357,36 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
           <tbody className="divide-y divide-slate-100 text-slate-800">
             {filteredTasks.map((task, rowIdx) => {
               const rowDraws = taskDrawAmounts[task.number] || {};
+              const isEven = rowIdx % 2 === 0;
+
               return (
                 <tr
                   key={task.number}
-                  className={`hover:bg-slate-50/80 transition-colors ${
-                    rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50/30"
+                  className={`group transition-colors ${
+                    isEven ? "bg-white hover:bg-slate-50" : "bg-slate-50/60 hover:bg-slate-100/70"
                   }`}
                 >
                   {/* Number */}
-                  <td className="py-2 px-3 font-mono font-bold text-slate-900 border-r border-slate-200 sticky left-0 z-10 bg-inherit">
+                  <td className="py-2 px-2 sm:px-3 font-mono font-bold text-slate-900 border-r border-slate-200">
                     {task.number}
                   </td>
 
                   {/* Description */}
-                  <td className="py-2 px-3 font-medium text-slate-900 border-r border-slate-200 sticky left-[70px] z-10 bg-inherit truncate max-w-[280px]">
+                  <td className="py-2 px-2.5 sm:px-3 font-medium text-slate-900 border-r border-slate-200 truncate max-w-[180px] sm:max-w-[280px]">
                     {task.description}
                   </td>
 
                   {/* Scheduled Value */}
-                  <td className="py-2 px-3 text-right font-medium tabular-nums text-slate-700 border-r border-slate-200">
+                  <td className="py-2 px-2.5 sm:px-3 text-right font-medium tabular-nums text-slate-700 border-r border-slate-200">
                     {formatMoney(task.scheduledValueCents)}
                   </td>
 
                   {/* Change Orders */}
-                  <td className={`py-2 px-3 text-right tabular-nums border-r border-slate-200 ${
-                    task.changeOrdersCents > 0 ? "text-amber-800 font-semibold" : "text-slate-400"
-                  }`}>
+                  <td
+                    className={`py-2 px-2.5 sm:px-3 text-right tabular-nums border-r border-slate-200 ${
+                      task.changeOrdersCents > 0 ? "text-amber-800 font-semibold" : "text-slate-400"
+                    }`}
+                  >
                     {formatMoney(task.changeOrdersCents)}
                   </td>
 
@@ -227,11 +399,12 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
                       <td
                         key={`${task.number}-${col.drawNumber}`}
                         className={`py-1.5 px-2 text-right tabular-nums border-r border-slate-200 ${
-                          isDraw4 ? "bg-blue-50/30" : ""
+                          isDraw4 ? "bg-blue-50/40" : ""
                         }`}
                       >
                         <input
                           type="text"
+                          inputMode="decimal"
                           value={
                             hasAmount
                               ? `$${(amountCents / 100).toLocaleString("en-US", {
@@ -243,7 +416,7 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
                           onChange={(e) =>
                             handleCellChange(task.number, col.drawNumber, e.target.value)
                           }
-                          className={`w-full text-right bg-transparent px-1 py-0.5 rounded text-xs transition-colors focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                          className={`w-full text-right bg-transparent px-1 py-0.5 rounded text-[11px] sm:text-xs transition-colors focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
                             hasAmount
                               ? isDraw4
                                 ? "font-bold text-blue-900"
@@ -260,18 +433,18 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
           </tbody>
 
           {/* Grand Totals Footer */}
-          <tfoot className="bg-slate-100 border-t-2 border-slate-300 font-bold text-slate-900 sticky bottom-0 z-20">
+          <tfoot className="bg-slate-100 border-t-2 border-slate-300 font-bold text-slate-900">
             <tr>
-              <td className="py-3 px-3 border-r border-slate-300 sticky left-0 z-30 bg-slate-100 font-mono">
+              <td className="py-3 px-2 sm:px-3 border-r border-slate-300 font-mono bg-slate-100">
                 TOTALS
               </td>
-              <td className="py-3 px-3 border-r border-slate-300 sticky left-[70px] z-30 bg-slate-100">
+              <td className="py-3 px-2.5 sm:px-3 border-r border-slate-300 bg-slate-100">
                 Total Budget & Draw Allocations
               </td>
-              <td className="py-3 px-3 text-right tabular-nums border-r border-slate-300 font-bold">
+              <td className="py-3 px-2.5 sm:px-3 text-right tabular-nums border-r border-slate-300 font-bold bg-slate-100">
                 {formatMoney(totalScheduledValueCents)}
               </td>
-              <td className="py-3 px-3 text-right tabular-nums border-r border-slate-300 font-bold text-amber-800">
+              <td className="py-3 px-2.5 sm:px-3 text-right tabular-nums border-r border-slate-300 font-bold text-amber-800 bg-slate-100">
                 {formatMoney(totalChangeOrdersCents)}
               </td>
               {EXCEL_DRAW_COLUMNS.map((col) => {
@@ -280,8 +453,8 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
                 return (
                   <td
                     key={`total-${col.drawNumber}`}
-                    className={`py-3 px-3 text-right tabular-nums border-r border-slate-300 font-extrabold ${
-                      isDraw4 ? "bg-blue-100 text-blue-950" : "text-slate-900"
+                    className={`py-3 px-2 sm:px-3 text-right tabular-nums border-r border-slate-300 font-extrabold ${
+                      isDraw4 ? "bg-blue-100 text-blue-950" : "text-slate-900 bg-slate-100"
                     }`}
                   >
                     <div className="flex flex-col items-end">
@@ -290,7 +463,7 @@ export function ExcelSovMatrix({ onSelectDraw }: ExcelSovMatrixProps) {
                         <button
                           type="button"
                           onClick={() => onSelectDraw(col.drawNumber)}
-                          className="text-[10px] font-semibold text-blue-600 hover:underline mt-0.5 inline-flex items-center gap-0.5"
+                          className="text-[10px] font-semibold text-blue-600 hover:underline mt-0.5 inline-flex items-center gap-0.5 cursor-pointer"
                         >
                           <span>Open</span>
                           <ArrowRight className="h-2.5 w-2.5" />

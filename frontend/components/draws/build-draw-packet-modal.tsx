@@ -564,8 +564,8 @@ export function BuildDrawPacketModal({
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-200 overflow-hidden">
-                <table className="w-full text-left text-xs">
+              <div className="rounded-xl border border-slate-200 overflow-x-auto custom-scrollbar">
+                <table className="w-full min-w-[580px] text-left text-xs">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                     <tr>
                       <th className="py-2.5 px-3">SOV Code & Description</th>

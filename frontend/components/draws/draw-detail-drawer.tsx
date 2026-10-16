@@ -431,8 +431,8 @@ export function DrawDetailDrawer({
             </div>
 
             {/* AUTHENTIC DRAW REQUEST FORM TABLE */}
-            <div className="rounded-lg border border-slate-200 overflow-hidden bg-white shadow-xs">
-              <table className="w-full text-left text-xs border-collapse">
+            <div className="rounded-lg border border-slate-200 overflow-x-auto custom-scrollbar bg-white shadow-xs">
+              <table className="w-full min-w-[560px] text-left text-xs border-collapse">
                 {/* Terracotta / Burnt Orange Header matching user specification */}
                 <thead>
                   <tr className="bg-[#C85A17] text-white font-bold text-xs">

@@ -7,6 +7,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Project, ContractModel, LifecycleStage } from "@/lib/types";
 import { ToastContainer, ToastMessage } from "@/components/Toast";
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from "@/components/ui/modal";
+import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
   Building2,
@@ -40,7 +42,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
-type SettingsTab = "general" | "capital" | "governance" | "team" | "danger";
+type SettingsTab = "general" | "capital" | "governance" | "team";
 
 const LIFECYCLE_OPTIONS: { id: LifecycleStage; label: string; desc: string }[] = [
   { id: "ACQUISITION", label: "Acquisition & Due Diligence", desc: "Purchase contract under review or title pending closing." },
@@ -353,27 +355,31 @@ export default function ProjectSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-16">
+    <div className="space-y-6 pb-12">
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-      {/* Header Sticky Bar */}
-      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-4">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* 1. Clean Enterprise Header Consistent With Other App Pages */}
+      <div className="border-b border-border bg-white px-4 sm:px-6 py-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
               <Link
                 href={`/projects/${projectId}/control-center`}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition"
+                className="hover:text-foreground transition inline-flex items-center gap-1"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Control Center</span>
               </Link>
-              <span className="text-slate-300">/</span>
-              <span className="text-xs font-bold text-slate-900">Project Settings</span>
+              <span>/</span>
+              <span className="text-foreground font-semibold">Project Settings</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <h1 className="text-lg sm:text-xl font-bold text-foreground tracking-tight flex items-center gap-2.5">
               <span>{project.name}</span>
-              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50/80 px-2.5 py-0.5 text-xs font-medium text-emerald-800 border border-emerald-200/60 shadow-2xs">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
                 Active Jobsite
               </span>
             </h1>
@@ -382,7 +388,7 @@ export default function ProjectSettingsPage() {
           <div className="flex items-center gap-2.5 shrink-0">
             <Link
               href={`/projects/${projectId}/control-center`}
-              className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition"
+              className="px-3.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition"
             >
               Cancel
             </Link>
@@ -390,7 +396,7 @@ export default function ProjectSettingsPage() {
               type="button"
               onClick={() => handleSave()}
               disabled={updateMutation.isPending}
-              className="px-5 py-2 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white rounded-xl text-xs font-bold shadow-xs transition inline-flex items-center gap-2 disabled:opacity-60 cursor-pointer"
+              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white rounded-lg text-xs font-semibold shadow-xs transition inline-flex items-center gap-2 disabled:opacity-60 cursor-pointer"
             >
               {updateMutation.isPending ? (
                 <>
@@ -408,15 +414,14 @@ export default function ProjectSettingsPage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-8 mt-6">
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-1 border-b border-slate-200 overflow-x-auto pb-px">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 min-w-0">
+        {/* Navigation Tabs - Matches Budget and Draws Tabs */}
+        <div className="flex items-center border-b border-slate-200 gap-4 sm:gap-6 overflow-x-auto scrollbar-none whitespace-nowrap">
           {[
             { id: "general", label: "Identity & Physical", icon: Building2 },
             { id: "capital", label: "Capital & Senior Debt", icon: Landmark },
             { id: "governance", label: "Contracts & Banking", icon: Shield },
             { id: "team", label: "Project Team", icon: Users },
-            { id: "danger", label: "Danger Zone", icon: AlertCircle },
           ].map((tab) => {
             const Icon = tab.icon;
             const isSelected = activeTab === tab.id;
@@ -425,12 +430,13 @@ export default function ProjectSettingsPage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id as SettingsTab)}
-                className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition whitespace-nowrap cursor-pointer ${isSelected
-                    ? "border-slate-900 text-slate-900 bg-white/60"
-                    : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
-                  }`}
+                className={`flex items-center gap-2 pb-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors -mb-px cursor-pointer shrink-0 ${
+                  isSelected
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isSelected ? "text-slate-900" : "text-slate-400"}`} />
+                <Icon className={`w-4 h-4 ${isSelected ? "text-blue-600" : "text-slate-400"}`} />
                 <span>{tab.label}</span>
               </button>
             );
@@ -548,7 +554,7 @@ export default function ProjectSettingsPage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label htmlFor="setting-started-at" className="block text-xs font-bold text-slate-800">
                       Construction Start Date
@@ -579,21 +585,6 @@ export default function ProjectSettingsPage() {
                         className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
                       />
                     </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label htmlFor="setting-progress-pct" className="block text-xs font-bold text-slate-800">
-                      Physical Progress ({progressPct}%)
-                    </label>
-                    <input
-                      id="setting-progress-pct"
-                      type="range"
-                      min={0}
-                      max={100}
-                      value={progressPct}
-                      onChange={(e) => setProgressPct(Number(e.target.value))}
-                      className="w-full mt-3 accent-slate-900 cursor-pointer"
-                    />
                   </div>
                 </div>
               </div>
@@ -835,7 +826,7 @@ export default function ProjectSettingsPage() {
                 </div>
 
                 {/* Team Metric Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                   <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5">
                     <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold uppercase tracking-wider">
                       <Users className="w-3.5 h-3.5 text-slate-600" />
@@ -855,17 +846,6 @@ export default function ProjectSettingsPage() {
                     <div className="mt-1.5 flex items-baseline gap-2">
                       <span className="text-lg font-bold text-slate-900">{pendingInvites.length}</span>
                       <span className="text-xs text-amber-600 font-medium">awaiting onboarding</span>
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5">
-                    <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold uppercase tracking-wider">
-                      <Key className="w-3.5 h-3.5 text-blue-600" />
-                      <span>Audit & Sign-Off</span>
-                    </div>
-                    <div className="mt-1.5 flex items-baseline gap-2">
-                      <span className="text-lg font-bold text-slate-900">Dual-Key</span>
-                      <span className="text-xs text-slate-500 font-medium">draw verification</span>
                     </div>
                   </div>
                 </div>
@@ -981,155 +961,109 @@ export default function ProjectSettingsPage() {
                     </div>
                   </div>
                 )}
-
-                {/* Role & Governance Reference Card */}
-                <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-4 space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-bold text-blue-950">
-                    <Shield className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Project Governance & Access Control</span>
-                  </div>
-                  <p className="text-[11px] text-blue-900/80 leading-relaxed">
-                    Collaborators invited to this project workspace can review AIA Schedule of Values lines, sign off on draw inspection packages, reconcile bank feed anomalies, and verify change order allocations. Dual authorization ensures bank disbursements are strictly reconciled before submission.
-                  </p>
-                </div>
               </div>
 
-              {/* Invite Modal */}
-              {showInviteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-                  <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-                    <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 bg-slate-50/50">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
-                          <UserPlus className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-bold text-slate-900">Invite Project Collaborator</h3>
-                          <p className="text-[11px] text-slate-500">Provide collaborator credentials and professional title</p>
-                        </div>
+              {/* Standard Enterprise Invite Modal */}
+              <Modal open={showInviteModal} onOpenChange={setShowInviteModal}>
+                <ModalContent maxWidth="md" className="p-0 overflow-hidden border border-slate-200 bg-white shadow-2xl rounded-2xl gap-0">
+                  <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 bg-slate-50/70">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-xs">
+                        <UserPlus className="w-4 h-4" />
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setShowInviteModal(false)}
-                        className="text-slate-400 hover:text-slate-700 p-1 rounded-lg transition"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900">Invite Project Collaborator</h3>
+                        <p className="text-[11px] text-slate-500">Provide collaborator credentials and professional title</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleSendInvite} className="p-4 sm:p-5 space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+                      <input
+                        type="text"
+                        required
+                        value={inviteName}
+                        onChange={(e) => setInviteName(e.target.value)}
+                        placeholder="e.g. Cameron Bennett"
+                        className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white"
+                      />
                     </div>
 
-                    <form onSubmit={handleSendInvite} className="p-4 sm:p-5 space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Work Email</label>
+                      <input
+                        type="email"
+                        required
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        placeholder="e.g. c.bennett@apexconstruction.com"
+                        className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">Organization</label>
                         <input
                           type="text"
-                          required
-                          value={inviteName}
-                          onChange={(e) => setInviteName(e.target.value)}
-                          placeholder="e.g. Cameron Bennett"
-                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-slate-900 focus:ring-1 focus:ring-slate-900 bg-white"
+                          value={inviteCompany}
+                          onChange={(e) => setInviteCompany(e.target.value)}
+                          placeholder="e.g. Apex Build Corp"
+                          className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">Work Email</label>
-                        <input
-                          type="email"
-                          required
-                          value={inviteEmail}
-                          onChange={(e) => setInviteEmail(e.target.value)}
-                          placeholder="e.g. c.bennett@apexconstruction.com"
-                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-slate-900 focus:ring-1 focus:ring-slate-900 bg-white"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-700 mb-1">Organization</label>
-                          <input
-                            type="text"
-                            value={inviteCompany}
-                            onChange={(e) => setInviteCompany(e.target.value)}
-                            placeholder="e.g. Apex Build Corp"
-                            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-slate-900 focus:ring-1 focus:ring-slate-900 bg-white"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-700 mb-1">Professional Role</label>
-                          <select
-                            value={inviteRoleTitle}
-                            onChange={(e) => setInviteRoleTitle(e.target.value)}
-                            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-slate-900 focus:ring-1 focus:ring-slate-900 bg-white"
-                          >
-                            <option value="Finance Partner">Finance Partner</option>
-                            <option value="General Contractor Lead">General Contractor Lead</option>
-                            <option value="Project Superintendent">Project Superintendent</option>
-                            <option value="Senior Loan Officer">Senior Loan Officer</option>
-                            <option value="Capital / Equity Partner">Capital / Equity Partner</option>
-                            <option value="Third-Party Draw Inspector">Third-Party Draw Inspector</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
-                        <button
-                          type="button"
-                          onClick={() => setShowInviteModal(false)}
-                          className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition"
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">Professional Role</label>
+                        <select
+                          value={inviteRoleTitle}
+                          onChange={(e) => setInviteRoleTitle(e.target.value)}
+                          className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white"
                         >
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          disabled={isSubmittingInvite}
-                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white text-xs font-medium shadow-xs transition"
-                        >
-                          {isSubmittingInvite ? (
-                            <>
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                              <span>Sending...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Send className="w-3.5 h-3.5" />
-                              <span>Send Invitation</span>
-                            </>
-                          )}
-                        </button>
+                          <option value="Finance Partner">Finance Partner</option>
+                          <option value="General Contractor Lead">General Contractor Lead</option>
+                          <option value="Project Superintendent">Project Superintendent</option>
+                          <option value="Senior Loan Officer">Senior Loan Officer</option>
+                          <option value="Capital / Equity Partner">Capital / Equity Partner</option>
+                          <option value="Third-Party Draw Inspector">Third-Party Draw Inspector</option>
+                        </select>
                       </div>
-                    </form>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+                    </div>
 
-          {/* ──────────────── TAB 5: DANGER ZONE ──────────────── */}
-          {activeTab === "danger" && (
-            <div className="space-y-6">
-              <div className="bg-red-50/50 rounded-2xl border border-red-200 p-5 sm:p-6 shadow-2xs space-y-4">
-                <div className="flex items-start gap-3">
-                  <ShieldAlert className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <h2 className="text-sm font-bold text-red-950">Archive or Delete Project</h2>
-                    <p className="text-xs text-red-700 leading-relaxed">
-                      Permanently delete this project workspace, associated mock transaction logs, draw records, and reconciliation history.
-                      This action cannot be undone.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-red-200/60 flex items-center justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setShowDeleteModal(true)}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white rounded-xl text-xs font-bold shadow-xs transition inline-flex items-center gap-2 cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Delete Project Workspace</span>
-                  </button>
-                </div>
-              </div>
+                    <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowInviteModal(false)}
+                        className="text-xs"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        size="sm"
+                        disabled={isSubmittingInvite}
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-xs gap-1.5"
+                      >
+                        {isSubmittingInvite ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Sending...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-3.5 h-3.5" />
+                            <span>Send Invitation</span>
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </ModalContent>
+              </Modal>
             </div>
           )}
         </div>
@@ -1138,7 +1072,7 @@ export default function ProjectSettingsPage() {
         <div className="mt-8 flex items-center justify-end gap-3 border-t border-slate-200/80 pt-4">
           <Link
             href={`/projects/${projectId}/control-center`}
-            className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition"
+            className="px-4 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition"
           >
             Cancel
           </Link>
@@ -1146,7 +1080,7 @@ export default function ProjectSettingsPage() {
             type="button"
             onClick={() => handleSave()}
             disabled={updateMutation.isPending}
-            className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white rounded-xl text-xs font-bold shadow-xs transition inline-flex items-center gap-2 disabled:opacity-60 cursor-pointer"
+            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white rounded-lg text-xs font-semibold shadow-xs transition inline-flex items-center gap-2 disabled:opacity-60 cursor-pointer"
           >
             {updateMutation.isPending ? (
               <>
@@ -1162,57 +1096,6 @@ export default function ProjectSettingsPage() {
           </button>
         </div>
       </div>
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-            <div className="flex items-center gap-3 text-red-600">
-              <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
-                <Trash2 className="w-5 h-5 text-red-600" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900">Delete Project?</h3>
-                <p className="text-xs text-slate-500">This action will permanently delete the project.</p>
-              </div>
-            </div>
-
-            <p className="text-xs text-slate-600 leading-relaxed">
-              To confirm deletion, please type the exact project display name:{" "}
-              <strong className="text-slate-900 font-bold">{project.name}</strong>
-            </p>
-
-            <input
-              type="text"
-              value={deleteConfirmText}
-              onChange={(e) => setDeleteConfirmText(e.target.value)}
-              placeholder={project.name}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-red-500 focus:bg-white transition"
-            />
-
-            <div className="flex items-center justify-end gap-2.5 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setDeleteConfirmText("");
-                }}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold cursor-pointer transition"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={deleteConfirmText.trim().toLowerCase() !== (project.name || "").trim().toLowerCase() || deleteMutation.isPending}
-                onClick={handleDelete}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold cursor-pointer transition disabled:opacity-40"
-              >
-                {deleteMutation.isPending ? "Deleting..." : "Permanently Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
