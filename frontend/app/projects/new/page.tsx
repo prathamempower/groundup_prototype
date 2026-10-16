@@ -341,7 +341,7 @@ export default function CreateProjectPage() {
       {/* Main Centered Onboarding Stage */}
       <div className="flex-1 flex flex-col justify-center items-center py-4 sm:py-8 px-3 sm:px-6">
         {/* Light Untitled-UI Style Raised Modal Container */}
-        <div className="w-full max-w-5xl rounded-2xl sm:rounded-[32px] bg-white shadow-[0_20px_50px_rgba(15,23,42,0.08)] border border-slate-200/80 overflow-hidden flex flex-col">
+        <div className="w-full max-w-4xl rounded-2xl sm:rounded-3xl bg-white shadow-xl shadow-slate-900/5 border border-slate-200/90 overflow-hidden flex flex-col">
           {/* Mobile Step Progress Line (< lg screens) */}
           <div className="lg:hidden bg-slate-50/80 border-b border-slate-200/80 px-4 py-3 sm:px-6">
             <div className="space-y-1.5">
@@ -362,9 +362,9 @@ export default function CreateProjectPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[520px] lg:min-h-[620px]">
+          <div className="grid grid-cols-1 lg:grid-cols-12">
             {/* Left Sidebar / Rail (Desktop only) */}
-            <aside className="hidden lg:flex lg:col-span-4 bg-[#F8FAFC] border-r border-slate-200/80 p-5 sm:p-8 flex-col justify-between">
+            <aside className="hidden lg:flex lg:col-span-4 bg-[#F8FAFC] border-r border-slate-200/80 p-6 sm:p-7 flex-col">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-3">
                   Project Setup
@@ -408,8 +408,8 @@ export default function CreateProjectPage() {
             </aside>
 
             {/* Right Main Content Area */}
-            <main className="lg:col-span-8 p-5 sm:p-8 lg:p-12 flex flex-col justify-between bg-white">
-              <div>
+            <main className="lg:col-span-8 p-6 sm:p-8 flex flex-col justify-between bg-white">
+              <div className="flex-1 flex flex-col justify-between">
 
                 {errorMessage && (
                   <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-red-700 flex items-center gap-2.5 shadow-2xs">
@@ -420,49 +420,51 @@ export default function CreateProjectPage() {
 
                 {/* Stage 0: Welcome & Choices */}
                 {stage === 0 && (
-                  <div className="space-y-6">
-                    <div>
-                      <h2
-                        onClick={() => setStage(1)}
-                        className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 cursor-pointer"
-                      >
-                        Create a New Project
-                      </h2>
-                      <p className="mt-1.5 text-xs sm:text-sm text-slate-600">
-                        Choose how you want to provision this project workspace.
-                      </p>
-                    </div>
+                  <div className="flex-1 flex flex-col justify-between">
+                    <div className="space-y-5">
+                      <div>
+                        <h2
+                          onClick={() => setStage(1)}
+                          className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 cursor-pointer"
+                        >
+                          Create a New Project
+                        </h2>
+                        <p className="mt-1 text-xs sm:text-sm text-slate-500">
+                          Choose how you want to provision this project workspace.
+                        </p>
+                      </div>
 
-                    <div className="max-w-md pt-1">
-                      {/* Primary Option: Create New */}
-                      <div
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => setStage(1)}
-                        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setStage(1)}
-                        className="cursor-pointer rounded-2xl border-2 border-slate-900 bg-slate-50/70 p-5 sm:p-6 transition-all shadow-xs hover:shadow-md hover:border-blue-600 group flex flex-col justify-between min-h-[190px] ring-1 ring-slate-900/5 active:scale-[0.99]"
-                      >
-                        <div>
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white shadow-xs group-hover:scale-105 group-hover:bg-blue-600 transition-all">
-                              <FolderPlus className="h-5 w-5" />
+                      <div className="max-w-md pt-1">
+                        {/* Primary Option: Create New */}
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setStage(1)}
+                          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setStage(1)}
+                          className="cursor-pointer rounded-2xl border-2 border-slate-900 bg-slate-50/70 p-5 sm:p-6 transition-all shadow-xs hover:shadow-md hover:border-blue-600 group flex flex-col justify-between min-h-[170px] ring-1 ring-slate-900/5 active:scale-[0.99]"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white shadow-xs group-hover:scale-105 group-hover:bg-blue-600 transition-all">
+                                <FolderPlus className="h-5 w-5" />
+                              </div>
                             </div>
-                          </div>
-                          <h3 className="font-bold text-slate-900 text-base sm:text-sm">Guided Setup</h3>
-                          <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                            Step-by-step setup for entity, capital structure, and governance.
-                          </p>
-                          <div className="mt-3.5 flex flex-wrap gap-1.5">
-                            <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">Entity & Structure</span>
-                            <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">Acquisition & Debt</span>
-                            <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">Compliance</span>
+                            <h3 className="font-bold text-slate-900 text-base sm:text-sm">Guided Setup</h3>
+                            <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
+                              Step-by-step setup for entity, capital structure, and governance.
+                            </p>
+                            <div className="mt-3.5 flex flex-wrap gap-1.5">
+                              <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">Entity & Structure</span>
+                              <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">Acquisition & Debt</span>
+                              <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">Compliance</span>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Action Row directly below choices */}
-                    <div className="pt-6 border-t border-slate-200 mt-6 sm:mt-8 flex items-center justify-end">
+                    <div className="pt-5 border-t border-slate-200/80 mt-6 sm:mt-8 flex items-center justify-end">
                       <Button
                         type="button"
                         variant="primary"
@@ -477,7 +479,7 @@ export default function CreateProjectPage() {
 
                 {/* Stage 1: Identity & Structure */}
                 {stage === 1 && (
-                  <div className="space-y-6">
+                  <div className="flex-1 flex flex-col justify-between">
                     <div>
                       <div className="flex items-start justify-between gap-3">
                         <h2 className="text-xl font-bold tracking-tight text-slate-900 leading-snug">
@@ -513,9 +515,6 @@ export default function CreateProjectPage() {
                               required
                               className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                             />
-                            <p className="text-[11px] text-slate-400 mt-1">
-                              The human-friendly name displayed across draw packages and reports.
-                            </p>
                           </div>
 
                           <div>
@@ -530,9 +529,6 @@ export default function CreateProjectPage() {
                               required
                               className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
                             />
-                            <p className="text-[11px] text-slate-400 mt-1">
-                              Dedicated corporate entity holding the property deed and bank account.
-                            </p>
                           </div>
                         </>
                       )}
@@ -809,7 +805,7 @@ export default function CreateProjectPage() {
                       )}
                     </div>
 
-                    <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
+                    <div className="pt-5 flex justify-between items-center border-t border-slate-200/80 mt-6 sm:mt-8">
                       <Button
                         type="button"
                         variant="secondary"
@@ -879,8 +875,9 @@ export default function CreateProjectPage() {
 
                 {/* Stage 2: Acquisition & Debt Structure */}
                 {stage === 2 && (
-                  <div className="space-y-6">
+                  <div className="flex-1 flex flex-col justify-between">
                     <div>
+                      <div>
                       <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
                         <Landmark className="h-5 w-5 text-blue-600" />
                         Acquisition & Debt Structure
@@ -914,8 +911,8 @@ export default function CreateProjectPage() {
                                 type="button"
                                 onClick={() => setIsAcquired(opt.val as any)}
                                 className={`rounded-xl border p-3.5 text-left transition-all cursor-pointer ${isSelected
-                                    ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
-                                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                                  ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
+                                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
                                   }`}
                               >
                                 <div className="flex items-center justify-between">
@@ -947,8 +944,8 @@ export default function CreateProjectPage() {
                                 type="button"
                                 onClick={() => setAcquisitionFunding(item.value)}
                                 className={`rounded-xl border p-3 text-center sm:text-left transition-all cursor-pointer ${isSelected
-                                    ? "border-slate-900 bg-slate-900 text-white shadow-xs"
-                                    : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
+                                  ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                                  : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
                                   }`}
                               >
                                 <span className="block text-xs font-semibold leading-tight">{item.label}</span>
@@ -996,8 +993,8 @@ export default function CreateProjectPage() {
                                 type="button"
                                 onClick={() => setHasConstructionLoan(opt.val as any)}
                                 className={`rounded-xl border p-3.5 text-left transition-all cursor-pointer ${isSelected
-                                    ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
-                                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                                  ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
+                                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
                                   }`}
                               >
                                 <div className="flex items-center justify-between">
@@ -1025,8 +1022,9 @@ export default function CreateProjectPage() {
                         </div>
                       )}
                     </div>
+                  </div>
 
-                    <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
+                  <div className="pt-5 flex justify-between items-center border-t border-slate-200/80 mt-6 sm:mt-8">
                       <Button
                         type="button"
                         variant="secondary"
@@ -1049,8 +1047,9 @@ export default function CreateProjectPage() {
 
                 {/* Stage 3: Construction & Operating Model */}
                 {stage === 3 && (
-                  <div className="space-y-6">
+                  <div className="flex-1 flex flex-col justify-between">
                     <div>
+                      <div>
                       <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
                         <Layers className="h-5 w-5 text-blue-600" />
                         Contract & Operating Model
@@ -1136,8 +1135,9 @@ export default function CreateProjectPage() {
                         })}
                       </div>
                     </div>
+                  </div>
 
-                    <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
+                  <div className="pt-5 flex justify-between items-center border-t border-slate-200/80 mt-6 sm:mt-8">
                       <Button
                         type="button"
                         variant="secondary"
@@ -1160,8 +1160,9 @@ export default function CreateProjectPage() {
 
                 {/* Stage 4: Team & Role Delegation */}
                 {stage === 4 && (
-                  <div className="space-y-6">
+                  <div className="flex-1 flex flex-col justify-between">
                     <div>
+                      <div>
                       <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
                           <Users className="h-5 w-5 text-blue-600" />
@@ -1240,8 +1241,9 @@ export default function CreateProjectPage() {
                         />
                       </div>
                     </div>
+                  </div>
 
-                    <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
+                  <div className="pt-5 flex justify-between items-center border-t border-slate-200/80 mt-6 sm:mt-8">
                       <Button
                         type="button"
                         variant="secondary"
@@ -1273,8 +1275,9 @@ export default function CreateProjectPage() {
 
                 {/* Stage 5: Source Documents */}
                 {stage === 5 && (
-                  <div className="space-y-6">
+                  <div className="flex-1 flex flex-col justify-between">
                     <div>
+                      <div>
                       <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
                           <FileCheck className="h-5 w-5 text-blue-600" />
@@ -1384,8 +1387,9 @@ export default function CreateProjectPage() {
                         Files are processed with a permanent digital audit trail. Invoices and lien waivers can be dragged directly into the workspace at any time.
                       </p>
                     </div>
+                  </div>
 
-                    <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
+                  <div className="pt-5 flex justify-between items-center border-t border-slate-200/80 mt-6 sm:mt-8">
                       <Button
                         type="button"
                         variant="secondary"
@@ -1417,8 +1421,9 @@ export default function CreateProjectPage() {
 
                 {/* Stage 6: Review & Confirmation */}
                 {stage === 6 && (
-                  <div className="space-y-6">
+                  <div className="flex-1 flex flex-col justify-between">
                     <div>
+                      <div>
                       <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
                         <ShieldCheck className="h-5 w-5 text-emerald-600" />
                         Review & Confirm Setup
@@ -1520,8 +1525,9 @@ export default function CreateProjectPage() {
                         </div>
                       </div>
                     </div>
+                  </div>
 
-                    <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
+                  <div className="pt-5 flex justify-between items-center border-t border-slate-200/80 mt-6 sm:mt-8">
                       <Button
                         type="button"
                         variant="secondary"
