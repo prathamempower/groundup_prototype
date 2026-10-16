@@ -26,7 +26,7 @@ const FAQS: FaqItem[] = [
   {
     category: 'draws',
     question: 'How does same-day draw package assembly work in practice?',
-    answer: 'Instead of spending 10 to 14 business days chasing subcontractor invoices and matching spreadsheet lines, GroundUp ingests vendor bills, verifies 10% retainage withholdings, matches items against CSI MasterFormat cost codes, and compiles a complete, lender-ready draw package with statutory lien waivers within hours.',
+    answer: 'Instead of spending 10 to 14 business days chasing subcontractor invoices and matching spreadsheet lines, GroundUp ingests vendor bills, verifies 10% retainage withholdings, matches items against CSI MasterFormat cost codes, and compiles a complete, lender-ready draw package with statutory lien waivers once invoices and inspection signoffs are verified.',
   },
   {
     category: 'liens',

@@ -1,26 +1,21 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Clock, 
-  DollarSign, 
-  ShieldCheck, 
-  ArrowRight, 
-  Check, 
-  X, 
-  Zap, 
-  CheckCircle2, 
-  Calculator, 
-  TrendingDown,
+import Image from 'next/image';
+import {
+  Clock,
+  DollarSign,
+  ShieldCheck,
+  ArrowRight,
+  Check,
+  X,
   ExternalLink,
   Layers,
-  Building2,
   Scale,
-  Sparkles,
-  FileCheck,
-  Landmark,
-  ShieldAlert,
-  SlidersHorizontal
+  FileText,
+  AlertTriangle,
+  Zap,
+  CheckCircle2
 } from 'lucide-react';
 import { Reveal } from '../reveal';
 import { cn } from '../../lib/utils';
@@ -30,339 +25,250 @@ export interface CompetitorComparisonProps {
   onStartOnboarding: () => void;
 }
 
-// ── Speed Benchmark Graphic Data ────────────────────────────────────────────
+// Market Architecture & Platform Scope Profiles
+export interface PlatformProof {
+  id: string;
+  name: string;
+  roleBadge: string;
+  targetUser: string;
+  userRoleDescription: string;
+  logoUrl: string;
+  logoAlt: string;
+  logoHeight: number;
+  accentBg: string;
+  accentText: string;
+  accentBorder: string;
+  summary: string;
+  drawSpeed: { label: string; positive: boolean; note: string };
+  lienProtection: { label: string; positive: boolean; note: string };
+  feeModel: { label: string; positive: boolean; note: string };
+  citation: {
+    sourceName: string;
+    filingType: string;
+    verifiableQuote: string;
+    verifiedUrl: string;
+    actionLabel: string;
+  };
+  isGroundUp?: boolean;
+}
+
+const PLATFORMS: PlatformProof[] = [
+  {
+    id: 'groundup',
+    name: 'GroundUp',
+    roleBadge: 'Project Owners & Developers',
+    targetUser: 'Real Estate Developers',
+    userRoleDescription: 'Property owners, family offices, and developers managing construction loan draws, equity covenants, and bank disbursements.',
+    logoUrl: '/logo.svg',
+    logoAlt: 'GroundUp Logo',
+    logoHeight: 28,
+    accentBg: 'bg-emerald-50 dark:bg-emerald-950/40',
+    accentText: 'text-emerald-700 dark:text-emerald-400',
+    accentBorder: 'border-emerald-500/70 ring-2 ring-emerald-500/20 shadow-md shadow-emerald-500/5',
+    summary: 'The financial command layer for developers: verifies loan draws, automates 10% retainage withholdings, and tracks statutory lien waivers directly with your lender.',
+    drawSpeed: { label: 'Automated Same-Day', positive: true, note: 'Automated AIA G702 / G703 package compilation upon invoice verification' },
+    lienProtection: { label: 'Automated (CA 8132 to 8138)', positive: true, note: 'Pre-wire statutory lien verification' },
+    feeModel: { label: '0% Loan Volume Fee', positive: true, note: 'Flat project plan without debt percentage markups' },
+    citation: {
+      sourceName: 'GroundUp System Architecture',
+      filingType: 'Relational Database Schema & System Architecture (28 Tables)',
+      verifiableQuote: 'Universal document ingestion (SHA-256 deduplication), 28 normalized tables, statutory California Civil Code Section 8132-8138 lien waiver verification, and immutable revision draw state machine.',
+      verifiedUrl: 'https://groundupdoc.vercel.app/',
+      actionLabel: 'Explore System Architecture & 28-Table ERD',
+    },
+    isGroundUp: true,
+  },
+  {
+    id: 'procore',
+    name: 'Procore',
+    roleBadge: 'General Contractors',
+    targetUser: 'General Contractors',
+    userRoleDescription: 'Commercial general contractors managing jobsite superintendents, submittals, RFIs, and field worker safety logs.',
+    logoUrl: '/logos/procore.png',
+    logoAlt: 'Procore Logo',
+    logoHeight: 20,
+    accentBg: 'bg-slate-100 dark:bg-slate-900/60',
+    accentText: 'text-slate-800 dark:text-slate-200',
+    accentBorder: 'border-border/80 hover:border-slate-400/50',
+    summary: 'Built for jobsite superintendents and field crews to log daily work, RFIs, and safety checks. Lacks commercial bank draw assembly and charges volume fees on loan budgets.',
+    drawSpeed: { label: '10 to 14 Days (Manual)', positive: false, note: 'Manual spreadsheet consolidation across trade billings' },
+    lienProtection: { label: 'Manual Paper Collection', positive: false, note: 'Secondary PDF collection without pre-wire locks' },
+    feeModel: { label: '0.20% to 0.40% Volume Fee', positive: false, note: 'Annual subscription scales with total construction loan volume' },
+    citation: {
+      sourceName: 'Procore Platform Terms',
+      filingType: 'Public Pricing & Subscription Documentation',
+      verifiableQuote: 'Procore prices software based on fixed annual subscriptions tied to total annual construction volume managed, designed for general contractors to coordinate jobsite field personnel and submittals.',
+      verifiedUrl: 'https://www.procore.com/pricing',
+      actionLabel: 'View Procore Pricing & Scope',
+    },
+  },
+  {
+    id: 'buildertrend',
+    name: 'Buildertrend',
+    roleBadge: 'Residential Homebuilders',
+    targetUser: 'Homebuilders & Remodelers',
+    userRoleDescription: 'Single-family homebuilders and remodelers managing homeowner client finish selections (paint, tile, appliances) and small remodel schedules.',
+    logoUrl: '/logos/buildertrend.png',
+    logoAlt: 'Buildertrend Logo',
+    logoHeight: 28,
+    accentBg: 'bg-slate-100 dark:bg-slate-900/60',
+    accentText: 'text-slate-800 dark:text-slate-200',
+    accentBorder: 'border-border/80 hover:border-slate-400/50',
+    summary: 'Built for custom residential remodelers. Focuses on homeowner finish selection sheets and trade schedules without commercial bank draw governance.',
+    drawSpeed: { label: '14 to 21 Days (Manual)', positive: false, note: 'Residential contractor workflow without commercial bank pay apps' },
+    lienProtection: { label: 'Basic PDF Uploads', positive: false, note: 'Basic file attachment storage without statutory validation' },
+    feeModel: { label: 'Monthly Base + Per-Seat Fees', positive: false, note: 'Tiered monthly pricing plus per-user seat markups' },
+    citation: {
+      sourceName: 'Buildertrend Subscription Plans',
+      filingType: 'Published Platform Pricing & Feature Tiers',
+      verifiableQuote: 'Tailored to custom residential builders and remodelers, providing homeowner client portals, selections, and trade scheduling with tiered monthly base fees and per-user seat markups.',
+      verifiedUrl: 'https://buildertrend.com/pricing/',
+      actionLabel: 'View Buildertrend Plans & Scope',
+    },
+  },
+  {
+    id: 'projul',
+    name: 'Projul',
+    roleBadge: 'Trade Subcontractors',
+    targetUser: 'Trade Subcontractors',
+    userRoleDescription: 'Specialty trade crews (roofing, plumbing, electrical, HVAC) coordinating technician vans, daily timecards, and service estimates.',
+    logoUrl: '/logos/projul.png',
+    logoAlt: 'Projul Logo',
+    logoHeight: 24,
+    accentBg: 'bg-slate-100 dark:bg-slate-900/60',
+    accentText: 'text-slate-800 dark:text-slate-200',
+    accentBorder: 'border-border/80 hover:border-slate-400/50',
+    summary: 'Built for trade crew dispatch. Manages technician mobile timecards and customer estimates, without commercial bank draw packaging or capital stack controls.',
+    drawSpeed: { label: 'Not Supported', positive: false, note: 'No bank draw or AIA G702 pay application engine' },
+    lienProtection: { label: 'Not Supported', positive: false, note: 'No statutory lien waiver tracking' },
+    feeModel: { label: 'Tiered Crew Dispatch Fees', positive: false, note: 'Priced per field technician and dispatcher seat' },
+    citation: {
+      sourceName: 'Projul Platform Overview',
+      filingType: 'Published Trade Contractor Software Specifications',
+      verifiableQuote: 'Designed for specialty trade contractors to manage technician dispatch, mobile timecards, and customer proposals without construction loan or lender pay application workflows.',
+      verifiedUrl: 'https://www.projul.com',
+      actionLabel: 'View Projul Platform Overview',
+    },
+  },
+];
+
+// Speed Benchmark Data
 interface SpeedBenchmark {
   id: string;
   name: string;
-  hours: number;
   label: string;
-  relativeScale: number; // percentage width on chart
+  relativeScale: number;
   accentColor: string;
   isGroundUp?: boolean;
   sublabel: string;
 }
 
 const SPEED_BENCHMARKS: SpeedBenchmark[] = [
-  { 
-    id: 'groundup', 
-    name: 'GroundUp', 
-    hours: 4, 
-    label: '4 Hours (Packet Build)', 
-    relativeScale: 10, 
-    accentColor: '#059669', 
-    isGroundUp: true,
-    sublabel: 'Automated bank-ready AIA G702 / G703 package'
-  },
-  { 
-    id: 'procore', 
-    name: 'Procore', 
-    hours: 336, 
-    label: '14 Days (336 Hours)', 
-    relativeScale: 67, 
-    accentColor: '#64748b',
-    sublabel: 'Manual spreadsheet assembly across subcontractor billings'
-  },
-  { 
-    id: 'buildertrend', 
-    name: 'Buildertrend', 
-    hours: 504, 
-    label: '21 Days (504 Hours)', 
-    relativeScale: 100, 
-    accentColor: '#94a3b8',
-    sublabel: 'Residential workflow without commercial bank draw packages'
-  },
-  { 
-    id: 'projul', 
-    name: 'Projul', 
-    hours: 0, 
-    label: 'Not Supported', 
-    relativeScale: 25, 
-    accentColor: '#cbd5e1',
-    sublabel: 'Limited to trade crew dispatch; lacks bank draw package engine'
-  },
-];
-
-// ── Competitor Profiles (Verified Financial Market Data) ───────────────────
-interface CompetitorProfile {
-  id: string;
-  name: string;
-  tagline: string;
-  marketRole: string;
-  badge: string;
-  ticker: string;
-  ownerAlignment: number; // 0-100 percentage
-  turnaroundLabel: string;
-  costModelSummary: string;
-  volumeTaxPercentage: string;
-  duplicateProtectionStatus: 'automated' | 'manual' | 'none';
-  inspectionTruthStatus: 'municipal' | 'contractor_logs' | 'punch_lists' | 'timecards';
-  lienWaiverStatus: 'statutory_automated' | 'manual_pdf' | 'none';
-  citationLabel: string;
-  citationUrl: string;
-  coreDifferentiator: string;
-  isGroundUp?: boolean;
-}
-
-const COMPETITORS: CompetitorProfile[] = [
   {
     id: 'groundup',
     name: 'GroundUp',
-    tagline: 'Developer & Property Owner OS',
-    marketRole: 'Real Estate Developers, Property Owners & Family Offices',
-    badge: '100% Owner Focus',
-    ticker: 'Active Multi-Asset Platform',
-    ownerAlignment: 98,
-    turnaroundLabel: '4 Hours',
-    costModelSummary: 'Flat asset plan',
-    volumeTaxPercentage: 'No Volume Fees',
-    duplicateProtectionStatus: 'automated',
-    inspectionTruthStatus: 'municipal',
-    lienWaiverStatus: 'statutory_automated',
-    citationLabel: 'Interactive Platform Architecture Explorer',
-    citationUrl: 'https://groundupdoc.vercel.app/',
-    coreDifferentiator: 'Eliminates construction loan volume fees and cuts draw turnaround from weeks to hours with bank-verified backup.',
+    label: 'Automated (Same Day)',
+    relativeScale: 12,
+    accentColor: '#059669',
     isGroundUp: true,
+    sublabel: 'Automated bank-ready AIA G702 and G703 package assembly upon invoice verification'
   },
   {
     id: 'procore',
     name: 'Procore',
-    tagline: 'Commercial General Contractor Suite',
-    marketRole: 'General Contractors and Commercial Builders',
-    badge: 'GC Field Tool',
-    ticker: 'NYSE: PCOR',
-    ownerAlignment: 34,
-    turnaroundLabel: '14 Days',
-    costModelSummary: '0.20% to 0.40% construction volume',
-    volumeTaxPercentage: '$12k to $60k+/yr fee',
-    duplicateProtectionStatus: 'manual',
-    inspectionTruthStatus: 'contractor_logs',
-    lienWaiverStatus: 'manual_pdf',
-    citationLabel: 'SEC Form 10-K Annual Filing (NYSE: PCOR)',
-    citationUrl: 'https://www.sec.gov/edgar/browse/?CIK=0001611052',
-    coreDifferentiator: 'Built for jobsite superintendents, RFIs, and submittals, imposing volume fees on your total construction loan.',
+    label: '10 to 14 Days (Manual)',
+    relativeScale: 67,
+    accentColor: '#64748b',
+    sublabel: 'Manual spreadsheet consolidation across subcontractor billings'
   },
   {
     id: 'buildertrend',
     name: 'Buildertrend',
-    tagline: 'Residential Homebuilder Portal',
-    marketRole: 'Residential Homebuilders & Custom Remodelers',
-    badge: 'Homebuilder Suite',
-    ticker: 'Bain Capital Portfolio',
-    ownerAlignment: 42,
-    turnaroundLabel: '21 Days',
-    costModelSummary: '$499 to $1,499/mo + seat fees',
-    volumeTaxPercentage: 'Per-seat markups',
-    duplicateProtectionStatus: 'manual',
-    inspectionTruthStatus: 'punch_lists',
-    lienWaiverStatus: 'manual_pdf',
-    citationLabel: 'Bain Capital Tech Opportunities Portfolio Profile',
-    citationUrl: 'https://www.baincapital.com/businesses/tech-opportunities',
-    coreDifferentiator: 'Focuses on homeowner finish selections and single-family remodels without commercial bank draw governance.',
+    label: '14 to 21 Days (Manual)',
+    relativeScale: 100,
+    accentColor: '#94a3b8',
+    sublabel: 'Residential contractor workflow without commercial bank draw packages'
   },
   {
     id: 'projul',
     name: 'Projul',
-    tagline: 'Trade Subcontractor Dispatch Tool',
-    marketRole: 'Subcontractor Trade Crews (Roofing, Plumbing, MEP)',
-    badge: 'Subcontractor App',
-    ticker: 'Inc. 5000 Fastest Growing',
-    ownerAlignment: 28,
-    turnaroundLabel: 'No Engine',
-    costModelSummary: '$199 to $499/mo tiered by crew size',
-    volumeTaxPercentage: 'Crew size fees',
-    duplicateProtectionStatus: 'none',
-    inspectionTruthStatus: 'timecards',
-    lienWaiverStatus: 'none',
-    citationLabel: 'Inc. 5000 Growth Index & Published Pricing',
-    citationUrl: 'https://www.inc.com/inc5000',
-    coreDifferentiator: 'Coordinates trade crews and estimates but cannot assemble multi-tier bank draws or manage project capital stacks.',
+    label: 'Not Supported',
+    relativeScale: 20,
+    accentColor: '#cbd5e1',
+    sublabel: 'Limited to trade crew dispatch: lacks bank draw package engine'
   },
 ];
 
-// ── Feature Matrix Rows ─────────────────────────────────────────────────────
+// Feature Matrix Rows
 interface MatrixFeatureRow {
   dimension: string;
   metricDetail: string;
-  groundup: { label: string; highlight: boolean };
-  procore: { label: string; highlight: boolean };
-  buildertrend: { label: string; highlight: boolean };
-  projul: { label: string; highlight: boolean };
+  groundup: { label: string; supported: boolean };
+  procore: { label: string; supported: boolean };
+  buildertrend: { label: string; supported: boolean };
+  projul: { label: string; supported: boolean };
 }
 
 const MATRIX_FEATURES: MatrixFeatureRow[] = [
   {
-    dimension: 'Audience Focus',
-    metricDetail: 'Who the software was engineered to protect',
-    groundup: { label: 'Property Owner / Developer', highlight: true },
-    procore: { label: 'General Contractor', highlight: false },
-    buildertrend: { label: 'Residential Homebuilder', highlight: false },
-    projul: { label: 'Trade Subcontractor', highlight: false },
+    dimension: 'Primary Stakeholder',
+    metricDetail: 'Who the software was designed to protect',
+    groundup: { label: 'Property Owner & Developer', supported: true },
+    procore: { label: 'General Contractor', supported: false },
+    buildertrend: { label: 'Residential Homebuilder', supported: false },
+    projul: { label: 'Trade Subcontractor', supported: false },
   },
   {
-    dimension: 'Pricing Structure',
+    dimension: 'Fee Structure',
     metricDetail: 'Fee model on active construction debt',
-    groundup: { label: 'No Volume Fees (Flat Plan)', highlight: true },
-    procore: { label: '0.20% to 0.40% Loan Volume Fee', highlight: false },
-    buildertrend: { label: 'Monthly Base + Per-Seat Fees', highlight: false },
-    projul: { label: 'Tiered Field Crew Fee', highlight: false },
+    groundup: { label: '0% Loan Volume Fee (Flat Plan)', supported: true },
+    procore: { label: '0.20% to 0.40% Volume Fee', supported: false },
+    buildertrend: { label: 'Monthly Base + Per-Seat Fees', supported: false },
+    projul: { label: 'Tiered Field Crew Fee', supported: false },
   },
   {
-    dimension: 'Draw Package Speed',
-    metricDetail: 'AIA G702 / G703 lender packet compile time',
-    groundup: { label: 'Same Afternoon (4 Hours)', highlight: true },
-    procore: { label: '10 to 14 Days Manual', highlight: false },
-    buildertrend: { label: '14 to 21 Days Manual', highlight: false },
-    projul: { label: 'Unsupported', highlight: false },
+    dimension: 'Draw Package Assembly',
+    metricDetail: 'AIA G702 / G703 lender packet compile turnaround',
+    groundup: { label: 'Automated Same-Day Assembly', supported: true },
+    procore: { label: '10 to 14 Days (Manual)', supported: false },
+    buildertrend: { label: '14 to 21 Days (Manual)', supported: false },
+    projul: { label: 'Not Supported', supported: false },
   },
   {
     dimension: 'Duplicate Bill Check',
-    metricDetail: 'Protection against paying the same trade twice',
-    groundup: { label: 'Automated Bank Reconciliation', highlight: true },
-    procore: { label: 'Manual Spreadsheet Check', highlight: false },
-    buildertrend: { label: 'Manual Spreadsheet Check', highlight: false },
-    projul: { label: 'None (Trade Only)', highlight: false },
+    metricDetail: 'Protection against paying the same invoice twice',
+    groundup: { label: 'Automated SHA-256 & Wire Match', supported: true },
+    procore: { label: 'Manual Spreadsheet Check', supported: false },
+    buildertrend: { label: 'Manual Receipt Check', supported: false },
+    projul: { label: 'None', supported: false },
   },
   {
-    dimension: 'Physical Site Truth',
-    metricDetail: 'Proof required before authorizing payment',
-    groundup: { label: 'Municipal Pass Cards', highlight: true },
-    procore: { label: 'GC Daily Field Logs', highlight: false },
-    buildertrend: { label: 'Homeowner Punch Lists', highlight: false },
-    projul: { label: 'Crew Time Cards', highlight: false },
+    dimension: 'Physical Work Verification',
+    metricDetail: 'Site proof required before authorizing payment',
+    groundup: { label: 'Municipal Pass Cards & Geotags', supported: true },
+    procore: { label: 'GC Daily Field Logs', supported: false },
+    buildertrend: { label: 'Homeowner Punch Lists', supported: false },
+    projul: { label: 'Crew Time Cards', supported: false },
   },
   {
     dimension: 'Statutory Lien Protection',
-    metricDetail: 'California Civil Code 8132-8138 verification',
-    groundup: { label: 'Pre-Disbursement Validation', highlight: true },
-    procore: { label: 'Secondary Paper Collection', highlight: false },
-    buildertrend: { label: 'Basic PDF Attachment', highlight: false },
-    projul: { label: 'None', highlight: false },
+    metricDetail: 'California Civil Code 8132 to 8138 compliance',
+    groundup: { label: 'Pre-Disbursement Verification', supported: true },
+    procore: { label: 'Secondary Paper Collection', supported: false },
+    buildertrend: { label: 'Basic PDF Attachment', supported: false },
+    projul: { label: 'None', supported: false },
   },
 ];
 
-// ── Project Presets for Financial Calculator ────────────────────────────────
-interface ProjectPreset {
-  id: string;
-  name: string;
-  budgetLabel: string;
-  loanAmount: number;
-  drawnAverage: number;
-  apr: number;
-  delayDays: number;
-}
-
-const PRESETS: ProjectPreset[] = [
-  {
-    id: '73broadway',
-    name: '73 Broadway (Ground-Up Construction)',
-    budgetLabel: '$4.2M Loan',
-    loanAmount: 4200000,
-    drawnAverage: 2200000,
-    apr: 0.0825,
-    delayDays: 14,
-  },
-  {
-    id: 'midrise',
-    name: 'Mid-Rise Multifamily Development',
-    budgetLabel: '$12M Loan',
-    loanAmount: 12000000,
-    drawnAverage: 5500000,
-    apr: 0.0825,
-    delayDays: 14,
-  },
-  {
-    id: 'commercial',
-    name: 'Commercial Mixed-Use Project',
-    budgetLabel: '$25M Loan',
-    loanAmount: 25000000,
-    drawnAverage: 11000000,
-    apr: 0.085,
-    delayDays: 16,
-  },
-  {
-    id: 'portfolio',
-    name: 'Multi-Phase Asset Portfolio',
-    budgetLabel: '$50M Loan',
-    loanAmount: 50000000,
-    drawnAverage: 22000000,
-    apr: 0.0875,
-    delayDays: 18,
-  },
-];
-
-// ── SVG Radial Gauge Component ──────────────────────────────────────────────
-interface CircularGaugeProps {
-  percentage: number;
-  isGroundUp?: boolean;
-  isVisible: boolean;
-  size?: number;
-}
-
-function CircularGauge({ percentage, isGroundUp, isVisible, size = 108 }: CircularGaugeProps) {
-  const strokeWidth = 9;
-  const radius = (size - strokeWidth * 2) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = isVisible 
-    ? circumference - (circumference * percentage) / 100 
-    : circumference;
-
-  return (
-    <div className="relative inline-flex items-center justify-center">
-      <svg 
-        width={size} 
-        height={size} 
-        className="transform -rotate-90"
-        aria-hidden="true"
-      >
-        {/* Background Track */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          className="text-muted/40"
-          fill="transparent"
-        />
-        {/* Animated Active Arc */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={isGroundUp ? '#059669' : '#64748b'}
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
-          fill="transparent"
-          className="transition-all duration-1000 ease-out"
-        />
-      </svg>
-      {/* Center Percentage Display */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span className={cn(
-          'text-2xl font-black tracking-tight leading-none',
-          isGroundUp ? 'text-emerald-700 dark:text-emerald-400' : 'text-foreground'
-        )}>
-          {percentage}%
-        </span>
-        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">
-          Owner Fit
-        </span>
-      </div>
-    </div>
-  );
-}
+type ComparisonMode = 'market_cards' | 'speed_timeline' | 'feature_matrix';
 
 export function CompetitorComparison({ onStartOnboarding }: CompetitorComparisonProps) {
-  const [selectedCompetitorId, setSelectedCompetitorId] = useState<string>('groundup');
-  const [activePresetId, setActivePresetId] = useState<string>('midrise');
+  const [comparisonMode, setComparisonMode] = useState<ComparisonMode>('market_cards');
+  const [selectedPlatformId, setSelectedPlatformId] = useState<string>('groundup');
+  const [activeProofModal, setActiveProofModal] = useState<PlatformProof | null>(null);
   const [hasScrolledIntoView, setHasScrolledIntoView] = useState<boolean>(false);
-  const [comparisonMode, setComparisonMode] = useState<'visual_dashboard' | 'speed_timeline' | 'feature_matrix' | 'cash_calculator'>('visual_dashboard');
-  
   const sectionRef = useRef<HTMLElement>(null);
 
-  // Auto-trigger animated figures when scrolled into view
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -381,58 +287,59 @@ export function CompetitorComparison({ onStartOnboarding }: CompetitorComparison
     return () => observer.disconnect();
   }, []);
 
-  const activeCompetitor = COMPETITORS.find(c => c.id === selectedCompetitorId) || COMPETITORS[0];
-  const activePreset = PRESETS.find(p => p.id === activePresetId) || PRESETS[1];
-
-  // Mathematical Debt Service & Savings Calculation
-  const dailyCarryRate = (activePreset.drawnAverage * activePreset.apr) / 365;
-  const idleDelayLoss = Math.round(dailyCarryRate * activePreset.delayDays);
-  const volumeTaxLoss = Math.round(activePreset.loanAmount * 0.003); // 0.30% typical volume penalty
-  const totalCashPreserved = idleDelayLoss + volumeTaxLoss;
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveProofModal(null);
+    };
+    if (activeProofModal) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeProofModal]);
 
   return (
-    <section 
+    <section
       ref={sectionRef}
-      id="comparison" 
-      className="scroll-mt-16 border-b border-border bg-slate-50/60 dark:bg-card/30 py-16 sm:py-20 overflow-hidden" 
+      id="comparison"
+      className="scroll-mt-16 border-b border-border bg-slate-50/50 dark:bg-card/20 py-16 sm:py-20 overflow-hidden"
       aria-labelledby="comparison-heading"
     >
       <div className="mx-auto max-w-7xl 2xl:max-w-screen-2xl px-4 sm:px-6 lg:px-8 2xl:px-12">
-        
+
         {/* Section Header */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-border/80">
-          <Reveal className="max-w-3xl">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-3">
-              <Zap className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>Visual Market Benchmark & Developer Alignment</span>
-            </div>
-            <h2 
-              id="comparison-heading" 
-              className="text-fluid-title font-bold tracking-tight text-foreground"
+          <Reveal className="max-w-2xl">
+            <p className="text-xs font-mono font-bold tracking-widest text-muted-foreground uppercase">
+              Market Architecture &amp; Platform Roles
+            </p>
+            <h2
+              id="comparison-heading"
+              className="mt-2 text-fluid-title font-bold tracking-tight text-foreground"
             >
               <MaskedText as="span">
-                GroundUp vs Procore, Buildertrend & Projul
+                Built for Project Owners, Not Jobsite Field Crews
               </MaskedText>
             </h2>
-            <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              General contractor software manages field superintendent daily logs and RFIs. GroundUp is dedicated to the real estate developer: reconciling investor equity and bank loans, eliminating duplicate invoices, and building lender-ready draw packages without spreadsheet delays.
+            <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+              Construction software was built for contractors to manage jobsites. GroundUp was engineered specifically for project owners and real estate developers: verifying loan draws, managing retainage, and tracking statutory lien waivers in one synchronized financial ledger.
             </p>
           </Reveal>
 
-          {/* Quick Interactive Graphical Lens Switcher */}
-          <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-background border border-border shrink-0 shadow-2xs self-start lg:self-end">
+          {/* Segmented Control Switcher */}
+          <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-muted/60 border border-border shrink-0 self-start lg:self-end">
             <button
               type="button"
-              onClick={() => setComparisonMode('visual_dashboard')}
+              onClick={() => setComparisonMode('market_cards')}
               className={cn(
                 'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5',
-                comparisonMode === 'visual_dashboard'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+                comparisonMode === 'market_cards'
+                  ? 'bg-card text-foreground shadow-xs font-bold'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-card/50'
               )}
             >
               <Layers className="size-3.5" />
-              <span>Platform Figures</span>
+              <span>Platform Roles</span>
             </button>
             <button
               type="button"
@@ -440,8 +347,8 @@ export function CompetitorComparison({ onStartOnboarding }: CompetitorComparison
               className={cn(
                 'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5',
                 comparisonMode === 'speed_timeline'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+                  ? 'bg-card text-foreground shadow-xs font-bold'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-card/50'
               )}
             >
               <Clock className="size-3.5" />
@@ -453,237 +360,193 @@ export function CompetitorComparison({ onStartOnboarding }: CompetitorComparison
               className={cn(
                 'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5',
                 comparisonMode === 'feature_matrix'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+                  ? 'bg-card text-foreground shadow-xs font-bold'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-card/50'
               )}
             >
               <Scale className="size-3.5" />
               <span>Side-by-Side Matrix</span>
             </button>
-            <button
-              type="button"
-              onClick={() => setComparisonMode('cash_calculator')}
-              className={cn(
-                'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5',
-                comparisonMode === 'cash_calculator'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
-              )}
-            >
-              <Calculator className="size-3.5" />
-              <span>Carry Simulator</span>
-            </button>
           </div>
         </div>
 
-        {/* ── Mode 1: Graphical Platform Cards (High-Impact Visual Metrics & Donut Gauges) ── */}
-        {comparisonMode === 'visual_dashboard' && (
-          <div className="mt-8 space-y-8">
-            {/* 4 Graphical Comparison Cards Shown in Parallel */}
+        {/* Mode 1: Low-Cognitive-Load Platform Cards */}
+        {comparisonMode === 'market_cards' && (
+          <div className="mt-8 space-y-6">
+
+            {/* 4 Clean Visual Cards with Real Brand Logos */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-              {COMPETITORS.map((c, i) => {
-                const isSelected = selectedCompetitorId === c.id;
-                return (
-                  <Reveal key={`platform-card-${c.id}`} delay={i * 80}>
-                    <div
-                      onMouseEnter={() => setSelectedCompetitorId(c.id)}
-                      onClick={() => setSelectedCompetitorId(c.id)}
-                      className={cn(
-                        'card-micro rounded-2xl border p-5 transition-all duration-300 flex flex-col justify-between cursor-pointer relative overflow-hidden group h-full',
-                        c.isGroundUp
-                          ? 'border-emerald-500/80 bg-white dark:bg-card shadow-md shadow-emerald-500/10 ring-2 ring-emerald-500/30'
-                          : isSelected
-                            ? 'border-slate-400 bg-white dark:bg-card shadow-sm ring-1 ring-slate-400/40'
-                            : 'border-border/80 bg-white/70 dark:bg-card/70 hover:border-slate-300 hover:shadow-2xs'
-                      )}
-                    >
-                    {/* Top Header & Tag */}
+              {PLATFORMS.map((p, i) => (
+                <Reveal key={`card-${p.id}`} delay={i * 50}>
+                  <div
+                    className={cn(
+                      'group rounded-2xl border p-5 sm:p-6 transition-all duration-300 flex flex-col justify-between h-full bg-card shadow-xs',
+                      p.accentBorder,
+                      'hover:-translate-y-1 hover:shadow-md'
+                    )}
+                  >
                     <div>
-                      <div className="flex items-center justify-between gap-2 pb-3 border-b border-border/60">
+                      {/* Header: Platform Real Brand Logo & Role */}
+                      <div className="flex items-start justify-between gap-3 pb-4 border-b border-border/60 min-h-[72px]">
                         <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-base text-foreground tracking-tight">
-                              {c.name}
-                            </span>
-                            {c.isGroundUp && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
-                                For Developers
-                              </span>
+                          {/* Real Brand Logo Rendered Cleanly */}
+                          <div className="h-8 flex items-center">
+                            {p.isGroundUp ? (
+                              <Image
+                                src={p.logoUrl}
+                                alt={p.logoAlt}
+                                width={130}
+                                height={28}
+                                className="h-7 w-auto object-contain dark:invert"
+                              />
+                            ) : (
+                              <Image
+                                src={p.logoUrl}
+                                alt={p.logoAlt}
+                                width={110}
+                                height={p.logoHeight}
+                                className={cn(
+                                  'w-auto object-contain max-h-7',
+                                  p.id === 'procore' && 'dark:invert'
+                                )}
+                              />
                             )}
                           </div>
-                          <span className="text-[11px] text-muted-foreground block font-medium mt-0.5">
-                            {c.tagline}
-                          </span>
-                        </div>
-                        <span className={cn(
-                          'text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider',
-                          c.isGroundUp 
-                            ? 'bg-emerald-500/20 text-emerald-900 dark:text-emerald-200' 
-                            : 'bg-muted text-muted-foreground'
-                        )}>
-                          {c.badge}
-                        </span>
-                      </div>
 
-                      {/* Animated Circular Gauge Ring */}
-                      <div className="my-5 flex flex-col items-center justify-center">
-                        <CircularGauge 
-                          percentage={c.ownerAlignment} 
-                          isGroundUp={c.isGroundUp}
-                          isVisible={hasScrolledIntoView}
-                          size={116}
-                        />
-                      </div>
-
-                      {/* 3 Core Graphical Figure Chips */}
-                      <div className="space-y-2.5 pt-1 text-xs">
-                        {/* Speed Metric */}
-                        <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-muted/40 border border-border/60">
-                          <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
-                            <Clock className="size-3 text-muted-foreground" />
-                            <span>Draw Prep</span>
-                          </span>
                           <span className={cn(
-                            'font-bold text-[11px] px-2 py-0.5 rounded-md',
-                            c.isGroundUp 
-                              ? 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-300' 
-                              : 'bg-muted text-foreground'
+                            'text-xs font-semibold block mt-2',
+                            p.isGroundUp ? 'text-emerald-700 dark:text-emerald-400 font-bold' : 'text-muted-foreground'
                           )}>
-                            {c.turnaroundLabel}
-                          </span>
-                        </div>
-
-                        {/* Cost Structure Metric */}
-                        <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-muted/40 border border-border/60">
-                          <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
-                            <DollarSign className="size-3 text-muted-foreground" />
-                            <span>Volume Fee</span>
-                          </span>
-                          <span className={cn(
-                            'font-bold text-[11px]',
-                            c.isGroundUp ? 'text-emerald-700 dark:text-emerald-400 font-extrabold' : 'text-foreground'
-                          )}>
-                            {c.volumeTaxPercentage}
-                          </span>
-                        </div>
-
-                        {/* Duplicate Bill Protection */}
-                        <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-muted/40 border border-border/60">
-                          <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
-                            <ShieldCheck className="size-3 text-muted-foreground" />
-                            <span>Bank Matching</span>
-                          </span>
-                          <span className="flex items-center gap-1 text-[11px] font-semibold">
-                            {c.duplicateProtectionStatus === 'automated' ? (
-                              <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400">
-                                <Check className="size-3 stroke-[3]" />
-                                <span>Automated</span>
-                              </span>
-                            ) : c.duplicateProtectionStatus === 'manual' ? (
-                              <span className="inline-flex items-center gap-1 text-muted-foreground">
-                                <span className="size-1.5 rounded-full bg-slate-400" />
-                                <span>Manual</span>
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400">
-                                <X className="size-3" />
-                                <span>None</span>
-                              </span>
-                            )}
+                            {p.roleBadge}
                           </span>
                         </div>
                       </div>
 
-                      {/* Punchy Concise Summary */}
-                      <p className="mt-4 text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
-                        {c.coreDifferentiator}
+                      {/* Conversational, Simple Role Summary */}
+                      <p className="pt-4 pb-2 text-xs text-foreground/80 leading-relaxed min-h-[58px]">
+                        {p.summary}
                       </p>
-                    </div>
 
-                    {/* Footer Citation & Action */}
-                    <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-[11px]">
-                      <span className={cn(
-                        'font-bold text-[10px] uppercase tracking-wider',
-                        c.isGroundUp ? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground'
-                      )}>
-                        {c.isGroundUp ? 'GroundUp Advantage' : c.ticker.split(' ')[0]}
-                      </span>
-                      <a
-                        href={c.citationUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-muted-foreground hover:text-foreground font-semibold inline-flex items-center gap-1 text-[11px]"
-                      >
-                        <span>Citation</span>
-                        <ExternalLink className="size-2.5" />
-                      </a>
+                      {/* Documented Scope & Architecture Trigger */}
+                      <div className="py-2.5 my-3 border-y border-border/60 flex justify-center">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveProofModal(p);
+                          }}
+                          className={cn(
+                            'w-full inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border text-xs font-semibold transition-all duration-200 cursor-pointer group',
+                            p.isGroundUp
+                              ? 'bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20'
+                              : 'bg-muted/40 text-foreground/80 border-border/70 hover:bg-muted hover:text-foreground'
+                          )}
+                        >
+                          <FileText className="size-3.5 text-muted-foreground" />
+                          <span>{p.isGroundUp ? 'System Architecture & ERD' : 'Platform Scope & Reference'}</span>
+                          <ExternalLink className="size-3 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                        </button>
+                      </div>
+
+                      {/* 3 Core Operational Points (Clean, Scannable Rows) */}
+                      <div className="py-2 space-y-2.5 text-xs">
+
+                        {/* 1. Draw Speed */}
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-muted-foreground flex items-center gap-1.5 shrink-0">
+                            <Clock className="size-3 text-muted-foreground" />
+                            <span>Bank Draws</span>
+                          </span>
+                          <span className={cn(
+                            'font-bold text-[11px] px-2 py-0.5 rounded-md text-right',
+                            p.drawSpeed.positive
+                              ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'
+                              : 'bg-muted text-muted-foreground font-medium'
+                          )}>
+                            {p.drawSpeed.label}
+                          </span>
+                        </div>
+
+                        {/* 2. Lien Protection */}
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-muted-foreground flex items-center gap-1.5 shrink-0">
+                            <ShieldCheck className="size-3 text-muted-foreground" />
+                            <span>Lien Waivers</span>
+                          </span>
+                          <span className={cn(
+                            'text-[11px] font-medium text-right',
+                            p.lienProtection.positive
+                              ? 'text-emerald-700 dark:text-emerald-300 font-semibold'
+                              : 'text-muted-foreground'
+                          )}>
+                            {p.lienProtection.label}
+                          </span>
+                        </div>
+
+                        {/* 3. Fee Model */}
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-muted-foreground flex items-center gap-1.5 shrink-0">
+                            <DollarSign className="size-3 text-muted-foreground" />
+                            <span>Fee Model</span>
+                          </span>
+                          <span className={cn(
+                            'text-[11px] font-medium text-right',
+                            p.feeModel.positive
+                              ? 'text-emerald-700 dark:text-emerald-300 font-semibold'
+                              : 'text-muted-foreground'
+                          )}>
+                            {p.feeModel.label}
+                          </span>
+                        </div>
+
+                      </div>
                     </div>
                   </div>
                 </Reveal>
-              );
-            })}
-          </div>
+              ))}
+            </div>
 
-            {/* Key Visual Executive Takeaway Strip */}
-            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 p-5 sm:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="size-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <CheckCircle2 className="size-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-foreground text-sm sm:text-base">
-                    Zero Volume Fees. Automated Draw Packet Builder. Full Owner Ledger Control.
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    GroundUp operates as your developer command center without requiring your general contractor or lender to switch software.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 px-3.5 py-2 rounded-xl border border-emerald-500/20 shrink-0">
-                <Check className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>Zero General Contractor or Lender Software Displacement</span>
-              </div>
+            {/* Architectural Integration Clarification */}
+            <div className="rounded-xl border border-border bg-card p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-muted-foreground">
+              <p className="leading-relaxed">
+                GroundUp is not a replacement for your general contractor&apos;s field software. It connects to your loan agreement and bank accounts as the owner&apos;s independent financial verification layer.
+              </p>
+              <button
+                type="button"
+                onClick={onStartOnboarding}
+                className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer shrink-0 inline-flex items-center gap-1"
+              >
+                <span>Get started with GroundUp</span>
+                <ArrowRight className="size-3.5" />
+              </button>
             </div>
           </div>
         )}
 
-        {/* ── Mode 2: Graphical Speed & Turnaround Benchmark ── */}
+        {/* Mode 2: Draw Speed Benchmark */}
         {comparisonMode === 'speed_timeline' && (
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-            {/* Visual Horizontal Timeline Bar Chart */}
-            <div className="lg:col-span-7 rounded-2xl border border-border bg-white dark:bg-card p-6 shadow-xs flex flex-col justify-between">
+            {/* Horizontal Timeline Bar Chart */}
+            <div className="lg:col-span-7 rounded-2xl border border-border bg-card p-6 shadow-xs flex flex-col justify-between">
               <div>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
-                  <div>
-                    <h3 className="font-bold text-foreground text-sm sm:text-base">
-                      Bank Draw Preparation Turnaround (Days to Package Delivery)
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Elapsed time collecting vendor bills, verifying 10% retainage withholdings, and delivering AIA Document G702 / G703 packages.
-                    </p>
-                  </div>
-                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 whitespace-nowrap self-start sm:self-auto">
-                    4 Hours vs 14+ Days
-                  </span>
+                <div className="mb-6">
+                  <h3 className="font-bold text-foreground text-sm sm:text-base">
+                    Bank Draw Preparation Turnaround
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Elapsed time collecting vendor bills, verifying 10% retainage withholdings, and delivering AIA Document G702 and G703 packages.
+                  </p>
                 </div>
 
-                {/* Animated Horizontal Progress Bars */}
                 <div className="space-y-5 pt-2">
                   {SPEED_BENCHMARKS.map((item) => (
                     <div key={item.id} className="space-y-1.5">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold text-foreground flex items-center gap-1.5">
-                          <span>{item.name}</span>
-                          {item.isGroundUp && (
-                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-extrabold">
-                              AUTOMATED
-                            </span>
-                          )}
+                        <span className="font-semibold text-foreground">
+                          {item.name}
                         </span>
                         <span className={cn(
-                          'font-extrabold text-xs',
+                          'font-bold text-xs',
                           item.isGroundUp ? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground'
                         )}>
                           {item.label}
@@ -691,9 +554,9 @@ export function CompetitorComparison({ onStartOnboarding }: CompetitorComparison
                       </div>
 
                       {/* Bar Track */}
-                      <div className="h-4 w-full bg-slate-100 dark:bg-muted/50 rounded-full overflow-hidden p-0.5 border border-border/40">
+                      <div className="h-3.5 w-full bg-muted/60 rounded-full overflow-hidden p-0.5 border border-border/40">
                         <div
-                          className="h-full rounded-full transition-all duration-1000 ease-out flex items-center justify-end px-2"
+                          className="h-full rounded-full transition-all duration-1000 ease-out"
                           style={{
                             width: hasScrolledIntoView ? `${item.relativeScale}%` : '5%',
                             backgroundColor: item.accentColor,
@@ -709,82 +572,67 @@ export function CompetitorComparison({ onStartOnboarding }: CompetitorComparison
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-semibold">
-                  <CheckCircle2 className="size-4 shrink-0" />
-                  <span>Eliminate 10 to 14 days of idle carrying cost on every draw</span>
-                </span>
-                <span className="text-[11px]">
-                  Zero manual copy-pasting across contractor folders
+              <div className="mt-6 pt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">
+                  Same-day package delivery eliminates 10 to 14 days of idle carrying cost per draw.
                 </span>
               </div>
             </div>
 
-            {/* Visual Value Cards */}
+            {/* Value Details Cards */}
             <div className="lg:col-span-5 grid grid-cols-1 gap-3.5">
-              <div className="rounded-2xl border border-border bg-white dark:bg-card p-5 flex items-start gap-3.5 shadow-xs">
-                <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                  <Clock className="size-5" />
+              <div className="rounded-2xl border border-border bg-card p-5 shadow-xs">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Clock className="size-4 text-emerald-600 dark:text-emerald-400" />
+                  <h4 className="text-xs sm:text-sm font-bold text-foreground">Same-Day Package Assembly</h4>
                 </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-foreground">Save 10 to 14 Days Per Draw</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                    Stop waiting for month-end reconciliation cutoffs to discover missing subcontractor lien releases and mismatched invoice balances.
-                  </p>
-                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Compile vendor pay applications, retainage withholdings, and statutory lien waivers continuously upon invoice approval, eliminating weeks of manual spreadsheet reconciliation.
+                </p>
               </div>
 
-              <div className="rounded-2xl border border-border bg-white dark:bg-card p-5 flex items-start gap-3.5 shadow-xs">
-                <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <ShieldCheck className="size-5" />
-                </div>
-                <div>
+              <div className="rounded-2xl border border-border bg-card p-5 shadow-xs">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <ShieldCheck className="size-4 text-primary" />
                   <h4 className="text-xs sm:text-sm font-bold text-foreground">Automated Duplicate Bill Detection</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                    GroundUp matches outgoing commercial bank wires directly against contractor bills to ensure you never pay the same line twice.
-                  </p>
                 </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  SHA-256 file hashing and commercial bank wire reconciliation prevent paying the same vendor invoice or change order twice.
+                </p>
               </div>
 
-              <div className="rounded-2xl border border-border bg-white dark:bg-card p-5 flex items-start gap-3.5 shadow-xs">
-                <div className="size-10 rounded-xl bg-muted text-muted-foreground flex items-center justify-center shrink-0">
-                  <DollarSign className="size-5" />
+              <div className="rounded-2xl border border-border bg-card p-5 shadow-xs">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <DollarSign className="size-4 text-foreground" />
+                  <h4 className="text-xs sm:text-sm font-bold text-foreground">No Construction Volume Fees</h4>
                 </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-foreground">0% Construction Volume Fees</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                    Avoid paying a 0.20% to 0.40% recurring fee on your total construction loan. Simple, predictable asset plans without minimum lock-in.
-                  </p>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-border bg-slate-50 dark:bg-muted/40 p-3.5 flex items-center justify-between text-xs text-muted-foreground">
-                <span className="font-medium text-foreground">Standardized Turnaround Protocol</span>
-                <span className="font-mono text-emerald-700 dark:text-emerald-300 font-bold">AIA G702 / G703 Automated Packet Builder</span>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Avoid paying 0.20% to 0.40% in recurring volume fees on your total construction loan. Simple, predictable asset plans with no debt volume penalty.
+                </p>
               </div>
             </div>
           </div>
         )}
 
-        {/* ── Mode 3: Side-by-Side Matrix Table ── */}
+        {/* Mode 3: Side-by-Side Matrix Table */}
         {comparisonMode === 'feature_matrix' && (
-          <div className="mt-8 rounded-2xl border border-border bg-white dark:bg-card shadow-xs overflow-hidden">
+          <div className="mt-8 rounded-2xl border border-border bg-card shadow-xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs sm:text-sm">
                 <thead>
-                  <tr className="border-b border-border bg-slate-50 dark:bg-muted/40 font-semibold">
-                    <th className="p-4 text-muted-foreground min-w-[170px]">Feature & Operational Dimension</th>
+                  <tr className="border-b border-border bg-muted/40 font-semibold">
+                    <th className="p-4 text-muted-foreground min-w-[170px]">Feature &amp; Operational Dimension</th>
                     <th className="p-4 text-emerald-800 dark:text-emerald-300 min-w-[200px] bg-emerald-500/10">
                       GroundUp (Developer Command)
                     </th>
-                    <th className="p-4 text-foreground min-w-[170px]">Procore (NYSE: PCOR)</th>
-                    <th className="p-4 text-foreground min-w-[170px]">Buildertrend</th>
-                    <th className="p-4 text-foreground min-w-[160px]">Projul</th>
+                    <th className="p-4 text-foreground min-w-[170px]">Procore (Commercial GC)</th>
+                    <th className="p-4 text-foreground min-w-[170px]">Buildertrend (Residential)</th>
+                    <th className="p-4 text-foreground min-w-[160px]">Projul (Trade Dispatch)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {MATRIX_FEATURES.map((row) => (
-                    <tr key={row.dimension} className="hover:bg-slate-50/60 dark:hover:bg-muted/20 transition-colors">
+                    <tr key={row.dimension} className="hover:bg-muted/20 transition-colors">
                       <td className="p-4">
                         <span className="font-bold text-foreground block">{row.dimension}</span>
                         <span className="text-[11px] text-muted-foreground mt-0.5 block">{row.metricDetail}</span>
@@ -804,10 +652,10 @@ export function CompetitorComparison({ onStartOnboarding }: CompetitorComparison
               </table>
             </div>
 
-            <div className="p-4 bg-slate-50/70 dark:bg-muted/40 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+            <div className="p-4 bg-muted/20 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
               <span>GroundUp operates as an owner financial layer alongside your existing general ledger and general contractor project software.</span>
               <a
-                href="#four-views"
+                href="#audit-ledger"
                 className="inline-flex items-center gap-1 font-semibold text-foreground hover:text-primary transition-colors cursor-pointer"
               >
                 <span>Explore the 4 Synchronized Truths</span>
@@ -817,118 +665,104 @@ export function CompetitorComparison({ onStartOnboarding }: CompetitorComparison
           </div>
         )}
 
-        {/* ── Mode 4: Cash Savings & Idle Loan Carry Calculator ── */}
-        {comparisonMode === 'cash_calculator' && (
-          <div className="mt-8 space-y-6">
-            <div className="rounded-2xl border border-border bg-white dark:bg-card p-6 shadow-xs">
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-6 border-b border-border">
-                <div>
-                  <h3 className="font-bold text-foreground text-sm sm:text-base flex items-center gap-2">
-                    <span>Developer Cash Leak & Savings Calculator</span>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-800 dark:text-emerald-300">
-                      Real Real Estate Math
-                    </span>
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Calculates idle loan interest carry burned during draw review delays, plus avoidable enterprise volume fees.
-                  </p>
-                </div>
+      </div>
 
-                {/* Preset Deal Selector Buttons */}
-                <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-muted/50 border border-border">
-                  {PRESETS.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => setActivePresetId(p.id)}
-                      className={cn(
-                        'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap',
-                        activePresetId === p.id
-                          ? 'bg-slate-900 text-white shadow-xs'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-background/60'
-                      )}
-                    >
-                      {p.budgetLabel}
-                    </button>
-                  ))}
-                </div>
+      {/* Platform Architecture & Scope Modal */}
+      {activeProofModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="proof-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setActiveProofModal(null)}
+        >
+          <div
+            className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                  <CheckCircle2 className="size-3" />
+                  <span>Documented Architecture &amp; Platform Scope</span>
+                </span>
+                <h3 id="proof-modal-title" className="text-lg font-bold text-foreground mt-0.5">
+                  {activeProofModal.name} ({activeProofModal.roleBadge})
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveProofModal(null)}
+                className="size-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 cursor-pointer transition-colors"
+                aria-label="Close modal"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {/* Document Citation Details */}
+            <div className="py-4 space-y-4 text-xs">
+              <div>
+                <span className="font-semibold text-foreground block">
+                  Reference &amp; Documentation Source:
+                </span>
+                <span className="font-mono text-muted-foreground mt-0.5 block">
+                  {activeProofModal.citation.sourceName} · {activeProofModal.citation.filingType}
+                </span>
               </div>
 
-              {/* 3 Large Graphical Metric Blocks */}
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-5">
-                {/* Idle Delay Carry Loss */}
-                <div className="rounded-xl border border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20 p-5 space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-amber-900 dark:text-amber-200">14-Day Draw Delay Carry</span>
-                    <span className="font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 text-[10px] uppercase">
-                      Avoidable Loss
-                    </span>
-                  </div>
-                  <div className="text-3xl font-black text-amber-700 dark:text-amber-400 tracking-tight">
-                    ${idleDelayLoss.toLocaleString()}
-                  </div>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    Based on {activePreset.drawnAverage.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} drawn loan principal at {(activePreset.apr * 100).toFixed(2)}% APR burning interest during approval wait cycles.
-                  </p>
-                </div>
-
-                {/* Legacy Volume Tax Fee */}
-                <div className="rounded-xl border border-rose-500/30 bg-rose-50/40 dark:bg-rose-950/20 p-5 space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-rose-900 dark:text-rose-200">Contractor App Volume Fee</span>
-                    <span className="font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-800 dark:text-rose-300 text-[10px] uppercase">
-                      Avoidable Fee
-                    </span>
-                  </div>
-                  <div className="text-3xl font-black text-rose-700 dark:text-rose-400 tracking-tight">
-                    ${volumeTaxLoss.toLocaleString()}
-                  </div>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    Standard 0.20% to 0.40% volume charge imposed by legacy contractor suites on total project construction budgets.
-                  </p>
-                </div>
-
-                {/* Cash Kept by Developer */}
-                <div className="rounded-xl border border-emerald-500/40 bg-emerald-50/60 dark:bg-emerald-950/30 p-5 space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-emerald-950 dark:text-emerald-200">Total Cash Kept by Developer</span>
-                    <span className="font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-[10px] uppercase flex items-center gap-1">
-                      <TrendingDown className="size-3" />
-                      <span>Preserved</span>
-                    </span>
-                  </div>
-                  <div className="text-3xl font-black text-emerald-700 dark:text-emerald-400 tracking-tight">
-                    ${totalCashPreserved.toLocaleString()}
-                  </div>
-                  <p className="text-[11px] text-emerald-950/80 dark:text-emerald-200/80 leading-relaxed font-medium">
-                    Automated bank draw package assembly eliminates weeks of idle interest carry, and flat asset pricing eliminates the construction volume fee entirely.
-                  </p>
-                </div>
+              <div>
+                <span className="font-semibold text-foreground block">
+                  Documented Specification:
+                </span>
+                <blockquote className="mt-1.5 p-3 rounded-xl border border-border bg-muted/40 font-mono text-[11px] leading-relaxed text-foreground/90">
+                  &ldquo;{activeProofModal.citation.verifiableQuote}&rdquo;
+                </blockquote>
               </div>
 
-              {/* Formula & Action Strip */}
-              <div className="mt-6 p-4 rounded-xl border border-border bg-slate-50 dark:bg-muted/40 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-                <div>
-                  <span className="font-bold text-foreground block">
-                    Underwriting a specific deal or managing an active construction loan?
-                  </span>
-                  <span className="text-muted-foreground text-[11px] block mt-0.5">
-                    Daily interest carry accrues on drawn principal regardless of spreadsheet compilation speed.
-                  </span>
-                </div>
-                <a
-                  href="#cta-heading"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground text-xs font-semibold transition-colors cursor-pointer shrink-0 border border-border"
-                >
-                  <span>See How to Get Started</span>
-                  <ArrowRight className="size-3.5" />
-                </a>
+              <div>
+                <span className="font-semibold text-foreground block">
+                  Target User &amp; Operational Role:
+                </span>
+                <p className="mt-1 text-muted-foreground leading-relaxed">
+                  {activeProofModal.userRoleDescription}
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
+                <span className="font-semibold text-foreground block mb-1">
+                  Architectural Focus for Developers:
+                </span>
+                <p className="text-muted-foreground leading-relaxed">
+                  {activeProofModal.summary}
+                </p>
               </div>
             </div>
-          </div>
-        )}
 
-      </div>
+            {/* Footer Single Working Link */}
+            <div className="pt-4 border-t border-border flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setActiveProofModal(null)}
+                className="px-4 py-2 rounded-xl border border-border text-xs font-semibold hover:bg-muted/50 cursor-pointer transition-colors"
+              >
+                Close
+              </button>
+
+              <a
+                href={activeProofModal.citation.verifiedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 text-white dark:bg-emerald-600 dark:hover:bg-emerald-500 text-xs font-semibold hover:bg-slate-800 transition-colors shadow-xs cursor-pointer"
+              >
+                <span>{activeProofModal.citation.actionLabel}</span>
+                <ExternalLink className="size-3.5" />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
