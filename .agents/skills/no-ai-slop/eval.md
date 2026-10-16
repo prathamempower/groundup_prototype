@@ -32,10 +32,7 @@ For detect requests, make sure the response names each pattern found with a quot
 6. Are summary-recap endings cut so the piece ends on a concrete point, takeaway, or next action?
 7. Is formatting slop removed: Emoji headings, decorative bold, bullets that should be prose, headers over tiny sections?
 8. Are colons sentence case unless grammar, a proper noun, a title, or code requires otherwise?
-9. Are em dashes strictly absent: Zero unicode em dashes (\u2014), HTML mdash entities (&mdash;), and double hyphens (--) used as punctuation, replaced with colons, commas, parentheses, or clean restructuring?
-10. Are CEO and CTO executive acronyms absent: Replaced with professional role-based corporate titles (Developer / Owner, Finance Controller, Super Admin, Systems Architect)?
-11. Are construction and real estate finance claims grounded in verifiable deliverables (AIA G702/G703, 10% retainage withholdings, statutory lien waivers, Four Truths) rather than unachievable SLAs or marketing puffery?
-12. Are fake status badges and pulsing telemetry slop strictly absent: Zero decorative pulsing green dots (`animate-pulse`), fake operational pills ("Ledger Verification Engines Active", "Financial Command", "All Systems Operational"), and ungrounded telemetry badges across headers, footers, and landing containers?
+9. Are em dashes used sparingly: Usually none in short copy, and only 1-2 in longer drafts when they clearly help?
 
 ## Final read
 

@@ -380,11 +380,10 @@ export default function ProjectsPortfolioPage() {
           <button
             onClick={() => setViewMode("CARD")}
             aria-label="Card view"
-            className={`flex h-9 sm:h-7 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-all ${
-              viewMode === "CARD"
+            className={`flex h-9 sm:h-7 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-all ${viewMode === "CARD"
                 ? "bg-white text-slate-900 shadow-2xs font-semibold"
                 : "text-slate-500 hover:text-slate-900"
-            }`}
+              }`}
           >
             <LayoutGrid className="h-3.5 w-3.5" />
             <span>Cards</span>
@@ -392,11 +391,10 @@ export default function ProjectsPortfolioPage() {
           <button
             onClick={() => setViewMode("TABLE")}
             aria-label="Table view"
-            className={`flex h-9 sm:h-7 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-all ${
-              viewMode === "TABLE"
+            className={`flex h-9 sm:h-7 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-all ${viewMode === "TABLE"
                 ? "bg-white text-slate-900 shadow-2xs font-semibold"
                 : "text-slate-500 hover:text-slate-900"
-            }`}
+              }`}
           >
             <List className="h-3.5 w-3.5" />
             <span>Table</span>
@@ -405,18 +403,14 @@ export default function ProjectsPortfolioPage() {
             <button
               onClick={() => setViewMode("COMPARE")}
               aria-label="Compare financials view"
-              className={`flex h-9 sm:h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-all ${
-                viewMode === "COMPARE"
+              className={`flex h-9 sm:h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-all ${viewMode === "COMPARE"
                   ? "bg-white text-slate-900 shadow-2xs font-semibold"
                   : "text-slate-500 hover:text-slate-900"
-              }`}
+                }`}
             >
               <BarChart3 className="h-3.5 w-3.5 text-blue-600" />
               <span className="truncate">Compare</span>
               <span className="hidden md:inline">Financials</span>
-              <span className="hidden sm:inline-flex items-center rounded-full bg-blue-100 text-blue-700 px-1 py-0.2 text-[9px] font-bold">
-                PRO
-              </span>
             </button>
           )}
         </div>

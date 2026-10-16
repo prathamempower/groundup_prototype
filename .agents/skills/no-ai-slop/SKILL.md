@@ -85,13 +85,7 @@ Often-empty phrases: it's worth noting, it's important to note, at the end of th
 
 **Formatting slop.** Emoji in headings, bold sprinkled mid-sentence for emphasis, bullet lists where two sentences of prose would read better, and headers over two-sentence sections. Format should follow the content, not decorate it.
 
-**Em dashes.** Strictly prohibit unicode em dashes (\u2014), HTML entities (&mdash;), or double hyphens (--) used as punctuation across all user-facing copy, code comments, and markdown documents. Use colons, commas, parentheses, or clean sentence restructuring.
-
-**Executive titles.** Never reference Chief Executive Officer or Chief Technology Officer (CEO or CTO). Use professional role-based corporate titles: Developer / Owner, Finance Controller, Super Admin, or Systems Architect.
-
-**Construction finance standards.** Ground copy in the Four Synchronized Truths: Budget Truth, Spend Truth, Progress Truth, and Funding Truth. Use AIA Document G702 / G703 standards, 10% AIA A201 retainage withholdings, statutory lien waivers (CA Civil Code Sections 8132, 8134, 8136, 8138), and explicit debt carry math rather than vague AI marketing hype.
-
-**Fake status badges and pulsing telemetry slop.** Strictly prohibit decorative pulsing status dots (`animate-pulse`), fake operational pills ("Ledger Verification Engines Active", "Financial Command", "All Systems Operational"), and ungrounded telemetry badges across headers, footers, and landing page containers. Indicators must only be rendered when bound to genuine, verifiable user data or real backend engine states.
+**Em dashes.** Do not use them as a default rhythm crutch. In short copy, use none. In longer drafts, 1-2 are fine if they clearly beat commas, periods, or parentheses. Remove clusters and decorative dashes.
 
 ## Workflow
 
