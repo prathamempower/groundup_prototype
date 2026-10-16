@@ -29,8 +29,10 @@ const ModalContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
     maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "full";
+    showCloseButton?: boolean;
+    closeButtonClassName?: string;
   }
->(({ className, children, maxWidth = "md", ...props }, ref) => {
+>(({ className, children, maxWidth = "md", showCloseButton = true, closeButtonClassName, ...props }, ref) => {
   const maxWidthClass =
     maxWidth === "sm"
       ? "max-w-sm"
@@ -59,10 +61,17 @@ const ModalContent = React.forwardRef<
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-md p-1.5 text-text-muted transition-colors hover:bg-subtle hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
+        {showCloseButton && (
+          <DialogPrimitive.Close
+            className={cn(
+              "absolute right-4 top-4 rounded-md p-1.5 text-text-muted transition-colors hover:bg-subtle hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary z-20",
+              closeButtonClassName
+            )}
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        )}
       </DialogPrimitive.Content>
     </ModalPortal>
   );

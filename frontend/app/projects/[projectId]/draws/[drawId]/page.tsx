@@ -10,7 +10,6 @@ import {
   DollarSign,
   Building2,
   ArrowLeft,
-  FileSpreadsheet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -19,7 +18,6 @@ import {
   DRAW_REQUEST_FORM_ITEMS,
   DRAW_REQUEST_TOTALS,
 } from "@/lib/data/draw-request-form-items";
-import { AllocateDrawTasksModal } from "@/components/draws/allocate-draw-tasks-modal";
 import { VerifyWorkModal } from "@/components/draws/verify-work-modal";
 import { VerifyCostModal } from "@/components/draws/verify-cost-modal";
 import { RecordDecisionModal } from "@/components/draws/record-decision-modal";
@@ -34,7 +32,6 @@ export default function DrawDetailPage() {
   const projectId = (params?.projectId as string) || "";
   const drawId = (params?.drawId as string) || "";
 
-  const [isAllocateTasksModalOpen, setIsAllocateTasksModalOpen] = useState(false);
   const [isVerifyWorkOpen, setIsVerifyWorkOpen] = useState(false);
   const [isVerifyCostOpen, setIsVerifyCostOpen] = useState(false);
   const [isRecordDecisionOpen, setIsRecordDecisionOpen] = useState(false);
@@ -180,16 +177,7 @@ export default function DrawDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
-            <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-              <Link href={`/projects/${projectId}/draws`} className="hover:text-slate-800 hover:underline">
-                Draws
-              </Link>
-              <span>/</span>
-              <span className="text-slate-900 font-semibold">
-                Draw Application #{activeDraw.draw_number}
-              </span>
-            </div>
-            <div className="flex items-center gap-2.5 mt-0.5">
+            <div className="flex items-center gap-2.5">
               <h1 className="text-xl font-bold tracking-tight text-slate-900">
                 Draw Application #{activeDraw.draw_number}
                 {activeDraw.revision_label && `-${activeDraw.revision_label}`}
@@ -213,7 +201,7 @@ export default function DrawDetailPage() {
       {/* DRAW REQUEST FORM - AUTHENTIC SOV TABLE */}
       <div className="rounded-xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 bg-slate-50/70 px-5 py-3.5">
+        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/70 px-5 py-3.5">
           <div className="flex items-center gap-3">
             <h2 className="text-sm font-bold text-slate-900 tracking-tight">
               Draw Request Form
@@ -222,16 +210,6 @@ export default function DrawDetailPage() {
               {lines.length} Tasks Requested
             </span>
           </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsAllocateTasksModalOpen(true)}
-            className="text-xs font-semibold gap-1.5 border-slate-300 bg-white shadow-2xs hover:bg-slate-50 cursor-pointer self-start sm:self-auto"
-          >
-            <FileSpreadsheet className="h-3.5 w-3.5 text-[#C85A17]" />
-            <span>Input / Allocate Work Tasks</span>
-          </Button>
         </div>
 
         {/* Authentic Draw Request Form Table */}
@@ -329,13 +307,6 @@ export default function DrawDetailPage() {
       </div>
 
       {/* Sub-modals for workflow actions */}
-      <AllocateDrawTasksModal
-        open={isAllocateTasksModalOpen}
-        onOpenChange={setIsAllocateTasksModalOpen}
-        drawNumber={activeDraw.draw_number}
-        initialLines={activeDraw.lines}
-        onSave={() => refreshAll()}
-      />
 
       <VerifyWorkModal
         open={isVerifyWorkOpen}
