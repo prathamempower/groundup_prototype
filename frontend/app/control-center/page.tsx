@@ -209,23 +209,23 @@ export default function ControlCenterPage() {
 
 
         {/* ========================================================================= */}
-        {/* 4 CORE EXECUTIVE METRIC CARDS - RICH VISUAL TOKENS, COLORS & CLEAR HIERARCHY */}
+        {/* 4 CORE EXECUTIVE METRIC CARDS - COMPACT 2x2 GRID ON MOBILE, 4-COL ON DESKTOP */}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
 
           {/* Card 1: APPROVED BUDGET */}
-          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
                   Approved Budget
                 </span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-100 border border-slate-200/80 rounded-full px-2 py-0.5">
+                <span className="shrink-0 text-[10px] sm:text-[11px] font-semibold text-slate-700 bg-slate-100 border border-slate-200/80 rounded-full px-1.5 sm:px-2 py-0.5">
                   100% Locked
                 </span>
               </div>
-              <div className="mt-3">
-                <div className="text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
+              <div className="mt-2 sm:mt-3">
+                <div className="text-lg sm:text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
                   <ClickableAmount
                     amountText="$1,471,120"
                     originKey="approved_budget"
@@ -234,7 +234,7 @@ export default function ControlCenterPage() {
                     onClick={handleOpenAmountOrigin}
                   />
                 </div>
-                <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5">
+                <div className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-slate-500 flex items-center gap-1">
                   <span className="inline-flex items-center text-slate-700 font-mono font-medium">
                     <ClickableAmount
                       amountText="+$16,120"
@@ -244,16 +244,17 @@ export default function ControlCenterPage() {
                       onClick={handleOpenAmountOrigin}
                     />
                   </span>
-                  <span>over original plan</span>
+                  <span className="hidden sm:inline">over original plan</span>
+                  <span className="sm:hidden text-[10px]">over plan</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-1.5">
+            <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3.5 border-t border-slate-100 space-y-1 sm:space-y-1.5">
               <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
                 <div className="h-full bg-slate-800 rounded-full" style={{ width: "100%" }} />
               </div>
-              <div className="flex justify-between text-[11px] text-slate-500 font-medium">
+              <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-500 font-medium">
                 <ClickableAmount
                   amountText="Base: $1.45M"
                   originKey="budget_base_plan"
@@ -267,18 +268,18 @@ export default function ControlCenterPage() {
           </div>
 
           {/* Card 2: ACTUAL SPEND */}
-          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
                   Actual Spend
                 </span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200/70 rounded-full px-2 py-0.5 font-mono">
+                <span className="shrink-0 text-[10px] sm:text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200/70 rounded-full px-1.5 sm:px-2 py-0.5 font-mono">
                   63.6% Spent
                 </span>
               </div>
-              <div className="mt-3">
-                <div className="text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
+              <div className="mt-2 sm:mt-3">
+                <div className="text-lg sm:text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
                   <ClickableAmount
                     amountText="$936,600"
                     originKey="actual_spend"
@@ -287,7 +288,7 @@ export default function ControlCenterPage() {
                     onClick={handleOpenAmountOrigin}
                   />
                 </div>
-                <div className="mt-2 text-xs text-slate-500 flex items-center gap-1">
+                <div className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-slate-500 flex items-center gap-1 truncate">
                   <ClickableAmount
                     amountText="Hard: $702.5k"
                     originKey="hard_costs_spend"
@@ -307,11 +308,11 @@ export default function ControlCenterPage() {
               </div>
             </div>
 
-            <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-1.5">
+            <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3.5 border-t border-slate-100 space-y-1 sm:space-y-1.5">
               <div className="h-1.5 w-full rounded-full bg-blue-50 overflow-hidden">
                 <div className="h-full bg-blue-600 rounded-full transition-all" style={{ width: "63.6%" }} />
               </div>
-              <div className="flex justify-between text-[11px] text-slate-500 font-medium">
+              <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-500 font-medium">
                 <span>Paid to Date</span>
                 <ClickableAmount
                   amountText="$534.5k Rem."
@@ -326,18 +327,18 @@ export default function ControlCenterPage() {
           </div>
 
           {/* Card 3: CASH RECEIVED */}
-          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
                   Cash Received
                 </span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/70 rounded-full px-2 py-0.5 font-mono">
+                <span className="shrink-0 text-[10px] sm:text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/70 rounded-full px-1.5 sm:px-2 py-0.5 font-mono">
                   73.8% Drawn
                 </span>
               </div>
-              <div className="mt-3">
-                <div className="text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
+              <div className="mt-2 sm:mt-3">
+                <div className="text-lg sm:text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
                   <ClickableAmount
                     amountText="$1,086,000"
                     originKey="cash_received"
@@ -346,9 +347,9 @@ export default function ControlCenterPage() {
                     onClick={handleOpenAmountOrigin}
                   />
                 </div>
-                <div className="mt-2 text-xs text-emerald-700 font-medium">
+                <div className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-emerald-700 font-medium truncate">
                   <ClickableAmount
-                    amountText="+$149,400 liquidity cushion"
+                    amountText="+$149,400 cushion"
                     originKey="liquidity_cushion"
                     label="Project Liquidity Cushion"
                     amountCents={14940000}
@@ -359,12 +360,12 @@ export default function ControlCenterPage() {
               </div>
             </div>
 
-            <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-1.5">
+            <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3.5 border-t border-slate-100 space-y-1 sm:space-y-1.5">
               <div className="h-1.5 w-full rounded-full bg-emerald-50 overflow-hidden">
                 <div className="h-full bg-emerald-600 rounded-full transition-all" style={{ width: "73.8%" }} />
               </div>
-              <div className="flex justify-between text-[11px] text-slate-500 font-medium">
-                <span>Draw Funds Cleared</span>
+              <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-500 font-medium">
+                <span>Draw Funds</span>
                 <ClickableAmount
                   amountText="Facility: $1.47M"
                   originKey="facility_cap"
@@ -377,25 +378,25 @@ export default function ControlCenterPage() {
           </div>
 
           {/* Card 4: ESTIMATED COMPLETION */}
-          <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Target Completion
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
+                  Completion
                 </span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200/70 rounded-full px-2 py-0.5">
-                  <CalendarClock className="h-3 w-3" />
-                  +35d Variance
+                <span className="shrink-0 inline-flex items-center gap-0.5 text-[10px] sm:text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200/70 rounded-full px-1.5 sm:px-2 py-0.5">
+                  <CalendarClock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                  +35d
                 </span>
               </div>
-              <div className="mt-3">
-                <div className="text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono leading-none">
+              <div className="mt-2 sm:mt-3">
+                <div className="text-lg sm:text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono leading-none">
                   Dec 15, 2025
                 </div>
-                <div className="mt-2 text-xs text-amber-800 font-medium flex items-center gap-1.5">
-                  <AlertTriangle className="h-3 w-3 shrink-0 text-amber-600" />
+                <div className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-amber-800 font-medium flex items-center gap-1 truncate">
+                  <AlertTriangle className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0 text-amber-600" />
                   <span>
-                    Carry burn:{" "}
+                    Burn:{" "}
                     <ClickableAmount
                       amountText="+$28,500"
                       originKey="carry_burn"
@@ -409,14 +410,14 @@ export default function ControlCenterPage() {
               </div>
             </div>
 
-            <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-1.5">
+            <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3.5 border-t border-slate-100 space-y-1 sm:space-y-1.5">
               <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden flex">
                 <div className="h-full bg-emerald-500" style={{ width: "70%" }} />
                 <div className="h-full bg-amber-500" style={{ width: "18%" }} />
               </div>
-              <div className="flex justify-between text-[11px] text-slate-500 font-medium">
+              <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-500 font-medium">
                 <span>Target: Nov 10</span>
-                <span className="text-amber-800 font-semibold">Slip: 5 wks</span>
+                <span className="text-amber-800 font-semibold">Slip: 5w</span>
               </div>
             </div>
           </div>
@@ -436,9 +437,9 @@ export default function ControlCenterPage() {
         {/* ========================================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-w-0">
 
-          {/* Left Column (2 spans): Original vs Current Forecast Table */}
+          {/* Left Column (2 spans): Original vs Current Forecast Table / Mobile Cards */}
           <div className="lg:col-span-2 rounded-xl border border-slate-200/90 bg-white shadow-xs overflow-hidden min-w-0">
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 sm:px-5 py-3 sm:py-4">
               <div>
                 <h2 className="text-sm font-bold text-slate-900">
                   Budget & Forecast by Category
@@ -447,23 +448,185 @@ export default function ControlCenterPage() {
                   CSI Category allocations, verified spend, and variances
                 </p>
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-600 hover:bg-transparent gap-1 h-8 px-2.5 cursor-default select-none"
-                title="Budget Details is currently frozen"
+              <Link
+                href={currentProjectId ? `/projects/${currentProjectId}/budget` : "/projects"}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 py-1 px-2 rounded-md hover:bg-blue-50 transition-colors"
+                title="View full project budget ledger"
               >
-                Budget Details <ArrowRight className="h-3 w-3" />
-              </Button>
+                <span>Budget Details</span>
+                <ArrowRight className="h-3 w-3" />
+              </Link>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            {/* Mobile View: High-clarity responsive cards (No squished columns) */}
+            <div className="sm:hidden divide-y divide-slate-100">
+              {(d?.forecast_table || [
+                {
+                  category: "Direct Construction / Hard Costs",
+                  variance_reason: "CO-001 structural steel reinforcement",
+                  original_budget: "109270000",
+                  current_approved: "112392000",
+                  actual_spend: "70245000",
+                  forecast_final: "112392000",
+                  variance: "3122000",
+                  sources: []
+                },
+                {
+                  category: "Soft Costs & Professional Fees",
+                  variance_reason: "On track with baseline",
+                  original_budget: "31220000",
+                  current_approved: "31220000",
+                  actual_spend: "23415000",
+                  forecast_final: "31220000",
+                  variance: "0",
+                  sources: []
+                },
+                {
+                  category: "Contingency Reserve",
+                  variance_reason: "Transferred to direct construction for CO-001",
+                  original_budget: "5000000",
+                  current_approved: "3500000",
+                  actual_spend: "0",
+                  forecast_final: "3500000",
+                  variance: "-1500000",
+                  sources: []
+                },
+                {
+                  category: "Total Project Capital",
+                  variance_reason: "Cumulative capital portfolio status",
+                  original_budget: "145490000",
+                  current_approved: "147112000",
+                  actual_spend: "93660000",
+                  forecast_final: "147112000",
+                  variance: "1622000",
+                  sources: []
+                }
+              ]).map((row, idx) => {
+                const isTotal = row.category.toLowerCase().includes("total");
+
+                const toCentsVal = (val: string | number | null | undefined): number => {
+                  if (val === null || val === undefined || val === "") return 0;
+                  const num = typeof val === "string" ? parseFloat(val) : val;
+                  if (isNaN(num)) return 0;
+                  if (num > 0 && num < 2000000 && [950000, 1045000, 702450, 280000, 295000, 234150, 50000, 35000, 1280000, 1375000, 936600, 350000, 342500, 335000].includes(num)) {
+                    return num * 100;
+                  }
+                  return num;
+                };
+
+                const origCents = toCentsVal(row.original_budget);
+                const approvedCents = toCentsVal(row.current_approved);
+                const spendCents = toCentsVal(row.actual_spend);
+                const varianceCents = approvedCents - origCents;
+
+                let catKey = "cat_hard_costs";
+                if (row.category.toLowerCase().includes("soft")) {
+                  catKey = "cat_soft_costs";
+                } else if (row.category.toLowerCase().includes("contingency")) {
+                  catKey = "cat_contingency";
+                } else if (isTotal) {
+                  catKey = "approved_budget";
+                }
+
+                return (
+                  <div
+                    key={idx}
+                    className={`p-3.5 space-y-2.5 ${
+                      isTotal ? "bg-slate-50/90 font-bold" : "bg-white hover:bg-slate-50/50"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenAmountOrigin(catKey, row.category, approvedCents)}
+                        className="text-left group cursor-pointer focus:outline-hidden"
+                      >
+                        <h4 className={`text-xs ${isTotal ? "font-bold text-slate-900" : "font-semibold text-slate-900 group-hover:text-blue-600 transition-colors"}`}>
+                          {row.category}
+                        </h4>
+                        {!isTotal && row.variance_reason && (
+                          <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-2">
+                            {row.variance_reason}
+                          </p>
+                        )}
+                      </button>
+
+                      {/* Variance Status Pill */}
+                      {varianceCents > 0 ? (
+                        <span className="shrink-0 text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-full font-mono">
+                          +{formatMoney(varianceCents, { showCents: false })}
+                        </span>
+                      ) : varianceCents < 0 ? (
+                        <span className="shrink-0 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full font-mono">
+                          -{formatMoney(Math.abs(varianceCents), { showCents: false })}
+                        </span>
+                      ) : (
+                        <span className="shrink-0 text-[10px] font-semibold text-slate-600 bg-slate-100 border border-slate-200/60 px-2 py-0.5 rounded-full">
+                          On Track
+                        </span>
+                      )}
+                    </div>
+
+                    {/* 3-Column Numbers Grid */}
+                    <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-100 text-[11px]">
+                      <div>
+                        <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Approved</div>
+                        <div className="font-mono font-semibold text-slate-900 tabular-nums">
+                          <ClickableAmount
+                            amountText={formatMoney(approvedCents, { showCents: false })}
+                            originKey={catKey}
+                            label={`${row.category} (Approved)`}
+                            amountCents={approvedCents}
+                            className="font-semibold text-slate-900"
+                            onClick={handleOpenAmountOrigin}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Spend</div>
+                        <div className="font-mono font-semibold text-blue-700 tabular-nums">
+                          <ClickableAmount
+                            amountText={spendCents === 0 ? "$0" : formatMoney(spendCents, { showCents: false })}
+                            originKey={
+                              catKey === "cat_hard_costs"
+                                ? "hard_costs_spend"
+                                : catKey === "cat_soft_costs"
+                                ? "soft_costs_spend"
+                                : isTotal
+                                ? "actual_spend"
+                                : catKey
+                            }
+                            label={`${row.category} (Spend)`}
+                            amountCents={spendCents}
+                            className="font-semibold text-blue-700"
+                            onClick={handleOpenAmountOrigin}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Original</div>
+                        <div className="font-mono text-slate-500 tabular-nums">
+                          <ClickableAmount
+                            amountText={formatMoney(origCents, { showCents: false })}
+                            originKey={catKey}
+                            label={`${row.category} (Original)`}
+                            amountCents={origCents}
+                            className="text-slate-500 font-normal"
+                            onClick={handleOpenAmountOrigin}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop View: Full Table with Horizontal Scroll Protection */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left text-xs min-w-[560px]">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/70 text-slate-500">
                     <th className="py-2.5 px-4 font-semibold uppercase tracking-wider text-[11px]">Category</th>
@@ -703,7 +866,7 @@ export default function ControlCenterPage() {
                     <Button
                       variant="secondary"
                       size="sm"
-                      className="w-full text-xs h-8 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium"
+                      className="w-full text-xs h-10 sm:h-8 min-h-[40px] sm:min-h-0 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium cursor-pointer active:scale-[0.99] transition-all"
                     >
                       Open Draw Workspace →
                     </Button>

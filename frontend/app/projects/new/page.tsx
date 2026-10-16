@@ -129,13 +129,52 @@ export default function CreateProjectPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F2F4F7] flex flex-col justify-center items-center py-4 sm:py-12 px-2 sm:px-6 font-sans">
+    <div className="min-h-screen bg-[#F2F4F7] flex flex-col justify-center items-center py-4 sm:py-12 px-3 sm:px-6 font-sans">
       {/* Light Untitled-UI Style Raised Modal Container */}
       <div className="w-full max-w-5xl rounded-2xl sm:rounded-[32px] bg-white shadow-[0_20px_50px_rgba(15,23,42,0.08)] border border-slate-200/80 overflow-hidden flex flex-col">
-        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[620px]">
+        {/* Mobile Navigation Header (< lg screens) */}
+        <header className="lg:hidden bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 py-3 sm:px-6 sticky top-0 z-30">
+          <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white shadow-2xs">
+                <Building2 className="h-4 w-4" />
+              </div>
+              <span className="text-sm font-bold tracking-tight text-slate-900">
+                GroundUp
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push("/projects")}
+              className="text-xs font-semibold text-slate-600 hover:text-slate-950 py-1.5 px-3 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              Exit
+            </button>
+          </div>
+
+          {/* Continuous Sleek Progress Line */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-semibold text-slate-900">
+                Step {stage + 1} of {stagesList.length}: {stagesList[stage].title}
+              </span>
+              <span className="font-medium text-slate-500">
+                {Math.round(((stage + 1) / stagesList.length) * 100)}%
+              </span>
+            </div>
+            <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-slate-900 transition-all duration-300 ease-out rounded-full"
+                style={{ width: `${((stage + 1) / stagesList.length) * 100}%` }}
+              />
+            </div>
+          </div>
+        </header>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[520px] lg:min-h-[620px]">
           
-          {/* Left Sidebar / Rail */}
-          <aside className="lg:col-span-4 bg-[#F8FAFC] border-b lg:border-b-0 lg:border-r border-slate-200/80 p-5 sm:p-8 flex flex-col justify-between">
+          {/* Left Sidebar / Rail (Desktop only) */}
+          <aside className="hidden lg:flex lg:col-span-4 bg-[#F8FAFC] border-r border-slate-200/80 p-5 sm:p-8 flex-col justify-between">
             <div className="space-y-8">
               {/* Brand Header */}
               <div className="flex items-center gap-3">
@@ -204,8 +243,8 @@ export default function CreateProjectPage() {
           {/* Right Main Content Area */}
           <main className="lg:col-span-8 p-5 sm:p-8 lg:p-12 flex flex-col justify-between bg-white">
             <div>
-              {/* Centered / Header Icon Badge */}
-              <div className="mb-6">
+              {/* Centered / Header Icon Badge (Desktop only) */}
+              <div className="mb-6 hidden lg:block">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm ring-4 ring-slate-100">
                   <Building2 className="h-5 w-5" />
                 </div>
@@ -224,11 +263,11 @@ export default function CreateProjectPage() {
                   <div>
                     <h2
                       onClick={() => setStage(1)}
-                      className="text-2xl font-bold tracking-tight text-slate-900 cursor-pointer"
+                      className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 cursor-pointer"
                     >
                       Create a New Project
                     </h2>
-                    <p className="mt-1.5 text-sm text-slate-600">
+                    <p className="mt-1.5 text-xs sm:text-sm text-slate-600">
                       Choose how you want to provision this project workspace.
                     </p>
                   </div>
@@ -240,21 +279,40 @@ export default function CreateProjectPage() {
                       tabIndex={0}
                       onClick={() => setStage(1)}
                       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setStage(1)}
-                      className="cursor-pointer rounded-xl border-2 border-slate-900 bg-slate-50/60 p-6 transition-all shadow-xs hover:shadow-md hover:border-blue-600 group flex flex-col justify-between min-h-[190px]"
+                      className="cursor-pointer rounded-2xl border-2 border-slate-900 bg-slate-50/70 p-5 sm:p-6 transition-all shadow-xs hover:shadow-md hover:border-blue-600 group flex flex-col justify-between min-h-[190px] ring-1 ring-slate-900/5 active:scale-[0.99]"
                     >
                       <div>
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-white mb-4 shadow-xs group-hover:scale-105 group-hover:bg-blue-600 transition-all">
-                          <FolderPlus className="h-5 w-5" />
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white shadow-xs group-hover:scale-105 group-hover:bg-blue-600 transition-all">
+                            <FolderPlus className="h-5 w-5" />
+                          </div>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 border border-emerald-200/60">
+                            <Check className="h-3 w-3 stroke-[2.5]" /> Recommended
+                          </span>
                         </div>
-                        <h3 className="font-bold text-slate-900 text-sm">Guided Setup</h3>
+                        <h3 className="font-bold text-slate-900 text-base sm:text-sm">Guided Setup</h3>
                         <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
                           Step-by-step setup for entity, capital structure, and governance.
                         </p>
-                      </div>
-                      <div className="mt-5 inline-flex items-center text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                        Begin Setup <ArrowRight className="ml-1 h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+                        <div className="mt-3.5 flex flex-wrap gap-1.5">
+                          <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">Entity & Structure</span>
+                          <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">Acquisition & Debt</span>
+                          <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">Compliance</span>
+                        </div>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Action Row directly below choices */}
+                  <div className="pt-6 border-t border-slate-200 mt-6 sm:mt-8 flex items-center justify-end">
+                    <Button
+                      type="button"
+                      variant="primary"
+                      onClick={() => setStage(1)}
+                      className="w-full sm:w-auto rounded-full px-7 py-2.5 text-xs font-semibold shadow-sm"
+                    >
+                      Begin Setup <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
               )}
@@ -434,7 +492,7 @@ export default function CreateProjectPage() {
                     )}
                   </div>
 
-                  <div className="pt-6 flex justify-between border-t border-slate-200">
+                  <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
                     <Button
                       type="button"
                       variant="secondary"
@@ -623,7 +681,7 @@ export default function CreateProjectPage() {
                     )}
                   </div>
 
-                  <div className="pt-6 flex justify-between border-t border-slate-200">
+                  <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
                     <Button type="button" variant="secondary" onClick={() => setStage(1)} className="rounded-full px-5 py-2.5 text-xs font-semibold">
                       <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
                     </Button>
@@ -755,7 +813,7 @@ export default function CreateProjectPage() {
                     </div>
                   </div>
 
-                  <div className="pt-6 flex justify-between border-t border-slate-200">
+                  <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
                     <Button type="button" variant="secondary" onClick={() => setStage(2)} className="rounded-full px-5 py-2.5 text-xs font-semibold">
                       <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
                     </Button>
@@ -807,7 +865,7 @@ export default function CreateProjectPage() {
                     </div>
                   </div>
 
-                  <div className="pt-6 flex justify-between border-t border-slate-200">
+                  <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
                     <Button type="button" variant="secondary" onClick={() => setStage(3)} className="rounded-full px-5 py-2.5 text-xs font-semibold">
                       <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
                     </Button>
@@ -869,7 +927,7 @@ export default function CreateProjectPage() {
                     ))}
                   </div>
 
-                  <div className="pt-6 flex justify-between border-t border-slate-200">
+                  <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
                     <Button type="button" variant="secondary" onClick={() => setStage(4)} className="rounded-full px-5 py-2.5 text-xs font-semibold">
                       <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
                     </Button>
@@ -940,7 +998,7 @@ export default function CreateProjectPage() {
                     </div>
                   </div>
 
-                  <div className="pt-6 flex justify-between border-t border-slate-200 mt-auto">
+                  <div className="pt-6 flex justify-between items-center border-t border-slate-200 mt-6 sm:mt-8">
                     <Button type="button" variant="secondary" onClick={() => setStage(5)} className="rounded-full px-5 py-2.5 text-xs font-semibold">
                       <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
                     </Button>

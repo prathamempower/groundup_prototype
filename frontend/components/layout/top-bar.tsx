@@ -172,7 +172,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
   return (
     <div className="sticky top-0 z-30 w-full flex flex-col">
       <header className="flex h-14 w-full items-center justify-between border-b border-slate-200/80 bg-white px-3 sm:px-5">
-        {/* Left: Mobile Toggle & Brand Logo & Contextual Enterprise Breadcrumb */}
+        {/* Left: Mobile Toggle, Visible Back Arrow, and GroundUp Logo with Text */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {Boolean(routeProjectId) && (
             <button
@@ -184,67 +184,46 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
             </button>
           )}
 
-          {/* Brand Logo: always visible on mobile, and on desktop when outside project workspace */}
-          <div className="flex md:hidden shrink-0">
-            <BrandLogo size="sm" iconOnly href="/projects" />
+          {/* Clean Back Arrow - Accessible and visible when inside any project workspace or subpage */}
+          {routeProjectId ? (
+            <>
+              {/* Mobile Back Arrow Icon */}
+              <Link
+                href="/projects"
+                className="flex md:hidden h-8 w-8 items-center justify-center rounded-lg bg-slate-100/90 hover:bg-blue-50 border border-slate-200/80 hover:border-blue-200 text-slate-700 hover:text-blue-700 transition-all shadow-2xs active:scale-95 cursor-pointer shrink-0"
+                title="Back to All Projects"
+                aria-label="Back to All Projects"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+
+              {/* Desktop Back to Projects Button */}
+              <Link
+                href="/projects"
+                className="hidden md:inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg bg-slate-100/90 hover:bg-blue-50 border border-slate-200/80 hover:border-blue-200 text-xs font-semibold text-slate-700 hover:text-blue-700 transition-all shadow-2xs group shrink-0 cursor-pointer"
+                title="Back to All Projects"
+                aria-label="Back to All Projects"
+              >
+                <ArrowLeft className="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600 group-hover:-translate-x-0.5 transition-transform" />
+                <span>All Projects</span>
+              </Link>
+            </>
+          ) : pathname === "/projects/new" ? (
+            <Link
+              href="/projects"
+              className="flex h-8 w-8 md:w-auto md:px-2.5 md:h-8 items-center justify-center gap-1.5 rounded-lg bg-slate-100/90 hover:bg-blue-50 border border-slate-200/80 hover:border-blue-200 text-xs font-semibold text-slate-700 hover:text-blue-700 transition-all shadow-2xs group shrink-0 cursor-pointer"
+              title="Back to All Projects"
+              aria-label="Back to All Projects"
+            >
+              <ArrowLeft className="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600 group-hover:-translate-x-0.5 transition-transform" />
+              <span className="hidden md:inline">All Projects</span>
+            </Link>
+          ) : null}
+
+          {/* GroundUp Logo with Wordmark Text (Visible on all screens, no duplicate labels) */}
+          <div className="flex items-center shrink-0">
+            <BrandLogo size="sm" href="/projects" showWordmark={true} iconOnly={false} showSubtitle={false} />
           </div>
-
-          {!routeProjectId && (
-            <div className="hidden md:flex items-center gap-2.5 shrink-0">
-              <BrandLogo size="sm" href="/projects" showSubtitle={false} />
-              <span className="text-slate-200 select-none font-light">|</span>
-            </div>
-          )}
-
-          {/* Clean Standard Breadcrumb & All Projects Navigation */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-            {routeProjectId ? (
-              <>
-                <Link
-                  href="/projects"
-                  className="inline-flex items-center gap-1.5 px-2 py-1 sm:px-2.5 rounded-lg bg-slate-100/90 hover:bg-blue-50 border border-slate-200/80 hover:border-blue-200 text-xs font-semibold text-slate-700 hover:text-blue-700 transition-all shadow-2xs group shrink-0"
-                  title="Back to All Projects"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600 group-hover:-translate-x-0.5 transition-transform" />
-                  <span className="hidden sm:inline">All Projects</span>
-                </Link>
-
-                <span className="text-slate-300 select-none font-normal">/</span>
-
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <Building2 className="h-3.5 w-3.5 text-blue-600 shrink-0" />
-                  <span
-                    className="text-xs font-bold text-slate-900 truncate max-w-[140px] sm:max-w-[240px] md:max-w-[320px]"
-                    title={currentProject ? currentProject.name : "Project"}
-                  >
-                    {currentProject ? currentProject.name : "Project"}
-                  </span>
-                </div>
-              </>
-            ) : pathname === "/projects/new" ? (
-              <>
-                <Link
-                  href="/projects"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100/90 hover:bg-blue-50 border border-slate-200/80 hover:border-blue-200 text-xs font-semibold text-slate-700 hover:text-blue-700 transition-all shadow-2xs group shrink-0"
-                  title="Back to All Projects"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600 group-hover:-translate-x-0.5 transition-transform" />
-                  <span>All Projects</span>
-                </Link>
-
-                <span className="text-slate-300 select-none font-normal">/</span>
-
-                <span className="text-xs font-bold text-slate-900">
-                  New Project
-                </span>
-              </>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                <Building2 className="h-3.5 w-3.5 text-blue-600" />
-                <span>Projects</span>
-              </span>
-            )}
-          </nav>
         </div>
 
         {/* Right: Tasks, Inbox, Notifications & User Menu */}
@@ -633,59 +612,84 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
 
       {/* Real-Time Alert Notification Bar - Strictly scoped to Control Center at top of page */}
       {!isAlertBarDismissed && isControlCenterPage && (
-        <div className="w-full border-b border-amber-200/90 bg-gradient-to-r from-amber-50 via-amber-50/95 to-amber-100/40 px-3 sm:px-5 py-2 sm:py-2.5 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs animate-in fade-in duration-150">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-200/80 text-amber-800">
-              <AlertTriangle className="h-4 w-4 text-amber-700" />
-            </span>
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-              <span className="font-bold text-amber-900 flex items-center gap-1.5">
-                Critical Path Risk
-                <span className="rounded-full bg-amber-200 text-amber-900 px-2 py-0.5 text-[10px] font-bold">
-                  Active Warning
-                </span>
-              </span>
-              <span className="text-slate-400 hidden sm:inline">·</span>
-              <span className="font-bold text-slate-800">
-                At-Risk Milestone: Structural Steel Fabrication
-              </span>
-              <span className="text-slate-600 hidden xl:inline">
-                (Fabricator lead time extended by 5 weeks. Delays framed assembly and secondary trade access.)
-              </span>
-              <span className="font-mono text-amber-800 text-[11px] font-bold inline-flex items-center gap-1.5">
-                <span className="rounded bg-white/90 border border-amber-200 px-1.5 py-0.5 text-amber-800 font-bold">
-                  Slip: +35 Days
-                </span>
-                <span className="rounded bg-white/90 border border-amber-200 px-1.5 py-0.5 text-amber-800 font-bold">
-                  Carry: +$28,500
-                </span>
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-            <button
-              type="button"
-              disabled
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
+        <div className="w-full border-b border-amber-200/90 bg-gradient-to-r from-amber-50 via-amber-50/95 to-amber-100/40 px-3 sm:px-5 py-2 sm:py-2.5 text-xs text-amber-950 shadow-2xs animate-in fade-in duration-150">
+          <div className="flex items-center justify-between gap-2 max-w-7xl mx-auto">
+            {/* Mobile View: Clean single-row alert strip */}
+            <div
+              onClick={() => {
+                if (currentProjectId) {
+                  router.push(`/projects/${currentProjectId}/alerts`);
+                }
               }}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#C85A17] text-white px-3 py-1.5 text-xs font-bold shadow-xs opacity-75 cursor-not-allowed select-none"
-              title="Milestone schedule is currently frozen"
-              aria-disabled="true"
+              className="sm:hidden flex items-center gap-2 flex-1 min-w-0 cursor-pointer active:opacity-80 py-0.5"
             >
-              <span>View Milestone Schedule</span>
-              <ArrowRight className="h-3.5 w-3.5 opacity-60" />
-            </button>
-            <button
-              onClick={() => setIsAlertBarDismissed(true)}
-              className="text-amber-700 hover:text-amber-950 p-1 rounded-md hover:bg-amber-100/60 transition-colors cursor-pointer"
-              title="Dismiss notification"
-              aria-label="Dismiss notification"
-            >
-              <X className="h-4 w-4" />
-            </button>
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-amber-200/80 text-amber-800">
+                <AlertTriangle className="h-3.5 w-3.5 text-amber-700" />
+              </span>
+              <div className="flex-1 min-w-0 truncate">
+                <span className="font-bold text-amber-950 text-xs">Structural Steel: </span>
+                <span className="font-semibold text-amber-800 text-[11px]">+35d slip, +$28.5k carry</span>
+              </div>
+              <ArrowRight className="h-3.5 w-3.5 text-amber-700 shrink-0" />
+            </div>
+
+            {/* Desktop View: Full milestone schedule context */}
+            <div className="hidden sm:flex items-center gap-2.5 min-w-0 flex-1">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-200/80 text-amber-800">
+                <AlertTriangle className="h-4 w-4 text-amber-700" />
+              </span>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                <span className="font-bold text-amber-900 flex items-center gap-1.5">
+                  Critical Path Risk
+                  <span className="rounded-full bg-amber-200 text-amber-900 px-2 py-0.5 text-[10px] font-bold">
+                    Active Warning
+                  </span>
+                </span>
+                <span className="text-slate-400">·</span>
+                <span className="font-bold text-slate-800">
+                  At-Risk Milestone: Structural Steel Fabrication
+                </span>
+                <span className="text-slate-600 hidden xl:inline">
+                  (Fabricator lead time extended by 5 weeks. Delays framed assembly and secondary trade access.)
+                </span>
+                <span className="font-mono text-amber-800 text-[11px] font-bold inline-flex items-center gap-1.5">
+                  <span className="rounded bg-white/90 border border-amber-200 px-1.5 py-0.5 text-amber-800 font-bold">
+                    Slip: +35 Days
+                  </span>
+                  <span className="rounded bg-white/90 border border-amber-200 px-1.5 py-0.5 text-amber-800 font-bold">
+                    Carry: +$28,500
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  if (currentProjectId) {
+                    router.push(`/projects/${currentProjectId}/alerts`);
+                  }
+                }}
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-[#C85A17] text-white px-3 py-1.5 text-xs font-bold shadow-xs hover:bg-[#a9480e] transition-colors cursor-pointer"
+                title="View milestone alerts"
+              >
+                <span>View Milestone Schedule</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsAlertBarDismissed(true);
+                }}
+                className="text-amber-700 hover:text-amber-950 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-md hover:bg-amber-100/60 transition-colors cursor-pointer"
+                title="Dismiss notification"
+                aria-label="Dismiss notification"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       )}
