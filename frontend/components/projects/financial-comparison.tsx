@@ -605,15 +605,15 @@ export function ProjectFinancialComparison({
           </div>
         </div>
 
-        <div className="rounded-xl sm:rounded-2xl border border-emerald-100 bg-emerald-50/40 p-3.5 sm:p-4 shadow-2xs">
-          <div className="flex items-center justify-between text-emerald-700">
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-emerald-800 truncate">Forecast Net Profit</span>
+        <div className="rounded-xl sm:rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-4 shadow-2xs">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 truncate">Forecast Net Profit</span>
             <Award className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 shrink-0" />
           </div>
-          <div className="mt-1.5 sm:mt-2 text-base sm:text-xl font-extrabold text-emerald-700 tabular-nums">
+          <div className="mt-1.5 sm:mt-2 text-base sm:text-xl font-extrabold text-slate-900 tabular-nums">
             {formatMoney(aggregatedStats.totalProfit)}
           </div>
-          <div className="mt-1 text-[11px] sm:text-xs font-semibold text-emerald-800 truncate">
+          <div className="mt-1 text-[11px] sm:text-xs font-semibold text-emerald-700 truncate">
             {aggregatedStats.portfolioMarginPct.toFixed(1)}% Combined Net Margin
           </div>
         </div>
@@ -736,7 +736,7 @@ export function ProjectFinancialComparison({
                 }}
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === "PROFITABILITY"
-                    ? "bg-white text-emerald-800 shadow-2xs font-bold"
+                    ? "bg-white text-slate-900 shadow-2xs font-bold"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -752,7 +752,7 @@ export function ProjectFinancialComparison({
                 }}
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === "CAPITAL"
-                    ? "bg-white text-amber-800 shadow-2xs font-bold"
+                    ? "bg-white text-slate-900 shadow-2xs font-bold"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -768,7 +768,7 @@ export function ProjectFinancialComparison({
                 }}
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === "HEALTH"
-                    ? "bg-white text-blue-800 shadow-2xs font-bold"
+                    ? "bg-white text-slate-900 shadow-2xs font-bold"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -827,7 +827,7 @@ export function ProjectFinancialComparison({
 
         {/* Dimension 1: Profitability & Returns Ledger */}
         {(activeTab === "ALL" || activeTab === "PROFITABILITY") && (
-          <div className="rounded-2xl border border-emerald-200/80 bg-white shadow-2xs overflow-hidden transition-all">
+          <div className="rounded-2xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden transition-all">
             {/* Dimension Card Header */}
             <div
               onClick={() =>
@@ -836,19 +836,18 @@ export function ProjectFinancialComparison({
                   PROFITABILITY: !prev.PROFITABILITY,
                 }))
               }
-              className="p-4 sm:p-5 bg-gradient-to-r from-emerald-50/70 via-white to-white border-b border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-emerald-50/90 transition-colors"
+              className="p-4 sm:p-5 bg-slate-50/50 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-slate-50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-2xs shrink-0">
-                  <TrendingUp className="h-5 w-5" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 shrink-0">
+                  <TrendingUp className="h-4.5 w-4.5 text-emerald-600" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <h4 className="text-sm sm:text-base font-bold text-slate-900">
                       Profitability &amp; Returns
                     </h4>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-bold">
-                      <Sparkles className="h-3 w-3 text-emerald-700" />
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200/80 px-2 py-0.5 text-[10px] font-semibold">
                       Yield Benchmark
                     </span>
                   </div>
@@ -860,7 +859,7 @@ export function ProjectFinancialComparison({
 
               <div className="flex items-center gap-2 self-end sm:self-auto">
                 <div className="hidden md:flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-xs font-bold text-emerald-800 tabular-nums">
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-xs font-bold text-emerald-800 tabular-nums">
                     Combined Margin: {aggregatedStats.portfolioMarginPct.toFixed(1)}%
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-lg bg-slate-50 border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 tabular-nums">
@@ -901,10 +900,7 @@ export function ProjectFinancialComparison({
                   const isHovered = hoveredProjectId === p.id;
                   const deltaMargin = margin - aggregatedStats.portfolioMarginPct;
                   const profitBarWidth = Math.max(10, Math.round((profit / maxProfit) * 100));
-
-                  const stageLabel = p.lifecycle_stage.toLowerCase().includes("conception")
-                    ? "Design & Planning"
-                    : p.lifecycle_stage.replace(/_/g, " ");
+                  const stageLabel = getStageLabel(p.lifecycle_stage);
 
                   return (
                     <div
@@ -914,10 +910,10 @@ export function ProjectFinancialComparison({
                       onClick={() => onOpenWorkspace(p)}
                       className={`group p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer ${
                         isHovered
-                          ? "bg-emerald-50/70 border-emerald-300 ring-2 ring-emerald-400/30 shadow-xs"
+                          ? "bg-slate-50/90 border-slate-300 ring-2 ring-slate-400/20 shadow-xs"
                           : hoveredProjectId
                           ? "opacity-75 border-slate-200/70 bg-white"
-                          : "border-slate-200/80 bg-white hover:border-emerald-200 hover:bg-emerald-50/30"
+                          : "border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50/40"
                       }`}
                     >
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
@@ -934,12 +930,12 @@ export function ProjectFinancialComparison({
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <h5 className="text-sm font-bold text-slate-900 truncate group-hover:text-emerald-900 transition-colors">
+                              <h5 className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
                                 {p.name}
                               </h5>
                               {isLeader && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-bold shrink-0">
-                                  <Award className="h-2.5 w-2.5" />
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 px-2 py-0.5 text-[10px] font-semibold shrink-0">
+                                  <Award className="h-2.5 w-2.5 text-emerald-600" />
                                   Top Margin
                                 </span>
                               )}
@@ -958,13 +954,13 @@ export function ProjectFinancialComparison({
                         <div className="flex-1 max-w-md w-full py-1">
                           <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 mb-1">
                             <span className="text-slate-500">Profit Distribution</span>
-                            <span className="tabular-nums font-bold text-slate-800">
+                            <span className="tabular-nums font-bold text-slate-900">
                               {formatMoney(profit)}
                             </span>
                           </div>
-                          <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden relative">
+                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden relative">
                             <div
-                              className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-300"
+                              className="h-full bg-emerald-600 rounded-full transition-all duration-300"
                               style={{ width: `${profitBarWidth}%` }}
                             />
                           </div>
@@ -1000,7 +996,7 @@ export function ProjectFinancialComparison({
                               e.stopPropagation();
                               onOpenWorkspace(p);
                             }}
-                            className="inline-flex items-center gap-1 rounded-lg bg-slate-900 group-hover:bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition-colors shrink-0 cursor-pointer"
+                            className="inline-flex items-center gap-1 rounded-lg bg-slate-900 hover:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition-colors shrink-0 cursor-pointer"
                           >
                             <span>Open</span>
                             <ArrowRight className="h-3 w-3" />
@@ -1017,7 +1013,7 @@ export function ProjectFinancialComparison({
 
         {/* Dimension 2: Capital Stack & Debt Facilities Ledger */}
         {(activeTab === "ALL" || activeTab === "CAPITAL") && (
-          <div className="rounded-2xl border border-amber-200/80 bg-white shadow-2xs overflow-hidden transition-all">
+          <div className="rounded-2xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden transition-all">
             {/* Dimension Card Header */}
             <div
               onClick={() =>
@@ -1026,19 +1022,18 @@ export function ProjectFinancialComparison({
                   CAPITAL: !prev.CAPITAL,
                 }))
               }
-              className="p-4 sm:p-5 bg-gradient-to-r from-amber-50/70 via-white to-white border-b border-amber-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-amber-50/90 transition-colors"
+              className="p-4 sm:p-5 bg-slate-50/50 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-slate-50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white shadow-2xs shrink-0">
-                  <Wallet className="h-5 w-5" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 shrink-0">
+                  <Wallet className="h-4.5 w-4.5 text-amber-600" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <h4 className="text-sm sm:text-base font-bold text-slate-900">
                       Capital Stack &amp; Loans
                     </h4>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-bold">
-                      <Sparkles className="h-3 w-3 text-amber-700" />
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200/80 px-2 py-0.5 text-[10px] font-semibold">
                       Senior Debt Facility
                     </span>
                   </div>
@@ -1089,10 +1084,7 @@ export function ProjectFinancialComparison({
                   const em = econ?.equity_multiple ?? 1.85;
                   const isHovered = hoveredProjectId === p.id;
                   const drawnBarWidth = Math.max(8, Math.round(debtDrawnPct));
-
-                  const stageLabel = p.lifecycle_stage.toLowerCase().includes("conception")
-                    ? "Design & Planning"
-                    : p.lifecycle_stage.replace(/_/g, " ");
+                  const stageLabel = getStageLabel(p.lifecycle_stage);
 
                   return (
                     <div
@@ -1102,10 +1094,10 @@ export function ProjectFinancialComparison({
                       onClick={() => onOpenWorkspace(p)}
                       className={`group p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer ${
                         isHovered
-                          ? "bg-amber-50/70 border-amber-300 ring-2 ring-amber-400/30 shadow-xs"
+                          ? "bg-slate-50/90 border-slate-300 ring-2 ring-slate-400/20 shadow-xs"
                           : hoveredProjectId
                           ? "opacity-75 border-slate-200/70 bg-white"
-                          : "border-slate-200/80 bg-white hover:border-amber-200 hover:bg-amber-50/30"
+                          : "border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50/40"
                       }`}
                     >
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
@@ -1121,7 +1113,7 @@ export function ProjectFinancialComparison({
                             />
                           </div>
                           <div className="min-w-0">
-                            <h5 className="text-sm font-bold text-slate-900 truncate group-hover:text-amber-900 transition-colors">
+                            <h5 className="text-sm font-bold text-slate-900 truncate group-hover:text-amber-800 transition-colors">
                               {p.name}
                             </h5>
                             <div className="flex items-center gap-1.5 mt-0.5 text-xs text-slate-500">
@@ -1138,13 +1130,13 @@ export function ProjectFinancialComparison({
                         <div className="flex-1 max-w-md w-full py-1">
                           <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 mb-1">
                             <span className="text-slate-500">Facility Draw Status</span>
-                            <span className="tabular-nums font-bold text-amber-900">
+                            <span className="tabular-nums font-bold text-slate-900">
                               {formatMoney(debtDrawn)} ({debtDrawnPct.toFixed(0)}% Drawn)
                             </span>
                           </div>
-                          <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden relative">
+                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden relative">
                             <div
-                              className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-300"
+                              className="h-full bg-amber-500 rounded-full transition-all duration-300"
                               style={{ width: `${drawnBarWidth}%` }}
                             />
                           </div>
@@ -1180,7 +1172,7 @@ export function ProjectFinancialComparison({
                               e.stopPropagation();
                               onOpenWorkspace(p);
                             }}
-                            className="inline-flex items-center gap-1 rounded-lg bg-slate-900 group-hover:bg-amber-700 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition-colors shrink-0 cursor-pointer"
+                            className="inline-flex items-center gap-1 rounded-lg bg-slate-900 hover:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition-colors shrink-0 cursor-pointer"
                           >
                             <span>Open</span>
                             <ArrowRight className="h-3 w-3" />
@@ -1197,7 +1189,7 @@ export function ProjectFinancialComparison({
 
         {/* Dimension 3: Project Health & Milestones Ledger */}
         {(activeTab === "ALL" || activeTab === "HEALTH") && (
-          <div className="rounded-2xl border border-blue-200/80 bg-white shadow-2xs overflow-hidden transition-all">
+          <div className="rounded-2xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden transition-all">
             {/* Dimension Card Header */}
             <div
               onClick={() =>
@@ -1206,19 +1198,18 @@ export function ProjectFinancialComparison({
                   HEALTH: !prev.HEALTH,
                 }))
               }
-              className="p-4 sm:p-5 bg-gradient-to-r from-blue-50/70 via-white to-white border-b border-blue-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-blue-50/90 transition-colors"
+              className="p-4 sm:p-5 bg-slate-50/50 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-slate-50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-2xs shrink-0">
-                  <Activity className="h-5 w-5" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 shrink-0">
+                  <Activity className="h-4.5 w-4.5 text-blue-600" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <h4 className="text-sm sm:text-base font-bold text-slate-900">
                       Project Health &amp; Progress
                     </h4>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-[10px] font-bold">
-                      <Sparkles className="h-3 w-3 text-blue-700" />
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200/80 px-2 py-0.5 text-[10px] font-semibold">
                       Physical Site Milestones
                     </span>
                   </div>
@@ -1231,7 +1222,7 @@ export function ProjectFinancialComparison({
               <div className="flex items-center gap-2 self-end sm:self-auto">
                 <div className="hidden md:flex items-center gap-2">
                   <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-xs font-bold text-emerald-800 tabular-nums">
-                    Healthy: {healthStats.healthy}
+                    On Track: {healthStats.healthy}
                   </span>
                   {healthStats.atRisk > 0 && (
                     <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 border border-amber-200 px-2.5 py-1 text-xs font-bold text-amber-800 tabular-nums">
@@ -1262,12 +1253,10 @@ export function ProjectFinancialComparison({
                 {comparedProjects.map((p) => {
                   const progress = p.progress_pct ?? (p.status === "COMPLETED" ? 100 : 45);
                   const health = p.health_status || "HEALTHY";
+                  const healthInfo = getHealthInfo(health);
                   const isHovered = hoveredProjectId === p.id;
                   const progressBarWidth = Math.max(6, Math.min(100, progress));
-
-                  const stageLabel = p.lifecycle_stage.toLowerCase().includes("conception")
-                    ? "Design & Planning"
-                    : p.lifecycle_stage.replace(/_/g, " ");
+                  const stageLabel = getStageLabel(p.lifecycle_stage);
 
                   const nextMilestone =
                     p.status === "COMPLETED"
@@ -1284,10 +1273,10 @@ export function ProjectFinancialComparison({
                       onClick={() => onOpenWorkspace(p)}
                       className={`group p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer ${
                         isHovered
-                          ? "bg-blue-50/70 border-blue-300 ring-2 ring-blue-400/30 shadow-xs"
+                          ? "bg-slate-50/90 border-slate-300 ring-2 ring-slate-400/20 shadow-xs"
                           : hoveredProjectId
                           ? "opacity-75 border-slate-200/70 bg-white"
-                          : "border-slate-200/80 bg-white hover:border-blue-200 hover:bg-blue-50/30"
+                          : "border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50/40"
                       }`}
                     >
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
@@ -1304,28 +1293,14 @@ export function ProjectFinancialComparison({
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <h5 className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-900 transition-colors">
+                              <h5 className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
                                 {p.name}
                               </h5>
                               <span
-                                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                                  health === "HEALTHY"
-                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                    : health === "AT_RISK"
-                                    ? "bg-amber-50 text-amber-700 border border-amber-200"
-                                    : "bg-rose-50 text-rose-700 border border-rose-200"
-                                }`}
+                                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-semibold border ${healthInfo.badgeClass}`}
                               >
-                                <span
-                                  className={`h-1.5 w-1.5 rounded-full ${
-                                    health === "HEALTHY"
-                                      ? "bg-emerald-600"
-                                      : health === "AT_RISK"
-                                      ? "bg-amber-600"
-                                      : "bg-rose-600"
-                                  }`}
-                                />
-                                {health}
+                                <span className={`h-1.5 w-1.5 rounded-full ${healthInfo.dotColor}`} />
+                                {healthInfo.label}
                               </span>
                             </div>
                             <div className="flex items-center gap-1.5 mt-0.5 text-xs text-slate-500">
@@ -1342,13 +1317,13 @@ export function ProjectFinancialComparison({
                         <div className="flex-1 max-w-md w-full py-1">
                           <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 mb-1">
                             <span className="text-slate-500">Physical Site Progress</span>
-                            <span className="tabular-nums font-bold text-blue-900">
+                            <span className="tabular-nums font-bold text-slate-900">
                               {progress}% Complete
                             </span>
                           </div>
-                          <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden relative">
+                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden relative">
                             <div
-                              className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-300"
+                              className="h-full bg-blue-600 rounded-full transition-all duration-300"
                               style={{ width: `${progressBarWidth}%` }}
                             />
                           </div>
@@ -1383,7 +1358,7 @@ export function ProjectFinancialComparison({
                               e.stopPropagation();
                               onOpenWorkspace(p);
                             }}
-                            className="inline-flex items-center gap-1 rounded-lg bg-slate-900 group-hover:bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition-colors shrink-0 cursor-pointer"
+                            className="inline-flex items-center gap-1 rounded-lg bg-slate-900 hover:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition-colors shrink-0 cursor-pointer"
                           >
                             <span>Open</span>
                             <ArrowRight className="h-3 w-3" />
