@@ -143,6 +143,11 @@ export default function ProjectsPortfolioPage() {
   };
 
   const formatStageLabel = (stage: string) => {
+    if (!stage) return "Active";
+    const s = stage.toLowerCase();
+    if (s.includes("conception") || s.includes("design") || s.includes("planning")) {
+      return "Design & Planning";
+    }
     switch (stage) {
       case "UNDER_CONSTRUCTION":
       case "CONSTRUCTION":
@@ -287,22 +292,27 @@ export default function ProjectsPortfolioPage() {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-5 sm:py-6 sm:px-6 lg:px-8 space-y-5 sm:space-y-6 min-w-0">
-      {/* Clean Page Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Projects
-          </h1>
-          <p className="mt-1 text-xs text-slate-500">
-            {projects.length} active {projects.length === 1 ? "project" : "projects"}
+      {/* Clean Page Header: Balanced side-by-side structure on mobile and desktop */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+              Projects
+            </h1>
+            <span className="inline-flex items-center rounded-full bg-slate-100 border border-slate-200/80 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+              {projects.length}
+            </span>
+          </div>
+          <p className="mt-0.5 text-xs text-slate-500 truncate">
+            {projects.length} active {projects.length === 1 ? "development" : "developments"}
           </p>
         </div>
 
         {globalRole === "OWNER" && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center shrink-0">
             <Link
               href="/projects/new"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 sm:px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-all hover:bg-slate-800 active:scale-95 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
             >
               <Plus className="h-4 w-4" />
               <span>Create Project</span>
@@ -312,44 +322,47 @@ export default function ProjectsPortfolioPage() {
       </div>
 
       {/* Control Filter Bar */}
-      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-slate-200 bg-white p-2.5 shadow-2xs">
-        <div className="flex flex-1 flex-wrap items-center gap-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-slate-200 bg-white p-3 sm:p-2.5 shadow-2xs">
+        <div className="flex flex-col sm:flex-row flex-1 sm:items-center gap-2.5 w-full">
           {/* Search Box */}
-          <div className="relative min-w-[240px] flex-1 sm:max-w-sm">
+          <div className="relative w-full sm:max-w-sm sm:min-w-[220px]">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type="text"
               placeholder="Search projects..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50/50 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 transition-colors hover:border-slate-300 focus:border-slate-900 focus:bg-white focus:outline-none"
+              className="h-10 sm:h-9 w-full rounded-lg border border-slate-200 bg-slate-50/50 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 transition-colors hover:border-slate-300 focus:border-slate-900 focus:bg-white focus:outline-none"
             />
           </div>
 
-          {/* Stage Filter */}
-          <select
-            value={stageFilter}
-            onChange={(e) => setStageFilter(e.target.value)}
-            className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 focus:border-slate-900 focus:outline-none cursor-pointer"
-          >
-            <option value="ALL">All Stages</option>
-            <option value="PRE_CONSTRUCTION">Pre-Construction</option>
-            <option value="UNDER_CONSTRUCTION">Under Construction</option>
-            <option value="POST_CONSTRUCTION">Post-Construction</option>
-            <option value="COMPLETE">Complete</option>
-          </select>
+          {/* Stage & Status Filters: 2-column grid on mobile, inline on desktop */}
+          <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto sm:items-center">
+            {/* Stage Filter */}
+            <select
+              value={stageFilter}
+              onChange={(e) => setStageFilter(e.target.value)}
+              className="h-10 sm:h-9 w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-2.5 sm:px-3 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 focus:border-slate-900 focus:outline-none cursor-pointer"
+            >
+              <option value="ALL">All Stages</option>
+              <option value="PRE_CONSTRUCTION">Pre-Construction</option>
+              <option value="UNDER_CONSTRUCTION">Under Construction</option>
+              <option value="POST_CONSTRUCTION">Post-Construction</option>
+              <option value="COMPLETE">Complete</option>
+            </select>
 
-          {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 focus:border-slate-900 focus:outline-none cursor-pointer"
-          >
-            <option value="ALL">All Statuses</option>
-            <option value="HEALTHY">Healthy</option>
-            <option value="AT_RISK">At Risk</option>
-            <option value="CRITICAL">Critical</option>
-          </select>
+            {/* Status Filter */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-10 sm:h-9 w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-2.5 sm:px-3 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 focus:border-slate-900 focus:outline-none cursor-pointer"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="HEALTHY">Healthy</option>
+              <option value="AT_RISK">At Risk</option>
+              <option value="CRITICAL">Critical</option>
+            </select>
+          </div>
 
           {(searchQuery || stageFilter !== "ALL" || statusFilter !== "ALL") && (
             <button
@@ -358,19 +371,19 @@ export default function ProjectsPortfolioPage() {
                 setStageFilter("ALL");
                 setStatusFilter("ALL");
               }}
-              className="text-xs font-medium text-slate-500 hover:text-slate-900 px-2 py-1 transition-colors"
+              className="text-xs font-medium text-slate-500 hover:text-slate-900 px-2 py-1 transition-colors self-start sm:self-auto"
             >
               Reset
             </button>
           )}
         </div>
 
-        {/* View Switcher */}
-        <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5 self-end sm:self-auto">
+        {/* View Switcher: full-width 3-column pill on mobile */}
+        <div className="w-full sm:w-auto grid grid-cols-3 sm:flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1 sm:p-0.5">
           <button
             onClick={() => setViewMode("CARD")}
             aria-label="Card view"
-            className={`flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-all ${
+            className={`flex h-9 sm:h-7 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-all ${
               viewMode === "CARD"
                 ? "bg-white text-slate-900 shadow-2xs font-semibold"
                 : "text-slate-500 hover:text-slate-900"
@@ -382,7 +395,7 @@ export default function ProjectsPortfolioPage() {
           <button
             onClick={() => setViewMode("TABLE")}
             aria-label="Table view"
-            className={`flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-all ${
+            className={`flex h-9 sm:h-7 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-all ${
               viewMode === "TABLE"
                 ? "bg-white text-slate-900 shadow-2xs font-semibold"
                 : "text-slate-500 hover:text-slate-900"
@@ -395,15 +408,16 @@ export default function ProjectsPortfolioPage() {
             <button
               onClick={() => setViewMode("COMPARE")}
               aria-label="Compare financials view"
-              className={`flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-all ${
+              className={`flex h-9 sm:h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-all ${
                 viewMode === "COMPARE"
                   ? "bg-white text-slate-900 shadow-2xs font-semibold"
                   : "text-slate-500 hover:text-slate-900"
               }`}
             >
               <BarChart3 className="h-3.5 w-3.5 text-blue-600" />
-              <span>Compare Financials</span>
-              <span className="hidden sm:inline-flex items-center rounded-full bg-blue-100 text-blue-700 px-1.5 py-0.2 text-[9px] font-bold">
+              <span className="truncate">Compare</span>
+              <span className="hidden md:inline">Financials</span>
+              <span className="hidden sm:inline-flex items-center rounded-full bg-blue-100 text-blue-700 px-1 py-0.2 text-[9px] font-bold">
                 PRO
               </span>
             </button>
@@ -604,21 +618,27 @@ export default function ProjectsPortfolioPage() {
       ) : (
         /* Clean SaaS Table View */
         <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-xs">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left text-xs">
-              <thead className="border-b border-slate-200 bg-slate-50/80 font-bold uppercase tracking-wider text-[10px] text-slate-500">
+          <div className="overflow-x-auto relative">
+            <table className="w-full min-w-[780px] border-separate border-spacing-0 text-left text-xs">
+              <thead className="bg-slate-50/90 font-bold uppercase tracking-wider text-[10px] text-slate-500">
                 <tr>
-                  <th className="px-5 py-3.5">Project</th>
-                  <th className="px-4 py-3.5">Stage</th>
-                  <th className="px-4 py-3.5">Your Role</th>
-                  <th className="px-4 py-3.5">Health</th>
-                  <th className="px-4 py-3.5">Progress</th>
-                  {canSeeFinancialSummary && <th className="px-4 py-3.5 text-right">Forecast Profit</th>}
-                  <th className="px-4 py-3.5">Next Milestone</th>
-                  <th className="px-5 py-3.5 text-right">Action</th>
+                  <th className="sticky left-0 z-10 bg-slate-50 px-4 sm:px-5 py-3.5 border-b border-slate-200 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] w-48 min-w-[190px] max-w-[190px]">
+                    Project
+                  </th>
+                  <th className="px-4 py-3.5 border-b border-slate-200 min-w-[130px]">Stage</th>
+                  <th className="px-4 py-3.5 border-b border-slate-200 min-w-[90px]">Role</th>
+                  <th className="px-4 py-3.5 border-b border-slate-200 min-w-[90px]">Health</th>
+                  <th className="px-4 py-3.5 border-b border-slate-200 min-w-[130px]">Progress</th>
+                  {canSeeFinancialSummary && (
+                    <th className="px-4 py-3.5 text-right border-b border-slate-200 min-w-[110px]">
+                      Forecast Profit
+                    </th>
+                  )}
+                  <th className="px-4 py-3.5 border-b border-slate-200 min-w-[150px]">Next Milestone</th>
+                  <th className="px-5 py-3.5 text-right border-b border-slate-200 min-w-[90px]">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="text-slate-700">
                 {filteredProjects.map((project) => {
                   const effectiveRole = getEffectiveRoleOnProject(project);
                   const canSeeProfit =
@@ -629,28 +649,30 @@ export default function ProjectsPortfolioPage() {
                     <tr
                       key={project.id}
                       onClick={() => handleOpenWorkspace(project)}
-                      className="transition-colors hover:bg-slate-50/80 cursor-pointer"
+                      className="group transition-colors hover:bg-slate-50/80 cursor-pointer"
                     >
-                      <td className="px-5 py-4">
-                        <div className="font-bold text-slate-900 hover:text-blue-600 transition-colors">
+                      <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 px-4 sm:px-5 py-3.5 border-b border-slate-100 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] w-48 min-w-[190px] max-w-[190px] align-middle">
+                        <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
                           {project.name}
                         </div>
-                        <div className="text-[11px] text-slate-500 truncate max-w-xs mt-0.5">
+                        <div className="text-[11px] text-slate-500 truncate mt-0.5">
                           {project.address}
                         </div>
                       </td>
-                      <td className="px-4 py-4">
-                        <span className="inline-flex rounded-lg border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                      <td className="px-4 py-3.5 border-b border-slate-100 align-middle">
+                        <span className="inline-flex rounded-lg border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 whitespace-nowrap">
                           {formatStageLabel(project.lifecycle_stage)}
                         </span>
                       </td>
-                      <td className="px-4 py-4">
-                        <span className="inline-flex rounded-lg border border-blue-100 bg-blue-50/80 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
+                      <td className="px-4 py-3.5 border-b border-slate-100 align-middle">
+                        <span className="inline-flex rounded-lg border border-blue-100 bg-blue-50/80 px-2 py-0.5 text-[11px] font-semibold text-blue-700 whitespace-nowrap">
                           {effectiveRole}
                         </span>
                       </td>
-                      <td className="px-4 py-4">{getTableHealthBadge(project.health_status)}</td>
-                      <td className="px-4 py-4 min-w-[120px]">
+                      <td className="px-4 py-3.5 border-b border-slate-100 align-middle whitespace-nowrap">
+                        {getTableHealthBadge(project.health_status)}
+                      </td>
+                      <td className="px-4 py-3.5 border-b border-slate-100 min-w-[130px] align-middle">
                         <div className="flex items-center gap-2">
                           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
                             <div className="h-full bg-blue-600 rounded-full" style={{ width: `${progress}%` }} />
@@ -661,15 +683,15 @@ export default function ProjectsPortfolioPage() {
                         </div>
                       </td>
                       {canSeeFinancialSummary && (
-                        <td className="px-4 py-4 text-right font-extrabold text-slate-900 tabular-nums">
+                        <td className="px-4 py-3.5 text-right font-extrabold text-slate-900 tabular-nums border-b border-slate-100 align-middle whitespace-nowrap">
                           {canSeeProfit ? formatMoney(project.forecast_profit || 0) : "-"}
                         </td>
                       )}
-                      <td className="px-4 py-4 text-slate-600 truncate max-w-[170px]">
+                      <td className="px-4 py-3.5 text-slate-600 truncate max-w-[160px] border-b border-slate-100 align-middle">
                         {project.next_milestone || "Handover & Final Audit"}
                       </td>
-                      <td className="px-5 py-4 text-right">
-                        <span className="inline-flex items-center gap-1 font-bold text-blue-600 hover:text-blue-700">
+                      <td className="px-5 py-3.5 text-right border-b border-slate-100 align-middle whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1 font-bold text-blue-600 group-hover:text-blue-700">
                           Open &rarr;
                         </span>
                       </td>
