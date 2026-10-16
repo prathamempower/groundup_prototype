@@ -134,9 +134,27 @@ export function AppShell({ children }: AppShellProps) {
   }, [pathname, session, rawProjectId, sessionUser, memberships, standaloneSection, router]);
 
   const workspaceProjectId = rawProjectId;
-  const projectMembership = workspaceProjectId
-    ? memberships.find((m: any) => m.project_id === workspaceProjectId)
-    : null;
+  const projectMembership = React.useMemo(() => {
+    if (!workspaceProjectId) return null;
+    // 1. Direct project_id match
+    const exact = memberships.find((m: any) => m.project_id === workspaceProjectId);
+    if (exact) return exact;
+
+    // 2. Organization-wide Owner has access to all project workspaces
+    if (session?.user?.role === "OWNER" || currentRole === "OWNER") {
+      return { project_id: workspaceProjectId, role: "OWNER" };
+    }
+
+    // 3. Normalized slug/alias match against memberships
+    const cleanQuery = workspaceProjectId.toLowerCase().replace(/^(proj-|project-)/, "").replace(/[-_]/g, " ").trim();
+    if (!cleanQuery) return null;
+
+    return memberships.find((m: any) => {
+      const pid = String(m.project_id || "").toLowerCase();
+      return pid === cleanQuery || pid.includes(cleanQuery);
+    }) || null;
+  }, [workspaceProjectId, memberships, session?.user?.role, currentRole]);
+
   const isUnauthorizedProject = Boolean(workspaceProjectId && !projectMembership);
 
   // Check if current route is allowed for the active role - always OWNER

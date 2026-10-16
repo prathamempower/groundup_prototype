@@ -90,7 +90,16 @@ export function Sidebar({
   });
 
   const allProjects: Project[] = projectsData?.data?.projects || [];
-  const activeProject = activeProjectData?.data || (allProjects.find(p => p.id === workspaceProjectId));
+  const activeProject =
+    activeProjectData?.data ||
+    allProjects.find((p) => p.id === workspaceProjectId) ||
+    allProjects.find((p) => {
+      const clean = (workspaceProjectId || "").toLowerCase().replace(/^(proj-|project-)/, "").replace(/[-_]/g, " ").trim();
+      if (!clean) return false;
+      const pName = (p.name || "").toLowerCase();
+      const pAddr = (p.address || "").toLowerCase();
+      return pName === clean || pName.includes(clean) || clean.includes(pName) || pAddr.includes(clean);
+    });
 
   // Derive effective role on this active project - always OWNER
   const effectiveRole: UserRole = "OWNER";

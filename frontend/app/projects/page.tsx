@@ -299,9 +299,6 @@ export default function ProjectsPortfolioPage() {
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
               Projects
             </h1>
-            <span className="inline-flex items-center rounded-full bg-slate-100 border border-slate-200/80 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
-              {projects.length}
-            </span>
           </div>
           <p className="mt-0.5 text-xs text-slate-500 truncate">
             {projects.length} active {projects.length === 1 ? "development" : "developments"}
@@ -357,7 +354,7 @@ export default function ProjectsPortfolioPage() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="h-10 sm:h-9 w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-2.5 sm:px-3 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 focus:border-slate-900 focus:outline-none cursor-pointer"
             >
-              <option value="ALL">All Statuses</option>
+              <option value="ALL">All Status</option>
               <option value="HEALTHY">Healthy</option>
               <option value="AT_RISK">At Risk</option>
               <option value="CRITICAL">Critical</option>

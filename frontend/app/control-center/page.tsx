@@ -349,7 +349,7 @@ export default function ControlCenterPage() {
                 </div>
                 <div className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-emerald-700 font-medium truncate">
                   <ClickableAmount
-                    amountText="+$149,400 cushion"
+                    amountText="+$149,400 reserve"
                     originKey="liquidity_cushion"
                     label="Project Liquidity Cushion"
                     amountCents={14940000}

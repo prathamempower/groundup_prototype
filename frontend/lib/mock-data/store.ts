@@ -187,11 +187,18 @@ class MockStore {
               parsed.users.forEach((u: any) => {
                 u.role = "OWNER";
                 u.title = "Owner";
-                if (Array.isArray(u.project_memberships)) {
-                  u.project_memberships.forEach((m: any) => {
-                    m.role = "OWNER";
+                u.project_memberships = u.project_memberships || [];
+                // Ensure all existing projects are present in memberships
+                if (Array.isArray(parsed.projects)) {
+                  parsed.projects.forEach((proj: any) => {
+                    if (proj?.id && !u.project_memberships.some((m: any) => m.project_id === proj.id)) {
+                      u.project_memberships.push({ project_id: proj.id, role: "OWNER" });
+                    }
                   });
                 }
+                u.project_memberships.forEach((m: any) => {
+                  m.role = "OWNER";
+                });
               });
             }
             parsed.projects.forEach((p: any) => {
@@ -281,11 +288,16 @@ class MockStore {
     if (user) {
       user.role = "OWNER";
       user.title = "Owner";
-      if (Array.isArray(user.project_memberships)) {
-        user.project_memberships.forEach((m) => {
-          m.role = "OWNER";
-        });
-      }
+      user.project_memberships = user.project_memberships || [];
+      const currentProjects = this.getProjects();
+      currentProjects.forEach((p) => {
+        if (!user.project_memberships.some((m) => m.project_id === p.id)) {
+          user.project_memberships.push({ project_id: p.id, role: "OWNER" });
+        }
+      });
+      user.project_memberships.forEach((m) => {
+        m.role = "OWNER";
+      });
     }
     return user;
   }
@@ -346,7 +358,29 @@ class MockStore {
   }
 
   getProjectById(projectId: string): Project | undefined {
-    return this.getProjects().find((p) => p.id === projectId);
+    if (!projectId) return undefined;
+    const all = this.getProjects();
+
+    // 1. Exact ID match
+    const exact = all.find((p) => p.id === projectId);
+    if (exact) return exact;
+
+    // 2. Normalized slug matching (e.g. 'proj-73-broadway' -> '73 broadway')
+    const cleanQuery = projectId.toLowerCase().replace(/^(proj-|project-)/, "").replace(/[-_]/g, " ").trim();
+    if (!cleanQuery) return undefined;
+
+    const matched = all.find((p) => {
+      const pName = (p.name || "").toLowerCase();
+      const pAddr = (p.address || "").toLowerCase();
+      return (
+        pName === cleanQuery ||
+        pName.includes(cleanQuery) ||
+        cleanQuery.includes(pName) ||
+        pAddr.includes(cleanQuery)
+      );
+    });
+
+    return matched;
   }
 
   createProject(projectData: Partial<Project>): Project {
@@ -609,6 +643,10 @@ class MockStore {
     if (dashboard) return dashboard;
 
     const project = this.getProjectById(projectId) || this.state.projects[0];
+    if (project && project.id && this.state.dashboards[project.id]) {
+      return this.state.dashboards[project.id];
+    }
+
     return {
       project,
       kpis: {
@@ -641,7 +679,9 @@ class MockStore {
       (d) => d.id !== "doc-broadway-sov" && d.original_filename !== "73 Broadway.xlsx"
     );
     if (projectId) {
-      return docs.filter((d) => d.project_id === projectId);
+      const resolved = this.getProjectById(projectId);
+      const targetId = resolved ? resolved.id : projectId;
+      return docs.filter((d) => d.project_id === targetId || d.project_id === projectId);
     }
     return docs;
   }

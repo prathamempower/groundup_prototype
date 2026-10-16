@@ -219,7 +219,7 @@ export function MilestoneGanttChart({
               aria-label="Filter status"
               className="h-8.5 rounded-lg border border-slate-200 bg-white px-3 pr-7 text-xs font-medium text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer"
             >
-              <option value="ALL">All Statuses</option>
+              <option value="ALL">All Status</option>
               <option value="CRITICAL">Critical</option>
               <option value="ON_TRACK">On Track</option>
               <option value="AT_RISK">At Risk</option>

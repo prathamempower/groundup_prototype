@@ -66,7 +66,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
   });
 
   const currentUser = meData?.data;
-  const projects = projectsData?.data?.projects || [];
+  const projects = React.useMemo(() => projectsData?.data?.projects || [], [projectsData?.data?.projects]);
 
   // Match /projects/[projectId] strictly from current route if active inside workspace
   const projectRouteMatch = pathname.match(/^\/projects\/([^\/]+)/);
@@ -74,8 +74,20 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
 
   // STRICT PROJECT ISOLATION: When outside a specific project workspace route (e.g. on /projects portfolio),
   // do not latch onto a random project or leak project-specific tasks/alerts.
-  const currentProjectId = routeProjectId || null;
-  const currentProject = routeProjectId ? projects.find((p) => p.id === routeProjectId) : null;
+  const currentProject = React.useMemo(() => {
+    if (!routeProjectId) return null;
+    const exact = projects.find((p) => p.id === routeProjectId);
+    if (exact) return exact;
+    const cleanQuery = routeProjectId.toLowerCase().replace(/^(proj-|project-)/, "").replace(/[-_]/g, " ").trim();
+    if (!cleanQuery) return null;
+    return projects.find((p) => {
+      const pName = (p.name || "").toLowerCase();
+      const pAddr = (p.address || "").toLowerCase();
+      return pName === cleanQuery || pName.includes(cleanQuery) || cleanQuery.includes(pName) || pAddr.includes(cleanQuery);
+    }) || null;
+  }, [projects, routeProjectId]);
+
+  const currentProjectId = currentProject?.id || routeProjectId || null;
   const { signOut, isSigningOut, SignOutOverlay } = useSignOut();
 
   const switchProjectMutation = useMutation({
