@@ -177,11 +177,6 @@ class MockStore {
           const parsed = JSON.parse(saved);
           if (parsed && Array.isArray(parsed.projects) && parsed.projects.length > 0) {
             parsed.projects = deduplicateProjects(parsed.projects);
-            if (Array.isArray(parsed.documents)) {
-              parsed.documents = parsed.documents.filter(
-                (d: any) => d.id !== "doc-broadway-sov" && d.original_filename !== "73 Broadway.xlsx"
-              );
-            }
             // Strictly enforce OWNER role on every user, membership, and project
             if (Array.isArray(parsed.users)) {
               parsed.users.forEach((u: any) => {
@@ -201,10 +196,17 @@ class MockStore {
                 });
               });
             }
-            parsed.projects.forEach((p: any) => {
-              p.role_on_project = "OWNER";
-            });
             parsed.currentUserId = "user-marcus";
+
+            // Sync newly registered seed documents into existing state if missing
+            if (Array.isArray(parsed.documents)) {
+              for (const seedDoc of SEED_DOCUMENTS) {
+                if (!parsed.documents.some((d: any) => d.id === seedDoc.id || d.original_filename === seedDoc.original_filename)) {
+                  parsed.documents.push(JSON.parse(JSON.stringify(seedDoc)));
+                }
+              }
+            }
+
             try {
               window.localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
             } catch {}
@@ -675,9 +677,7 @@ class MockStore {
   // Documents
   // -------------------------------------------------------------
   getDocuments(projectId?: string): DocumentItem[] {
-    const docs = (this.state.documents || []).filter(
-      (d) => d.id !== "doc-broadway-sov" && d.original_filename !== "73 Broadway.xlsx"
-    );
+    const docs = this.state.documents || [];
     if (projectId) {
       const resolved = this.getProjectById(projectId);
       const targetId = resolved ? resolved.id : projectId;
@@ -687,10 +687,7 @@ class MockStore {
   }
 
   getDocumentById(documentId: string): DocumentItem | undefined {
-    if (documentId === "doc-broadway-sov") return undefined;
-    return this.state.documents.find(
-      (d) => d.id === documentId && d.original_filename !== "73 Broadway.xlsx"
-    );
+    return this.state.documents.find((d) => d.id === documentId);
   }
 
   createDocument(docData: {

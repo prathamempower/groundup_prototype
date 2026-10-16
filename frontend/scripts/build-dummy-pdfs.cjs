@@ -894,4 +894,14 @@ renderPdf(`
 </html>
 `, "combined_draw_project446_draw4301.pdf");
 
-console.log("All 6 PDF documents successfully generated with clean dummy data!");
+fs.copyFileSync(
+  path.join(outputDir, "161 Woodlawn Ave.xlsx.pdf"),
+  path.join(outputDir, "161 Woodlawn Ave - Underwriting Summary.pdf")
+);
+fs.copyFileSync(
+  path.join(outputDir, "combined_draw_project446_draw4301.pdf"),
+  path.join(outputDir, "392 1st Street - Final Draw Package #15.pdf")
+);
+
+console.log("All PDF documents (including project-scoped Underwriting & Draw packages) successfully generated!");
+
