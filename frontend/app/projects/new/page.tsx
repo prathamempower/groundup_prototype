@@ -364,7 +364,7 @@ export default function CreateProjectPage() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[520px] lg:min-h-[620px]">
-          
+
           {/* Left Sidebar / Rail (Desktop only) */}
           <aside className="hidden lg:flex lg:col-span-4 bg-[#F8FAFC] border-r border-slate-200/80 p-5 sm:p-8 flex-col justify-between">
             <div className="space-y-8">
@@ -391,22 +391,20 @@ export default function CreateProjectPage() {
                         type="button"
                         onClick={() => s.num <= stage && setStage(s.num as any)}
                         disabled={s.num > stage}
-                        className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
-                          isActive
-                            ? "bg-white text-slate-900 font-bold shadow-xs border border-slate-200"
-                            : isCompleted
+                        className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${isActive
+                          ? "bg-white text-slate-900 font-bold shadow-xs border border-slate-200"
+                          : isCompleted
                             ? "text-slate-800 hover:bg-slate-200/60 font-semibold cursor-pointer"
                             : "text-slate-600 hover:text-slate-900 cursor-not-allowed font-medium"
-                        }`}
+                          }`}
                       >
                         <div
-                          className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-bold ${
-                            isActive
-                              ? "bg-slate-900 text-white shadow-xs"
-                              : isCompleted
+                          className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-bold ${isActive
+                            ? "bg-slate-900 text-white shadow-xs"
+                            : isCompleted
                               ? "bg-emerald-600 text-white"
                               : "bg-slate-200 text-slate-700"
-                          }`}
+                            }`}
                         >
                           {isCompleted ? <Check className="h-3 w-3 stroke-[3]" /> : s.num + 1}
                         </div>
@@ -640,11 +638,10 @@ export default function CreateProjectPage() {
                             />
                             {zipMessage && (
                               <p
-                                className={`text-[11px] mt-1.5 flex items-center gap-1 ${
-                                  zipStatus === "valid"
-                                    ? "text-emerald-700 font-medium"
-                                    : "text-amber-700"
-                                }`}
+                                className={`text-[11px] mt-1.5 flex items-center gap-1 ${zipStatus === "valid"
+                                  ? "text-emerald-700 font-medium"
+                                  : "text-amber-700"
+                                  }`}
                               >
                                 {zipMessage}
                               </p>
@@ -757,11 +754,10 @@ export default function CreateProjectPage() {
                                   key={type.value}
                                   type="button"
                                   onClick={() => setProjectType(type.value)}
-                                  className={`rounded-xl border p-3 text-center sm:text-left transition-all cursor-pointer ${
-                                    isSelected
-                                      ? "border-slate-900 bg-slate-900 text-white shadow-xs"
-                                      : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
-                                  }`}
+                                  className={`rounded-xl border p-3 text-center sm:text-left transition-all cursor-pointer ${isSelected
+                                    ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                                    : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
+                                    }`}
                                 >
                                   <span className="block text-xs font-semibold leading-tight">{type.label}</span>
                                 </button>
@@ -800,11 +796,10 @@ export default function CreateProjectPage() {
                                   key={stageItem.value}
                                   type="button"
                                   onClick={() => setLifecycleStage(stageItem.value as LifecycleStage)}
-                                  className={`rounded-xl border p-3 text-center sm:text-left transition-all cursor-pointer ${
-                                    isSelected
-                                      ? "border-slate-900 bg-slate-900 text-white shadow-xs"
-                                      : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
-                                  }`}
+                                  className={`rounded-xl border p-3 text-center sm:text-left transition-all cursor-pointer ${isSelected
+                                    ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                                    : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
+                                    }`}
                                 >
                                   <span className="block text-xs font-semibold leading-tight">{stageItem.label}</span>
                                 </button>
@@ -949,11 +944,10 @@ export default function CreateProjectPage() {
                               key={opt.val}
                               type="button"
                               onClick={() => setIsAcquired(opt.val as any)}
-                              className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${
-                                isSelected
-                                  ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
-                                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                              }`}
+                              className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${isSelected
+                                ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
+                                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                                }`}
                             >
                               <div className="flex items-center justify-between">
                                 <span className="block text-sm font-semibold text-slate-900">{opt.label}</span>
@@ -984,17 +978,15 @@ export default function CreateProjectPage() {
                               key={item.value}
                               type="button"
                               onClick={() => setAcquisitionFunding(item.value)}
-                              className={`rounded-xl border p-3.5 text-left transition-all cursor-pointer ${
-                                isSelected
-                                  ? "border-slate-900 bg-slate-900 text-white shadow-xs"
-                                  : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
-                              }`}
+                              className={`rounded-xl border p-3.5 text-left transition-all cursor-pointer ${isSelected
+                                ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                                : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
+                                }`}
                             >
                               <span className="block text-xs font-bold leading-tight">{item.label}</span>
                               <span
-                                className={`block text-[11px] mt-0.5 ${
-                                  isSelected ? "text-slate-300" : "text-slate-500"
-                                }`}
+                                className={`block text-[11px] mt-0.5 ${isSelected ? "text-slate-300" : "text-slate-500"
+                                  }`}
                               >
                                 {item.sub}
                               </span>
@@ -1043,11 +1035,10 @@ export default function CreateProjectPage() {
                               key={opt.val}
                               type="button"
                               onClick={() => setHasConstructionLoan(opt.val as any)}
-                              className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${
-                                isSelected
-                                  ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
-                                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                              }`}
+                              className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${isSelected
+                                ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
+                                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                                }`}
                             >
                               <div className="flex items-center justify-between">
                                 <span className="block text-sm font-semibold text-slate-900">{opt.label}</span>
@@ -1122,13 +1113,11 @@ export default function CreateProjectPage() {
                       {[
                         {
                           value: "FIXED",
-                          badge: "Standard GMP",
                           title: "Fixed Price (GMP / Lump Sum)",
                           desc: "Locked contract value with standard 10% AIA A201 retainage withheld per draw inspection.",
                         },
                         {
                           value: "DAILY",
-                          badge: "Time & Materials",
                           title: "Day Rate (Cost-Plus)",
                           desc: "Billed on verified daily labor, actual subcontractor hours, and material invoices.",
                         },
@@ -1139,21 +1128,13 @@ export default function CreateProjectPage() {
                           <div
                             key={m.value}
                             onClick={() => setContractModel(m.value as ContractModel)}
-                            className={`group cursor-pointer rounded-xl border p-4 transition-all ${
-                              isSelected
-                                ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20 shadow-xs"
-                                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                            }`}
+                            className={`group cursor-pointer rounded-xl border p-4 transition-all ${isSelected
+                              ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20 shadow-xs"
+                              : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                              }`}
                           >
                             <div className="flex items-center justify-between gap-2">
                               <span className="font-semibold text-sm text-slate-900">{m.title}</span>
-                              <span
-                                className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                                  isSelected ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600"
-                                }`}
-                              >
-                                {m.badge}
-                              </span>
                             </div>
                             <p className="mt-1.5 text-xs text-slate-500 leading-normal">{m.desc}</p>
                           </div>
@@ -1171,13 +1152,11 @@ export default function CreateProjectPage() {
                       {[
                         {
                           val: "DEDICATED",
-                          badge: "Recommended",
                           title: "Dedicated Project Account",
                           desc: "Separate single-entity LLC bank account with 1:1 transaction matching and automated wire reconciliation.",
                         },
                         {
                           val: "SHARED",
-                          badge: "Multi-Asset",
                           title: "Central Operating Account",
                           desc: "Master operating account requiring strict inter-project transfer rules and cost code tagging.",
                         },
@@ -1187,21 +1166,13 @@ export default function CreateProjectPage() {
                           <div
                             key={opt.val}
                             onClick={() => setOperatingAccountModel(opt.val as any)}
-                            className={`group cursor-pointer rounded-xl border p-4 transition-all ${
-                              isSelected
-                                ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20 shadow-xs"
-                                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                            }`}
+                            className={`group cursor-pointer rounded-xl border p-4 transition-all ${isSelected
+                              ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20 shadow-xs"
+                              : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                              }`}
                           >
                             <div className="flex items-center justify-between gap-2">
                               <span className="font-semibold text-sm text-slate-900">{opt.title}</span>
-                              <span
-                                className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                                  isSelected ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600"
-                                }`}
-                              >
-                                {opt.badge}
-                              </span>
                             </div>
                             <p className="mt-1.5 text-xs text-slate-500 leading-normal">{opt.desc}</p>
                           </div>
@@ -1240,9 +1211,6 @@ export default function CreateProjectPage() {
                         <Users className="h-5 w-5 text-blue-600" />
                         Team & Role Delegation
                       </h2>
-                      <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
-                        Optional Seats
-                      </span>
                     </div>
                     <p className="mt-1 text-xs text-slate-500">
                       Assign project roles now, or skip and invite collaborators anytime from Project Settings.
@@ -1259,9 +1227,6 @@ export default function CreateProjectPage() {
                             Finance Controller / Co-Owner
                           </span>
                         </div>
-                        <span className="text-[10px] font-semibold uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
-                          Draws & Accounting
-                        </span>
                       </div>
                       <p className="text-[11px] text-slate-500 mb-2">
                         Oversees pay applications, bank wire reconciliation, and project P&L.
@@ -1284,9 +1249,6 @@ export default function CreateProjectPage() {
                             Project Manager / Field Superintendent
                           </span>
                         </div>
-                        <span className="text-[10px] font-semibold uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
-                          Site & Inspections
-                        </span>
                       </div>
                       <p className="text-[11px] text-slate-500 mb-2">
                         Uploads site milestones, daily field logs, and municipal inspection cards.
@@ -1309,9 +1271,6 @@ export default function CreateProjectPage() {
                             General Contractor Principal
                           </span>
                         </div>
-                        <span className="text-[10px] font-semibold uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
-                          Trades & Invoices
-                        </span>
                       </div>
                       <p className="text-[11px] text-slate-500 mb-2">
                         Submits trade invoices, monthly AIA G702 drafts, and statutory lien waivers.
@@ -1365,9 +1324,6 @@ export default function CreateProjectPage() {
                         <FileCheck className="h-5 w-5 text-blue-600" />
                         Source Documents Checklist
                       </h2>
-                      <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
-                        Optional Ingestion
-                      </span>
                     </div>
                     <p className="mt-1 text-xs text-slate-500">
                       Attach initial documents to start automated file matching, or skip and upload later in your workspace.
@@ -1380,13 +1336,11 @@ export default function CreateProjectPage() {
                         key: "deed" as const,
                         title: "Acquisition Deed or HUD-1",
                         sub: "Validates purchase price and title recording.",
-                        tag: isAcquired === "true" ? "Title Gate" : "Diligence",
                       },
                       {
                         key: "gcContract" as const,
                         title: "GC Agreement & SOV",
                         sub: "Establishes Schedule of Values & CSI cost codes.",
-                        tag: "Budget Lock Gate",
                       },
                       {
                         key: "loanAgreement" as const,
@@ -1395,33 +1349,27 @@ export default function CreateProjectPage() {
                           hasConstructionLoan === "true"
                             ? "Sets draw disbursement rules & interest carry formula."
                             : "Optional for self-funded projects.",
-                        tag: hasConstructionLoan === "true" ? "Senior Draw Gate" : "Optional",
                       },
                       {
                         key: "permitSet" as const,
                         title: "Building Permit & Plans",
                         sub: "Enables municipal milestone gates to Certificate of Occupancy.",
-                        tag: "Permit Gate",
                       },
                     ].map((item) => {
                       const file = uploadedFiles[item.key];
                       return (
                         <div
                           key={item.key}
-                          className={`rounded-xl border p-4 transition-all ${
-                            file
-                              ? "border-emerald-300 bg-emerald-50/30"
-                              : "border-slate-200 bg-white hover:border-slate-300"
-                          }`}
+                          className={`rounded-xl border p-4 transition-all ${file
+                            ? "border-emerald-300 bg-emerald-50/30"
+                            : "border-slate-200 bg-white hover:border-slate-300"
+                            }`}
                         >
                           <div className="flex items-start justify-between gap-2 mb-1.5">
                             <div>
                               <span className="font-semibold text-xs text-slate-900 block">{item.title}</span>
                               <span className="text-[11px] text-slate-500 mt-0.5 block">{item.sub}</span>
                             </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded shrink-0">
-                              {item.tag}
-                            </span>
                           </div>
 
                           <div className="mt-3 pt-2.5 border-t border-slate-100">
