@@ -34,6 +34,8 @@ import {
   Info,
   DollarSign,
   MoreHorizontal,
+  LayoutList,
+  Table as TableIcon,
 } from "lucide-react";
 
 import { ImportWizardModal } from "@/components/reconciliation/import-wizard-modal";
@@ -80,6 +82,7 @@ export default function ReconciliationPage() {
   const [evidenceFilter, setEvidenceFilter] = useState("ALL");
   const [sortOrder, setSortOrder] = useState<"NEWEST" | "OLDEST">("NEWEST");
   const [selectedMatchIds, setSelectedMatchIds] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
   // Modal States
   const [isImportOpen, setIsImportOpen] = useState(false);
@@ -672,17 +675,47 @@ export default function ReconciliationPage() {
         {/* ========================================================================= */}
         {activeTab === "queue" && (
           <div className="space-y-3.5">
-            {/* Header description */}
-            <div className="flex items-center justify-between">
+            {/* Header description with responsive view toggle */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div>
                 <h3 className="text-sm font-bold text-slate-900">Review queue</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Specify owner resolution actions and audit reasons to clear transactions.
                 </p>
               </div>
-              <span className="text-xs text-slate-500 font-medium">
-                {unresolvedCount} items need review
-              </span>
+              <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+                <span className="text-xs text-slate-500 font-medium">
+                  {unresolvedCount} items need review
+                </span>
+                <div className="flex items-center rounded-lg border border-slate-200/90 bg-slate-100/80 p-0.5 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("table")}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+                      viewMode === "table"
+                        ? "bg-white text-slate-900 shadow-2xs"
+                        : "text-slate-500 hover:text-slate-900"
+                    }`}
+                    title="Table view"
+                  >
+                    <TableIcon className="h-3.5 w-3.5" />
+                    <span>Table</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("cards")}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+                      viewMode === "cards"
+                        ? "bg-white text-slate-900 shadow-2xs"
+                        : "text-slate-500 hover:text-slate-900"
+                    }`}
+                    title="Cards view"
+                  >
+                    <LayoutList className="h-3.5 w-3.5" />
+                    <span>Cards</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Filter controls bar */}
@@ -741,194 +774,379 @@ export default function ReconciliationPage() {
               </div>
             </div>
 
-            {/* Clean, Simple Table Component */}
-            <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                      <th className="px-3.5 py-2.5 w-8">
-                        <input
-                          type="checkbox"
-                          checked={
-                            selectedMatchIds.length === filteredReviewItems.length &&
-                            filteredReviewItems.length > 0
-                          }
-                          onChange={(e) => handleSelectAll(e.target.checked)}
-                          className="rounded border-slate-300 text-slate-900 focus:ring-0"
-                        />
-                      </th>
-                      <th className="px-3.5 py-2.5">Date</th>
-                      <th className="px-3.5 py-2.5">Account</th>
-                      <th className="px-3.5 py-2.5">Description</th>
-                      <th className="px-3.5 py-2.5">Amount</th>
-                      <th className="px-3.5 py-2.5">Category</th>
-                      <th className="px-3.5 py-2.5">Evidence</th>
-                      <th className="px-3.5 py-2.5">Status</th>
-                      <th className="px-3.5 py-2.5 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-medium">
-                    {isQueueLoading ? (
-                      Array.from({ length: 5 }).map((_, idx) => (
-                        <tr key={`queue-skel-${idx}`} className="animate-pulse">
-                          <td className="px-3.5 py-3">
-                            <Skeleton className="h-4 w-4 rounded" />
-                          </td>
-                          <td className="px-3.5 py-3">
-                            <Skeleton className="h-3.5 w-16" />
-                          </td>
-                          <td className="px-3.5 py-3">
-                            <Skeleton className="h-3.5 w-24" />
-                          </td>
-                          <td className="px-3.5 py-3">
-                            <div className="space-y-1">
-                              <Skeleton className="h-3.5 w-40" />
-                              <Skeleton className="h-2.5 w-20" />
-                            </div>
-                          </td>
-                          <td className="px-3.5 py-3">
-                            <Skeleton className="h-4 w-20" />
-                          </td>
-                          <td className="px-3.5 py-3">
-                            <Skeleton className="h-5 w-24 rounded-full" />
-                          </td>
-                          <td className="px-3.5 py-3">
-                            <Skeleton className="h-5 w-16 rounded-full" />
-                          </td>
-                          <td className="px-3.5 py-3">
-                            <Skeleton className="h-5 w-20 rounded-full" />
-                          </td>
-                          <td className="px-3.5 py-3 text-right">
-                            <Skeleton className="h-7 w-20 ml-auto rounded-md" />
-                          </td>
-                        </tr>
-                      ))
-                    ) : filteredReviewItems.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={9}
-                          className="py-10 text-center text-xs text-slate-400"
-                        >
-                          No transactions found.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredReviewItems.map((row) => {
-                        const isSelected = selectedMatchIds.includes(row.id);
-                        const isResolved = row.status === "Resolved";
+            {/* Review Queue Content: Table View or Cards View */}
+            {viewMode === "table" ? (
+              <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
+                {/* Mobile scroll hint */}
+                <div className="md:hidden flex items-center justify-between px-3.5 py-2 bg-slate-50/90 border-b border-slate-200/80 text-[11px] text-slate-500">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <ArrowRightLeft className="h-3.5 w-3.5 text-slate-400" />
+                    Scroll horizontally to view all columns
+                  </span>
+                  <span className="font-mono text-[10px] bg-slate-200/70 text-slate-700 px-1.5 py-0.5 rounded font-semibold">
+                    9 columns
+                  </span>
+                </div>
 
-                        return (
-                          <tr
-                            key={row.id}
-                            className={`hover:bg-slate-50/60 transition-colors ${
-                              isSelected ? "bg-blue-50/20" : ""
-                            }`}
-                          >
+                <div className="overflow-x-auto touch-pan-x scrollbar-thin scrollbar-thumb-slate-300">
+                  <table className="w-full min-w-[980px] text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        <th className="px-3.5 py-2.5 w-10 text-center">
+                          <input
+                            type="checkbox"
+                            checked={
+                              selectedMatchIds.length === filteredReviewItems.length &&
+                              filteredReviewItems.length > 0
+                            }
+                            onChange={(e) => handleSelectAll(e.target.checked)}
+                            className="rounded border-slate-300 text-slate-900 focus:ring-0"
+                          />
+                        </th>
+                        <th className="px-3.5 py-2.5 w-[110px] min-w-[105px] whitespace-nowrap">Date</th>
+                        <th className="px-3.5 py-2.5 w-[155px] min-w-[145px] whitespace-nowrap">Account</th>
+                        <th className="px-3.5 py-2.5 w-[220px] min-w-[190px]">Description</th>
+                        <th className="px-3.5 py-2.5 w-[130px] min-w-[120px] whitespace-nowrap">Amount</th>
+                        <th className="px-3.5 py-2.5 w-[210px] min-w-[190px] whitespace-nowrap">Category</th>
+                        <th className="px-3.5 py-2.5 w-[95px] min-w-[90px] whitespace-nowrap">Evidence</th>
+                        <th className="px-3.5 py-2.5 w-[115px] min-w-[105px] whitespace-nowrap">Status</th>
+                        <th className="px-3.5 py-2.5 w-[95px] min-w-[85px] whitespace-nowrap text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {isQueueLoading ? (
+                        Array.from({ length: 5 }).map((_, idx) => (
+                          <tr key={`queue-skel-${idx}`} className="animate-pulse">
+                            <td className="px-3.5 py-3 text-center">
+                              <Skeleton className="h-4 w-4 rounded mx-auto" />
+                            </td>
                             <td className="px-3.5 py-3">
-                              <input
-                                type="checkbox"
-                                checked={isSelected}
-                                onChange={() => handleToggleSelect(row.id)}
-                                className="rounded border-slate-300 text-slate-900 focus:ring-0"
-                              />
-                            </td>
-                            <td className="px-3.5 py-3 whitespace-nowrap text-slate-600">
-                              {row.date}
-                            </td>
-                            <td className="px-3.5 py-3 whitespace-nowrap text-slate-600">
-                              {row.account}
+                              <Skeleton className="h-3.5 w-16" />
                             </td>
                             <td className="px-3.5 py-3">
-                              <div className="font-bold text-slate-900">{row.description}</div>
-                              <div className="text-[10px] text-slate-400 mt-0.5">{row.type}</div>
+                              <Skeleton className="h-3.5 w-24" />
                             </td>
-                            <td className="px-3.5 py-3 whitespace-nowrap">
-                              <span
-                                className={`font-mono font-bold ${
-                                  row.direction === "in" ? "text-emerald-700" : "text-slate-900"
-                                }`}
-                              >
-                                {row.amount}
-                              </span>
-                              <span className="block text-[10px] text-slate-400 font-normal mt-0.5">
-                                {row.direction === "in" ? "Money in" : "Money out"}
-                              </span>
+                            <td className="px-3.5 py-3">
+                              <div className="space-y-1">
+                                <Skeleton className="h-3.5 w-40" />
+                                <Skeleton className="h-2.5 w-20" />
+                              </div>
                             </td>
-                            <td className="px-3.5 py-3 whitespace-nowrap">
-                              <span className="inline-block rounded-md bg-slate-100/90 text-slate-700 px-2 py-0.5 text-[11px] border border-slate-200">
-                                {row.proposedLink}
-                              </span>
+                            <td className="px-3.5 py-3">
+                              <Skeleton className="h-4 w-20" />
                             </td>
-                            <td className="px-3.5 py-3 whitespace-nowrap">
-                              {row.evidence === "Strong" && (
-                                <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-bold border border-emerald-200">
-                                  Strong
-                                </span>
-                              )}
-                              {row.evidence === "Partial" && (
-                                <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-bold border border-amber-200">
-                                  Partial
-                                </span>
-                              )}
-                              {row.evidence === "Missing" && (
-                                <span className="rounded bg-rose-50 text-rose-800 px-2 py-0.5 text-[10px] font-bold border border-rose-200">
-                                  Missing
-                                </span>
-                              )}
+                            <td className="px-3.5 py-3">
+                              <Skeleton className="h-5 w-24 rounded-full" />
                             </td>
-                            <td className="px-3.5 py-3 whitespace-nowrap">
-                              {isResolved ? (
-                                getResolutionBadge(row.resolutionType)
-                              ) : (
-                                <span className="rounded-full bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-semibold border border-amber-200">
-                                  Pending
-                                </span>
-                              )}
+                            <td className="px-3.5 py-3">
+                              <Skeleton className="h-5 w-16 rounded-full" />
                             </td>
-                            <td className="px-3.5 py-3 whitespace-nowrap text-right">
-                              {isResolved ? (
-                                <button
-                                  type="button"
-                                  onClick={() => setResolutionModalItem(row)}
-                                  className="rounded border border-slate-200 bg-white text-slate-700 px-2.5 py-1 text-xs font-medium hover:bg-slate-50 transition-colors shadow-2xs"
-                                >
-                                  Edit
-                                </button>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => setResolutionModalItem(row)}
-                                  className="rounded bg-slate-900 text-white px-3 py-1 text-xs font-semibold hover:bg-slate-800 transition-colors shadow-2xs"
-                                >
-                                  Resolve
-                                </button>
-                              )}
+                            <td className="px-3.5 py-3">
+                              <Skeleton className="h-5 w-20 rounded-full" />
+                            </td>
+                            <td className="px-3.5 py-3 text-right">
+                              <Skeleton className="h-7 w-18 ml-auto rounded-md" />
                             </td>
                           </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                        ))
+                      ) : filteredReviewItems.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan={9}
+                            className="py-10 text-center text-xs text-slate-400"
+                          >
+                            No transactions found.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredReviewItems.map((row) => {
+                          const isSelected = selectedMatchIds.includes(row.id);
+                          const isResolved = row.status === "Resolved";
 
-              {/* Bottom Pagination Strip */}
-              <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-white text-xs text-slate-500">
-                <span>Showing {filteredReviewItems.length} items</span>
-                <div className="flex items-center gap-1 font-mono text-xs">
-                  <button className="h-6 w-6 rounded border border-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center">
-                    ‹
-                  </button>
-                  <button className="h-6 w-6 rounded bg-slate-100 text-slate-900 font-bold flex items-center justify-center">
-                    1
-                  </button>
-                  <button className="h-6 w-6 rounded border border-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center">
-                    ›
-                  </button>
+                          return (
+                            <tr
+                              key={row.id}
+                              className={`hover:bg-slate-50/60 transition-colors ${
+                                isSelected ? "bg-blue-50/20" : ""
+                              }`}
+                            >
+                              <td className="px-3.5 py-3 text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => handleToggleSelect(row.id)}
+                                  className="rounded border-slate-300 text-slate-900 focus:ring-0"
+                                />
+                              </td>
+                              <td className="px-3.5 py-3 whitespace-nowrap text-slate-600 font-mono text-[11px]">
+                                {row.date}
+                              </td>
+                              <td className="px-3.5 py-3 whitespace-nowrap text-slate-600">
+                                {row.account}
+                              </td>
+                              <td className="px-3.5 py-3">
+                                <div className="font-bold text-slate-900">{row.description}</div>
+                                <div className="text-[10px] text-slate-400 mt-0.5">{row.type}</div>
+                              </td>
+                              <td className="px-3.5 py-3 whitespace-nowrap">
+                                <span
+                                  className={`font-mono font-bold ${
+                                    row.direction === "in" ? "text-emerald-700" : "text-slate-900"
+                                  }`}
+                                >
+                                  {row.amount}
+                                </span>
+                                <span className="block text-[10px] text-slate-400 font-normal mt-0.5">
+                                  {row.direction === "in" ? "Money in" : "Money out"}
+                                </span>
+                              </td>
+                              <td className="px-3.5 py-3 whitespace-nowrap">
+                                <span className="inline-block rounded-md bg-slate-100/90 text-slate-700 px-2 py-0.5 text-[11px] border border-slate-200">
+                                  {row.proposedLink}
+                                </span>
+                              </td>
+                              <td className="px-3.5 py-3 whitespace-nowrap">
+                                {row.evidence === "Strong" && (
+                                  <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-bold border border-emerald-200">
+                                    Strong
+                                  </span>
+                                )}
+                                {row.evidence === "Partial" && (
+                                  <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-bold border border-amber-200">
+                                    Partial
+                                  </span>
+                                )}
+                                {row.evidence === "Missing" && (
+                                  <span className="rounded bg-rose-50 text-rose-800 px-2 py-0.5 text-[10px] font-bold border border-rose-200">
+                                    Missing
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-3.5 py-3 whitespace-nowrap">
+                                {isResolved ? (
+                                  getResolutionBadge(row.resolutionType)
+                                ) : (
+                                  <span className="rounded-full bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-semibold border border-amber-200">
+                                    Pending
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-3.5 py-3 whitespace-nowrap text-right">
+                                {isResolved ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setResolutionModalItem(row)}
+                                    className="rounded border border-slate-200 bg-white text-slate-700 px-2.5 py-1 text-xs font-medium hover:bg-slate-50 transition-colors shadow-2xs"
+                                  >
+                                    Edit
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => setResolutionModalItem(row)}
+                                    className="rounded bg-slate-900 text-white px-3 py-1 text-xs font-semibold hover:bg-slate-800 transition-colors shadow-2xs"
+                                  >
+                                    Resolve
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Bottom Pagination Strip */}
+                <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-white text-xs text-slate-500">
+                  <span>Showing {filteredReviewItems.length} items</span>
+                  <div className="flex items-center gap-1 font-mono text-xs">
+                    <button className="h-6 w-6 rounded border border-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center">
+                      ‹
+                    </button>
+                    <button className="h-6 w-6 rounded bg-slate-100 text-slate-900 font-bold flex items-center justify-center">
+                      1
+                    </button>
+                    <button className="h-6 w-6 rounded border border-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center">
+                      ›
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              /* Mobile & Compact Card View */
+              <div className="space-y-3">
+                {/* Select all header for card view */}
+                <div className="flex items-center justify-between px-3.5 py-2 bg-slate-50 border border-slate-200/90 rounded-lg text-xs">
+                  <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedMatchIds.length === filteredReviewItems.length &&
+                        filteredReviewItems.length > 0
+                      }
+                      onChange={(e) => handleSelectAll(e.target.checked)}
+                      className="rounded border-slate-300 text-slate-900 focus:ring-0"
+                    />
+                    <span>Select all ({filteredReviewItems.length})</span>
+                  </label>
+                  <span className="text-[11px] text-slate-400">
+                    {selectedMatchIds.length} selected
+                  </span>
+                </div>
+
+                {isQueueLoading ? (
+                  Array.from({ length: 4 }).map((_, idx) => (
+                    <div key={`card-skel-${idx}`} className="p-4 bg-white border border-slate-200 rounded-xl space-y-3 animate-pulse">
+                      <div className="flex justify-between items-center">
+                        <Skeleton className="h-4 w-28" />
+                        <Skeleton className="h-4 w-16 rounded-full" />
+                      </div>
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1.5">
+                          <Skeleton className="h-4 w-40" />
+                          <Skeleton className="h-3 w-24" />
+                        </div>
+                        <Skeleton className="h-5 w-20" />
+                      </div>
+                    </div>
+                  ))
+                ) : filteredReviewItems.length === 0 ? (
+                  <div className="rounded-xl border border-slate-200/90 bg-white p-8 text-center text-xs text-slate-400">
+                    No transactions found.
+                  </div>
+                ) : (
+                  filteredReviewItems.map((row) => {
+                    const isSelected = selectedMatchIds.includes(row.id);
+                    const isResolved = row.status === "Resolved";
+
+                    return (
+                      <div
+                        key={row.id}
+                        className={`p-3.5 sm:p-4 bg-white border rounded-xl space-y-3 shadow-2xs transition-colors ${
+                          isSelected
+                            ? "border-blue-400/80 bg-blue-50/20"
+                            : "border-slate-200/90"
+                        }`}
+                      >
+                        {/* Top: Checkbox, Date, Account, Status */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleToggleSelect(row.id)}
+                              className="rounded border-slate-300 text-slate-900 focus:ring-0"
+                            />
+                            <span className="text-xs font-semibold text-slate-700 font-mono">
+                              {row.date}
+                            </span>
+                            <span className="text-[11px] text-slate-300">•</span>
+                            <span className="text-xs text-slate-500 truncate">
+                              {row.account}
+                            </span>
+                          </div>
+                          <div className="shrink-0">
+                            {isResolved ? (
+                              getResolutionBadge(row.resolutionType)
+                            ) : (
+                              <span className="rounded-full bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-semibold border border-amber-200">
+                                Pending
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Middle: Vendor Name & Amount */}
+                        <div className="flex items-start justify-between gap-3 pt-0.5">
+                          <div className="min-w-0">
+                            <h4 className="font-bold text-slate-900 text-sm leading-snug break-words">
+                              {row.description}
+                            </h4>
+                            <p className="text-[11px] text-slate-400 mt-0.5">{row.type}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div
+                              className={`font-mono text-sm font-bold ${
+                                row.direction === "in" ? "text-emerald-700" : "text-slate-900"
+                              }`}
+                            >
+                              {row.amount}
+                            </div>
+                            <span className="text-[10px] text-slate-400 font-normal">
+                              {row.direction === "in" ? "Money in" : "Money out"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Category & Evidence */}
+                        <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
+                          <span className="inline-block rounded-md bg-slate-100 text-slate-700 px-2 py-0.5 text-[11px] font-medium border border-slate-200 max-w-[220px] truncate">
+                            {row.proposedLink}
+                          </span>
+                          {row.evidence === "Strong" && (
+                            <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-bold border border-emerald-200">
+                              Strong evidence
+                            </span>
+                          )}
+                          {row.evidence === "Partial" && (
+                            <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-bold border border-amber-200">
+                              Partial evidence
+                            </span>
+                          )}
+                          {row.evidence === "Missing" && (
+                            <span className="rounded bg-rose-50 text-rose-800 px-2 py-0.5 text-[10px] font-bold border border-rose-200">
+                              Missing evidence
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Footer: Why matches & Action button */}
+                        <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-100/90">
+                          <p className="text-[11px] text-slate-400 truncate flex-1">
+                            {row.whyMatches}
+                          </p>
+                          {isResolved ? (
+                            <button
+                              type="button"
+                              onClick={() => setResolutionModalItem(row)}
+                              className="rounded border border-slate-200 bg-white text-slate-700 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 transition-colors shadow-2xs shrink-0"
+                            >
+                              Edit resolution
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setResolutionModalItem(row)}
+                              className="rounded bg-slate-900 text-white px-3.5 py-1.5 text-xs font-semibold hover:bg-slate-800 transition-colors shadow-2xs shrink-0"
+                            >
+                              Resolve
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+
+                {/* Card view pagination strip */}
+                <div className="flex items-center justify-between px-3.5 py-2.5 border border-slate-200/90 rounded-xl bg-white text-xs text-slate-500">
+                  <span>Showing {filteredReviewItems.length} items</span>
+                  <div className="flex items-center gap-1 font-mono text-xs">
+                    <button className="h-6 w-6 rounded border border-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center">
+                      ‹
+                    </button>
+                    <button className="h-6 w-6 rounded bg-slate-100 text-slate-900 font-bold flex items-center justify-center">
+                      1
+                    </button>
+                    <button className="h-6 w-6 rounded border border-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center">
+                      ›
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -945,8 +1163,8 @@ export default function ReconciliationPage() {
             </div>
 
             <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px] text-left text-xs border-collapse">
+              <div className="overflow-x-auto touch-pan-x">
+                <table className="w-full min-w-[720px] text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                     <th className="px-4 py-2.5">Account / Period</th>
@@ -967,7 +1185,7 @@ export default function ReconciliationPage() {
                     <td className="px-4 py-3.5 font-mono text-slate-900 font-semibold">8,420.00</td>
                     <td className="px-4 py-3.5 font-mono text-slate-900 font-semibold">4,155.00</td>
                     <td className="px-4 py-3.5 font-mono text-slate-900 font-semibold">4,155.00</td>
-                    <td className="px-4 py-3.5 font-mono text-slate-600 font-medium">bash.00</td>
+                    <td className="px-4 py-3.5 font-mono text-slate-600 font-medium">0.00</td>
                     <td className="px-4 py-3.5">
                       <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-bold border border-emerald-200">
                         Complete
@@ -1033,8 +1251,8 @@ export default function ReconciliationPage() {
             </div>
 
             <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px] text-left text-xs border-collapse">
+              <div className="overflow-x-auto touch-pan-x">
+                <table className="w-full min-w-[720px] text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                     <th className="px-4 py-2.5">Exception</th>
