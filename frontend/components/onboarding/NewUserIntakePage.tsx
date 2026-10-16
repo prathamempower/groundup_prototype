@@ -1654,9 +1654,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         value={projectName}
                         onChange={(e) => {
                           setProjectName(e.target.value);
-                          if (!projectEntity || projectEntity === `${projectName} Partners LLC`) {
-                            setProjectEntity(`${e.target.value} Partners LLC`);
-                          }
                           if (projectError) setProjectError(null);
                         }}
                         placeholder={projectStatus === 'active' ? 'e.g. 73 Broadway Mixed-Use' : 'e.g. 161 Woodlawn Mixed-Use'}
