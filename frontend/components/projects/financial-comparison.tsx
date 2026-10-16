@@ -7,20 +7,10 @@ import { api } from "@/lib/api";
 import { Project, ProjectEconomics, UserRole } from "@/lib/types";
 import { formatMoney } from "@/lib/format";
 import {
-  TrendingUp,
-  DollarSign,
-  ArrowRight,
   Download,
-  Building2,
-  CheckCircle2,
-  AlertTriangle,
   BarChart3,
   Check,
-  Search,
-  X,
-  Wallet,
-  Activity,
-  Layers,
+  ArrowRight,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -39,13 +29,24 @@ interface ProjectFinancialComparisonProps {
   onOpenWorkspace: (project: Project) => void;
 }
 
-type MatrixTab = "OVERVIEW" | "PROFITABILITY" | "LOANS" | "HEALTH";
+type MatrixTab = "OVERVIEW" | "LOANS" | "HEALTH";
 
 const toNum = (val?: string | number | null): number => {
   if (val === null || val === undefined) return 0;
   if (typeof val === "number") return val;
   const parsed = Number(val);
   return isNaN(parsed) ? 0 : parsed;
+};
+
+const isProjectCompleted = (p: Project): boolean => {
+  return (
+    p.status === "COMPLETED" ||
+    p.lifecycle_stage === "COMPLETE" ||
+    p.lifecycle_stage === "COMPLETION" ||
+    p.lifecycle_stage === "CLOSED" ||
+    p.lifecycle_stage === "DISPOSITION" ||
+    (p.progress_pct !== undefined && p.progress_pct >= 100)
+  );
 };
 
 const getProjectThumbnail = (proj: Project) => {
@@ -116,7 +117,6 @@ export function ProjectFinancialComparison({
 
   const [activeTab, setActiveTab] = useState<MatrixTab>("OVERVIEW");
   const [showChart, setShowChart] = useState(true);
-  const [projectSearch, setProjectSearch] = useState("");
 
   // Fetch economics in parallel for all projects
   const economicsQueries = useQueries({
@@ -143,18 +143,6 @@ export function ProjectFinancialComparison({
     return map;
   }, [projects, economicsQueries]);
 
-  // Filtered available projects for search
-  const filteredAvailableProjects = useMemo(() => {
-    return projects.filter((p) => {
-      const q = projectSearch.toLowerCase();
-      return (
-        projectSearch === "" ||
-        p.name.toLowerCase().includes(q) ||
-        (p.address || "").toLowerCase().includes(q)
-      );
-    });
-  }, [projects, projectSearch]);
-
   // Projects actively in comparison
   const comparedProjects = useMemo(() => {
     return projects.filter((p) => selectedIds.includes(p.id));
@@ -163,7 +151,7 @@ export function ProjectFinancialComparison({
   const toggleProject = (id: string) => {
     setSelectedIds((prev) => {
       if (prev.includes(id)) {
-        if (prev.length <= 1) return prev; // Keep at least one
+        if (prev.length <= 1) return prev;
         return prev.filter((pId) => pId !== id);
       }
       return [...prev, id];
@@ -184,11 +172,12 @@ export function ProjectFinancialComparison({
   const aggregatedStats = useMemo(() => {
     let totalGDV = 0;
     let totalCost = 0;
-    let totalProfit = 0;
     let totalDebtDrawn = 0;
     let totalDebtFacility = 0;
-    let rocCount = 0;
-    let rocSum = 0;
+
+    let realizedProfit = 0;
+    let realizedGDV = 0;
+    let completedCount = 0;
 
     comparedProjects.forEach((p) => {
       const econ = economicsMap.get(p.id);
@@ -198,70 +187,51 @@ export function ProjectFinancialComparison({
         ? p.forecast_profit + toNum(p.loan_commitment)
         : 0;
       const cost = econ?.total_cost ? toNum(econ.total_cost) : toNum(p.loan_commitment);
-      const profit = econ?.net_profit ? toNum(econ.net_profit) : p.forecast_profit || 0;
       const debtDrawn = toNum(econ?.senior_debt_drawn);
       const debtFacility = toNum(p.loan_commitment) || toNum(econ?.senior_debt_balance);
 
       totalGDV += gdv;
       totalCost += cost;
-      totalProfit += profit;
       totalDebtDrawn += debtDrawn;
       totalDebtFacility += debtFacility;
 
-      if (econ?.return_on_cost_pct !== undefined && econ.return_on_cost_pct > 0) {
-        rocSum += econ.return_on_cost_pct;
-        rocCount++;
+      if (isProjectCompleted(p)) {
+        completedCount++;
+        const profit = econ?.net_profit ? toNum(econ.net_profit) : p.forecast_profit || 0;
+        realizedProfit += profit;
+        realizedGDV += gdv;
       }
     });
 
-    const portfolioMarginPct = totalGDV > 0 ? (totalProfit / totalGDV) * 100 : 0;
-    const avgROC = rocCount > 0 ? rocSum / rocCount : totalCost > 0 ? (totalProfit / totalCost) * 100 : 0;
+    const realizedMarginPct = realizedGDV > 0 ? (realizedProfit / realizedGDV) * 100 : 0;
     const portfolioLeveragePct = totalCost > 0 ? (totalDebtDrawn / totalCost) * 100 : 0;
 
     return {
       totalGDV,
       totalCost,
-      totalProfit,
       totalDebtDrawn,
       totalDebtFacility,
-      portfolioMarginPct,
-      avgROC,
       portfolioLeveragePct,
+      realizedProfit,
+      realizedMarginPct,
+      completedCount,
     };
   }, [comparedProjects, economicsMap]);
 
-  // Top margin project
-  const topMarginProject = useMemo<{ name: string; margin: number } | null>(() => {
-    if (comparedProjects.length === 0) return null;
-    let best: { name: string; margin: number } | null = null;
-    comparedProjects.forEach((p) => {
-      const econ = economicsMap.get(p.id);
-      const gdv = toNum(econ?.gross_development_value) || 1;
-      const profit = toNum(econ?.net_profit) || p.forecast_profit || 0;
-      const margin = (profit / gdv) * 100;
-      if (!best || margin > best.margin) {
-        best = { name: p.name, margin };
-      }
-    });
-    return best;
-  }, [comparedProjects, economicsMap]);
-
-  // Data for Chart View
+  // Data for Chart View: Comparing Revenue, Budget, and Loan Drawn (the true active capital stack metrics)
   const chartData = useMemo(() => {
     return comparedProjects.map((p) => {
       const econ = economicsMap.get(p.id);
       const gdvCents = toNum(econ?.gross_development_value);
       const costCents = toNum(econ?.total_cost);
-      const profitCents = toNum(econ?.net_profit) || p.forecast_profit || 0;
-      const margin = gdvCents > 0 ? (profitCents / gdvCents) * 100 : 0;
+      const debtDrawnCents = toNum(econ?.senior_debt_drawn);
 
       return {
         name: p.name.length > 14 ? `${p.name.substring(0, 12)}...` : p.name,
         fullName: p.name,
         revenue: Math.round(gdvCents / 100),
         cost: Math.round(costCents / 100),
-        profit: Math.round(profitCents / 100),
-        margin: Number(margin.toFixed(1)),
+        loanDrawn: Math.round(debtDrawnCents / 100),
       };
     });
   }, [comparedProjects, economicsMap]);
@@ -273,10 +243,9 @@ export function ProjectFinancialComparison({
       "Stage",
       "Revenue",
       "Budget",
-      "Net Profit",
-      "Margin (%)",
-      "Loan Facility",
       "Loan Drawn",
+      "Realized Profit",
+      "Margin (%)",
       "Status",
       "Progress (%)",
     ];
@@ -285,10 +254,14 @@ export function ProjectFinancialComparison({
       const econ = economicsMap.get(p.id);
       const gdv = (toNum(econ?.gross_development_value) / 100).toFixed(2);
       const cost = (toNum(econ?.total_cost) / 100).toFixed(2);
-      const profit = ((toNum(econ?.net_profit) || p.forecast_profit || 0) / 100).toFixed(2);
-      const margin = gdv && Number(gdv) > 0 ? ((Number(profit) / Number(gdv)) * 100).toFixed(1) : "0";
       const debtDrawn = (toNum(econ?.senior_debt_drawn) / 100).toFixed(2);
-      const commitment = (toNum(p.loan_commitment) / 100).toFixed(2);
+      const isComplete = isProjectCompleted(p);
+      const profitVal = isComplete
+        ? ((toNum(econ?.net_profit) || p.forecast_profit || 0) / 100).toFixed(2)
+        : "In Progress";
+      const marginVal = isComplete && gdv && Number(gdv) > 0
+        ? `${(((toNum(econ?.net_profit) || p.forecast_profit || 0) / toNum(econ?.gross_development_value)) * 100).toFixed(1)}%`
+        : "-";
       const health = p.health_status || "HEALTHY";
       const progress = p.progress_pct ?? 0;
 
@@ -297,10 +270,9 @@ export function ProjectFinancialComparison({
         `"${p.lifecycle_stage}"`,
         gdv,
         cost,
-        profit,
-        `"${margin}%"`,
-        commitment,
         debtDrawn,
+        `"${profitVal}"`,
+        `"${marginVal}"`,
         `"${health}"`,
         `"${progress}%"`,
       ].join(",");
@@ -379,7 +351,7 @@ export function ProjectFinancialComparison({
         {/* Project Selection Chips */}
         {projects.length > 1 && (
           <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
-            {filteredAvailableProjects.map((p) => {
+            {projects.map((p) => {
               const isSelected = selectedIds.includes(p.id);
               return (
                 <button
@@ -426,17 +398,37 @@ export function ProjectFinancialComparison({
           </div>
         </div>
 
+        {/* Logical Realized Profit or Loss Card (Only from Completed Projects) */}
         <div className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-2xs">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-              Net Profit
+              {aggregatedStats.completedCount === 0
+                ? "Realized Profit"
+                : aggregatedStats.realizedProfit >= 0
+                ? "Realized Profit"
+                : "Realized Loss"}
             </span>
-            <span className="text-xs font-semibold text-emerald-700">
-              {aggregatedStats.portfolioMarginPct.toFixed(1)}% Margin
-            </span>
+            {aggregatedStats.completedCount > 0 && (
+              <span
+                className={`text-xs font-semibold ${
+                  aggregatedStats.realizedProfit >= 0 ? "text-emerald-700" : "text-rose-700"
+                }`}
+              >
+                {aggregatedStats.realizedMarginPct.toFixed(1)}% Margin
+              </span>
+            )}
           </div>
           <div className="mt-1 text-lg sm:text-xl font-bold text-slate-900 tabular-nums">
-            {formatMoney(aggregatedStats.totalProfit)}
+            {aggregatedStats.completedCount > 0
+              ? formatMoney(aggregatedStats.realizedProfit)
+              : "$0.00"}
+          </div>
+          <div className="mt-1 text-[11px] text-slate-400 truncate">
+            {aggregatedStats.completedCount > 0
+              ? `${aggregatedStats.completedCount} completed ${
+                  aggregatedStats.completedCount === 1 ? "project" : "projects"
+                }`
+              : "Pending closeout & disposition"}
           </div>
         </div>
 
@@ -455,18 +447,16 @@ export function ProjectFinancialComparison({
         </div>
       </div>
 
-      {/* 3. Collapsible Minimalist Bar Chart */}
+      {/* 3. Collapsible Minimalist Bar Chart: Revenue, Budget, and Loan Drawn */}
       {showChart && (
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Revenue, Budget, and Profit
+              Revenue, Budget, and Loan Drawn
             </h3>
-            {topMarginProject && (
-              <span className="text-xs text-slate-600">
-                Top Margin: <strong className="font-semibold text-slate-900">{topMarginProject.name}</strong> ({topMarginProject.margin.toFixed(1)}%)
-              </span>
-            )}
+            <span className="text-xs text-slate-500">
+              Active Capital Stack Comparison
+            </span>
           </div>
 
           <div className="w-full h-56 pt-1">
@@ -497,14 +487,14 @@ export function ProjectFinancialComparison({
                 />
                 <Bar dataKey="revenue" name="Revenue" fill="#1E293B" radius={[3, 3, 0, 0]} />
                 <Bar dataKey="cost" name="Budget" fill="#94A3B8" radius={[3, 3, 0, 0]} />
-                <Bar dataKey="profit" name="Net Profit" fill="#059669" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="loanDrawn" name="Loan Drawn" fill="#2563EB" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
       )}
 
-      {/* 4. Condensed Project Matrix (One Row Per Project) */}
+      {/* 4. Condensed Project Matrix (Streamlined 3-Tab Architecture) */}
       <div className="rounded-xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
         {/* Dimension Filter Tabs */}
         <div className="p-3 bg-slate-50/60 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
@@ -519,17 +509,6 @@ export function ProjectFinancialComparison({
               }`}
             >
               Overview
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("PROFITABILITY")}
-              className={`rounded-md px-3 py-1.5 font-medium transition-colors cursor-pointer ${
-                activeTab === "PROFITABILITY"
-                  ? "bg-slate-900 text-white font-semibold shadow-2xs"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Profitability
             </button>
             <button
               type="button"
@@ -570,7 +549,6 @@ export function ProjectFinancialComparison({
             const cost = toNum(econ?.total_cost) || toNum(p.loan_commitment);
             const profit = toNum(econ?.net_profit) || p.forecast_profit || 0;
             const margin = gdv > 0 ? (profit / gdv) * 100 : 0;
-            const roc = econ?.return_on_cost_pct ?? (cost > 0 ? (profit / cost) * 100 : 0);
 
             const commitment = toNum(p.loan_commitment) || toNum(econ?.senior_debt_balance);
             const debtDrawn = toNum(econ?.senior_debt_drawn);
@@ -582,6 +560,8 @@ export function ProjectFinancialComparison({
             const health = p.health_status || "HEALTHY";
             const healthBadge = getHealthBadge(health);
             const stageLabel = getStageLabel(p.lifecycle_stage);
+            const isCompleted = isProjectCompleted(p);
+
             const nextMilestone =
               p.status === "COMPLETED"
                 ? "Handover & Investor Waterfall"
@@ -626,7 +606,7 @@ export function ProjectFinancialComparison({
                     </div>
                   </div>
 
-                  {/* Dynamic Metrics per Tab */}
+                  {/* Overview Tab: Logical handling between Completed vs In-Flight Projects */}
                   {activeTab === "OVERVIEW" && (
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 flex-1 max-w-2xl text-xs">
                       <div>
@@ -635,18 +615,37 @@ export function ProjectFinancialComparison({
                           {formatMoney(gdv)}
                         </div>
                       </div>
+
                       <div>
                         <div className="text-slate-400 font-medium">Budget</div>
                         <div className="text-slate-900 font-semibold mt-0.5 tabular-nums">
                           {formatMoney(cost)}
                         </div>
                       </div>
-                      <div>
-                        <div className="text-slate-400 font-medium">Net Profit</div>
-                        <div className="text-slate-900 font-semibold mt-0.5 tabular-nums">
-                          {formatMoney(profit)} ({margin.toFixed(0)}%)
+
+                      {/* Completed projects show Realized Profit / Loss; In-flight projects show Loan Drawn */}
+                      {isCompleted ? (
+                        <div>
+                          <div className="text-slate-400 font-medium">
+                            {profit >= 0 ? "Realized Profit" : "Realized Loss"}
+                          </div>
+                          <div
+                            className={`font-semibold mt-0.5 tabular-nums ${
+                              profit >= 0 ? "text-emerald-700" : "text-rose-700"
+                            }`}
+                          >
+                            {formatMoney(profit)} ({margin.toFixed(0)}%)
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div>
+                          <div className="text-slate-400 font-medium">Loan Drawn</div>
+                          <div className="text-slate-900 font-semibold mt-0.5 tabular-nums">
+                            {formatMoney(debtDrawn)} ({debtDrawnPct.toFixed(0)}%)
+                          </div>
+                        </div>
+                      )}
+
                       <div>
                         <div className="text-slate-400 font-medium">Progress</div>
                         <div className="text-slate-900 font-semibold mt-0.5 tabular-nums">
@@ -656,35 +655,7 @@ export function ProjectFinancialComparison({
                     </div>
                   )}
 
-                  {activeTab === "PROFITABILITY" && (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 flex-1 max-w-2xl text-xs">
-                      <div>
-                        <div className="text-slate-400 font-medium">Revenue</div>
-                        <div className="text-slate-900 font-semibold mt-0.5 tabular-nums">
-                          {formatMoney(gdv)}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-slate-400 font-medium">Total Cost</div>
-                        <div className="text-slate-900 font-semibold mt-0.5 tabular-nums">
-                          {formatMoney(cost)}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-slate-400 font-medium">Net Profit</div>
-                        <div className="text-emerald-700 font-semibold mt-0.5 tabular-nums">
-                          {formatMoney(profit)}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-slate-400 font-medium">Margin / ROC</div>
-                        <div className="text-slate-900 font-semibold mt-0.5 tabular-nums">
-                          {margin.toFixed(1)}% / {roc.toFixed(1)}%
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
+                  {/* Loans Tab: Facility, Loan Drawn, LTC, Target Multiple */}
                   {activeTab === "LOANS" && (
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 flex-1 max-w-2xl text-xs">
                       <div>
@@ -714,6 +685,7 @@ export function ProjectFinancialComparison({
                     </div>
                   )}
 
+                  {/* Health Tab: Physical Site Progress & Active Milestone */}
                   {activeTab === "HEALTH" && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 flex-1 max-w-2xl text-xs">
                       <div>
