@@ -36,14 +36,14 @@ export function CardSettlementModal({
   const amount = match?.amount || transaction?.amount || "0";
 
   const [notes, setNotes] = useState(
-    "Corporate credit card autopay statement settlement. Clears balance sheet card liability."
+    "Credit card payment. Avoids double-counting card purchases."
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   React.useEffect(() => {
     if (open) {
-      setNotes("Corporate credit card autopay statement settlement. Clears balance sheet card liability.");
+      setNotes("Credit card payment. Avoids double-counting card purchases.");
       setErrorMsg(null);
     }
   }, [open]);
@@ -71,17 +71,17 @@ export function CardSettlementModal({
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent maxWidth="md">
         <ModalHeader>
-          <ModalTitle>Classify as Credit Card Liability Settlement</ModalTitle>
+          <ModalTitle>Mark as Credit Card Payment</ModalTitle>
           <ModalDescription>
-            Record bank debit as a corporate card liability payment rather than a direct project CSI expense.
+            Record this bank transaction as a credit card payment instead of a direct project expense.
           </ModalDescription>
         </ModalHeader>
 
         <div className="space-y-5 py-2">
           <Banner
             variant="info"
-            title="PRD Liability Accounting Rule"
-            message="Classifying this payment as a Credit Card Liability Settlement ensures underlying itemized receipts (e.g. materials, site supplies) can be categorized without double-counting the payment."
+            title="Credit card payment rule"
+            message="Marking this transaction as a credit card payment ensures individual card receipts (materials, supplies) can be categorized without counting this payoff twice."
           />
 
           <div className="rounded-lg border border-border bg-subtle p-3.5 space-y-1">
@@ -104,7 +104,7 @@ export function CardSettlementModal({
 
           <div>
             <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
-              Classification Notes
+              Notes
             </label>
             <Textarea
               value={notes}
@@ -124,7 +124,7 @@ export function CardSettlementModal({
             onClick={handleSubmit}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Classifying..." : "Confirm Liability Settlement"}
+            {isSubmitting ? "Saving..." : "Save Card Payment"}
           </Button>
         </ModalFooter>
       </ModalContent>

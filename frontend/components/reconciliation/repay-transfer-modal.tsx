@@ -82,7 +82,7 @@ export function RepayTransferModal({
         <ModalHeader>
           <ModalTitle>Record Transfer Repayment</ModalTitle>
           <ModalDescription>
-            Record incoming repayment cash against an active inter-project temporary loan.
+            Record repayment received for a transfer to another project.
           </ModalDescription>
         </ModalHeader>
 
@@ -94,19 +94,19 @@ export function RepayTransferModal({
             </div>
             <div className="grid grid-cols-3 gap-2 pt-1 border-t border-border/60">
               <div>
-                <span className="text-caption text-text-secondary block">Original Loan</span>
+                <span className="text-caption text-text-secondary block">Original Transfer</span>
                 <span className="font-semibold text-text-primary tabular-nums">
                   {formatMoney(transfer.amount)}
                 </span>
               </div>
               <div>
-                <span className="text-caption text-text-secondary block">Prior Repaid</span>
+                <span className="text-caption text-text-secondary block">Already Repaid</span>
                 <span className="font-semibold text-text-secondary tabular-nums">
                   {formatMoney(transfer.repaid_amount || "0")}
                 </span>
               </div>
               <div>
-                <span className="text-caption text-text-secondary block">Outstanding</span>
+                <span className="text-caption text-text-secondary block">Balance Owed</span>
                 <span className="font-bold text-amber-700 tabular-nums">
                   {formatMoney(String(outstanding))}
                 </span>
@@ -143,10 +143,10 @@ export function RepayTransferModal({
 
           <div>
             <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
-              Repayment Reference / Notes
+              Repayment Notes / Reference
             </label>
             <Textarea
-              placeholder="e.g. Cleared via BCB wire reference #BCB-WIRE-9921..."
+              placeholder="e.g. Cleared via bank wire reference #..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
@@ -164,7 +164,7 @@ export function RepayTransferModal({
             onClick={handleSubmit}
             disabled={repaidCents <= 0 || isSubmitting}
           >
-            {isSubmitting ? "Recording Repayment..." : "Confirm Repayment"}
+            {isSubmitting ? "Saving..." : "Save Repayment"}
           </Button>
         </ModalFooter>
       </ModalContent>

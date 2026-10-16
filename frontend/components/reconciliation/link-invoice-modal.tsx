@@ -80,9 +80,9 @@ export function LinkInvoiceModal({
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent maxWidth="md">
         <ModalHeader>
-          <ModalTitle>Link Invoice Evidence to Payment</ModalTitle>
+          <ModalTitle>Link Invoice to Payment</ModalTitle>
           <ModalDescription>
-            Attach an ingested source invoice to satisfy audit requirements and upgrade evidence strength.
+            Attach an invoice or receipt to support this payment.
           </ModalDescription>
         </ModalHeader>
 
@@ -107,7 +107,7 @@ export function LinkInvoiceModal({
 
           <div>
             <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
-              Select Supporting Source Document
+              Select Document
             </label>
             <select
               className="flex h-9 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary focus:border-primary focus:outline-hidden"
@@ -124,10 +124,10 @@ export function LinkInvoiceModal({
 
           <div>
             <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
-              Evidence Verification Notes
+              Notes
             </label>
             <Textarea
-              placeholder="e.g. Subcontractor invoice #INV-4991 matches check amount and milestone period..."
+              placeholder="e.g. Subcontractor invoice #INV-4991 matches payment amount..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
@@ -145,7 +145,7 @@ export function LinkInvoiceModal({
             onClick={handleSubmit}
             disabled={!selectedDocId || isSubmitting}
           >
-            {isSubmitting ? "Linking Evidence..." : "Link Invoice Evidence"}
+            {isSubmitting ? "Linking..." : "Link Invoice"}
           </Button>
         </ModalFooter>
       </ModalContent>

@@ -245,8 +245,8 @@ export default function ControlCenterPage() {
                       onClick={handleOpenAmountOrigin}
                     />
                   </span>
-                  <span className="hidden sm:inline">over original plan</span>
-                  <span className="sm:hidden text-[10px]">over plan</span>
+                  <span className="hidden sm:inline">over original budget</span>
+                  <span className="sm:hidden text-[10px]">over budget</span>
                 </div>
               </div>
             </div>
@@ -259,11 +259,11 @@ export default function ControlCenterPage() {
                 <ClickableAmount
                   amountText="Base: $1.45M"
                   originKey="budget_base_plan"
-                  label="Original Base Baseline Budget"
+                  label="Original budget"
                   amountCents={145500000}
                   onClick={handleOpenAmountOrigin}
                 />
-                <span>100% Committed</span>
+                <span>100% committed</span>
               </div>
             </div>
           </div>
@@ -293,7 +293,7 @@ export default function ControlCenterPage() {
                   <ClickableAmount
                     amountText="Hard: $702.5k"
                     originKey="hard_costs_spend"
-                    label="Direct Construction / Hard Costs Spend"
+                    label="Hard costs"
                     amountCents={70245000}
                     onClick={handleOpenAmountOrigin}
                   />
@@ -301,7 +301,7 @@ export default function ControlCenterPage() {
                   <ClickableAmount
                     amountText="Soft: $234.1k"
                     originKey="soft_costs_spend"
-                    label="Soft Costs & Professional Fees Spend"
+                    label="Soft costs"
                     amountCents={23415000}
                     onClick={handleOpenAmountOrigin}
                   />
@@ -318,7 +318,7 @@ export default function ControlCenterPage() {
                 <ClickableAmount
                   amountText="$534.5k Rem."
                   originKey="remaining_budget"
-                  label="Remaining Unspent Budget"
+                  label="Remaining budget"
                   amountCents={53452000}
                   className="font-mono text-slate-700 font-semibold"
                   onClick={handleOpenAmountOrigin}
@@ -352,7 +352,7 @@ export default function ControlCenterPage() {
                   <ClickableAmount
                     amountText="+$149,400 reserve"
                     originKey="liquidity_cushion"
-                    label="Project Liquidity Cushion"
+                    label="Available cash"
                     amountCents={14940000}
                     className="text-emerald-700 font-medium"
                     onClick={handleOpenAmountOrigin}
@@ -368,9 +368,9 @@ export default function ControlCenterPage() {
               <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-500 font-medium">
                 <span>Draw Funds</span>
                 <ClickableAmount
-                  amountText="Facility: $1.47M"
+                  amountText="Loan: $1.47M"
                   originKey="facility_cap"
-                  label="Senior Construction Loan Facility"
+                  label="Construction loan"
                   amountCents={147112000}
                   onClick={handleOpenAmountOrigin}
                 />
@@ -397,11 +397,11 @@ export default function ControlCenterPage() {
                 <div className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-amber-800 font-medium flex items-center gap-1 truncate">
                   <AlertTriangle className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0 text-amber-600" />
                   <span>
-                    Burn:{" "}
+                    Delay cost:{" "}
                     <ClickableAmount
                       amountText="+$28,500"
                       originKey="carry_burn"
-                      label="Carry Burn Due to Schedule Slip"
+                      label="Holding costs from delay"
                       amountCents={2850000}
                       className="text-amber-800 font-semibold"
                       onClick={handleOpenAmountOrigin}
@@ -418,7 +418,7 @@ export default function ControlCenterPage() {
               </div>
               <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-500 font-medium">
                 <span>Target: Nov 10</span>
-                <span className="text-amber-800 font-semibold">Slip: 5w</span>
+                <span className="text-amber-800 font-semibold">5 weeks late</span>
               </div>
             </div>
           </div>
@@ -446,17 +446,17 @@ export default function ControlCenterPage() {
                   Budget & Forecast by Category
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  CSI Category allocations, verified spend, and variances
+                  Budget categories, spend to date, and variances
                 </p>
               </div>
               <button
                 type="button"
-                disabled
-                aria-disabled="true"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 bg-slate-50 border border-slate-200/90 py-1 px-2.5 rounded-md cursor-not-allowed select-none opacity-80"
-                title="Budget Details locked (Project Economics is hidden)"
+                onClick={(e) => {
+                  e.preventDefault();
+                }}
+                className="inline-flex items-center text-xs font-semibold text-slate-600 bg-white border border-slate-200 py-1 px-2.5 rounded-md cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-2xs"
+                title="Budget Details"
               >
-                <Lock className="h-3 w-3 text-slate-400 shrink-0" />
                 <span>Budget Details</span>
               </button>
             </div>
@@ -465,7 +465,7 @@ export default function ControlCenterPage() {
             <div className="sm:hidden divide-y divide-slate-100">
               {(d?.forecast_table || [
                 {
-                  category: "Direct Construction / Hard Costs",
+                  category: "Hard costs",
                   variance_reason: "CO-001 structural steel reinforcement",
                   original_budget: "109270000",
                   current_approved: "112392000",
@@ -475,7 +475,7 @@ export default function ControlCenterPage() {
                   sources: []
                 },
                 {
-                  category: "Soft Costs & Professional Fees",
+                  category: "Soft costs",
                   variance_reason: "On track with baseline",
                   original_budget: "31220000",
                   current_approved: "31220000",
@@ -485,7 +485,7 @@ export default function ControlCenterPage() {
                   sources: []
                 },
                 {
-                  category: "Contingency Reserve",
+                  category: "Reserve",
                   variance_reason: "Transferred to direct construction for CO-001",
                   original_budget: "5000000",
                   current_approved: "3500000",
@@ -495,8 +495,8 @@ export default function ControlCenterPage() {
                   sources: []
                 },
                 {
-                  category: "Total Project Capital",
-                  variance_reason: "Cumulative capital portfolio status",
+                  category: "Total project budget",
+                  variance_reason: "Total project costs and variances",
                   original_budget: "145490000",
                   current_approved: "147112000",
                   actual_spend: "93660000",
@@ -642,7 +642,7 @@ export default function ControlCenterPage() {
                 <tbody className="divide-y divide-slate-100 text-slate-800">
                   {(d?.forecast_table || [
                     {
-                      category: "Direct Construction / Hard Costs",
+                      category: "Hard costs",
                       variance_reason: "CO-001 structural steel reinforcement",
                       original_budget: "109270000",
                       current_approved: "112392000",
@@ -652,7 +652,7 @@ export default function ControlCenterPage() {
                       sources: []
                     },
                     {
-                      category: "Soft Costs & Professional Fees",
+                      category: "Soft costs",
                       variance_reason: "On track with baseline",
                       original_budget: "31220000",
                       current_approved: "31220000",
@@ -662,7 +662,7 @@ export default function ControlCenterPage() {
                       sources: []
                     },
                     {
-                      category: "Contingency Reserve",
+                      category: "Reserve",
                       variance_reason: "Transferred to direct construction for CO-001",
                       original_budget: "5000000",
                       current_approved: "3500000",
@@ -672,8 +672,8 @@ export default function ControlCenterPage() {
                       sources: []
                     },
                     {
-                      category: "Total Project Capital",
-                      variance_reason: "Cumulative capital portfolio status",
+                      category: "Total project budget",
+                      variance_reason: "Total project costs and variances",
                       original_budget: "145490000",
                       current_approved: "147112000",
                       actual_spend: "93660000",
@@ -847,7 +847,7 @@ export default function ControlCenterPage() {
                   <ClickableAmount
                     amountText="$150,000.00"
                     originKey="draw_request_150k"
-                    label="Draw #1 Funds Cleared Disbursement"
+                    label="Draw #1 cleared funds"
                     amountCents={15000000}
                     className="font-mono font-bold text-emerald-800 tabular-nums"
                     onClick={handleOpenAmountOrigin}
@@ -856,8 +856,8 @@ export default function ControlCenterPage() {
 
                 <div className="pt-1.5">
                   <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1">
-                    <span>Disbursement Progress</span>
-                    <span className="font-semibold text-emerald-700">100% Cleared</span>
+                    <span>Draw funding</span>
+                    <span className="font-semibold text-emerald-700">100% funded</span>
                   </div>
                   <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
                     <div className="h-full bg-emerald-600 rounded-full" style={{ width: "100%" }} />
@@ -871,7 +871,7 @@ export default function ControlCenterPage() {
                       size="sm"
                       className="w-full text-xs h-10 sm:h-8 min-h-[40px] sm:min-h-0 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium cursor-pointer active:scale-[0.99] transition-all"
                     >
-                      Open Draw Workspace →
+                      View draws →
                     </Button>
                   </Link>
                 </div>

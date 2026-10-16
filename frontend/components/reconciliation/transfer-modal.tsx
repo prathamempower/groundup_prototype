@@ -71,7 +71,7 @@ export function TransferModal({
 
   const handleSubmit = async () => {
     if (!notes.trim()) {
-      setErrorMsg("Transfer purpose notes are required.");
+      setErrorMsg("Please enter a purpose for this transfer.");
       return;
     }
 
@@ -96,7 +96,7 @@ export function TransferModal({
       onSuccess();
       onOpenChange(false);
     } catch (err: unknown) {
-      setErrorMsg((err as Error).message || "Failed to create inter-project transfer.");
+      setErrorMsg((err as Error).message || "Failed to create project transfer.");
     } finally {
       setIsSubmitting(false);
     }
@@ -107,10 +107,10 @@ export function TransferModal({
       <ModalContent maxWidth="md">
         <ModalHeader>
           <ModalTitle>
-            {match ? "Classify as Inter-Project Transfer" : "New Inter-Project Transfer"}
+            {match ? "Transfer Money to Another Project" : "New Project Transfer"}
           </ModalTitle>
           <ModalDescription>
-            Record a temporary inter-company transfer between project entities with repayment tracking.
+            Record a short-term transfer from this project to another, tracked until repaid.
           </ModalDescription>
         </ModalHeader>
 
@@ -118,8 +118,8 @@ export function TransferModal({
           {/* PRD Integrity Banner */}
           <Banner
             variant="info"
-            title="PRD Accounting Integrity Rule"
-            message="Inter-project transfers are tracked on the balance sheet transfer ledger and never impact project revenues, budget expense, or net profit until formally converted."
+            title="Transfer tracking"
+            message="Project transfers are tracked as balances between projects and do not count as project construction costs."
           />
 
           {errorMsg && (
@@ -169,10 +169,10 @@ export function TransferModal({
 
           <div>
             <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
-              Purpose & Repayment Terms (Required)
+              Purpose & Repayment Notes (Required)
             </label>
             <Textarea
-              placeholder="e.g. Temporary cash loan for architectural zoning deposit; repayment expected from upcoming mezzanine close..."
+              placeholder="e.g. Short-term funds for zoning deposit; to be repaid next month..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
@@ -191,10 +191,10 @@ export function TransferModal({
             disabled={!notes.trim() || isSubmitting}
           >
             {isSubmitting
-              ? "Recording Transfer..."
+              ? "Saving..."
               : match
-              ? "Confirm as Inter-Project Transfer"
-              : "Create Transfer Record"}
+              ? "Confirm Project Transfer"
+              : "Save Transfer"}
           </Button>
         </ModalFooter>
       </ModalContent>

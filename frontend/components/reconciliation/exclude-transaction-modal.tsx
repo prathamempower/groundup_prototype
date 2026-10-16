@@ -46,7 +46,7 @@ export function ExcludeTransactionModal({
 
   const handleSubmit = async () => {
     if (!rationale.trim()) {
-      setErrorMsg("An exclusion reason is required for financial audit tracking.");
+      setErrorMsg("Please enter a reason to exclude this transaction.");
       return;
     }
 
@@ -73,7 +73,7 @@ export function ExcludeTransactionModal({
         <ModalHeader>
           <ModalTitle>Exclude Transaction from Project</ModalTitle>
           <ModalDescription>
-            Mark this transaction as non-project spend (e.g. personal draw, separate entity charge, or disallowed expense).
+            Mark this transaction as a non-project cost (such as a personal expense, owner draw, or transfer to another business).
           </ModalDescription>
         </ModalHeader>
 
@@ -88,7 +88,7 @@ export function ExcludeTransactionModal({
               </span>
             </div>
             <p className="text-caption text-text-secondary">
-              Excluded items are removed from project actual spend and will not draw on construction loan commitments.
+              Excluded items will not count toward project costs and will not be submitted in bank draws.
             </p>
           </div>
 
@@ -98,27 +98,27 @@ export function ExcludeTransactionModal({
 
           <div>
             <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
-              Exclusion Reason Category
+              Reason Category
             </label>
             <select
               className="flex h-9 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary focus:border-primary focus:outline-hidden"
               value={category}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCategory(e.target.value)}
             >
-              <option value="NON_PROJECT_EXPENSE">Non-Project / Separate Entity Charge</option>
-              <option value="SPONSOR_PERSONAL_DRAW">Sponsor Equity Distribution / Personal Draw</option>
-              <option value="DUPLICATE_SETTLEMENT">Duplicate Card / Bank Transaction</option>
-              <option value="DISALLOWED_OVERHEAD">Disallowed Contractor Overhead</option>
-              <option value="BANK_FEES_REVERSAL">Bank Fee Reversal / Refund</option>
+              <option value="NON_PROJECT_EXPENSE">Non-project or other business expense</option>
+              <option value="SPONSOR_PERSONAL_DRAW">Owner draw or personal expense</option>
+              <option value="DUPLICATE_SETTLEMENT">Duplicate card or bank charge</option>
+              <option value="DISALLOWED_OVERHEAD">Disallowed contractor charge</option>
+              <option value="BANK_FEES_REVERSAL">Bank fee refund or reversal</option>
             </select>
           </div>
 
           <div>
             <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
-              Detailed Audit Justification (Required)
+              Reason for exclusion (required)
             </label>
             <Textarea
-              placeholder="Document the exact circumstances and verification reason for excluding this transaction..."
+              placeholder="Explain why this should be excluded from project costs..."
               value={rationale}
               onChange={(e) => setRationale(e.target.value)}
               rows={3}
@@ -136,7 +136,7 @@ export function ExcludeTransactionModal({
             onClick={handleSubmit}
             disabled={!rationale.trim() || isSubmitting}
           >
-            {isSubmitting ? "Excluding..." : "Confirm Exclusion"}
+            {isSubmitting ? "Excluding..." : "Exclude Transaction"}
           </Button>
         </ModalFooter>
       </ModalContent>

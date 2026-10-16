@@ -51,31 +51,31 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
   approved_budget: {
     id: "approved_budget",
     title: "Approved Project Budget",
-    subtitle: "Legally underwritten total budget including executed change orders",
+    subtitle: "Total approved budget including signed change orders",
     amountFormatted: "$1,471,120",
     amountCents: 147112000,
     statusBadge: {
-      label: "100% Locked & Approved",
+      label: "100% Locked",
       variant: "approved",
     },
     sourceDocument: {
       fileName: "Budget for 73 Broadway (1).pdf",
       fileType: "pdf",
-      fileTypeName: "Underwritten Schedule of Values (SoV)",
+      fileTypeName: "Schedule of Values (SOV)",
       section: "Page 1 • Divisions 01–07 Cost Summary + Approved CO-001",
-      extractionMethod: "AI OCR Engine • Table Extraction",
+      extractionMethod: "Document extraction",
       extractionDate: "Apr 01, 2025 • Reconciled Oct 26, 2025",
-      confidenceScore: "99.8% AI Match",
+      confidenceScore: "99.8% Match",
     },
     formula: {
       expression: "Base Budget ($1,455,000) + Approved Change Order CO-001 ($16,120) = $1,471,120",
-      explanation: "Sum of underwritten loan baseline agreement and subsequent executed owner-architect change orders.",
+      explanation: "Total of original loan budget plus approved change orders.",
     },
     components: [
       {
         id: "ab-1",
         code: "02–05",
-        name: "Direct Construction / Hard Costs",
+        name: "Hard costs",
         vendor: "Hudson Peak General Contracting",
         amountFormatted: "$1,123,920",
         amountCents: 112392000,
@@ -86,7 +86,7 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
       {
         id: "ab-2",
         code: "01 & 06",
-        name: "Soft Costs & Professional Fees",
+        name: "Soft costs",
         vendor: "Studio M Architecture & Vanguard Legal",
         amountFormatted: "$312,200",
         amountCents: 31220000,
@@ -97,7 +97,7 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
       {
         id: "ab-3",
         code: "07.00",
-        name: "Contingency Reserve",
+        name: "Reserve",
         vendor: "Escrow Reserve Account",
         amountFormatted: "$35,000",
         amountCents: 3500000,

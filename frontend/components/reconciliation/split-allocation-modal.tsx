@@ -54,13 +54,13 @@ export function SplitAllocationModal({
       id: "row_1",
       budget_line_id: match?.proposed_budget_line_id || budgetLines[0]?.id || "",
       amount: half1,
-      notes: "Primary trade scope",
+      notes: "Main trade scope",
     },
     {
       id: "row_2",
       budget_line_id: budgetLines[1]?.id || budgetLines[0]?.id || "",
       amount: half2,
-      notes: "Secondary work order / materials",
+      notes: "Materials or extra work",
     },
   ]);
 
@@ -77,13 +77,13 @@ export function SplitAllocationModal({
           id: "row_1",
           budget_line_id: match.proposed_budget_line_id || budgetLines[0]?.id || "",
           amount: h1,
-          notes: "Primary trade scope",
+          notes: "Main trade scope",
         },
         {
           id: "row_2",
           budget_line_id: budgetLines[1]?.id || budgetLines[0]?.id || "",
           amount: h2,
-          notes: "Secondary work order / materials",
+          notes: "Materials or extra work",
         },
       ]);
       setErrorMsg(null);
@@ -163,9 +163,9 @@ export function SplitAllocationModal({
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent maxWidth="xl">
         <ModalHeader>
-          <ModalTitle>Split Multi-Line Allocation</ModalTitle>
+          <ModalTitle>Split Transaction Across Budget Lines</ModalTitle>
           <ModalDescription>
-            Divide a single transaction across multiple CSI budget codes. Enforces strict zero-discrepancy balance rules.
+            Divide a single transaction across multiple budget lines (such as when one payment covers materials and labor).
           </ModalDescription>
         </ModalHeader>
 
@@ -216,8 +216,8 @@ export function SplitAllocationModal({
               <div>
                 <span className="text-body font-semibold">
                   {isBalanced
-                    ? "Allocations Balanced (100% Accounted)"
-                    : `Allocation Unbalanced (${remainingCents > 0 ? "Under-allocated" : "Over-allocated"})`}
+                    ? "Allocations balanced ($0 remaining)"
+                    : `Remaining to allocate: ${formatMoney(String(Math.abs(remainingCents)))}`}
                 </span>
                 <p className="text-caption opacity-85">
                   Total Allocated: {formatMoney(String(totalAllocatedCents))} of {formatMoney(match.amount)}
@@ -226,7 +226,7 @@ export function SplitAllocationModal({
             </div>
             <div className="text-right">
               <span className="text-caption font-semibold uppercase block opacity-75">
-                Remaining Balance
+                Unallocated
               </span>
               <span className="text-section font-bold tabular-nums">
                 {formatMoney(String(Math.abs(remainingCents)))}
@@ -238,7 +238,7 @@ export function SplitAllocationModal({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-caption font-semibold text-text-secondary uppercase tracking-wider">
-                Itemized Line Allocations ({rows.length} lines)
+                Budget Lines ({rows.length})
               </label>
               <Button
                 variant="outline"
@@ -246,7 +246,7 @@ export function SplitAllocationModal({
                 onClick={handleAddRow}
                 className="text-caption"
               >
-                <Plus className="h-3.5 w-3.5 mr-1" /> Add Split Line
+                <Plus className="h-3.5 w-3.5 mr-1" /> Add Line
               </Button>
             </div>
 
@@ -325,10 +325,10 @@ export function SplitAllocationModal({
             disabled={!isBalanced || isSubmitting}
           >
             {isSubmitting
-              ? "Validating & Splitting..."
+              ? "Splitting..."
               : isBalanced
-              ? "Confirm Balanced Split"
-              : "Balance Required to Submit"}
+              ? "Split Transaction"
+              : "Must balance to $0"}
           </Button>
         </ModalFooter>
       </ModalContent>

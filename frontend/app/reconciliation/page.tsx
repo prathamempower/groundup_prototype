@@ -306,12 +306,12 @@ export default function ReconciliationPage() {
       id: "rq-6",
       date: getRealDate(5),
       account: "Business card · 1108",
-      description: "Card payment - statement settlement",
+      description: "Credit card payment",
       type: "Bank transaction",
       direction: "out",
       amount: "-$1,850.00",
-      proposedLink: "Card liability settlement",
-      whyMatches: "Likely card settlement; do not classify as project spend",
+      proposedLink: "Credit card payment",
+      whyMatches: "Credit card payoff. Exclude to avoid counting card purchases twice.",
       evidence: "Partial",
       status: "Pending review",
     },
@@ -348,7 +348,7 @@ export default function ReconciliationPage() {
     {
       id: "ex-1",
       title: "Missing invoice or receipt",
-      subtitle: "Required evidence not attached",
+      subtitle: "Missing receipt or invoice",
       relatedTxn: "Nilson Mocalos · $155.00",
       severity: "High",
       owner: "Owner",
@@ -490,7 +490,7 @@ export default function ReconciliationPage() {
       case "SETTLE_LIABILITY":
         return (
           <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 border border-amber-200">
-            <CreditCard className="h-2.5 w-2.5" /> Card Settlement
+            <CreditCard className="h-2.5 w-2.5" /> Credit Card Payment
           </span>
         );
       case "EXCLUDE_NON_PROJECT":
@@ -502,7 +502,7 @@ export default function ReconciliationPage() {
       case "OTHER":
         return (
           <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-700 border border-purple-200">
-            <MoreHorizontal className="h-2.5 w-2.5" /> Others
+            <MoreHorizontal className="h-2.5 w-2.5" /> Other
           </span>
         );
       default:
@@ -566,7 +566,7 @@ export default function ReconciliationPage() {
               Reconciliation
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Make sure every bank transaction is explained and supported.
+              Match bank transactions with budget lines and receipts.
             </p>
 
           </div>
@@ -592,7 +592,7 @@ export default function ReconciliationPage() {
           {/* Card 2: Missing evidence */}
           <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
             <span className="text-[11px] font-semibold text-slate-500 block">
-              Missing evidence
+              Missing receipts or invoices
             </span>
             <div className="mt-2 text-xl font-bold font-mono text-slate-900 tabular-nums">
               ${missingEvidenceDollars.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -611,7 +611,7 @@ export default function ReconciliationPage() {
               $25,000.00
             </div>
             <p className="mt-1 text-[11px] text-slate-400">
-              Cleared deposits not linked to a draw
+              Deposits received but not linked to a draw
             </p>
           </div>
         </div>
@@ -627,7 +627,7 @@ export default function ReconciliationPage() {
                   : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <span>Review queue</span>
+              <span>To review</span>
               <span className="text-[10px] text-slate-400 font-mono">{unresolvedCount}</span>
             </button>
 
@@ -639,7 +639,7 @@ export default function ReconciliationPage() {
                   : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <span>Statement coverage</span>
+              <span>Monthly statements</span>
               <span className="text-[10px] text-slate-400 font-mono">2</span>
             </button>
 
@@ -651,7 +651,7 @@ export default function ReconciliationPage() {
                   : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <span>Evidence and exceptions</span>
+              <span>Missing documents & alerts</span>
               <span className="text-[10px] text-slate-400 font-mono">2</span>
             </button>
           </nav>

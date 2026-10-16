@@ -51,7 +51,7 @@ export function AmountSourceModal({
               {cleanTitle}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Source Origin
+              Source document
             </p>
           </div>
 

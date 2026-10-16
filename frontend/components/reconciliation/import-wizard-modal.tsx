@@ -118,9 +118,9 @@ export function ImportWizardModal({
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent maxWidth="xl">
         <ModalHeader>
-          <ModalTitle>Import a statement CSV</ModalTitle>
+          <ModalTitle>Import Bank Transactions</ModalTitle>
           <ModalDescription>
-            Import real transaction records for review. Your original rows are retained for audit history.
+            Upload a bank statement CSV to add transactions to your review queue.
           </ModalDescription>
         </ModalHeader>
 
@@ -183,7 +183,7 @@ export function ImportWizardModal({
               Cancel
             </Button>
             <Button variant="primary" onClick={handleImport} loading={isSubmitting} disabled={accounts.isLoading}>
-              Import for review
+              Import Transactions
             </Button>
           </div>
         </div>

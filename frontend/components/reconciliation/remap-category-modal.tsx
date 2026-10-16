@@ -51,7 +51,7 @@ export function RemapCategoryModal({
 
   const handleSubmit = async () => {
     if (!rationale.trim()) {
-      setErrorMsg("A rationale note is required when remapping budget codes.");
+      setErrorMsg("Please explain why this transaction is being moved.");
       return;
     }
 
@@ -77,9 +77,9 @@ export function RemapCategoryModal({
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent maxWidth="md">
         <ModalHeader>
-          <ModalTitle>Remap Budget Category</ModalTitle>
+          <ModalTitle>Move to Different Budget Line</ModalTitle>
           <ModalDescription>
-            Reassign this vendor transaction to a different Schedule of Values (SOV) line code.
+            Move this transaction to a different budget line.
           </ModalDescription>
         </ModalHeader>
 
@@ -94,7 +94,7 @@ export function RemapCategoryModal({
               </span>
             </div>
             <p className="text-caption text-text-secondary">
-              Current proposed code: <span className="font-medium text-text-primary">{match.proposed_budget_line_name}</span>
+              Current budget line: <span className="font-medium text-text-primary">{match.proposed_budget_line_name}</span>
             </p>
           </div>
 
@@ -104,7 +104,7 @@ export function RemapCategoryModal({
 
           <div>
             <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
-              New Target Budget Line
+              New Budget Line
             </label>
             <select
               className="flex h-9 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary focus:border-primary focus:outline-hidden"
@@ -121,10 +121,10 @@ export function RemapCategoryModal({
 
           <div>
             <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
-              Remapping Rationale (Required)
+              Reason for move (required)
             </label>
             <Textarea
-              placeholder="Explain why this expense belongs to the selected budget code instead of the proposed code..."
+              placeholder="Explain why this belongs to the new budget line..."
               value={rationale}
               onChange={(e) => setRationale(e.target.value)}
               rows={3}
@@ -142,7 +142,7 @@ export function RemapCategoryModal({
             onClick={handleSubmit}
             disabled={!rationale.trim() || isSubmitting}
           >
-            {isSubmitting ? "Remapping..." : "Confirm Category Remap"}
+            {isSubmitting ? "Moving..." : "Move Transaction"}
           </Button>
         </ModalFooter>
       </ModalContent>

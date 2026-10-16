@@ -58,7 +58,7 @@ export function StatementPeriodSignoffModal({
 
   const handleSubmit = async () => {
     if (!allControlsPassed && !waiverReason.trim()) {
-      setErrorMsg("An executive waiver reason is strictly required when signing off a period with open control exceptions.");
+      setErrorMsg("Please provide a reason to close this statement while transactions remain unresolved.");
       return;
     }
 
@@ -84,9 +84,9 @@ export function StatementPeriodSignoffModal({
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent maxWidth="lg">
         <ModalHeader>
-          <ModalTitle>Executive Statement Period Reconciliation Sign-Off</ModalTitle>
+          <ModalTitle>Close Monthly Statement</ModalTitle>
           <ModalDescription>
-            Verify coverage controls and mathematical balance before locking monthly statement records.
+            Check that all transactions match your bank statement before closing the month.
           </ModalDescription>
         </ModalHeader>
 
@@ -107,7 +107,7 @@ export function StatementPeriodSignoffModal({
               </div>
               <StatusBadge
                 status={allControlsPassed ? "verified" : "provisional"}
-                customLabel={allControlsPassed ? "Controls Passed" : "Exceptions Present"}
+                customLabel={allControlsPassed ? "Balanced" : "Discrepancy found"}
               />
             </div>
           </div>
@@ -119,7 +119,7 @@ export function StatementPeriodSignoffModal({
           {/* Balance Controls Card */}
           <div className="rounded-lg border border-border p-4 space-y-3">
             <label className="text-caption font-semibold text-text-secondary uppercase tracking-wider block">
-              Mathematical Balance Control
+              Statement Balance Check
             </label>
 
             <div className="grid grid-cols-4 gap-2 text-center">
@@ -130,19 +130,19 @@ export function StatementPeriodSignoffModal({
                 </span>
               </div>
               <div className="p-2.5 rounded bg-subtle border border-border">
-                <span className="text-caption text-text-secondary block">+ Credits (Inflows)</span>
+                <span className="text-caption text-text-secondary block">+ Deposits received</span>
                 <span className="font-semibold text-emerald-700 tabular-nums">
                   +{formatMoney(period.total_credits)}
                 </span>
               </div>
               <div className="p-2.5 rounded bg-subtle border border-border">
-                <span className="text-caption text-text-secondary block">- Debits (Outflows)</span>
+                <span className="text-caption text-text-secondary block">- Payments & withdrawals</span>
                 <span className="font-semibold text-text-primary tabular-nums">
                   -{formatMoney(period.total_debits)}
                 </span>
               </div>
               <div className="p-2.5 rounded bg-subtle border border-border">
-                <span className="text-caption text-text-secondary block">= Computed Closing</span>
+                <span className="text-caption text-text-secondary block">= Calculated ending balance</span>
                 <span className="font-semibold text-text-primary tabular-nums">
                   {formatMoney(String(computedClose))}
                 </span>
@@ -157,7 +157,7 @@ export function StatementPeriodSignoffModal({
                   <AlertTriangle className="h-4 w-4 text-red-600" />
                 )}
                 <span className="text-body font-medium text-text-primary">
-                  Reported Statement Closing: {formatMoney(period.closing_balance)}
+                  Bank statement ending balance: {formatMoney(period.closing_balance)}
                 </span>
               </div>
               <span
@@ -167,7 +167,7 @@ export function StatementPeriodSignoffModal({
                     : "bg-red-100 text-red-800"
                 }`}
               >
-                {isMathBalanced ? "Zero Discrepancy" : `Discrepancy: ${formatMoney(String(Math.abs(closeAmt - computedClose)))}`}
+                {isMathBalanced ? "Balanced ($0 discrepancy)" : `Discrepancy: ${formatMoney(String(Math.abs(closeAmt - computedClose)))}`}
               </span>
             </div>
           </div>
@@ -176,10 +176,10 @@ export function StatementPeriodSignoffModal({
           <div className="rounded-lg border border-border p-4 flex items-center justify-between">
             <div className="space-y-0.5">
               <label className="text-caption font-semibold text-text-secondary uppercase tracking-wider block">
-                Statement Coverage Integrity
+                Statement Date Range
               </label>
               <p className="text-body text-text-secondary">
-                Contiguous daily statement records with no unmapped gaps.
+                Full calendar month covered with no missing dates.
               </p>
             </div>
             <StatusBadge
@@ -193,15 +193,15 @@ export function StatementPeriodSignoffModal({
             <div className="space-y-2">
               <Banner
                 variant="warning"
-                title="Waiver Required for Incomplete Controls"
-                message="PRD Section 3.4 requires an explicit documented reason and sign-off justification when reconciling a period with balance or coverage exceptions."
+                title="Reason required for open items"
+                message="A documented note is required when closing a monthly statement that has an open balance difference or missing dates."
               />
               <div>
                 <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
-                  Executive Waiver Rationale (Required)
+                  Reason for closing with open items (required)
                 </label>
                 <Textarea
-                  placeholder="Explain the variance or why statement gap is permitted (e.g. pending month-end interest posting adjustment)..."
+                  placeholder="Explain the difference or why this month is closing with open items..."
                   value={waiverReason}
                   onChange={(e) => setWaiverReason(e.target.value)}
                   rows={3}
@@ -211,8 +211,8 @@ export function StatementPeriodSignoffModal({
           ) : (
             <Banner
               variant="info"
-              title="Ready for Sign-Off"
-              message="All balance controls and coverage prerequisites have been independently verified."
+              title="Statement is balanced"
+              message="The numbers match your bank statement and all dates are covered."
             />
           )}
         </div>
@@ -229,8 +229,8 @@ export function StatementPeriodSignoffModal({
             disabled={(!allControlsPassed && !waiverReason.trim()) || isSubmitting}
           >
             {isSubmitting
-              ? "Recording Sign-Off..."
-              : "Sign Off Statement Period"}
+              ? "Closing statement..."
+              : "Close Statement"}
           </Button>
         </ModalFooter>
       </ModalContent>

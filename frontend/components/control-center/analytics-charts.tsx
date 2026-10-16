@@ -131,12 +131,12 @@ export const ControlCenterAnalytics: React.FC<AnalyticsDashboardProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-bold text-slate-900 tracking-tight">
-              Financial Trajectory
+              Spend & Cash Flow
             </h2>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            {activeTab === "COST_VS_FUNDING" && "Spend, earned value progress, and draw funding cleared vs. approved plan."}
-            {activeTab === "CASH_POSITION" && "Monthly working capital surplus vs. equity draw outlays."}
+            {activeTab === "COST_VS_FUNDING" && "Spend, verified progress, and draw funds compared to approved budget."}
+            {activeTab === "CASH_POSITION" && "Monthly cash balance after expenses."}
             {activeTab === "PROJECTED_PROFIT" && "Expected project profit compared to original plan."}
           </p>
         </div>
