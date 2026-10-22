@@ -12,7 +12,7 @@ test("owner creates an account and launches a first project", async ({ page }) =
   await page.getByLabel("Organization name").fill(`Workspace ${Date.now()}`);
   await page.getByLabel("First name").fill("Taylor");
   await page.getByLabel("Last name").fill("Owner");
-  await page.getByLabel("Work email").fill(email);
+  await page.getByLabel(/^(Work email|Email)/i).fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Complete registration" }).click();

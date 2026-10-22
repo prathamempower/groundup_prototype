@@ -12,7 +12,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Sparkles,
-  Calendar,
+  Building2,
   ShieldCheck,
   AlertCircle,
   X,
@@ -75,28 +75,14 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
   const [signUpStep, setSignUpStep] = useState<1 | 2>(1);
   const [firstName, setFirstName] = useState('Alex');
   const [lastName, setLastName] = useState('Vance');
-  const [username, setUsername] = useState('alexvance');
-  const [dob, setDob] = useState('1992-06-18');
   const [signUpEmail, setSignUpEmail] = useState('alex@vancedevelopment.com');
+  const [companyName, setCompanyName] = useState('Vance Development Partners');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
   const [isEmailVerified, setIsEmailVerified] = useState(true);
   const [signUpPassword, setSignUpPassword] = useState('GroundUp2026!Secure');
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   const [signUpError, setSignUpError] = useState('');
-
-  // 18+ Max DOB Date (calculated dynamically)
-  const maxDobDate = useMemo(() => {
-    const d = new Date();
-    d.setFullYear(d.getFullYear() - 18);
-    return d.toISOString().split('T')[0];
-  }, []);
-
-  // Workspace username validation
-  const isUsernameValid = useMemo(() => {
-    if (!username) return null;
-    return /^[a-zA-Z0-9_-]{3,20}$/.test(username);
-  }, [username]);
 
   // Password strength calculation
   const passwordStrength = useMemo(() => {
@@ -156,7 +142,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
   // ── Sign Up Navigation & Verification ───────────────────────────────────────
   const handleSendOtp = () => {
     if (!signUpEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signUpEmail.trim())) {
-      setSignUpError('Please enter a valid work email address before requesting a code.');
+      setSignUpError('Please enter a valid email address before requesting a code.');
       return;
     }
     setSignUpError('');
@@ -177,22 +163,18 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
       setSignUpError('Please enter both your first and last name.');
       return;
     }
-    if (!username.trim() || !isUsernameValid) {
-      setSignUpError('Please choose a valid workspace handle (3-20 characters, alphanumeric).');
-      return;
-    }
-    if (!dob) {
-      setSignUpError('Please select your date of birth (must be 18+).');
-      return;
-    }
     if (!signUpEmail.trim()) {
-      setSignUpError('Please provide your work email address.');
+      setSignUpError('Please provide your email address.');
+      return;
+    }
+    if (!companyName.trim()) {
+      setSignUpError('Please enter your company name.');
       return;
     }
     setSignUpStep(2);
   };
 
-  const handleSignUpComplete = (e: React.FormEvent) => {
+  const handleSignUpComplete = async (e: React.FormEvent) => {
     e.preventDefault();
     setSignUpError('');
     if (signUpPassword.length < 12) {
@@ -205,14 +187,29 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
     }
 
     try {
-      localStorage.setItem('groundup_onboarding_prefill', JSON.stringify({
-        name: `${firstName.trim()} ${lastName.trim()}`,
+      const session = await authAdapter.signUp({
+        organization_name: companyName.trim() || 'Vance Development Partners',
         email: signUpEmail.trim(),
-        username: username.trim(),
-      }));
-    } catch { }
+        password: signUpPassword,
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+      });
+      window.localStorage.setItem('groundup_session_seen', '1');
+      queryClient.setQueryData(['auth-session'], session);
+      queryClient.setQueryData(['me'], { data: session.user });
 
-    router.push('/onboarding');
+      try {
+        localStorage.setItem('groundup_onboarding_prefill', JSON.stringify({
+          name: `${firstName.trim()} ${lastName.trim()}`,
+          email: signUpEmail.trim(),
+          company: companyName.trim(),
+        }));
+      } catch { }
+
+      router.replace('/projects');
+    } catch (err: unknown) {
+      setSignUpError(err instanceof Error ? err.message : 'Failed to create account.');
+    }
   };
 
   return (
@@ -464,21 +461,34 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                 {/* 1. Continue with Google OAuth Button (At the Top for Best UX) */}
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     setFirstName('Alex');
                     setLastName('Vance');
-                    setUsername('alexvance');
-                    setDob('1992-06-18');
                     setSignUpEmail('alex@vancedevelopment.com');
+                    setCompanyName('Vance Development Partners');
                     setIsEmailVerified(true);
                     try {
-                      localStorage.setItem('groundup_onboarding_prefill', JSON.stringify({
-                        name: 'Alex Vance',
+                      const session = await authAdapter.signUp({
+                        organization_name: 'Vance Development Partners',
                         email: 'alex@vancedevelopment.com',
-                        username: 'alexvance',
-                      }));
-                    } catch { }
-                    router.push('/onboarding');
+                        password: 'GroundUp2026!Secure',
+                        first_name: 'Alex',
+                        last_name: 'Vance',
+                      });
+                      window.localStorage.setItem('groundup_session_seen', '1');
+                      queryClient.setQueryData(['auth-session'], session);
+                      queryClient.setQueryData(['me'], { data: session.user });
+                      try {
+                        localStorage.setItem('groundup_onboarding_prefill', JSON.stringify({
+                          name: 'Alex Vance',
+                          email: 'alex@vancedevelopment.com',
+                          company: 'Vance Development Partners',
+                        }));
+                      } catch { }
+                      router.replace('/projects');
+                    } catch {
+                      router.replace('/projects');
+                    }
                   }}
                   className="w-full h-11 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50/80 active:scale-[0.99] text-slate-700 text-sm font-medium flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-2xs hover:border-slate-300"
                 >
@@ -541,62 +551,11 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                   </div>
                 </div>
 
-                {/* 4. Username & Availability Badge */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="signup-username" className="block text-xs font-medium text-slate-700">
-                      Username <span className="text-red-500">*</span>
-                    </label>
-                    {isUsernameValid && (
-                      <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
-                        <Check className="size-3" />
-                        Available
-                      </span>
-                    )}
-                  </div>
-                  <div className="relative group">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400 select-none pointer-events-none">
-                      groundup.ai/
-                    </span>
-                    <input
-                      id="signup-username"
-                      type="text"
-                      required
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
-                      placeholder="alexvance"
-                      className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/50 pl-[98px] pr-3.5 text-sm font-mono text-slate-900 transition-all placeholder:text-slate-400 hover:bg-white hover:border-slate-300 focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
-                    />
-                  </div>
-                </div>
-
-                {/* 5. DOB with 18+ Calendar Validation */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="signup-dob" className="block text-xs font-medium text-slate-700">
-                      Date of birth <span className="text-red-500">*</span>
-                    </label>
-                    <span className="text-[11px] text-slate-400 font-medium">Must be 18+</span>
-                  </div>
-                  <div className="relative group">
-                    <Calendar className="size-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors group-focus-within:text-blue-600" />
-                    <input
-                      id="signup-dob"
-                      type="date"
-                      max={maxDobDate}
-                      required
-                      value={dob}
-                      onChange={(e) => setDob(e.target.value)}
-                      className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/50 pl-10 pr-3.5 text-sm text-slate-900 transition-all focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
-                    />
-                  </div>
-                </div>
-
-                {/* 6. Work Email & Verification */}
+                {/* Email & Verification */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <label htmlFor="signup-email" className="block text-xs font-medium text-slate-700">
-                      Work email <span className="text-red-500">*</span>
+                      Email <span className="text-red-500">*</span>
                     </label>
                     {isEmailVerified && (
                       <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
@@ -628,6 +587,25 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                         {isOtpSent ? 'Resend' : 'Send Code'}
                       </button>
                     )}
+                  </div>
+                </div>
+
+                {/* Company Name Section (below Email) */}
+                <div className="space-y-1.5">
+                  <label htmlFor="signup-company" className="block text-xs font-medium text-slate-700">
+                    Company name <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative group">
+                    <Building2 className="size-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors group-focus-within:text-blue-600" />
+                    <input
+                      id="signup-company"
+                      type="text"
+                      required
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      placeholder="e.g. Vance Development Partners"
+                      className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/50 pl-10 pr-3.5 text-sm text-slate-900 transition-all placeholder:text-slate-400 hover:bg-white hover:border-slate-300 focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                    />
                   </div>
                 </div>
 
@@ -670,7 +648,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                   type="submit"
                   className="w-full h-11 rounded-xl bg-slate-950 hover:bg-slate-900 active:scale-[0.99] text-white text-sm font-semibold shadow-[0_2px_8px_-2px_rgba(15,23,42,0.2),inset_0_1px_0_rgba(255,255,255,0.12)] transition-all focus:outline-none focus:ring-4 focus:ring-slate-900/15 disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer mt-1"
                 >
-                  <span>Next: Create Password</span>
+                  <span>Next</span>
                   <ArrowRight className="size-4" />
                 </button>
 
@@ -782,7 +760,7 @@ export function AuthSwitchCard({ initialMode = 'login' }: AuthSwitchCardProps) {
                     type="submit"
                     className="flex-1 h-11 rounded-xl bg-slate-950 hover:bg-slate-900 active:scale-[0.99] text-white text-sm font-semibold shadow-[0_2px_8px_-2px_rgba(15,23,42,0.2),inset_0_1px_0_rgba(255,255,255,0.12)] transition-all focus:outline-none focus:ring-4 focus:ring-slate-900/15 flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <span>Create Account</span>
+                    <span>Continue</span>
                     <ArrowRight className="size-4" />
                   </button>
                 </div>

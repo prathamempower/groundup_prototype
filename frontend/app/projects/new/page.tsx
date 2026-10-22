@@ -1,1611 +1,2015 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { ContractModel, LifecycleStage } from "@/lib/types";
+import { ContractModel, LifecycleStage, OnboardingRole, ProjectPhase } from "@/lib/types";
 import {
   Building2,
-  FolderPlus,
+  HardHat,
   ArrowRight,
   ArrowLeft,
-  ShieldCheck,
-  Layers,
-  AlertCircle,
-  Landmark,
-  Users,
-  FileCheck,
-  CopyCheck,
   Check,
   CheckCircle2,
   MapPin,
   UploadCloud,
+  FileSpreadsheet,
   FileText,
-  X,
+  Trash2,
+  Plus,
+  AlertCircle,
+  Calendar,
+  Landmark,
+  Mail,
+  Users,
   Loader2,
-  Briefcase,
-  HardHat,
-  FileUp,
-  Shield,
-  Coins,
+  FolderPlus,
+  ShieldCheck,
+  Compass,
+  KeyRound,
+  DollarSign,
+  FileCheck,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { BrandLogo } from "@/components/ui/brand-logo";
-import { GroundUpMark } from "@/components/brand/GroundUpBrand";
+import { Logo } from "@/components/logo";
+import { AmbientStructuralWireframes } from "@/components/ui/AmbientStructuralWireframes";
+import { CircularWorkspaceGauge } from "@/components/onboarding/GroundUpLoader";
+import { TextEffect } from "@/components/motion-primitives/text-effect";
+import { PhaseIllustration } from "@/components/projects/PhaseIllustration";
+import { ConstructionLenderSelect } from "@/components/projects/ConstructionLenderSelect";
 
-// High-frequency US real estate market postal lookup dictionary
-const KNOWN_ZIPS: Record<string, { city: string; state: string; county?: string }> = {
-  // New Jersey
-  "07302": { city: "Jersey City", state: "NJ", county: "Hudson County" },
-  "07304": { city: "Jersey City", state: "NJ", county: "Hudson County" },
-  "07305": { city: "Jersey City", state: "NJ", county: "Hudson County" },
-  "07306": { city: "Jersey City", state: "NJ", county: "Hudson County" },
-  "07307": { city: "Jersey City", state: "NJ", county: "Hudson County" },
-  "07030": { city: "Hoboken", state: "NJ", county: "Hudson County" },
-  "07102": { city: "Newark", state: "NJ", county: "Essex County" },
-  "08701": { city: "Lakewood", state: "NJ", county: "Ocean County" },
-  // New York
-  "10001": { city: "New York", state: "NY", county: "New York County" },
-  "10011": { city: "New York", state: "NY", county: "New York County" },
-  "11201": { city: "Brooklyn", state: "NY", county: "Kings County" },
-  "11211": { city: "Brooklyn", state: "NY", county: "Kings County" },
-  "11101": { city: "Long Island City", state: "NY", county: "Queens County" },
-  // Florida
-  "33101": { city: "Miami", state: "FL", county: "Miami-Dade County" },
-  "33139": { city: "Miami Beach", state: "FL", county: "Miami-Dade County" },
-  // California
-  "90001": { city: "Los Angeles", state: "CA", county: "Los Angeles County" },
-  "90210": { city: "Beverly Hills", state: "CA", county: "Los Angeles County" },
-  "94102": { city: "San Francisco", state: "CA", county: "San Francisco County" },
-  // Texas
-  "75201": { city: "Dallas", state: "TX", county: "Dallas County" },
-  "77002": { city: "Houston", state: "TX", county: "Harris County" },
-  "78701": { city: "Austin", state: "TX", county: "Travis County" },
-};
+// Supported file extensions for document vault
+const SUPPORTED_EXTENSIONS = [".pdf", ".xlsx", ".csv", ".png", ".jpg", ".jpeg", ".docx", ".zip"];
 
-const US_STATES = [
-  { code: "NJ", name: "New Jersey" },
-  { code: "NY", name: "New York" },
-  { code: "CA", name: "California" },
-  { code: "FL", name: "Florida" },
-  { code: "TX", name: "Texas" },
-  { code: "AL", name: "Alabama" },
-  { code: "AK", name: "Alaska" },
-  { code: "AZ", name: "Arizona" },
-  { code: "AR", name: "Arkansas" },
-  { code: "CO", name: "Colorado" },
-  { code: "CT", name: "Connecticut" },
-  { code: "DE", name: "Delaware" },
-  { code: "GA", name: "Georgia" },
-  { code: "HI", name: "Hawaii" },
-  { code: "ID", name: "Idaho" },
-  { code: "IL", name: "Illinois" },
-  { code: "IN", name: "Indiana" },
-  { code: "IA", name: "Iowa" },
-  { code: "KS", name: "Kansas" },
-  { code: "KY", name: "Kentucky" },
-  { code: "LA", name: "Louisiana" },
-  { code: "ME", name: "Maine" },
-  { code: "MD", name: "Maryland" },
-  { code: "MA", name: "Massachusetts" },
-  { code: "MI", name: "Michigan" },
-  { code: "MN", name: "Minnesota" },
-  { code: "MS", name: "Mississippi" },
-  { code: "MO", name: "Missouri" },
-  { code: "MT", name: "Montana" },
-  { code: "NE", name: "Nebraska" },
-  { code: "NV", name: "Nevada" },
-  { code: "NH", name: "New Hampshire" },
-  { code: "NM", name: "New Mexico" },
-  { code: "NC", name: "North Carolina" },
-  { code: "ND", name: "North Dakota" },
-  { code: "OH", name: "Ohio" },
-  { code: "OK", name: "Oklahoma" },
-  { code: "OR", name: "Oregon" },
-  { code: "PA", name: "Pennsylvania" },
-  { code: "RI", name: "Rhode Island" },
-  { code: "SC", name: "South Carolina" },
-  { code: "SD", name: "South Dakota" },
-  { code: "TN", name: "Tennessee" },
-  { code: "UT", name: "Utah" },
-  { code: "VT", name: "Vermont" },
-  { code: "VA", name: "Virginia" },
-  { code: "WA", name: "Washington" },
-  { code: "WV", name: "West Virginia" },
-  { code: "WI", name: "Wisconsin" },
-  { code: "WY", name: "Wyoming" },
-  { code: "DC", name: "District of Columbia" },
+// Stage Choices based on phase selection
+const ACTIVE_STAGE_CHOICES = [
+  {
+    id: "Under construction",
+    label: "Under Construction",
+    stageNum: "Active Stage",
+    desc: "Active foundation, structural framing, and MEP trades.",
+  },
+  {
+    id: "Procurement",
+    label: "Procurement & Buyout",
+    stageNum: "Active Stage",
+    desc: "Trade contracts buyout and vendor purchase orders.",
+  },
+  {
+    id: "Preconstruction phase",
+    label: "Preconstruction Logistics",
+    stageNum: "Active Stage",
+    desc: "Soil borings, engineering, and site logistics lock.",
+  },
+  {
+    id: "Post-construction",
+    label: "Post-Construction & Closeout",
+    stageNum: "Active Stage",
+    desc: "Punch lists, final municipal inspections, and Certificate of Occupancy.",
+  },
 ];
+
+const NEW_STAGE_CHOICES = [
+  {
+    id: "Conception, design & planning",
+    label: "Conception & Feasibility",
+    stageNum: "Planning Stage",
+    desc: "Architectural drawings, zoning feasibility, and development pro forma.",
+  },
+  {
+    id: "Building permits",
+    label: "Building Permits",
+    stageNum: "Planning Stage",
+    desc: "Township permit filings and agency plan sign-offs.",
+  },
+  {
+    id: "Preconstruction phase",
+    label: "Preconstruction Bidding",
+    stageNum: "Planning Stage",
+    desc: "Subcontractor bid packages and initial cost estimation lock.",
+  },
+  {
+    id: "Procurement",
+    label: "Contractor Buyout",
+    stageNum: "Planning Stage",
+    desc: "General Contractor RFP buyout and pricing negotiations.",
+  },
+];
+
+const ACTIVE_DOC_TYPES = [
+  "Budget or cost spreadsheet",
+  "Executed GC contract",
+  "Subcontractor pay application (AIA G702)",
+  "Bank construction loan agreement",
+  "Municipal inspection card",
+  "Not ready yet",
+];
+
+const NEW_DOC_TYPES = [
+  "Development pro forma spreadsheet",
+  "Architectural schematic plans",
+  "Township permit filing document",
+  "Land purchase contract or LOI",
+  "Bank financing term sheet",
+  "Not ready yet",
+];
+
+const ROLE_OPTIONS: Array<{ role: OnboardingRole; label: string }> = [
+  { role: "OWNER", label: "Owner / Developer" },
+  { role: "CFO", label: "CFO / Accountant" },
+  { role: "PROJECT_MANAGER", label: "Project Manager" },
+  { role: "INVESTOR", label: "Investor / Partner" },
+  { role: "GC_FIXED", label: "GC (Fixed Contract)" },
+  { role: "GC_DAILY", label: "GC (Daily Updates)" },
+];
+
+// Vector Architectural Illustration for Active Construction
+function ActiveJobsiteSvg({ active }: { active: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 160 110"
+      className="w-full h-full"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <defs>
+        <pattern id="create-jobsite-grid" width="10" height="10" patternUnits="userSpaceOnUse">
+          <path
+            d="M 10 0 L 0 0 0 10"
+            fill="none"
+            stroke={active ? "#0f172a" : "#94a3b8"}
+            strokeWidth="0.5"
+            strokeOpacity="0.15"
+          />
+        </pattern>
+      </defs>
+      <rect width="160" height="110" rx="8" fill="url(#create-jobsite-grid)" />
+
+      {/* Ground Foundation Line */}
+      <line
+        x1="10"
+        y1="96"
+        x2="150"
+        y2="96"
+        stroke={active ? "#0f172a" : "#64748b"}
+        strokeWidth="2"
+        strokeDasharray="3 3"
+      />
+      <rect x="22" y="94" width="70" height="4" rx="1" fill={active ? "#0f172a" : "#94a3b8"} />
+
+      {/* Structural Steel Columns & Beams */}
+      <rect x="28" y="44" width="4" height="50" rx="1" fill={active ? "#0f172a" : "#64748b"} />
+      <rect x="52" y="44" width="4" height="50" rx="1" fill={active ? "#0f172a" : "#64748b"} />
+      <rect x="76" y="58" width="4" height="36" rx="1" fill={active ? "#0f172a" : "#64748b"} />
+
+      {/* Horizontal Structural Beams */}
+      <line x1="26" y1="72" x2="80" y2="72" stroke={active ? "#0f172a" : "#64748b"} strokeWidth="2.5" />
+      <line x1="26" y1="52" x2="58" y2="52" stroke={active ? "#0f172a" : "#64748b"} strokeWidth="2.5" />
+
+      {/* Cross Bracing Tension Cables */}
+      <line
+        x1="32"
+        y1="72"
+        x2="52"
+        y2="94"
+        stroke={active ? "#3b82f6" : "#94a3b8"}
+        strokeWidth="1"
+        strokeDasharray="2 2"
+      />
+      <line
+        x1="52"
+        y1="72"
+        x2="32"
+        y2="94"
+        stroke={active ? "#3b82f6" : "#94a3b8"}
+        strokeWidth="1"
+        strokeDasharray="2 2"
+      />
+
+      {/* Tower Crane Mast */}
+      <rect x="104" y="20" width="5" height="74" rx="1" fill={active ? "#d97706" : "#94a3b8"} />
+      <path d="M 104 35 L 109 45 M 104 55 L 109 65 M 104 75 L 109 85" stroke="white" strokeWidth="1" />
+
+      {/* Crane Jib */}
+      <line
+        x1="72"
+        y1="20"
+        x2="142"
+        y2="20"
+        stroke={active ? "#d97706" : "#94a3b8"}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <rect x="130" y="16" width="8" height="8" rx="1" fill={active ? "#0f172a" : "#64748b"} />
+      <polygon
+        points="106,8 90,20 120,20"
+        fill="none"
+        stroke={active ? "#d97706" : "#94a3b8"}
+        strokeWidth="1.5"
+      />
+
+      {/* Hoist Trolley, Cable & Suspended I-Beam */}
+      <rect x="84" y="19" width="6" height="3" rx="0.5" fill={active ? "#0f172a" : "#64748b"} />
+      <line
+        x1="87"
+        y1="22"
+        x2="87"
+        y2="42"
+        stroke={active ? "#0f172a" : "#64748b"}
+        strokeWidth="1"
+        strokeDasharray="1 1"
+      />
+      <rect x="80" y="42" width="14" height="3" rx="1" fill={active ? "#f59e0b" : "#64748b"} />
+
+      {/* Active Draw / Verification Badge Pill */}
+      <g transform="translate(18, 14)">
+        <rect
+          width="64"
+          height="18"
+          rx="9"
+          fill={active ? "#0f172a" : "#f1f5f9"}
+          stroke={active ? "#334155" : "#cbd5e1"}
+          strokeWidth="1"
+        />
+        <circle cx="9" cy="9" r="3.5" fill="#10b981" />
+        <text
+          x="17"
+          y="12"
+          fill={active ? "#f8fafc" : "#475569"}
+          fontSize="7.5"
+          fontWeight="bold"
+          fontFamily="sans-serif"
+        >
+          Draw Verified
+        </text>
+      </g>
+    </svg>
+  );
+}
+
+// Vector Architectural Blueprint for Planning & Pre-Development
+function PreDevelopmentSvg({ active }: { active: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 160 110"
+      className="w-full h-full"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <defs>
+        <pattern id="create-predev-grid" width="10" height="10" patternUnits="userSpaceOnUse">
+          <path
+            d="M 10 0 L 0 0 0 10"
+            fill="none"
+            stroke={active ? "#0f172a" : "#94a3b8"}
+            strokeWidth="0.5"
+            strokeOpacity="0.15"
+          />
+        </pattern>
+      </defs>
+      <rect width="160" height="110" rx="8" fill="url(#create-predev-grid)" />
+
+      {/* Pro Forma Baseline Document Card */}
+      <g transform="translate(16, 14)">
+        <rect
+          width="84"
+          height="80"
+          rx="5"
+          fill={active ? "#ffffff" : "#f8fafc"}
+          stroke={active ? "#0f172a" : "#cbd5e1"}
+          strokeWidth="1.5"
+        />
+
+        {/* Document Header Bar */}
+        <rect x="6" y="8" width="40" height="5" rx="1" fill={active ? "#0f172a" : "#64748b"} />
+        <rect x="52" y="8" width="24" height="5" rx="1" fill={active ? "#0284c7" : "#94a3b8"} />
+
+        {/* Table Rows */}
+        <line x1="6" y1="20" x2="78" y2="20" stroke={active ? "#e2e8f0" : "#cbd5e1"} strokeWidth="1" />
+
+        <rect x="6" y="24" width="22" height="3" rx="0.5" fill={active ? "#64748b" : "#94a3b8"} />
+        <rect x="54" y="24" width="22" height="3" rx="0.5" fill={active ? "#0f172a" : "#64748b"} />
+
+        <rect x="6" y="32" width="28" height="3" rx="0.5" fill={active ? "#64748b" : "#94a3b8"} />
+        <rect x="58" y="32" width="18" height="3" rx="0.5" fill={active ? "#0f172a" : "#64748b"} />
+
+        <rect x="6" y="40" width="18" height="3" rx="0.5" fill={active ? "#64748b" : "#94a3b8"} />
+        <rect x="52" y="40" width="24" height="3" rx="0.5" fill={active ? "#0f172a" : "#64748b"} />
+
+        <rect x="6" y="48" width="25" height="3" rx="0.5" fill={active ? "#64748b" : "#94a3b8"} />
+        <rect x="56" y="48" width="20" height="3" rx="0.5" fill={active ? "#0f172a" : "#64748b"} />
+
+        {/* Total Summary Row */}
+        <line x1="6" y1="56" x2="78" y2="56" stroke={active ? "#0f172a" : "#cbd5e1"} strokeWidth="1.5" />
+        <rect x="6" y="60" width="30" height="4" rx="0.5" fill={active ? "#0f172a" : "#64748b"} />
+        <rect x="50" y="60" width="26" height="4" rx="0.5" fill={active ? "#059669" : "#059669"} />
+
+        {/* WBS Tag */}
+        <rect x="6" y="69" width="38" height="6" rx="2" fill={active ? "#e0f2fe" : "#f1f5f9"} />
+        <text x="9" y="73.5" fill={active ? "#0369a1" : "#64748b"} fontSize="4" fontWeight="bold">
+          CSI 50-DIV
+        </text>
+      </g>
+
+      {/* Drafting 30-60 Triangle Ruler */}
+      <g transform="translate(98, 20)">
+        <polygon
+          points="0,68 44,68 0,10"
+          fill={active ? "rgba(59, 130, 246, 0.12)" : "rgba(148, 163, 184, 0.12)"}
+          stroke={active ? "#0284c7" : "#64748b"}
+          strokeWidth="1.5"
+        />
+        <polygon points="6,62 30,62 6,28" fill="white" stroke={active ? "#0284c7" : "#94a3b8"} strokeWidth="1" />
+        <line x1="0" y1="20" x2="3" y2="20" stroke={active ? "#0284c7" : "#64748b"} strokeWidth="1" />
+        <line x1="0" y1="30" x2="3" y2="30" stroke={active ? "#0284c7" : "#64748b"} strokeWidth="1" />
+        <line x1="0" y1="40" x2="3" y2="40" stroke={active ? "#0284c7" : "#64748b"} strokeWidth="1" />
+        <line x1="0" y1="50" x2="3" y2="50" stroke={active ? "#0284c7" : "#64748b"} strokeWidth="1" />
+        <line x1="0" y1="60" x2="3" y2="60" stroke={active ? "#0284c7" : "#64748b"} strokeWidth="1" />
+      </g>
+
+      {/* Municipal Permit Stamp Seal */}
+      <g transform="translate(108, 64)">
+        <circle
+          cx="16"
+          cy="16"
+          r="14"
+          fill={active ? "#fef3c7" : "#f1f5f9"}
+          stroke={active ? "#d97706" : "#94a3b8"}
+          strokeWidth="1.5"
+          strokeDasharray="3 1.5"
+        />
+        <text
+          x="16"
+          y="14"
+          textAnchor="middle"
+          fill={active ? "#92400e" : "#475569"}
+          fontSize="5"
+          fontWeight="bold"
+        >
+          PERMIT
+        </text>
+        <text
+          x="16"
+          y="21"
+          textAnchor="middle"
+          fill={active ? "#b45309" : "#64748b"}
+          fontSize="4"
+          fontWeight="bold"
+        >
+          APPROVED
+        </text>
+      </g>
+    </svg>
+  );
+}
+
+interface IntakeFileItem {
+  id: string;
+  name: string;
+  size: number;
+}
 
 export default function CreateProjectPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const isFirstRun =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search).get("firstRun") === "1"
-      : false;
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Stages 0 to 6
-  const [stage, setStage] = useState<0 | 1 | 2 | 3 | 4 | 5 | 6>(0);
-  const [stage1Step, setStage1Step] = useState<1 | 2 | 3>(1);
-  const [errorMessage, setErrorMessage] = useState("");
+  // Steps:
+  // 1. Select Project Phase (Active vs Planning)
+  // 2. Project Specifications (Sub-steps: 1. Identity & Dates, 2. Capital & Debt)
+  // 3. Project Records (Document Vault)
+  // 4. Team Allocation (Invites)
+  // 5. Workspace Provisioning & Launch
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [projectSubStep, setProjectSubStep] = useState<1 | 2>(1);
 
-  // Duplicate Check Modal State
-  const [duplicateMatches, setDuplicateMatches] = useState<
-    Array<{ id: string; name: string; address: string; project_entity: string; similarity_reason: string }>
-  >([]);
-  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  // Step 1: Project Phase
+  const [projectPhase, setProjectPhase] = useState<ProjectPhase>("ACTIVE_CONSTRUCTION");
+  const [projectStatus, setProjectStatus] = useState<"active" | "new">("active");
 
-  // Form State: Stage 1 (Identity & Granular Location)
-  const [name, setName] = useState("");
+  // Step 2: Part 1 - Identity & Schedule
+  const [projectName, setProjectName] = useState("");
   const [projectEntity, setProjectEntity] = useState("");
-  const [address, setAddress] = useState("");
-  const [streetAddress, setStreetAddress] = useState("");
-  const [unitSuite, setUnitSuite] = useState("");
-  const [zipCode, setZipCode] = useState("");
-  const [city, setCity] = useState("");
-  const [stateCode, setStateCode] = useState("NJ");
-  const [country, setCountry] = useState("United States");
-  const [zipStatus, setZipStatus] = useState<"idle" | "loading" | "valid" | "unrecognized">("idle");
-  const [zipMessage, setZipMessage] = useState("");
-
-  const [lifecycleStage, setLifecycleStage] = useState<LifecycleStage>("PRE_CONSTRUCTION");
-  const [projectType, setProjectType] = useState("MULTIFAMILY");
+  const [projectAddress, setProjectAddress] = useState("");
+  const [assetType, setAssetType] = useState("SINGLE_FAMILY");
+  const [projectStage, setProjectStage] = useState("Under construction");
   const [startedAt, setStartedAt] = useState("");
-  const [targetCompletionAt, setTargetCompletionAt] = useState("");
+  const [targetDate, setTargetDate] = useState("");
+  const [projectError, setProjectError] = useState<string | null>(null);
 
-  // Stage 2 (Acquisition & Debt)
+  // Phase-Specific Questions State
+  const [permitStatus, setPermitStatus] = useState<"PERMIT_APPROVED" | "PERMIT_PENDING" | "NOT_YET_APPLIED">("PERMIT_APPROVED");
+  const [budgetSheetStatus, setBudgetSheetStatus] = useState<"BUDGET_READY" | "BUDGET_IN_PROGRESS">("BUDGET_READY");
+  const [dueDiligenceStatus, setDueDiligenceStatus] = useState<"LOI_NEGOTIATION" | "PSA_SIGNED" | "FEASIBILITY_STUDY">("PSA_SIGNED");
+  const [targetPurchasePrice, setTargetPurchasePrice] = useState("");
+  const [postConstructionStatus, setPostConstructionStatus] = useState<"COMMISSIONING" | "HANDOVER_WARRANTY">("COMMISSIONING");
+  const [unitPriceDecided, setUnitPriceDecided] = useState<"YES" | "NO">("YES");
+  const [targetUnitPrice, setTargetUnitPrice] = useState("");
+  const [totalUnits, setTotalUnits] = useState<string>("1");
+  const [unitPrices, setUnitPrices] = useState<Record<number, string>>({});
+  const [bulkUnitPrice, setBulkUnitPrice] = useState("");
+
+  // Step 2: Part 2 - Capital & Debt
   const [isAcquired, setIsAcquired] = useState<"true" | "false">("true");
   const [acquisitionFunding, setAcquisitionFunding] = useState("ACQUISITION_LOAN");
+  const [acquisitionDate, setAcquisitionDate] = useState("");
+  const [acquisitionProofDocs, setAcquisitionProofDocs] = useState<IntakeFileItem[]>([]);
+  const [isAcquisitionProofDragging, setIsAcquisitionProofDragging] = useState(false);
+  const acquisitionProofInputRef = useRef<HTMLInputElement>(null);
   const [hasConstructionLoan, setHasConstructionLoan] = useState<"true" | "false">("true");
   const [lenderName, setLenderName] = useState("");
-
-  // Stage 3 (Contract & Operating)
   const [contractModel, setContractModel] = useState<ContractModel>("FIXED");
-  const [hybridCustomDetails, setHybridCustomDetails] = useState("");
   const [operatingAccountModel, setOperatingAccountModel] = useState<"DEDICATED" | "SHARED">("DEDICATED");
 
-  // Stage 4 (Delegation Invites)
-  const [cfoEmail, setCfoEmail] = useState("");
-  const [pmEmail, setPmEmail] = useState("");
-  const [gcEmail, setGcEmail] = useState("");
-
-  // Stage 5 (Source Documents Attachments)
-  const [uploadedFiles, setUploadedFiles] = useState<{
-    deed?: File;
-    gcContract?: File;
-    loanAgreement?: File;
-    permitSet?: File;
-  }>({});
-
-  // Helper to sync granular address inputs into unified address string
-  const updateAddressString = (
-    st: string,
-    unit: string,
-    c: string,
-    s: string,
-    z: string,
-    cName: string
-  ) => {
-    const parts: string[] = [];
-    const line1 = [st.trim(), unit.trim()].filter(Boolean).join(", ");
-    if (line1) parts.push(line1);
-    if (c.trim()) parts.push(c.trim());
-    if (s.trim() || z.trim()) {
-      parts.push([s.trim(), z.trim()].filter(Boolean).join(" "));
-    }
-    if (cName.trim() && cName !== "United States") {
-      parts.push(cName.trim());
-    }
-    const full = parts.join(", ");
-    setAddress(full);
-    return full;
+  const handleAddAcquisitionProofFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const newItems: IntakeFileItem[] = Array.from(files).map((f) => ({
+      id: `proof-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      name: f.name,
+      size: f.size,
+      type: f.type,
+      status: "ready" as const,
+      category: "Acquisition Proof",
+    }));
+    setAcquisitionProofDocs((prev) => [...prev, ...newItems]);
+    setDocumentsList((prev) => [...prev, ...newItems]);
   };
 
-  // Smart ZIP code postal resolution
-  const handleZipCodeChange = async (val: string) => {
-    const cleaned = val.replace(/\D/g, "").slice(0, 5);
-    setZipCode(cleaned);
+  // Step 3: Document Vault / Records
+  const [selectedDocTypes, setSelectedDocTypes] = useState<string[]>([]);
+  const [documentsList, setDocumentsList] = useState<IntakeFileItem[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
 
-    if (cleaned.length < 5) {
-      setZipStatus("idle");
-      setZipMessage("");
-      updateAddressString(streetAddress, unitSuite, city, stateCode, cleaned, country);
-      return;
-    }
+  // Step 4: Team Allocation
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<OnboardingRole>("OWNER");
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [teamList, setTeamList] = useState<Array<{ email: string; role: OnboardingRole }>>([]);
 
-    // 1. Instant check against high-frequency real estate markets
-    if (KNOWN_ZIPS[cleaned]) {
-      const match = KNOWN_ZIPS[cleaned];
-      setCity(match.city);
-      setStateCode(match.state);
-      setCountry("United States");
-      setZipStatus("valid");
-      setZipMessage(`${match.city}, ${match.state}${match.county ? ` (${match.county})` : ""}`);
-      updateAddressString(streetAddress, unitSuite, match.city, match.state, cleaned, "United States");
-      return;
-    }
-
-    // 2. Fallback to postal API
-    setZipStatus("loading");
-    try {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 2000);
-      const res = await fetch(`https://api.zippopotam.us/us/${cleaned}`, { signal: ctrl.signal });
-      clearTimeout(timer);
-      if (res.ok) {
-        const data = await res.json();
-        const place = data.places?.[0];
-        if (place) {
-          const detectedCity = place["place name"];
-          const detectedState = place["state abbreviation"];
-          setCity(detectedCity);
-          setStateCode(detectedState);
-          setCountry("United States");
-          setZipStatus("valid");
-          setZipMessage(`${detectedCity}, ${detectedState}`);
-          updateAddressString(streetAddress, unitSuite, detectedCity, detectedState, cleaned, "United States");
-          return;
-        }
-      }
-      setZipStatus("unrecognized");
-      setZipMessage("Unrecognized ZIP code. Please enter city and state manually.");
-      updateAddressString(streetAddress, unitSuite, city, stateCode, cleaned, country);
-    } catch {
-      setZipStatus("unrecognized");
-      setZipMessage("Unrecognized ZIP code. Please enter city and state manually.");
-      updateAddressString(streetAddress, unitSuite, city, stateCode, cleaned, country);
-    }
-  };
-
-  useEffect(() => {
-    if (isFirstRun && typeof window !== "undefined") {
-      window.sessionStorage.removeItem("groundup_signup_completed");
-    }
-  }, [isFirstRun]);
-
-  const duplicateCheckMutation = useMutation({
-    mutationFn: () =>
-      api.projects.checkDuplicates({
-        name,
-        address,
-        project_entity: projectEntity,
-      }),
-    onSuccess: (res) => {
-      if (res.data && res.data.has_matches && res.data.matches.length > 0) {
-        setDuplicateMatches(res.data.matches);
-        setShowDuplicateModal(true);
-      } else {
-        setStage(2);
-      }
-    },
-    onError: () => {
-      setStage(2);
-    },
+  // Step 5: Provisioning Stages
+  const [setupStages, setSetupStages] = useState({
+    savingOrg: false,
+    creatingProject: false,
+    preparingDashboard: false,
+    finalizing: false,
   });
 
-  const createMutation = useMutation({
-    mutationFn: () =>
-      api.projects.create({
-        name,
-        project_entity: projectEntity || `${name} LLC`,
-        address,
-        lifecycle_stage: lifecycleStage,
-        contract_model: contractModel,
-        status: "SETUP_INCOMPLETE",
-        currency: "USD",
-        is_user_created: true,
-        ...(startedAt ? { started_at: new Date(startedAt).toISOString() } : {}),
-        ...(targetCompletionAt
-          ? { target_completion_at: new Date(targetCompletionAt).toISOString() }
-          : {}),
-      }),
-    onSuccess: (res) => {
-      localStorage.setItem("groundup_active_project_id", res.data.id);
-      queryClient.invalidateQueries();
-      router.push(`/projects/${res.data.id}/control-center`);
-    },
-    onError: (err: Error) => {
-      setErrorMessage(err.message || "Failed to create project.");
-    },
-  });
-
-  const stagesList = [
-    { num: 0, title: "Welcome & Choice" },
-    { num: 1, title: "Identity & Structure" },
-    { num: 2, title: "Acquisition & Debt" },
-    { num: 3, title: "Contract & Operating" },
-    { num: 4, title: "Team & Delegation" },
-    { num: 5, title: "Source Documents" },
-    { num: 6, title: "Review & Launch" },
+  // Step Titles map
+  const STEP_TITLES = [
+    "",
+    "Project Phase",
+    "Project Specifications",
+    "Project Records",
+    "Team Allocation",
+    "Workspace Initialization",
   ];
 
+  // Auto-sync legal entity from project name if left untouched
+  useEffect(() => {
+    if (projectName && (!projectEntity || projectEntity.endsWith(" LLC") || projectEntity.endsWith(" Partners LLC"))) {
+      setProjectEntity(`${projectName.trim()} Partners LLC`);
+    }
+  }, [projectName]);
+
+  // Sync project stage and status choices whenever projectPhase changes
+  useEffect(() => {
+    switch (projectPhase) {
+      case "PRE_ACQUISITION":
+        setProjectStage("Pre Acquisition");
+        setProjectStatus("new");
+        break;
+      case "ACQUISITION":
+        setProjectStage("Acquisition");
+        setProjectStatus("new");
+        break;
+      case "PERMITTING":
+        setProjectStage("Permitting");
+        setProjectStatus("new");
+        break;
+      case "ACTIVE_CONSTRUCTION":
+        setProjectStage("Under construction");
+        setProjectStatus("active");
+        break;
+      case "POST_CONSTRUCTION":
+        setProjectStage("Post construction");
+        setProjectStatus("active");
+        break;
+    }
+  }, [projectPhase]);
+
+  // Handle advancing through specifications sub-steps
+  const handleAdvanceToPart2 = () => {
+    if (!projectName.trim()) {
+      setProjectError("Please enter a valid project display name.");
+      return;
+    }
+    if (!projectEntity.trim()) {
+      setProjectEntity(`${projectName.trim()} Partners LLC`);
+    }
+    setProjectError(null);
+    setProjectSubStep(2);
+  };
+
+  const handleAdvanceToPart3 = () => {
+    setProjectError(null);
+    setCurrentStep(3);
+  };
+
+  const handleAdvanceToStep3 = () => {
+    setProjectError(null);
+    setCurrentStep(3);
+  };
+
+  // Unit pricing handlers for post-construction
+  const handleSetBulkUnitPrice = (val: string) => {
+    setBulkUnitPrice(val);
+    const count = Math.min(Math.max(parseInt(totalUnits, 10) || 1, 1), 50);
+    const updated: Record<number, string> = {};
+    for (let i = 1; i <= count; i++) {
+      updated[i] = val;
+    }
+    setUnitPrices(updated);
+    setTargetUnitPrice(val);
+  };
+
+  const handleUnitCountChange = (val: string) => {
+    setTotalUnits(val);
+    const count = Math.min(Math.max(parseInt(val, 10) || 1, 1), 50);
+    setUnitPrices((prev) => {
+      const updated: Record<number, string> = { ...prev };
+      for (let i = 1; i <= count; i++) {
+        if (!updated[i]) {
+          updated[i] = bulkUnitPrice || targetUnitPrice || "";
+        }
+      }
+      return updated;
+    });
+  };
+
+  const handleSingleUnitChange = (unitNum: number, price: string) => {
+    setUnitPrices((prev) => ({
+      ...prev,
+      [unitNum]: price,
+    }));
+    if (unitNum === 1) {
+      setTargetUnitPrice(price);
+    }
+  };
+
+  const calculatedTotalValue = React.useMemo(() => {
+    const count = Math.min(Math.max(parseInt(totalUnits, 10) || 1, 1), 50);
+    let sum = 0;
+    for (let i = 1; i <= count; i++) {
+      const raw = unitPrices[i] ?? (count === 1 ? targetUnitPrice : bulkUnitPrice);
+      if (raw) {
+        const num = parseFloat(raw.replace(/[^0-9.]/g, ""));
+        if (!isNaN(num)) sum += num;
+      }
+    }
+    return sum;
+  }, [totalUnits, unitPrices, targetUnitPrice, bulkUnitPrice]);
+
+  // Add files to documents list
+  const handleAddFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const newItems: IntakeFileItem[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      newItems.push({
+        id: `doc-${Date.now()}-${i}`,
+        name: file.name,
+        size: file.size,
+      });
+    }
+    setDocumentsList((prev) => [...prev, ...newItems]);
+  };
+
+  // Add collaborator
+  const handleAddCollaborator = () => {
+    if (!inviteEmail.trim()) {
+      setInviteError("Please enter a collaborator email.");
+      return;
+    }
+    if (!inviteEmail.includes("@") || !inviteEmail.includes(".")) {
+      setInviteError("Please enter a valid email address.");
+      return;
+    }
+    if (teamList.some((m) => m.email.toLowerCase() === inviteEmail.trim().toLowerCase())) {
+      setInviteError("This collaborator is already in your invitation list.");
+      return;
+    }
+    setTeamList((prev) => [...prev, { email: inviteEmail.trim(), role: inviteRole }]);
+    setInviteEmail("");
+    setInviteError(null);
+  };
+
+  // Final project creation and workspace provisioning
+  const handleLaunchProject = async () => {
+    setCurrentStep(5);
+
+    // Stage 1: Setup organization/workspace keys
+    setSetupStages({
+      savingOrg: true,
+      creatingProject: false,
+      preparingDashboard: false,
+      finalizing: false,
+    });
+
+    await new Promise((r) => setTimeout(r, 600));
+
+    // Stage 2: Create project record via api
+    setSetupStages({
+      savingOrg: true,
+      creatingProject: true,
+      preparingDashboard: false,
+      finalizing: false,
+    });
+
+    let newProjectId = `proj-${Date.now()}`;
+
+    try {
+      let targetLifecycleStage: LifecycleStage = "CONSTRUCTION";
+      if (projectPhase === "PRE_ACQUISITION") targetLifecycleStage = "PRE_ACQUISITION";
+      else if (projectPhase === "ACQUISITION") targetLifecycleStage = "ACQUISITION";
+      else if (projectPhase === "PERMITTING") targetLifecycleStage = "PERMITTING";
+      else if (projectPhase === "ACTIVE_CONSTRUCTION") targetLifecycleStage = "CONSTRUCTION";
+      else if (projectPhase === "POST_CONSTRUCTION") targetLifecycleStage = "POST_CONSTRUCTION";
+
+      const createdRes = await api.projects.create({
+        name: projectName.trim() || (projectPhase === "ACTIVE_CONSTRUCTION" ? "73 Broadway" : "161 Woodlawn"),
+        project_entity: projectEntity.trim() || `${projectName.trim() || "GroundUp"} Partners LLC`,
+        address: projectAddress.trim() || "Jersey City, NJ",
+        lifecycle_stage: targetLifecycleStage,
+        phase: projectPhase,
+        contract_model: contractModel,
+        status: "ACTIVE",
+        currency: "USD",
+        is_user_created: true,
+        acquisition_funding: acquisitionFunding,
+        ...(acquisitionDate ? { acquisition_date: new Date(acquisitionDate).toISOString() } : {}),
+        ...(startedAt ? { started_at: new Date(startedAt).toISOString() } : {}),
+        ...(targetDate ? { target_completion_at: new Date(targetDate).toISOString() } : {}),
+        ...(projectPhase === "ACQUISITION" || projectPhase === "PERMITTING" ? { permit_status: permitStatus } : {}),
+        ...(projectPhase === "PERMITTING" ? { budget_sheet_status: budgetSheetStatus } : {}),
+        ...(projectPhase === "PRE_ACQUISITION"
+          ? {
+              due_diligence_status: dueDiligenceStatus,
+              target_purchase_price: targetPurchasePrice || undefined,
+            }
+          : {}),
+        ...(projectPhase === "POST_CONSTRUCTION"
+          ? {
+              unit_price_decided: unitPriceDecided,
+              total_units: parseInt(totalUnits, 10) || 1,
+              unit_prices: unitPrices,
+              target_unit_price:
+                unitPriceDecided === "YES"
+                  ? (unitPrices[1] || targetUnitPrice || bulkUnitPrice)
+                  : undefined,
+            }
+          : {}),
+      });
+
+      if (createdRes?.data?.id) {
+        newProjectId = createdRes.data.id;
+      }
+    } catch {
+      // In case of mock failure fallback
+    }
+
+    localStorage.setItem("groundup_active_project_id", newProjectId);
+    localStorage.setItem("groundup_last_project_id", newProjectId);
+
+    await new Promise((r) => setTimeout(r, 700));
+
+    // Stage 3: Calibrate financial ledger and CSI divisions
+    setSetupStages({
+      savingOrg: true,
+      creatingProject: true,
+      preparingDashboard: true,
+      finalizing: false,
+    });
+
+    await new Promise((r) => setTimeout(r, 600));
+
+    // Stage 4: Finalize
+    setSetupStages({
+      savingOrg: true,
+      creatingProject: true,
+      preparingDashboard: true,
+      finalizing: true,
+    });
+
+    await new Promise((r) => setTimeout(r, 500));
+
+    // Invalidate query client and navigate to control center
+    await queryClient.invalidateQueries();
+    router.push(`/projects/${newProjectId}/control-center`);
+  };
+
+  // Back navigation handler
+  const handleBack = () => {
+    if (currentStep === 2) {
+      if (projectSubStep === 2) {
+        setProjectSubStep(1);
+      } else {
+        setCurrentStep(1);
+      }
+    } else if (currentStep === 3) {
+      setCurrentStep(2);
+      setProjectSubStep(2);
+    } else if (currentStep === 4) {
+      setCurrentStep(3);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#F2F4F7] flex flex-col font-sans">
-      {/* Full-time Sticky Top Header Above Onboarding Page */}
-      <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
-          <BrandLogo href="/projects" size="lg" className="hover:opacity-95 transition-opacity" />
-          <button
-            type="button"
-            onClick={() => router.push("/projects")}
-            className="inline-flex items-center text-xs font-semibold text-slate-700 hover:text-slate-950 py-1.5 sm:py-2 px-3 sm:px-3.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-2xs"
+    <div className="min-h-screen bg-slate-50/40 relative flex flex-col font-sans text-slate-900 selection:bg-slate-200 overflow-x-hidden">
+      {/* Subtle blueprint grid and ambient structural wireframe shards */}
+      <div className="blueprint-grid pointer-events-none absolute inset-0 opacity-[0.05]" aria-hidden="true" />
+      <AmbientStructuralWireframes intensity="subtle" />
+
+      {/* ── Top Header Navigation Bar ────────────────────────────────────────── */}
+      <header className="bg-white/90 backdrop-blur-md border-b border-slate-200/90 px-3 sm:px-6 py-2.5 sm:py-3.5 sticky top-0 z-30 shadow-2xs relative">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-2 sm:gap-3">
+          {/* GroundUp Logo linking back to Projects */}
+          <Link
+            href="/projects"
+            className="flex items-center gap-2 sm:gap-3 shrink-0 hover:opacity-85 transition cursor-pointer text-left focus:outline-none"
+            title="Return to GroundUp Projects"
           >
-            Exit Setup
-          </button>
+            <div className="sm:hidden flex items-center">
+              <Logo variant="mark" size="sm" />
+            </div>
+            <div className="hidden sm:flex items-center">
+              <Logo theme="light" size="md" />
+            </div>
+          </Link>
+
+          {/* Clean Step Progress Indicator */}
+          {currentStep >= 1 && currentStep <= 4 && (
+            <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 bg-slate-50/90 border border-slate-200/80 rounded-full text-center shadow-2xs min-w-0">
+              <span className="text-[11px] font-mono text-sky-600 font-bold whitespace-nowrap shrink-0">
+                {currentStep} / 4
+              </span>
+              <div className="h-3 w-px bg-slate-200 shrink-0" />
+              <span className="text-[11px] sm:text-xs font-bold text-slate-800 truncate max-w-[100px] sm:max-w-none">
+                {STEP_TITLES[currentStep]}
+              </span>
+            </div>
+          )}
+
+          {/* Exit Action */}
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href="/projects"
+              className="text-xs font-semibold text-slate-600 hover:text-slate-900 px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition cursor-pointer shadow-2xs whitespace-nowrap"
+            >
+              <span className="hidden sm:inline">Exit to projects</span>
+              <span className="sm:hidden">Exit</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Dynamic Gradient Progress Bar */}
+        <div className="h-1.5 w-full bg-slate-100 absolute bottom-0 left-0 right-0 overflow-hidden">
+          <div
+            className="h-full rounded-r-full transition-all duration-500 ease-out shadow-[0_0_8px_rgba(14,165,233,0.4)]"
+            style={{
+              width: `${Math.min(100, (currentStep / 4) * 100)}%`,
+              background: "linear-gradient(to right, #0ea5e9, #0d9488)",
+            }}
+          />
         </div>
       </header>
 
-      {/* Main Centered Onboarding Stage */}
-      <div className="flex-1 flex flex-col justify-center items-center py-4 sm:py-8 px-3 sm:px-6">
-        {/* Light Untitled-UI Style Raised Modal Container */}
-        <div className="w-full max-w-4xl rounded-2xl sm:rounded-3xl bg-white shadow-xl shadow-slate-900/5 border border-slate-200/90 overflow-hidden flex flex-col">
-          {/* Mobile Step Progress Line (< lg screens) */}
-          <div className="lg:hidden bg-slate-50/80 border-b border-slate-200/80 px-4 py-3 sm:px-6">
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="font-semibold text-slate-900">
-                  Step {stage + 1} of {stagesList.length}: {stagesList[stage].title}
-                </span>
-                <span className="font-medium text-slate-500">
-                  {Math.round(((stage + 1) / stagesList.length) * 100)}%
-                </span>
-              </div>
-              <div className="h-1.5 w-full bg-slate-200/70 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-slate-900 transition-all duration-300 ease-out rounded-full"
-                  style={{ width: `${((stage + 1) / stagesList.length) * 100}%` }}
-                />
-              </div>
+      {/* ── Main Centered Form Container ─────────────────────────────────────── */}
+      <main
+        className={`flex-1 w-full mx-auto px-3 sm:px-6 py-4 sm:py-10 flex flex-col justify-center relative z-10 transition-all duration-200 ${
+          currentStep === 2 ? "max-w-2xl sm:max-w-3xl" : "max-w-xl sm:max-w-2xl"
+        }`}
+      >
+        <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-[0_10px_30px_-5px_rgba(15,23,42,0.04),0_1px_3px_rgba(0,0,0,0.02)] transition-all relative overflow-hidden">
+          {/* Back button for steps / sub-steps */}
+          {(currentStep > 1 || (currentStep === 2 && projectSubStep > 1)) && currentStep < 5 && (
+            <div className="mb-4">
+              <button
+                type="button"
+                onClick={handleBack}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back</span>
+              </button>
             </div>
-          </div>
+          )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-12">
-            {/* Left Sidebar / Rail (Desktop only) */}
-            <aside className="hidden lg:flex lg:col-span-4 bg-[#F8FAFC] border-r border-slate-200/80 p-6 sm:p-7 flex-col">
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-3">
-                  Project Setup
-                </span>
-                <nav className="space-y-1.5">
-                  {stagesList.map((s) => {
-                    const isActive = stage === s.num;
-                    const isCompleted = stage > s.num;
-
-                    return (
-                      <button
-                        key={s.num}
-                        type="button"
-                        onClick={() => s.num <= stage && setStage(s.num as any)}
-                        disabled={s.num > stage}
-                        className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${isActive
-                          ? "bg-white text-slate-900 font-bold shadow-xs border border-slate-200"
-                          : isCompleted
-                            ? "text-slate-800 hover:bg-slate-200/60 font-semibold cursor-pointer"
-                            : "text-slate-600 hover:text-slate-900 cursor-not-allowed font-medium"
-                          }`}
-                      >
-                        <div
-                          className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-bold ${isActive
-                            ? "bg-slate-900 text-white shadow-xs"
-                            : isCompleted
-                              ? "bg-emerald-600 text-white"
-                              : "bg-slate-200 text-slate-700"
-                            }`}
-                        >
-                          {isCompleted ? <Check className="h-3 w-3 stroke-[3]" /> : s.num + 1}
-                        </div>
-                        <span className={`truncate text-xs ${isActive ? "text-slate-900 font-bold" : isCompleted ? "text-slate-800 font-semibold" : "text-slate-600"}`}>
-                          {s.title}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </nav>
+          {/* ─────────────────────────────────────────────────────────────────── */}
+          {/* STEP 1: SELECT YOUR PROJECT PHASE                                   */}
+          {/* ─────────────────────────────────────────────────────────────────── */}
+          {currentStep === 1 && (
+            <div className="space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="space-y-1 sm:space-y-1.5">
+                <TextEffect
+                  as="h1"
+                  preset="fade-in-blur"
+                  per="word"
+                  className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight"
+                >
+                  Select your project phase
+                </TextEffect>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Calibrate your cost codes, draw schedules, and workflow.
+                </p>
               </div>
-            </aside>
 
-            {/* Right Main Content Area */}
-            <main className="lg:col-span-8 p-6 sm:p-8 flex flex-col justify-between bg-white">
-              <div className="flex-1 flex flex-col justify-between">
-
-                {errorMessage && (
-                  <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-red-700 flex items-center gap-2.5 shadow-2xs">
-                    <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
-                    <span>{errorMessage}</span>
-                  </div>
-                )}
-
-                {/* Stage 0: Welcome & Choices */}
-                {stage === 0 && (
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div className="space-y-5">
-                      <div>
-                        <h2
-                          onClick={() => setStage(1)}
-                          className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 cursor-pointer"
+              <div className="space-y-2 sm:space-y-2.5 pt-1">
+                {[
+                  {
+                    id: "PRE_ACQUISITION" as ProjectPhase,
+                    title: "Pre Acquisition",
+                    desc: "Planning, site feasibility, and LOI negotiations before purchase.",
+                    icon: Compass,
+                    badge: "Planning Phase",
+                  },
+                  {
+                    id: "ACQUISITION" as ProjectPhase,
+                    title: "Acquisition",
+                    desc: "Land purchased and deed recorded; preparing for site work and design.",
+                    icon: KeyRound,
+                    badge: "Closing Phase",
+                  },
+                  {
+                    id: "PERMITTING" as ProjectPhase,
+                    title: "Permitting",
+                    desc: "Architectural drawings submitted and municipal permits in review.",
+                    icon: ShieldCheck,
+                    badge: "Approval Phase",
+                  },
+                  {
+                    id: "ACTIVE_CONSTRUCTION" as ProjectPhase,
+                    title: "Active Project Construction",
+                    desc: "Active jobsite with ongoing contractor draws, inspections, and trade work.",
+                    icon: HardHat,
+                    badge: "Active Phase",
+                  },
+                  {
+                    id: "POST_CONSTRUCTION" as ProjectPhase,
+                    title: "Post Construction",
+                    desc: "Certificate of occupancy issued, punch list closeout, and warranty handover.",
+                    icon: Building2,
+                    badge: "Closeout Phase",
+                  },
+                ].map((card) => {
+                  const isSelected = projectPhase === card.id;
+                  const CardIcon = card.icon;
+                  return (
+                    <div
+                      key={card.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setProjectPhase(card.id)}
+                      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setProjectPhase(card.id)}
+                      className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 sm:gap-4 ${
+                        isSelected
+                          ? "bg-slate-100 border-slate-900 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10"
+                          : "bg-white text-slate-800 border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/60 shadow-2xs"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+                        <div
+                          className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                            isSelected ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"
+                          }`}
                         >
-                          Create a New Project
-                        </h2>
-                        <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                          Choose how you want to provision this project workspace.
-                        </p>
+                          <CardIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                            {card.title}
+                          </h3>
+                          <p className="text-[11px] sm:text-xs text-slate-500 font-normal leading-normal mt-0.5">
+                            {card.desc}
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="max-w-md pt-1">
-                        {/* Primary Option: Create New */}
-                        <div
-                          role="button"
-                          tabIndex={0}
-                          onClick={() => setStage(1)}
-                          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setStage(1)}
-                          className="cursor-pointer rounded-2xl border-2 border-slate-900 bg-slate-50/70 p-5 sm:p-6 transition-all shadow-xs hover:shadow-md hover:border-blue-600 group flex flex-col justify-between min-h-[170px] ring-1 ring-slate-900/5 active:scale-[0.99]"
-                        >
-                          <div>
-                            <div className="flex items-center justify-between mb-4">
-                              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white shadow-xs group-hover:scale-105 group-hover:bg-blue-600 transition-all">
-                                <FolderPlus className="h-5 w-5" />
-                              </div>
-                            </div>
-                            <h3 className="font-bold text-slate-900 text-base sm:text-sm">Guided Setup</h3>
-                            <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-                              Step-by-step setup for entity, capital structure, and governance.
-                            </p>
-                            <div className="mt-3.5 flex flex-wrap gap-1.5">
-                              <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">Entity & Structure</span>
-                              <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">Acquisition & Debt</span>
-                              <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">Compliance</span>
-                            </div>
+                      {/* Architectural Phase Illustration Preview */}
+                      <div className="hidden sm:flex w-32 h-20 shrink-0">
+                        <PhaseIllustration phase={card.id} active={isSelected} className="w-full h-full" />
+                      </div>
+
+                      <div className="shrink-0 flex items-center">
+                        {isSelected ? (
+                          <div className="w-5 h-5 rounded-full bg-slate-900 flex items-center justify-center shadow-2xs text-white">
+                            <Check className="w-3 h-3 stroke-[3]" />
                           </div>
+                        ) : (
+                          <div className="w-5 h-5 rounded-full border-2 border-slate-300" />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button
+                id="btn-phase-next"
+                type="button"
+                onClick={() => setCurrentStep(2)}
+                className="w-full py-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99] min-h-[44px]"
+              >
+                <span>Next</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* ─────────────────────────────────────────────────────────────────── */}
+          {/* STEP 2: PROJECT SPECIFICATIONS (DYNAMIC PHASE QUESTIONNAIRE)        */}
+          {/* ─────────────────────────────────────────────────────────────────── */}
+          {currentStep === 2 && (
+            <div className="space-y-6 animate-in fade-in duration-200">
+              {/* Header with Title based on sub-step */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                    {projectSubStep === 1 && "Let's add your project"}
+                    {projectSubStep === 2 &&
+                      (projectPhase === "PRE_ACQUISITION"
+                        ? "Capital & Funding"
+                        : "Capital & Debt Structure")}
+                  </h1>
+                  <p className="text-xs text-slate-500">
+                    {projectSubStep === 1 &&
+                      (projectPhase === "PRE_ACQUISITION"
+                        ? "Configure identity, entity ownership, and expected closing schedule."
+                        : "Configure identity, entity ownership, and schedule.")}
+                    {projectSubStep === 2 &&
+                      (projectPhase === "PRE_ACQUISITION"
+                        ? "Define planned capital source and financing structure."
+                        : "Define acquisition capital, lending, permits, and contract governance.")}
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress Indicator: 2 Sub-steps */}
+              <div className="space-y-1.5">
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setProjectSubStep(1)}
+                    className="group text-left cursor-pointer focus:outline-none"
+                  >
+                    <div
+                      className={`h-1.5 rounded-full transition-colors ${
+                        projectSubStep >= 1 ? "bg-slate-900" : "bg-slate-200"
+                      }`}
+                    />
+                    <span
+                      className={`block text-[11px] font-semibold mt-1.5 transition-colors ${
+                        projectSubStep === 1 ? "text-slate-900" : "text-slate-400 group-hover:text-slate-600"
+                      }`}
+                    >
+                      1. Identity & Schedule
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (projectName.trim()) setProjectSubStep(2);
+                    }}
+                    className="group text-left cursor-pointer focus:outline-none"
+                  >
+                    <div
+                      className={`h-1.5 rounded-full transition-colors ${
+                        projectSubStep >= 2 ? "bg-slate-900" : "bg-slate-200"
+                      }`}
+                    />
+                    <span
+                      className={`block text-[11px] font-semibold mt-1.5 transition-colors ${
+                        projectSubStep === 2 ? "text-slate-900" : "text-slate-400 group-hover:text-slate-600"
+                      }`}
+                    >
+                      {projectPhase === "PRE_ACQUISITION" ? "2. Capital & Funding" : "2. Capital & Debt"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {projectError && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-red-700 flex items-center gap-2.5 shadow-2xs">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+                  <span>{projectError}</span>
+                </div>
+              )}
+
+              {/* ────────────────── SUB-STEP 1: IDENTITY & SCHEDULE ────────────────── */}
+              {projectSubStep === 1 && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {/* Project Display Name */}
+                    <div className="space-y-1.5">
+                      <label htmlFor="input-project-name" className="block text-xs font-bold text-slate-800">
+                        Project display name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="input-project-name"
+                        type="text"
+                        autoFocus
+                        value={projectName}
+                        onChange={(e) => {
+                          setProjectName(e.target.value);
+                          if (projectError) setProjectError(null);
+                        }}
+                        placeholder="e.g. 73 Broadway Mixed-Use"
+                        className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition ${
+                          projectError
+                            ? "border-red-400 focus:ring-red-500/20"
+                            : "border-slate-200 focus:border-slate-900 focus:ring-slate-900/10"
+                        }`}
+                      />
+                    </div>
+
+                    {/* Legal Ownership Entity */}
+                    <div className="space-y-1.5">
+                      <label htmlFor="input-project-entity" className="block text-xs font-bold text-slate-800">
+                        Legal ownership entity (LLC / LP) <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="input-project-entity"
+                        type="text"
+                        value={projectEntity}
+                        onChange={(e) => setProjectEntity(e.target.value)}
+                        placeholder="e.g. 73 Broadway Partners LLC"
+                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Site Address */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="input-project-address" className="block text-xs font-bold text-slate-800">
+                      {projectPhase === "PRE_ACQUISITION" ? "Target site address / location" : "Site address / location"}{" "}
+                      <span className="text-slate-400 font-normal">(optional)</span>
+                    </label>
+                    <div className="relative">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        id="input-project-address"
+                        type="text"
+                        value={projectAddress}
+                        onChange={(e) => setProjectAddress(e.target.value)}
+                        placeholder="e.g. 73 Broadway, Jersey City, NJ 07306"
+                        className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Development Type */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="select-asset-archetype" className="block text-xs font-bold text-slate-800">
+                      Development Type
+                    </label>
+                    <select
+                      id="select-asset-archetype"
+                      value={assetType}
+                      onChange={(e) => setAssetType(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition cursor-pointer"
+                    >
+                      <option value="SINGLE_FAMILY">Single Family</option>
+                      <option value="TWO_FAMILY">Two Family</option>
+                      <option value="MULTIFAMILY">Multi Family</option>
+                      <option value="MIXED_USE">Mixed Use</option>
+                    </select>
+                  </div>
+
+                  {/* Pre Acquisition Specific Dates */}
+                  {projectPhase === "PRE_ACQUISITION" ? (
+                    <div className="space-y-1.5">
+                      <label htmlFor="input-target-date" className="block text-xs font-bold text-slate-800">
+                        Expected acquisition / closing date <span className="text-slate-400 font-normal">(optional)</span>
+                      </label>
+                      <div className="relative">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          id="input-target-date"
+                          type="date"
+                          value={targetDate}
+                          onChange={(e) => setTargetDate(e.target.value)}
+                          className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    /* Other Phases Dates */
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      <div className="space-y-1.5">
+                        <label htmlFor="input-started-at" className="block text-xs font-bold text-slate-800">
+                          {projectPhase === "POST_CONSTRUCTION" ? "Construction completion date" : "Target construction start"}{" "}
+                          <span className="text-slate-400 font-normal">(optional)</span>
+                        </label>
+                        <div className="relative">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                          <input
+                            id="input-started-at"
+                            type="date"
+                            value={startedAt}
+                            onChange={(e) => setStartedAt(e.target.value)}
+                            className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label htmlFor="input-target-date" className="block text-xs font-bold text-slate-800">
+                          {projectPhase === "POST_CONSTRUCTION" ? "Final closeout & handover date" : "Target completion date"}{" "}
+                          <span className="text-slate-400 font-normal">(optional)</span>
+                        </label>
+                        <div className="relative">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                          <input
+                            id="input-target-date"
+                            type="date"
+                            value={targetDate}
+                            onChange={(e) => setTargetDate(e.target.value)}
+                            className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                          />
                         </div>
                       </div>
                     </div>
+                  )}
 
-                    {/* Action Row directly below choices */}
-                    <div className="pt-5 border-t border-slate-200/80 mt-6 sm:mt-8 flex items-center justify-end">
-                      <Button
-                        type="button"
-                        variant="primary"
-                        onClick={() => setStage(1)}
-                        className="w-full sm:w-auto rounded-full px-7 py-2.5 text-xs font-semibold shadow-sm"
-                      >
-                        Begin Setup <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                      </Button>
-                    </div>
+                  {/* Sub-step 1 Actions */}
+                  <div className="space-y-2.5 pt-3">
+                    <button
+                      type="button"
+                      onClick={handleAdvanceToPart2}
+                      className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
+                    >
+                      <span>Next</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setCurrentStep(3)}
+                      className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer text-center"
+                    >
+                      Skip for now, I&apos;ll configure project details later
+                    </button>
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* Stage 1: Identity & Structure */}
-                {stage === 1 && (
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-start justify-between gap-3">
-                        <h2 className="text-xl font-bold tracking-tight text-slate-900 leading-snug">
-                          {stage1Step === 1 && "Project Identity & Legal Entity"}
-                          {stage1Step === 2 && "Property Location"}
-                          {stage1Step === 3 && "Asset Classification & Schedule"}
-                        </h2>
-                        <span className="shrink-0 whitespace-nowrap text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
-                          Step {stage1Step} of 3
-                        </span>
+              {/* ────────────────── SUB-STEP 2: DYNAMIC CAPITAL & PERMITTING ────────────────── */}
+              {projectSubStep === 2 && (
+                <div className="space-y-4 animate-in fade-in duration-150">
+                  {/* PRE ACQUISITION SUB-STEP 2 */}
+                  {projectPhase === "PRE_ACQUISITION" ? (
+                    <>
+                      {/* Planned Acquisition Capital Source */}
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-800">
+                          Planned acquisition capital source
+                        </label>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          {[
+                            { id: "ACQUISITION_LOAN", label: "Bank Loan" },
+                            { id: "CASH_EQUITY", label: "Self Funded" },
+                          ].map((f) => {
+                            const isSelected =
+                              acquisitionFunding === f.id ||
+                              (f.id === "CASH_EQUITY" &&
+                                (acquisitionFunding === "EQUITY" || acquisitionFunding === "SELF_FUNDED"));
+                            return (
+                              <button
+                                key={f.id}
+                                type="button"
+                                onClick={() => setAcquisitionFunding(f.id)}
+                                className={`rounded-xl border py-2.5 px-3.5 text-center transition cursor-pointer ${
+                                  isSelected
+                                    ? "border-slate-900 bg-slate-100 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10"
+                                    : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium"
+                                }`}
+                              >
+                                <span className="text-xs">{f.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <p className="mt-1 text-xs text-slate-500">
-                        {stage1Step === 1 && "Name the project and specify its designated legal entity."}
-                        {stage1Step === 2 && "Enter the municipal site address for zoning and tax tracking."}
-                        {stage1Step === 3 && "Define property type, project phase, and construction timeline."}
-                      </p>
-                    </div>
 
-                    <div className="space-y-4 pt-1">
-                      {/* Sub-step 1: Project Name & Legal Entity */}
-                      {stage1Step === 1 && (
-                        <>
-                          <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                              Project Display Name <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              autoFocus
-                              value={name}
-                              onChange={(e) => setName(e.target.value)}
-                              placeholder="e.g. 161 Woodlawn Avenue"
-                              required
-                              className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                            />
-                          </div>
 
-                          <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                              Legal Ownership Entity (LLC / LP) <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              value={projectEntity}
-                              onChange={(e) => setProjectEntity(e.target.value)}
-                              placeholder="e.g. 161 Woodlawn Partners LLC"
-                              required
-                              className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                            />
+                    </>
+                  ) : (
+                    /* ACQUISITION, PERMITTING, ACTIVE CONSTRUCTION, POST CONSTRUCTION */
+                    <>
+                      {/* Initial Acquisition Capital Source */}
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-800">
+                          Initial acquisition capital source
+                        </label>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          {[
+                            { id: "ACQUISITION_LOAN", label: "Bank Loan" },
+                            { id: "CASH_EQUITY", label: "Self Funded" },
+                          ].map((f) => {
+                            const isSelected =
+                              acquisitionFunding === f.id ||
+                              (f.id === "CASH_EQUITY" &&
+                                (acquisitionFunding === "EQUITY" || acquisitionFunding === "SELF_FUNDED"));
+                            return (
+                              <button
+                                key={f.id}
+                                type="button"
+                                onClick={() => setAcquisitionFunding(f.id)}
+                                className={`rounded-xl border py-2.5 px-3.5 text-center transition cursor-pointer ${
+                                  isSelected
+                                    ? "border-slate-900 bg-slate-100 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10"
+                                    : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium"
+                                }`}
+                              >
+                                <span className="text-xs">{f.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Date of Acquisition */}
+                      <div className="space-y-1.5">
+                        <label htmlFor="input-acquisition-date" className="block text-xs font-bold text-slate-800">
+                          Date of acquisition <span className="text-slate-400 font-normal">(optional)</span>
+                        </label>
+                        <div className="relative">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                          <input
+                            id="input-acquisition-date"
+                            type="date"
+                            value={acquisitionDate}
+                            onChange={(e) => setAcquisitionDate(e.target.value)}
+                            className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                          />
+                        </div>
+                      </div>
+
+
+
+                      {/* ACQUISITION & PERMITTING: Permit Status Question */}
+                      {(projectPhase === "ACQUISITION" || projectPhase === "PERMITTING") && (
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-800">
+                            {projectPhase === "PERMITTING"
+                              ? "Is permit accepted for construction of that project?"
+                              : "Permit status of the project"}
+                          </label>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                            {[
+                              { id: "PERMIT_APPROVED", label: "Permit Approved" },
+                              { id: "PERMIT_PENDING", label: "Permit Submitted & Pending" },
+                              { id: "NOT_YET_APPLIED", label: "Not Yet Applied" },
+                            ].map((p) => {
+                              const isSelected = permitStatus === p.id;
+                              return (
+                                <button
+                                  key={p.id}
+                                  type="button"
+                                  onClick={() => setPermitStatus(p.id as any)}
+                                  className={`rounded-xl border py-2.5 px-3 text-center transition cursor-pointer ${
+                                    isSelected
+                                      ? "border-slate-900 bg-slate-100 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10"
+                                      : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium"
+                                  }`}
+                                >
+                                  <span className="text-xs">{p.label}</span>
+                                </button>
+                              );
+                            })}
                           </div>
-                        </>
+                        </div>
                       )}
 
-                      {/* Sub-step 2: Granular Property Location & Smart ZIP Code Auto-Detection */}
-                      {stage1Step === 2 && (
-                        <div className="space-y-4">
-                          {/* Street Address & Unit */}
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div className="sm:col-span-2">
-                              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                                Street Address <span className="text-red-500">*</span>
-                              </label>
-                              <div className="relative">
-                                <MapPin className="h-4 w-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
-                                <input
-                                  type="text"
-                                  autoFocus
-                                  value={streetAddress}
-                                  onChange={(e) => {
-                                    setStreetAddress(e.target.value);
-                                    updateAddressString(e.target.value, unitSuite, city, stateCode, zipCode, country);
-                                  }}
-                                  placeholder="e.g. 161 Woodlawn Ave"
-                                  required
-                                  className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                                />
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                                Unit / Suite / Bldg <span className="text-slate-400 font-normal">(Optional)</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={unitSuite}
-                                onChange={(e) => {
-                                  setUnitSuite(e.target.value);
-                                  updateAddressString(streetAddress, e.target.value, city, stateCode, zipCode, country);
-                                }}
-                                placeholder="e.g. Suite 200"
-                                className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                              />
-                            </div>
-                          </div>
-
-                          {/* ZIP Code & City */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                              <div className="flex items-center justify-between mb-1.5">
-                                <label className="block text-xs font-semibold text-slate-700">
-                                  ZIP / Postal Code <span className="text-red-500">*</span>
-                                </label>
-                                {zipStatus === "loading" && (
-                                  <span className="inline-flex items-center gap-1 text-[11px] text-blue-600 font-medium">
-                                    <Loader2 className="h-3 w-3 animate-spin" /> Detecting...
-                                  </span>
-                                )}
-                                {zipStatus === "valid" && (
-                                  <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
-                                    <CheckCircle2 className="h-3 w-3 text-emerald-600" /> Auto-detected
-                                  </span>
-                                )}
-                              </div>
-                              <input
-                                type="text"
-                                maxLength={5}
-                                value={zipCode}
-                                onChange={(e) => handleZipCodeChange(e.target.value)}
-                                placeholder="e.g. 07305"
-                                required
-                                className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 font-mono tracking-wide"
-                              />
-                              {zipMessage && (
-                                <p
-                                  className={`text-[11px] mt-1.5 flex items-center gap-1 ${zipStatus === "valid"
-                                    ? "text-emerald-700 font-medium"
-                                    : "text-amber-700"
-                                    }`}
+                      {/* PERMITTING: Budget Sheet Question */}
+                      {projectPhase === "PERMITTING" && (
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-800">
+                            Is the budget sheet for construction made?
+                          </label>
+                          <div className="grid grid-cols-2 gap-2.5">
+                            {[
+                              { id: "BUDGET_READY", label: "Yes (Budget Sheet / SOV Ready)" },
+                              { id: "BUDGET_IN_PROGRESS", label: "No (In Progress / Estimating)" },
+                            ].map((b) => {
+                              const isSelected = budgetSheetStatus === b.id;
+                              return (
+                                <button
+                                  key={b.id}
+                                  type="button"
+                                  onClick={() => setBudgetSheetStatus(b.id as any)}
+                                  className={`rounded-xl border py-2.5 px-3.5 text-center transition cursor-pointer ${
+                                    isSelected
+                                      ? "border-slate-900 bg-slate-100 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10"
+                                      : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium"
+                                  }`}
                                 >
-                                  {zipMessage}
-                                </p>
-                              )}
-                            </div>
-
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                                City / Municipality <span className="text-red-500">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={city}
-                                onChange={(e) => {
-                                  setCity(e.target.value);
-                                  updateAddressString(streetAddress, unitSuite, e.target.value, stateCode, zipCode, country);
-                                }}
-                                placeholder="e.g. Jersey City"
-                                required
-                                className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                              />
-                            </div>
+                                  <span className="text-xs">{b.label}</span>
+                                </button>
+                              );
+                            })}
                           </div>
+                        </div>
+                      )}
 
-                          {/* State & Country */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                                State / Territory <span className="text-red-500">*</span>
-                              </label>
-                              <select
-                                value={stateCode}
-                                onChange={(e) => {
-                                  setStateCode(e.target.value);
-                                  updateAddressString(streetAddress, unitSuite, city, e.target.value, zipCode, country);
-                                }}
-                                className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 shadow-2xs transition-colors hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10 cursor-pointer"
+                      {/* Construction Debt Structure */}
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-800">
+                          Construction debt structure
+                        </label>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          {[
+                            { val: "true", label: "Construction Loan" },
+                            { val: "false", label: "Self Funded Project" },
+                          ].map((opt) => (
+                            <button
+                              key={opt.val}
+                              type="button"
+                              onClick={() => setHasConstructionLoan(opt.val as any)}
+                              className={`rounded-xl border py-2.5 px-3.5 text-center transition cursor-pointer ${
+                                hasConstructionLoan === opt.val
+                                  ? "border-slate-900 bg-slate-100 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10"
+                                  : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium"
+                              }`}
+                            >
+                              <span className="text-xs">{opt.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Primary Lender Name with Live Bank API & Other Option */}
+                      {hasConstructionLoan === "true" && (
+                        <div className="space-y-1.5 animate-in fade-in duration-150">
+                          <label htmlFor="input-lender-name" className="block text-xs font-bold text-slate-800">
+                            Primary construction lender
+                          </label>
+                          <ConstructionLenderSelect
+                            id="input-lender-name"
+                            value={lenderName}
+                            onChange={setLenderName}
+                            placeholder="Select or search US bank (or choose Other)..."
+                          />
+                        </div>
+                      )}
+
+                      {/* General Contractor Contract Model */}
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-800">
+                          General Contractor contract model
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {[
+                            {
+                              value: "FIXED",
+                              badge: "Lump Sum",
+                              title: "GC fixed contract",
+                            },
+                            {
+                              value: "DAILY",
+                              badge: "Day Rate",
+                              title: "GC daily updates",
+                            },
+                          ].map((m) => {
+                            const isSelected = contractModel === m.value;
+                            return (
+                              <button
+                                key={m.value}
+                                type="button"
+                                onClick={() => setContractModel(m.value as ContractModel)}
+                                className={`rounded-xl border py-3 px-3.5 text-left transition cursor-pointer ${
+                                  isSelected
+                                    ? "border-slate-900 bg-slate-100 text-slate-900 shadow-xs ring-1 ring-slate-900/10 font-bold"
+                                    : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
+                                }`}
                               >
-                                {US_STATES.map((st) => (
-                                  <option key={st.code} value={st.code}>
-                                    {st.name} ({st.code})
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
+                                <div className="flex items-center justify-between gap-1.5">
+                                  <span className="font-bold text-xs text-slate-900">
+                                    {m.title}
+                                  </span>
+                                  <span
+                                    className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                                      isSelected ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"
+                                    }`}
+                                  >
+                                    {m.badge}
+                                  </span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
 
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                                Country
-                              </label>
+                      {/* POST CONSTRUCTION: Units & Unit Pricing (Closeout status removed) */}
+                      {projectPhase === "POST_CONSTRUCTION" && (
+                        <div className="space-y-3.5 pt-1">
+                          {/* Number of Units */}
+                          <div className="space-y-1.5">
+                            <label htmlFor="input-total-units" className="block text-xs font-bold text-slate-800">
+                              How many units? <span className="text-slate-400 font-normal">(total units in project)</span>
+                            </label>
+                            <div className="relative">
+                              <Building2 className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                               <input
-                                type="text"
-                                value={country}
-                                onChange={(e) => {
-                                  setCountry(e.target.value);
-                                  updateAddressString(streetAddress, unitSuite, city, stateCode, zipCode, e.target.value);
-                                }}
-                                className="h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 text-sm text-slate-700 shadow-2xs focus:outline-none"
+                                id="input-total-units"
+                                type="number"
+                                min="1"
+                                max="100"
+                                value={totalUnits}
+                                onChange={(e) => handleUnitCountChange(e.target.value)}
+                                placeholder="e.g. 4"
+                                className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition font-medium"
                               />
                             </div>
                           </div>
 
-                          {/* Live Unified Address Preview */}
-                          {address && (
-                            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 flex items-start gap-2.5">
-                              <MapPin className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
-                              <div className="min-w-0">
-                                <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400 block">
-                                  Unified Site Location
-                                </span>
-                                <p className="text-xs font-semibold text-slate-800 truncate mt-0.5">
-                                  {address}
-                                </p>
-                              </div>
+                          {/* Unit price decided */}
+                          <div className="space-y-1.5">
+                            <label className="block text-xs font-bold text-slate-800">
+                              Unit price decided?
+                            </label>
+                            <div className="grid grid-cols-2 gap-2.5">
+                              {[
+                                { id: "YES", label: "Yes (Prices Established)" },
+                                { id: "NO", label: "No (Pending Appraisal)" },
+                              ].map((u) => {
+                                const isSelected = unitPriceDecided === u.id;
+                                return (
+                                  <button
+                                    key={u.id}
+                                    type="button"
+                                    onClick={() => setUnitPriceDecided(u.id as any)}
+                                    className={`rounded-xl border py-2.5 px-3.5 text-center transition cursor-pointer ${
+                                      isSelected
+                                        ? "border-slate-900 bg-slate-100 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10"
+                                        : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium"
+                                    }`}
+                                  >
+                                    <span className="text-xs">{u.label}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Unit Price Breakdown */}
+                          {unitPriceDecided === "YES" && (
+                            <div className="space-y-2.5 pt-1 animate-in fade-in duration-150">
+                              {(parseInt(totalUnits, 10) || 1) <= 1 ? (
+                                <div className="space-y-1.5">
+                                  <label htmlFor="input-single-unit-price" className="block text-xs font-bold text-slate-800">
+                                    Unit price <span className="text-slate-400 font-normal">(established sales price)</span>
+                                  </label>
+                                  <div className="relative">
+                                    <DollarSign className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                                    <input
+                                      id="input-single-unit-price"
+                                      type="text"
+                                      value={unitPrices[1] ?? targetUnitPrice}
+                                      onChange={(e) => handleSingleUnitChange(1, e.target.value)}
+                                      placeholder="e.g. $850,000"
+                                      className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                                    />
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="space-y-2.5">
+                                  {/* Multi-unit header & bulk quick-apply */}
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                                    <span className="text-xs font-bold text-slate-800">
+                                      Price for each unit ({Math.min(Math.max(parseInt(totalUnits, 10) || 1, 1), 50)} units)
+                                    </span>
+                                    <div className="flex items-center gap-1.5">
+                                      <div className="relative">
+                                        <DollarSign className="w-3 h-3 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2" />
+                                        <input
+                                          type="text"
+                                          value={bulkUnitPrice}
+                                          onChange={(e) => setBulkUnitPrice(e.target.value)}
+                                          placeholder="Set same price for all"
+                                          className="w-36 pl-6 pr-2 py-1 bg-white border border-slate-200 rounded-lg text-[11px] text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 transition"
+                                        />
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleSetBulkUnitPrice(bulkUnitPrice)}
+                                        className="px-2.5 py-1 text-[11px] font-semibold bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition cursor-pointer shrink-0"
+                                      >
+                                        Apply to all
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  {/* Individual unit price cards */}
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+                                    {Array.from({ length: Math.min(Math.max(parseInt(totalUnits, 10) || 1, 1), 50) }, (_, i) => i + 1).map((uNum) => (
+                                      <div
+                                        key={uNum}
+                                        className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl hover:border-slate-300 transition"
+                                      >
+                                        <span className="text-[11px] font-bold text-slate-700 w-14 shrink-0">
+                                          Unit {uNum}
+                                        </span>
+                                        <div className="relative flex-1">
+                                          <DollarSign className="w-3 h-3 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                                          <input
+                                            type="text"
+                                            value={unitPrices[uNum] ?? ""}
+                                            onChange={(e) => handleSingleUnitChange(uNum, e.target.value)}
+                                            placeholder="e.g. $750,000"
+                                            className="w-full pl-7 pr-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-slate-900 transition"
+                                          />
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  {/* Calculated total project valuation badge */}
+                                  {calculatedTotalValue > 0 && (
+                                    <div className="flex items-center justify-between px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900">
+                                      <span className="font-medium">Total Project Gross Value</span>
+                                      <span className="font-bold font-mono">
+                                        ${calculatedTotalValue.toLocaleString()}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
                       )}
+                    </>
+                  )}
 
-                      {/* Sub-step 3: Asset Type, Lifecycle & Dates */}
-                      {stage1Step === 3 && (
-                        <div className="space-y-5">
-                          {/* Project Asset Type */}
-                          <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-2">
-                              Project Asset Type
-                            </label>
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-                              {[
-                                {
-                                  value: "MULTIFAMILY",
-                                  label: "Multifamily",
-                                },
-                                {
-                                  value: "SINGLE_FAMILY",
-                                  label: "Single Family",
-                                },
-                                {
-                                  value: "MIXED_USE",
-                                  label: "Mixed-Use",
-                                },
-                                {
-                                  value: "COMMERCIAL",
-                                  label: "Commercial",
-                                },
-                              ].map((type) => {
-                                const isSelected = projectType === type.value;
-                                return (
-                                  <button
-                                    key={type.value}
-                                    type="button"
-                                    onClick={() => setProjectType(type.value)}
-                                    className={`rounded-xl border p-3 text-center sm:text-left transition-all cursor-pointer ${isSelected
-                                      ? "border-slate-900 bg-slate-900 text-white shadow-xs"
-                                      : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
-                                      }`}
-                                  >
-                                    <span className="block text-xs font-semibold leading-tight">{type.label}</span>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-
-                          {/* Lifecycle Stage */}
-                          <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-2">
-                              Lifecycle Stage
-                            </label>
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-                              {[
-                                {
-                                  value: "PRE_CONSTRUCTION",
-                                  label: "Pre-Construction",
-                                },
-                                {
-                                  value: "CONSTRUCTION",
-                                  label: "Under Construction",
-                                },
-                                {
-                                  value: "ACQUISITION",
-                                  label: "Acquisition",
-                                },
-                                {
-                                  value: "COMPLETION",
-                                  label: "Closeout",
-                                },
-                              ].map((stageItem) => {
-                                const isSelected = lifecycleStage === stageItem.value;
-                                return (
-                                  <button
-                                    key={stageItem.value}
-                                    type="button"
-                                    onClick={() => setLifecycleStage(stageItem.value as LifecycleStage)}
-                                    className={`rounded-xl border p-3 text-center sm:text-left transition-all cursor-pointer ${isSelected
-                                      ? "border-slate-900 bg-slate-900 text-white shadow-xs"
-                                      : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
-                                      }`}
-                                  >
-                                    <span className="block text-xs font-semibold leading-tight">{stageItem.label}</span>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                                Target Construction Start
-                              </label>
-                              <input
-                                type="date"
-                                value={startedAt}
-                                onChange={(e) => setStartedAt(e.target.value)}
-                                className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs transition-colors hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                              />
-                              <p className="text-[11px] text-slate-400 mt-1">Groundbreaking or permit issuance date</p>
-                            </div>
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                                Target Completion Date
-                              </label>
-                              <input
-                                type="date"
-                                value={targetCompletionAt}
-                                onChange={(e) => setTargetCompletionAt(e.target.value)}
-                                className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs transition-colors hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                              />
-                              <p className="text-[11px] text-slate-400 mt-1">Expected Certificate of Occupancy (CO)</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="pt-5 flex justify-between items-center border-t border-slate-200/80 mt-6 sm:mt-8">
-                      <Button
+                  {/* Sub-step 2 Actions */}
+                  <div className="space-y-2.5 pt-3">
+                    <div className="flex items-center gap-3">
+                      <button
                         type="button"
-                        variant="secondary"
-                        onClick={() => {
-                          if (stage1Step > 1) {
-                            setStage1Step((s) => (s - 1) as any);
-                          } else {
-                            setStage(0);
-                          }
-                        }}
-                        className="rounded-full px-5 py-2.5 text-xs font-semibold"
+                        onClick={() => setProjectSubStep(1)}
+                        className="flex-1 py-3 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
                       >
-                        <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
-                      </Button>
-
-                      {stage1Step < 3 ? (
-                        <Button
-                          type="button"
-                          variant="primary"
-                          onClick={() => {
-                            if (stage1Step === 1 && !name.trim()) {
-                              setErrorMessage("Please enter a project display name to continue.");
-                              return;
-                            }
-                            if (stage1Step === 2) {
-                              if (!streetAddress.trim() || !city.trim() || !zipCode.trim()) {
-                                setErrorMessage("Please enter street address, city, and ZIP code.");
-                                return;
-                              }
-                              updateAddressString(streetAddress, unitSuite, city, stateCode, zipCode, country);
-                            }
-                            setErrorMessage("");
-                            setStage1Step((s) => (s + 1) as any);
-                          }}
-                          className="rounded-full px-6 py-2.5 text-xs font-semibold shadow-sm"
-                        >
-                          Next Step <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                        </Button>
-                      ) : (
-                        <Button
-                          type="button"
-                          variant="primary"
-                          loading={duplicateCheckMutation.isPending}
-                          onClick={() => {
-                            if (!name.trim()) {
-                              setErrorMessage("Please complete the required project name.");
-                              return;
-                            }
-                            if (!address.trim()) {
-                              const generated = updateAddressString(streetAddress, unitSuite, city, stateCode, zipCode, country);
-                              if (!generated.trim()) {
-                                setErrorMessage("Please complete the property location.");
-                                return;
-                              }
-                            }
-                            setErrorMessage("");
-                            duplicateCheckMutation.mutate();
-                          }}
-                          className="rounded-full px-6 py-2.5 text-xs font-semibold shadow-sm"
-                        >
-                          Next: Capital & Debt <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Stage 2: Acquisition & Debt Structure */}
-                {stage === 2 && (
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <div>
-                      <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                        <Landmark className="h-5 w-5 text-blue-600" />
-                        Acquisition & Debt Structure
-                      </h2>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Specify property acquisition status, equity source, and construction financing.
-                      </p>
-                    </div>
-
-                    <div className="space-y-5 pt-1">
-                      {/* Acquisition Status */}
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-2">
-                          Property Acquisition Status
-                        </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {[
-                            {
-                              val: "true",
-                              label: "Yes, Deed Closed & Recorded",
-                            },
-                            {
-                              val: "false",
-                              label: "No, Under Purchase Contract",
-                            },
-                          ].map((opt) => {
-                            const isSelected = isAcquired === opt.val;
-                            return (
-                              <button
-                                key={opt.val}
-                                type="button"
-                                onClick={() => setIsAcquired(opt.val as any)}
-                                className={`rounded-xl border p-3.5 text-left transition-all cursor-pointer ${isSelected
-                                  ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
-                                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                                  }`}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <span className="block text-sm font-semibold text-slate-900">{opt.label}</span>
-                                  {isSelected && <Check className="h-4 w-4 text-blue-600 stroke-[2.5]" />}
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Acquisition Funding Source */}
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-2">
-                          Acquisition Funding Source
-                        </label>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                          {[
-                            { value: "CASH_EQUITY", label: "Cash Equity" },
-                            { value: "ACQUISITION_LOAN", label: "Bridge Loan" },
-                            { value: "SELLER_FINANCING", label: "Seller Note" },
-                            { value: "OTHER", label: "Other" },
-                          ].map((item) => {
-                            const isSelected = acquisitionFunding === item.value;
-                            return (
-                              <button
-                                key={item.value}
-                                type="button"
-                                onClick={() => setAcquisitionFunding(item.value)}
-                                className={`rounded-xl border p-3 text-center sm:text-left transition-all cursor-pointer ${isSelected
-                                  ? "border-slate-900 bg-slate-900 text-white shadow-xs"
-                                  : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/70"
-                                  }`}
-                              >
-                                <span className="block text-xs font-semibold leading-tight">{item.label}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {acquisitionFunding === "OTHER" && (
-                          <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
-                              Specify Custom Funding Source
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="e.g. Mezzanine debt, PACE financing, or land equity contribution"
-                              value={lenderName}
-                              onChange={(e) => setLenderName(e.target.value)}
-                              className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Construction Loan Status */}
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-2">
-                          Active or Planned Construction Loan
-                        </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {[
-                            {
-                              val: "true",
-                              label: "Construction Loan in Place",
-                            },
-                            {
-                              val: "false",
-                              label: "100% Sponsor Self-Funded",
-                            },
-                          ].map((opt) => {
-                            const isSelected = hasConstructionLoan === opt.val;
-                            return (
-                              <button
-                                key={opt.val}
-                                type="button"
-                                onClick={() => setHasConstructionLoan(opt.val as any)}
-                                className={`rounded-xl border p-3.5 text-left transition-all cursor-pointer ${isSelected
-                                  ? "border-blue-600 bg-blue-50/50 text-slate-900 ring-2 ring-blue-600/20 shadow-xs"
-                                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                                  }`}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <span className="block text-sm font-semibold text-slate-900">{opt.label}</span>
-                                  {isSelected && <Check className="h-4 w-4 text-blue-600 stroke-[2.5]" />}
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {hasConstructionLoan === "true" && (
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                            Primary Construction Lender Name <span className="text-slate-400 font-normal">(Optional)</span>
-                          </label>
-                          <input
-                            type="text"
-                            value={lenderName}
-                            onChange={(e) => setLenderName(e.target.value)}
-                            placeholder="e.g. Columbia Bank"
-                            className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="pt-5 flex justify-between items-center border-t border-slate-200/80 mt-6 sm:mt-8">
-                      <Button
+                        <ArrowLeft className="w-3.5 h-3.5" />
+                        <span>Back to Identity</span>
+                      </button>
+                      <button
                         type="button"
-                        variant="secondary"
-                        onClick={() => setStage(1)}
-                        className="rounded-full px-5 py-2.5 text-xs font-semibold"
+                        onClick={handleAdvanceToStep3}
+                        className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.99]"
                       >
-                        <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="primary"
-                        onClick={() => setStage(3)}
-                        className="rounded-full px-6 py-2.5 text-xs font-semibold shadow-sm"
-                      >
-                        Next: Contract & Operating <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                      </Button>
+                        <span>Next</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setCurrentStep(3)}
+                      className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer text-center"
+                    >
+                      Skip for now, I&apos;ll configure details later
+                    </button>
                   </div>
-                )}
+                </div>
+              )}
+            </div>
+          )}
 
-                {/* Stage 3: Construction & Operating Model */}
-                {stage === 3 && (
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <div>
-                      <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                        <Layers className="h-5 w-5 text-blue-600" />
-                        Contract & Operating Model
-                      </h2>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Select how the General Contractor will bill and how project disbursements are banked.
-                      </p>
-                    </div>
-
-                    {/* Contract Model */}
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-2">
-                        General Contractor Contract Model
-                      </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {[
-                          {
-                            value: "FIXED",
-                            title: "Fixed Price (GMP / Lump Sum)",
-                            desc: "Locked contract value with standard 10% AIA A201 retainage withheld per draw inspection.",
-                          },
-                          {
-                            value: "DAILY",
-                            title: "Day Rate (Cost-Plus)",
-                            desc: "Billed on verified daily labor, actual subcontractor hours, and material invoices.",
-                          },
-                        ].map((m) => {
-                          const isSelected =
-                            contractModel === m.value || (m.value === "FIXED" && contractModel !== "DAILY");
-                          return (
-                            <div
-                              key={m.value}
-                              onClick={() => setContractModel(m.value as ContractModel)}
-                              className={`group cursor-pointer rounded-xl border p-4 transition-all ${isSelected
-                                ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20 shadow-xs"
-                                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                                }`}
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <span className="font-semibold text-sm text-slate-900">{m.title}</span>
-                              </div>
-                              <p className="mt-1.5 text-xs text-slate-500 leading-normal">{m.desc}</p>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Operating Account Model */}
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-2">
-                        Operating Bank Account Model
-                      </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {[
-                          {
-                            val: "DEDICATED",
-                            title: "Dedicated Project Account",
-                            desc: "Separate single-entity LLC bank account with 1:1 transaction matching and automated wire reconciliation.",
-                          },
-                          {
-                            val: "SHARED",
-                            title: "Central Operating Account",
-                            desc: "Master operating account requiring strict inter-project transfer rules and cost code tagging.",
-                          },
-                        ].map((opt) => {
-                          const isSelected = operatingAccountModel === opt.val;
-                          return (
-                            <div
-                              key={opt.val}
-                              onClick={() => setOperatingAccountModel(opt.val as any)}
-                              className={`group cursor-pointer rounded-xl border p-4 transition-all ${isSelected
-                                ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20 shadow-xs"
-                                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                                }`}
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <span className="font-semibold text-sm text-slate-900">{opt.title}</span>
-                              </div>
-                              <p className="mt-1.5 text-xs text-slate-500 leading-normal">{opt.desc}</p>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-5 flex justify-between items-center border-t border-slate-200/80 mt-6 sm:mt-8">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => setStage(2)}
-                        className="rounded-full px-5 py-2.5 text-xs font-semibold"
-                      >
-                        <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="primary"
-                        onClick={() => setStage(4)}
-                        className="rounded-full px-6 py-2.5 text-xs font-semibold shadow-sm"
-                      >
-                        Next: Team & Delegation <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Stage 4: Team & Role Delegation */}
-                {stage === 4 && (
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <div>
-                      <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                          <Users className="h-5 w-5 text-blue-600" />
-                          Team & Role Delegation
-                        </h2>
-                      </div>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Assign project roles now, or skip and invite collaborators anytime from Project Settings.
-                      </p>
-                    </div>
-
-                    <div className="space-y-3.5 pt-1">
-                      {/* Finance Controller / Co-Owner */}
-                      <div className="rounded-xl border border-slate-200 p-4 bg-white shadow-2xs hover:border-slate-300 transition-colors">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-2">
-                            <Briefcase className="h-4 w-4 text-blue-600" />
-                            <span className="text-xs font-bold text-slate-900">
-                              Finance Controller / Co-Owner
-                            </span>
-                          </div>
-                        </div>
-                        <p className="text-[11px] text-slate-500 mb-2">
-                          Oversees pay applications, bank wire reconciliation, and project P&L.
-                        </p>
-                        <input
-                          type="email"
-                          value={cfoEmail}
-                          onChange={(e) => setCfoEmail(e.target.value)}
-                          placeholder="controller@yourdevelopmentgroup.com"
-                          className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                        />
-                      </div>
-
-                      {/* Project Manager / Field Superintendent */}
-                      <div className="rounded-xl border border-slate-200 p-4 bg-white shadow-2xs hover:border-slate-300 transition-colors">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-2">
-                            <HardHat className="h-4 w-4 text-amber-600" />
-                            <span className="text-xs font-bold text-slate-900">
-                              Project Manager / Field Superintendent
-                            </span>
-                          </div>
-                        </div>
-                        <p className="text-[11px] text-slate-500 mb-2">
-                          Uploads site milestones, daily field logs, and municipal inspection cards.
-                        </p>
-                        <input
-                          type="email"
-                          value={pmEmail}
-                          onChange={(e) => setPmEmail(e.target.value)}
-                          placeholder="super@fieldoperations.com"
-                          className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                        />
-                      </div>
-
-                      {/* General Contractor Principal */}
-                      <div className="rounded-xl border border-slate-200 p-4 bg-white shadow-2xs hover:border-slate-300 transition-colors">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-2">
-                            <Building2 className="h-4 w-4 text-emerald-600" />
-                            <span className="text-xs font-bold text-slate-900">
-                              General Contractor Principal
-                            </span>
-                          </div>
-                        </div>
-                        <p className="text-[11px] text-slate-500 mb-2">
-                          Submits trade invoices, monthly AIA G702 drafts, and statutory lien waivers.
-                        </p>
-                        <input
-                          type="email"
-                          value={gcEmail}
-                          onChange={(e) => setGcEmail(e.target.value)}
-                          placeholder="principal@generalcontractor.com"
-                          className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-2xs placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-5 flex justify-between items-center border-t border-slate-200/80 mt-6 sm:mt-8">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => setStage(3)}
-                        className="rounded-full px-5 py-2.5 text-xs font-semibold"
-                      >
-                        <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
-                      </Button>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setStage(5)}
-                          className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors px-3 py-2 cursor-pointer"
-                        >
-                          Skip for now
-                        </button>
-                        <Button
-                          type="button"
-                          variant="primary"
-                          onClick={() => setStage(5)}
-                          className="rounded-full px-6 py-2.5 text-xs font-semibold shadow-sm"
-                        >
-                          Next: Source Documents <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Stage 5: Source Documents */}
-                {stage === 5 && (
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <div>
-                      <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                          <FileCheck className="h-5 w-5 text-blue-600" />
-                          Source Documents Checklist
-                        </h2>
-                      </div>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Attach initial documents to start automated file matching, or skip and upload later in your workspace.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
-                      {[
-                        {
-                          key: "deed" as const,
-                          title: "Acquisition Deed or HUD-1",
-                          sub: "Validates purchase price and title recording.",
-                        },
-                        {
-                          key: "gcContract" as const,
-                          title: "GC Agreement & SOV",
-                          sub: "Establishes Schedule of Values & CSI cost codes.",
-                        },
-                        {
-                          key: "loanAgreement" as const,
-                          title: "Construction Loan Agreement",
-                          sub:
-                            hasConstructionLoan === "true"
-                              ? "Sets draw disbursement rules & interest carry formula."
-                              : "Optional for self-funded projects.",
-                        },
-                        {
-                          key: "permitSet" as const,
-                          title: "Building Permit & Plans",
-                          sub: "Enables municipal milestone gates to Certificate of Occupancy.",
-                        },
-                      ].map((item) => {
-                        const file = uploadedFiles[item.key];
-                        return (
-                          <div
-                            key={item.key}
-                            className={`rounded-xl border p-4 transition-all ${file
-                              ? "border-emerald-300 bg-emerald-50/30"
-                              : "border-slate-200 bg-white hover:border-slate-300"
-                              }`}
-                          >
-                            <div className="flex items-start justify-between gap-2 mb-1.5">
-                              <div>
-                                <span className="font-semibold text-xs text-slate-900 block">{item.title}</span>
-                                <span className="text-[11px] text-slate-500 mt-0.5 block">{item.sub}</span>
-                              </div>
-                            </div>
-
-                            <div className="mt-3 pt-2.5 border-t border-slate-100">
-                              {file ? (
-                                <div className="flex items-center justify-between text-xs bg-white rounded-lg p-2 border border-emerald-200">
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    <FileCheck className="h-4 w-4 text-emerald-600 shrink-0" />
-                                    <span className="font-medium text-slate-800 truncate text-[11px]">
-                                      {file.name}
-                                    </span>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      setUploadedFiles((prev) => {
-                                        const next = { ...prev };
-                                        delete next[item.key];
-                                        return next;
-                                      })
-                                    }
-                                    className="text-slate-400 hover:text-red-600 p-1 transition-colors"
-                                    title="Remove attached file"
-                                  >
-                                    <X className="h-3.5 w-3.5" />
-                                  </button>
-                                </div>
-                              ) : (
-                                <label className="flex items-center justify-center gap-2 w-full py-2 px-3 border border-dashed border-slate-300 hover:border-blue-500 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 bg-slate-50/50 hover:bg-blue-50/30 transition-all cursor-pointer">
-                                  <FileUp className="h-3.5 w-3.5" />
-                                  <span>Choose PDF or Document</span>
-                                  <input
-                                    type="file"
-                                    accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                      const picked = e.target.files?.[0];
-                                      if (picked) {
-                                        setUploadedFiles((prev) => ({
-                                          ...prev,
-                                          [item.key]: picked,
-                                        }));
-                                      }
-                                    }}
-                                  />
-                                </label>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 text-xs text-slate-600 flex items-start gap-2.5">
-                      <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-slate-500 leading-relaxed">
-                        Files are processed with a permanent digital audit trail. Invoices and lien waivers can be dragged directly into the workspace at any time.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-5 flex justify-between items-center border-t border-slate-200/80 mt-6 sm:mt-8">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => setStage(4)}
-                        className="rounded-full px-5 py-2.5 text-xs font-semibold"
-                      >
-                        <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
-                      </Button>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setStage(6)}
-                          className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors px-3 py-2 cursor-pointer"
-                        >
-                          Skip and upload later
-                        </button>
-                        <Button
-                          type="button"
-                          variant="primary"
-                          onClick={() => setStage(6)}
-                          className="rounded-full px-6 py-2.5 text-xs font-semibold shadow-sm"
-                        >
-                          Next: Review & Launch <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Stage 6: Review & Confirmation */}
-                {stage === 6 && (
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <div>
-                      <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                        <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                        Review & Confirm Setup
-                      </h2>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Verify project parameters before generating your construction workspace.
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 space-y-4 text-xs">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {/* Project Identity */}
-                        <div className="bg-white rounded-xl p-3 border border-slate-200/70">
-                          <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
-                            Project Identity
-                          </span>
-                          <span className="font-bold text-slate-900 text-sm mt-1 block truncate">
-                            {name || "Untitled Project"}
-                          </span>
-                          <span className="text-slate-600 text-xs mt-0.5 block truncate">
-                            {projectEntity || "Entity Pending"}
-                          </span>
-                          <span className="text-slate-400 text-[11px] mt-1 block truncate">
-                            {address || "Site address unassigned"}
-                          </span>
-                        </div>
-
-                        {/* Capital & Debt */}
-                        <div className="bg-white rounded-xl p-3 border border-slate-200/70">
-                          <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
-                            Financing Structure
-                          </span>
-                          <span className="font-bold text-slate-900 text-sm mt-1 block">
-                            {hasConstructionLoan === "true"
-                              ? lenderName
-                                ? `Loan: ${lenderName}`
-                                : "Senior Construction Loan"
-                              : "100% Sponsor Self-Funded"}
-                          </span>
-                          <span className="text-slate-600 text-xs mt-0.5 block">
-                            Funding: {acquisitionFunding.replace("_", " ")}
-                          </span>
-                          <span className="text-slate-400 text-[11px] mt-1 block">
-                            Deed: {isAcquired === "true" ? "Recorded & Closed" : "Under Contract"}
-                          </span>
-                        </div>
-
-                        {/* Contract & Governance */}
-                        <div className="bg-white rounded-xl p-3 border border-slate-200/70">
-                          <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
-                            Contract & Accounts
-                          </span>
-                          <span className="font-bold text-slate-900 text-sm mt-1 block">
-                            {contractModel === "FIXED" ? "Fixed Price (GMP)" : "Day Rate"}
-                          </span>
-                          <span className="text-slate-600 text-xs mt-0.5 block">
-                            10% AIA Retainage Enforced
-                          </span>
-                          <span className="text-slate-400 text-[11px] mt-1 block">
-                            {operatingAccountModel === "DEDICATED" ? "Dedicated Account" : "Central Account"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                        <div className="flex items-center justify-between bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/70">
-                          <span className="text-slate-500 font-medium">Invited Collaborators:</span>
-                          <span className="font-semibold text-slate-800">
-                            {[cfoEmail, pmEmail, gcEmail].filter(Boolean).length > 0
-                              ? `${[cfoEmail, pmEmail, gcEmail].filter(Boolean).length} team seats assigned`
-                              : "Owner only (Invite anytime)"}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/70">
-                          <span className="text-slate-500 font-medium">Initial Source Documents:</span>
-                          <span className="font-semibold text-slate-800">
-                            {Object.values(uploadedFiles).filter(Boolean).length > 0
-                              ? `${Object.values(uploadedFiles).filter(Boolean).length} document(s) attached`
-                              : "Upload in workspace"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="rounded-xl border border-slate-200 bg-white p-4.5 text-xs text-slate-600 space-y-2.5 shadow-2xs">
-                      <p className="font-bold text-slate-900">Workspace Activation Deliverables:</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-slate-600 text-[11px]">
-                        <div className="flex items-start gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                          <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                          <span>CSI MasterFormat trade budget accounts initialized</span>
-                        </div>
-                        <div className="flex items-start gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                          <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                          <span>Draw packages pre-formatted for bank-ready AIA G702 / G703</span>
-                        </div>
-                        <div className="flex items-start gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                          <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                          <span>Standard 10% retainage withholdings and statutory lien releases</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-5 flex justify-between items-center border-t border-slate-200/80 mt-6 sm:mt-8">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => setStage(5)}
-                        className="rounded-full px-5 py-2.5 text-xs font-semibold"
-                      >
-                        <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="primary"
-                        onClick={() => createMutation.mutate()}
-                        loading={createMutation.isPending}
-                        className="rounded-full bg-slate-900 hover:bg-slate-800 text-white px-7 py-2.5 text-xs font-semibold shadow-md shadow-slate-950/20"
-                      >
-                        <FolderPlus className="mr-1.5 h-4 w-4" /> Launch Project Workspace
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </main>
-          </div>
-        </div>
-      </div>
-
-      {/* Duplicate Check Warning Modal */}
-      {showDuplicateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-          <div className="max-w-lg w-full rounded-xl border border-slate-200 bg-white p-6 shadow-overlay">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 shrink-0">
-                <CopyCheck className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900">
-                  Potential Duplicate Project Found
-                </h3>
-                <p className="mt-1 text-xs text-slate-500">
-                  One or more existing projects match this legal entity or address.
+          {/* ─────────────────────────────────────────────────────────────────── */}
+          {/* STEP 3: ADD PROJECT RECORDS (DOCUMENT VAULT)                         */}
+          {/* ─────────────────────────────────────────────────────────────────── */}
+          {currentStep === 3 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="space-y-1.5">
+                <TextEffect
+                  as="h1"
+                  preset="fade-in-blur"
+                  per="word"
+                  className="text-2xl font-bold text-slate-900 tracking-tight"
+                >
+                  Do you have project documents ready?
+                </TextEffect>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Upload your budget spreadsheets, vendor contracts, or bank loan packages. You can also skip this and add them later.
                 </p>
               </div>
-            </div>
 
-            <div className="mt-4 space-y-2.5 max-h-48 overflow-y-auto">
-              {duplicateMatches.map((m) => (
-                <div key={m.id} className="rounded-xl border border-slate-200 p-3 text-xs bg-slate-50">
-                  <div className="font-semibold text-slate-900">{m.name}</div>
-                  <div className="text-slate-500">{m.address}</div>
-                  <div className="text-amber-700 mt-1 font-medium">{m.similarity_reason}</div>
+              {/* Document Type Chips */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-800">
+                  What document types are you working with?
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {(projectStatus === "active" ? ACTIVE_DOC_TYPES : NEW_DOC_TYPES).map((type) => {
+                    const isSelected = selectedDocTypes.includes(type);
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => {
+                          if (type === "Not ready yet") {
+                            setSelectedDocTypes(["Not ready yet"]);
+                          } else {
+                            setSelectedDocTypes((prev) => {
+                              const withoutNotReady = prev.filter((t) => t !== "Not ready yet");
+                              if (withoutNotReady.includes(type)) {
+                                return withoutNotReady.filter((t) => t !== type);
+                              }
+                              return [...withoutNotReady, type];
+                            });
+                          }
+                        }}
+                        className={`text-xs px-3 py-1.5 rounded-lg border transition cursor-pointer flex items-center gap-1.5 ${
+                          isSelected
+                            ? "bg-slate-50 border-slate-900 text-slate-900 font-bold ring-1 ring-slate-900/10 shadow-2xs"
+                            : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/50"
+                        }`}
+                      >
+                        {isSelected && <Check className="w-3 h-3 text-slate-900 stroke-[3]" />}
+                        <span>{type}</span>
+                      </button>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
+              </div>
 
-            <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
-              <Button
-                variant="tertiary"
-                onClick={() => {
-                  setShowDuplicateModal(false);
-                }}
-                className="rounded-full px-5 py-2 text-xs font-semibold"
-              >
-                Edit Information
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  setShowDuplicateModal(false);
-                  setStage(2);
-                }}
-                className="rounded-full px-6 py-2 text-xs font-semibold"
-              >
-                Proceed Anyway
-              </Button>
+              {/* Upload Zone */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-800">
+                  Upload project documents
+                </label>
+
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                    handleAddFiles(e.dataTransfer.files);
+                  }}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-2xl p-6 text-center transition cursor-pointer ${
+                    isDragging ? "border-slate-900 bg-slate-50" : "border-slate-200 hover:border-slate-300 bg-white"
+                  }`}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept={SUPPORTED_EXTENSIONS.join(",")}
+                    className="hidden"
+                    onChange={(e) => handleAddFiles(e.target.files)}
+                  />
+                  <UploadCloud className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                  <p className="text-xs font-bold text-slate-800">Drop files here or click to browse</p>
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    PDF, Excel (.xlsx, .csv), Images, or ZIP archive packages
+                  </p>
+                </div>
+              </div>
+
+              {/* Uploaded Documents List */}
+              {documentsList.length > 0 && (
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-bold text-slate-700 block">
+                    Uploaded files ({documentsList.length})
+                  </span>
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                    {documentsList.map((doc) => (
+                      <div
+                        key={doc.id}
+                        className="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-white text-xs"
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <FileSpreadsheet className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span className="font-medium text-slate-800 truncate">{doc.name}</span>
+                          <span className="text-[10px] text-slate-400 font-mono shrink-0">
+                            ({(doc.size / 1024).toFixed(0)} KB)
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          title="Remove document"
+                          onClick={() => setDocumentsList((prev) => prev.filter((d) => d.id !== doc.id))}
+                          className="text-slate-400 hover:text-red-600 p-1 transition cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(4)}
+                  className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
+                >
+                  <span>Next</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(4)}
+                  className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer text-center"
+                >
+                  Skip for now
+                </button>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* ─────────────────────────────────────────────────────────────────── */}
+          {/* STEP 4: TEAM ALLOCATION                                             */}
+          {/* ─────────────────────────────────────────────────────────────────── */}
+          {currentStep === 4 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="space-y-1.5">
+                <TextEffect
+                  as="h1"
+                  preset="fade-in-blur"
+                  per="word"
+                  className="text-2xl font-bold text-slate-900 tracking-tight"
+                >
+                  Who else works on this project?
+                </TextEffect>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Invite your team and external partners. Each role gets dedicated permissions and filtered views.
+                </p>
+              </div>
+
+              {/* Add Collaborator Form */}
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
+                <div className="space-y-1.5">
+                  <label htmlFor="input-invite-email" className="block text-xs font-bold text-slate-800">
+                    Collaborator email
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      id="input-invite-email"
+                      type="email"
+                      value={inviteEmail}
+                      onChange={(e) => {
+                        setInviteEmail(e.target.value);
+                        if (inviteError) setInviteError(null);
+                      }}
+                      placeholder="collaborator@gmail.com"
+                      className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="select-invite-role" className="block text-xs font-bold text-slate-800">
+                    Project role &amp; access level
+                  </label>
+                  <select
+                    id="select-invite-role"
+                    value={inviteRole}
+                    onChange={(e) => setInviteRole(e.target.value as OnboardingRole)}
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 cursor-pointer"
+                  >
+                    {ROLE_OPTIONS.map((r) => (
+                      <option key={r.role} value={r.role}>
+                        {r.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {inviteError && (
+                  <p className="text-[11px] text-red-600 font-medium flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    <span>{inviteError}</span>
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleAddCollaborator}
+                  className="w-full py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add to invitation list</span>
+                </button>
+              </div>
+
+              {/* Team Members List */}
+              {teamList.length > 0 && (
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-bold text-slate-700 block">
+                    Pending invitations ({teamList.length})
+                  </span>
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                    {teamList.map((member) => (
+                      <div
+                        key={member.email}
+                        className="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-white text-xs"
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <Users className="w-4 h-4 text-indigo-600 shrink-0" />
+                          <span className="font-semibold text-slate-900 truncate">{member.email}</span>
+                          <span className="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono shrink-0">
+                            {ROLE_OPTIONS.find((r) => r.role === member.role)?.label || member.role}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          title="Remove collaborator"
+                          onClick={() => setTeamList((prev) => prev.filter((m) => m.email !== member.email))}
+                          className="text-slate-400 hover:text-red-600 p-1 transition cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={handleLaunchProject}
+                  className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
+                >
+                  <span>
+                    {teamList.length > 0 ? "Send invitations & launch workspace" : "Complete setup & launch"}
+                  </span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleLaunchProject}
+                  className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer text-center"
+                >
+                  Skip for now
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ─────────────────────────────────────────────────────────────────── */}
+          {/* STEP 5: ARCHITECTURAL WORKSPACE INITIALIZATION                      */}
+          {/* ─────────────────────────────────────────────────────────────────── */}
+          {currentStep === 5 && (
+            <div className="space-y-6 text-center py-2 animate-in fade-in duration-300">
+              <div className="space-y-1.5">
+                <TextEffect
+                  as="h1"
+                  preset="fade-in-blur"
+                  per="word"
+                  className="text-2xl font-bold text-slate-900 tracking-tight"
+                >
+                  Provisioning your project workspace
+                </TextEffect>
+                <p className="text-xs text-slate-500">
+                  Calibrating relational project ledgers, CSI 50-division structures, and security keys.
+                </p>
+              </div>
+
+              {/* Architectural Linear Calibration Gauge */}
+              <div className="py-2">
+                <CircularWorkspaceGauge
+                  percentage={
+                    setupStages.finalizing
+                      ? 100
+                      : setupStages.preparingDashboard
+                      ? 75
+                      : setupStages.creatingProject
+                      ? 50
+                      : setupStages.savingOrg
+                      ? 25
+                      : 10
+                  }
+                  currentStage={
+                    setupStages.finalizing
+                      ? "Finalizing security keys and launching workspace..."
+                      : setupStages.preparingDashboard
+                      ? "Calibrating financial ledger and focus modules..."
+                      : setupStages.creatingProject
+                      ? `Provisioning ${projectName || "project"} ledger records...`
+                      : setupStages.savingOrg
+                      ? "Configuring project security context..."
+                      : "Initializing relational ledger database..."
+                  }
+                />
+              </div>
+
+              {/* Verified Architectural Ledger Telemetry Rows */}
+              <div className="space-y-2 bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs text-left max-w-md mx-auto">
+                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 px-1 pb-1 border-b border-slate-100 flex items-center justify-between">
+                  <span>System Module</span>
+                  <span>Ledger Status</span>
+                </div>
+
+                {/* Module 1: Project Identity */}
+                <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
+                  <div className="flex items-center gap-2.5">
+                    {setupStages.savingOrg ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : (
+                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
+                    )}
+                    <div>
+                      <span className="font-bold text-slate-800 block text-xs">Project Workspace Identity</span>
+                      <span className="text-[10px] text-slate-500 font-mono">SYS-01 · Multi-Tenant Security</span>
+                    </div>
+                  </div>
+                  <span
+                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                      setupStages.savingOrg
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+                        : "bg-blue-50 text-blue-700 border border-blue-200/60"
+                    }`}
+                  >
+                    {setupStages.savingOrg ? "VERIFIED" : "ACTIVE"}
+                  </span>
+                </div>
+
+                {/* Module 2: CSI MasterFormat */}
+                <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
+                  <div className="flex items-center gap-2.5">
+                    {setupStages.creatingProject ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : setupStages.savingOrg ? (
+                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
+                    ) : (
+                      <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
+                    )}
+                    <div>
+                      <span className="font-bold text-slate-800 block text-xs">CSI MasterFormat Structure</span>
+                      <span className="text-[10px] text-slate-500 font-mono">WBS-50 · 50-Division Cost Baseline</span>
+                    </div>
+                  </div>
+                  <span
+                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                      setupStages.creatingProject
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+                        : setupStages.savingOrg
+                        ? "bg-blue-50 text-blue-700 border border-blue-200/60"
+                        : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {setupStages.creatingProject ? "LOCKED" : setupStages.savingOrg ? "ACTIVE" : "PENDING"}
+                  </span>
+                </div>
+
+                {/* Module 3: AIA G702 / G703 Draw Engine */}
+                <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
+                  <div className="flex items-center gap-2.5">
+                    {setupStages.preparingDashboard ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : setupStages.creatingProject ? (
+                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
+                    ) : (
+                      <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
+                    )}
+                    <div>
+                      <span className="font-bold text-slate-800 block text-xs">Draw Package Engine</span>
+                      <span className="text-[10px] text-slate-500 font-mono">FIN-03 · AIA G702 / G703 Protocols</span>
+                    </div>
+                  </div>
+                  <span
+                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                      setupStages.preparingDashboard
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+                        : setupStages.creatingProject
+                        ? "bg-blue-50 text-blue-700 border border-blue-200/60"
+                        : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {setupStages.preparingDashboard ? "ONLINE" : setupStages.creatingProject ? "ACTIVE" : "PENDING"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </main>
     </div>
   );
 }

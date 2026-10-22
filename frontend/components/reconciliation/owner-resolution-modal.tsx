@@ -217,13 +217,13 @@ export function OwnerResolutionModal({
                   onClick={() => handleSelectAction(action.id)}
                   className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-xs font-medium transition-all ${
                     isSelected
-                      ? "border-slate-900 bg-slate-900 text-white shadow-2xs font-semibold"
+                      ? "border-slate-900 bg-slate-100 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10"
                       : "border-slate-200 bg-white hover:border-slate-300 text-slate-700 hover:bg-slate-50"
                   }`}
                 >
                   <Icon
                     className={`h-4 w-4 shrink-0 ${
-                      isSelected ? "text-white" : "text-slate-500"
+                      isSelected ? "text-slate-900" : "text-slate-500"
                     }`}
                   />
                   <span className="truncate">{action.label}</span>

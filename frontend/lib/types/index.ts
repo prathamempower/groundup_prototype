@@ -124,11 +124,13 @@ export interface OnboardingAnswers {
   organizationWebsite?: string;
   projectName?: string;
   projectEntity?: string;
-  assetType?: 'MULTIFAMILY' | 'SINGLE_FAMILY' | 'MIXED_USE' | 'SUBDIVISION';
+  assetType?: 'SINGLE_FAMILY' | 'TWO_FAMILY' | 'MULTIFAMILY' | 'MIXED_USE' | 'SUBDIVISION';
   targetStartDate?: string;
   startedAt?: string;
   isAcquired?: 'true' | 'false';
   acquisitionFunding?: string;
+  acquisitionDate?: string;
+  acquisitionProofDocuments?: Array<{ id: string; name: string; size: number }>;
   hasConstructionLoan?: 'true' | 'false';
   lenderName?: string;
   contractModel?: ContractModel;
@@ -136,6 +138,25 @@ export interface OnboardingAnswers {
   operatingAccountModel?: 'DEDICATED' | 'SHARED';
   projectAddress?: string;
   projectStage?: OnboardingProjectStage;
+  phase?: ProjectPhase;
+  permitStatus?: 'PERMIT_APPROVED' | 'PERMIT_PENDING' | 'NOT_YET_APPLIED';
+  permit_status?: 'PERMIT_APPROVED' | 'PERMIT_PENDING' | 'NOT_YET_APPLIED';
+  budgetSheetStatus?: 'BUDGET_READY' | 'BUDGET_IN_PROGRESS';
+  budget_sheet_status?: 'BUDGET_READY' | 'BUDGET_IN_PROGRESS';
+  dueDiligenceStatus?: 'LOI_NEGOTIATION' | 'PSA_SIGNED' | 'FEASIBILITY_STUDY' | 'IN_DILIGENCE' | 'LOI_SIGNED' | 'FEASIBILITY_REVIEW';
+  due_diligence_status?: 'LOI_NEGOTIATION' | 'PSA_SIGNED' | 'FEASIBILITY_STUDY' | 'IN_DILIGENCE' | 'LOI_SIGNED' | 'FEASIBILITY_REVIEW';
+  targetPurchasePrice?: string | number;
+  target_purchase_price?: string | number;
+  postConstructionStatus?: 'COMMISSIONING' | 'HANDOVER_WARRANTY';
+  post_construction_status?: 'COMMISSIONING' | 'HANDOVER_WARRANTY';
+  unitPriceDecided?: 'YES' | 'NO';
+  unit_price_decided?: 'YES' | 'NO';
+  totalUnits?: number;
+  total_units?: number;
+  unitPrices?: Record<string, string>;
+  unit_prices?: Record<string, string>;
+  targetUnitPrice?: string;
+  target_unit_price?: string;
   targetCompletionDate?: string;
   skipProjectCreation?: boolean;
   primaryChallenge?: string;
@@ -179,7 +200,9 @@ export interface OnboardingConfigurationResult {
 
 
 export type LifecycleStage =
+  | "PRE_ACQUISITION"
   | "ACQUISITION"
+  | "PERMITTING"
   | "PRE_CONSTRUCTION"
   | "CONSTRUCTION"
   | "UNDER_CONSTRUCTION"
@@ -189,6 +212,13 @@ export type LifecycleStage =
   | "MARKETING"
   | "DISPOSITION"
   | "CLOSED";
+
+export type ProjectPhase =
+  | "PRE_ACQUISITION"
+  | "ACQUISITION"
+  | "PERMITTING"
+  | "ACTIVE_CONSTRUCTION"
+  | "POST_CONSTRUCTION";
 
 export type ContractModel =
   | "FIXED"
@@ -208,12 +238,22 @@ export interface Project {
   project_entity: string;
   address: string;
   lifecycle_stage: LifecycleStage;
+  phase?: ProjectPhase;
   contract_model: ContractModel;
   status: "ACTIVE" | "COMPLETED" | "SETUP_INCOMPLETE";
   currency: string;
   loan_commitment?: string; // minor units in cents as string
   started_at: string;
   target_completion_at: string;
+  acquisition_date?: string;
+  acquisition_funding?: string;
+  permit_status?: 'PERMIT_APPROVED' | 'PERMIT_PENDING' | 'NOT_YET_APPLIED';
+  budget_sheet_status?: 'BUDGET_READY' | 'BUDGET_IN_PROGRESS';
+  due_diligence_status?: 'LOI_NEGOTIATION' | 'PSA_SIGNED' | 'FEASIBILITY_STUDY' | 'IN_DILIGENCE' | 'LOI_SIGNED' | 'FEASIBILITY_REVIEW';
+  target_purchase_price?: string | number;
+  post_construction_status?: 'COMMISSIONING' | 'HANDOVER_WARRANTY';
+  unit_price_decided?: 'YES' | 'NO';
+  target_unit_price?: string;
   created_at: string;
   // Portfolio fields
   role_on_project?: UserRole;

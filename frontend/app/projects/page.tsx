@@ -27,18 +27,16 @@ import {
   MapPin,
   Briefcase,
   ChevronRight,
-  BarChart3,
   Trash2,
   Loader2,
 } from "lucide-react";
-import { ProjectFinancialComparison } from "@/components/projects/financial-comparison";
 
 const DEFAULT_GLOBAL_ROLE: UserRole = "OWNER";
 
 export default function ProjectsPortfolioPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [viewMode, setViewMode] = useState<"CARD" | "TABLE" | "COMPARE">("CARD");
+  const [viewMode, setViewMode] = useState<"CARD" | "TABLE">("CARD");
   const [searchQuery, setSearchQuery] = useState("");
   const [stageFilter, setStageFilter] = useState<string>("ALL");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -94,12 +92,27 @@ export default function ProjectsPortfolioPage() {
           query === "" ||
           p.name.toLowerCase().includes(query);
 
+        const stageUpper = (p.lifecycle_stage || "").toUpperCase();
+        const stageLower = (p.lifecycle_stage || "").toLowerCase();
+        const statusUpper = (p.status || "").toUpperCase();
+
         const matchesStage =
           stageFilter === "ALL" ||
-          (stageFilter === "PRE_CONSTRUCTION" && p.lifecycle_stage === "PRE_CONSTRUCTION") ||
-          (stageFilter === "UNDER_CONSTRUCTION" && (p.lifecycle_stage === "UNDER_CONSTRUCTION" || p.lifecycle_stage === "CONSTRUCTION")) ||
-          (stageFilter === "POST_CONSTRUCTION" && (p.lifecycle_stage === "POST_CONSTRUCTION" || p.lifecycle_stage === "DISPOSITION")) ||
-          (stageFilter === "COMPLETE" && (p.lifecycle_stage === "COMPLETE" || p.lifecycle_stage === "COMPLETION" || p.lifecycle_stage === "CLOSED" || p.status === "COMPLETED"));
+          (stageFilter === "PRE_ACQUISITION" && (
+            stageUpper.includes("PRE_ACQ") || stageLower.includes("pre-acquisition") || stageLower.includes("pre acquisition")
+          )) ||
+          (stageFilter === "ACQUISITION" && (
+            (stageUpper === "ACQUISITION" || stageLower.includes("acquisition")) && !stageUpper.includes("PRE") && !stageLower.includes("pre")
+          )) ||
+          (stageFilter === "PERMITTING" && (
+            stageUpper.includes("PERMIT") || stageUpper.includes("PRE_CON") || stageLower.includes("pre-construction") || stageLower.includes("design") || stageLower.includes("planning")
+          )) ||
+          (stageFilter === "ACTIVE_CONSTRUCTION" && (
+            stageUpper.includes("CONSTRUCTION") || stageUpper.includes("ACTIVE") || stageLower.includes("construction") || statusUpper === "ACTIVE"
+          )) ||
+          (stageFilter === "POST_CONSTRUCTION" && (
+            stageUpper.includes("POST") || stageUpper.includes("DISPOSITION") || stageUpper.includes("COMPLETE") || stageUpper.includes("CLOSED") || statusUpper === "COMPLETED"
+          ));
         const matchesStatus =
           statusFilter === "ALL" ||
           (statusFilter === "HEALTHY" && p.health_status === "HEALTHY") ||
@@ -143,31 +156,28 @@ export default function ProjectsPortfolioPage() {
   };
 
   const formatStageLabel = (stage: string) => {
-    if (!stage) return "Active";
+    if (!stage) return "Active Project Construction";
     const s = stage.toLowerCase();
-    if (s.includes("conception") || s.includes("design") || s.includes("planning")) {
-      return "Design & Planning";
+    if (s.includes("pre_acq") || s.includes("pre-acq") || s.includes("preacq") || s.includes("pre acq")) {
+      return "Pre Acquisition";
     }
-    switch (stage) {
-      case "UNDER_CONSTRUCTION":
-      case "CONSTRUCTION":
-        return "Under Construction";
-      case "PRE_CONSTRUCTION":
-        return "Pre-Construction";
-      case "POST_CONSTRUCTION":
-      case "DISPOSITION":
-        return "Post-Construction";
-      case "COMPLETE":
-      case "COMPLETION":
-      case "CLOSED":
-        return "Complete";
-      default:
-        return stage
-          .toLowerCase()
-          .split("_")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ");
+    if (s.includes("acquisition") || (s.includes("acq") && !s.includes("pre"))) {
+      return "Acquisition";
     }
+    if (s.includes("permit") || s.includes("conception") || s.includes("design") || s.includes("planning") || s.includes("pre_con") || s.includes("pre-con")) {
+      return "Permitting";
+    }
+    if (s.includes("post") || s.includes("disposition") || s.includes("complete") || s.includes("closed") || s.includes("completion")) {
+      return "Post construction";
+    }
+    if (s.includes("under_con") || s.includes("construction") || s.includes("active")) {
+      return "Active Project Construction";
+    }
+    return stage
+      .toLowerCase()
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
   };
 
   const getProjectImage = (project: Project) => {
@@ -222,20 +232,6 @@ export default function ProjectsPortfolioPage() {
       default:
         return 45;
     }
-  };
-
-  const formatCompactProfit = (cents?: number | null) => {
-    if (cents === null || cents === undefined) return "-";
-    const dollars = cents / 100;
-    if (dollars >= 1_000_000) {
-      const millions = dollars / 1_000_000;
-      return `$${millions.toFixed(2).replace(/\.00$/, "")}M`;
-    }
-    if (dollars >= 1_000) {
-      const thousands = Math.round(dollars / 1_000);
-      return `$${thousands}K`;
-    }
-    return `$${Math.round(dollars)}`;
   };
 
   const getCardStatusBadge = (project: Project) => {
@@ -312,7 +308,7 @@ export default function ProjectsPortfolioPage() {
               className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 sm:px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-all hover:bg-slate-800 active:scale-95 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
             >
               <Plus className="h-4 w-4" />
-              <span>Create Project</span>
+              <span>Add Project</span>
             </Link>
           </div>
         )}
@@ -342,10 +338,11 @@ export default function ProjectsPortfolioPage() {
               className="h-10 sm:h-9 w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-2.5 sm:px-3 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 focus:border-slate-900 focus:outline-none cursor-pointer"
             >
               <option value="ALL">All Stages</option>
-              <option value="PRE_CONSTRUCTION">Pre-Construction</option>
-              <option value="UNDER_CONSTRUCTION">Under Construction</option>
-              <option value="POST_CONSTRUCTION">Post-Construction</option>
-              <option value="COMPLETE">Complete</option>
+              <option value="PRE_ACQUISITION">Pre Acquisition</option>
+              <option value="ACQUISITION">Acquisition</option>
+              <option value="PERMITTING">Permitting</option>
+              <option value="ACTIVE_CONSTRUCTION">Active Project Construction</option>
+              <option value="POST_CONSTRUCTION">Post construction</option>
             </select>
 
             {/* Status Filter */}
@@ -360,23 +357,10 @@ export default function ProjectsPortfolioPage() {
               <option value="CRITICAL">Critical</option>
             </select>
           </div>
-
-          {(searchQuery || stageFilter !== "ALL" || statusFilter !== "ALL") && (
-            <button
-              onClick={() => {
-                setSearchQuery("");
-                setStageFilter("ALL");
-                setStatusFilter("ALL");
-              }}
-              className="text-xs font-medium text-slate-500 hover:text-slate-900 px-2 py-1 transition-colors self-start sm:self-auto"
-            >
-              Reset
-            </button>
-          )}
         </div>
 
-        {/* View Switcher: full-width 3-column pill on mobile */}
-        <div className="w-full sm:w-auto grid grid-cols-3 sm:flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1 sm:p-0.5">
+        {/* View Switcher: full-width 2-column pill on mobile, inline on desktop */}
+        <div className="w-full sm:w-auto grid grid-cols-2 sm:flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1 sm:p-0.5">
           <button
             onClick={() => setViewMode("CARD")}
             aria-label="Card view"
@@ -399,33 +383,13 @@ export default function ProjectsPortfolioPage() {
             <List className="h-3.5 w-3.5" />
             <span>Table</span>
           </button>
-          {canSeeFinancialSummary && (
-            <button
-              onClick={() => setViewMode("COMPARE")}
-              aria-label="Compare financials view"
-              className={`flex h-9 sm:h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-all ${viewMode === "COMPARE"
-                  ? "bg-white text-slate-900 shadow-2xs font-semibold"
-                  : "text-slate-500 hover:text-slate-900"
-                }`}
-            >
-              <BarChart3 className="h-3.5 w-3.5 text-blue-600" />
-              <span className="truncate">Compare</span>
-              <span className="hidden md:inline">Financials</span>
-            </button>
-          )}
         </div>
       </div>
 
 
 
       {/* Projects Display */}
-      {viewMode === "COMPARE" ? (
-        <ProjectFinancialComparison
-          projects={filteredProjects.length > 0 ? filteredProjects : projects}
-          globalRole={globalRole || DEFAULT_GLOBAL_ROLE}
-          onOpenWorkspace={handleOpenWorkspace}
-        />
-      ) : filteredProjects.length === 0 ? (
+      {filteredProjects.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-200 bg-white p-12 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 text-slate-400 mb-3 border border-slate-100">
             <Building2 className="h-6 w-6" />
@@ -442,7 +406,7 @@ export default function ProjectsPortfolioPage() {
                   className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800"
                 >
                   <Plus className="h-3.5 w-3.5" />
-                  <span>Create project</span>
+                  <span>Add Project</span>
                 </Link>
               </div>
             ) : (
@@ -476,9 +440,6 @@ export default function ProjectsPortfolioPage() {
         /* Clean Professional Architectural Card Grid */
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {filteredProjects.map((project) => {
-            const effectiveRole = getEffectiveRoleOnProject(project);
-            const canSeeProfit =
-              effectiveRole === "OWNER" && project.forecast_profit !== undefined;
             const heroImage = getProjectImage(project);
             const progress = getProjectProgress(project);
 
@@ -528,16 +489,11 @@ export default function ProjectsPortfolioPage() {
 
                   {/* Body Content */}
                   <div className="p-4 space-y-3.5">
-                    {/* Stage & Role Badges & Delete Action */}
+                    {/* Stage Badge & Delete Action */}
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600">
-                          {formatStageLabel(project.lifecycle_stage)}
-                        </span>
-                        <span className="inline-flex items-center rounded border border-blue-100 bg-blue-50/70 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
-                          Role: {effectiveRole}
-                        </span>
-                      </div>
+                      <span className="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                        {formatStageLabel(project.lifecycle_stage)}
+                      </span>
                       <button
                         type="button"
                         onClick={(e) => {
@@ -568,30 +524,6 @@ export default function ProjectsPortfolioPage() {
                         />
                       </div>
                     </div>
-
-                    {/* Financial Metrics & Next Milestone */}
-                    <div className="grid grid-cols-2 gap-3 pt-1 border-t border-slate-100">
-                      <div>
-                        <div className="font-semibold text-slate-400 uppercase text-[10px] tracking-wider">
-                          Forecast Profit
-                        </div>
-                        <div className="mt-0.5 text-sm font-bold text-slate-900 tabular-nums truncate">
-                          {canSeeProfit ? formatCompactProfit(project.forecast_profit) : "-"}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="font-semibold text-slate-400 uppercase text-[10px] tracking-wider truncate">
-                          Next Milestone
-                        </div>
-                        <div
-                          className="mt-0.5 text-[11px] font-medium text-slate-700 truncate"
-                          title={project.next_milestone || "Handover & Final Audit"}
-                        >
-                          {project.next_milestone || "Handover & Final Audit"}
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
 
@@ -617,23 +549,14 @@ export default function ProjectsPortfolioPage() {
                     Project
                   </th>
                   <th className="px-4 py-3.5 border-b border-slate-200 min-w-[130px]">Stage</th>
-                  <th className="px-4 py-3.5 border-b border-slate-200 min-w-[90px]">Role</th>
                   <th className="px-4 py-3.5 border-b border-slate-200 min-w-[90px]">Health</th>
                   <th className="px-4 py-3.5 border-b border-slate-200 min-w-[130px]">Progress</th>
-                  {canSeeFinancialSummary && (
-                    <th className="px-4 py-3.5 text-right border-b border-slate-200 min-w-[110px]">
-                      Forecast Profit
-                    </th>
-                  )}
                   <th className="px-4 py-3.5 border-b border-slate-200 min-w-[150px]">Next Milestone</th>
                   <th className="px-5 py-3.5 text-right border-b border-slate-200 min-w-[90px]">Action</th>
                 </tr>
               </thead>
               <tbody className="text-slate-700">
                 {filteredProjects.map((project) => {
-                  const effectiveRole = getEffectiveRoleOnProject(project);
-                  const canSeeProfit =
-                    effectiveRole === "OWNER" && project.forecast_profit !== undefined;
                   const progress = getProjectProgress(project);
 
                   return (
@@ -655,11 +578,6 @@ export default function ProjectsPortfolioPage() {
                           {formatStageLabel(project.lifecycle_stage)}
                         </span>
                       </td>
-                      <td className="px-4 py-3.5 border-b border-slate-100 align-middle">
-                        <span className="inline-flex rounded-lg border border-blue-100 bg-blue-50/80 px-2 py-0.5 text-[11px] font-semibold text-blue-700 whitespace-nowrap">
-                          {effectiveRole}
-                        </span>
-                      </td>
                       <td className="px-4 py-3.5 border-b border-slate-100 align-middle whitespace-nowrap">
                         {getTableHealthBadge(project.health_status)}
                       </td>
@@ -673,11 +591,6 @@ export default function ProjectsPortfolioPage() {
                           </span>
                         </div>
                       </td>
-                      {canSeeFinancialSummary && (
-                        <td className="px-4 py-3.5 text-right font-extrabold text-slate-900 tabular-nums border-b border-slate-100 align-middle whitespace-nowrap">
-                          {canSeeProfit ? formatMoney(project.forecast_profit || 0) : "-"}
-                        </td>
-                      )}
                       <td className="px-4 py-3.5 text-slate-600 truncate max-w-[160px] border-b border-slate-100 align-middle">
                         {project.next_milestone || "Handover & Final Audit"}
                       </td>

@@ -43,6 +43,7 @@ import {
   UserRole,
   AuthenticatedUser,
   ContractModel,
+  ProjectPhase,
 } from '@/lib/types';
 import {
   ArrowLeft,
@@ -64,7 +65,6 @@ import {
   Trash2,
   Plus,
   Minus,
-  Globe,
   AlertCircle,
   ShieldCheck,
   Mail,
@@ -82,6 +82,8 @@ import {
   FileCheck,
   Layers,
 } from 'lucide-react';
+import { PhaseIllustration } from '@/components/projects/PhaseIllustration';
+import { ConstructionLenderSelect } from '@/components/projects/ConstructionLenderSelect';
 
 interface NewUserIntakePageProps {
   user: AuthenticatedUser;
@@ -311,15 +313,12 @@ const DOC_TYPE_CHOICES = [
 ];
 
 const ROLE_OPTIONS: Array<{ role: OnboardingRole; label: string }> = [
-  { role: 'OWNER', label: 'Project Owner / Principal' },
-  { role: 'PARTNER', label: 'Co-Sponsor Equity Partner' },
-  { role: 'GC', label: 'General Contractor' },
-  { role: 'OWNERS_REP', label: "Owner's Representative" },
-  { role: 'ARCHITECT', label: 'Inspecting Architect' },
-  { role: 'CFO', label: 'Finance Controller' },
-  { role: 'SUBCONTRACTOR', label: 'Subcontractor Lead' },
-  { role: 'MUNICIPAL_INSPECTOR', label: 'Municipal Building Inspector' },
-  { role: 'LENDER_INSPECTOR', label: 'Bank Loan Officer / Inspector' },
+  { role: 'OWNER', label: 'Owner / Developer' },
+  { role: 'CFO', label: 'CFO / Accountant' },
+  { role: 'PROJECT_MANAGER', label: 'Project Manager' },
+  { role: 'INVESTOR', label: 'Investor / Partner' },
+  { role: 'GC_FIXED', label: 'GC (Fixed Contract)' },
+  { role: 'GC_DAILY', label: 'GC (Daily Updates)' },
 ];
 
 function ActiveJobsiteSvg({ active }: { active: boolean }) {
@@ -554,9 +553,94 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
   }, [username]);
 
   // Screen 1: Project Portfolio Status ("Do you have an active project or are you new to construction?")
+  const [projectPhase, setProjectPhase] = useState<ProjectPhase>('ACTIVE_CONSTRUCTION');
   const [projectStatus, setProjectStatus] = useState<'active' | 'new'>('active');
   const [primaryFocus, setPrimaryFocus] = useState<string>('draw_delays');
   const [secondaryFocuses, setSecondaryFocuses] = useState<string[]>(['budget_overruns', 'records_dont_match']);
+
+  // Phase-specific questionnaire state
+  const [permitStatus, setPermitStatus] = useState<'PERMIT_APPROVED' | 'PERMIT_PENDING' | 'NOT_YET_APPLIED'>('PERMIT_PENDING');
+  const [budgetSheetStatus, setBudgetSheetStatus] = useState<'BUDGET_READY' | 'BUDGET_IN_PROGRESS'>('BUDGET_READY');
+  const [dueDiligenceStatus, setDueDiligenceStatus] = useState<'IN_DILIGENCE' | 'LOI_SIGNED' | 'FEASIBILITY_REVIEW'>('IN_DILIGENCE');
+  const [targetPurchasePrice, setTargetPurchasePrice] = useState<string>('');
+  const [postConstructionStatus, setPostConstructionStatus] = useState<'COMMISSIONING' | 'HANDOVER_WARRANTY'>('COMMISSIONING');
+  const [unitPriceDecided, setUnitPriceDecided] = useState<'YES' | 'NO'>('NO');
+  const [targetUnitPrice, setTargetUnitPrice] = useState<string>('');
+  const [totalUnits, setTotalUnits] = useState<string>('1');
+  const [unitPrices, setUnitPrices] = useState<Record<number, string>>({});
+  const [bulkUnitPrice, setBulkUnitPrice] = useState<string>('');
+
+  const handleSetBulkUnitPrice = (val: string) => {
+    setBulkUnitPrice(val);
+    const count = Math.min(Math.max(parseInt(totalUnits, 10) || 1, 1), 50);
+    const updated: Record<number, string> = {};
+    for (let i = 1; i <= count; i++) {
+      updated[i] = val;
+    }
+    setUnitPrices(updated);
+    setTargetUnitPrice(val);
+  };
+
+  const handleUnitCountChange = (val: string) => {
+    setTotalUnits(val);
+    const count = Math.min(Math.max(parseInt(val, 10) || 1, 1), 50);
+    setUnitPrices((prev) => {
+      const updated: Record<number, string> = { ...prev };
+      for (let i = 1; i <= count; i++) {
+        if (!updated[i]) {
+          updated[i] = bulkUnitPrice || targetUnitPrice || '';
+        }
+      }
+      return updated;
+    });
+  };
+
+  const handleSingleUnitChange = (unitNum: number, price: string) => {
+    setUnitPrices((prev) => ({
+      ...prev,
+      [unitNum]: price,
+    }));
+    if (unitNum === 1) {
+      setTargetUnitPrice(price);
+    }
+  };
+
+  const calculatedTotalValue = React.useMemo(() => {
+    const count = Math.min(Math.max(parseInt(totalUnits, 10) || 1, 1), 50);
+    let sum = 0;
+    for (let i = 1; i <= count; i++) {
+      const raw = unitPrices[i] ?? (count === 1 ? targetUnitPrice : bulkUnitPrice);
+      if (raw) {
+        const num = parseFloat(raw.replace(/[^0-9.]/g, ''));
+        if (!isNaN(num)) sum += num;
+      }
+    }
+    return sum;
+  }, [totalUnits, unitPrices, targetUnitPrice, bulkUnitPrice]);
+
+  useEffect(() => {
+    if (projectPhase === 'PRE_ACQUISITION') {
+      setProjectStatus('new');
+      setProjectStage('Conception, design & planning');
+      setIsAcquired('false');
+    } else if (projectPhase === 'ACQUISITION') {
+      setProjectStatus('new');
+      setProjectStage('Conception, design & planning');
+      setIsAcquired('true');
+    } else if (projectPhase === 'PERMITTING') {
+      setProjectStatus('new');
+      setProjectStage('Building permits');
+      setIsAcquired('true');
+    } else if (projectPhase === 'ACTIVE_CONSTRUCTION') {
+      setProjectStatus('active');
+      setProjectStage('Under construction');
+      setIsAcquired('true');
+    } else if (projectPhase === 'POST_CONSTRUCTION') {
+      setProjectStatus('active');
+      setProjectStage('Post-construction');
+      setIsAcquired('true');
+    }
+  }, [projectPhase]);
 
   // Screen 2: Organization Details
   const [orgName, setOrgName] = useState<string>(
@@ -565,16 +649,16 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
   const [orgSize, setOrgSize] = useState<'Small' | 'Medium' | 'Large'>('Small');
   const [teamSizeChoice, setTeamSizeChoice] = useState<'1-5' | '5+' | '50+' | '100+' | 'custom'>('1-5');
   const [employeeCount, setEmployeeCount] = useState<number>(4);
-  const [website, setWebsite] = useState<string>('https://vancedevelopment.com');
+  const [website, setWebsite] = useState<string>('');
 
-  // Screen 3: Project Setup (Identity, Capital & Debt, Contract Governance)
+  // Screen 3: Project Setup (Identity, Capital & Debt)
   const [isProjectFormOpen, setIsProjectFormOpen] = useState<boolean>(true);
-  const [projectSubStep, setProjectSubStep] = useState<1 | 2 | 3>(1);
+  const [projectSubStep, setProjectSubStep] = useState<1 | 2>(1);
   const [showGovDetails, setShowGovDetails] = useState<boolean>(false);
   const [skippedProject, setSkippedProject] = useState<boolean>(false);
   const [projectName, setProjectName] = useState<string>('73 Broadway');
   const [projectEntity, setProjectEntity] = useState<string>('73 Broadway Development LLC');
-  const [assetType, setAssetType] = useState<string>('MULTIFAMILY');
+  const [assetType, setAssetType] = useState<string>('SINGLE_FAMILY');
   const [projectAddress, setProjectAddress] = useState<string>('73 Broadway, Brooklyn, NY 11249');
   const [projectStage, setProjectStage] = useState<string>('Under construction');
   const [startedAt, setStartedAt] = useState<string>('2024-03-01');
@@ -583,6 +667,24 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
   // Acquisition & Senior Debt Structure
   const [isAcquired, setIsAcquired] = useState<'true' | 'false'>('true');
   const [acquisitionFunding, setAcquisitionFunding] = useState<string>('ACQUISITION_LOAN');
+  const [acquisitionDate, setAcquisitionDate] = useState<string>('');
+  const [acquisitionProofDocs, setAcquisitionProofDocs] = useState<IntakeDocument[]>([]);
+  const [isAcquisitionProofDragging, setIsAcquisitionProofDragging] = useState(false);
+  const acquisitionProofInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAddAcquisitionProofFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const newDocs: IntakeDocument[] = Array.from(files).map((f) => ({
+      id: `proof-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      name: f.name,
+      size: f.size,
+      type: f.type,
+      status: 'ready' as const,
+      category: 'Acquisition Proof',
+    }));
+    setAcquisitionProofDocs((prev) => [...prev, ...newDocs]);
+    setDocumentsList((prev) => [...prev, ...newDocs]);
+  };
   const [hasConstructionLoan, setHasConstructionLoan] = useState<'true' | 'false'>('true');
   const [lenderName, setLenderName] = useState<string>('Columbia Bank');
 
@@ -841,6 +943,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
       return;
     }
 
+    saveAnswer('projectPhase', projectPhase);
     saveAnswer('projectStatus', projectStatus);
     saveAnswer('hasActiveProject', projectStatus === 'active');
     saveAnswer('primaryFocus', primaryFocus);
@@ -896,11 +999,21 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
       targetDate: targetDate || undefined,
       isAcquired,
       acquisitionFunding,
+      acquisitionDate: acquisitionDate || undefined,
       hasConstructionLoan,
       lenderName: lenderName.trim() || undefined,
       contractModel,
       hybridCustomDetails: hybridCustomDetails.trim() || undefined,
       operatingAccountModel,
+      phase: projectPhase,
+      permit_status: (projectPhase === 'ACQUISITION' || projectPhase === 'PERMITTING') ? permitStatus : undefined,
+      budget_sheet_status: projectPhase === 'PERMITTING' ? budgetSheetStatus : undefined,
+      due_diligence_status: projectPhase === 'PRE_ACQUISITION' ? dueDiligenceStatus : undefined,
+      target_purchase_price: projectPhase === 'PRE_ACQUISITION' ? targetPurchasePrice || undefined : undefined,
+      unit_price_decided: projectPhase === 'POST_CONSTRUCTION' ? unitPriceDecided : undefined,
+      total_units: projectPhase === 'POST_CONSTRUCTION' ? parseInt(totalUnits, 10) || 1 : undefined,
+      unit_prices: projectPhase === 'POST_CONSTRUCTION' ? unitPrices : undefined,
+      target_unit_price: (projectPhase === 'POST_CONSTRUCTION' && unitPriceDecided === 'YES') ? (unitPrices[1] || targetUnitPrice || bulkUnitPrice) || undefined : undefined,
     });
     if (!validation.success) {
       const msg = validation.error.errors[0]?.message || 'Please complete all required project fields.';
@@ -923,11 +1036,34 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
     saveAnswer('targetCompletionDate', targetDate);
     saveAnswer('isAcquired', isAcquired);
     saveAnswer('acquisitionFunding', acquisitionFunding);
+    saveAnswer('acquisitionDate', acquisitionDate);
     saveAnswer('hasConstructionLoan', hasConstructionLoan);
     saveAnswer('lenderName', lenderName.trim());
     saveAnswer('contractModel', contractModel);
     saveAnswer('hybridCustomDetails', hybridCustomDetails.trim());
     saveAnswer('operatingAccountModel', operatingAccountModel);
+    saveAnswer('phase', projectPhase);
+    saveAnswer('projectPhase', projectPhase);
+    if (projectPhase === 'ACQUISITION' || projectPhase === 'PERMITTING') {
+      saveAnswer('permit_status', permitStatus);
+    }
+    if (projectPhase === 'PERMITTING') {
+      saveAnswer('budget_sheet_status', budgetSheetStatus);
+    }
+    if (projectPhase === 'PRE_ACQUISITION') {
+      saveAnswer('due_diligence_status', dueDiligenceStatus);
+      if (targetPurchasePrice) saveAnswer('target_purchase_price', targetPurchasePrice);
+    }
+    if (projectPhase === 'POST_CONSTRUCTION') {
+      saveAnswer('unit_price_decided', unitPriceDecided);
+      saveAnswer('total_units', parseInt(totalUnits, 10) || 1);
+      saveAnswer('totalUnits', parseInt(totalUnits, 10) || 1);
+      saveAnswer('unit_prices', unitPrices);
+      if (unitPriceDecided === 'YES') {
+        const effectivePrice = unitPrices[1] || targetUnitPrice || bulkUnitPrice;
+        if (effectivePrice) saveAnswer('target_unit_price', effectivePrice);
+      }
+    }
     triggerStepTransition(4, 'Preparing document vault...', 'Configuring audit-backed source document requirements');
   };
 
@@ -1020,8 +1156,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
   const handleAddCollaborator = () => {
     const trimmed = inviteEmail.trim().toLowerCase();
     if (!trimmed || !trimmed.includes('@') || !trimmed.includes('.')) {
-      setInviteError('Please enter a valid work email address.');
-      showToast('error', 'Please enter a valid work email address.');
+      setInviteError('Please enter a valid email address.');
+      showToast('error', 'Please enter a valid email address.');
       return;
     }
     if (teamList.some(m => m.email.toLowerCase() === trimmed)) {
@@ -1104,6 +1240,15 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
         projectAddress: projectAddress.trim() || undefined,
         projectStage: projectStage as OnboardingProjectStage,
         targetCompletionDate: targetDate || undefined,
+        phase: projectPhase,
+        permit_status: (projectPhase === 'ACQUISITION' || projectPhase === 'PERMITTING') ? permitStatus : undefined,
+        budget_sheet_status: projectPhase === 'PERMITTING' ? budgetSheetStatus : undefined,
+        due_diligence_status: projectPhase === 'PRE_ACQUISITION' ? dueDiligenceStatus : undefined,
+        target_purchase_price: projectPhase === 'PRE_ACQUISITION' ? targetPurchasePrice || undefined : undefined,
+        unit_price_decided: projectPhase === 'POST_CONSTRUCTION' ? unitPriceDecided : undefined,
+        total_units: projectPhase === 'POST_CONSTRUCTION' ? parseInt(totalUnits, 10) || 1 : undefined,
+        unit_prices: projectPhase === 'POST_CONSTRUCTION' ? unitPrices : undefined,
+        target_unit_price: (projectPhase === 'POST_CONSTRUCTION' && unitPriceDecided === 'YES') ? (unitPrices[1] || targetUnitPrice || bulkUnitPrice) || undefined : undefined,
         selectedDocumentTypes: selectedDocTypes,
         uploadedDocuments: documentsList.map(d => ({
           id: d.id,
@@ -1198,7 +1343,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
 
   const handleBack = () => {
     if (currentStep === 3 && projectSubStep > 1) {
-      setProjectSubStep((s) => (s - 1) as 1 | 2 | 3);
+      setProjectSubStep((s) => (s - 1) as 1 | 2);
       return;
     }
     if (currentStep === 1) {
@@ -1235,8 +1380,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
       {/* ── Top Header Navigation Bar (Mobile-Responsive, Zero Clutter) ─ */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-slate-200/90 px-3 sm:px-6 py-3 sm:py-3.5 sticky top-0 z-30 shadow-2xs relative">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
+      <header className="bg-white/90 backdrop-blur-md border-b border-slate-200/90 px-3 sm:px-6 py-2.5 sm:py-3.5 sticky top-0 z-30 shadow-2xs relative">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-2 sm:gap-3">
 
           {/* Logo & Context (Clickable to exit to Home) */}
           <button
@@ -1245,32 +1390,38 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
             className="flex items-center gap-2 sm:gap-3 shrink-0 hover:opacity-85 transition cursor-pointer text-left focus:outline-none"
             title="Return to GroundUp Home"
           >
-            <Logo theme="light" className="h-5 sm:h-6 w-auto" />
+            <div className="sm:hidden flex items-center">
+              <Logo variant="mark" size="sm" />
+            </div>
+            <div className="hidden sm:flex items-center">
+              <Logo theme="light" size="md" />
+            </div>
           </button>
 
           {/* Step Progress Pill: Clean single indicator */}
           {currentStep >= 1 && currentStep <= 5 && (
-            <div className="flex items-center gap-2 px-3 py-1 bg-slate-50/90 border border-slate-200/80 rounded-full text-center shadow-2xs">
-              <span className="text-[11px] font-mono text-sky-600 font-bold whitespace-nowrap">
+            <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 bg-slate-50/90 border border-slate-200/80 rounded-full text-center shadow-2xs min-w-0">
+              <span className="text-[11px] font-mono text-sky-600 font-bold whitespace-nowrap shrink-0">
                 {currentStep} / 5
               </span>
               <div className="h-3 w-px bg-slate-200 shrink-0" />
-              <span className="text-xs font-bold text-slate-800 truncate max-w-[130px] sm:max-w-none">
+              <span className="text-[11px] sm:text-xs font-bold text-slate-800 truncate max-w-[100px] sm:max-w-none">
                 {STEP_TITLES[currentStep]}
               </span>
             </div>
           )}
 
           {/* Header Exit Action: Single source of truth for exiting onboarding */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               id="btn-exit-onboarding"
               type="button"
               onClick={() => onCancelOrSignOut?.()}
-              className="text-xs font-semibold text-slate-500 hover:text-slate-900 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+              className="text-xs font-semibold text-slate-600 hover:text-slate-900 px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition cursor-pointer shadow-2xs whitespace-nowrap"
               title="Exit onboarding and return to home"
             >
-              Exit to home
+              <span className="hidden sm:inline">Exit to home</span>
+              <span className="sm:hidden">Exit</span>
             </button>
           </div>
         </div>
@@ -1288,9 +1439,9 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
       </header>
 
       {/* ── Structured Onboarding Container (Pro UI/UX, Balanced White Space) ── */}
-      <main className={`flex-1 w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col justify-center relative z-10 transition-all duration-200 ${currentStep === 3 ? 'max-w-2xl sm:max-w-3xl' : 'max-w-xl sm:max-w-2xl'
+      <main className={`flex-1 w-full mx-auto px-3 sm:px-6 py-4 sm:py-10 flex flex-col justify-center relative z-10 transition-all duration-200 ${currentStep === 3 ? 'max-w-2xl sm:max-w-3xl' : 'max-w-xl sm:max-w-2xl'
         }`}>
-        <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-6 sm:p-9 shadow-[0_10px_30px_-5px_rgba(15,23,42,0.04),0_1px_3px_rgba(0,0,0,0.02)] transition-all relative">
+        <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-[0_10px_30px_-5px_rgba(15,23,42,0.04),0_1px_3px_rgba(0,0,0,0.02)] transition-all relative overflow-hidden">
           {/* Back button for steps 2 to 5 */}
           {currentStep > 1 && currentStep < 6 && (
             <div className="mb-4">
@@ -1332,102 +1483,100 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                 </div>
               </div>
 
-              <div className="space-y-3.5 pt-1">
-                {/* Choice 1: Active Construction Projects */}
-                <div
-                  id="focus-card-funding"
-                  data-project-type="active"
-                  onClick={() => {
-                    setProjectStatus('active');
-                    setPrimaryFocus('funding');
-                    setProjectStage('Under construction');
-                    setSecondaryFocuses([]);
-                  }}
-                  className={`p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${projectStatus === 'active'
-                    ? 'bg-sky-50/50 border-sky-600 ring-1 ring-sky-600/15 text-slate-900 shadow-2xs'
-                    : 'bg-white text-slate-800 border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/60 shadow-2xs'
-                    }`}
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${projectStatus === 'active' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-700'
-                          }`}>
-                          <HardHat className="w-4 h-4" />
+              <div className="space-y-2.5 pt-1">
+                {[
+                  {
+                    id: "PRE_ACQUISITION" as ProjectPhase,
+                    domId: "focus-card-budget",
+                    title: "Pre Acquisition",
+                    desc: "Planning, site feasibility, and LOI negotiations before purchase.",
+                    icon: Compass,
+                    badge: "Planning Phase",
+                  },
+                  {
+                    id: "ACQUISITION" as ProjectPhase,
+                    domId: "focus-card-acquisition",
+                    title: "Acquisition",
+                    desc: "Land purchased and deed recorded; preparing for site work and design.",
+                    icon: KeyRound,
+                    badge: "Closing Phase",
+                  },
+                  {
+                    id: "PERMITTING" as ProjectPhase,
+                    domId: "focus-card-permitting",
+                    title: "Permitting",
+                    desc: "Architectural drawings submitted and municipal permits in review.",
+                    icon: ShieldCheck,
+                    badge: "Approval Phase",
+                  },
+                  {
+                    id: "ACTIVE_CONSTRUCTION" as ProjectPhase,
+                    domId: "focus-card-funding",
+                    title: "Active Project Construction",
+                    desc: "Active jobsite with ongoing contractor draws, inspections, and trade work.",
+                    icon: HardHat,
+                    badge: "Active Phase",
+                  },
+                  {
+                    id: "POST_CONSTRUCTION" as ProjectPhase,
+                    domId: "focus-card-post-construction",
+                    title: "Post Construction",
+                    desc: "Certificate of occupancy issued, punch list closeout, and warranty handover.",
+                    icon: Building2,
+                    badge: "Closeout Phase",
+                  },
+                ].map((card) => {
+                  const isSelected = projectPhase === card.id;
+                  const CardIcon = card.icon;
+                  return (
+                    <div
+                      key={card.id}
+                      id={card.domId}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setProjectPhase(card.id)}
+                      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setProjectPhase(card.id)}
+                      className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 sm:gap-4 ${
+                        isSelected
+                          ? "bg-slate-100 border-slate-900 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10"
+                          : "bg-white text-slate-800 border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/60 shadow-2xs"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+                        <div
+                          className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                            isSelected ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"
+                          }`}
+                        >
+                          <CardIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                            {card.title}
+                          </h3>
+                          <p className="text-[11px] sm:text-xs text-slate-500 font-normal leading-normal mt-0.5">
+                            {card.desc}
+                          </p>
                         </div>
                       </div>
-                      <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                        Active Construction
-                      </h3>
-                      <p className="text-xs text-slate-500 leading-relaxed mt-0.5">
-                        Live site with ongoing draw packages, bills, and lien waivers.
-                      </p>
-                    </div>
 
-                    {/* Custom Vector Architectural Illustration */}
-                    <div className="hidden sm:flex w-32 h-24 shrink-0 rounded-xl overflow-hidden border border-slate-200/80 bg-white p-1 items-center justify-center shadow-2xs">
-                      <ActiveJobsiteSvg active={projectStatus === 'active'} />
-                    </div>
-                  </div>
-
-                  <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex items-center justify-end">
-                    {projectStatus === 'active' ? (
-                      <div className="w-5 h-5 rounded-full bg-sky-600 flex items-center justify-center shadow-2xs text-white">
-                        <Check className="w-3 h-3 stroke-[3]" />
+                      {/* Architectural Phase Illustration Preview */}
+                      <div className="hidden sm:flex w-32 h-20 shrink-0">
+                        <PhaseIllustration phase={card.id} active={isSelected} className="w-full h-full" />
                       </div>
-                    ) : (
-                      <div className="w-5 h-5 rounded-full border-2 border-slate-300" />
-                    )}
-                  </div>
-                </div>
 
-                {/* Choice 2: New to Construction / Planning Project */}
-                <div
-                  id="focus-card-budget"
-                  data-project-type="new"
-                  onClick={() => {
-                    setProjectStatus('new');
-                    setPrimaryFocus('budget');
-                    setProjectStage('Conception, design & planning');
-                    setSecondaryFocuses([]);
-                  }}
-                  className={`p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${projectStatus === 'new'
-                    ? 'bg-sky-50/50 border-sky-600 ring-1 ring-sky-600/15 text-slate-900 shadow-2xs'
-                    : 'bg-white text-slate-800 border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/60 shadow-2xs'
-                    }`}
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${projectStatus === 'new' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-700'
-                          }`}>
-                          <Building2 className="w-4 h-4" />
-                        </div>
+                      <div className="shrink-0 flex items-center">
+                        {isSelected ? (
+                          <div className="w-5 h-5 rounded-full bg-slate-900 flex items-center justify-center shadow-2xs text-white">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </div>
+                        ) : (
+                          <div className="w-5 h-5 rounded-full border-2 border-slate-300" />
+                        )}
                       </div>
-                      <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                        Planning & Pre-Development
-                      </h3>
-                      <p className="text-xs text-slate-500 leading-relaxed mt-0.5">
-                        Pro forma budgets, CSI 50 divisions, and municipal permits.
-                      </p>
                     </div>
-
-                    {/* Custom Vector Architectural Blueprint Illustration */}
-                    <div className="hidden sm:flex w-32 h-24 shrink-0 rounded-xl overflow-hidden border border-slate-200/80 bg-white p-1 items-center justify-center shadow-2xs">
-                      <PreDevelopmentSvg active={projectStatus === 'new'} />
-                    </div>
-                  </div>
-
-                  <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex items-center justify-end">
-                    {projectStatus === 'new' ? (
-                      <div className="w-5 h-5 rounded-full bg-sky-600 flex items-center justify-center shadow-2xs text-white">
-                        <Check className="w-3 h-3 stroke-[3]" />
-                      </div>
-                    ) : (
-                      <div className="w-5 h-5 rounded-full border-2 border-slate-300" />
-                    )}
-                  </div>
-                </div>
+                  );
+                })}
               </div>
 
               {/* Secondary priority button hidden for test suite backward compatibility */}
@@ -1446,7 +1595,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                 onClick={handleContinueChallenge}
                 className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
               >
-                <span>Continue</span>
+                <span>Next</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -1497,64 +1646,6 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     </p>
                   )}
                 </div>
-
-                {/* Active Projects Selection */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold text-slate-800">
-                    How many active projects do you have?
-                  </label>
-                  <div className="grid grid-cols-3 gap-2.5">
-                    {[
-                      { id: 'Small' as const, label: '1 to 3 projects', count: 3, team: '1-5' as const },
-                      { id: 'Medium' as const, label: '4 to 10 projects', count: 12, team: '5+' as const },
-                      { id: 'Large' as const, label: '10+ projects', count: 50, team: '50+' as const },
-                    ].map((tier) => {
-                      const isSelected = orgSize === tier.id;
-                      return (
-                        <button
-                          key={tier.id}
-                          id={`org-size-${tier.id.toLowerCase()}`}
-                          type="button"
-                          onClick={() => {
-                            setOrgSize(tier.id);
-                            setTeamSizeChoice(tier.team);
-                            setEmployeeCount(tier.count);
-                          }}
-                          className={`p-3.5 rounded-xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 ${isSelected
-                            ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                            : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                            }`}
-                        >
-                          <span className="text-xs font-bold">{tier.label}</span>
-                          {isSelected && (
-                            <span className="text-[10px] text-slate-200 font-medium flex items-center gap-1 mt-0.5">
-                              <Check className="w-3 h-3 stroke-[2.5]" />
-                              Selected
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Website */}
-                <div className="space-y-1.5">
-                  <label htmlFor="input-website" className="block text-xs font-semibold text-slate-800">
-                    Website <span className="text-slate-400 font-normal">(optional)</span>
-                  </label>
-                  <div className="relative">
-                    <Globe className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      id="input-website"
-                      type="text"
-                      value={website}
-                      onChange={(e) => setWebsite(e.target.value)}
-                      placeholder="https://yourcompany.com"
-                      className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900"
-                    />
-                  </div>
-                </div>
               </div>
 
               {/* Action Buttons: Continue & Skip */}
@@ -1565,7 +1656,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   onClick={handleCreateOrganization}
                   className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
                 >
-                  <span>Continue</span>
+                  <span>Next</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -1584,16 +1675,19 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">
                   <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-                    {projectSubStep === 1 && "Let's add your first project"}
-                    {projectSubStep === 2 && 'Capital & Debt Structure'}
-                    {projectSubStep === 3 && 'Contract Model & Banking'}
+                    {projectSubStep === 1 && (projectPhase === 'PRE_ACQUISITION' ? 'Pre-acquisition asset details' : "Let's add your first project")}
+                    {projectSubStep === 2 && (projectPhase === 'PRE_ACQUISITION' ? 'Purchase Capital & Funding' : 'Capital & Debt Structure')}
                   </h1>
+                  <p className="text-xs text-slate-500">
+                    {projectSubStep === 1 && (projectPhase === 'PRE_ACQUISITION' ? 'Property planning, location, and target schedule.' : 'Project identity, archetype, and target schedule.')}
+                    {projectSubStep === 2 && (projectPhase === 'PRE_ACQUISITION' ? 'Financing source and capital structure.' : 'Acquisition financing, loan facilities, and GC contract structure.')}
+                  </p>
                 </div>
               </div>
 
-              {/* Progress Indicator: 3 segments */}
+              {/* Progress Indicator: 2 segments */}
               <div className="space-y-1.5">
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setProjectSubStep(1)}
@@ -1601,7 +1695,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   >
                     <div className={`h-1.5 rounded-full transition-colors ${projectSubStep >= 1 ? 'bg-slate-900' : 'bg-slate-200'}`} />
                     <span className={`block text-[11px] font-semibold mt-1.5 transition-colors ${projectSubStep === 1 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
-                      1. Identity & Dates
+                      {projectPhase === 'PRE_ACQUISITION' ? '1. Planning & Schedule' : '1. Identity & Dates'}
                     </span>
                   </button>
                   <button
@@ -1613,19 +1707,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   >
                     <div className={`h-1.5 rounded-full transition-colors ${projectSubStep >= 2 ? 'bg-slate-900' : 'bg-slate-200'}`} />
                     <span className={`block text-[11px] font-semibold mt-1.5 transition-colors ${projectSubStep === 2 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
-                      2. Capital & Debt
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (projectName.trim()) setProjectSubStep(3);
-                    }}
-                    className="group text-left cursor-pointer focus:outline-none"
-                  >
-                    <div className={`h-1.5 rounded-full transition-colors ${projectSubStep >= 3 ? 'bg-slate-900' : 'bg-slate-200'}`} />
-                    <span className={`block text-[11px] font-semibold mt-1.5 transition-colors ${projectSubStep === 3 ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'}`}>
-                      3. Contract & Banking
+                      {projectPhase === 'PRE_ACQUISITION' ? '2. Capital & Funding' : '2. Capital & Debt'}
                     </span>
                   </button>
                 </div>
@@ -1641,134 +1723,212 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
               {/* ────────────────── PART 1: IDENTITY & SCHEDULE ────────────────── */}
               {projectSubStep === 1 && (
                 <div className="space-y-4 animate-in fade-in duration-200">
-                  {/* Project Name and Auto-derived Legal Entity */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div className="space-y-1.5">
-                      <label htmlFor="input-project-name" className="block text-xs font-bold text-slate-800">
-                        Project display name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        id="input-project-name"
-                        type="text"
-                        autoFocus
-                        value={projectName}
-                        onChange={(e) => {
-                          setProjectName(e.target.value);
-                          if (projectError) setProjectError(null);
-                        }}
-                        placeholder={projectStatus === 'active' ? 'e.g. 73 Broadway Mixed-Use' : 'e.g. 161 Woodlawn Mixed-Use'}
-                        className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition ${projectError ? 'border-red-400 focus:ring-red-500/20' : 'border-slate-200 focus:border-slate-900 focus:ring-slate-900/10'
-                          }`}
-                      />
-                    </div>
+                  {/* PRE-ACQUISITION PART 1 */}
+                  {projectPhase === 'PRE_ACQUISITION' ? (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <div className="space-y-1.5">
+                          <label htmlFor="input-project-name" className="block text-xs font-bold text-slate-800">
+                            Prospective project / property name <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            id="input-project-name"
+                            type="text"
+                            autoFocus
+                            value={projectName}
+                            onChange={(e) => {
+                              setProjectName(e.target.value);
+                              if (projectError) setProjectError(null);
+                            }}
+                            placeholder="e.g. 142 Ocean Ave Acquisition"
+                            className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition ${
+                              projectError ? 'border-red-400 focus:ring-red-500/20' : 'border-slate-200 focus:border-slate-900 focus:ring-slate-900/10'
+                            }`}
+                          />
+                        </div>
 
-                    <div className="space-y-1.5">
-                      <label htmlFor="input-project-entity" className="block text-xs font-bold text-slate-800">
-                        Legal ownership entity (LLC / LP) <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        id="input-project-entity"
-                        type="text"
-                        value={projectEntity}
-                        onChange={(e) => setProjectEntity(e.target.value)}
-                        placeholder="e.g. 161 Woodlawn Partners LLC"
-                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Site Address */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="input-project-address" className="block text-xs font-bold text-slate-800">
-                      Site address / location <span className="text-slate-400 font-normal">(optional)</span>
-                    </label>
-                    <div className="relative">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        id="input-project-address"
-                        type="text"
-                        value={projectAddress}
-                        onChange={(e) => setProjectAddress(e.target.value)}
-                        placeholder={projectStatus === 'active' ? 'e.g. 73 Broadway, Jersey City, NJ 07306' : 'e.g. 161 Woodlawn Ave, Jersey City, NJ 07305'}
-                        className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Minimalist Dropdowns for Archetype and Stage */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    {/* Project Asset Archetype */}
-                    <div className="space-y-1.5">
-                      <label htmlFor="select-asset-archetype" className="block text-xs font-bold text-slate-800">
-                        Project asset archetype
-                      </label>
-                      <select
-                        id="select-asset-archetype"
-                        value={assetType}
-                        onChange={(e) => setAssetType(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition cursor-pointer"
-                      >
-                        <option value="MULTIFAMILY">Multifamily</option>
-                        <option value="SINGLE_FAMILY">Single Family</option>
-                        <option value="MIXED_USE">Mixed-Use</option>
-                        <option value="SUBDIVISION">Subdivision</option>
-                      </select>
-                    </div>
-
-                    {/* Current Project Stage */}
-                    <div className="space-y-1.5">
-                      <label htmlFor="select-project-stage" className="block text-xs font-bold text-slate-800">
-                        Current project stage
-                      </label>
-                      <select
-                        id="select-project-stage"
-                        value={projectStage}
-                        onChange={(e) => setProjectStage(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition cursor-pointer"
-                      >
-                        {(projectStatus === 'active' ? ACTIVE_STAGE_CHOICES : NEW_STAGE_CHOICES).map((choice) => (
-                          <option key={choice.id} value={choice.id}>
-                            {choice.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Timeline Schedule: Start and Completion Dates */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div className="space-y-1.5">
-                      <label htmlFor="input-started-at" className="block text-xs font-bold text-slate-800">
-                        Target construction start <span className="text-slate-400 font-normal">(optional)</span>
-                      </label>
-                      <div className="relative">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input
-                          id="input-started-at"
-                          type="date"
-                          value={startedAt}
-                          onChange={(e) => setStartedAt(e.target.value)}
-                          className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                        />
+                        <div className="space-y-1.5">
+                          <label htmlFor="input-project-entity" className="block text-xs font-bold text-slate-800">
+                            Legal purchasing entity (LLC / LP) <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            id="input-project-entity"
+                            type="text"
+                            value={projectEntity}
+                            onChange={(e) => setProjectEntity(e.target.value)}
+                            placeholder="e.g. 142 Ocean Holdings LLC"
+                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                          />
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="space-y-1.5">
-                      <label htmlFor="input-target-date" className="block text-xs font-bold text-slate-800">
-                        Target completion date <span className="text-slate-400 font-normal">(optional)</span>
-                      </label>
-                      <div className="relative">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input
-                          id="input-target-date"
-                          type="date"
-                          value={targetDate}
-                          onChange={(e) => setTargetDate(e.target.value)}
-                          className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                        />
+                      {/* Site Address */}
+                      <div className="space-y-1.5">
+                        <label htmlFor="input-project-address" className="block text-xs font-bold text-slate-800">
+                          Target site address / parcel location <span className="text-slate-400 font-normal">(optional)</span>
+                        </label>
+                        <div className="relative">
+                          <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                          <input
+                            id="input-project-address"
+                            type="text"
+                            value={projectAddress}
+                            onChange={(e) => setProjectAddress(e.target.value)}
+                            placeholder="e.g. 142 Ocean Ave, Jersey City, NJ 07305"
+                            className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </div>
+
+                      {/* Development Type */}
+                      <div className="space-y-1.5">
+                        <label htmlFor="select-asset-archetype" className="block text-xs font-bold text-slate-800">
+                          Development Type
+                        </label>
+                        <select
+                          id="select-asset-archetype"
+                          value={assetType}
+                          onChange={(e) => setAssetType(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition cursor-pointer"
+                        >
+                          <option value="SINGLE_FAMILY">Single Family</option>
+                          <option value="TWO_FAMILY">Two Family</option>
+                          <option value="MULTIFAMILY">Multi Family</option>
+                          <option value="MIXED_USE">Mixed Use</option>
+                        </select>
+                      </div>
+
+                      {/* Target Acquisition Date */}
+                      <div className="space-y-1.5">
+                        <label htmlFor="input-started-at" className="block text-xs font-bold text-slate-800">
+                          Target acquisition / purchase close date <span className="text-slate-400 font-normal">(optional)</span>
+                        </label>
+                        <div className="relative">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                          <input
+                            id="input-started-at"
+                            type="date"
+                            value={startedAt}
+                            onChange={(e) => {
+                              setStartedAt(e.target.value);
+                              setAcquisitionDate(e.target.value);
+                            }}
+                            className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    /* NON-PRE-ACQUISITION PART 1 */
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <div className="space-y-1.5">
+                          <label htmlFor="input-project-name" className="block text-xs font-bold text-slate-800">
+                            Project display name <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            id="input-project-name"
+                            type="text"
+                            autoFocus
+                            value={projectName}
+                            onChange={(e) => {
+                              setProjectName(e.target.value);
+                              if (projectError) setProjectError(null);
+                            }}
+                            placeholder={projectStatus === 'active' ? 'e.g. 73 Broadway Mixed-Use' : 'e.g. 161 Woodlawn Mixed-Use'}
+                            className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition ${
+                              projectError ? 'border-red-400 focus:ring-red-500/20' : 'border-slate-200 focus:border-slate-900 focus:ring-slate-900/10'
+                            }`}
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label htmlFor="input-project-entity" className="block text-xs font-bold text-slate-800">
+                            Legal ownership entity (LLC / LP) <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            id="input-project-entity"
+                            type="text"
+                            value={projectEntity}
+                            onChange={(e) => setProjectEntity(e.target.value)}
+                            placeholder="e.g. 161 Woodlawn Partners LLC"
+                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Site Address */}
+                      <div className="space-y-1.5">
+                        <label htmlFor="input-project-address" className="block text-xs font-bold text-slate-800">
+                          Site address / location <span className="text-slate-400 font-normal">(optional)</span>
+                        </label>
+                        <div className="relative">
+                          <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                          <input
+                            id="input-project-address"
+                            type="text"
+                            value={projectAddress}
+                            onChange={(e) => setProjectAddress(e.target.value)}
+                            placeholder={projectStatus === 'active' ? 'e.g. 73 Broadway, Jersey City, NJ 07306' : 'e.g. 161 Woodlawn Ave, Jersey City, NJ 07305'}
+                            className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Development Type */}
+                      <div className="space-y-1.5">
+                        <label htmlFor="select-asset-archetype" className="block text-xs font-bold text-slate-800">
+                          Development Type
+                        </label>
+                        <select
+                          id="select-asset-archetype"
+                          value={assetType}
+                          onChange={(e) => setAssetType(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition cursor-pointer"
+                        >
+                          <option value="SINGLE_FAMILY">Single Family</option>
+                          <option value="TWO_FAMILY">Two Family</option>
+                          <option value="MULTIFAMILY">Multi Family</option>
+                          <option value="MIXED_USE">Mixed Use</option>
+                        </select>
+                      </div>
+
+                      {/* Timeline Schedule: Start and Completion Dates */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <div className="space-y-1.5">
+                          <label htmlFor="input-started-at" className="block text-xs font-bold text-slate-800">
+                            Target construction start <span className="text-slate-400 font-normal">(optional)</span>
+                          </label>
+                          <div className="relative">
+                            <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                            <input
+                              id="input-started-at"
+                              type="date"
+                              value={startedAt}
+                              onChange={(e) => setStartedAt(e.target.value)}
+                              className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label htmlFor="input-target-date" className="block text-xs font-bold text-slate-800">
+                            Target completion date <span className="text-slate-400 font-normal">(optional)</span>
+                          </label>
+                          <div className="relative">
+                            <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                            <input
+                              id="input-target-date"
+                              type="date"
+                              value={targetDate}
+                              onChange={(e) => setTargetDate(e.target.value)}
+                              className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   {/* Part 1 Actions */}
                   <div className="space-y-2.5 pt-3">
@@ -1778,7 +1938,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                       onClick={handleAdvanceToPart2}
                       className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
                     >
-                      <span>Next: Capital & Debt Structure</span>
+                      <span>Next</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
 
@@ -1794,107 +1954,381 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                 </div>
               )}
 
-              {/* ────────────────── PART 2: CAPITAL & DEBT ────────────────── */}
+              {/* ────────────────── PART 2: CAPITAL, DEBT & PHASE QUESTIONS ────────────────── */}
               {projectSubStep === 2 && (
                 <div className="space-y-4 animate-in fade-in duration-150">
-                  {/* Property Acquisition Status */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-800">
-                      Property acquisition status
-                    </label>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      {[
-                        { val: 'true', label: 'Title / Deed Closed' },
-                        { val: 'false', label: 'Under Contract / LOI' },
-                      ].map((opt) => (
-                        <button
-                          key={opt.val}
-                          type="button"
-                          onClick={() => setIsAcquired(opt.val as any)}
-                          className={`rounded-xl border py-2.5 px-3.5 text-center transition cursor-pointer ${isAcquired === opt.val
-                            ? 'border-slate-900 bg-slate-900 text-white shadow-xs font-bold'
-                            : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium'
-                            }`}
-                        >
-                          <span className="text-xs">{opt.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  {/* PRE-ACQUISITION FLOW */}
+                  {projectPhase === 'PRE_ACQUISITION' ? (
+                    <>
 
-                  {/* Initial Acquisition Funding Source */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-800">
-                      Initial acquisition capital source
-                    </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {[
-                        { id: 'ACQUISITION_LOAN', label: 'Bank Debt' },
-                        { id: 'EQUITY', label: 'Sponsor Equity' },
-                        { id: 'LP_EQUITY', label: 'LP Equity' },
-                        { id: 'SELLER_FINANCED', label: 'Seller Note' },
-                      ].map((f) => {
-                        const isSelected = acquisitionFunding === f.id;
-                        return (
-                          <button
-                            key={f.id}
-                            type="button"
-                            onClick={() => setAcquisitionFunding(f.id)}
-                            className={`rounded-xl border py-2.5 px-3 text-center transition cursor-pointer ${isSelected
-                              ? 'border-slate-900 bg-slate-900 text-white shadow-xs font-bold'
-                              : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium'
-                              }`}
-                          >
-                            <span className="text-xs">{f.label}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Construction Debt Structure */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-800">
-                      Construction debt structure
-                    </label>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      {[
-                        { val: 'true', label: 'Construction Loan' },
-                        { val: 'false', label: 'All-Equity / Self-Funded' },
-                      ].map((opt) => (
-                        <button
-                          key={opt.val}
-                          type="button"
-                          onClick={() => setHasConstructionLoan(opt.val as any)}
-                          className={`rounded-xl border py-2.5 px-3.5 text-center transition cursor-pointer ${hasConstructionLoan === opt.val
-                            ? 'border-slate-900 bg-slate-900 text-white shadow-xs font-bold'
-                            : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium'
-                            }`}
-                        >
-                          <span className="text-xs">{opt.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Senior Lender Name */}
-                  {hasConstructionLoan === 'true' && (
-                    <div className="space-y-1.5 animate-in fade-in duration-150">
-                      <label htmlFor="input-lender-name" className="block text-xs font-bold text-slate-800">
-                        Primary construction lender
-                      </label>
-                      <div className="relative">
-                        <Landmark className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input
-                          id="input-lender-name"
-                          type="text"
-                          value={lenderName}
-                          onChange={(e) => setLenderName(e.target.value)}
-                          placeholder="e.g. Columbia Bank"
-                          className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                        />
+                      {/* Planned Acquisition Capital Source */}
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-800">
+                          Planned acquisition capital source
+                        </label>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          {[
+                            { id: 'ACQUISITION_LOAN', label: 'Bank Loan' },
+                            { id: 'CASH_EQUITY', label: 'Self Funded' },
+                          ].map((f) => {
+                            const isSelected = acquisitionFunding === f.id || (f.id === 'CASH_EQUITY' && (acquisitionFunding === 'EQUITY' || acquisitionFunding === 'SELF_FUNDED'));
+                            return (
+                              <button
+                                key={f.id}
+                                type="button"
+                                onClick={() => setAcquisitionFunding(f.id)}
+                                className={`rounded-xl border py-2.5 px-3.5 text-center transition cursor-pointer ${
+                                  isSelected
+                                    ? 'border-slate-900 bg-slate-100 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10'
+                                    : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium'
+                                }`}
+                              >
+                                <span className="text-xs">{f.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
+
+
+                    </>
+                  ) : (
+                    /* ACQUISITION, PERMITTING, ACTIVE CONSTRUCTION, & POST CONSTRUCTION FLOW */
+                    <>
+                      {/* Initial Acquisition Funding Source */}
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-800">
+                          Initial acquisition capital source
+                        </label>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          {[
+                            { id: 'ACQUISITION_LOAN', label: 'Bank Loan' },
+                            { id: 'CASH_EQUITY', label: 'Self Funded' },
+                          ].map((f) => {
+                            const isSelected = acquisitionFunding === f.id || (f.id === 'CASH_EQUITY' && (acquisitionFunding === 'EQUITY' || acquisitionFunding === 'SELF_FUNDED'));
+                            return (
+                              <button
+                                key={f.id}
+                                type="button"
+                                onClick={() => setAcquisitionFunding(f.id)}
+                                className={`rounded-xl border py-2.5 px-3.5 text-center transition cursor-pointer ${
+                                  isSelected
+                                    ? 'border-slate-900 bg-slate-100 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10'
+                                    : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium'
+                                }`}
+                              >
+                                <span className="text-xs">{f.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Date of Acquisition */}
+                      <div className="space-y-1.5">
+                        <label htmlFor="input-acquisition-date" className="block text-xs font-bold text-slate-800">
+                          Date of acquisition <span className="text-slate-400 font-normal">(optional)</span>
+                        </label>
+                        <div className="relative">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                          <input
+                            id="input-acquisition-date"
+                            type="date"
+                            value={acquisitionDate}
+                            onChange={(e) => setAcquisitionDate(e.target.value)}
+                            className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                          />
+                        </div>
+                      </div>
+
+
+
+                      {/* ACQUISITION & PERMITTING: Permit Status Question */}
+                      {(projectPhase === 'ACQUISITION' || projectPhase === 'PERMITTING') && (
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-800">
+                            {projectPhase === 'PERMITTING'
+                              ? 'Is permit accepted for construction of that project?'
+                              : 'Permit status of the project'}
+                          </label>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                            {[
+                              { id: 'PERMIT_APPROVED', label: 'Permit Approved' },
+                              { id: 'PERMIT_PENDING', label: 'Permit Submitted & Pending' },
+                              { id: 'NOT_YET_APPLIED', label: 'Not Yet Applied' },
+                            ].map((p) => {
+                              const isSelected = permitStatus === p.id;
+                              return (
+                                <button
+                                  key={p.id}
+                                  type="button"
+                                  onClick={() => setPermitStatus(p.id as any)}
+                                  className={`rounded-xl border py-2.5 px-3 text-center transition cursor-pointer ${
+                                    isSelected
+                                      ? 'border-slate-900 bg-slate-100 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10'
+                                      : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium'
+                                  }`}
+                                >
+                                  <span className="text-xs">{p.label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* PERMITTING: Budget Sheet Question */}
+                      {projectPhase === 'PERMITTING' && (
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-800">
+                            Is the budget sheet for construction made?
+                          </label>
+                          <div className="grid grid-cols-2 gap-2.5">
+                            {[
+                              { id: 'BUDGET_READY', label: 'Yes (Budget Sheet / SOV Ready)' },
+                              { id: 'BUDGET_IN_PROGRESS', label: 'No (In Progress / Estimating)' },
+                            ].map((b) => {
+                              const isSelected = budgetSheetStatus === b.id;
+                              return (
+                                <button
+                                  key={b.id}
+                                  type="button"
+                                  onClick={() => setBudgetSheetStatus(b.id as any)}
+                                  className={`rounded-xl border py-2.5 px-3.5 text-center transition cursor-pointer ${
+                                    isSelected
+                                      ? 'border-slate-900 bg-slate-100 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10'
+                                      : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium'
+                                  }`}
+                                >
+                                  <span className="text-xs">{b.label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Construction Debt Structure */}
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-800">
+                          Construction debt structure
+                        </label>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          {[
+                            { val: 'true', label: 'Construction Loan' },
+                            { val: 'false', label: 'Self Funded Project' },
+                          ].map((opt) => (
+                            <button
+                              key={opt.val}
+                              type="button"
+                              onClick={() => setHasConstructionLoan(opt.val as any)}
+                              className={`rounded-xl border py-2.5 px-3.5 text-center transition cursor-pointer ${
+                                hasConstructionLoan === opt.val
+                                  ? 'border-slate-900 bg-slate-100 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10'
+                                  : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium'
+                              }`}
+                            >
+                              <span className="text-xs">{opt.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Primary Lender Name with Live FDIC Bank API & Other Option */}
+                      {hasConstructionLoan === 'true' && (
+                        <div className="space-y-1.5 animate-in fade-in duration-150">
+                          <label htmlFor="input-lender-name" className="block text-xs font-bold text-slate-800">
+                            Primary construction lender
+                          </label>
+                          <ConstructionLenderSelect
+                            id="input-lender-name"
+                            value={lenderName}
+                            onChange={setLenderName}
+                            placeholder="Select or search US bank (or choose Other)..."
+                          />
+                        </div>
+                      )}
+
+                      {/* General Contractor Contract Model */}
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-800">
+                          General Contractor contract model
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {[
+                            {
+                              value: 'FIXED',
+                              badge: 'Lump Sum',
+                              title: 'GC fixed contract',
+                            },
+                            {
+                              value: 'DAILY',
+                              badge: 'Day Rate',
+                              title: 'GC daily updates',
+                            },
+                          ].map((m) => {
+                            const isSelected = contractModel === m.value || (m.value === 'FIXED' && contractModel !== 'DAILY');
+                            return (
+                              <button
+                                key={m.value}
+                                type="button"
+                                onClick={() => setContractModel(m.value as ContractModel)}
+                                className={`rounded-xl border py-3 px-3.5 text-left transition cursor-pointer ${
+                                  isSelected
+                                    ? 'border-slate-900 bg-slate-100 text-slate-900 shadow-xs ring-1 ring-slate-900/10 font-bold'
+                                    : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between gap-1.5">
+                                  <span className="font-bold text-xs text-slate-900">{m.title}</span>
+                                  <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'}`}>{m.badge}</span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* POST CONSTRUCTION: Units & Unit Pricing (Closeout status removed) */}
+                      {projectPhase === 'POST_CONSTRUCTION' && (
+                        <div className="space-y-3.5 pt-1">
+                          {/* Number of Units */}
+                          <div className="space-y-1.5">
+                            <label htmlFor="input-total-units" className="block text-xs font-bold text-slate-800">
+                              How many units? <span className="text-slate-400 font-normal">(total units in project)</span>
+                            </label>
+                            <div className="relative">
+                              <Building2 className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                              <input
+                                id="input-total-units"
+                                type="number"
+                                min="1"
+                                max="100"
+                                value={totalUnits}
+                                onChange={(e) => handleUnitCountChange(e.target.value)}
+                                placeholder="e.g. 4"
+                                className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition font-medium"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Unit price decided */}
+                          <div className="space-y-1.5">
+                            <label className="block text-xs font-bold text-slate-800">
+                              Unit price decided?
+                            </label>
+                            <div className="grid grid-cols-2 gap-2.5">
+                              {[
+                                { id: 'YES', label: 'Yes (Prices Established)' },
+                                { id: 'NO', label: 'No (Pending Appraisal)' },
+                              ].map((u) => {
+                                const isSelected = unitPriceDecided === u.id;
+                                return (
+                                  <button
+                                    key={u.id}
+                                    type="button"
+                                    onClick={() => setUnitPriceDecided(u.id as any)}
+                                    className={`rounded-xl border py-2.5 px-3.5 text-center transition cursor-pointer ${
+                                      isSelected
+                                        ? 'border-slate-900 bg-slate-100 text-slate-900 shadow-xs font-bold ring-1 ring-slate-900/10'
+                                        : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-medium'
+                                    }`}
+                                  >
+                                    <span className="text-xs">{u.label}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Unit Price Breakdown */}
+                          {unitPriceDecided === 'YES' && (
+                            <div className="space-y-2.5 pt-1 animate-in fade-in duration-150">
+                              {(parseInt(totalUnits, 10) || 1) <= 1 ? (
+                                <div className="space-y-1.5">
+                                  <label htmlFor="input-single-unit-price" className="block text-xs font-bold text-slate-800">
+                                    Unit price <span className="text-slate-400 font-normal">(established sales price)</span>
+                                  </label>
+                                  <div className="relative">
+                                    <DollarSign className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                                    <input
+                                      id="input-single-unit-price"
+                                      type="text"
+                                      value={unitPrices[1] ?? targetUnitPrice}
+                                      onChange={(e) => handleSingleUnitChange(1, e.target.value)}
+                                      placeholder="e.g. $850,000"
+                                      className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                                    />
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="space-y-2.5">
+                                  {/* Multi-unit header & bulk quick-apply */}
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                                    <span className="text-xs font-bold text-slate-800">
+                                      Price for each unit ({Math.min(Math.max(parseInt(totalUnits, 10) || 1, 1), 50)} units)
+                                    </span>
+                                    <div className="flex items-center gap-1.5">
+                                      <div className="relative">
+                                        <DollarSign className="w-3 h-3 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2" />
+                                        <input
+                                          type="text"
+                                          value={bulkUnitPrice}
+                                          onChange={(e) => setBulkUnitPrice(e.target.value)}
+                                          placeholder="Set same price for all"
+                                          className="w-36 pl-6 pr-2 py-1 bg-white border border-slate-200 rounded-lg text-[11px] text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 transition"
+                                        />
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleSetBulkUnitPrice(bulkUnitPrice)}
+                                        className="px-2.5 py-1 text-[11px] font-semibold bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition cursor-pointer shrink-0"
+                                      >
+                                        Apply to all
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  {/* Individual unit price cards */}
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+                                    {Array.from({ length: Math.min(Math.max(parseInt(totalUnits, 10) || 1, 1), 50) }, (_, i) => i + 1).map((uNum) => (
+                                      <div
+                                        key={uNum}
+                                        className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl hover:border-slate-300 transition"
+                                      >
+                                        <span className="text-[11px] font-bold text-slate-700 w-14 shrink-0">
+                                          Unit {uNum}
+                                        </span>
+                                        <div className="relative flex-1">
+                                          <DollarSign className="w-3 h-3 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                                          <input
+                                            type="text"
+                                            value={unitPrices[uNum] ?? ''}
+                                            onChange={(e) => handleSingleUnitChange(uNum, e.target.value)}
+                                            placeholder="e.g. $750,000"
+                                            className="w-full pl-7 pr-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-slate-900 transition"
+                                          />
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  {/* Calculated total project valuation badge */}
+                                  {calculatedTotalValue > 0 && (
+                                    <div className="flex items-center justify-between px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900">
+                                      <span className="font-medium">Total Project Gross Value</span>
+                                      <span className="font-bold font-mono">
+                                        ${calculatedTotalValue.toLocaleString()}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {/* Part 2 Actions */}
@@ -1911,117 +2345,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                       <button
                         id="btn-onboarding-next"
                         type="button"
-                        onClick={() => setProjectSubStep(3)}
-                        className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.99]"
-                      >
-                        <span>Next: Contract & Banking</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    <button
-                      id="btn-skip-project"
-                      type="button"
-                      onClick={handleSkipProject}
-                      className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer text-center"
-                    >
-                      Skip for now, I&apos;ll add a project later
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* ────────────────── PART 3: CONTRACT & GOVERNANCE ────────────────── */}
-              {projectSubStep === 3 && (
-                <div className="space-y-4 animate-in fade-in duration-150">
-                  {/* GC Contract Model */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-800">
-                      General Contractor contract model
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      {[
-                        {
-                          value: 'FIXED',
-                          badge: 'Lump Sum',
-                          title: 'Fixed Price Contract',
-                        },
-                        {
-                          value: 'DAILY',
-                          badge: 'Day Rate',
-                          title: 'Time & Material / Daily',
-                        },
-                      ].map((m) => {
-                        const isSelected = contractModel === m.value || (m.value === 'FIXED' && contractModel !== 'DAILY');
-                        return (
-                          <button
-                            key={m.value}
-                            type="button"
-                            onClick={() => setContractModel(m.value as ContractModel)}
-                            className={`rounded-xl border py-3 px-3.5 text-left transition cursor-pointer ${isSelected
-                              ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                              : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
-                              }`}
-                          >
-                            <div className="flex items-center justify-between gap-1.5">
-                              <span className={`font-bold text-xs ${isSelected ? 'text-white' : 'text-slate-900'}`}>{m.title}</span>
-                              <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>{m.badge}</span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Operating Bank Account */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-800">
-                      Operating bank account model
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      {[
-                        { val: 'DEDICATED', badge: 'Recommended', title: 'Dedicated Project Account' },
-                        { val: 'SHARED', badge: 'Multi-Project', title: 'Shared / Master Account' },
-                      ].map((opt) => {
-                        const isSelected = operatingAccountModel === opt.val;
-                        return (
-                          <button
-                            key={opt.val}
-                            type="button"
-                            onClick={() => setOperatingAccountModel(opt.val as any)}
-                            className={`rounded-xl border py-3 px-3.5 text-left transition cursor-pointer ${isSelected
-                              ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                              : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
-                              }`}
-                          >
-                            <div className="flex items-center justify-between gap-1.5">
-                              <span className={`font-bold text-xs ${isSelected ? 'text-white' : 'text-slate-900'}`}>{opt.title}</span>
-                              <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>{opt.badge}</span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Part 3 Actions */}
-                  <div className="space-y-2.5 pt-3">
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setProjectSubStep(2)}
-                        className="flex-1 py-3 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
-                      >
-                        <ArrowLeft className="w-3.5 h-3.5" />
-                        <span>Back to Capital</span>
-                      </button>
-                      <button
-                        id="btn-onboarding-next"
-                        type="button"
                         onClick={handleCreateProject}
                         className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.99]"
                       >
-                        <span>Continue to Project Records</span>
+                        <span>Next</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -2175,7 +2502,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   onClick={() => handleContinueRecords(false)}
                   className="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99]"
                 >
-                  <span>{documentsList.length > 0 ? 'Continue with documents' : 'Continue'}</span>
+                  <span>Next</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
 
@@ -2228,7 +2555,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         setInviteEmail(e.target.value);
                         if (inviteError) setInviteError(null);
                       }}
-                      placeholder="colleague@company.com"
+                      placeholder="collaborator@gmail.com"
                       className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900"
                     />
                   </div>
@@ -2286,7 +2613,7 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                           <Users className="w-4 h-4 text-indigo-600 shrink-0" />
                           <span className="font-semibold text-slate-900 truncate">{member.email}</span>
                           <span className="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono shrink-0">
-                            {member.role}
+                            {ROLE_OPTIONS.find(r => r.role === member.role)?.label || member.role}
                           </span>
                         </div>
                         <button

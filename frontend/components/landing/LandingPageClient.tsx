@@ -24,11 +24,7 @@ export function LandingPageClient() {
       localStorage.setItem("groundup_user", JSON.stringify(user));
       localStorage.setItem("groundup_session_seen", "1");
     } catch {}
-    if (user.isNewUser) {
-      router.push("/onboarding");
-    } else {
-      router.push("/projects");
-    }
+    router.push("/projects");
   };
 
   return (

@@ -176,13 +176,13 @@ export function Sidebar({
   };
 
   const formatStageLabel = (stage?: string) => {
-    if (!stage) return "Active Construction";
+    if (!stage) return "Active Project Construction";
     const s = stage.toLowerCase();
-    if (s.includes("conception") || s.includes("design") || s.includes("planning")) return "Design & Planning";
-    if (s.includes("pre_con") || s.includes("pre_construction")) return "Pre-Construction";
-    if (s.includes("under_con") || s.includes("construction") || s.includes("active")) return "Active Construction";
-    if (s.includes("completion") || s.includes("closeout") || s.includes("closed") || s.includes("disposition")) return "Closeout & TCO";
-    if (s.includes("acquisition")) return "Acquisition Diligence";
+    if (s.includes("pre_acq") || s.includes("pre-acq") || s.includes("preacq") || s.includes("pre acq")) return "Pre Acquisition";
+    if (s.includes("acquisition") || (s.includes("acq") && !s.includes("pre"))) return "Acquisition";
+    if (s.includes("permit") || s.includes("conception") || s.includes("design") || s.includes("planning") || s.includes("pre_con") || s.includes("pre_construction")) return "Permitting";
+    if (s.includes("post") || s.includes("completion") || s.includes("closeout") || s.includes("closed") || s.includes("disposition")) return "Post construction";
+    if (s.includes("under_con") || s.includes("construction") || s.includes("active")) return "Active Project Construction";
     return s
       .replace(/_/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());

@@ -41,6 +41,7 @@ import {
   RefreshCw,
   UserCheck,
 } from "lucide-react";
+import { ConstructionLenderSelect } from "@/components/projects/ConstructionLenderSelect";
 
 type SettingsTab = "general" | "capital" | "governance" | "team";
 
@@ -54,13 +55,13 @@ const LIFECYCLE_OPTIONS: { id: LifecycleStage; label: string; desc: string }[] =
 const CONTRACT_OPTIONS: { id: ContractModel; title: string; badge: string; desc: string }[] = [
   {
     id: "FIXED",
-    title: "Fixed",
+    title: "GC fixed contract",
     badge: "Lump Sum",
     desc: "Predetermined contract amount; disbursements tied to completion milestones and draw inspections.",
   },
   {
     id: "DAILY",
-    title: "Daily",
+    title: "GC daily updates",
     badge: "Day Rate",
     desc: "Contractor compensation billed on daily rates, actual work days, and verified time logs.",
   },
@@ -522,21 +523,21 @@ export default function ProjectSettingsPage() {
                         type="button"
                         onClick={() => setLifecycleStage(opt.id)}
                         className={`p-3.5 rounded-xl border text-left transition cursor-pointer ${isSelected
-                            ? "bg-slate-900 border-slate-900 text-white shadow-xs"
+                            ? "bg-slate-100 border-slate-900 text-slate-900 shadow-xs ring-1 ring-slate-900/10 font-bold"
                             : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50/70"
                           }`}
                       >
                         <div className="flex items-center justify-between gap-1 mb-1">
-                          <span className={`text-xs font-bold ${isSelected ? "text-white" : "text-slate-900"}`}>
+                          <span className="text-xs font-bold text-slate-900">
                             {opt.label}
                           </span>
                           {isSelected && (
-                            <div className="w-4 h-4 rounded-full bg-white text-slate-900 flex items-center justify-center">
+                            <div className="w-4 h-4 rounded-full bg-slate-900 text-white flex items-center justify-center">
                               <Check className="w-2.5 h-2.5 stroke-[3]" />
                             </div>
                           )}
                         </div>
-                        <p className={`text-[11px] leading-snug ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
+                        <p className={`text-[11px] leading-snug ${isSelected ? "text-slate-600 font-normal" : "text-slate-500"}`}>
                           {opt.desc}
                         </p>
                       </button>
@@ -616,12 +617,12 @@ export default function ProjectSettingsPage() {
                         type="button"
                         onClick={() => setIsAcquired(opt.val)}
                         className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${isAcquired === opt.val
-                            ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                            ? "border-slate-900 bg-slate-100 text-slate-900 shadow-xs ring-1 ring-slate-900/10 font-bold"
                             : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
                           }`}
                       >
                         <span className="block text-xs font-bold">{opt.label}</span>
-                        <span className={`mt-0.5 block text-[11px] ${isAcquired === opt.val ? "text-slate-300" : "text-slate-500"}`}>
+                        <span className={`mt-0.5 block text-[11px] ${isAcquired === opt.val ? "text-slate-600 font-normal" : "text-slate-500"}`}>
                           {opt.desc}
                         </span>
                       </button>
@@ -636,19 +637,19 @@ export default function ProjectSettingsPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
                       { val: "true", label: "Construction Loan in Place", desc: "Disbursements routed via monthly draw inspections." },
-                      { val: "false", label: "All-Equity Self-Funded", desc: "Funded directly from sponsor or partner equity accounts." },
+                      { val: "false", label: "Self Funded Project", desc: "Funded directly from sponsor or partner equity accounts." },
                     ].map((opt) => (
                       <button
                         key={opt.val}
                         type="button"
                         onClick={() => setHasConstructionLoan(opt.val)}
                         className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${hasConstructionLoan === opt.val
-                            ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                            ? "border-slate-900 bg-slate-100 text-slate-900 shadow-xs ring-1 ring-slate-900/10 font-bold"
                             : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
                           }`}
                       >
                         <span className="block text-xs font-bold">{opt.label}</span>
-                        <span className={`mt-0.5 block text-[11px] ${hasConstructionLoan === opt.val ? "text-slate-300" : "text-slate-500"}`}>
+                        <span className={`mt-0.5 block text-[11px] ${hasConstructionLoan === opt.val ? "text-slate-600 font-normal" : "text-slate-500"}`}>
                           {opt.desc}
                         </span>
                       </button>
@@ -662,17 +663,12 @@ export default function ProjectSettingsPage() {
                       <label htmlFor="setting-lender-name" className="block text-xs font-bold text-slate-800">
                         Primary Construction Lender
                       </label>
-                      <div className="relative">
-                        <Landmark className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input
-                          id="setting-lender-name"
-                          type="text"
-                          value={lenderName}
-                          onChange={(e) => setLenderName(e.target.value)}
-                          placeholder="e.g. Pacific Western Bank"
-                          className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                        />
-                      </div>
+                      <ConstructionLenderSelect
+                        id="setting-lender-name"
+                        value={lenderName}
+                        onChange={setLenderName}
+                        placeholder="Search or select US bank (or choose Other)..."
+                      />
                     </div>
 
                     <div className="space-y-1.5">
@@ -717,22 +713,22 @@ export default function ProjectSettingsPage() {
                         type="button"
                         onClick={() => setContractModel(m.id)}
                         className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${isSelected
-                            ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                            ? "border-slate-900 bg-slate-100 text-slate-900 shadow-xs ring-1 ring-slate-900/10 font-bold"
                             : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
                           }`}
                       >
                         <div className="flex items-center justify-between gap-1.5">
-                          <span className={`font-bold text-xs ${isSelected ? "text-white" : "text-slate-900"}`}>
+                          <span className="font-bold text-xs text-slate-900">
                             {m.title}
                           </span>
                           <span
-                            className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+                            className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"
                               }`}
                           >
                             {m.badge}
                           </span>
                         </div>
-                        <p className={`mt-1 text-[11px] leading-snug ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
+                        <p className={`mt-1 text-[11px] leading-snug ${isSelected ? "text-slate-600 font-normal" : "text-slate-500"}`}>
                           {m.desc}
                         </p>
                       </button>
@@ -772,22 +768,22 @@ export default function ProjectSettingsPage() {
                         type="button"
                         onClick={() => setOperatingAccountModel(opt.val as any)}
                         className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${isSelected
-                            ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                            ? "border-slate-900 bg-slate-100 text-slate-900 shadow-xs ring-1 ring-slate-900/10 font-bold"
                             : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
                           }`}
                       >
                         <div className="flex items-center justify-between gap-1.5">
-                          <span className={`font-bold text-xs ${isSelected ? "text-white" : "text-slate-900"}`}>
+                          <span className="font-bold text-xs text-slate-900">
                             {opt.title}
                           </span>
                           <span
-                            className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+                            className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${isSelected ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"
                               }`}
                           >
                             {opt.badge}
                           </span>
                         </div>
-                        <p className={`mt-1 text-[11px] leading-snug ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
+                        <p className={`mt-1 text-[11px] leading-snug ${isSelected ? "text-slate-600 font-normal" : "text-slate-500"}`}>
                           {opt.desc}
                         </p>
                       </button>
