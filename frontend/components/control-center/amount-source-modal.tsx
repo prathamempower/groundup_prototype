@@ -164,10 +164,7 @@ export function AmountSourceModal({
                           {c.targetDate || "—"}
                         </td>
                         <td className="py-2 px-3 text-slate-800 font-mono font-medium whitespace-nowrap text-[11px]">
-                          <span className="inline-flex items-center gap-1">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                            {c.actualDate || "—"}
-                          </span>
+                          {c.actualDate || "—"}
                         </td>
                         <td className="py-2 px-3 text-right font-mono font-medium text-slate-600 tabular-nums whitespace-nowrap">
                           {c.approvedAmountFormatted || c.amountFormatted}
