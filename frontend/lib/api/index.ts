@@ -289,7 +289,20 @@ export const api = {
     },
     getDownloadUrl: async (documentId: string) => {
       const doc = mockStore.getDocumentById(documentId);
-      const filename = doc?.original_filename || "document.pdf";
+      let filename = doc?.original_filename;
+      if (!filename || filename === "document.pdf") {
+        if (documentId.includes("expense") || documentId.includes("track")) {
+          filename = "73 Broadway - Expense Tracker.xlsx";
+        } else if (documentId.includes("schedule") || documentId.includes("timeline")) {
+          filename = "73 Broadway - Master Construction Schedule.pdf";
+        } else if (documentId.includes("report")) {
+          filename = "73 Broadway - Report #2.pdf";
+        } else if (documentId.includes("budget")) {
+          filename = "Budget for 73 Broadway (1).pdf";
+        } else {
+          filename = "73 Broadway - Expense Tracker.xlsx";
+        }
+      }
       return wrap({
         document_id: documentId,
         download_url: `/sample-docs/${encodeURIComponent(filename)}`,

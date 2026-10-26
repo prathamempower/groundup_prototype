@@ -26,6 +26,8 @@ import { CONTROL_CENTER_AMOUNT_ORIGINS } from "@/lib/data/control-center-origins
 import { TimelineCalendarView } from "@/components/timeline/timeline-calendar-view";
 import { TaskDetailDrawer } from "@/components/timeline/task-detail-drawer";
 import { CreateFieldTaskModal } from "@/components/timeline/create-field-task-modal";
+import { DocumentQuickPreviewModal } from "@/components/documents/document-quick-preview-modal";
+import { DocumentItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export default function TimelinePage() {
@@ -40,6 +42,10 @@ export default function TimelinePage() {
     mep: true,
     critical: true,
   });
+
+  // Demo Document preview state
+  const [previewDoc, setPreviewDoc] = useState<DocumentItem | null>(null);
+  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
 
   // Construction Calendar Tasks State
   const [constructionTasks, setConstructionTasks] = useState<ConstructionTask[]>(INITIAL_CONSTRUCTION_TASKS);
@@ -208,6 +214,52 @@ export default function TimelinePage() {
 
   const tasksOnSelectedDate = constructionTasks.filter((t) => t.date === selectedDate);
 
+  const handleOpenScheduleDoc = async () => {
+    try {
+      const res = await api.documents.list(currentProjectId || "df16b577-3585-4fb0-a13a-ffadaca73e0f");
+      const found = res.data?.find(
+        (d) =>
+          d.id === "doc-broadway-schedule" ||
+          d.original_filename.toLowerCase().includes("schedule") ||
+          d.original_filename.toLowerCase().includes("master construction")
+      );
+      if (found) {
+        setPreviewDoc(found);
+      } else {
+        setPreviewDoc({
+          id: "doc-broadway-schedule",
+          organization_id: "org-vance-dev",
+          project_id: currentProjectId || "df16b577-3585-4fb0-a13a-ffadaca73e0f",
+          original_filename: "73 Broadway - Master Construction Schedule.pdf",
+          mime_type: "application/pdf",
+          document_type: "INSPECTION",
+          document_date: "2025-10-25",
+          ingestion_status: "REVIEWED",
+          uploaded_by: "system",
+          uploaded_at: new Date().toISOString(),
+          pages_count: 1,
+          notes: "Official 19-activity construction milestone schedule and sequence of work",
+        });
+      }
+    } catch {
+      setPreviewDoc({
+        id: "doc-broadway-schedule",
+        organization_id: "org-vance-dev",
+        project_id: currentProjectId || "df16b577-3585-4fb0-a13a-ffadaca73e0f",
+        original_filename: "73 Broadway - Master Construction Schedule.pdf",
+        mime_type: "application/pdf",
+        document_type: "INSPECTION",
+        document_date: "2025-10-25",
+        ingestion_status: "REVIEWED",
+        uploaded_by: "system",
+        uploaded_at: new Date().toISOString(),
+        pages_count: 1,
+        notes: "Official 19-activity construction milestone schedule and sequence of work",
+      });
+    }
+    setIsDocModalOpen(true);
+  };
+
   return (
     <div className="space-y-4 pb-16 min-h-screen bg-slate-50/30">
       <div className="px-4 sm:px-6 max-w-[1600px] mx-auto space-y-4 pt-3">
@@ -338,8 +390,18 @@ export default function TimelinePage() {
             </div>
           )}
 
-          {/* Right: Search Input */}
+          {/* Right: Search Input & View Schedule Document Button */}
           <div className="flex items-center gap-2 w-full md:w-auto">
+            <button
+              type="button"
+              onClick={handleOpenScheduleDoc}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-100 hover:border-blue-300 px-3 py-1.5 text-xs font-bold text-blue-700 shadow-2xs transition-colors cursor-pointer shrink-0"
+              title="Open Official Master Construction Schedule PDF"
+            >
+              <FileText className="h-3.5 w-3.5 text-blue-600" />
+              <span>View Schedule Document</span>
+            </button>
+
             <div className="relative flex-1 md:w-56 lg:w-64">
               <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
               <input
@@ -395,8 +457,18 @@ export default function TimelinePage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
-                <span>Final Target: <strong className="text-slate-800 font-bold">May – June 2027</strong></span>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
+                  <span>Final Target: <strong className="text-slate-800 font-bold">May – June 2027</strong></span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleOpenScheduleDoc}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-blue-300 bg-blue-600 text-white hover:bg-blue-700 text-xs font-bold shadow-xs transition-all cursor-pointer"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  <span>View Schedule PDF</span>
+                </button>
               </div>
             </div>
 
@@ -515,6 +587,14 @@ export default function TimelinePage() {
         defaultDate={selectedDate}
         projectId={currentProjectId}
         onCreateTask={handleCreateTask}
+      />
+
+      {/* Direct Interactive Document Preview Modal for Master Schedule */}
+      <DocumentQuickPreviewModal
+        document={previewDoc}
+        open={isDocModalOpen}
+        onOpenChange={setIsDocModalOpen}
+        currentProjectId={currentProjectId}
       />
     </div>
   );

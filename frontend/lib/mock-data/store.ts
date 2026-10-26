@@ -693,6 +693,13 @@ class MockStore {
   // Documents
   // -------------------------------------------------------------
   getDocuments(projectId?: string): DocumentItem[] {
+    // Ensure all canonical SEED_DOCUMENTS are present in state
+    for (const seedDoc of SEED_DOCUMENTS) {
+      if (!this.state.documents.some((d) => d.id === seedDoc.id || d.original_filename === seedDoc.original_filename)) {
+        this.state.documents.push(JSON.parse(JSON.stringify(seedDoc)));
+      }
+    }
+
     const docs = this.state.documents || [];
     if (projectId) {
       const resolved = this.getProjectById(projectId);
@@ -703,7 +710,81 @@ class MockStore {
   }
 
   getDocumentById(documentId: string): DocumentItem | undefined {
-    return this.state.documents.find((d) => d.id === documentId);
+    // 1. Direct match in state
+    const direct = this.state.documents.find((d) => d.id === documentId);
+    if (direct) return direct;
+
+    // 2. Direct match in canonical SEED_DOCUMENTS
+    const seedDirect = SEED_DOCUMENTS.find((d) => d.id === documentId);
+    if (seedDirect) {
+      const cloned = JSON.parse(JSON.stringify(seedDirect));
+      this.state.documents.push(cloned);
+      this.save();
+      return cloned;
+    }
+
+    // 3. Match by filename or normalized ID
+    const cleanTarget = documentId.toLowerCase().replace(/^doc-/, "").replace(/[^a-z0-9]/g, "");
+    const byName = this.state.documents.find((d) => {
+      const cleanName = d.original_filename.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const cleanId = d.id.toLowerCase().replace(/^doc-/, "").replace(/[^a-z0-9]/g, "");
+      return cleanName.includes(cleanTarget) || cleanTarget.includes(cleanName) || cleanId === cleanTarget;
+    });
+    if (byName) return byName;
+
+    const seedByName = SEED_DOCUMENTS.find((d) => {
+      const cleanName = d.original_filename.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const cleanId = d.id.toLowerCase().replace(/^doc-/, "").replace(/[^a-z0-9]/g, "");
+      return cleanName.includes(cleanTarget) || cleanTarget.includes(cleanName) || cleanId === cleanTarget;
+    });
+    if (seedByName) {
+      const cloned = JSON.parse(JSON.stringify(seedByName));
+      this.state.documents.push(cloned);
+      this.save();
+      return cloned;
+    }
+
+    if (cleanTarget.includes("schedule") || cleanTarget.includes("timeline")) {
+      const syntheticDoc: DocumentItem = {
+        id: documentId,
+        organization_id: "org-vance-dev",
+        project_id: "df16b577-3585-4fb0-a13a-ffadaca73e0f",
+        original_filename: "73 Broadway - Master Construction Schedule.pdf",
+        mime_type: "application/pdf",
+        document_type: "INSPECTION",
+        document_date: "2025-10-25",
+        ingestion_status: "REVIEWED",
+        uploaded_by: "system",
+        uploaded_at: new Date().toISOString(),
+        pages_count: 1,
+        notes: "Master Construction Schedule & Milestones",
+      };
+      this.state.documents.push(syntheticDoc);
+      this.save();
+      return syntheticDoc;
+    }
+
+    if (cleanTarget.includes("expense") || cleanTarget.includes("track")) {
+      const syntheticDoc: DocumentItem = {
+        id: documentId,
+        organization_id: "org-vance-dev",
+        project_id: "df16b577-3585-4fb0-a13a-ffadaca73e0f",
+        original_filename: "73 Broadway - Expense Tracker.xlsx",
+        mime_type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        document_type: "BUDGET_SOV",
+        document_date: "2025-10-25",
+        ingestion_status: "REVIEWED",
+        uploaded_by: "system",
+        uploaded_at: new Date().toISOString(),
+        pages_count: 7,
+        notes: "Itemized actual expenses register: construction, labor, accounting & legal, bank & municipal fees",
+      };
+      this.state.documents.push(syntheticDoc);
+      this.save();
+      return syntheticDoc;
+    }
+
+    return undefined;
   }
 
   createDocument(docData: {
