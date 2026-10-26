@@ -218,12 +218,14 @@ export default function DocumentReviewPage() {
               size="sm"
               onClick={() => setShowSideReview((prev) => !prev)}
               className={cn(
-                "h-8 px-2 sm:px-3 text-xs font-semibold rounded-lg shadow-2xs gap-1.5",
-                showSideReview ? "bg-slate-900 text-white hover:bg-slate-800 border-transparent" : "bg-white text-slate-700 border-slate-200"
+                "h-8 px-2 sm:px-3 text-xs font-semibold rounded-lg shadow-2xs gap-1.5 transition-colors",
+                showSideReview
+                  ? "bg-slate-100 text-slate-800 border-slate-300 hover:bg-slate-200 hover:text-slate-900"
+                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900"
               )}
               title={showSideReview ? "Hide review panel" : "Open review panel"}
             >
-              <PanelRight className="h-3.5 w-3.5" />
+              <PanelRight className="h-3.5 w-3.5 text-slate-600" />
               <span>{showSideReview ? "Hide" : `Review (${extractions.length})`}</span>
             </Button>
           )}
