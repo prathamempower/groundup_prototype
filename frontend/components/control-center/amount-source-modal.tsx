@@ -7,6 +7,12 @@ import {
   FileText,
   FileSpreadsheet,
   Eye,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  ArrowRight,
+  TrendingUp,
 } from "lucide-react";
 import { AmountSourceOrigin } from "@/lib/data/control-center-origins";
 import { cn } from "@/lib/utils";
@@ -30,6 +36,8 @@ export function AmountSourceModal({
     origin.sourceDocument.fileType === "xlsx" ||
     origin.sourceDocument.fileName.toLowerCase().endsWith(".xlsx");
 
+  const isWide = Boolean(origin.isComparisonTable || origin.isTimelineSchedule);
+
   // Clean, short title
   const cleanTitle = origin.title
     .replace(" Scope", "")
@@ -41,9 +49,17 @@ export function AmountSourceModal({
   const locationText = origin.sourceDocument.sectionOrPage || origin.sourceDocument.section || "";
   const shortLocation = locationText.split("•")[0]?.trim() || locationText;
 
+  // Has target dates in standard table
+  const hasTargetDates = origin.components?.some((c) => Boolean(c.targetDate));
+
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent className="max-w-lg overflow-hidden flex flex-col p-0 rounded-xl bg-white border border-slate-200 shadow-xl">
+      <ModalContent
+        className={cn(
+          "overflow-hidden flex flex-col p-0 rounded-xl bg-white border border-slate-200 shadow-xl transition-all",
+          isWide ? "max-w-4xl lg:max-w-5xl" : "max-w-lg"
+        )}
+      >
         {/* Header - Clean & Simple */}
         <div className="px-5 pt-4 pb-3 border-b border-slate-100 flex items-center justify-between gap-4">
           <div>
@@ -67,7 +83,7 @@ export function AmountSourceModal({
           </div>
         </div>
 
-        {/* Body - Clean, Essential items only */}
+        {/* Body - Clean, Essential items */}
         <div className="p-5 space-y-4 text-xs">
           {/* Source Document Row */}
           <div className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-slate-50 border border-slate-200/80">
@@ -111,14 +127,162 @@ export function AmountSourceModal({
             )}
           </div>
 
-          {/* Clean Line Items Table with All Tasks */}
-          {origin.components && origin.components.length > 0 && (
+          {/* CASE A: COMPARISON TABLE (Actual Spend vs Approved Budget) */}
+          {origin.isComparisonTable && origin.components && origin.components.length > 0 && (
+            <div className="rounded-lg border border-slate-200 overflow-hidden shadow-2xs">
+              <div className="max-h-[380px] overflow-y-auto overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
+                    <tr className="text-slate-500 font-semibold text-[11px]">
+                      <th className="py-2 px-3 text-left">Task / Line Item</th>
+                      <th className="py-2 px-3 text-left whitespace-nowrap">Target Date</th>
+                      <th className="py-2 px-3 text-left whitespace-nowrap">Actual Date</th>
+                      <th className="py-2 px-3 text-right whitespace-nowrap">Approved Budget</th>
+                      <th className="py-2 px-3 text-right whitespace-nowrap">Actual Spend</th>
+                      <th className="py-2 px-3 text-right whitespace-nowrap">Variance</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-800">
+                    {origin.components.map((c) => (
+                      <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-2 px-3">
+                          <div className="flex items-center gap-1.5 font-medium text-slate-900">
+                            {c.code && (
+                              <span className="font-mono text-[11px] font-semibold text-slate-500 bg-slate-100 px-1 py-0.5 rounded border border-slate-200/60">
+                                {c.code}
+                              </span>
+                            )}
+                            <span>{c.name}</span>
+                          </div>
+                          {c.transactionRef && (
+                            <p className="text-[10px] text-slate-400 font-mono mt-0.5 truncate max-w-xs sm:max-w-md">
+                              {c.transactionRef}
+                            </p>
+                          )}
+                        </td>
+                        <td className="py-2 px-3 text-slate-600 font-mono whitespace-nowrap text-[11px]">
+                          {c.targetDate || "—"}
+                        </td>
+                        <td className="py-2 px-3 text-slate-800 font-mono font-medium whitespace-nowrap text-[11px]">
+                          {c.actualDate || "—"}
+                        </td>
+                        <td className="py-2 px-3 text-right font-mono font-medium text-slate-600 tabular-nums whitespace-nowrap">
+                          {c.approvedAmountFormatted || c.amountFormatted}
+                        </td>
+                        <td className="py-2 px-3 text-right font-mono font-bold text-slate-900 tabular-nums whitespace-nowrap">
+                          {c.actualSpendFormatted || c.amountFormatted}
+                        </td>
+                        <td className="py-2 px-3 text-right font-mono font-semibold tabular-nums whitespace-nowrap">
+                          <span
+                            className={cn(
+                              "inline-block px-1.5 py-0.5 rounded text-[11px]",
+                              c.varianceFormatted?.startsWith("+")
+                                ? "text-amber-700 bg-amber-50"
+                                : c.varianceFormatted?.startsWith("-")
+                                ? "text-blue-700 bg-blue-50"
+                                : "text-slate-500 bg-slate-50"
+                            )}
+                          >
+                            {c.varianceFormatted || "$0.00"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="sticky bottom-0 z-10 bg-slate-50/95 backdrop-blur-xs border-t-2 border-slate-200">
+                    <tr className="font-bold text-slate-900">
+                      <td colSpan={3} className="py-2.5 px-3">
+                        Total Reconciled to Bank Statement (13 Tasks)
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono tabular-nums whitespace-nowrap text-slate-600">
+                        {origin.summaryStats?.approvedTotal || origin.amountFormatted}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono tabular-nums whitespace-nowrap text-slate-900">
+                        {origin.summaryStats?.actualTotal || origin.amountFormatted}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono tabular-nums whitespace-nowrap text-emerald-600 font-bold">
+                        {origin.summaryStats?.varianceTotal || "$0.00"}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* CASE B: TIMELINE SCHEDULE TABLE (Matching User Image 3 Exactly) */}
+          {origin.isTimelineSchedule && origin.components && origin.components.length > 0 && (
+            <div className="rounded-lg border border-slate-200 overflow-hidden shadow-2xs">
+              <div className="max-h-[380px] overflow-y-auto overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead className="sticky top-0 z-10 bg-[#1e3a5f] text-white">
+                    <tr className="font-semibold text-[11px]">
+                      <th className="py-2.5 px-3.5 text-left">Construction Activity</th>
+                      <th className="py-2.5 px-3 text-left">Line Item</th>
+                      <th className="py-2.5 px-3 text-left">Status</th>
+                      <th className="py-2.5 px-3.5 text-left whitespace-nowrap">Target</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-800">
+                    {origin.components.map((c) => {
+                      const isCompleted = c.amountFormatted === "Completed";
+                      const isInProgress = c.amountFormatted === "In Progress";
+                      const isTarget = c.amountFormatted === "Target";
+                      return (
+                        <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="py-2.5 px-3.5 font-semibold text-slate-900">
+                            {c.name}
+                          </td>
+                          <td className="py-2.5 px-3 font-mono text-slate-500 text-[11px]">
+                            {c.code || "—"}
+                          </td>
+                          <td className="py-2.5 px-3 whitespace-nowrap">
+                            <span
+                              className={cn(
+                                "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                                isCompleted
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : isInProgress
+                                  ? "bg-amber-100 text-amber-800"
+                                  : isTarget
+                                  ? "bg-indigo-100 text-indigo-800"
+                                  : "bg-slate-100 text-slate-700"
+                              )}
+                            >
+                              {c.amountFormatted}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3.5 font-medium text-slate-700 whitespace-nowrap">
+                            {c.targetDate || "—"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot className="sticky bottom-0 z-10 bg-slate-50/95 backdrop-blur-xs border-t-2 border-slate-200">
+                    <tr className="font-bold text-slate-900 text-xs">
+                      <td colSpan={3} className="py-2.5 px-3.5">
+                        Total Activities: {origin.components.length} Tasks
+                      </td>
+                      <td className="py-2.5 px-3.5 text-slate-700">Target: May – June 2027</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* CASE C: STANDARD LINE ITEMS TABLE (e.g. Approved Project Budget) */}
+          {!origin.isComparisonTable && !origin.isTimelineSchedule && origin.components && origin.components.length > 0 && (
             <div className="rounded-lg border border-slate-200 overflow-hidden">
               <div className="max-h-[340px] overflow-y-auto">
                 <table className="w-full text-xs">
                   <thead className="sticky top-0 z-10 bg-slate-50">
                     <tr className="border-b border-slate-200 text-slate-500 font-medium">
                       <th className="py-2.5 px-3.5 text-left">Item</th>
+                      {hasTargetDates && (
+                        <th className="py-2.5 px-3 text-left whitespace-nowrap">Target Date</th>
+                      )}
                       <th className="py-2.5 px-3.5 text-right">Amount</th>
                     </tr>
                   </thead>
@@ -133,6 +297,11 @@ export function AmountSourceModal({
                           )}
                           <span>{c.name}</span>
                         </td>
+                        {hasTargetDates && (
+                          <td className="py-2.5 px-3 text-slate-600 font-mono whitespace-nowrap text-[11px]">
+                            {c.targetDate || "—"}
+                          </td>
+                        )}
                         <td className="py-2.5 px-3.5 text-right font-mono font-semibold tabular-nums text-slate-900 whitespace-nowrap">
                           {c.amountFormatted}
                         </td>
@@ -141,7 +310,9 @@ export function AmountSourceModal({
                   </tbody>
                   <tfoot className="sticky bottom-0 z-10 bg-slate-50/95 backdrop-blur-xs">
                     <tr className="border-t border-slate-200 font-bold text-slate-900">
-                      <td className="py-2.5 px-3.5">Total</td>
+                      <td colSpan={hasTargetDates ? 2 : 1} className="py-2.5 px-3.5">
+                        Total
+                      </td>
                       <td className="py-2.5 px-3.5 text-right font-mono tabular-nums whitespace-nowrap">
                         {origin.amountFormatted}
                       </td>
@@ -168,3 +339,4 @@ export function AmountSourceModal({
     </Modal>
   );
 }
+
