@@ -203,9 +203,6 @@ export default function DrawDetailPage() {
                 customLabel={activeDraw.status.replace("_", " ")}
               />
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {activeDraw.lender_name} • Period: {activeDraw.period_start} to {activeDraw.period_end}
-            </p>
           </div>
         </div>
 

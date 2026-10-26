@@ -260,9 +260,6 @@ export function DrawDetailDrawer({
                     </span>
                   )}
                 </div>
-                <p className="text-caption text-text-secondary mt-0.5">
-                  {activeDraw.lender_name} • Period: {activeDraw.period_start} to {activeDraw.period_end}
-                </p>
               </div>
             </div>
 
