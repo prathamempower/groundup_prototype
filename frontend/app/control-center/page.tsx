@@ -286,8 +286,13 @@ export default function ControlCenterPage() {
                 </span>
               </div>
               <div className="mt-2 sm:mt-3">
-                <div className="text-lg sm:text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono leading-none">
-                  Dec 15, 2025
+                <div className="text-base sm:text-xl lg:text-[22px] xl:text-2xl font-bold tracking-tight text-slate-900 font-mono leading-none">
+                  <ClickableAmount
+                    amountText="Dec 15, 2025"
+                    originKey="completion_timeline"
+                    label="Project Completion Timeline & Schedule"
+                    onClick={handleOpenAmountOrigin}
+                  />
                 </div>
               </div>
             </div>
