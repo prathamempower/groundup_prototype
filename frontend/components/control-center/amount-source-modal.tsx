@@ -63,27 +63,11 @@ export function AmountSourceModal({
         {/* Header - Clean & Simple */}
         <div className="px-5 pt-4 pb-3 border-b border-slate-100 flex items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-slate-900 tracking-tight">
-                {cleanTitle}
-              </h2>
-              {origin.statusBadge && (
-                <span
-                  className={cn(
-                    "text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider",
-                    origin.statusBadge.variant === "reconciled"
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : origin.statusBadge.variant === "variance"
-                      ? "bg-amber-50 text-amber-700 border-amber-200"
-                      : "bg-blue-50 text-blue-700 border-blue-200"
-                  )}
-                >
-                  {origin.statusBadge.label}
-                </span>
-              )}
-            </div>
+            <h2 className="text-base font-bold text-slate-900 tracking-tight">
+              {cleanTitle}
+            </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              {origin.subtitle || "Source document & audited line items"}
+              Source document
             </p>
           </div>
 
@@ -143,12 +127,12 @@ export function AmountSourceModal({
             )}
           </div>
 
-          {/* Summary Stats Strip (for Comparison Table / Timeline) */}
-          {origin.summaryStats && (
+          {/* Summary Stats Strip (only for Actual Spend Comparison Table) */}
+          {origin.isComparisonTable && origin.summaryStats && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2.5 rounded-lg bg-slate-50/70 border border-slate-200/70 text-xs">
               <div>
                 <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                  {origin.isTimelineSchedule ? "Baseline Target" : "Approved Budget"}
+                  Approved Budget
                 </span>
                 <span className="font-mono font-bold text-slate-800 text-xs sm:text-sm">
                   {origin.summaryStats.approvedTotal}
@@ -156,7 +140,7 @@ export function AmountSourceModal({
               </div>
               <div>
                 <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                  {origin.isTimelineSchedule ? "Forecast Completion" : "Actual Spend"}
+                  Actual Spend
                 </span>
                 <span className="font-mono font-bold text-slate-800 text-xs sm:text-sm">
                   {origin.summaryStats.actualTotal}
@@ -164,13 +148,12 @@ export function AmountSourceModal({
               </div>
               <div>
                 <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                  {origin.isTimelineSchedule ? "Delay Variance" : "Net Variance"}
+                  Net Variance
                 </span>
                 <span
                   className={cn(
                     "font-mono font-bold text-xs sm:text-sm",
-                    origin.summaryStats.varianceTotal?.startsWith("+") ||
-                      origin.summaryStats.varianceTotal?.includes("Slip")
+                    origin.summaryStats.varianceTotal?.startsWith("+")
                       ? "text-amber-600"
                       : "text-emerald-600"
                   )}
@@ -198,7 +181,7 @@ export function AmountSourceModal({
                     <tr className="text-slate-500 font-semibold text-[11px]">
                       <th className="py-2 px-3 text-left">Task / Line Item</th>
                       <th className="py-2 px-3 text-left whitespace-nowrap">Target Date</th>
-                      <th className="py-2 px-3 text-left whitespace-nowrap">Bank Statement Date</th>
+                      <th className="py-2 px-3 text-left whitespace-nowrap">Actual Date</th>
                       <th className="py-2 px-3 text-right whitespace-nowrap">Approved Budget</th>
                       <th className="py-2 px-3 text-right whitespace-nowrap">Actual Spend</th>
                       <th className="py-2 px-3 text-right whitespace-nowrap">Variance</th>
@@ -275,19 +258,17 @@ export function AmountSourceModal({
             </div>
           )}
 
-          {/* CASE B: TIMELINE SCHEDULE TABLE (Matching Image 3) */}
+          {/* CASE B: TIMELINE SCHEDULE TABLE (Matching User Image 3 Exactly) */}
           {origin.isTimelineSchedule && origin.components && origin.components.length > 0 && (
             <div className="rounded-lg border border-slate-200 overflow-hidden shadow-2xs">
               <div className="max-h-[380px] overflow-y-auto overflow-x-auto">
                 <table className="w-full text-xs">
-                  <thead className="sticky top-0 z-10 bg-slate-900 text-white">
+                  <thead className="sticky top-0 z-10 bg-[#1e3a5f] text-white">
                     <tr className="font-semibold text-[11px]">
-                      <th className="py-2 px-3 text-left">Construction Activity</th>
-                      <th className="py-2 px-3 text-left">Line Item</th>
-                      <th className="py-2 px-3 text-left">Status</th>
-                      <th className="py-2 px-3 text-left whitespace-nowrap">Target</th>
-                      <th className="py-2 px-3 text-left whitespace-nowrap">Actual / Forecast</th>
-                      <th className="py-2 px-3 text-left whitespace-nowrap">Delay Incurred</th>
+                      <th className="py-2.5 px-3.5 text-left">Construction Activity</th>
+                      <th className="py-2.5 px-3 text-left">Line Item</th>
+                      <th className="py-2.5 px-3 text-left">Status</th>
+                      <th className="py-2.5 px-3.5 text-left whitespace-nowrap">Target</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-slate-800">
@@ -297,13 +278,13 @@ export function AmountSourceModal({
                       const isTarget = c.amountFormatted === "Target";
                       return (
                         <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
-                          <td className="py-2 px-3 font-semibold text-slate-900">
+                          <td className="py-2.5 px-3.5 font-semibold text-slate-900">
                             {c.name}
                           </td>
-                          <td className="py-2 px-3 font-mono text-slate-500 text-[11px]">
+                          <td className="py-2.5 px-3 font-mono text-slate-500 text-[11px]">
                             {c.code || "—"}
                           </td>
-                          <td className="py-2 px-3 whitespace-nowrap">
+                          <td className="py-2.5 px-3 whitespace-nowrap">
                             <span
                               className={cn(
                                 "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
@@ -319,25 +300,8 @@ export function AmountSourceModal({
                               {c.amountFormatted}
                             </span>
                           </td>
-                          <td className="py-2 px-3 font-medium text-slate-700 whitespace-nowrap">
+                          <td className="py-2.5 px-3.5 font-medium text-slate-700 whitespace-nowrap">
                             {c.targetDate || "—"}
-                          </td>
-                          <td className="py-2 px-3 font-mono text-slate-900 whitespace-nowrap text-[11px]">
-                            {c.actualDate || "—"}
-                          </td>
-                          <td className="py-2 px-3 whitespace-nowrap">
-                            <span
-                              className={cn(
-                                "inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-semibold font-mono",
-                                c.delayIncurred?.includes("slip") || c.delayIncurred?.includes("+")
-                                  ? "text-amber-700 bg-amber-50"
-                                  : c.delayIncurred === "On Schedule"
-                                  ? "text-emerald-700 bg-emerald-50"
-                                  : "text-slate-600 bg-slate-50"
-                              )}
-                            >
-                              {c.delayIncurred || "—"}
-                            </span>
                           </td>
                         </tr>
                       );
@@ -345,12 +309,10 @@ export function AmountSourceModal({
                   </tbody>
                   <tfoot className="sticky bottom-0 z-10 bg-slate-50/95 backdrop-blur-xs border-t-2 border-slate-200">
                     <tr className="font-bold text-slate-900 text-xs">
-                      <td colSpan={3} className="py-2.5 px-3">
+                      <td colSpan={3} className="py-2.5 px-3.5">
                         Total Activities: {origin.components.length} Tasks
                       </td>
-                      <td className="py-2.5 px-3">Baseline: Nov 10, 2025</td>
-                      <td className="py-2.5 px-3 font-mono text-slate-900">Current: Dec 15, 2025</td>
-                      <td className="py-2.5 px-3 font-mono text-amber-700 font-bold">+35 Days Critical Slip</td>
+                      <td className="py-2.5 px-3.5 text-slate-700">Target: May – June 2027</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -411,14 +373,7 @@ export function AmountSourceModal({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-          <p className="text-[11px] text-slate-400">
-            {origin.isComparisonTable
-              ? "All amounts reconciled against cleared bank debits & invoices"
-              : origin.isTimelineSchedule
-              ? "Milestone schedule synced with general contractor weekly field reports"
-              : "Amounts extracted from certified Schedule of Values & executed change orders"}
-          </p>
+        <div className="px-5 py-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end">
           <Button
             variant="outline"
             size="sm"

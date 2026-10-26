@@ -332,9 +332,8 @@ export default function TimelinePage() {
                 <Clock className="h-3 w-3 text-amber-600" />
                 1 In Progress
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-800 border border-rose-200/70 font-semibold">
-                <AlertTriangle className="h-3 w-3 text-rose-600" />
-                +35 Days Critical Slip
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 font-semibold">
+                14 Upcoming / Target
               </span>
             </div>
           )}
@@ -358,7 +357,7 @@ export default function TimelinePage() {
           </div>
         </div>
 
-        {/* View Selection: Calendar View OR Milestone Schedule & Delays Table */}
+        {/* View Selection: Calendar View OR Milestone Schedule Table */}
         {activeView === "calendar" ? (
           <TimelineCalendarView
             tasks={constructionTasks}
@@ -380,13 +379,13 @@ export default function TimelinePage() {
             onToday={handleToday}
           />
         ) : (
-          /* Milestone Schedule & Delay Table (Matching Image 3) */
+          /* Milestone Schedule Table (Matching Image 3) */
           <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
             {/* Table Header Banner */}
             <div className="p-4 sm:p-5 border-b border-slate-200/80 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                  <span>Master Construction Activity Schedule & Delays</span>
+                  <span>Master Construction Activity Schedule</span>
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
                     19 Activities
                   </span>
@@ -397,9 +396,7 @@ export default function TimelinePage() {
               </div>
 
               <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
-                <span>Baseline Target: <strong className="text-slate-800 font-bold">Nov 10, 2025</strong></span>
-                <span>•</span>
-                <span>Current Completion: <strong className="text-slate-800 font-bold">Dec 15, 2025</strong></span>
+                <span>Final Target: <strong className="text-slate-800 font-bold">May – June 2027</strong></span>
               </div>
             </div>
 
@@ -411,9 +408,7 @@ export default function TimelinePage() {
                     <th className="py-3 px-4">Construction Activity</th>
                     <th className="py-3 px-3">Line Item</th>
                     <th className="py-3 px-3">Status</th>
-                    <th className="py-3 px-3 whitespace-nowrap">Target</th>
-                    <th className="py-3 px-3 whitespace-nowrap">Actual / Projected</th>
-                    <th className="py-3 px-4 whitespace-nowrap">Delay Incurred</th>
+                    <th className="py-3 px-4 whitespace-nowrap">Target</th>
                     <th className="py-3 px-4">Notes & Inspection Signoff</th>
                   </tr>
                 </thead>
@@ -425,8 +420,7 @@ export default function TimelinePage() {
                       return (
                         item.name.toLowerCase().includes(q) ||
                         item.code?.toLowerCase().includes(q) ||
-                        item.amountFormatted.toLowerCase().includes(q) ||
-                        item.delayIncurred?.toLowerCase().includes(q)
+                        item.amountFormatted.toLowerCase().includes(q)
                       );
                     })
                     .map((item, idx) => {
@@ -470,26 +464,8 @@ export default function TimelinePage() {
                               {item.amountFormatted}
                             </span>
                           </td>
-                          <td className="py-3 px-3 font-medium text-slate-700 whitespace-nowrap">
+                          <td className="py-3 px-4 font-medium text-slate-700 whitespace-nowrap">
                             {item.targetDate || "Completed"}
-                          </td>
-                          <td className="py-3 px-3 font-mono font-medium text-slate-900 whitespace-nowrap text-[11px]">
-                            {item.actualDate || "—"}
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap">
-                            <span
-                              className={cn(
-                                "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold font-mono",
-                                item.delayIncurred?.includes("slip") ||
-                                  item.delayIncurred?.includes("+")
-                                  ? "text-amber-700 bg-amber-50 border border-amber-200/60"
-                                  : item.delayIncurred === "On Schedule"
-                                  ? "text-emerald-700 bg-emerald-50 border border-emerald-200/60"
-                                  : "text-slate-600 bg-slate-50 border border-slate-200/60"
-                              )}
-                            >
-                              {item.delayIncurred || "—"}
-                            </span>
                           </td>
                           <td className="py-3 px-4 text-slate-500 text-[11px]">
                             {item.notes || "—"}
@@ -503,13 +479,9 @@ export default function TimelinePage() {
                     <td colSpan={3} className="py-3 px-4">
                       Total: 19 Milestone Activities
                     </td>
-                    <td className="py-3 px-3 whitespace-nowrap">Target: Nov 10, 2025</td>
-                    <td className="py-3 px-3 font-mono whitespace-nowrap">Actual: Dec 15, 2025</td>
-                    <td className="py-3 px-4 font-mono text-amber-700 whitespace-nowrap">
-                      +35 Days Critical Slip
-                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">Target: May – June 2027</td>
                     <td className="py-3 px-4 text-[11px] text-slate-500 font-normal">
-                      Critical path driven by structural framing steel fabrication delay
+                      All activities tracked against General Contractor master milestone schedule
                     </td>
                   </tr>
                 </tfoot>
