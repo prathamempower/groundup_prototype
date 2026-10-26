@@ -92,7 +92,7 @@ export function TopBar({
   }, [projects, routeProjectId]);
 
   const currentProjectId = currentProject?.id || routeProjectId || null;
-  const { signOut, isSigningOut, SignOutOverlay } = useSignOut();
+  const { signOut, isSigningOut } = useSignOut();
 
   // Adaptive logo display:
   // - On mobile (< md): Sidebar is off-canvas, so TopBar must always show the logo.
@@ -651,7 +651,7 @@ export function TopBar({
           </div>
         </div>
       </header>
-      <SignOutOverlay />
     </div>
   );
 }
+

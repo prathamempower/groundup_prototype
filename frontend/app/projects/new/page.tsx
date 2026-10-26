@@ -34,7 +34,8 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { AmbientStructuralWireframes } from "@/components/ui/AmbientStructuralWireframes";
-import { CircularWorkspaceGauge } from "@/components/onboarding/GroundUpLoader";
+import { WelcomingWorkspaceLoader } from "@/components/onboarding/WelcomingWorkspaceLoader";
+import { LocationAutocompleteInput } from "@/components/projects/LocationAutocompleteInput";
 import { TextEffect } from "@/components/motion-primitives/text-effect";
 import { PhaseIllustration } from "@/components/projects/PhaseIllustration";
 import { ConstructionLenderSelect } from "@/components/projects/ConstructionLenderSelect";
@@ -115,13 +116,12 @@ const NEW_DOC_TYPES = [
   "Not ready yet",
 ];
 
-const ROLE_OPTIONS: Array<{ role: OnboardingRole; label: string }> = [
-  { role: "OWNER", label: "Owner / Developer" },
-  { role: "CFO", label: "CFO / Accountant" },
+const ROLE_OPTIONS = [
+  { role: "GC", label: "General Contractor (GC)" },
   { role: "PROJECT_MANAGER", label: "Project Manager" },
+  { role: "CFO", label: "CFO / Accountant" },
   { role: "INVESTOR", label: "Investor / Partner" },
-  { role: "GC_FIXED", label: "GC (Fixed Contract)" },
-  { role: "GC_DAILY", label: "GC (Daily Updates)" },
+  { role: "OTHER", label: "Other (Custom Role)" },
 ];
 
 // Vector Architectural Illustration for Active Construction
@@ -445,9 +445,11 @@ export default function CreateProjectPage() {
 
   // Step 4: Team Allocation
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<OnboardingRole>("OWNER");
+  const [inviteRole, setInviteRole] = useState<string>("GC");
+  const [customRoleTitle, setCustomRoleTitle] = useState("");
   const [inviteError, setInviteError] = useState<string | null>(null);
-  const [teamList, setTeamList] = useState<Array<{ email: string; role: OnboardingRole }>>([]);
+  const [teamList, setTeamList] = useState<Array<{ email: string; role: string }>>([]);
+  const createdProjectIdRef = useRef<string>("");
 
   // Step 5: Provisioning Stages
   const [setupStages, setSetupStages] = useState({
@@ -606,32 +608,25 @@ export default function CreateProjectPage() {
       setInviteError("This collaborator is already in your invitation list.");
       return;
     }
-    setTeamList((prev) => [...prev, { email: inviteEmail.trim(), role: inviteRole }]);
+    if (inviteRole === "OTHER" && !customRoleTitle.trim()) {
+      setInviteError("Please enter a custom role title.");
+      return;
+    }
+
+    const assignedRole =
+      inviteRole === "OTHER"
+        ? customRoleTitle.trim()
+        : (ROLE_OPTIONS.find((r) => r.role === inviteRole)?.label || inviteRole);
+
+    setTeamList((prev) => [...prev, { email: inviteEmail.trim(), role: assignedRole }]);
     setInviteEmail("");
+    setCustomRoleTitle("");
     setInviteError(null);
   };
 
-  // Final project creation and workspace provisioning
+  // Final project creation and workspace launch
   const handleLaunchProject = async () => {
     setCurrentStep(5);
-
-    // Stage 1: Setup organization/workspace keys
-    setSetupStages({
-      savingOrg: true,
-      creatingProject: false,
-      preparingDashboard: false,
-      finalizing: false,
-    });
-
-    await new Promise((r) => setTimeout(r, 600));
-
-    // Stage 2: Create project record via api
-    setSetupStages({
-      savingOrg: true,
-      creatingProject: true,
-      preparingDashboard: false,
-      finalizing: false,
-    });
 
     let newProjectId = `proj-${Date.now()}`;
 
@@ -682,37 +677,18 @@ export default function CreateProjectPage() {
         newProjectId = createdRes.data.id;
       }
     } catch {
-      // In case of mock failure fallback
+      // Graceful fallback for mock
     }
 
     localStorage.setItem("groundup_active_project_id", newProjectId);
     localStorage.setItem("groundup_last_project_id", newProjectId);
+    createdProjectIdRef.current = newProjectId;
+  };
 
-    await new Promise((r) => setTimeout(r, 700));
-
-    // Stage 3: Calibrate financial ledger and CSI divisions
-    setSetupStages({
-      savingOrg: true,
-      creatingProject: true,
-      preparingDashboard: true,
-      finalizing: false,
-    });
-
-    await new Promise((r) => setTimeout(r, 600));
-
-    // Stage 4: Finalize
-    setSetupStages({
-      savingOrg: true,
-      creatingProject: true,
-      preparingDashboard: true,
-      finalizing: true,
-    });
-
-    await new Promise((r) => setTimeout(r, 500));
-
-    // Invalidate query client and navigate to control center
+  const handleLaunchFinished = async () => {
+    const targetId = createdProjectIdRef.current || `proj-${Date.now()}`;
     await queryClient.invalidateQueries();
-    router.push(`/projects/${newProjectId}/control-center`);
+    router.push(`/projects/${targetId}/control-center`);
   };
 
   // Back navigation handler
@@ -1062,17 +1038,12 @@ export default function CreateProjectPage() {
                       {projectPhase === "PRE_ACQUISITION" ? "Target site address / location" : "Site address / location"}{" "}
                       <span className="text-slate-400 font-normal">(optional)</span>
                     </label>
-                    <div className="relative">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        id="input-project-address"
-                        type="text"
-                        value={projectAddress}
-                        onChange={(e) => setProjectAddress(e.target.value)}
-                        placeholder="e.g. 73 Broadway, Jersey City, NJ 07306"
-                        className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                      />
-                    </div>
+                    <LocationAutocompleteInput
+                      id="input-project-address"
+                      value={projectAddress}
+                      onChange={setProjectAddress}
+                      placeholder="e.g. 73 Broadway, Jersey City, NJ 07306"
+                    />
                   </div>
 
                   {/* Development Type */}
@@ -1793,7 +1764,10 @@ export default function CreateProjectPage() {
                   <select
                     id="select-invite-role"
                     value={inviteRole}
-                    onChange={(e) => setInviteRole(e.target.value as OnboardingRole)}
+                    onChange={(e) => {
+                      setInviteRole(e.target.value);
+                      if (inviteError) setInviteError(null);
+                    }}
                     className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 cursor-pointer"
                   >
                     {ROLE_OPTIONS.map((r) => (
@@ -1803,6 +1777,27 @@ export default function CreateProjectPage() {
                     ))}
                   </select>
                 </div>
+
+                {/* Custom role input field when "Other" is selected */}
+                {inviteRole === "OTHER" && (
+                  <div className="space-y-1.5 animate-in fade-in duration-150">
+                    <label htmlFor="input-custom-role" className="block text-xs font-bold text-slate-800">
+                      Enter custom role title
+                    </label>
+                    <input
+                      id="input-custom-role"
+                      type="text"
+                      value={customRoleTitle}
+                      onChange={(e) => {
+                        setCustomRoleTitle(e.target.value);
+                        if (inviteError) setInviteError(null);
+                      }}
+                      placeholder="e.g. Architect, Structural Engineer, Expediter"
+                      className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                      autoFocus
+                    />
+                  </div>
+                )}
 
                 {inviteError && (
                   <p className="text-[11px] text-red-600 font-medium flex items-center gap-1">
@@ -1836,8 +1831,8 @@ export default function CreateProjectPage() {
                         <div className="flex items-center gap-2 truncate">
                           <Users className="w-4 h-4 text-indigo-600 shrink-0" />
                           <span className="font-semibold text-slate-900 truncate">{member.email}</span>
-                          <span className="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono shrink-0">
-                            {ROLE_OPTIONS.find((r) => r.role === member.role)?.label || member.role}
+                          <span className="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-medium shrink-0">
+                            {member.role}
                           </span>
                         </div>
                         <button
@@ -1878,140 +1873,13 @@ export default function CreateProjectPage() {
           )}
 
           {/* ─────────────────────────────────────────────────────────────────── */}
-          {/* STEP 5: ARCHITECTURAL WORKSPACE INITIALIZATION                      */}
+          {/* STEP 5: WELCOMING WORKSPACE INITIALIZATION                          */}
           {/* ─────────────────────────────────────────────────────────────────── */}
           {currentStep === 5 && (
-            <div className="space-y-6 text-center py-2 animate-in fade-in duration-300">
-              <div className="space-y-1.5">
-                <TextEffect
-                  as="h1"
-                  preset="fade-in-blur"
-                  per="word"
-                  className="text-2xl font-bold text-slate-900 tracking-tight"
-                >
-                  Provisioning your project workspace
-                </TextEffect>
-                <p className="text-xs text-slate-500">
-                  Calibrating relational project ledgers, CSI 50-division structures, and security keys.
-                </p>
-              </div>
-
-              {/* Architectural Linear Calibration Gauge */}
-              <div className="py-2">
-                <CircularWorkspaceGauge
-                  percentage={
-                    setupStages.finalizing
-                      ? 100
-                      : setupStages.preparingDashboard
-                      ? 75
-                      : setupStages.creatingProject
-                      ? 50
-                      : setupStages.savingOrg
-                      ? 25
-                      : 10
-                  }
-                  currentStage={
-                    setupStages.finalizing
-                      ? "Finalizing security keys and launching workspace..."
-                      : setupStages.preparingDashboard
-                      ? "Calibrating financial ledger and focus modules..."
-                      : setupStages.creatingProject
-                      ? `Provisioning ${projectName || "project"} ledger records...`
-                      : setupStages.savingOrg
-                      ? "Configuring project security context..."
-                      : "Initializing relational ledger database..."
-                  }
-                />
-              </div>
-
-              {/* Verified Architectural Ledger Telemetry Rows */}
-              <div className="space-y-2 bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs text-left max-w-md mx-auto">
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 px-1 pb-1 border-b border-slate-100 flex items-center justify-between">
-                  <span>System Module</span>
-                  <span>Ledger Status</span>
-                </div>
-
-                {/* Module 1: Project Identity */}
-                <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
-                  <div className="flex items-center gap-2.5">
-                    {setupStages.savingOrg ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    ) : (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
-                    )}
-                    <div>
-                      <span className="font-bold text-slate-800 block text-xs">Project Workspace Identity</span>
-                      <span className="text-[10px] text-slate-500 font-mono">SYS-01 · Multi-Tenant Security</span>
-                    </div>
-                  </div>
-                  <span
-                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
-                      setupStages.savingOrg
-                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
-                        : "bg-blue-50 text-blue-700 border border-blue-200/60"
-                    }`}
-                  >
-                    {setupStages.savingOrg ? "VERIFIED" : "ACTIVE"}
-                  </span>
-                </div>
-
-                {/* Module 2: CSI MasterFormat */}
-                <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
-                  <div className="flex items-center gap-2.5">
-                    {setupStages.creatingProject ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    ) : setupStages.savingOrg ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
-                    ) : (
-                      <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
-                    )}
-                    <div>
-                      <span className="font-bold text-slate-800 block text-xs">CSI MasterFormat Structure</span>
-                      <span className="text-[10px] text-slate-500 font-mono">WBS-50 · 50-Division Cost Baseline</span>
-                    </div>
-                  </div>
-                  <span
-                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
-                      setupStages.creatingProject
-                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
-                        : setupStages.savingOrg
-                        ? "bg-blue-50 text-blue-700 border border-blue-200/60"
-                        : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    {setupStages.creatingProject ? "LOCKED" : setupStages.savingOrg ? "ACTIVE" : "PENDING"}
-                  </span>
-                </div>
-
-                {/* Module 3: AIA G702 / G703 Draw Engine */}
-                <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
-                  <div className="flex items-center gap-2.5">
-                    {setupStages.preparingDashboard ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    ) : setupStages.creatingProject ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
-                    ) : (
-                      <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
-                    )}
-                    <div>
-                      <span className="font-bold text-slate-800 block text-xs">Draw Package Engine</span>
-                      <span className="text-[10px] text-slate-500 font-mono">FIN-03 · AIA G702 / G703 Protocols</span>
-                    </div>
-                  </div>
-                  <span
-                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
-                      setupStages.preparingDashboard
-                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
-                        : setupStages.creatingProject
-                        ? "bg-blue-50 text-blue-700 border border-blue-200/60"
-                        : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    {setupStages.preparingDashboard ? "ONLINE" : setupStages.creatingProject ? "ACTIVE" : "PENDING"}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <WelcomingWorkspaceLoader
+              projectName={projectName.trim() || (projectPhase === "ACTIVE_CONSTRUCTION" ? "73 Broadway" : "161 Woodlawn")}
+              onFinished={handleLaunchFinished}
+            />
           )}
         </div>
       </main>

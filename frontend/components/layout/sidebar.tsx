@@ -71,7 +71,7 @@ export function Sidebar({
     };
   }, [mobileOpen]);
 
-  const { signOut, isSigningOut, SignOutOverlay } = useSignOut();
+  const { signOut, isSigningOut } = useSignOut();
 
   const { data: meData } = useQuery({
     queryKey: ["me"],
@@ -444,8 +444,6 @@ export function Sidebar({
           </button>
         </div>
       </aside>
-
-      <SignOutOverlay />
     </>
   );
 }
