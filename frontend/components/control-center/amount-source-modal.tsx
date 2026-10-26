@@ -127,51 +127,6 @@ export function AmountSourceModal({
             )}
           </div>
 
-          {/* Summary Stats Strip (only for Actual Spend Comparison Table) */}
-          {origin.isComparisonTable && origin.summaryStats && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2.5 rounded-lg bg-slate-50/70 border border-slate-200/70 text-xs">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                  Approved Budget
-                </span>
-                <span className="font-mono font-bold text-slate-800 text-xs sm:text-sm">
-                  {origin.summaryStats.approvedTotal}
-                </span>
-              </div>
-              <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                  Actual Spend
-                </span>
-                <span className="font-mono font-bold text-slate-800 text-xs sm:text-sm">
-                  {origin.summaryStats.actualTotal}
-                </span>
-              </div>
-              <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                  Net Variance
-                </span>
-                <span
-                  className={cn(
-                    "font-mono font-bold text-xs sm:text-sm",
-                    origin.summaryStats.varianceTotal?.startsWith("+")
-                      ? "text-amber-600"
-                      : "text-emerald-600"
-                  )}
-                >
-                  {origin.summaryStats.varianceTotal}
-                </span>
-              </div>
-              <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                  Scope Covered
-                </span>
-                <span className="font-medium text-slate-700 text-xs truncate block" title={origin.summaryStats.drawsIncluded}>
-                  {origin.summaryStats.drawsIncluded}
-                </span>
-              </div>
-            </div>
-          )}
-
           {/* CASE A: COMPARISON TABLE (Actual Spend vs Approved Budget) */}
           {origin.isComparisonTable && origin.components && origin.components.length > 0 && (
             <div className="rounded-lg border border-slate-200 overflow-hidden shadow-2xs">
