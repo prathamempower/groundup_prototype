@@ -29,7 +29,9 @@ import {
 } from '@/lib/validations/onboarding';
 
 import { Logo } from '@/components/logo';
-import { GroundUpTransitionLoader, CircularWorkspaceGauge } from '@/components/onboarding/GroundUpLoader';
+import { GroundUpTransitionLoader } from '@/components/onboarding/GroundUpLoader';
+import { WelcomingWorkspaceLoader } from '@/components/onboarding/WelcomingWorkspaceLoader';
+import { LocationAutocompleteInput } from '@/components/projects/LocationAutocompleteInput';
 import { LegalModal } from '@/components/LegalModal';
 import { ToastContainer, ToastMessage } from '@/components/Toast';
 import { TextEffect } from '@/components/motion-primitives/text-effect';
@@ -93,7 +95,7 @@ interface NewUserIntakePageProps {
 
 interface TeamMemberInvite {
   email: string;
-  role: OnboardingRole;
+  role: string;
 }
 
 interface IntakeDocument {
@@ -312,13 +314,12 @@ const DOC_TYPE_CHOICES = [
   'Not ready yet (I will upload documents later)'
 ];
 
-const ROLE_OPTIONS: Array<{ role: OnboardingRole; label: string }> = [
-  { role: 'OWNER', label: 'Owner / Developer' },
-  { role: 'CFO', label: 'CFO / Accountant' },
+const ROLE_OPTIONS = [
+  { role: 'GC', label: 'General Contractor (GC)' },
   { role: 'PROJECT_MANAGER', label: 'Project Manager' },
+  { role: 'CFO', label: 'CFO / Accountant' },
   { role: 'INVESTOR', label: 'Investor / Partner' },
-  { role: 'GC_FIXED', label: 'GC (Fixed Contract)' },
-  { role: 'GC_DAILY', label: 'GC (Daily Updates)' },
+  { role: 'OTHER', label: 'Other (Custom Role)' },
 ];
 
 function ActiveJobsiteSvg({ active }: { active: boolean }) {
@@ -731,11 +732,11 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
 
   // Screen 5: Collaborator & Team Access
   const [inviteEmail, setInviteEmail] = useState<string>('');
-  const [inviteRole, setInviteRole] = useState<OnboardingRole>('OWNER');
+  const [inviteRole, setInviteRole] = useState<string>('GC');
+  const [customRoleTitle, setCustomRoleTitle] = useState<string>('');
   const [teamList, setTeamList] = useState<TeamMemberInvite[]>([
-    { email: 'd.vance@vancedevelopment.com', role: 'OWNER' },
-    { email: 'm.chen@apex-builders-gc.com', role: 'GC' },
-    { email: 'sarah.jenkins@columbiabank.com', role: 'LENDER_INSPECTOR' }
+    { email: 'm.chen@apex-builders-gc.com', role: 'General Contractor (GC)' },
+    { email: 'sarah.jenkins@columbiabank.com', role: 'Bank Draw Inspector' }
   ]);
 
   // Validation errors
@@ -1165,10 +1166,22 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
       showToast('info', 'Collaborator already added to access list.');
       return;
     }
+    if (inviteRole === 'OTHER' && !customRoleTitle.trim()) {
+      setInviteError('Please enter a custom role title.');
+      showToast('error', 'Please enter a custom role title.');
+      return;
+    }
+
+    const assignedRole =
+      inviteRole === 'OTHER'
+        ? customRoleTitle.trim()
+        : (ROLE_OPTIONS.find(r => r.role === inviteRole)?.label || inviteRole);
+
     setInviteError(null);
-    setTeamList(prev => [...prev, { email: trimmed, role: inviteRole }]);
+    setTeamList(prev => [...prev, { email: trimmed, role: assignedRole }]);
     setInviteEmail('');
-    showToast('success', `Added ${trimmed} as ${inviteRole}.`);
+    setCustomRoleTitle('');
+    showToast('success', `Added ${trimmed} as ${assignedRole}.`);
   };
 
   const handleSendInvitations = (skipped = false) => {
@@ -1862,17 +1875,12 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         <label htmlFor="input-project-address" className="block text-xs font-bold text-slate-800">
                           Site address / location <span className="text-slate-400 font-normal">(optional)</span>
                         </label>
-                        <div className="relative">
-                          <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                          <input
-                            id="input-project-address"
-                            type="text"
-                            value={projectAddress}
-                            onChange={(e) => setProjectAddress(e.target.value)}
-                            placeholder={projectStatus === 'active' ? 'e.g. 73 Broadway, Jersey City, NJ 07306' : 'e.g. 161 Woodlawn Ave, Jersey City, NJ 07305'}
-                            className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                          />
-                        </div>
+                        <LocationAutocompleteInput
+                          id="input-project-address"
+                          value={projectAddress}
+                          onChange={setProjectAddress}
+                          placeholder={projectStatus === 'active' ? 'e.g. 73 Broadway, Jersey City, NJ 07306' : 'e.g. 161 Woodlawn Ave, Jersey City, NJ 07305'}
+                        />
                       </div>
 
                       {/* Development Type */}
@@ -2568,7 +2576,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   <select
                     id="select-invite-role"
                     value={inviteRole}
-                    onChange={(e) => setInviteRole(e.target.value as OnboardingRole)}
+                    onChange={(e) => {
+                      setInviteRole(e.target.value);
+                      if (inviteError) setInviteError(null);
+                    }}
                     className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 cursor-pointer"
                   >
                     {ROLE_OPTIONS.map(r => (
@@ -2578,6 +2589,27 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                     ))}
                   </select>
                 </div>
+
+                {/* Custom role input field when "Other" is selected */}
+                {inviteRole === 'OTHER' && (
+                  <div className="space-y-1.5 animate-in fade-in duration-150">
+                    <label htmlFor="input-custom-role" className="block text-xs font-bold text-slate-800">
+                      Enter custom role title
+                    </label>
+                    <input
+                      id="input-custom-role"
+                      type="text"
+                      value={customRoleTitle}
+                      onChange={(e) => {
+                        setCustomRoleTitle(e.target.value);
+                        if (inviteError) setInviteError(null);
+                      }}
+                      placeholder="e.g. Architect, Structural Engineer, Expediter"
+                      className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                      autoFocus
+                    />
+                  </div>
+                )}
 
                 {inviteError && (
                   <p className="text-[11px] text-red-600 font-medium flex items-center gap-1">
@@ -2612,8 +2644,8 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         <div className="flex items-center gap-2 truncate">
                           <Users className="w-4 h-4 text-indigo-600 shrink-0" />
                           <span className="font-semibold text-slate-900 truncate">{member.email}</span>
-                          <span className="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono shrink-0">
-                            {ROLE_OPTIONS.find(r => r.role === member.role)?.label || member.role}
+                          <span className="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-medium shrink-0">
+                            {member.role}
                           </span>
                         </div>
                         <button
@@ -2657,143 +2689,15 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
           {/* SCREEN 8: WORKSPACE SETUP AND REAL LOADING                  */}
           {/* ──────────────────────────────────────────────────────────── */}
           {/* ──────────────────────────────────────────────────────────── */}
-          {/* SCREEN 8: ARCHITECTURAL WORKSPACE INITIALIZATION             */}
-          {/* ──────────────────────────────────────────────────────────── */}
+          {/* SCREEN 8: WELCOMING WORKSPACE INITIALIZATION */}
           {currentStep === 6 && (
-            <div className="space-y-6 text-center">
-              <div className="space-y-1.5">
-                <TextEffect
-                  as="h1"
-                  preset="fade-in-blur"
-                  per="word"
-                  className="text-2xl font-bold text-slate-900 tracking-tight"
-                >
-                  Setting up your workspace
-                </TextEffect>
-              </div>
-
-              {/* Architectural Linear Calibration Gauge */}
-              <div className="py-1">
-                <CircularWorkspaceGauge
-                  percentage={
-                    setupStages.finalizing ? 100 :
-                      setupStages.preparingDashboard ? 75 :
-                        setupStages.creatingProject ? 50 :
-                          setupStages.savingOrg ? 25 : 10
-                  }
-                  currentStage={
-                    setupStages.finalizing ? 'Finalizing security keys and launching workspace...' :
-                      setupStages.preparingDashboard ? 'Calibrating financial ledger and focus modules...' :
-                        setupStages.creatingProject ? `Provisioning ${projectName || 'project'} ledger records...` :
-                          setupStages.savingOrg ? `Configuring ${orgName || 'company'} workspace...` :
-                            'Initializing relational ledger database...'
-                  }
-                />
-              </div>
-
-              {/* Verified Architectural Ledger Telemetry Rows */}
-              <div className="space-y-2 bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs text-left max-w-md mx-auto">
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 px-1 pb-1 border-b border-slate-100 flex items-center justify-between">
-                  <span>System Module</span>
-                  <span>Ledger Status</span>
-                </div>
-
-                {/* Module 1: Org */}
-                <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
-                  <div className="flex items-center gap-2.5">
-                    {setupStages.savingOrg ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    ) : (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
-                    )}
-                    <div>
-                      <span className="font-bold text-slate-800 block text-xs">Company Workspace</span>
-                      <span className="text-[10px] text-slate-500 font-mono">SYS-01 · Multi-Tenant Security</span>
-                    </div>
-                  </div>
-                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${setupStages.savingOrg ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-blue-50 text-blue-700 border border-blue-200/60'
-                    }`}>
-                    {setupStages.savingOrg ? 'VERIFIED' : 'ACTIVE'}
-                  </span>
-                </div>
-
-                {/* Module 2: Project Ledger */}
-                <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
-                  <div className="flex items-center gap-2.5">
-                    {setupStages.creatingProject ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    ) : setupStages.savingOrg ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
-                    ) : (
-                      <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
-                    )}
-                    <div>
-                      <span className="font-bold text-slate-800 block text-xs">CSI MasterFormat Structure</span>
-                      <span className="text-[10px] text-slate-500 font-mono">WBS-50 · 50-Division Cost Baseline</span>
-                    </div>
-                  </div>
-                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${setupStages.creatingProject ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : setupStages.savingOrg ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-slate-100 text-slate-500'
-                    }`}>
-                    {setupStages.creatingProject ? 'LOCKED' : setupStages.savingOrg ? 'ACTIVE' : 'PENDING'}
-                  </span>
-                </div>
-
-                {/* Module 3: Lien Compliance */}
-                <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
-                  <div className="flex items-center gap-2.5">
-                    {setupStages.preparingDashboard ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    ) : setupStages.creatingProject ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
-                    ) : (
-                      <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
-                    )}
-                    <div>
-                      <span className="font-bold text-slate-800 block text-xs">Statutory Lien Defense</span>
-                      <span className="text-[10px] text-slate-500 font-mono">LIEN-CA · § 8132-8138 Automatic Waivers</span>
-                    </div>
-                  </div>
-                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${setupStages.preparingDashboard ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : setupStages.creatingProject ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-slate-100 text-slate-500'
-                    }`}>
-                    {setupStages.preparingDashboard ? 'ENFORCED' : setupStages.creatingProject ? 'ACTIVE' : 'PENDING'}
-                  </span>
-                </div>
-
-                {/* Module 4: Draw Package Assembly */}
-                <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
-                  <div className="flex items-center gap-2.5">
-                    {setupStages.finalizing ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    ) : setupStages.preparingDashboard ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0 ml-1 mr-1" />
-                    ) : (
-                      <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0 ml-1 mr-1" />
-                    )}
-                    <div>
-                      <span className="font-bold text-slate-800 block text-xs">Lender Draw Engine</span>
-                      <span className="text-[10px] text-slate-500 font-mono">DRAW-AIA · G702 / G703 Package Engine</span>
-                    </div>
-                  </div>
-                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${setupStages.finalizing ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : setupStages.preparingDashboard ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-slate-100 text-slate-500'
-                    }`}>
-                    {setupStages.finalizing ? 'READY' : setupStages.preparingDashboard ? 'ACTIVE' : 'PENDING'}
-                  </span>
-                </div>
-              </div>
-
-              {setupError && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center justify-between text-left max-w-md mx-auto">
-                  <span>{setupError}</span>
-                  <button
-                    type="button"
-                    onClick={executeWorkspaceSetup}
-                    className="underline font-bold text-red-900 cursor-pointer"
-                  >
-                    Retry
-                  </button>
-                </div>
-              )}
-            </div>
+            <WelcomingWorkspaceLoader
+              projectName={projectName.trim() || '73 Broadway'}
+              onFinished={() => {
+                const targetId = localStorage.getItem('groundup_active_project_id') || 'df16b577-3585-4fb0-a13a-ffadaca73e0f';
+                router.push(`/projects/${targetId}/control-center`);
+              }}
+            />
           )}
         </div>
       </main>
