@@ -355,7 +355,7 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
       fileName: "73 Broadway - Expense Tracker.xlsx",
       fileType: "xlsx",
       fileTypeName: "Actual Expense & General Ledger Register",
-      section: "Total Expenses • Direct Construction & Trade Exp Breakdown",
+      section: "Total Expenses & Subcategories • 13 Tasks Reconciled",
       extractionMethod: "Multi-Tab Excel OCR & Bank Reconciliation Ingestion",
       extractionDate: "Oct 25, 2025 • Daily Sync",
       confidenceScore: "100% Reconciled",
