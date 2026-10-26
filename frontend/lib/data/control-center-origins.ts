@@ -655,12 +655,12 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
       variant: "variance",
     },
     sourceDocument: {
-      fileName: "73 Broadway - Report #2.pdf",
+      fileName: "73 Broadway - Master Construction Schedule.pdf",
       fileType: "pdf",
-      fileTypeName: "Project Milestone & Schedule Audit Report",
-      section: "Section 2.01 • Master Construction Schedule & Delay Audit",
-      extractionMethod: "GC Project Schedule & Field Progress Audit",
-      extractionDate: "Oct 25, 2025 • Daily Sync",
+      fileTypeName: "Master Construction Schedule & Milestones",
+      section: "Exhibit A • Divisions 01–16 Master Milestone Activity Schedule",
+      extractionMethod: "OCR Parser & General Contractor Schedule Ingestion",
+      extractionDate: "Oct 25, 2025",
       confidenceScore: "100% Verified",
     },
     components: [
