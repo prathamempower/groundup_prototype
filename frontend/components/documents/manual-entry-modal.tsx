@@ -23,6 +23,13 @@ import {
   Layers,
 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ManualEntryModalProps {
   document: DocumentItem | null;
@@ -175,17 +182,18 @@ export function ManualEntryModal({
               <label className="block text-caption font-semibold text-text-primary mb-1">
                 CSI Budget Line Allocation:
               </label>
-              <select
-                value={budgetLineId}
-                onChange={(e) => setBudgetLineId(e.target.value)}
-                className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary focus-visible:outline-primary"
-              >
-                {budgetLines.map((line) => (
-                  <option key={line.id} value={line.id}>
-                    {line.code} - {line.name}
-                  </option>
-                ))}
-              </select>
+              <Select value={budgetLineId} onValueChange={(val) => setBudgetLineId(val)}>
+                <SelectTrigger className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary">
+                  <SelectValue placeholder="Select CSI budget line" />
+                </SelectTrigger>
+                <SelectContent>
+                  {budgetLines.map((line) => (
+                    <SelectItem key={line.id} value={line.id}>
+                      {line.code} - {line.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="md:col-span-2">

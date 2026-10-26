@@ -11,7 +11,13 @@ import {
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { MoneyInput } from "@/components/ui/money-input";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Banner } from "@/components/ui/banner";
@@ -130,17 +136,18 @@ export function TransferModal({
             <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
               Destination Project Entity
             </label>
-            <select
-              className="flex h-9 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary focus:border-primary focus:outline-hidden"
-              value={toProjectId}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setToProjectId(e.target.value)}
-            >
-              {otherProjects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({p.lifecycle_stage})
-                </option>
-              ))}
-            </select>
+            <Select value={toProjectId} onValueChange={(val) => setToProjectId(val)}>
+              <SelectTrigger className="flex h-9 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary">
+                <SelectValue placeholder="Select destination project" />
+              </SelectTrigger>
+              <SelectContent>
+                {otherProjects.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name} ({p.lifecycle_stage})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

@@ -13,6 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Banner } from "@/components/ui/banner";
 import { api } from "@/lib/api";
 import { UploadCloud } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ImportWizardModalProps {
   open: boolean;
@@ -149,20 +156,23 @@ export function ImportWizardModal({
             <label htmlFor="statement-account" className="mb-2 block text-sm font-medium text-text-primary">
               Financial account
             </label>
-            <select
-              id="statement-account"
-              value={accountId}
-              onChange={(event) => setAccountId(event.target.value)}
-              className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary"
+            <Select
+              value={accountId || "NONE"}
+              onValueChange={(val) => setAccountId(val === "NONE" ? "" : val)}
               disabled={accounts.isLoading}
             >
-              <option value="">Leave unlinked for review</option>
-              {(accounts.data?.data ?? []).filter((account) => account.status === "ACTIVE").map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.institution} {account.masked_identifier}: {account.account_purpose}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger id="statement-account" className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-primary">
+                <SelectValue placeholder="Leave unlinked for review" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="NONE">Leave unlinked for review</SelectItem>
+                {(accounts.data?.data ?? []).filter((account) => account.status === "ACTIVE").map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.institution} {account.masked_identifier}: {account.account_purpose}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {accounts.error && (
               <p role="alert" className="mt-1.5 text-xs text-danger">
                 Financial accounts could not be loaded. You may still import without linking one.

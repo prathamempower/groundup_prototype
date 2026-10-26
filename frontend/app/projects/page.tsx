@@ -30,6 +30,13 @@ import {
   Trash2,
   Loader2,
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const DEFAULT_GLOBAL_ROLE: UserRole = "OWNER";
 
@@ -321,29 +328,31 @@ export default function ProjectsPortfolioPage() {
           {/* Stage & Status Filters: 2-column grid on mobile, inline on desktop */}
           <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto sm:items-center">
             {/* Stage Filter */}
-            <select
-              value={stageFilter}
-              onChange={(e) => setStageFilter(e.target.value)}
-              className="h-10 sm:h-9 w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-2.5 sm:px-3 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 focus:border-slate-900 focus:outline-none cursor-pointer"
-            >
-              <option value="ALL">All Stages</option>
-              <option value="PRE_ACQUISITION">Pre Acquisition</option>
-              <option value="ACQUISITION">Acquisition</option>
-              <option value="PERMITTING">Permitting</option>
-              <option value="ACTIVE_CONSTRUCTION">Active Project Construction</option>
-              <option value="POST_CONSTRUCTION">Post construction</option>
-            </select>
+            <Select value={stageFilter} onValueChange={(val) => setStageFilter(val)}>
+              <SelectTrigger className="h-10 sm:h-9 w-full sm:w-[200px] rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800">
+                <SelectValue placeholder="All Stages" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Stages</SelectItem>
+                <SelectItem value="PRE_ACQUISITION">Pre Acquisition</SelectItem>
+                <SelectItem value="ACQUISITION">Acquisition</SelectItem>
+                <SelectItem value="PERMITTING">Permitting</SelectItem>
+                <SelectItem value="ACTIVE_CONSTRUCTION">Active Project Construction</SelectItem>
+                <SelectItem value="POST_CONSTRUCTION">Post construction</SelectItem>
+              </SelectContent>
+            </Select>
 
             {/* Status Filter */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-10 sm:h-9 w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-2.5 sm:px-3 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 focus:border-slate-900 focus:outline-none cursor-pointer"
-            >
-              <option value="ALL">All Status</option>
-              <option value="HEALTHY">Healthy</option>
-              <option value="AT_RISK">At Risk</option>
-            </select>
+            <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val)}>
+              <SelectTrigger className="h-10 sm:h-9 w-full sm:w-[140px] rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Status</SelectItem>
+                <SelectItem value="HEALTHY">Healthy</SelectItem>
+                <SelectItem value="AT_RISK">At Risk</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

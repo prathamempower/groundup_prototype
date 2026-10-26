@@ -5,6 +5,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { AlertItem } from "@/lib/types";
 import { AlertOctagon, X, ArrowUpRight, AlertTriangle } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface EscalateAlertModalProps {
   alert: AlertItem;
@@ -84,16 +91,17 @@ export function EscalateAlertModal({
             <label className="block text-caption font-semibold text-text-primary">
               Assign Escalation Recipient
             </label>
-            <select
-              value={escalatedTo}
-              onChange={(e) => setEscalatedTo(e.target.value)}
-              className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary focus:border-danger focus:outline-hidden"
-            >
-              <option value="Marcus Vance (Owner)">Marcus Vance (Managing Principal / Owner)</option>
-              <option value="Sarah Lin (Co-Owner)">Sarah Lin (Managing Partner / Co-Owner)</option>
-              <option value="David Ross (Co-Owner)">David Ross (Executive Partner / Co-Owner)</option>
-              <option value="Strategic Advisory Board">Strategic Advisory Board & Ownership Committee</option>
-            </select>
+            <Select value={escalatedTo} onValueChange={(val) => setEscalatedTo(val)}>
+              <SelectTrigger className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary">
+                <SelectValue placeholder="Select escalation recipient" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Marcus Vance (Owner)">Marcus Vance (Managing Principal / Owner)</SelectItem>
+                <SelectItem value="Sarah Lin (Co-Owner)">Sarah Lin (Managing Partner / Co-Owner)</SelectItem>
+                <SelectItem value="David Ross (Co-Owner)">David Ross (Executive Partner / Co-Owner)</SelectItem>
+                <SelectItem value="Strategic Advisory Board">Strategic Advisory Board & Ownership Committee</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-1.5">

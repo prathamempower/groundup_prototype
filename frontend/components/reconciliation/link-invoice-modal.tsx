@@ -10,7 +10,13 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Banner } from "@/components/ui/banner";
 import { formatMoney } from "@/lib/format";
@@ -109,17 +115,18 @@ export function LinkInvoiceModal({
             <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
               Select Document
             </label>
-            <select
-              className="flex h-9 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary focus:border-primary focus:outline-hidden"
-              value={selectedDocId}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedDocId(e.target.value)}
-            >
-              {documents.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.original_filename} ({d.document_type}, {d.ingestion_status})
-                </option>
-              ))}
-            </select>
+            <Select value={selectedDocId} onValueChange={(val) => setSelectedDocId(val)}>
+              <SelectTrigger className="flex h-9 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary">
+                <SelectValue placeholder="Select document" />
+              </SelectTrigger>
+              <SelectContent>
+                {documents.map((d) => (
+                  <SelectItem key={d.id} value={d.id}>
+                    {d.original_filename} ({d.document_type}, {d.ingestion_status})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>

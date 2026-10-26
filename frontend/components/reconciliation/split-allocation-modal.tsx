@@ -11,7 +11,13 @@ import {
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { MoneyInput } from "@/components/ui/money-input";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Banner } from "@/components/ui/banner";
@@ -260,19 +266,23 @@ export function SplitAllocationModal({
                     <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
                       Line #{index + 1} CSI Budget Code
                     </label>
-                    <select
-                      className="flex h-9 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary focus:border-primary focus:outline-hidden"
+                    <Select
                       value={row.budget_line_id}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                        handleUpdateRow(row.id, "budget_line_id", e.target.value)
+                      onValueChange={(val) =>
+                        handleUpdateRow(row.id, "budget_line_id", val)
                       }
                     >
-                      {budgetLines.map((bl) => (
-                        <option key={bl.id} value={bl.id}>
-                          {bl.code}: {bl.name}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="Select budget line" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {budgetLines.map((bl) => (
+                          <SelectItem key={bl.id} value={bl.id}>
+                            {bl.code}: {bl.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="md:col-span-3">

@@ -19,6 +19,13 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function AuditLogPanel() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -87,47 +94,50 @@ export function AuditLogPanel() {
 
           {/* Actor filter */}
           <div>
-            <select
-              value={actorFilter}
-              onChange={(e) => setActorFilter(e.target.value)}
-              className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary focus:border-primary focus:outline-hidden"
-            >
-              <option value="ALL">All Actors & Roles</option>
-              {uniqueActors.map((actor) => (
-                <option key={actor} value={actor}>{actor}</option>
-              ))}
-            </select>
+            <Select value={actorFilter} onValueChange={(val) => setActorFilter(val)}>
+              <SelectTrigger className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary">
+                <SelectValue placeholder="All Actors & Roles" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Actors & Roles</SelectItem>
+                {uniqueActors.map((actor) => (
+                  <SelectItem key={actor} value={actor}>{actor}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Entity Type filter */}
           <div>
-            <select
-              value={entityFilter}
-              onChange={(e) => setEntityFilter(e.target.value)}
-              className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary focus:border-primary focus:outline-hidden"
-            >
-              <option value="ALL">All Entity Types</option>
-              {uniqueEntities.map((entity) => (
-                <option key={entity} value={entity}>{entity.replace(/_/g, " ")}</option>
-              ))}
-            </select>
+            <Select value={entityFilter} onValueChange={(val) => setEntityFilter(val)}>
+              <SelectTrigger className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary">
+                <SelectValue placeholder="All Entity Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Entity Types</SelectItem>
+                {uniqueEntities.map((entity) => (
+                  <SelectItem key={entity} value={entity}>{entity.replace(/_/g, " ")}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Action category filter */}
           <div>
-            <select
-              value={actionFilter}
-              onChange={(e) => setActionFilter(e.target.value)}
-              className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary focus:border-primary focus:outline-hidden"
-            >
-              <option value="ALL">All Action Categories</option>
-              <option value="APPROVE">Approvals & Baselines</option>
-              <option value="DRAW">Draws & Fundings</option>
-              <option value="RECONCILIATION">Reconciliation Matches</option>
-              <option value="ALERT">Alerts & Exceptions</option>
-              <option value="PUBLISH">Investor Publications</option>
-              <option value="CLOSEOUT">Project Closeouts</option>
-            </select>
+            <Select value={actionFilter} onValueChange={(val) => setActionFilter(val)}>
+              <SelectTrigger className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary">
+                <SelectValue placeholder="All Action Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Action Categories</SelectItem>
+                <SelectItem value="APPROVE">Approvals & Baselines</SelectItem>
+                <SelectItem value="DRAW">Draws & Fundings</SelectItem>
+                <SelectItem value="RECONCILIATION">Reconciliation Matches</SelectItem>
+                <SelectItem value="ALERT">Alerts & Exceptions</SelectItem>
+                <SelectItem value="PUBLISH">Investor Publications</SelectItem>
+                <SelectItem value="CLOSEOUT">Project Closeouts</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>

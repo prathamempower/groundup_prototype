@@ -8,6 +8,13 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface MilestoneGanttChartProps {
   milestones: MilestoneItem[];
@@ -212,28 +219,18 @@ export function MilestoneGanttChart({
           </div>
 
           {/* Status Dropdown */}
-          <div className="relative">
-            <select
-              value={statusFilter}
-              onChange={(e) => onStatusFilterChange(e.target.value)}
-              aria-label="Filter status"
-              className="h-8.5 rounded-lg border border-slate-200 bg-white px-3 pr-7 text-xs font-medium text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer"
-            >
-              <option value="ALL">All Status</option>
-              <option value="CRITICAL">Critical</option>
-              <option value="ON_TRACK">On Track</option>
-              <option value="AT_RISK">At Risk</option>
-              <option value="COMPLETED">Completed</option>
-            </select>
-            <svg
-              className="pointer-events-none absolute right-2.5 top-3 h-3 w-3 text-slate-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
+          <Select value={statusFilter} onValueChange={(val) => onStatusFilterChange(val)}>
+            <SelectTrigger aria-label="Filter status" className="h-8.5 w-[130px] rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Status</SelectItem>
+              <SelectItem value="CRITICAL">Critical</SelectItem>
+              <SelectItem value="ON_TRACK">On Track</SelectItem>
+              <SelectItem value="AT_RISK">At Risk</SelectItem>
+              <SelectItem value="COMPLETED">Completed</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* View Range & Granularity Controls */}

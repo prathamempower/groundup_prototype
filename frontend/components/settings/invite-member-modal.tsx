@@ -5,6 +5,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { UserRole } from "@/lib/types";
 import { UserPlus, X, AlertTriangle, ShieldCheck, Mail, Building, User } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface InviteMemberModalProps {
   projectId: string;
@@ -125,13 +132,14 @@ export function InviteMemberModal({
               <label className="block text-caption font-semibold text-text-primary">
                 Assigned Role Boundary *
               </label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as UserRole)}
-                className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body font-medium text-text-primary focus:border-primary focus:outline-hidden"
-              >
-                <option value="OWNER">OWNER: Full Portfolio & Budget Authority</option>
-              </select>
+              <Select value={role} onValueChange={(val) => setRole(val as UserRole)}>
+                <SelectTrigger className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body font-medium text-text-primary">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="OWNER">OWNER: Full Portfolio & Budget Authority</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1.5">

@@ -14,6 +14,13 @@ import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { MilestoneItem, BudgetLine } from "@/lib/types";
 import { Calendar, Plus, Link as LinkIcon, CheckCircle2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface CreateMilestoneModalProps {
   open: boolean;
@@ -175,18 +182,22 @@ export function CreateMilestoneModal({
                 label="Linked Budget Line (SOV)"
                 helperText="Maps physical milestone completion to cost category"
               >
-                <select
-                  value={budgetLineId}
-                  onChange={(e) => setBudgetLineId(e.target.value)}
-                  className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                <Select
+                  value={budgetLineId || "NONE"}
+                  onValueChange={(val) => setBudgetLineId(val === "NONE" ? "" : val)}
                 >
-                  <option value="">-- Select CSI Budget Line (Optional) --</option>
-                  {budgetLines.map((bl) => (
-                    <option key={bl.id} value={bl.id}>
-                      {bl.code} - {bl.name}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary">
+                    <SelectValue placeholder="-- Select CSI Budget Line (Optional) --" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NONE">-- Select CSI Budget Line (Optional) --</SelectItem>
+                    {budgetLines.map((bl) => (
+                      <SelectItem key={bl.id} value={bl.id}>
+                        {bl.code} - {bl.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormField>
             </div>
 

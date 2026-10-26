@@ -23,6 +23,26 @@ const nextConfig = {
         destination: "/auth/sign-up",
         permanent: false,
       },
+      {
+        source: "/login",
+        destination: "/auth/login",
+        permanent: false,
+      },
+      {
+        source: "/projects/:projectId/economics",
+        destination: "/projects/:projectId/budget",
+        permanent: false,
+      },
+      {
+        source: "/projects/:projectId/directs",
+        destination: "/projects/:projectId/inbox",
+        permanent: false,
+      },
+      {
+        source: "/projects/:projectId/investor-update",
+        destination: "/projects/:projectId/investor-updates",
+        permanent: false,
+      },
     ];
   },
   async rewrites() {

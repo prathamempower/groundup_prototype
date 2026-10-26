@@ -10,8 +10,14 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Banner } from "@/components/ui/banner";
 import { formatMoney } from "@/lib/format";
 import { ReconciliationMatch } from "@/lib/types";
@@ -97,20 +103,21 @@ export function ExcludeTransactionModal({
           )}
 
           <div>
-            <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
+            <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">
               Reason Category
             </label>
-            <select
-              className="flex h-9 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary focus:border-primary focus:outline-hidden"
-              value={category}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCategory(e.target.value)}
-            >
-              <option value="NON_PROJECT_EXPENSE">Non-project or other business expense</option>
-              <option value="SPONSOR_PERSONAL_DRAW">Owner draw or personal expense</option>
-              <option value="DUPLICATE_SETTLEMENT">Duplicate card or bank charge</option>
-              <option value="DISALLOWED_OVERHEAD">Disallowed contractor charge</option>
-              <option value="BANK_FEES_REVERSAL">Bank fee refund or reversal</option>
-            </select>
+            <Select value={category} onValueChange={(val) => setCategory(val)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select reason category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="NON_PROJECT_EXPENSE">Non-project or other business expense</SelectItem>
+                <SelectItem value="SPONSOR_PERSONAL_DRAW">Owner draw or personal expense</SelectItem>
+                <SelectItem value="DUPLICATE_SETTLEMENT">Duplicate card or bank charge</SelectItem>
+                <SelectItem value="DISALLOWED_OVERHEAD">Disallowed contractor charge</SelectItem>
+                <SelectItem value="BANK_FEES_REVERSAL">Bank fee refund or reversal</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
@@ -120,7 +127,7 @@ export function ExcludeTransactionModal({
             <Textarea
               placeholder="Explain why this should be excluded from project costs..."
               value={rationale}
-              onChange={(e) => setRationale(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRationale(e.target.value)}
               rows={3}
             />
           </div>

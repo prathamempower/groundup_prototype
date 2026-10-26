@@ -13,6 +13,13 @@ import {
 } from "lucide-react";
 import { Checkbox } from "./checkbox";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
 
 export interface ColumnDef<T> {
   id: string;
@@ -367,18 +374,22 @@ export function DataTable<T>({
         <div className="flex flex-wrap items-center justify-between gap-3 text-caption text-text-secondary px-1">
           <div className="flex items-center gap-2">
             <span>Rows per page:</span>
-            <select
-              value={rowsPerPage}
-              onChange={(e) => {
-                setRowsPerPage(Number(e.target.value));
+            <Select
+              value={String(rowsPerPage)}
+              onValueChange={(val) => {
+                setRowsPerPage(Number(val));
                 setCurrentPage(1);
               }}
-              className="rounded border border-border bg-surface px-2 py-1 text-caption text-text-primary focus-visible:outline-primary"
             >
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
+              <SelectTrigger className="h-8 w-[72px] rounded-lg border border-slate-200/90 bg-white px-2 text-xs font-semibold text-slate-800">
+                <SelectValue placeholder="25" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
             <span className="text-text-muted">
               Showing {(currentPage - 1) * rowsPerPage + 1} to{" "}
               {Math.min(currentPage * rowsPerPage, sortedData.length)} of{" "}

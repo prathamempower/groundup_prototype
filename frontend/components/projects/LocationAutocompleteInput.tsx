@@ -179,10 +179,10 @@ export function LocationAutocompleteInput({
         </div>
       </div>
 
-      {/* Apple-Style Minimalist Autocomplete Dropdown */}
+      {/* Apple-Grade Technical Blueprint Autocomplete Dropdown */}
       {isOpen && !isLoading && suggestions.length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-xl shadow-lg overflow-hidden animate-in fade-in duration-100 p-1">
-          <ul className="max-h-56 overflow-y-auto divide-y divide-slate-100/60">
+        <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white/98 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-[0_4px_20px_-2px_rgba(15,23,42,0.08),0_12px_36px_-4px_rgba(15,23,42,0.12)] overflow-hidden animate-in fade-in zoom-in-95 duration-150 ease-out p-1.5">
+          <ul className="max-h-56 overflow-y-auto space-y-0.5 p-0.5">
             {suggestions.map((item, idx) => {
               const isSelected = idx === selectedIndex;
               return (
@@ -190,13 +190,15 @@ export function LocationAutocompleteInput({
                   key={`${item.label}-${idx}`}
                   onMouseEnter={() => setSelectedIndex(idx)}
                   onClick={() => handleSelect(item)}
-                  className={`px-3 py-2 cursor-pointer flex items-center gap-2.5 rounded-lg transition text-left ${
-                    isSelected ? "bg-slate-100 text-slate-900" : "hover:bg-slate-50 text-slate-700"
+                  className={`px-2.5 py-2 cursor-pointer flex items-center gap-2.5 rounded-lg transition-colors text-left ${
+                    isSelected
+                      ? "bg-blue-50/80 text-blue-900 font-semibold border border-blue-200/60"
+                      : "hover:bg-slate-100/80 text-slate-700"
                   }`}
                 >
                   <MapPin
                     className={`w-3.5 h-3.5 shrink-0 ${
-                      isSelected ? "text-slate-900" : "text-slate-400"
+                      isSelected ? "text-blue-600" : "text-slate-400"
                     }`}
                   />
                   <div className="flex-1 min-w-0">
@@ -204,7 +206,7 @@ export function LocationAutocompleteInput({
                       {item.street || item.label}
                     </span>
                     {(item.city || item.state) && (
-                      <span className="text-[11px] text-slate-500 truncate block">
+                      <span className={`text-[11px] truncate block ${isSelected ? "text-blue-700/80 font-mono" : "text-slate-500"}`}>
                         {[item.city, item.state, item.zip].filter(Boolean).join(", ")}
                       </span>
                     )}

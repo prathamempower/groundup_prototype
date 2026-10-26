@@ -15,6 +15,13 @@ import { api } from "@/lib/api";
 import { MilestoneItem } from "@/lib/types";
 import { formatDate } from "@/lib/format";
 import { Clock, AlertTriangle, CheckCircle, DollarSign, Calendar } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface UpdateMilestoneModalProps {
   open: boolean;
@@ -167,17 +174,18 @@ export function UpdateMilestoneModal({
 
             <div>
               <FormField label="Lifecycle Status">
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as MilestoneItem["status"])}
-                  className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                >
-                  <option value="NOT_STARTED">Not Started</option>
-                  <option value="IN_PROGRESS">In Progress</option>
-                  <option value="AT_RISK">At Risk</option>
-                  <option value="DELAYED">Delayed</option>
-                  <option value="COMPLETED">Completed</option>
-                </select>
+                <Select value={status} onValueChange={(val) => setStatus(val as MilestoneItem["status"])}>
+                  <SelectTrigger className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NOT_STARTED">Not Started</SelectItem>
+                    <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                    <SelectItem value="AT_RISK">At Risk</SelectItem>
+                    <SelectItem value="DELAYED">Delayed</SelectItem>
+                    <SelectItem value="COMPLETED">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
               </FormField>
             </div>
           </div>

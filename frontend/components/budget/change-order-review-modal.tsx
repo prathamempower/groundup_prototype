@@ -11,6 +11,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoneyInput } from "@/components/ui/money-input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Check,
   X,
   ArrowRight,
@@ -303,17 +310,21 @@ export function ChangeOrderReviewModal({
                     <label className="text-[11px] text-muted-foreground block mb-1">
                       Select Equity Partner
                     </label>
-                    <select
+                    <Select
                       value={selectedSponsor}
-                      onChange={(e) => setSelectedSponsor(e.target.value)}
-                      className="w-full text-xs h-9 px-3 rounded-md border border-border bg-white text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      onValueChange={(val) => setSelectedSponsor(val)}
                     >
-                      {PROJECT_SPONSORS.map((sp) => (
-                        <option key={sp.id} value={sp.id}>
-                          {sp.name} ({sp.share})
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger className="w-full text-xs h-9">
+                        <SelectValue placeholder="Select Equity Partner" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PROJECT_SPONSORS.map((sp) => (
+                          <SelectItem key={sp.id} value={sp.id}>
+                            {sp.name} ({sp.share})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
 
@@ -323,17 +334,21 @@ export function ChangeOrderReviewModal({
                     <label className="text-[11px] text-muted-foreground block mb-1">
                       Select Credit Line
                     </label>
-                    <select
+                    <Select
                       value={selectedLoan}
-                      onChange={(e) => setSelectedLoan(e.target.value)}
-                      className="w-full text-xs h-9 px-3 rounded-md border border-border bg-white text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      onValueChange={(val) => setSelectedLoan(val)}
                     >
-                      {LOAN_FACILITIES.map((ln) => (
-                        <option key={ln.id} value={ln.id}>
-                          {ln.name}: {ln.available}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger className="w-full text-xs h-9">
+                        <SelectValue placeholder="Select Credit Line" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LOAN_FACILITIES.map((ln) => (
+                          <SelectItem key={ln.id} value={ln.id}>
+                            {ln.name}: {ln.available}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
 

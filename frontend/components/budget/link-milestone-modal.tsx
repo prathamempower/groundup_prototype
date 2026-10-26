@@ -13,6 +13,13 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Calendar, Link2, CheckCircle2, Unlink } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 
@@ -105,18 +112,22 @@ export function LinkMilestoneModal({
             <label className="block text-caption font-semibold text-text-primary mb-1">
               Associated Project Milestone:
             </label>
-            <select
+            <Select
               value={selectedMilestoneId}
-              onChange={(e) => setSelectedMilestoneId(e.target.value)}
-              className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary focus-visible:outline-primary"
+              onValueChange={(val) => setSelectedMilestoneId(val)}
             >
-              <option value="none">-- Unlinked (No Milestone Dependency) --</option>
-              {milestones.map((ms) => (
-                <option key={ms.id} value={ms.id}>
-                  {ms.name} ({ms.percent_complete}% Complete • Status: {ms.status})
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Associated Project Milestone" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No Milestone Dependency (Unlinked)</SelectItem>
+                {milestones.map((ms) => (
+                  <SelectItem key={ms.id} value={ms.id}>
+                    {ms.name} ({ms.percent_complete}% Complete • Status: {ms.status})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <p className="text-[11px] text-text-muted mt-1">
               Linking allows progress verification and draw eligibility tracking against on-site physical milestones.
             </p>

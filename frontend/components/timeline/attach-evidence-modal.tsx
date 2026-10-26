@@ -14,6 +14,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { MilestoneItem, MilestoneEvidence } from "@/lib/types";
 import { FileUp, Camera, FileCheck, ShieldCheck, Upload } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AttachEvidenceModalProps {
   open: boolean;
@@ -174,34 +181,39 @@ export function AttachEvidenceModal({
 
             <div>
               <FormField label="Evidence Type" required>
-                <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value as MilestoneEvidence["type"])}
-                  className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                >
-                  <option value="PHOTO">Site Progress Photography</option>
-                  <option value="INSPECTION_REPORT">Special Inspection Report</option>
-                  <option value="PERMIT">Municipal Permit / DOB Signoff</option>
-                  <option value="ENGINEERING_MEMO">Structural Engineering Memo</option>
-                </select>
+                <Select value={type} onValueChange={(val) => setType(val as MilestoneEvidence["type"])}>
+                  <SelectTrigger className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary">
+                    <SelectValue placeholder="Select evidence type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PHOTO">Site Progress Photography</SelectItem>
+                    <SelectItem value="INSPECTION_REPORT">Special Inspection Report</SelectItem>
+                    <SelectItem value="PERMIT">Municipal Permit / DOB Signoff</SelectItem>
+                    <SelectItem value="ENGINEERING_MEMO">Structural Engineering Memo</SelectItem>
+                  </SelectContent>
+                </Select>
               </FormField>
             </div>
 
             <div>
               <FormField label="Verification Status">
-                <select
+                <Select
                   value={verificationStatus}
-                  onChange={(e) =>
+                  onValueChange={(val) =>
                     setVerificationStatus(
-                      e.target.value as "VERIFIED" | "PENDING_REVIEW" | "DISPUTED"
+                      val as "VERIFIED" | "PENDING_REVIEW" | "DISPUTED"
                     )
                   }
-                  className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 >
-                  <option value="VERIFIED">Verified & Certified</option>
-                  <option value="PENDING_REVIEW">Pending Lender / Owner Review</option>
-                  <option value="DISPUTED">Disputed Discrepancy</option>
-                </select>
+                  <SelectTrigger className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary">
+                    <SelectValue placeholder="Select verification status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="VERIFIED">Verified & Certified</SelectItem>
+                    <SelectItem value="PENDING_REVIEW">Pending Lender / Owner Review</SelectItem>
+                    <SelectItem value="DISPUTED">Disputed Discrepancy</SelectItem>
+                  </SelectContent>
+                </Select>
               </FormField>
             </div>
 

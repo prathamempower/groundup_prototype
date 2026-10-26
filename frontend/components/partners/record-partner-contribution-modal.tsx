@@ -13,6 +13,13 @@ import { FormField } from "@/components/ui/form-field";
 import { Button } from "@/components/ui/button";
 import { MoneyInput } from "@/components/ui/money-input";
 import { DollarSign, Landmark, CheckCircle2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface RecordPartnerContributionModalProps {
   open: boolean;
@@ -100,35 +107,39 @@ export function RecordPartnerContributionModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <FormField label="Contributing Partner" required>
-              <select
-                value={partnerName}
-                onChange={(e) => setPartnerName(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
-              >
-                {partners.map((p) => (
-                  <option key={p.name} value={p.name}>
-                    {p.name} ({p.role})
-                  </option>
-                ))}
-              </select>
+              <Select value={partnerName} onValueChange={(val) => setPartnerName(val)}>
+                <SelectTrigger className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800">
+                  <SelectValue placeholder="Select partner" />
+                </SelectTrigger>
+                <SelectContent>
+                  {partners.map((p) => (
+                    <SelectItem key={p.name} value={p.name}>
+                      {p.name} ({p.role})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </FormField>
 
             <FormField label="Funding Classification" required>
-              <select
+              <Select
                 value={sourceType}
-                onChange={(e) => {
-                  const val = e.target.value as any;
+                onValueChange={(val: "Partner Equity" | "Partner Loans" | "Unclassified") => {
                   setSourceType(val);
                   if (val === "Partner Equity") setSourceName("Bank transfer");
                   else if (val === "Partner Loans") setSourceName("Direct wire loan");
                   else setSourceName("Oak Tree (unclassified)");
                 }}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
               >
-                <option value="Partner Equity">Partner Equity (Classified)</option>
-                <option value="Partner Loans">Partner Loan</option>
-                <option value="Unclassified">Unclassified / Sponsor Advance</option>
-              </select>
+                <SelectTrigger className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800">
+                  <SelectValue placeholder="Select classification" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Partner Equity">Partner Equity (Classified)</SelectItem>
+                  <SelectItem value="Partner Loans">Partner Loan</SelectItem>
+                  <SelectItem value="Unclassified">Unclassified / Sponsor Advance</SelectItem>
+                </SelectContent>
+              </Select>
             </FormField>
           </div>
 

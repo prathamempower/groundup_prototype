@@ -6,6 +6,13 @@ import { api } from "@/lib/api";
 import { TeamMember, UserRole } from "@/lib/types";
 import { Shield, X, AlertTriangle, CheckCircle2, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface EditRoleModalProps {
   projectId: string;
@@ -93,15 +100,14 @@ export function EditRoleModal({
             <label className="block text-xs font-semibold text-slate-800">
               Assigned Role
             </label>
-            <div className="relative">
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as UserRole)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-800 shadow-2xs focus:border-blue-600 focus:outline-hidden focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer"
-              >
-                <option value="OWNER">Owner: Principal Developer / Portfolio Lead</option>
-              </select>
-            </div>
+            <Select value={role} onValueChange={(val) => setRole(val as UserRole)}>
+              <SelectTrigger className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-800 shadow-2xs">
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="OWNER">Owner: Principal Developer / Portfolio Lead</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Membership Status */}
