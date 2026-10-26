@@ -591,7 +591,7 @@ export default function ControlCenterPage() {
                     {/* 2-Column Numbers Grid */}
                     <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 text-[11px]">
                       <div>
-                        <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Approved</div>
+                        <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Approved Budget</div>
                         <div className="font-mono font-semibold text-slate-900 tabular-nums">
                           <ClickableAmount
                             amountText={formatMoney(approvedCents, { showCents: false })}
@@ -605,7 +605,7 @@ export default function ControlCenterPage() {
                       </div>
 
                       <div className="text-right">
-                        <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Spend</div>
+                        <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Actual Spend</div>
                         <div className="font-mono font-semibold text-blue-700 tabular-nums">
                           <ClickableAmount
                             amountText={spendCents === 0 ? "$0" : formatMoney(spendCents, { showCents: false })}
@@ -629,8 +629,8 @@ export default function ControlCenterPage() {
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/70 text-slate-500">
                     <th className="py-2.5 px-4 font-semibold uppercase tracking-wider text-[11px]">Task Description</th>
-                    <th className="py-2.5 px-3 text-right font-semibold uppercase tracking-wider text-[11px]">Approved</th>
-                    <th className="py-2.5 px-3 text-right font-semibold uppercase tracking-wider text-[11px]">Spend to Date</th>
+                    <th className="py-2.5 px-3 text-right font-semibold uppercase tracking-wider text-[11px]">Approved Budget</th>
+                    <th className="py-2.5 px-3 text-right font-semibold uppercase tracking-wider text-[11px]">Actual Spend</th>
                     <th className="py-2.5 px-4 text-right font-semibold uppercase tracking-wider text-[11px]">Variance</th>
                   </tr>
                 </thead>
