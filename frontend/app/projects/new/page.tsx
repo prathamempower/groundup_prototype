@@ -469,8 +469,13 @@ export default function CreateProjectPage() {
 
   // Auto-sync legal entity from project name if left untouched
   useEffect(() => {
-    if (projectName && (!projectEntity || projectEntity.endsWith(" LLC") || projectEntity.endsWith(" Partners LLC"))) {
-      setProjectEntity(`${projectName.trim()} Partners LLC`);
+    if (projectName) {
+      setProjectEntity((prev) => {
+        if (!prev || prev.endsWith(" LLC") || prev.endsWith(" Partners LLC")) {
+          return `${projectName.trim()} Partners LLC`;
+        }
+        return prev;
+      });
     }
   }, [projectName]);
 

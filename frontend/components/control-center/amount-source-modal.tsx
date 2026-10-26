@@ -43,7 +43,7 @@ export function AmountSourceModal({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent className="max-w-md overflow-hidden flex flex-col p-0 rounded-xl bg-white border border-slate-200 shadow-xl">
+      <ModalContent className="max-w-lg overflow-hidden flex flex-col p-0 rounded-xl bg-white border border-slate-200 shadow-xl">
         {/* Header - Clean & Simple */}
         <div className="px-5 pt-4 pb-3 border-b border-slate-100 flex items-center justify-between gap-4">
           <div>
@@ -111,37 +111,44 @@ export function AmountSourceModal({
             )}
           </div>
 
-          {/* Clean Line Items Table (Without Share) */}
+          {/* Clean Line Items Table with All Tasks */}
           {origin.components && origin.components.length > 0 && (
             <div className="rounded-lg border border-slate-200 overflow-hidden">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-500 font-medium">
-                    <th className="py-2 px-3 text-left">Item</th>
-                    <th className="py-2 px-3 text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-800">
-                  {origin.components.map((c) => (
-                    <tr key={c.id} className="hover:bg-slate-50/70">
-                      <td className="py-2 px-3 font-medium text-slate-900">
-                        {c.name}
-                      </td>
-                      <td className="py-2 px-3 text-right font-mono font-semibold tabular-nums text-slate-900">
-                        {c.amountFormatted}
+              <div className="max-h-[340px] overflow-y-auto">
+                <table className="w-full text-xs">
+                  <thead className="sticky top-0 z-10 bg-slate-50">
+                    <tr className="border-b border-slate-200 text-slate-500 font-medium">
+                      <th className="py-2.5 px-3.5 text-left">Item</th>
+                      <th className="py-2.5 px-3.5 text-right">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-800">
+                    {origin.components.map((c) => (
+                      <tr key={c.id} className="hover:bg-slate-50/70">
+                        <td className="py-2.5 px-3.5 font-medium text-slate-900">
+                          {c.code && (
+                            <span className="font-mono text-slate-500 mr-2 text-[11px] font-semibold">
+                              {c.code}
+                            </span>
+                          )}
+                          <span>{c.name}</span>
+                        </td>
+                        <td className="py-2.5 px-3.5 text-right font-mono font-semibold tabular-nums text-slate-900 whitespace-nowrap">
+                          {c.amountFormatted}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="sticky bottom-0 z-10 bg-slate-50/95 backdrop-blur-xs">
+                    <tr className="border-t border-slate-200 font-bold text-slate-900">
+                      <td className="py-2.5 px-3.5">Total</td>
+                      <td className="py-2.5 px-3.5 text-right font-mono tabular-nums whitespace-nowrap">
+                        {origin.amountFormatted}
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="border-t border-slate-200 font-bold bg-slate-50/70 text-slate-900">
-                    <td className="py-2 px-3">Total</td>
-                    <td className="py-2 px-3 text-right font-mono tabular-nums">
-                      {origin.amountFormatted}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
+                  </tfoot>
+                </table>
+              </div>
             </div>
           )}
         </div>

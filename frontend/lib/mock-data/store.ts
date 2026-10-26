@@ -114,7 +114,7 @@ interface MockDbState {
   importBatches: Record<string, ImportBatch[]>;
 }
 
-const STORAGE_KEY = "groundup_mock_db_v4";
+const STORAGE_KEY = "groundup_mock_db_v6";
 
 export function deduplicateProjects(projects: Project[]): Project[] {
   if (!Array.isArray(projects)) return [];
@@ -206,6 +206,22 @@ class MockStore {
                 }
               }
             }
+
+            // Always synchronize canonical draws, budget lines, and dashboard for benchmark project 73 Broadway
+            if (!parsed.draws) parsed.draws = {};
+            parsed.draws["df16b577-3585-4fb0-a13a-ffadaca73e0f"] = JSON.parse(
+              JSON.stringify(SEED_DRAWS["df16b577-3585-4fb0-a13a-ffadaca73e0f"] || [])
+            );
+
+            if (!parsed.budgetLines) parsed.budgetLines = {};
+            parsed.budgetLines["df16b577-3585-4fb0-a13a-ffadaca73e0f"] = JSON.parse(
+              JSON.stringify(SEED_BUDGET_LINES["df16b577-3585-4fb0-a13a-ffadaca73e0f"] || [])
+            );
+
+            if (!parsed.dashboards) parsed.dashboards = {};
+            parsed.dashboards["df16b577-3585-4fb0-a13a-ffadaca73e0f"] = JSON.parse(
+              JSON.stringify(SEED_DASHBOARDS["df16b577-3585-4fb0-a13a-ffadaca73e0f"])
+            );
 
             try {
               window.localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));

@@ -519,17 +519,16 @@ export default function DocumentsPage() {
                 <thead>
                   <tr className="border-b border-slate-200/80 bg-slate-50/75 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                     <th className="py-3 px-5 min-w-[320px]">Document & Classification</th>
-                    <th className="py-3 px-4 min-w-[180px]">Verification Status</th>
-                    <th className="py-3 px-4 min-w-[160px]">Uploaded By</th>
-                    <th className="py-3 px-4 text-right whitespace-nowrap min-w-[110px]">Date</th>
+                    <th className="py-3 px-5 min-w-[170px]">Verification Status</th>
+                    <th className="py-3 px-5 min-w-[160px]">Uploaded By</th>
+                    <th className="py-3 px-5 text-right whitespace-nowrap min-w-[110px]">Date</th>
                     <th className="py-3 px-5 text-right min-w-[110px]">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
-                  {filteredDocuments.map((doc, idx) => {
+                  {filteredDocuments.map((doc) => {
                     const projectObj = projects.find((p) => p.id === doc.project_id);
                     const isSheet = doc.mime_type.includes("sheet") || doc.original_filename.endsWith(".xlsx");
-                    const confidenceScore = doc.ingestion_status === "REVIEWED" ? 100 : (95 + (idx % 5));
 
                     return (
                       <tr
@@ -541,7 +540,7 @@ export default function DocumentsPage() {
                         )}
                       >
                         {/* Unified: Source Document + Classification Badge + Duplicates */}
-                        <td className="py-3.5 px-5">
+                        <td className="py-3.5 px-5 align-middle">
                           <div className="flex items-start gap-3">
                             <div className={cn(
                               "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 border mt-0.5",
@@ -590,40 +589,38 @@ export default function DocumentsPage() {
                           </div>
                         </td>
 
-                        {/* Unified: Verification Status + AI Confidence Indicator */}
-                        <td className="py-3.5 px-4">
-                          <div className="space-y-1">
-                            <div>
-                              {doc.ingestion_status === "REVIEWED" && (
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/70 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
-                                  <CheckCircle2 className="h-3 w-3" /> Reviewed & Verified
-                                </span>
-                              )}
-                              {doc.ingestion_status === "READY_FOR_REVIEW" && (
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200/70 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700">
-                                  <Clock className="h-3 w-3" /> Ready for Review
-                                </span>
-                              )}
-                              {doc.ingestion_status === "QUARANTINED" && (
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-200/70 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700">
-                                  <ShieldAlert className="h-3 w-3" /> Quarantined
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-mono">
-                              <span className="text-slate-400">OCR Confidence:</span>
-                              <span className={cn(
-                                "font-semibold",
-                                confidenceScore >= 98 ? "text-emerald-700" : "text-blue-700"
-                              )}>
-                                {confidenceScore}%
+                        {/* Verification Status */}
+                        <td className="py-3.5 px-5 align-middle">
+                          {doc.ingestion_status === "REVIEWED" && (
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-xs font-semibold text-emerald-800 shadow-2xs whitespace-nowrap">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                              Verified
+                            </span>
+                          )}
+                          {doc.ingestion_status === "READY_FOR_REVIEW" && (
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-1 text-xs font-semibold text-amber-800 shadow-2xs whitespace-nowrap">
+                              <Clock className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                              Needs Review
+                            </span>
+                          )}
+                          {doc.ingestion_status === "QUARANTINED" && (
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-200/80 px-2.5 py-1 text-xs font-semibold text-rose-800 shadow-2xs whitespace-nowrap">
+                              <ShieldAlert className="h-3.5 w-3.5 text-rose-600 shrink-0" />
+                              Quarantined
+                            </span>
+                          )}
+                          {doc.ingestion_status !== "REVIEWED" &&
+                            doc.ingestion_status !== "READY_FOR_REVIEW" &&
+                            doc.ingestion_status !== "QUARANTINED" && (
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200/80 px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs whitespace-nowrap">
+                                <Clock className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                                Processing
                               </span>
-                            </div>
-                          </div>
+                            )}
                         </td>
 
                         {/* Uploader */}
-                        <td className="py-3.5 px-4 text-xs">
+                        <td className="py-3.5 px-5 align-middle text-xs">
                           {(() => {
                             const uploaderName = getUploaderName(doc);
                             const initials = uploaderName
@@ -647,12 +644,12 @@ export default function DocumentsPage() {
                         </td>
 
                         {/* Date */}
-                        <td className="py-3.5 px-4 text-right whitespace-nowrap tabular-nums text-slate-600 text-xs font-medium font-mono">
+                        <td className="py-3.5 px-5 align-middle text-right whitespace-nowrap tabular-nums text-slate-600 text-xs font-medium font-mono">
                           {formatDate(doc.document_date)}
                         </td>
 
                         {/* Actions */}
-                        <td className="py-3.5 px-5 text-right">
+                        <td className="py-3.5 px-5 align-middle text-right">
                           <div className="flex items-center justify-end gap-2">
 
                             {doc.ingestion_status === "QUARANTINED" ? (

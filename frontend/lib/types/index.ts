@@ -243,6 +243,8 @@ export interface Project {
   status: "ACTIVE" | "COMPLETED" | "SETUP_INCOMPLETE";
   currency: string;
   loan_commitment?: string; // minor units in cents as string
+  general_contractor?: string;
+  lender_name?: string;
   started_at: string;
   target_completion_at: string;
   acquisition_date?: string;

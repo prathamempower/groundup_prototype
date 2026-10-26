@@ -5,25 +5,22 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { formatMoney, formatAsOf } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
 import { DocumentItem } from "@/lib/types";
 import {
   ShieldAlert,
   AlertTriangle,
-  Landmark,
   MapPin,
   Briefcase,
   ArrowRight,
   TrendingUp,
   Wallet,
   PiggyBank,
-  CalendarClock,
   ArrowUpRight,
   FileText,
   Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ControlCenterAnalytics } from "@/components/control-center/analytics-charts";
 import { DocumentQuickPreviewModal } from "@/components/documents/document-quick-preview-modal";
 import {
   AmountSourceOrigin,
@@ -67,6 +64,208 @@ function ClickableAmount({
   );
 }
 
+const DEFAULT_FORECAST_TASKS = [
+  // --- Draw #1 Tasks: Soft Costs & Pre-Development ($448,000.00 Incurred) ---
+  {
+    category: "01.01 Architectural Design & Working Drawings (Draw #1)",
+    variance_reason: "Draw #1 funded • AIA architectural invoicing 100% complete",
+    original_budget: "22500000",
+    current_approved: "22500000",
+    actual_spend: "22500000",
+    forecast_final: "22500000",
+    variance: "0",
+    sources: [],
+  },
+  {
+    category: "01.02 Structural, MEP & Civil Engineering (Draw #1)",
+    variance_reason: "Draw #1 funded • PE stamped calculation sets delivered",
+    original_budget: "11850000",
+    current_approved: "11850000",
+    actual_spend: "11850000",
+    forecast_final: "11850000",
+    variance: "0",
+    sources: [],
+  },
+  {
+    category: "01.03 Municipal Plan Check, Zoning & Building Permits (Draw #1)",
+    variance_reason: "Draw #1 funded • City building permits approved & fee receipts verified",
+    original_budget: "5450000",
+    current_approved: "5450000",
+    actual_spend: "5450000",
+    forecast_final: "5450000",
+    variance: "0",
+    sources: [],
+  },
+  {
+    category: "01.04 Environmental Testing, Civil Survey & Site Closing Admin (Draw #1)",
+    variance_reason: "Draw #1 funded • Phase II environmental clean report & ALTA survey",
+    original_budget: "5000000",
+    current_approved: "5000000",
+    actual_spend: "5000000",
+    forecast_final: "5000000",
+    variance: "0",
+    sources: [],
+  },
+
+  // --- Draw #2 Tasks: Excavation & Structural Core ($320,000.00 Incurred) ---
+  {
+    category: "02.01 Site Demolition, Clearing & Earthwork Excavation (Draw #2)",
+    variance_reason: "Draw #2 funded • Mass grading and excavation certified by bank inspector",
+    original_budget: "8530000",
+    current_approved: "8530000",
+    actual_spend: "8530000",
+    forecast_final: "8530000",
+    variance: "0",
+    sources: [],
+  },
+  {
+    category: "02.02 Deep Foundation, Shoring & Soil Retention (Draw #2)",
+    variance_reason: "Draw #2 funded • Helical pile installation & shoring load tests verified",
+    original_budget: "5000000",
+    current_approved: "5000000",
+    actual_spend: "5000000",
+    forecast_final: "5000000",
+    variance: "0",
+    sources: [],
+  },
+  {
+    category: "03.01 Reinforced Concrete Core, Grade Beams & Foundation Slabs (Draw #2)",
+    variance_reason: "Draw #2 funded • 4000 PSI concrete 28-day compression break reports passed",
+    original_budget: "11500000",
+    current_approved: "11500000",
+    actual_spend: "11500000",
+    forecast_final: "11500000",
+    variance: "0",
+    sources: [],
+  },
+  {
+    category: "03.02 Structural Steel Columns, Beams & Moment Connections (Draw #2)",
+    variance_reason: "Draw #2 funded • Primary steel framing erection & UT ultrasonic weld testing verified",
+    original_budget: "6970000",
+    current_approved: "6970000",
+    actual_spend: "6970000",
+    forecast_final: "6970000",
+    variance: "0",
+    sources: [],
+  },
+
+  // --- Draw #3 Tasks: Framing & MEP Rough-Ins ($298,920.00 Incurred) ---
+  {
+    category: "03.03 Cold-Formed Light Gauge Steel Stud Framing & Lateral Bracing (Draw #3)",
+    variance_reason: "Draw #3 funded • Interior partition & lateral perimeter framing 100% complete",
+    original_budget: "11530000",
+    current_approved: "11530000",
+    actual_spend: "11530000",
+    forecast_final: "11530000",
+    variance: "0",
+    sources: [],
+  },
+  {
+    category: "04.01 Plumbing Waste, Vent & Domestic Water Distribution Rough-Ins (Draw #3)",
+    variance_reason: "Draw #3 funded • Municipal rough plumbing air pressure inspection certified",
+    original_budget: "6500000",
+    current_approved: "6500000",
+    actual_spend: "6500000",
+    forecast_final: "6500000",
+    variance: "0",
+    sources: [],
+  },
+  {
+    category: "04.02 Electrical Service Main, Conduit & Branch Circuit Rough-Ins (Draw #3)",
+    variance_reason: "Draw #3 funded • Main electrical service tie-in and conduit rough-ins verified",
+    original_budget: "7500000",
+    current_approved: "7500000",
+    actual_spend: "7500000",
+    forecast_final: "7500000",
+    variance: "0",
+    sources: [],
+  },
+  {
+    category: "04.03 HVAC Equipment, Refrigerant Lines & Duct Distribution (Draw #3)",
+    variance_reason: "Draw #3 active spending • $35,000 paid to trades, $5,000 unit testing retainage",
+    original_budget: "4000000",
+    current_approved: "4000000",
+    actual_spend: "3500000",
+    forecast_final: "4000000",
+    variance: "0",
+    sources: [],
+  },
+  {
+    category: "16.01 Contingency Draw Allocation (Trade Field Adjustments) (Draw #3)",
+    variance_reason: "Draw #3 active spending • $8,620 paid for field pipe adjustments, $14,080 remaining",
+    original_budget: "2270000",
+    current_approved: "2270000",
+    actual_spend: "862000",
+    forecast_final: "2270000",
+    variance: "0",
+    sources: [],
+  },
+
+  // --- Draw #4 Tasks: Finishes, Enclosure & Closeout ($0.00 Incurred, $385,120 Scheduled) ---
+  {
+    category: "05.01 Gypsum Board Drywall, Acoustical Batt & Taping (Draw #4)",
+    variance_reason: "Draw #4 scheduled • Drywall boards delivered, pre-hanging inspection scheduled",
+    original_budget: "12000000",
+    current_approved: "12000000",
+    actual_spend: "0",
+    forecast_final: "12000000",
+    variance: "0",
+    sources: [],
+  },
+  {
+    category: "05.02 Millwork, Interior Doors, Trim & Custom Cabinetry (Draw #4)",
+    variance_reason: "Draw #4 scheduled • Custom cabinetry fabrication deposit in process",
+    original_budget: "10000000",
+    current_approved: "10000000",
+    actual_spend: "0",
+    forecast_final: "10000000",
+    variance: "0",
+    sources: [],
+  },
+  {
+    category: "06.01 Commercial Storefront Windows, Exterior Glazing & Weather Barrier (Draw #4)",
+    variance_reason: "Draw #4 scheduled • Aluminum storefront frames staged for install",
+    original_budget: "4690000",
+    current_approved: "4690000",
+    actual_spend: "0",
+    forecast_final: "4690000",
+    variance: "0",
+    sources: [],
+  },
+  {
+    category: "01.05 Construction Administration & Project Management Closeout (Draw #4)",
+    variance_reason: "Draw #4 scheduled • Project management supervisory closeout allowance",
+    original_budget: "390000",
+    current_approved: "390000",
+    actual_spend: "0",
+    forecast_final: "390000",
+    variance: "0",
+    sources: [],
+  },
+  {
+    category: "16.02 Remaining Contingency Reserve for Final Punchlist (Draw #4)",
+    variance_reason: "Draw #4 scheduled • Unallocated contingency reserved for final closeout",
+    original_budget: "11432000",
+    current_approved: "11432000",
+    actual_spend: "0",
+    forecast_final: "11432000",
+    variance: "0",
+    sources: [],
+  },
+
+  // --- Total Summary Row ---
+  {
+    category: "Total Project Budget",
+    variance_reason: "13 tasks funded through Draws 1–3 ($1,066,920.00 incurred), $404,200.00 to finish",
+    original_budget: "147112000",
+    current_approved: "147112000",
+    actual_spend: "106692000",
+    forecast_final: "147112000",
+    variance: "0",
+    sources: [],
+  },
+];
+
 export default function ControlCenterPage() {
   const params = useParams();
   const urlProjectId = (params?.projectId as string) || "";
@@ -77,8 +276,10 @@ export default function ControlCenterPage() {
   });
 
   const projects = projectsData?.data?.projects || [];
-  const currentProjectId = urlProjectId || projectsData?.data?.current_project_id || "";
-  const currentProject = projects.find((p) => p.id === currentProjectId) || projects[0];
+  const broadwayProject = projects.find((p) => p.id === "df16b577-3585-4fb0-a13a-ffadaca73e0f" || p.name?.toLowerCase().includes("broadway"));
+  const defaultProjectId = broadwayProject?.id || projectsData?.data?.current_project_id || "df16b577-3585-4fb0-a13a-ffadaca73e0f";
+  const currentProjectId = urlProjectId || defaultProjectId;
+  const currentProject = projects.find((p) => p.id === currentProjectId) || broadwayProject || projects[0];
 
   const { data: dashboardData, isLoading: isDashboardLoading } = useQuery({
     queryKey: ["dashboard", currentProjectId],
@@ -146,8 +347,8 @@ export default function ControlCenterPage() {
           <div className="h-6 w-48 rounded shimmer-wave bg-slate-100 mb-2" />
           <div className="h-3.5 w-72 rounded shimmer-wave bg-slate-100" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs space-y-3">
               <div className="flex justify-between items-center">
                 <div className="h-3 w-24 rounded shimmer-wave bg-slate-100" />
@@ -157,10 +358,6 @@ export default function ControlCenterPage() {
               <div className="h-2 w-full rounded-full shimmer-wave bg-slate-100" />
             </div>
           ))}
-        </div>
-        <div className="h-80 rounded-xl border border-slate-200/90 bg-white p-6 shadow-xs flex flex-col justify-between">
-          <div className="h-4 w-48 rounded shimmer-wave bg-slate-100" />
-          <div className="h-56 w-full rounded-lg shimmer-wave bg-slate-100" />
         </div>
       </div>
     );
@@ -184,18 +381,18 @@ export default function ControlCenterPage() {
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2.5">
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                  {project?.name || "161 Woodlawn Ave"}
+                  {project?.name || "73 Broadway"}
                 </h1>
                 <span className="inline-flex items-center rounded-full bg-blue-50 text-blue-700 border border-blue-200/70 px-2.5 py-0.5 text-xs font-semibold">
                   {project?.lifecycle_stage
                     ? project.lifecycle_stage.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
-                    : "Pre Construction"}
+                    : "Construction"}
                 </span>
               </div>
               <div className="text-xs text-slate-500 flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="flex items-center gap-1 text-slate-600">
                   <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                  {project?.address || "161 Woodlawn Ave, Jersey City, NJ 07305"}
+                  {project?.address || "73 Broadway, Jersey City, NJ 07306"}
                 </span>
                 <span className="hidden sm:inline text-slate-300">·</span>
                 <span className="flex items-center gap-1 text-slate-600">
@@ -210,60 +407,28 @@ export default function ControlCenterPage() {
 
 
         {/* ========================================================================= */}
-        {/* 4 CORE EXECUTIVE METRIC CARDS - COMPACT 2x2 GRID ON MOBILE, 4-COL ON DESKTOP */}
+        {/* 4 CORE EXECUTIVE METRIC CARDS */}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
 
           {/* Card 1: APPROVED BUDGET */}
           <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
-              <div className="flex items-center justify-between gap-1">
+              <div className="flex items-center justify-between gap-1 min-h-[20px] sm:min-h-[22px]">
                 <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
                   Approved Budget
                 </span>
-                <span className="shrink-0 text-[10px] sm:text-[11px] font-semibold text-slate-700 bg-slate-100 border border-slate-200/80 rounded-full px-1.5 sm:px-2 py-0.5">
-                  100% Locked
-                </span>
               </div>
               <div className="mt-2 sm:mt-3">
-                <div className="text-lg sm:text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
+                <div className="text-base sm:text-xl lg:text-[22px] xl:text-2xl font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
                   <ClickableAmount
-                    amountText="$1,471,120"
+                    amountText="$1,471,120.00"
                     originKey="approved_budget"
                     label="Approved Project Budget"
                     amountCents={147112000}
                     onClick={handleOpenAmountOrigin}
                   />
                 </div>
-                <div className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-slate-500 flex items-center gap-1">
-                  <span className="inline-flex items-center text-slate-700 font-mono font-medium">
-                    <ClickableAmount
-                      amountText="+$16,120"
-                      originKey="budget_variance_over_plan"
-                      label="Budget Variance Over Original Plan"
-                      amountCents={1612000}
-                      onClick={handleOpenAmountOrigin}
-                    />
-                  </span>
-                  <span className="hidden sm:inline">over original budget</span>
-                  <span className="sm:hidden text-[10px]">over budget</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3.5 border-t border-slate-100 space-y-1 sm:space-y-1.5">
-              <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
-                <div className="h-full bg-slate-800 rounded-full" style={{ width: "100%" }} />
-              </div>
-              <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-500 font-medium">
-                <ClickableAmount
-                  amountText="Base: $1.45M"
-                  originKey="budget_base_plan"
-                  label="Original budget"
-                  amountCents={145500000}
-                  onClick={handleOpenAmountOrigin}
-                />
-                <span>100% committed</span>
               </div>
             </div>
           </div>
@@ -271,109 +436,43 @@ export default function ControlCenterPage() {
           {/* Card 2: ACTUAL SPEND */}
           <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
-              <div className="flex items-center justify-between gap-1">
+              <div className="flex items-center justify-between gap-1 min-h-[20px] sm:min-h-[22px]">
                 <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
                   Actual Spend
                 </span>
-                <span className="shrink-0 text-[10px] sm:text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200/70 rounded-full px-1.5 sm:px-2 py-0.5 font-mono">
-                  63.6% Spent
-                </span>
               </div>
               <div className="mt-2 sm:mt-3">
-                <div className="text-lg sm:text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
+                <div className="text-base sm:text-xl lg:text-[22px] xl:text-2xl font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
                   <ClickableAmount
-                    amountText="$936,600"
+                    amountText="$1,066,920.00"
                     originKey="actual_spend"
-                    label="Total Actual Spend to Date"
-                    amountCents={93660000}
+                    label="Total Actual Spend to Date (Draws 1–3)"
+                    amountCents={106692000}
                     onClick={handleOpenAmountOrigin}
                   />
                 </div>
-                <div className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-slate-500 flex items-center gap-1 truncate">
-                  <ClickableAmount
-                    amountText="Hard: $702.5k"
-                    originKey="hard_costs_spend"
-                    label="Hard costs"
-                    amountCents={70245000}
-                    onClick={handleOpenAmountOrigin}
-                  />
-                  <span className="text-slate-300">·</span>
-                  <ClickableAmount
-                    amountText="Soft: $234.1k"
-                    originKey="soft_costs_spend"
-                    label="Soft costs"
-                    amountCents={23415000}
-                    onClick={handleOpenAmountOrigin}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3.5 border-t border-slate-100 space-y-1 sm:space-y-1.5">
-              <div className="h-1.5 w-full rounded-full bg-blue-50 overflow-hidden">
-                <div className="h-full bg-blue-600 rounded-full transition-all" style={{ width: "63.6%" }} />
-              </div>
-              <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-500 font-medium">
-                <span>Paid to Date</span>
-                <ClickableAmount
-                  amountText="$534.5k Rem."
-                  originKey="remaining_budget"
-                  label="Remaining budget"
-                  amountCents={53452000}
-                  className="font-mono text-slate-700 font-semibold"
-                  onClick={handleOpenAmountOrigin}
-                />
               </div>
             </div>
           </div>
 
-          {/* Card 3: CASH RECEIVED */}
+          {/* Card 3: DRAW RECEIVED */}
           <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
-              <div className="flex items-center justify-between gap-1">
+              <div className="flex items-center justify-between gap-1 min-h-[20px] sm:min-h-[22px]">
                 <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
-                  Cash Received
-                </span>
-                <span className="shrink-0 text-[10px] sm:text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/70 rounded-full px-1.5 sm:px-2 py-0.5 font-mono">
-                  73.8% Drawn
+                  Draw Received
                 </span>
               </div>
               <div className="mt-2 sm:mt-3">
-                <div className="text-lg sm:text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
+                <div className="text-base sm:text-xl lg:text-[22px] xl:text-2xl font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
                   <ClickableAmount
-                    amountText="$1,086,000"
-                    originKey="cash_received"
-                    label="Cash Received & Cleared Draws"
+                    amountText="$1,086,000.00"
+                    originKey="draw_received"
+                    label="Draw Received"
                     amountCents={108600000}
                     onClick={handleOpenAmountOrigin}
                   />
                 </div>
-                <div className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-emerald-700 font-medium truncate">
-                  <ClickableAmount
-                    amountText="+$149,400 reserve"
-                    originKey="liquidity_cushion"
-                    label="Available cash"
-                    amountCents={14940000}
-                    className="text-emerald-700 font-medium"
-                    onClick={handleOpenAmountOrigin}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3.5 border-t border-slate-100 space-y-1 sm:space-y-1.5">
-              <div className="h-1.5 w-full rounded-full bg-emerald-50 overflow-hidden">
-                <div className="h-full bg-emerald-600 rounded-full transition-all" style={{ width: "73.8%" }} />
-              </div>
-              <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-500 font-medium">
-                <span>Draw Funds</span>
-                <ClickableAmount
-                  amountText="Loan: $1.47M"
-                  originKey="facility_cap"
-                  label="Construction loan"
-                  amountCents={147112000}
-                  onClick={handleOpenAmountOrigin}
-                />
               </div>
             </div>
           </div>
@@ -381,44 +480,15 @@ export default function ControlCenterPage() {
           {/* Card 4: ESTIMATED COMPLETION */}
           <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
-              <div className="flex items-center justify-between gap-1">
+              <div className="flex items-center justify-between gap-1 min-h-[20px] sm:min-h-[22px]">
                 <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
                   Completion
-                </span>
-                <span className="shrink-0 inline-flex items-center gap-0.5 text-[10px] sm:text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200/70 rounded-full px-1.5 sm:px-2 py-0.5">
-                  <CalendarClock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                  +35d
                 </span>
               </div>
               <div className="mt-2 sm:mt-3">
                 <div className="text-lg sm:text-2xl lg:text-[26px] font-bold tracking-tight text-slate-900 font-mono leading-none">
                   Dec 15, 2025
                 </div>
-                <div className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-amber-800 font-medium flex items-center gap-1 truncate">
-                  <AlertTriangle className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0 text-amber-600" />
-                  <span>
-                    Delay cost:{" "}
-                    <ClickableAmount
-                      amountText="+$28,500"
-                      originKey="carry_burn"
-                      label="Holding costs from delay"
-                      amountCents={2850000}
-                      className="text-amber-800 font-semibold"
-                      onClick={handleOpenAmountOrigin}
-                    />
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3.5 border-t border-slate-100 space-y-1 sm:space-y-1.5">
-              <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden flex">
-                <div className="h-full bg-emerald-500" style={{ width: "70%" }} />
-                <div className="h-full bg-amber-500" style={{ width: "18%" }} />
-              </div>
-              <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-500 font-medium">
-                <span>Target: Nov 10</span>
-                <span className="text-amber-800 font-semibold">5 weeks late</span>
               </div>
             </div>
           </div>
@@ -426,27 +496,16 @@ export default function ControlCenterPage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* ANALYTICS CHARTS                                                          */}
+        {/* MASTER BUDGET TASKS & COST INCURRED TABLE                                 */}
         {/* ========================================================================= */}
-        <ControlCenterAnalytics
-          projectName={project?.name ? `${project.name} · ${project.project_entity || "Development"}` : "161 Woodlawn Ave"}
-          asOfDate={formatAsOf(meta?.as_of) || "Oct 26"}
-        />
-
-        {/* ========================================================================= */}
-        {/* TWO COLUMNS: FORECAST TABLE & RIGHT OPERATIONAL PANELS                     */}
-        {/* ========================================================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-w-0">
-
-          {/* Left Column (2 spans): Original vs Current Forecast Table / Mobile Cards */}
-          <div className="lg:col-span-2 rounded-xl border border-slate-200/90 bg-white shadow-xs overflow-hidden min-w-0">
+        <div className="rounded-xl border border-slate-200/90 bg-white shadow-xs overflow-hidden min-w-0">
             <div className="flex items-center justify-between border-b border-slate-100 px-4 sm:px-5 py-3 sm:py-4">
               <div>
                 <h2 className="text-sm font-bold text-slate-900">
-                  Budget & Forecast by Category
+                  Master Budget Tasks & Cost Incurred
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Budget categories, spend to date, and variances
+                  Schedule of values tasks, approved allocations, and actual costs incurred through Draws 1–3
                 </p>
               </div>
               <button
@@ -463,48 +522,7 @@ export default function ControlCenterPage() {
 
             {/* Mobile View: High-clarity responsive cards (No squished columns) */}
             <div className="sm:hidden divide-y divide-slate-100">
-              {(d?.forecast_table || [
-                {
-                  category: "Hard costs",
-                  variance_reason: "CO-001 structural steel reinforcement",
-                  original_budget: "109270000",
-                  current_approved: "112392000",
-                  actual_spend: "70245000",
-                  forecast_final: "112392000",
-                  variance: "3122000",
-                  sources: []
-                },
-                {
-                  category: "Soft costs",
-                  variance_reason: "On track with baseline",
-                  original_budget: "31220000",
-                  current_approved: "31220000",
-                  actual_spend: "23415000",
-                  forecast_final: "31220000",
-                  variance: "0",
-                  sources: []
-                },
-                {
-                  category: "Reserve",
-                  variance_reason: "Transferred to direct construction for CO-001",
-                  original_budget: "5000000",
-                  current_approved: "3500000",
-                  actual_spend: "0",
-                  forecast_final: "3500000",
-                  variance: "-1500000",
-                  sources: []
-                },
-                {
-                  category: "Total project budget",
-                  variance_reason: "Total project costs and variances",
-                  original_budget: "145490000",
-                  current_approved: "147112000",
-                  actual_spend: "93660000",
-                  forecast_final: "147112000",
-                  variance: "1622000",
-                  sources: []
-                }
-              ]).map((row, idx) => {
+              {(d?.forecast_table && d.forecast_table.length > 0 ? d.forecast_table : DEFAULT_FORECAST_TASKS).map((row, idx) => {
                 const isTotal = row.category.toLowerCase().includes("total");
 
                 const toCentsVal = (val: string | number | null | undefined): number => {
@@ -522,12 +540,12 @@ export default function ControlCenterPage() {
                 const spendCents = toCentsVal(row.actual_spend);
                 const varianceCents = approvedCents - origCents;
 
-                let catKey = "cat_hard_costs";
-                if (row.category.toLowerCase().includes("soft")) {
-                  catKey = "cat_soft_costs";
-                } else if (row.category.toLowerCase().includes("contingency")) {
-                  catKey = "cat_contingency";
-                } else if (isTotal) {
+                let catKey = "actual_spend";
+                if (isTotal) {
+                  catKey = "approved_budget";
+                } else if (spendCents > 0) {
+                  catKey = "actual_spend";
+                } else {
                   catKey = "approved_budget";
                 }
 
@@ -570,8 +588,8 @@ export default function ControlCenterPage() {
                       )}
                     </div>
 
-                    {/* 3-Column Numbers Grid */}
-                    <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-100 text-[11px]">
+                    {/* 2-Column Numbers Grid */}
+                    <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 text-[11px]">
                       <div>
                         <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Approved</div>
                         <div className="font-mono font-semibold text-slate-900 tabular-nums">
@@ -586,37 +604,15 @@ export default function ControlCenterPage() {
                         </div>
                       </div>
 
-                      <div>
+                      <div className="text-right">
                         <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Spend</div>
                         <div className="font-mono font-semibold text-blue-700 tabular-nums">
                           <ClickableAmount
                             amountText={spendCents === 0 ? "$0" : formatMoney(spendCents, { showCents: false })}
-                            originKey={
-                              catKey === "cat_hard_costs"
-                                ? "hard_costs_spend"
-                                : catKey === "cat_soft_costs"
-                                ? "soft_costs_spend"
-                                : isTotal
-                                ? "actual_spend"
-                                : catKey
-                            }
+                            originKey="actual_spend"
                             label={`${row.category} (Spend)`}
                             amountCents={spendCents}
                             className="font-semibold text-blue-700"
-                            onClick={handleOpenAmountOrigin}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Original</div>
-                        <div className="font-mono text-slate-500 tabular-nums">
-                          <ClickableAmount
-                            amountText={formatMoney(origCents, { showCents: false })}
-                            originKey={catKey}
-                            label={`${row.category} (Original)`}
-                            amountCents={origCents}
-                            className="text-slate-500 font-normal"
                             onClick={handleOpenAmountOrigin}
                           />
                         </div>
@@ -632,56 +628,14 @@ export default function ControlCenterPage() {
               <table className="w-full text-left text-xs min-w-[560px]">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/70 text-slate-500">
-                    <th className="py-2.5 px-4 font-semibold uppercase tracking-wider text-[11px]">Category</th>
-                    <th className="py-2.5 px-3 text-right font-semibold uppercase tracking-wider text-[11px]">Original</th>
+                    <th className="py-2.5 px-4 font-semibold uppercase tracking-wider text-[11px]">Task Description</th>
                     <th className="py-2.5 px-3 text-right font-semibold uppercase tracking-wider text-[11px]">Approved</th>
                     <th className="py-2.5 px-3 text-right font-semibold uppercase tracking-wider text-[11px]">Spend to Date</th>
                     <th className="py-2.5 px-4 text-right font-semibold uppercase tracking-wider text-[11px]">Variance</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-800">
-                  {(d?.forecast_table || [
-                    {
-                      category: "Hard costs",
-                      variance_reason: "CO-001 structural steel reinforcement",
-                      original_budget: "109270000",
-                      current_approved: "112392000",
-                      actual_spend: "70245000",
-                      forecast_final: "112392000",
-                      variance: "3122000",
-                      sources: []
-                    },
-                    {
-                      category: "Soft costs",
-                      variance_reason: "On track with baseline",
-                      original_budget: "31220000",
-                      current_approved: "31220000",
-                      actual_spend: "23415000",
-                      forecast_final: "31220000",
-                      variance: "0",
-                      sources: []
-                    },
-                    {
-                      category: "Reserve",
-                      variance_reason: "Transferred to direct construction for CO-001",
-                      original_budget: "5000000",
-                      current_approved: "3500000",
-                      actual_spend: "0",
-                      forecast_final: "3500000",
-                      variance: "-1500000",
-                      sources: []
-                    },
-                    {
-                      category: "Total project budget",
-                      variance_reason: "Total project costs and variances",
-                      original_budget: "145490000",
-                      current_approved: "147112000",
-                      actual_spend: "93660000",
-                      forecast_final: "147112000",
-                      variance: "1622000",
-                      sources: []
-                    }
-                  ]).map((row, idx) => {
+                  {(d?.forecast_table && d.forecast_table.length > 0 ? d.forecast_table : DEFAULT_FORECAST_TASKS).map((row, idx) => {
                     const isTotal = row.category.toLowerCase().includes("total");
 
                     const toCentsVal = (val: string | number | null | undefined): number => {
@@ -699,13 +653,13 @@ export default function ControlCenterPage() {
                     const spendCents = toCentsVal(row.actual_spend);
                     const varianceCents = approvedCents - origCents;
 
-                    // Map category key to detailed source origin
-                    let catKey = "cat_hard_costs";
-                    if (row.category.toLowerCase().includes("soft")) {
-                      catKey = "cat_soft_costs";
-                    } else if (row.category.toLowerCase().includes("contingency")) {
-                      catKey = "cat_contingency";
-                    } else if (isTotal) {
+                    // Map task row key to detailed source origin
+                    let catKey = "actual_spend";
+                    if (isTotal) {
+                      catKey = "approved_budget";
+                    } else if (spendCents > 0) {
+                      catKey = "actual_spend";
+                    } else {
                       catKey = "approved_budget";
                     }
 
@@ -721,7 +675,7 @@ export default function ControlCenterPage() {
                             type="button"
                             onClick={() => handleOpenAmountOrigin(catKey, row.category, approvedCents)}
                             className="text-left group cursor-pointer focus:outline-hidden"
-                            title="Click to inspect category source origin"
+                            title="Click to inspect task source origin"
                           >
                             <div className={cn(isTotal ? "font-bold text-slate-900" : "font-semibold text-slate-900", "group-hover:text-blue-600 transition-colors")}>
                               {row.category}
@@ -732,16 +686,6 @@ export default function ControlCenterPage() {
                               </div>
                             )}
                           </button>
-                        </td>
-                        <td className="py-3 px-3 text-right font-mono tabular-nums text-slate-500">
-                          <ClickableAmount
-                            amountText={formatMoney(origCents, { showCents: false })}
-                            originKey={catKey}
-                            label={`${row.category} (Original Budget)`}
-                            amountCents={origCents}
-                            className="text-slate-500 font-normal"
-                            onClick={handleOpenAmountOrigin}
-                          />
                         </td>
                         <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-slate-900">
                           <ClickableAmount
@@ -756,15 +700,7 @@ export default function ControlCenterPage() {
                         <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-blue-700">
                           <ClickableAmount
                             amountText={spendCents === 0 ? "$0" : formatMoney(spendCents, { showCents: false })}
-                            originKey={
-                              catKey === "cat_hard_costs"
-                                ? "hard_costs_spend"
-                                : catKey === "cat_soft_costs"
-                                ? "soft_costs_spend"
-                                : isTotal
-                                ? "actual_spend"
-                                : catKey
-                            }
+                            originKey="actual_spend"
                             label={`${row.category} (Actual Spend)`}
                             amountCents={spendCents}
                             className="font-semibold text-blue-700"
@@ -801,88 +737,6 @@ export default function ControlCenterPage() {
               </table>
             </div>
           </div>
-
-          {/* Right Column (1 span): Operational Status Panels */}
-          <div className="space-y-4">
-
-            {/* Draw Status Panel with Semantic Emerald Cleared Token */}
-            <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <Landmark className="h-4 w-4 text-blue-600" />
-                  <h3 className="text-xs font-bold text-slate-900">
-                    Draw Request Status
-                  </h3>
-                </div>
-                <span className="rounded-full bg-blue-50 text-blue-700 border border-blue-200/60 px-2.5 py-0.5 text-[11px] font-semibold">
-                  Draw #1
-                </span>
-              </div>
-
-              <div className="mt-3.5 space-y-2.5 text-xs">
-                <div className="flex items-center justify-between text-slate-500">
-                  <span>Requested Amount:</span>
-                  <ClickableAmount
-                    amountText="$150,000.00"
-                    originKey="draw_request_150k"
-                    label="Draw #1 Requested Amount"
-                    amountCents={15000000}
-                    className="font-mono font-medium text-slate-800 tabular-nums"
-                    onClick={handleOpenAmountOrigin}
-                  />
-                </div>
-                <div className="flex items-center justify-between text-slate-500">
-                  <span>Lender Approved:</span>
-                  <ClickableAmount
-                    amountText="$150,000.00"
-                    originKey="draw_request_150k"
-                    label="Draw #1 Lender Approved Amount"
-                    amountCents={15000000}
-                    className="font-mono font-medium text-slate-800 tabular-nums"
-                    onClick={handleOpenAmountOrigin}
-                  />
-                </div>
-                <div className="flex items-center justify-between pt-1 border-t border-slate-100 bg-emerald-50/60 -mx-1 px-3 py-1.5 rounded-lg border border-emerald-100">
-                  <span className="font-semibold text-emerald-900">Funds Cleared:</span>
-                  <ClickableAmount
-                    amountText="$150,000.00"
-                    originKey="draw_request_150k"
-                    label="Draw #1 cleared funds"
-                    amountCents={15000000}
-                    className="font-mono font-bold text-emerald-800 tabular-nums"
-                    onClick={handleOpenAmountOrigin}
-                  />
-                </div>
-
-                <div className="pt-1.5">
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1">
-                    <span>Draw funding</span>
-                    <span className="font-semibold text-emerald-700">100% funded</span>
-                  </div>
-                  <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
-                    <div className="h-full bg-emerald-600 rounded-full" style={{ width: "100%" }} />
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <Link href={currentProjectId ? `/projects/${currentProjectId}/draws` : "/projects"}>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="w-full text-xs h-10 sm:h-8 min-h-[40px] sm:min-h-0 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium cursor-pointer active:scale-[0.99] transition-all"
-                    >
-                      View draws →
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-
-
-          </div>
-
-        </div>
 
       </div>
 

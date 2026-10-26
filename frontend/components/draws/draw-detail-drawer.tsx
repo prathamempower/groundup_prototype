@@ -28,6 +28,7 @@ import type { DrawItem, DrawLine } from "@/lib/types";
 import {
   DRAW_REQUEST_FORM_ITEMS,
   DRAW_REQUEST_TOTALS,
+  getDrawTasksByNumber,
 } from "@/lib/data/draw-request-form-items";
 import { AllocateDrawTasksModal } from "./allocate-draw-tasks-modal";
 
@@ -146,7 +147,10 @@ export function DrawDetailDrawer({
 
   if (!open || !activeDraw) return null;
 
-  const lines = activeDraw.lines && activeDraw.lines.length > 0 ? activeDraw.lines : DRAW_REQUEST_FORM_ITEMS;
+  const lines =
+    activeDraw.lines && activeDraw.lines.length > 0
+      ? activeDraw.lines
+      : getDrawTasksByNumber(activeDraw.draw_number || 1);
 
   const totalRequestedCents = lines.reduce(
     (acc, l) => acc + (parseInt(l.requested_amount || "0", 10) || 0),

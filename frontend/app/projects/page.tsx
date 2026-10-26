@@ -83,6 +83,30 @@ export default function ProjectsPortfolioPage() {
     });
   }, [projectsData]);
 
+  const formatStageLabel = (stage?: string, phase?: string): string => {
+    const raw = (phase || stage || "").toLowerCase();
+    if (!raw) return "Active Project Construction";
+    if (raw.includes("pre_acq") || raw.includes("pre-acq") || raw.includes("preacq") || raw.includes("pre acq")) {
+      return "Pre Acquisition";
+    }
+    if (raw.includes("acquisition") || (raw.includes("acq") && !raw.includes("pre"))) {
+      return "Acquisition";
+    }
+    if (raw.includes("permit") || raw.includes("conception") || raw.includes("design") || raw.includes("planning") || raw.includes("pre_con") || raw.includes("pre-con") || raw.includes("pre_construction")) {
+      return "Permitting";
+    }
+    if (raw.includes("post") || raw.includes("disposition") || raw.includes("complete") || raw.includes("closed") || raw.includes("completion")) {
+      return "Post construction";
+    }
+    if (raw.includes("under_con") || raw.includes("active_con") || raw.includes("construction") || raw === "active") {
+      return "Active Project Construction";
+    }
+    return raw
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   // Filter & Search
   const filteredProjects = useMemo(() => {
     return projects
@@ -92,32 +116,20 @@ export default function ProjectsPortfolioPage() {
           query === "" ||
           p.name.toLowerCase().includes(query);
 
-        const stageUpper = (p.lifecycle_stage || "").toUpperCase();
-        const stageLower = (p.lifecycle_stage || "").toLowerCase();
-        const statusUpper = (p.status || "").toUpperCase();
+        const projectStage = formatStageLabel(p.lifecycle_stage, p.phase);
 
         const matchesStage =
           stageFilter === "ALL" ||
-          (stageFilter === "PRE_ACQUISITION" && (
-            stageUpper.includes("PRE_ACQ") || stageLower.includes("pre-acquisition") || stageLower.includes("pre acquisition")
-          )) ||
-          (stageFilter === "ACQUISITION" && (
-            (stageUpper === "ACQUISITION" || stageLower.includes("acquisition")) && !stageUpper.includes("PRE") && !stageLower.includes("pre")
-          )) ||
-          (stageFilter === "PERMITTING" && (
-            stageUpper.includes("PERMIT") || stageUpper.includes("PRE_CON") || stageLower.includes("pre-construction") || stageLower.includes("design") || stageLower.includes("planning")
-          )) ||
-          (stageFilter === "ACTIVE_CONSTRUCTION" && (
-            stageUpper.includes("CONSTRUCTION") || stageUpper.includes("ACTIVE") || stageLower.includes("construction") || statusUpper === "ACTIVE"
-          )) ||
-          (stageFilter === "POST_CONSTRUCTION" && (
-            stageUpper.includes("POST") || stageUpper.includes("DISPOSITION") || stageUpper.includes("COMPLETE") || stageUpper.includes("CLOSED") || statusUpper === "COMPLETED"
-          ));
+          (stageFilter === "PRE_ACQUISITION" && projectStage === "Pre Acquisition") ||
+          (stageFilter === "ACQUISITION" && projectStage === "Acquisition") ||
+          (stageFilter === "PERMITTING" && projectStage === "Permitting") ||
+          (stageFilter === "ACTIVE_CONSTRUCTION" && projectStage === "Active Project Construction") ||
+          (stageFilter === "POST_CONSTRUCTION" && projectStage === "Post construction");
+
         const matchesStatus =
           statusFilter === "ALL" ||
           (statusFilter === "HEALTHY" && p.health_status === "HEALTHY") ||
           (statusFilter === "AT_RISK" && p.health_status === "AT_RISK") ||
-          (statusFilter === "CRITICAL" && p.health_status === "CRITICAL") ||
           (statusFilter === "ACTIVE" && p.status === "ACTIVE") ||
           (statusFilter === "COMPLETED" && p.status === "COMPLETED");
 
@@ -125,7 +137,7 @@ export default function ProjectsPortfolioPage() {
       })
       .sort((a, b) => {
         if (sortBy === "NAME") return a.name.localeCompare(b.name);
-        if (sortBy === "STAGE") return a.lifecycle_stage.localeCompare(b.lifecycle_stage);
+        if (sortBy === "STAGE") return (a.lifecycle_stage || "").localeCompare(b.lifecycle_stage || "");
         return new Date(b.created_at || "").getTime() - new Date(a.created_at || "").getTime();
       });
   }, [projects, searchQuery, stageFilter, statusFilter, sortBy]);
@@ -155,30 +167,7 @@ export default function ProjectsPortfolioPage() {
     router.push(destination);
   };
 
-  const formatStageLabel = (stage: string) => {
-    if (!stage) return "Active Project Construction";
-    const s = stage.toLowerCase();
-    if (s.includes("pre_acq") || s.includes("pre-acq") || s.includes("preacq") || s.includes("pre acq")) {
-      return "Pre Acquisition";
-    }
-    if (s.includes("acquisition") || (s.includes("acq") && !s.includes("pre"))) {
-      return "Acquisition";
-    }
-    if (s.includes("permit") || s.includes("conception") || s.includes("design") || s.includes("planning") || s.includes("pre_con") || s.includes("pre-con")) {
-      return "Permitting";
-    }
-    if (s.includes("post") || s.includes("disposition") || s.includes("complete") || s.includes("closed") || s.includes("completion")) {
-      return "Post construction";
-    }
-    if (s.includes("under_con") || s.includes("construction") || s.includes("active")) {
-      return "Active Project Construction";
-    }
-    return stage
-      .toLowerCase()
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
+
 
   const getProjectImage = (project: Project) => {
     if (project.hero_image) {
@@ -354,7 +343,6 @@ export default function ProjectsPortfolioPage() {
               <option value="ALL">All Status</option>
               <option value="HEALTHY">Healthy</option>
               <option value="AT_RISK">At Risk</option>
-              <option value="CRITICAL">Critical</option>
             </select>
           </div>
         </div>
@@ -492,7 +480,7 @@ export default function ProjectsPortfolioPage() {
                     {/* Stage Badge & Delete Action */}
                     <div className="flex items-center justify-between gap-2">
                       <span className="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600">
-                        {formatStageLabel(project.lifecycle_stage)}
+                        {formatStageLabel(project.lifecycle_stage, project.phase)}
                       </span>
                       <button
                         type="button"
@@ -575,7 +563,7 @@ export default function ProjectsPortfolioPage() {
                       </td>
                       <td className="px-4 py-3.5 border-b border-slate-100 align-middle">
                         <span className="inline-flex rounded-lg border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 whitespace-nowrap">
-                          {formatStageLabel(project.lifecycle_stage)}
+                          {formatStageLabel(project.lifecycle_stage, project.phase)}
                         </span>
                       </td>
                       <td className="px-4 py-3.5 border-b border-slate-100 align-middle whitespace-nowrap">

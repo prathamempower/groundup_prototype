@@ -1,110 +1,291 @@
 import type { DrawLine } from "@/lib/types";
 
-export const DRAW_REQUEST_FORM_ITEMS: DrawLine[] = [
+export const DRAW_1_TASKS: DrawLine[] = [
   {
-    id: "draw-req-1",
-    draw_id: "draw-current",
-    budget_line_id: "line-mech-wh",
-    budget_line_name: "MECHANICAL - Water Heater(s)",
-    budget_line_code: "4.04",
-    budgeted_amount: "400000",   // $4,000.00
-    requested_amount: "400000",  // $4,000.00
-    recommended_amount: "400000",
-    approved_amount: "400000",   // $4,000.00
-    funded_amount: "400000",
+    id: "dl-73-01-1",
+    draw_id: "draw-73-01",
+    budget_line_id: "bl-01-01",
+    budget_line_name: "Architectural Design & Working Drawings",
+    budget_line_code: "01.01",
+    budgeted_amount: "22500000",
+    requested_amount: "22500000",
+    recommended_amount: "22500000",
+    approved_amount: "22500000",
+    funded_amount: "22500000",
     evidence_status: "VERIFIED",
-    lender_notes: "Water heaters installation & pressure testing certified",
+    lender_notes: "AIA B101 architect contract, stamped permit sets & milestone billing verified",
   },
   {
-    id: "draw-req-2",
-    draw_id: "draw-current",
-    budget_line_id: "line-int-app",
-    budget_line_name: "INTERIOR - Appliances",
-    budget_line_code: "5.02",
-    budgeted_amount: "1500000",  // $15,000.00
-    requested_amount: "1500000", // $15,000.00
-    recommended_amount: "1500000",
-    approved_amount: "1500000",  // $15,000.00
-    funded_amount: "1500000",
+    id: "dl-73-01-2",
+    draw_id: "draw-73-01",
+    budget_line_id: "bl-01-02",
+    budget_line_name: "Structural, MEP & Civil Engineering",
+    budget_line_code: "01.02",
+    budgeted_amount: "11850000",
+    requested_amount: "11850000",
+    recommended_amount: "11850000",
+    approved_amount: "11850000",
+    funded_amount: "11850000",
     evidence_status: "VERIFIED",
-    lender_notes: "Kitchen & utility appliance package delivered and installed",
+    lender_notes: "PE certified foundation & steel calculations verified by lender engineer",
   },
   {
-    id: "draw-req-3",
-    draw_id: "draw-current",
-    budget_line_id: "line-int-bv",
-    budget_line_name: "INTERIOR - Bath Vanities",
-    budget_line_code: "5.06",
-    budgeted_amount: "300000",   // $3,000.00
-    requested_amount: "150000",  // $1,500.00
-    recommended_amount: "150000",
-    approved_amount: "150000",   // $1,500.00
-    funded_amount: "150000",
+    id: "dl-73-01-3",
+    draw_id: "draw-73-01",
+    budget_line_id: "bl-01-03",
+    budget_line_name: "Municipal Plan Check, Zoning & Building Permits",
+    budget_line_code: "01.03",
+    budgeted_amount: "5450000",
+    requested_amount: "5450000",
+    recommended_amount: "5450000",
+    approved_amount: "5450000",
+    funded_amount: "5450000",
     evidence_status: "VERIFIED",
-    lender_notes: "Primary & guest bath vanities 50% progress draw",
+    lender_notes: "Building Department approved permit set & fee receipts on file",
   },
   {
-    id: "draw-req-4",
-    draw_id: "draw-current",
-    budget_line_id: "line-int-hm",
-    budget_line_name: "INTERIOR - Hardware and Mirrors",
-    budget_line_code: "5.09",
-    budgeted_amount: "50000",    // $500.00
-    requested_amount: "50000",   // $500.00
-    recommended_amount: "50000",
-    approved_amount: "50000",    // $500.00
-    funded_amount: "50000",
+    id: "dl-73-01-4",
+    draw_id: "draw-73-01",
+    budget_line_id: "bl-01-04",
+    budget_line_name: "Environmental Testing, Civil Survey & Site Closing Admin",
+    budget_line_code: "01.04",
+    budgeted_amount: "5000000",
+    requested_amount: "5000000",
+    recommended_amount: "5000000",
+    approved_amount: "5000000",
+    funded_amount: "5000000",
     evidence_status: "VERIFIED",
-    lender_notes: "Cabinet pulls, towel bars, and vanity mirrors installed",
-  },
-  {
-    id: "draw-req-5",
-    draw_id: "draw-current",
-    budget_line_id: "line-int-wt",
-    budget_line_name: "INTERIOR - Wall Tile/Shower Surround",
-    budget_line_code: "5.11",
-    budgeted_amount: "600000",   // $6,000.00
-    requested_amount: "75000",   // $750.00
-    recommended_amount: "75000",
-    approved_amount: "75000",    // $750.00
-    funded_amount: "75000",
-    evidence_status: "VERIFIED",
-    lender_notes: "Shower surround tile setting and grouting verified",
-  },
-  {
-    id: "draw-req-6",
-    draw_id: "draw-current",
-    budget_line_id: "line-int-sd",
-    budget_line_name: "INTERIOR - Shower Doors",
-    budget_line_code: "5.14",
-    budgeted_amount: "750000",   // $7,500.00
-    requested_amount: "200000",  // $2,000.00
-    recommended_amount: "200000",
-    approved_amount: "200000",   // $2,000.00
-    funded_amount: "200000",
-    evidence_status: "VERIFIED",
-    lender_notes: "Frameless glass shower door hardware and panel installation",
-  },
-  {
-    id: "draw-req-7",
-    draw_id: "draw-current",
-    budget_line_id: "line-int-fc",
-    budget_line_name: "INTERIOR - Final Clean-up",
-    budget_line_code: "5.18",
-    budgeted_amount: "250000",   // $2,500.00
-    requested_amount: "250000",  // $2,500.00
-    recommended_amount: "0",
-    approved_amount: "0",        // $0.00
-    funded_amount: "0",
-    evidence_status: "PENDING_INSPECTION",
-    lender_notes: "Holdback pending certificate of occupancy and final walk inspection",
+    lender_notes: "Phase II clean environmental certification and ALTA boundary survey verified",
   },
 ];
 
+export const DRAW_2_TASKS: DrawLine[] = [
+  {
+    id: "dl-73-02-1",
+    draw_id: "draw-73-02",
+    budget_line_id: "bl-02-01",
+    budget_line_name: "Site Demolition, Clearing & Earthwork Excavation",
+    budget_line_code: "02.01",
+    budgeted_amount: "8530000",
+    requested_amount: "8530000",
+    recommended_amount: "8530000",
+    approved_amount: "8530000",
+    funded_amount: "8530000",
+    evidence_status: "VERIFIED",
+    lender_notes: "Excavation and site grading certified by bank inspector",
+  },
+  {
+    id: "dl-73-02-2",
+    draw_id: "draw-73-02",
+    budget_line_id: "bl-02-02",
+    budget_line_name: "Deep Foundation, Shoring & Soil Retention",
+    budget_line_code: "02.02",
+    budgeted_amount: "5000000",
+    requested_amount: "5000000",
+    recommended_amount: "5000000",
+    approved_amount: "5000000",
+    funded_amount: "5000000",
+    evidence_status: "VERIFIED",
+    lender_notes: "Helical piling and shoring load test reports passed",
+  },
+  {
+    id: "dl-73-02-3",
+    draw_id: "draw-73-02",
+    budget_line_id: "bl-03-01",
+    budget_line_name: "Reinforced Concrete Core, Grade Beams & Foundation Slabs",
+    budget_line_code: "03.01",
+    budgeted_amount: "11500000",
+    requested_amount: "11500000",
+    recommended_amount: "11500000",
+    approved_amount: "11500000",
+    funded_amount: "11500000",
+    evidence_status: "VERIFIED",
+    lender_notes: "4000 PSI concrete break test reports certified at 28 days",
+  },
+  {
+    id: "dl-73-02-4",
+    draw_id: "draw-73-02",
+    budget_line_id: "bl-03-02",
+    budget_line_name: "Structural Steel Columns, Beams & Moment Connections",
+    budget_line_code: "03.02",
+    budgeted_amount: "6970000",
+    requested_amount: "6970000",
+    recommended_amount: "6970000",
+    approved_amount: "6970000",
+    funded_amount: "6970000",
+    evidence_status: "VERIFIED",
+    lender_notes: "Primary steel framing erection and UT weld inspections verified",
+  },
+];
+
+export const DRAW_3_TASKS: DrawLine[] = [
+  {
+    id: "dl-73-03-1",
+    draw_id: "draw-73-03",
+    budget_line_id: "bl-03-03",
+    budget_line_name: "Cold-Formed Light Gauge Steel Stud Framing & Lateral Bracing",
+    budget_line_code: "03.03",
+    budgeted_amount: "11530000",
+    requested_amount: "11530000",
+    recommended_amount: "11530000",
+    approved_amount: "11530000",
+    funded_amount: "11530000",
+    evidence_status: "VERIFIED",
+    lender_notes: "Metal stud perimeter & partition framing 100% complete",
+  },
+  {
+    id: "dl-73-03-2",
+    draw_id: "draw-73-03",
+    budget_line_id: "bl-04-01",
+    budget_line_name: "Plumbing Waste, Vent & Domestic Water Distribution Rough-Ins",
+    budget_line_code: "04.01",
+    budgeted_amount: "6500000",
+    requested_amount: "6500000",
+    recommended_amount: "6500000",
+    approved_amount: "6500000",
+    funded_amount: "6500000",
+    evidence_status: "VERIFIED",
+    lender_notes: "Plumbing rough pressure test verified by municipal plumbing inspector",
+  },
+  {
+    id: "dl-73-03-3",
+    draw_id: "draw-73-03",
+    budget_line_id: "bl-04-02",
+    budget_line_name: "Electrical Service Main, Conduit & Branch Circuit Rough-Ins",
+    budget_line_code: "04.02",
+    budgeted_amount: "7500000",
+    requested_amount: "7500000",
+    recommended_amount: "7500000",
+    approved_amount: "7500000",
+    funded_amount: "7500000",
+    evidence_status: "VERIFIED",
+    lender_notes: "Rough electrical panel tie-ins and conduit rough-ins verified",
+  },
+  {
+    id: "dl-73-03-4",
+    draw_id: "draw-73-03",
+    budget_line_id: "bl-04-03",
+    budget_line_name: "HVAC Equipment, Refrigerant Lines & Duct Distribution",
+    budget_line_code: "04.03",
+    budgeted_amount: "4000000",
+    requested_amount: "4000000",
+    recommended_amount: "4000000",
+    approved_amount: "4000000",
+    funded_amount: "4000000",
+    evidence_status: "VERIFIED",
+    lender_notes: "Duct distribution and line sets verified on second floor walkthrough",
+  },
+  {
+    id: "dl-73-03-5",
+    draw_id: "draw-73-03",
+    budget_line_id: "bl-16-01",
+    budget_line_name: "Contingency Draw Allocation (Trade Field Adjustments)",
+    budget_line_code: "16.01",
+    budgeted_amount: "2270000",
+    requested_amount: "2270000",
+    recommended_amount: "2270000",
+    approved_amount: "2270000",
+    funded_amount: "2270000",
+    evidence_status: "VERIFIED",
+    lender_notes: "Owner & lender approved contingency draw allocation for pipe routing adjustments",
+  },
+];
+
+export const DRAW_4_TASKS: DrawLine[] = [
+  {
+    id: "dl-73-04-1",
+    draw_id: "draw-73-04",
+    budget_line_id: "bl-05-01",
+    budget_line_name: "Gypsum Board Drywall, Acoustical Batt & Taping",
+    budget_line_code: "05.01",
+    budgeted_amount: "12000000",
+    requested_amount: "12000000",
+    recommended_amount: "12000000",
+    approved_amount: "12000000",
+    funded_amount: "0",
+    evidence_status: "PENDING_INSPECTION",
+    lender_notes: "Pending pre-sheetrock inspection signoff",
+  },
+  {
+    id: "dl-73-04-2",
+    draw_id: "draw-73-04",
+    budget_line_id: "bl-05-02",
+    budget_line_name: "Millwork, Interior Doors, Trim & Custom Cabinetry",
+    budget_line_code: "05.02",
+    budgeted_amount: "10000000",
+    requested_amount: "10000000",
+    recommended_amount: "10000000",
+    approved_amount: "10000000",
+    funded_amount: "0",
+    evidence_status: "PENDING_INSPECTION",
+    lender_notes: "Cabinet fabrication deposit & delivery verification",
+  },
+  {
+    id: "dl-73-04-3",
+    draw_id: "draw-73-04",
+    budget_line_id: "bl-06-01",
+    budget_line_name: "Commercial Storefront Windows, Exterior Glazing & Weather Barrier",
+    budget_line_code: "06.01",
+    budgeted_amount: "4690000",
+    requested_amount: "4690000",
+    recommended_amount: "4690000",
+    approved_amount: "4690000",
+    funded_amount: "0",
+    evidence_status: "PENDING_INSPECTION",
+    lender_notes: "Glazing panels and weather barrier membrane installed",
+  },
+  {
+    id: "dl-73-04-4",
+    draw_id: "draw-73-04",
+    budget_line_id: "bl-01-05",
+    budget_line_name: "Construction Administration & Project Management Closeout",
+    budget_line_code: "01.05",
+    budgeted_amount: "390000",
+    requested_amount: "390000",
+    recommended_amount: "390000",
+    approved_amount: "390000",
+    funded_amount: "0",
+    evidence_status: "PENDING_INSPECTION",
+    lender_notes: "Phase 4 project management supervisory allowance",
+  },
+  {
+    id: "dl-73-04-5",
+    draw_id: "draw-73-04",
+    budget_line_id: "bl-16-02",
+    budget_line_name: "Remaining Contingency Reserve for Final Punchlist",
+    budget_line_code: "16.02",
+    budgeted_amount: "11432000",
+    requested_amount: "11432000",
+    recommended_amount: "11432000",
+    approved_amount: "11432000",
+    funded_amount: "0",
+    evidence_status: "PENDING_INSPECTION",
+    lender_notes: "Contingency reserve balance requested for project completion",
+  },
+];
+
+export function getDrawTasksByNumber(drawNumber: number): DrawLine[] {
+  switch (drawNumber) {
+    case 1:
+      return DRAW_1_TASKS;
+    case 2:
+      return DRAW_2_TASKS;
+    case 3:
+      return DRAW_3_TASKS;
+    case 4:
+      return DRAW_4_TASKS;
+    default:
+      return DRAW_1_TASKS;
+  }
+}
+
+// Default export alias to Draw 1 tasks ($448,000.00)
+export const DRAW_REQUEST_FORM_ITEMS: DrawLine[] = DRAW_1_TASKS;
+
 export const DRAW_REQUEST_TOTALS = {
-  budgetedCents: 3850000,   // $38,500.00
-  requestedCents: 2625000,  // $26,250.00
-  recommendedCents: 2625000,// $26,250.00
-  approvedCents: 2375000,   // $23,750.00
-  fundedCents: 2375000,     // $23,750.00
+  budgetedCents: 44800000,   // $448,000.00
+  requestedCents: 44800000,  // $448,000.00
+  recommendedCents: 44800000,// $448,000.00
+  approvedCents: 44800000,   // $448,000.00
+  fundedCents: 44800000,     // $448,000.00
 };

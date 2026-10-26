@@ -60,7 +60,7 @@ const DRAW_PIPELINE_DATA: PipelineDrawNode[] = [
     code: "01",
     title: "Draw #1",
     phaseTitle: "Mobilization & Foundation",
-    amount: "$50,000",
+    amount: "$448,000",
     hasPacketBuilt: true,
     spendProgressPct: 100,
     date: "Jan 12",
@@ -71,7 +71,7 @@ const DRAW_PIPELINE_DATA: PipelineDrawNode[] = [
     code: "02",
     title: "Draw #2",
     phaseTitle: "Concrete Core & Framing",
-    amount: "$68,200",
+    amount: "$320,000",
     hasPacketBuilt: true,
     spendProgressPct: 100,
     date: "Mar 04",
@@ -82,7 +82,7 @@ const DRAW_PIPELINE_DATA: PipelineDrawNode[] = [
     code: "03",
     title: "Draw #3",
     phaseTitle: "Rough MEP & Utilities",
-    amount: "$84,000",
+    amount: "$318,000",
     hasPacketBuilt: true,
     spendProgressPct: 94,
     date: "May 19",
@@ -93,7 +93,7 @@ const DRAW_PIPELINE_DATA: PipelineDrawNode[] = [
     code: "04",
     title: "Draw #4",
     phaseTitle: "Exterior & Roofing",
-    amount: "Pending",
+    amount: "$385,120",
     hasPacketBuilt: false,
     spendProgressPct: 0,
     date: "Oct 18",
@@ -104,7 +104,7 @@ const DRAW_PIPELINE_DATA: PipelineDrawNode[] = [
     code: "05",
     title: "Draw #5",
     phaseTitle: "Drywall & Interior Finishes",
-    amount: "$95,000",
+    amount: "Scheduled",
     hasPacketBuilt: false,
     spendProgressPct: 0,
     date: "Scheduled",
@@ -121,7 +121,7 @@ const SHOWCASE_ROWS = [
     scopeName: "Exterior Enclosure & Roofing",
     drawRefId: "DRW-2026-004",
     date: "Oct 18, 2026",
-    requestedAmt: "$92,400.00",
+    requestedAmt: "$385,120.00",
     statusLabel: "Ready to Request",
     statusType: "PENDING",
     actionLabel: "Request Draw #4",
@@ -138,13 +138,13 @@ const SHOWCASE_ROWS = [
     scopeName: "Rough MEP & Utility Rough-Ins",
     drawRefId: "DRW-2026-003",
     date: "May 19, 2026",
-    requestedAmt: "$84,000.00",
-    statusLabel: "Active Spending",
+    requestedAmt: "$318,000.00",
+    statusLabel: "Active (94%)",
     statusType: "ACTIVE",
     actionLabel: "View Details",
     actionType: "OUTLINE",
     drawNumber: 3,
-    disbursed: "$84,000.00",
+    disbursed: "$318,000.00",
     reconciledPct: 94,
   },
   {
@@ -155,13 +155,13 @@ const SHOWCASE_ROWS = [
     scopeName: "Concrete Core & Structural Steel",
     drawRefId: "DRW-2026-002",
     date: "Mar 04, 2026",
-    requestedAmt: "$68,200.00",
+    requestedAmt: "$320,000.00",
     statusLabel: "Funded",
     statusType: "FUNDED",
     actionLabel: "View Details",
     actionType: "OUTLINE",
     drawNumber: 2,
-    disbursed: "$68,200.00",
+    disbursed: "$320,000.00",
     reconciledPct: 100,
   },
   {
@@ -172,13 +172,13 @@ const SHOWCASE_ROWS = [
     scopeName: "Site Mobilization & Foundation Footings",
     drawRefId: "DRW-2026-001",
     date: "Jan 12, 2026",
-    requestedAmt: "$50,000.00",
+    requestedAmt: "$448,000.00",
     statusLabel: "Funded",
     statusType: "FUNDED",
     actionLabel: "View Details",
     actionType: "OUTLINE",
     drawNumber: 1,
-    disbursed: "$50,000.00",
+    disbursed: "$448,000.00",
     reconciledPct: 100,
   },
   {
@@ -189,7 +189,7 @@ const SHOWCASE_ROWS = [
     scopeName: "Fire Riser Hydraulic Calculation Submittal",
     drawRefId: "DRW-2026-003-REV",
     date: "May 25, 2026",
-    requestedAmt: "$6,200.00",
+    requestedAmt: "$19,080.00",
     statusLabel: "Action Required",
     statusType: "REJECTED",
     actionLabel: "Resolve",
@@ -326,7 +326,7 @@ export default function DrawsPage() {
     }
     const cleanAmt = parseFloat(amount.replace(/[^0-9.]/g, "")) || 50000;
     const cents = Math.round(cleanAmt * 100);
-    const itemizedLines = drawNumber === 4 ? DRAW_REQUEST_FORM_ITEMS : getExcelDrawLines(drawNumber, cents);
+    const itemizedLines = getExcelDrawLines(drawNumber, cents);
     const computedRequestedCents = itemizedLines.reduce(
       (sum, l) => sum + (parseInt(l.requested_amount || "0", 10) || 0),
       0
@@ -342,13 +342,13 @@ export default function DrawsPage() {
 
     return {
       id: `draw-fallback-${drawNumber}`,
-      project_id: currentProjectId || "6b96d4aa-0ca1-4d8a-9909-cf7b5232c666",
-      loan_id: "loan-crt-001",
+      project_id: currentProjectId || "df16b577-3585-4fb0-a13a-ffadaca73e0f",
+      loan_id: "loan-col-73",
       draw_number: drawNumber,
-      status: drawNumber < 3 ? "CLOSED" : drawNumber === 3 ? "APPROVED" : "UNDER_REVIEW",
-      period_start: "2026-01-01",
-      period_end: "2026-10-15",
-      lender_name: "Capital Reserve Trust",
+      status: drawNumber <= 3 ? "FUNDED" : "UNDER_REVIEW",
+      period_start: "2025-06-01",
+      period_end: "2025-08-31",
+      lender_name: "First National Bank Construction Lending",
       requested_amount: String(computedRequestedCents),
       recommended_amount: String(computedRequestedCents),
       approved_amount: String(computedApprovedCents),
@@ -421,14 +421,14 @@ export default function DrawsPage() {
       </div>
 
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5 sm:space-y-6 min-w-0">
-        {/* 2. 4 Clean KPI Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+        {/* 2. 3 Clean KPI Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
           <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">
-              Facility Commitment
+              Loan Approved
             </span>
             <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5">
-              $824,450.00
+              $1,471,120.00
             </div>
             <span className="text-xs text-slate-500 mt-1 block">
               Approved construction loan
@@ -437,13 +437,13 @@ export default function DrawsPage() {
 
           <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">
-              Drawn to Date
+              Draw Received
             </span>
             <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5">
-              $202,200.00
+              $1,086,000.00
             </div>
             <span className="text-xs font-medium text-emerald-700 mt-1 block">
-              24.5% of commitment funded
+              73.8% of loan funded
             </span>
           </div>
 
@@ -452,22 +452,10 @@ export default function DrawsPage() {
               Active Draw Spending
             </span>
             <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5">
-              $78,960.00
+              $298,920.00
             </div>
             <span className="text-xs font-medium text-slate-700 mt-1 block">
-              94% paid to trades ($5,040 remaining)
-            </span>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">
-              Next Draw
-            </span>
-            <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5">
-              Draw #4 Ready
-            </div>
-            <span className="text-xs text-slate-500 mt-1 block">
-              Ready for lender submission
+              94% paid to trades ($19,080 remaining)
             </span>
           </div>
         </div>
@@ -477,7 +465,7 @@ export default function DrawsPage() {
           {/* Header & Legend */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-slate-100">
             <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200/60 shadow-2xs">
+              <div className="h-8 w-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-200/60 shadow-2xs">
                 <SlidersHorizontal className="h-3.5 w-3.5" />
               </div>
               <h3 className="text-sm font-bold text-slate-900 tracking-tight">
@@ -488,19 +476,19 @@ export default function DrawsPage() {
             {/* Status Legend */}
             <div className="flex items-center flex-wrap gap-3 sm:gap-4 text-xs font-medium text-slate-600">
               <div className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-slate-900" />
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                 <span className="text-slate-700">Completed</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-blue-600" />
+                <span className="h-2.5 w-2.5 rounded-full bg-teal-500" />
                 <span className="text-slate-700">Active</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-amber-500" />
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
                 <span className="text-slate-700">Ready to Request</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-slate-300" />
+                <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
                 <span className="text-slate-500">Upcoming</span>
               </div>
             </div>
@@ -512,24 +500,27 @@ export default function DrawsPage() {
               {/* Stepper Track with Connected Line Segments */}
               <div className="grid grid-cols-5 relative">
                 {/* Continuous Background Track */}
-                <div className="absolute top-[20px] left-[10%] right-[10%] h-[2px] bg-slate-200 rounded-full z-0 pointer-events-none" />
-                {/* Active Progress Line (From D1 through D3) */}
-                <div className="absolute top-[20px] left-[10%] w-[50%] h-[2px] bg-slate-900 rounded-full z-0 pointer-events-none" />
+                <div className="absolute top-[20px] left-[10%] right-[10%] h-[3px] bg-slate-200 rounded-full z-0 pointer-events-none" />
+                {/* Active Progress Line (From D1 through D4) */}
+                <div className="absolute top-[20px] left-[10%] w-[60%] h-[3px] bg-emerald-500 rounded-full z-0 pointer-events-none shadow-[0_0_8px_rgba(16,185,129,0.25)]" />
 
                 {/* Node 1: Draw #1 */}
                 <div
                   className="flex flex-col items-center cursor-pointer group px-2 select-none"
                   onClick={() => {
                     setSelectedTimelineDrawNumber(1);
-                    const fallback = buildDrawFallback(1, "Draw #1", "$50,000");
+                    const fallback = buildDrawFallback(1, "Draw #1", "$448,000");
                     const matching = draws.find((d) => d.draw_number === 1) || fallback;
                     handleOpenDetail(matching);
                   }}
                 >
                   <div className="relative z-10">
-                    <div className="h-10 w-10 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-xs ring-4 ring-white group-hover:scale-105 transition-transform duration-150">
+                    <div className="h-10 w-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-xs ring-4 ring-white group-hover:scale-105 transition-transform duration-150">
                       <Check className="h-4 w-4 stroke-[3]" />
                     </div>
+                    <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-bold font-mono border-2 border-white shadow-2xs leading-none">
+                      D1
+                    </span>
                   </div>
 
                   <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
@@ -537,9 +528,10 @@ export default function DrawsPage() {
                       Draw #1
                     </div>
                     <div className="text-sm font-bold font-mono tracking-tight text-slate-900">
-                      $50,000
+                      $448,000
                     </div>
-                    <div className="text-[11px] font-medium text-slate-500">
+                    <div className="h-1 w-10 bg-emerald-500 rounded-full mx-auto my-1.5" />
+                    <div className="text-[11px] font-semibold text-emerald-700">
                       100% Disbursed
                     </div>
                     <div className="text-[11px] text-slate-400 font-medium pt-0.5">
@@ -553,15 +545,18 @@ export default function DrawsPage() {
                   className="flex flex-col items-center cursor-pointer group px-2 select-none"
                   onClick={() => {
                     setSelectedTimelineDrawNumber(2);
-                    const fallback = buildDrawFallback(2, "Draw #2", "$68,200");
+                    const fallback = buildDrawFallback(2, "Draw #2", "$320,000");
                     const matching = draws.find((d) => d.draw_number === 2) || fallback;
                     handleOpenDetail(matching);
                   }}
                 >
                   <div className="relative z-10">
-                    <div className="h-10 w-10 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-xs ring-4 ring-white group-hover:scale-105 transition-transform duration-150">
+                    <div className="h-10 w-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-xs ring-4 ring-white group-hover:scale-105 transition-transform duration-150">
                       <Check className="h-4 w-4 stroke-[3]" />
                     </div>
+                    <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-bold font-mono border-2 border-white shadow-2xs leading-none">
+                      D2
+                    </span>
                   </div>
 
                   <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
@@ -569,9 +564,10 @@ export default function DrawsPage() {
                       Draw #2
                     </div>
                     <div className="text-sm font-bold font-mono tracking-tight text-slate-900">
-                      $68,200
+                      $320,000
                     </div>
-                    <div className="text-[11px] font-medium text-slate-500">
+                    <div className="h-1 w-10 bg-emerald-500 rounded-full mx-auto my-1.5" />
+                    <div className="text-[11px] font-semibold text-emerald-700">
                       100% Disbursed
                     </div>
                     <div className="text-[11px] text-slate-400 font-medium pt-0.5">
@@ -585,25 +581,30 @@ export default function DrawsPage() {
                   className="flex flex-col items-center cursor-pointer group px-2 select-none"
                   onClick={() => {
                     setSelectedTimelineDrawNumber(3);
-                    const fallback = buildDrawFallback(3, "Draw #3", "$84,000");
+                    const fallback = buildDrawFallback(3, "Draw #3", "$318,000");
                     const matching = draws.find((d) => d.draw_number === 3) || fallback;
                     handleOpenDetail(matching);
                   }}
                 >
                   <div className="relative z-10">
-                    <div className="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-xs ring-4 ring-blue-100/80 group-hover:scale-105 transition-transform duration-150">
+                    <div className="h-10 w-10 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-md ring-4 ring-teal-300/80 ring-offset-2 ring-offset-teal-50 group-hover:scale-105 transition-transform duration-150">
                       <Zap className="h-4 w-4 fill-white stroke-[1.5]" />
                     </div>
+                    <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-bold font-mono border-2 border-white shadow-2xs leading-none">
+                      D3
+                    </span>
                   </div>
 
                   <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
-                    <div className="text-xs font-bold text-blue-600 group-hover:underline">
-                      Draw #3 (Active)
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="text-xs font-bold text-blue-600 group-hover:underline">Draw #3</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200/70 leading-none">Active</span>
                     </div>
                     <div className="text-sm font-bold font-mono tracking-tight text-slate-900">
-                      $84,000
+                      $318,000
                     </div>
-                    <div className="text-[11px] font-semibold text-blue-700">
+                    <div className="h-1 w-10 bg-teal-500 rounded-full mx-auto my-1.5" />
+                    <div className="text-[11px] font-semibold text-teal-700">
                       94% Disbursed
                     </div>
                     <div className="text-[11px] text-slate-400 font-medium pt-0.5">
@@ -626,17 +627,23 @@ export default function DrawsPage() {
                   }}
                 >
                   <div className="relative z-10">
-                    <div className="h-10 w-10 rounded-full bg-white border-2 border-slate-400 text-slate-700 flex items-center justify-center shadow-xs ring-4 ring-white group-hover:scale-105 group-hover:border-slate-900 group-hover:text-slate-900 transition-all duration-150">
-                      <Plus className="h-4 w-4 stroke-[2.5]" />
+                    <div className="h-10 w-10 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs ring-4 ring-white group-hover:scale-105 transition-transform duration-150">
+                      <Plus className="h-4 w-4 stroke-[3]" />
                     </div>
+                    <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-bold font-mono border-2 border-white shadow-2xs leading-none">
+                      D4
+                    </span>
                   </div>
 
                   <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
-                    <div className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                      Draw #4
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">Draw #4</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200/70 leading-none">Next</span>
                     </div>
-                    <div className="text-xs font-semibold text-amber-700">
-                      Ready to Request
+                    <div className="my-1">
+                      <span className="inline-block border border-amber-200/80 bg-amber-50/90 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md">
+                        Ready to Request
+                      </span>
                     </div>
                     <div className="text-[11px] text-slate-400 font-medium pt-0.5">
                       Oct 18
@@ -658,17 +665,23 @@ export default function DrawsPage() {
                   }}
                 >
                   <div className="relative z-10">
-                    <div className="h-10 w-10 rounded-full bg-slate-50 border-2 border-dashed border-slate-300 text-slate-400 flex items-center justify-center ring-4 ring-white group-hover:scale-105 transition-transform duration-150">
-                      <Plus className="h-4 w-4 stroke-[1.5]" />
+                    <div className="h-10 w-10 rounded-full bg-slate-100 border border-slate-200/90 text-slate-500 flex items-center justify-center shadow-2xs ring-4 ring-white group-hover:scale-105 transition-transform duration-150">
+                      <Plus className="h-4 w-4 stroke-[2]" />
                     </div>
+                    <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-bold font-mono border-2 border-white shadow-2xs leading-none">
+                      D5
+                    </span>
                   </div>
 
                   <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
-                    <div className="text-xs font-bold text-slate-500">
-                      Draw #5
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="text-xs font-bold text-slate-700">Draw #5</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200/70 leading-none">Next</span>
                     </div>
-                    <div className="text-[11px] text-slate-400 font-medium">
-                      Scheduled
+                    <div className="my-1">
+                      <span className="inline-block border border-amber-200/80 bg-amber-50/90 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md">
+                        Scheduled
+                      </span>
                     </div>
                   </div>
                 </div>

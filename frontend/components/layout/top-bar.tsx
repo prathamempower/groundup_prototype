@@ -58,8 +58,6 @@ export function TopBar({
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isTasksOpen, setIsTasksOpen] = useState(false);
-  const [isAlertBarDismissed, setIsAlertBarDismissed] = useState(false);
-  const isControlCenterPage = pathname.includes("control-center");
 
   const { data: meData } = useQuery({
     queryKey: ["me"],
@@ -653,90 +651,6 @@ export function TopBar({
           </div>
         </div>
       </header>
-
-      {/* Real-Time Alert Notification Bar - Strictly scoped to Control Center at top of page */}
-      {!isAlertBarDismissed && isControlCenterPage && (
-        <div className="w-full border-b border-amber-200/90 bg-gradient-to-r from-amber-50 via-amber-50/95 to-amber-100/40 px-3 sm:px-5 py-2 sm:py-2.5 text-xs text-amber-950 shadow-2xs animate-in fade-in duration-150">
-          <div className="flex items-center justify-between gap-2 max-w-7xl mx-auto">
-            {/* Mobile View: Clean single-row alert strip */}
-            <div
-              onClick={() => {
-                if (currentProjectId) {
-                  router.push(`/projects/${currentProjectId}/alerts`);
-                }
-              }}
-              className="sm:hidden flex items-center gap-2 flex-1 min-w-0 cursor-pointer active:opacity-80 py-0.5"
-            >
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-amber-200/80 text-amber-800">
-                <AlertTriangle className="h-3.5 w-3.5 text-amber-700" />
-              </span>
-              <div className="flex-1 min-w-0 truncate">
-                <span className="font-bold text-amber-950 text-xs">Structural Steel: </span>
-                <span className="font-semibold text-amber-800 text-[11px]">+35d slip, +$28.5k carry</span>
-              </div>
-              <ArrowRight className="h-3.5 w-3.5 text-amber-700 shrink-0" />
-            </div>
-
-            {/* Desktop View: Full milestone schedule context */}
-            <div className="hidden sm:flex items-center gap-2.5 min-w-0 flex-1">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-200/80 text-amber-800">
-                <AlertTriangle className="h-4 w-4 text-amber-700" />
-              </span>
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-                <span className="font-bold text-amber-900 flex items-center gap-1.5">
-                  Critical Path Risk
-                  <span className="rounded-full bg-amber-200 text-amber-900 px-2 py-0.5 text-[10px] font-bold">
-                    Active Warning
-                  </span>
-                </span>
-                <span className="text-slate-400">·</span>
-                <span className="font-bold text-slate-800">
-                  At-Risk Milestone: Structural Steel Fabrication
-                </span>
-                <span className="text-slate-600 hidden xl:inline">
-                  (Fabricator lead time extended by 5 weeks. Delays framed assembly and secondary trade access.)
-                </span>
-                <span className="font-mono text-amber-800 text-[11px] font-bold inline-flex items-center gap-1.5">
-                  <span className="rounded bg-white/90 border border-amber-200 px-1.5 py-0.5 text-amber-800 font-bold">
-                    Slip: +35 Days
-                  </span>
-                  <span className="rounded bg-white/90 border border-amber-200 px-1.5 py-0.5 text-amber-800 font-bold">
-                    Carry: +$28,500
-                  </span>
-                </span>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  if (currentProjectId) {
-                    router.push(`/projects/${currentProjectId}/alerts`);
-                  }
-                }}
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-[#C85A17] text-white px-3 py-1.5 text-xs font-bold shadow-xs hover:bg-[#a9480e] transition-colors cursor-pointer"
-                title="View milestone alerts"
-              >
-                <span>View Milestone Schedule</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsAlertBarDismissed(true);
-                }}
-                className="text-amber-700 hover:text-amber-950 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-md hover:bg-amber-100/60 transition-colors cursor-pointer"
-                title="Dismiss notification"
-                aria-label="Dismiss notification"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       <SignOutOverlay />
     </div>
   );

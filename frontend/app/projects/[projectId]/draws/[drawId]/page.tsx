@@ -17,6 +17,7 @@ import type { DrawItem } from "@/lib/types";
 import {
   DRAW_REQUEST_FORM_ITEMS,
   DRAW_REQUEST_TOTALS,
+  getDrawTasksByNumber,
 } from "@/lib/data/draw-request-form-items";
 import { VerifyWorkModal } from "@/components/draws/verify-work-modal";
 import { VerifyCostModal } from "@/components/draws/verify-cost-modal";
@@ -66,28 +67,42 @@ export default function DrawDetailPage() {
     }
 
     const drawNumMatch = drawId.match(/(\d+)/);
-    const num = drawNumMatch ? parseInt(drawNumMatch[1], 10) : 4;
+    const num = base?.draw_number || (drawNumMatch ? parseInt(drawNumMatch[1], 10) : 1);
+    const resolvedLines =
+      base?.lines && base.lines.length > 0 ? base.lines : getDrawTasksByNumber(num);
+    const lineRequestedCents = resolvedLines.reduce(
+      (acc, l) => acc + (parseInt(l.requested_amount || "0", 10) || 0),
+      0
+    );
+    const lineApprovedCents = resolvedLines.reduce(
+      (acc, l) => acc + (parseInt(l.approved_amount || "0", 10) || 0),
+      0
+    );
+    const lineFundedCents = resolvedLines.reduce(
+      (acc, l) => acc + (parseInt(l.funded_amount || "0", 10) || 0),
+      0
+    );
 
     if (!base) {
       return {
         id: drawId.startsWith("draw-") ? drawId : `draw-fallback-${num}`,
-        project_id: projectId || "6b96d4aa-0ca1-4d8a-9909-cf7b5232c666",
-        loan_id: "loan-crt-001",
+        project_id: projectId || "df16b577-3585-4fb0-a13a-ffadaca73e0f",
+        loan_id: "loan-col-73",
         draw_number: num,
-        status: num >= 4 ? "UNDER_REVIEW" : "APPROVED",
-        period_start: "2026-09-25",
-        period_end: "2026-10-18",
-        lender_name: "Capital Reserve Trust",
-        requested_amount: String(DRAW_REQUEST_TOTALS.requestedCents),
-        recommended_amount: String(DRAW_REQUEST_TOTALS.recommendedCents),
-        approved_amount: String(DRAW_REQUEST_TOTALS.approvedCents),
-        funded_amount: String(DRAW_REQUEST_TOTALS.fundedCents),
-        shortfall_amount: "250000",
-        lines: DRAW_REQUEST_FORM_ITEMS,
+        status: num >= 4 ? "SUBMITTED" : "FUNDED",
+        period_start: "2025-06-01",
+        period_end: "2025-08-31",
+        lender_name: "First National Bank Construction Lending",
+        requested_amount: String(lineRequestedCents),
+        recommended_amount: String(lineRequestedCents),
+        approved_amount: String(lineApprovedCents),
+        funded_amount: String(lineFundedCents),
+        shortfall_amount: "0",
+        lines: resolvedLines,
         conditions: [
           { id: "c1", title: "Lender Title Date-Down Endorsement", status: "SATISFIED", required_for: "Wire Clearance" },
           { id: "c2", title: "Subcontractor Lien Waivers Reconciled", status: "SATISFIED", required_for: "Disbursement" },
-          { id: "c3", title: "Certificate of Occupancy for Final Clean-up Release", status: "OPEN", required_for: "Final Holdback" },
+          { id: "c3", title: "Certificate of Occupancy for Final Clean-up Release", status: num === 4 ? "OPEN" : "SATISFIED", required_for: "Final Holdback" },
         ],
         packet_checklist: [
           { id: "p1", requirement: "AIA G702 / G703 Application for Payment", status: "COMPLETE", document_name: "G702_Signed.pdf" },
@@ -99,9 +114,10 @@ export default function DrawDetailPage() {
 
     return {
       ...base,
-      requested_amount: base.requested_amount || String(DRAW_REQUEST_TOTALS.requestedCents),
-      approved_amount: base.approved_amount || String(DRAW_REQUEST_TOTALS.approvedCents),
-      lines: base.lines && base.lines.length > 0 ? base.lines : DRAW_REQUEST_FORM_ITEMS,
+      requested_amount: base.requested_amount || String(lineRequestedCents),
+      approved_amount: base.approved_amount || String(lineApprovedCents),
+      funded_amount: base.funded_amount || String(lineFundedCents),
+      lines: resolvedLines,
     };
   }, [drawData, drawsListData, drawId, projectId]);
 
