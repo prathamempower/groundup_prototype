@@ -12,6 +12,7 @@ import {
   Clock,
   AlertCircle,
   ChevronRight,
+  ChevronLeft,
   ExternalLink,
   Check,
   Zap,
@@ -36,6 +37,88 @@ import { ResubmitRevisionModal } from "@/components/draws/resubmit-revision-moda
 import { DrawDetailDrawer } from "@/components/draws/draw-detail-drawer";
 
 type FilterTab = "ALL" | "ACTIVE" | "FUNDED" | "DISCREPANCY";
+
+export interface TimelineStepNode {
+  num: number;
+  nodeId: string;
+  title: string;
+  scope: string;
+  amount: string;
+  disbursedText: string;
+  progressPct: number;
+  date: string;
+  status: "COMPLETED" | "ACTIVE" | "READY" | "UPCOMING";
+  badgeLabel?: string;
+  actionLabel: string;
+  isPrimaryAction?: boolean;
+}
+
+const TIMELINE_STEPS: TimelineStepNode[] = [
+  {
+    num: 1,
+    nodeId: "D1",
+    title: "Draw #1",
+    scope: "Site Mobilization & Foundation Footings",
+    amount: "$448,000",
+    disbursedText: "100% Disbursed",
+    progressPct: 100,
+    date: "Jan 12",
+    status: "COMPLETED",
+    actionLabel: "View Details",
+  },
+  {
+    num: 2,
+    nodeId: "D2",
+    title: "Draw #2",
+    scope: "Concrete Core & Structural Steel",
+    amount: "$320,000",
+    disbursedText: "100% Disbursed",
+    progressPct: 100,
+    date: "Mar 04",
+    status: "COMPLETED",
+    actionLabel: "View Details",
+  },
+  {
+    num: 3,
+    nodeId: "D3",
+    title: "Draw #3",
+    scope: "Rough MEP & Utility Rough-Ins",
+    amount: "$318,000",
+    disbursedText: "94% Disbursed",
+    progressPct: 94,
+    date: "May 19",
+    status: "ACTIVE",
+    badgeLabel: "Active",
+    actionLabel: "View Details",
+  },
+  {
+    num: 4,
+    nodeId: "D4",
+    title: "Draw #4",
+    scope: "Exterior Enclosure & Roofing",
+    amount: "$385,120",
+    disbursedText: "Ready to Request",
+    progressPct: 0,
+    date: "Oct 18",
+    status: "READY",
+    badgeLabel: "Next",
+    actionLabel: "Request Draw #4",
+    isPrimaryAction: true,
+  },
+  {
+    num: 5,
+    nodeId: "D5",
+    title: "Draw #5",
+    scope: "Interior Finishes & Drywall",
+    amount: "$350,000",
+    disbursedText: "Scheduled",
+    progressPct: 0,
+    date: "Target: Dec",
+    status: "UPCOMING",
+    badgeLabel: "Upcoming",
+    actionLabel: "View Details",
+  },
+];
 
 export interface PipelineDrawNode {
   drawNumber: number;
@@ -234,6 +317,48 @@ export default function DrawsPage() {
   const [drawOverrides, setDrawOverrides] = useState<Record<number, DrawItem>>({});
   const [selectedDraw, setSelectedDraw] = useState<DrawItem | null>(null);
   const [selectedTimelineDrawNumber, setSelectedTimelineDrawNumber] = useState<number>(3);
+  const [activeMobileStep, setActiveMobileStep] = useState<number>(3);
+  const mobileCarouselRef = React.useRef<HTMLDivElement>(null);
+
+  const scrollToMobileStep = (stepNum: number) => {
+    setActiveMobileStep(stepNum);
+    setSelectedTimelineDrawNumber(stepNum);
+    if (mobileCarouselRef.current) {
+      const targetChild = mobileCarouselRef.current.children[stepNum - 1] as HTMLElement | undefined;
+      if (targetChild) {
+        targetChild.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      }
+    }
+  };
+
+  const handleMobilePrev = () => {
+    if (activeMobileStep > 1) {
+      scrollToMobileStep(activeMobileStep - 1);
+    }
+  };
+
+  const handleMobileNext = () => {
+    if (activeMobileStep < TIMELINE_STEPS.length) {
+      scrollToMobileStep(activeMobileStep + 1);
+    }
+  };
+
+  const handleStepClick = (step: TimelineStepNode) => {
+    setSelectedTimelineDrawNumber(step.num);
+    setActiveMobileStep(step.num);
+    if (step.isPrimaryAction) {
+      if (currentProjectId) {
+        router.push(`/projects/${currentProjectId}/draws/build-packet?draw=${step.num}`);
+      } else {
+        setPacketDrawNumber(step.num);
+        setIsBuildDrawPacketOpen(true);
+      }
+    } else {
+      const fallback = buildDrawFallback(step.num, step.title, step.amount);
+      const matching = draws.find((d) => d.draw_number === step.num) || fallback;
+      handleOpenDetail(matching);
+    }
+  };
 
   // Modal states
   const [isBuildDrawPacketOpen, setIsBuildDrawPacketOpen] = useState(false);
@@ -455,19 +580,48 @@ export default function DrawsPage() {
 
         {/* 3. Visual Draw Timeline */}
         <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-xs">
-          {/* Header & Legend */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-slate-100">
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-200/60 shadow-2xs">
-                <SlidersHorizontal className="h-3.5 w-3.5" />
+          {/* Header & Controls */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 sm:pb-5 border-b border-slate-100">
+            <div className="flex items-center justify-between sm:justify-start gap-2.5 w-full sm:w-auto">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-200/60 shadow-2xs">
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                    Draw Timeline
+                  </h3>
+                  <p className="text-[11px] text-slate-400 sm:hidden">
+                    Step {activeMobileStep} of {TIMELINE_STEPS.length} • {TIMELINE_STEPS[activeMobileStep - 1]?.title} ({TIMELINE_STEPS[activeMobileStep - 1]?.status === "ACTIVE" ? "Active" : TIMELINE_STEPS[activeMobileStep - 1]?.status === "READY" ? "Ready" : TIMELINE_STEPS[activeMobileStep - 1]?.status === "COMPLETED" ? "Funded" : "Upcoming"})
+                  </p>
+                </div>
               </div>
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                Draw Timeline
-              </h3>
+
+              {/* Mobile Prev / Next Arrows */}
+              <div className="flex sm:hidden items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handleMobilePrev}
+                  disabled={activeMobileStep <= 1}
+                  className="h-7 w-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-slate-700 shadow-2xs cursor-pointer"
+                  aria-label="Previous Draw"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleMobileNext}
+                  disabled={activeMobileStep >= TIMELINE_STEPS.length}
+                  className="h-7 w-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-slate-700 shadow-2xs cursor-pointer"
+                  aria-label="Next Draw"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
-            {/* Status Legend */}
-            <div className="flex items-center flex-wrap gap-3 sm:gap-4 text-xs font-medium text-slate-600">
+            {/* Status Legend (Desktop) */}
+            <div className="hidden sm:flex items-center flex-wrap gap-3 sm:gap-4 text-xs font-medium text-slate-600">
               <div className="flex items-center gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                 <span className="text-slate-700">Completed</span>
@@ -487,197 +641,326 @@ export default function DrawsPage() {
             </div>
           </div>
 
-          {/* Stepper Pipeline Container */}
-          <div className="relative pt-6 pb-2 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
+          {/* Mobile Interactive Stepper Track & Cards (sm:hidden) */}
+          <div className="sm:hidden pt-4 pb-2 space-y-4">
+            {/* Connected Track */}
+            <div className="relative py-1 px-2">
+              {/* Background Track Line */}
+              <div className="absolute top-[20px] left-[20px] right-[20px] h-[2px] bg-slate-200 z-0 pointer-events-none" />
+              {/* Active Progress Line */}
+              <div
+                className="absolute top-[20px] left-[20px] h-[2px] bg-emerald-500 z-0 pointer-events-none transition-all duration-300"
+                style={{
+                  width: `${((Math.min(activeMobileStep, 4) - 1) / (TIMELINE_STEPS.length - 1)) * 100}%`,
+                }}
+              />
+
+              <div className="flex justify-between items-center relative z-10">
+                {TIMELINE_STEPS.map((step) => {
+                  const isSelected = activeMobileStep === step.num;
+                  const isCompleted = step.status === "COMPLETED";
+                  const isActive = step.status === "ACTIVE";
+                  const isReady = step.status === "READY";
+
+                  return (
+                    <button
+                      key={`mob-step-${step.num}`}
+                      type="button"
+                      onClick={() => scrollToMobileStep(step.num)}
+                      className="flex flex-col items-center group cursor-pointer focus:outline-hidden"
+                    >
+                      <div
+                        className={cn(
+                          "h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ring-2 ring-white shadow-2xs",
+                          isCompleted
+                            ? "bg-emerald-500 text-white"
+                            : isActive
+                            ? "bg-teal-500 text-white ring-teal-200 ring-offset-1"
+                            : isReady
+                            ? "bg-amber-500 text-white"
+                            : "bg-slate-100 text-slate-400 border border-slate-200",
+                          isSelected && "scale-110 shadow-sm ring-blue-500 ring-offset-2"
+                        )}
+                      >
+                        {isCompleted ? (
+                          <Check className="h-3.5 w-3.5 stroke-[3]" />
+                        ) : isActive ? (
+                          <Zap className="h-3.5 w-3.5 fill-white stroke-[1.5]" />
+                        ) : (
+                          <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
+                        )}
+                      </div>
+                      <span
+                        className={cn(
+                          "text-[10px] font-mono mt-1 font-semibold leading-none",
+                          isSelected ? "text-blue-600 font-bold" : "text-slate-500"
+                        )}
+                      >
+                        {step.nodeId}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Mobile Swipeable Card Carousel */}
+            <div
+              ref={mobileCarouselRef}
+              onScroll={(e) => {
+                const el = e.currentTarget;
+                const cardWidth = el.scrollWidth / TIMELINE_STEPS.length;
+                const index = Math.round(el.scrollLeft / cardWidth);
+                if (index >= 0 && index < TIMELINE_STEPS.length && TIMELINE_STEPS[index].num !== activeMobileStep) {
+                  setActiveMobileStep(TIMELINE_STEPS[index].num);
+                  setSelectedTimelineDrawNumber(TIMELINE_STEPS[index].num);
+                }
+              }}
+              className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-none py-1 -mx-2 px-2"
+            >
+              {TIMELINE_STEPS.map((step) => {
+                const isSelected = activeMobileStep === step.num;
+                const isCompleted = step.status === "COMPLETED";
+                const isActive = step.status === "ACTIVE";
+                const isReady = step.status === "READY";
+
+                return (
+                  <div
+                    key={`carousel-card-${step.num}`}
+                    onClick={() => handleStepClick(step)}
+                    className={cn(
+                      "w-[84vw] max-w-[310px] shrink-0 snap-center rounded-xl p-4 border transition-all cursor-pointer space-y-3 shadow-xs",
+                      isSelected
+                        ? "border-blue-400/80 bg-blue-50/20 ring-1 ring-blue-300/50"
+                        : "border-slate-200/90 bg-white"
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-slate-900 text-sm">{step.title}</span>
+                          {isCompleted && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/70">
+                              Completed
+                            </span>
+                          )}
+                          {isActive && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200/70">
+                              Active
+                            </span>
+                          )}
+                          {isReady && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200/70">
+                              Ready to Request
+                            </span>
+                          )}
+                          {step.status === "UPCOMING" && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/70">
+                              Upcoming
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 font-medium mt-0.5 line-clamp-1">{step.scope}</p>
+                      </div>
+                      <span className="text-xs font-semibold text-slate-400 shrink-0">{step.date}</span>
+                    </div>
+
+                    {/* Financial Metrics */}
+                    <div className="grid grid-cols-2 gap-2 p-2.5 bg-slate-50 rounded-lg border border-slate-100 text-xs">
+                      <div>
+                        <span className="text-[10px] uppercase font-semibold text-slate-400 block">Amount</span>
+                        <span className="font-mono font-bold text-slate-900 text-sm">{step.amount}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] uppercase font-semibold text-slate-400 block">Disbursed</span>
+                        <span
+                          className={cn(
+                            "font-semibold text-xs mt-0.5 block",
+                            isCompleted
+                              ? "text-emerald-700"
+                              : isActive
+                              ? "text-teal-700"
+                              : isReady
+                              ? "text-amber-700"
+                              : "text-slate-500"
+                          )}
+                        >
+                          {step.disbursedText}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar for completed/active */}
+                    {(isCompleted || isActive) && (
+                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-all duration-300",
+                            isCompleted ? "bg-emerald-500" : "bg-teal-500"
+                          )}
+                          style={{ width: `${step.progressPct}%` }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Action Button */}
+                    <div onClick={(e) => e.stopPropagation()}>
+                      {step.isPrimaryAction ? (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleStepClick(step)}
+                          className="w-full h-8 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-2xs"
+                        >
+                          <Plus className="h-3.5 w-3.5 mr-1" />
+                          {step.actionLabel}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleStepClick(step)}
+                          className="w-full h-8 text-xs font-medium text-slate-700 border-slate-200 bg-white hover:bg-slate-50 rounded-lg shadow-2xs flex items-center justify-center gap-1"
+                        >
+                          <span>{step.actionLabel}</span>
+                          <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Subtle pagination dots */}
+            <div className="flex items-center justify-center gap-1.5 pt-1">
+              {TIMELINE_STEPS.map((s) => (
+                <button
+                  key={`dot-${s.num}`}
+                  type="button"
+                  onClick={() => scrollToMobileStep(s.num)}
+                  className={cn(
+                    "h-1.5 rounded-full transition-all cursor-pointer",
+                    activeMobileStep === s.num ? "w-5 bg-blue-600" : "w-1.5 bg-slate-200 hover:bg-slate-300"
+                  )}
+                  aria-label={`Go to Draw ${s.num}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop Stepper Pipeline (hidden sm:block) */}
+          <div className="hidden sm:block relative pt-6 pb-2 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
             <div className="min-w-[640px] px-4 relative">
-              {/* Stepper Track with Connected Line Segments */}
               <div className="grid grid-cols-5 relative">
                 {/* Continuous Background Track */}
                 <div className="absolute top-[20px] left-[10%] right-[10%] h-[3px] bg-slate-200 rounded-full z-0 pointer-events-none" />
                 {/* Active Progress Line (From D1 through D4) */}
                 <div className="absolute top-[20px] left-[10%] w-[60%] h-[3px] bg-emerald-500 rounded-full z-0 pointer-events-none shadow-[0_0_8px_rgba(16,185,129,0.25)]" />
 
-                {/* Node 1: Draw #1 */}
-                <div
-                  className="flex flex-col items-center cursor-pointer group px-2 select-none"
-                  onClick={() => {
-                    setSelectedTimelineDrawNumber(1);
-                    const fallback = buildDrawFallback(1, "Draw #1", "$448,000");
-                    const matching = draws.find((d) => d.draw_number === 1) || fallback;
-                    handleOpenDetail(matching);
-                  }}
-                >
-                  <div className="relative z-10">
-                    <div className="h-10 w-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-xs ring-4 ring-white group-hover:scale-105 transition-transform duration-150">
-                      <Check className="h-4 w-4 stroke-[3]" />
-                    </div>
-                    <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-bold font-mono border-2 border-white shadow-2xs leading-none">
-                      D1
-                    </span>
-                  </div>
+                {TIMELINE_STEPS.map((step) => {
+                  const isCompleted = step.status === "COMPLETED";
+                  const isActive = step.status === "ACTIVE";
+                  const isReady = step.status === "READY";
+                  const isUpcoming = step.status === "UPCOMING";
 
-                  <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
-                    <div className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                      Draw #1
-                    </div>
-                    <div className="text-sm font-bold font-mono tracking-tight text-slate-900">
-                      $448,000
-                    </div>
-                    <div className="h-1 w-10 bg-emerald-500 rounded-full mx-auto my-1.5" />
-                    <div className="text-[11px] font-semibold text-emerald-700">
-                      100% Disbursed
-                    </div>
-                    <div className="text-[11px] text-slate-400 font-medium pt-0.5">
-                      Jan 12
-                    </div>
-                  </div>
-                </div>
+                  return (
+                    <div
+                      key={`desk-step-${step.num}`}
+                      className="flex flex-col items-center cursor-pointer group px-2 select-none"
+                      onClick={() => handleStepClick(step)}
+                    >
+                      <div className="relative z-10">
+                        <div
+                          className={cn(
+                            "h-10 w-10 rounded-full flex items-center justify-center shadow-xs ring-4 group-hover:scale-105 transition-transform duration-150",
+                            isCompleted
+                              ? "bg-emerald-500 text-white ring-white"
+                              : isActive
+                              ? "bg-teal-500 text-white ring-teal-300/80 ring-offset-2 ring-offset-teal-50 shadow-md"
+                              : isReady
+                              ? "bg-amber-500 text-white ring-white"
+                              : "bg-slate-100 border border-slate-200/90 text-slate-500 ring-white shadow-2xs"
+                          )}
+                        >
+                          {isCompleted ? (
+                            <Check className="h-4 w-4 stroke-[3]" />
+                          ) : isActive ? (
+                            <Zap className="h-4 w-4 fill-white stroke-[1.5]" />
+                          ) : (
+                            <Plus className={cn("h-4 w-4", isReady ? "stroke-[3]" : "stroke-[2]")} />
+                          )}
+                        </div>
+                        <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-bold font-mono border-2 border-white shadow-2xs leading-none">
+                          {step.nodeId}
+                        </span>
+                      </div>
 
-                {/* Node 2: Draw #2 */}
-                <div
-                  className="flex flex-col items-center cursor-pointer group px-2 select-none"
-                  onClick={() => {
-                    setSelectedTimelineDrawNumber(2);
-                    const fallback = buildDrawFallback(2, "Draw #2", "$320,000");
-                    const matching = draws.find((d) => d.draw_number === 2) || fallback;
-                    handleOpenDetail(matching);
-                  }}
-                >
-                  <div className="relative z-10">
-                    <div className="h-10 w-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-xs ring-4 ring-white group-hover:scale-105 transition-transform duration-150">
-                      <Check className="h-4 w-4 stroke-[3]" />
-                    </div>
-                    <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-bold font-mono border-2 border-white shadow-2xs leading-none">
-                      D2
-                    </span>
-                  </div>
+                      <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <span
+                            className={cn(
+                              "text-xs font-bold transition-colors",
+                              isActive
+                                ? "text-blue-600 group-hover:underline"
+                                : isUpcoming
+                                ? "text-slate-700"
+                                : "text-slate-900 group-hover:text-blue-600"
+                            )}
+                          >
+                            {step.title}
+                          </span>
+                          {step.badgeLabel && (
+                            <span
+                              className={cn(
+                                "text-[10px] font-bold px-1.5 py-0.5 rounded leading-none border",
+                                isActive
+                                  ? "bg-teal-50 text-teal-700 border-teal-200/70"
+                                  : "bg-amber-50 text-amber-700 border-amber-200/70"
+                              )}
+                            >
+                              {step.badgeLabel}
+                            </span>
+                          )}
+                        </div>
 
-                  <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
-                    <div className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                      Draw #2
-                    </div>
-                    <div className="text-sm font-bold font-mono tracking-tight text-slate-900">
-                      $320,000
-                    </div>
-                    <div className="h-1 w-10 bg-emerald-500 rounded-full mx-auto my-1.5" />
-                    <div className="text-[11px] font-semibold text-emerald-700">
-                      100% Disbursed
-                    </div>
-                    <div className="text-[11px] text-slate-400 font-medium pt-0.5">
-                      Mar 04
-                    </div>
-                  </div>
-                </div>
+                        {isReady || isUpcoming ? (
+                          <div className="my-1">
+                            <span className="inline-block border border-amber-200/80 bg-amber-50/90 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md">
+                              {step.disbursedText}
+                            </span>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="text-sm font-bold font-mono tracking-tight text-slate-900">
+                              {step.amount}
+                            </div>
+                            <div
+                              className={cn(
+                                "h-1 w-10 rounded-full mx-auto my-1.5",
+                                isCompleted ? "bg-emerald-500" : "bg-teal-500"
+                              )}
+                            />
+                            <div
+                              className={cn(
+                                "text-[11px] font-semibold",
+                                isCompleted ? "text-emerald-700" : "text-teal-700"
+                              )}
+                            >
+                              {step.disbursedText}
+                            </div>
+                          </>
+                        )}
 
-                {/* Node 3: Draw #3 (Active) */}
-                <div
-                  className="flex flex-col items-center cursor-pointer group px-2 select-none"
-                  onClick={() => {
-                    setSelectedTimelineDrawNumber(3);
-                    const fallback = buildDrawFallback(3, "Draw #3", "$318,000");
-                    const matching = draws.find((d) => d.draw_number === 3) || fallback;
-                    handleOpenDetail(matching);
-                  }}
-                >
-                  <div className="relative z-10">
-                    <div className="h-10 w-10 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-md ring-4 ring-teal-300/80 ring-offset-2 ring-offset-teal-50 group-hover:scale-105 transition-transform duration-150">
-                      <Zap className="h-4 w-4 fill-white stroke-[1.5]" />
+                        {step.date && (
+                          <div className="text-[11px] text-slate-400 font-medium pt-0.5">
+                            {step.date}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-bold font-mono border-2 border-white shadow-2xs leading-none">
-                      D3
-                    </span>
-                  </div>
-
-                  <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
-                    <div className="flex items-center justify-center gap-1.5">
-                      <span className="text-xs font-bold text-blue-600 group-hover:underline">Draw #3</span>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200/70 leading-none">Active</span>
-                    </div>
-                    <div className="text-sm font-bold font-mono tracking-tight text-slate-900">
-                      $318,000
-                    </div>
-                    <div className="h-1 w-10 bg-teal-500 rounded-full mx-auto my-1.5" />
-                    <div className="text-[11px] font-semibold text-teal-700">
-                      94% Disbursed
-                    </div>
-                    <div className="text-[11px] text-slate-400 font-medium pt-0.5">
-                      May 19
-                    </div>
-                  </div>
-                </div>
-
-                {/* Node 4: Draw #4 (Next) */}
-                <div
-                  className="flex flex-col items-center cursor-pointer group px-2 select-none"
-                  onClick={() => {
-                    setSelectedTimelineDrawNumber(4);
-                    if (currentProjectId) {
-                      router.push(`/projects/${currentProjectId}/draws/build-packet?draw=4`);
-                    } else {
-                      setPacketDrawNumber(4);
-                      setIsBuildDrawPacketOpen(true);
-                    }
-                  }}
-                >
-                  <div className="relative z-10">
-                    <div className="h-10 w-10 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs ring-4 ring-white group-hover:scale-105 transition-transform duration-150">
-                      <Plus className="h-4 w-4 stroke-[3]" />
-                    </div>
-                    <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-bold font-mono border-2 border-white shadow-2xs leading-none">
-                      D4
-                    </span>
-                  </div>
-
-                  <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
-                    <div className="flex items-center justify-center gap-1.5">
-                      <span className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">Draw #4</span>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200/70 leading-none">Next</span>
-                    </div>
-                    <div className="my-1">
-                      <span className="inline-block border border-amber-200/80 bg-amber-50/90 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md">
-                        Ready to Request
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-slate-400 font-medium pt-0.5">
-                      Oct 18
-                    </div>
-                  </div>
-                </div>
-
-                {/* Node 5: Draw #5 (Upcoming) */}
-                <div
-                  className="flex flex-col items-center cursor-pointer group px-2 select-none"
-                  onClick={() => {
-                    setSelectedTimelineDrawNumber(5);
-                    if (currentProjectId) {
-                      router.push(`/projects/${currentProjectId}/draws/build-packet?draw=5`);
-                    } else {
-                      setPacketDrawNumber(5);
-                      setIsBuildDrawPacketOpen(true);
-                    }
-                  }}
-                >
-                  <div className="relative z-10">
-                    <div className="h-10 w-10 rounded-full bg-slate-100 border border-slate-200/90 text-slate-500 flex items-center justify-center shadow-2xs ring-4 ring-white group-hover:scale-105 transition-transform duration-150">
-                      <Plus className="h-4 w-4 stroke-[2]" />
-                    </div>
-                    <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-bold font-mono border-2 border-white shadow-2xs leading-none">
-                      D5
-                    </span>
-                  </div>
-
-                  <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
-                    <div className="flex items-center justify-center gap-1.5">
-                      <span className="text-xs font-bold text-slate-700">Draw #5</span>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200/70 leading-none">Next</span>
-                    </div>
-                    <div className="my-1">
-                      <span className="inline-block border border-amber-200/80 bg-amber-50/90 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md">
-                        Scheduled
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -695,7 +978,7 @@ export default function DrawsPage() {
           </div>
 
           {/* Filter Pills */}
-          <div className="flex items-center gap-1 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-none">
+          <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-none -mx-1 px-1">
             {(
               [
                 { key: "ALL", label: "All Draws" },
@@ -709,7 +992,7 @@ export default function DrawsPage() {
                 type="button"
                 onClick={() => setFilterTab(key as FilterTab)}
                 className={cn(
-                  "px-3 py-1 text-xs rounded-lg transition-colors font-medium cursor-pointer shrink-0",
+                  "px-3 py-1.5 text-xs rounded-lg transition-colors font-medium cursor-pointer shrink-0",
                   filterTab === key
                     ? "bg-slate-900 text-white font-semibold shadow-2xs"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
@@ -721,154 +1004,308 @@ export default function DrawsPage() {
           </div>
         </div>
 
-        {/* 5. Draws Register Table */}
+        {/* 5. Draws Register: Responsive Table and Mobile Card List */}
         <div className="rounded-2xl border border-slate-200/80 bg-white overflow-hidden shadow-xs">
-            <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full min-w-[760px] text-left text-xs">
-                <thead className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-semibold text-[11px] uppercase tracking-wider">
-                  <tr>
-                    <th className="py-3 px-4">Draw</th>
-                    <th className="py-3 px-4">Scope</th>
-                    <th className="py-3 px-4">Date</th>
-                    <th className="py-3 px-4 text-right">Requested</th>
-                    <th className="py-3 px-4 text-right">Disbursed</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-800">
-                  {isDrawsLoading ? (
-                    Array.from({ length: 4 }).map((_, idx) => (
-                      <tr key={`skel-${idx}`} className="animate-pulse">
-                        <td className="py-3.5 px-4"><Skeleton className="h-4 w-20" /></td>
-                        <td className="py-3.5 px-4"><Skeleton className="h-4 w-40" /></td>
-                        <td className="py-3.5 px-4"><Skeleton className="h-4 w-24" /></td>
-                        <td className="py-3.5 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
-                        <td className="py-3.5 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
-                        <td className="py-3.5 px-4"><Skeleton className="h-4 w-20" /></td>
-                        <td className="py-3.5 px-4 text-right"><Skeleton className="h-6 w-16 ml-auto" /></td>
-                      </tr>
-                    ))
-                  ) : filteredShowcaseRows.map((row) => (
-                    <tr
-                      key={row.id}
-                      onClick={() => {
-                        setSelectedTimelineDrawNumber(row.drawNumber);
-                        const matchingDraw =
-                          draws.find((d) => d.draw_number === row.drawNumber) ||
-                          buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
-                        handleOpenDetail(matchingDraw);
-                      }}
-                      className="hover:bg-slate-50/70 transition-colors cursor-pointer"
-                    >
-                      {/* Draw Ref */}
-                      <td className="py-3.5 px-4 font-mono font-medium text-xs">
-                        <div className="font-bold text-slate-900">{row.title}</div>
-                        <span className="text-[11px] text-slate-400">{row.drawRefId}</span>
-                      </td>
-
-                      {/* Scope */}
-                      <td className="py-3.5 px-4 text-slate-800 font-medium">
-                        {row.scopeName}
-                      </td>
-
-                      {/* Date */}
-                      <td className="py-3.5 px-4 text-slate-500 font-medium">
-                        {row.date}
-                      </td>
-
-                      {/* Requested */}
-                      <td className="py-3.5 px-4 font-mono font-bold text-right text-slate-900">
-                        {row.requestedAmt}
-                      </td>
-
-                      {/* Disbursed */}
-                      <td className="py-3.5 px-4 font-mono text-right text-slate-600 font-medium">
-                        {row.disbursed}
-                      </td>
-
-                      {/* Status badge */}
-                      <td className="py-3.5 px-4">
+          {/* Mobile Card List (sm:hidden) */}
+          <div className="divide-y divide-slate-100 sm:hidden">
+            {isDrawsLoading ? (
+              Array.from({ length: 3 }).map((_, idx) => (
+                <div key={`mob-skel-${idx}`} className="p-4 space-y-3 animate-pulse">
+                  <div className="flex justify-between items-center">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                  <Skeleton className="h-3 w-48" />
+                  <div className="grid grid-cols-2 gap-2 p-2.5 bg-slate-50 rounded-lg">
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                  </div>
+                  <Skeleton className="h-8 w-full rounded-lg" />
+                </div>
+              ))
+            ) : filteredShowcaseRows.length === 0 ? (
+              <div className="p-8 text-center text-xs text-slate-500">
+                No draws found matching the selected filter.
+              </div>
+            ) : (
+              filteredShowcaseRows.map((row) => (
+                <div
+                  key={`mob-row-${row.id}`}
+                  onClick={() => {
+                    setSelectedTimelineDrawNumber(row.drawNumber);
+                    const matchingDraw =
+                      draws.find((d) => d.draw_number === row.drawNumber) ||
+                      buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
+                    handleOpenDetail(matchingDraw);
+                  }}
+                  className="p-4 hover:bg-slate-50/70 transition-colors cursor-pointer space-y-3"
+                >
+                  {/* Top row: Title + Status + Date */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-bold text-slate-900 text-sm">{row.title}</span>
                         {row.statusType === "FUNDED" && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-800 border border-slate-200/80">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-800 border border-slate-200/80">
                             Funded
                           </span>
                         )}
                         {row.statusType === "ACTIVE" && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200/60">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60">
                             Active ({row.reconciledPct}%)
                           </span>
                         )}
                         {row.statusType === "PENDING" && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200/60">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200/60">
                             Ready to Request
                           </span>
                         )}
                         {row.statusType === "REJECTED" && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200/60">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200/60">
                             Action Required
                           </span>
                         )}
-                      </td>
+                      </div>
+                      <span className="text-[11px] font-mono text-slate-400 block mt-0.5">
+                        {row.drawRefId}
+                      </span>
+                    </div>
+                    <span className="text-xs text-slate-500 font-medium shrink-0 pt-0.5">
+                      {row.date}
+                    </span>
+                  </div>
 
-                      {/* Action */}
-                      <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        {row.actionType === "PRIMARY" ? (
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedTimelineDrawNumber(row.drawNumber);
-                              if (currentProjectId) {
-                                router.push(`/projects/${currentProjectId}/draws/build-packet?draw=${row.drawNumber}`);
-                              } else {
-                                setPacketDrawNumber(row.drawNumber);
-                                setIsBuildDrawPacketOpen(true);
-                              }
-                            }}
-                            className="h-7 text-xs font-semibold px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-2xs"
-                          >
-                            Request Draw #4
-                          </Button>
-                        ) : row.actionType === "DANGER_OUTLINE" ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedTimelineDrawNumber(row.drawNumber);
-                              const matchingDraw =
-                                draws.find((d) => d.draw_number === row.drawNumber) ||
-                                buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
-                              setSelectedDraw(matchingDraw);
-                              setIsResubmitRevisionOpen(true);
-                            }}
-                            className="h-7 text-xs font-semibold px-3 text-rose-700 border-rose-200 bg-rose-50/50 hover:bg-rose-100/50 rounded-lg shadow-2xs"
-                          >
-                            Resolve
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedTimelineDrawNumber(row.drawNumber);
-                              const matchingDraw =
-                                draws.find((d) => d.draw_number === row.drawNumber) ||
-                                buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
-                              handleOpenDetail(matchingDraw);
-                            }}
-                            className="h-7 text-xs font-medium px-3 text-slate-700 border-slate-200 bg-white hover:bg-slate-50 rounded-lg shadow-2xs"
-                          >
-                            View Details
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  {/* Scope */}
+                  <div className="text-xs text-slate-700 font-medium">
+                    {row.scopeName}
+                  </div>
+
+                  {/* Financials Summary */}
+                  <div className="grid grid-cols-2 gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                    <div>
+                      <span className="text-[10px] uppercase font-semibold text-slate-400 block">
+                        Requested
+                      </span>
+                      <span className="font-mono font-bold text-slate-900 text-sm">
+                        {row.requestedAmt}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-semibold text-slate-400 block">
+                        Disbursed
+                      </span>
+                      <span className="font-mono font-semibold text-slate-700 text-sm">
+                        {row.disbursed}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <div onClick={(e) => e.stopPropagation()}>
+                    {row.actionType === "PRIMARY" ? (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedTimelineDrawNumber(row.drawNumber);
+                          if (currentProjectId) {
+                            router.push(`/projects/${currentProjectId}/draws/build-packet?draw=${row.drawNumber}`);
+                          } else {
+                            setPacketDrawNumber(row.drawNumber);
+                            setIsBuildDrawPacketOpen(true);
+                          }
+                        }}
+                        className="w-full h-8 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-2xs"
+                      >
+                        <Plus className="h-3.5 w-3.5 mr-1" />
+                        Request Draw #4
+                      </Button>
+                    ) : row.actionType === "DANGER_OUTLINE" ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedTimelineDrawNumber(row.drawNumber);
+                          const matchingDraw =
+                            draws.find((d) => d.draw_number === row.drawNumber) ||
+                            buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
+                          setSelectedDraw(matchingDraw);
+                          setIsResubmitRevisionOpen(true);
+                        }}
+                        className="w-full h-8 text-xs font-semibold text-rose-700 border-rose-200 bg-rose-50/50 hover:bg-rose-100/50 rounded-lg shadow-2xs"
+                      >
+                        Resolve
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedTimelineDrawNumber(row.drawNumber);
+                          const matchingDraw =
+                            draws.find((d) => d.draw_number === row.drawNumber) ||
+                            buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
+                          handleOpenDetail(matchingDraw);
+                        }}
+                        className="w-full h-8 text-xs font-medium text-slate-700 border-slate-200 bg-white hover:bg-slate-50 rounded-lg shadow-2xs flex items-center justify-center gap-1.5"
+                      >
+                        <span>View Details</span>
+                        <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
+
+          {/* Desktop Table (hidden sm:block) */}
+          <div className="hidden sm:block overflow-x-auto custom-scrollbar">
+            <table className="w-full min-w-[760px] text-left text-xs">
+              <thead className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-semibold text-[11px] uppercase tracking-wider">
+                <tr>
+                  <th className="py-3 px-4">Draw</th>
+                  <th className="py-3 px-4">Scope</th>
+                  <th className="py-3 px-4">Date</th>
+                  <th className="py-3 px-4 text-right">Requested</th>
+                  <th className="py-3 px-4 text-right">Disbursed</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-800">
+                {isDrawsLoading ? (
+                  Array.from({ length: 4 }).map((_, idx) => (
+                    <tr key={`skel-${idx}`} className="animate-pulse">
+                      <td className="py-3.5 px-4"><Skeleton className="h-4 w-20" /></td>
+                      <td className="py-3.5 px-4"><Skeleton className="h-4 w-40" /></td>
+                      <td className="py-3.5 px-4"><Skeleton className="h-4 w-24" /></td>
+                      <td className="py-3.5 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
+                      <td className="py-3.5 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
+                      <td className="py-3.5 px-4"><Skeleton className="h-4 w-20" /></td>
+                      <td className="py-3.5 px-4 text-right"><Skeleton className="h-6 w-16 ml-auto" /></td>
+                    </tr>
+                  ))
+                ) : filteredShowcaseRows.map((row) => (
+                  <tr
+                    key={row.id}
+                    onClick={() => {
+                      setSelectedTimelineDrawNumber(row.drawNumber);
+                      const matchingDraw =
+                        draws.find((d) => d.draw_number === row.drawNumber) ||
+                        buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
+                      handleOpenDetail(matchingDraw);
+                    }}
+                    className="hover:bg-slate-50/70 transition-colors cursor-pointer"
+                  >
+                    {/* Draw Ref */}
+                    <td className="py-3.5 px-4 font-mono font-medium text-xs">
+                      <div className="font-bold text-slate-900">{row.title}</div>
+                      <span className="text-[11px] text-slate-400">{row.drawRefId}</span>
+                    </td>
+
+                    {/* Scope */}
+                    <td className="py-3.5 px-4 text-slate-800 font-medium">
+                      {row.scopeName}
+                    </td>
+
+                    {/* Date */}
+                    <td className="py-3.5 px-4 text-slate-500 font-medium">
+                      {row.date}
+                    </td>
+
+                    {/* Requested */}
+                    <td className="py-3.5 px-4 font-mono font-bold text-right text-slate-900">
+                      {row.requestedAmt}
+                    </td>
+
+                    {/* Disbursed */}
+                    <td className="py-3.5 px-4 font-mono text-right text-slate-600 font-medium">
+                      {row.disbursed}
+                    </td>
+
+                    {/* Status badge */}
+                    <td className="py-3.5 px-4">
+                      {row.statusType === "FUNDED" && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-800 border border-slate-200/80">
+                          Funded
+                        </span>
+                      )}
+                      {row.statusType === "ACTIVE" && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200/60">
+                          Active ({row.reconciledPct}%)
+                        </span>
+                      )}
+                      {row.statusType === "PENDING" && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200/60">
+                          Ready to Request
+                        </span>
+                      )}
+                      {row.statusType === "REJECTED" && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200/60">
+                          Action Required
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Action */}
+                    <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                      {row.actionType === "PRIMARY" ? (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedTimelineDrawNumber(row.drawNumber);
+                            if (currentProjectId) {
+                              router.push(`/projects/${currentProjectId}/draws/build-packet?draw=${row.drawNumber}`);
+                            } else {
+                              setPacketDrawNumber(row.drawNumber);
+                              setIsBuildDrawPacketOpen(true);
+                            }
+                          }}
+                          className="h-7 text-xs font-semibold px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-2xs"
+                        >
+                          Request Draw #4
+                        </Button>
+                      ) : row.actionType === "DANGER_OUTLINE" ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedTimelineDrawNumber(row.drawNumber);
+                            const matchingDraw =
+                              draws.find((d) => d.draw_number === row.drawNumber) ||
+                              buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
+                            setSelectedDraw(matchingDraw);
+                            setIsResubmitRevisionOpen(true);
+                          }}
+                          className="h-7 text-xs font-semibold px-3 text-rose-700 border-rose-200 bg-rose-50/50 hover:bg-rose-100/50 rounded-lg shadow-2xs"
+                        >
+                          Resolve
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedTimelineDrawNumber(row.drawNumber);
+                            const matchingDraw =
+                              draws.find((d) => d.draw_number === row.drawNumber) ||
+                              buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
+                            handleOpenDetail(matchingDraw);
+                          }}
+                          className="h-7 text-xs font-medium px-3 text-slate-700 border-slate-200 bg-white hover:bg-slate-50 rounded-lg shadow-2xs"
+                        >
+                          View Details
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
         </div>
 
       {/* Modals & Drawers */}
