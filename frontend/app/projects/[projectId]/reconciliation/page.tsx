@@ -715,24 +715,24 @@ export default function ReconciliationPage() {
             </div>
 
             {/* Filter controls bar */}
-            <div className="flex flex-col sm:flex-row items-center gap-2.5">
-              <div className="relative flex-1 w-full">
-                <Search className="h-3.5 w-3.5 absolute left-3 top-2.5 text-slate-400" />
+            <div className="flex flex-col md:flex-row md:items-center gap-2.5">
+              <div className="relative flex-1 min-w-0 w-full">
+                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 <input
                   type="text"
                   placeholder="Search transactions..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200/90 bg-white pl-8 pr-3 py-1.5 text-xs placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
+                  className="w-full h-9 rounded-xl border border-slate-200/90 bg-white pl-9 pr-3 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 shadow-2xs transition-colors"
                 />
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:flex md:items-center md:flex-nowrap gap-2 w-full md:w-auto shrink-0">
                 <Select
                   value={accountFilter}
                   onValueChange={(val) => setAccountFilter(val)}
                 >
-                  <SelectTrigger className="flex-1 min-w-[130px] sm:flex-none h-8 text-xs font-medium">
+                  <SelectTrigger className="w-full md:w-auto min-w-[130px] h-9 text-xs font-medium">
                     <SelectValue placeholder="All accounts" />
                   </SelectTrigger>
                   <SelectContent>
@@ -746,11 +746,11 @@ export default function ReconciliationPage() {
                   value={statusFilter}
                   onValueChange={(val) => setStatusFilter(val)}
                 >
-                  <SelectTrigger className="flex-1 min-w-[120px] sm:flex-none h-8 text-xs font-medium">
-                    <SelectValue placeholder="All Status" />
+                  <SelectTrigger className="w-full md:w-auto min-w-[120px] h-9 text-xs font-medium">
+                    <SelectValue placeholder="All statuses" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ALL">All Status</SelectItem>
+                    <SelectItem value="ALL">All statuses</SelectItem>
                     <SelectItem value="PENDING">Pending action</SelectItem>
                     <SelectItem value="RESOLVED">Resolved</SelectItem>
                   </SelectContent>
@@ -760,7 +760,7 @@ export default function ReconciliationPage() {
                   value={evidenceFilter}
                   onValueChange={(val) => setEvidenceFilter(val)}
                 >
-                  <SelectTrigger className="flex-1 min-w-[110px] sm:flex-none h-8 text-xs font-medium">
+                  <SelectTrigger className="w-full md:w-auto min-w-[115px] h-9 text-xs font-medium">
                     <SelectValue placeholder="All evidence" />
                   </SelectTrigger>
                   <SelectContent>
@@ -775,8 +775,8 @@ export default function ReconciliationPage() {
                   value={sortOrder}
                   onValueChange={(val) => setSortOrder(val as any)}
                 >
-                  <SelectTrigger className="flex-1 min-w-[110px] sm:flex-none h-8 text-xs font-medium">
-                    <SelectValue placeholder="Sort order" />
+                  <SelectTrigger className="w-full md:w-auto min-w-[115px] h-9 text-xs font-medium">
+                    <SelectValue placeholder="Newest first" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="NEWEST">Newest first</SelectItem>
