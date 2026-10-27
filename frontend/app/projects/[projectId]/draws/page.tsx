@@ -451,13 +451,13 @@ export default function DrawsPage() {
 
           <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">
-              Active Draw Spending
+              Actual Spend
             </span>
             <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5">
-              $298,920.00
+              $1,066,920.00
             </div>
             <span className="text-xs font-medium text-slate-700 mt-1 block">
-              94% paid to trades ($19,080 remaining)
+              98.2% paid to trades ($19,080 remaining)
             </span>
           </div>
         </div>
