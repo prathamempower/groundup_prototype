@@ -11,9 +11,6 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  FileSpreadsheet,
-  ListFilter,
-  Layers,
   ChevronRight,
   ExternalLink,
   Check,
@@ -24,8 +21,6 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { DrawItem } from "@/lib/types";
 import { getExcelDrawLines } from "@/lib/data/excel-draw-schedule";
-import { DRAW_REQUEST_FORM_ITEMS } from "@/lib/data/draw-request-form-items";
-import { ExcelSovMatrix } from "@/components/draws/excel-sov-matrix";
 import { cn } from "@/lib/utils";
 
 // Modals and Drawers
@@ -236,7 +231,6 @@ export default function DrawsPage() {
   const [showcaseRows, setShowcaseRows] = useState(SHOWCASE_ROWS);
   const [packetDrawNumber, setPacketDrawNumber] = useState<number>(4);
   const [filterTab, setFilterTab] = useState<FilterTab>("ALL");
-  const [mainView, setMainView] = useState<"REGISTER" | "EXCEL_MATRIX">("REGISTER");
   const [drawOverrides, setDrawOverrides] = useState<Record<number, DrawItem>>({});
   const [selectedDraw, setSelectedDraw] = useState<DrawItem | null>(null);
   const [selectedTimelineDrawNumber, setSelectedTimelineDrawNumber] = useState<number>(3);
@@ -689,81 +683,46 @@ export default function DrawsPage() {
           </div>
         </div>
 
-        {/* 4. Controls: View Switcher (Register vs SOV) & Filter Pills */}
+        {/* 4. Controls: Draws Register Filter Pills */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          {/* Segmented View Switcher */}
-          <div className="flex rounded-xl bg-slate-100 p-0.5 border border-slate-200/80 w-full sm:w-fit overflow-x-auto scrollbar-none">
-            <button
-              type="button"
-              onClick={() => setMainView("REGISTER")}
-              className={cn(
-                "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shrink-0",
-                mainView === "REGISTER"
-                  ? "bg-white text-slate-900 shadow-xs font-semibold"
-                  : "text-slate-600 hover:text-slate-900"
-              )}
-            >
-              <Layers className="h-3.5 w-3.5" />
-              <span>Draws Register</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setMainView("EXCEL_MATRIX")}
-              className={cn(
-                "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shrink-0",
-                mainView === "EXCEL_MATRIX"
-                  ? "bg-white text-slate-900 shadow-xs font-semibold"
-                  : "text-slate-600 hover:text-slate-900"
-              )}
-            >
-              <FileSpreadsheet className="h-3.5 w-3.5" />
-              <span>Schedule of Values (SOV)</span>
-            </button>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+              Draws Register
+            </h3>
+            <span className="text-xs text-slate-400 font-mono">
+              ({filteredShowcaseRows.length})
+            </span>
           </div>
 
-          {/* Filter Pills (Shown only on Register view) */}
-          {mainView === "REGISTER" && (
-            <div className="flex items-center gap-1 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-none">
-              {(
-                [
-                  { key: "ALL", label: "All Draws" },
-                  { key: "ACTIVE", label: "Active" },
-                  { key: "FUNDED", label: "Funded" },
-                  { key: "DISCREPANCY", label: "Needs Attention" },
-                ] as const
-              ).map(({ key, label }) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setFilterTab(key as FilterTab)}
-                  className={cn(
-                    "px-3 py-1 text-xs rounded-lg transition-colors font-medium cursor-pointer shrink-0",
-                    filterTab === key
-                      ? "bg-slate-900 text-white font-semibold shadow-2xs"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Filter Pills */}
+          <div className="flex items-center gap-1 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-none">
+            {(
+              [
+                { key: "ALL", label: "All Draws" },
+                { key: "ACTIVE", label: "Active" },
+                { key: "FUNDED", label: "Funded" },
+                { key: "DISCREPANCY", label: "Needs Attention" },
+              ] as const
+            ).map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setFilterTab(key as FilterTab)}
+                className={cn(
+                  "px-3 py-1 text-xs rounded-lg transition-colors font-medium cursor-pointer shrink-0",
+                  filterTab === key
+                    ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* 5. Main View: Draws Register or SOV Matrix */}
-        {mainView === "EXCEL_MATRIX" ? (
-          <ExcelSovMatrix
-            onSelectDraw={(num) => {
-              setSelectedTimelineDrawNumber(num);
-              const matchingDraw =
-                drawOverrides[num] ||
-                draws.find((d) => d.draw_number === num) ||
-                buildDrawFallback(num, `Draw #${num}`, "$50,000");
-              handleOpenDetail(matchingDraw);
-            }}
-          />
-        ) : (
-          <div className="rounded-2xl border border-slate-200/80 bg-white overflow-hidden shadow-xs">
+        {/* 5. Draws Register Table */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white overflow-hidden shadow-xs">
             <div className="overflow-x-auto custom-scrollbar">
               <table className="w-full min-w-[760px] text-left text-xs">
                 <thead className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-semibold text-[11px] uppercase tracking-wider">
@@ -910,8 +869,7 @@ export default function DrawsPage() {
               </table>
             </div>
           </div>
-        )}
-      </div>
+        </div>
 
       {/* Modals & Drawers */}
       <BuildDrawPacketModal
