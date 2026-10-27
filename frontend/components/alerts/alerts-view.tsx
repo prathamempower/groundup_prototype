@@ -476,14 +476,11 @@ export function AlertsView({
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            const href = item.actionHref;
-                            const targetUrl = projectId ? `/projects/${projectId}${href}` : href;
-                            router.push(targetUrl);
                           }}
-                          className="h-7 px-2.5 text-xs font-medium text-primary hover:text-primary gap-1"
+                          className="h-7 px-2.5 text-xs font-medium text-slate-700 border-slate-200 bg-white hover:bg-white hover:text-slate-700 cursor-default shadow-none gap-1 select-none"
                         >
                           <span>{item.actionLabel}</span>
-                          <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
+                          <ChevronRight className="h-3 w-3 text-slate-400" />
                         </Button>
                       </td>
                     </tr>
@@ -570,7 +567,13 @@ export function AlertsView({
                     </div>
 
                     {/* Action Button */}
-                    <div className="pt-0.5">
+                    <div
+                      className="pt-0.5"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                    >
                       <Button
                         type="button"
                         variant="outline"
@@ -578,14 +581,11 @@ export function AlertsView({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          const href = item.actionHref;
-                          const targetUrl = projectId ? `/projects/${projectId}${href}` : href;
-                          router.push(targetUrl);
                         }}
-                        className="w-full h-8 text-xs font-medium text-primary hover:text-primary justify-between px-3"
+                        className="w-full h-8 text-xs font-medium text-slate-700 border-slate-200 bg-white hover:bg-white hover:text-slate-700 cursor-default shadow-none justify-between px-3 select-none"
                       >
                         <span>{item.actionLabel}</span>
-                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                        <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
                       </Button>
                     </div>
                   </div>
@@ -665,24 +665,7 @@ export function AlertsView({
 
               {/* Modal Footer */}
               <div className="border-t border-border bg-subtle/40 px-4 sm:px-6 py-3 sm:py-4 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3">
-                {selectedAlert.actionHref && selectedAlert.actionHref !== "/timeline" && selectedAlert.actionHref !== "/budget" ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const href = selectedAlert.actionHref;
-                      const targetUrl = projectId ? `/projects/${projectId}${href}` : href;
-                      router.push(targetUrl);
-                    }}
-                    className="text-xs h-8 text-primary border-border gap-1.5 cursor-pointer font-medium w-full sm:w-auto"
-                  >
-                    <span>Go to {selectedAlert.actionLabel}</span>
-                    <ExternalLink className="h-3 w-3" />
-                  </Button>
-                ) : (
-                  <div />
-                )}
+                <div />
 
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                   {selectedAlert.status === "Open" ? (
