@@ -226,8 +226,8 @@ export function AlertsView({
   return (
     <div className="space-y-6 pb-12">
       {/* 1. Standard Page Header */}
-      <div className="border-b border-border bg-white px-6 py-4">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="border-b border-border bg-white px-4 sm:px-6 py-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-semibold text-foreground">
@@ -255,24 +255,24 @@ export function AlertsView({
         </div>
       </div>
 
-      <div className="px-4 sm:px-6 max-w-7xl mx-auto space-y-5">
+      <div className="px-4 sm:px-6 max-w-7xl mx-auto space-y-4 sm:space-y-5">
         {/* 2. Top 5 Filter KPI Cards Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 sm:gap-3.5">
           {/* Card 1: Total Alerts */}
           <button
             type="button"
             onClick={() => setSelectedFilter("all")}
             className={cn(
-              "rounded-lg border bg-white p-4 text-left transition-all cursor-pointer",
+              "rounded-lg border bg-white p-3 sm:p-4 text-left transition-all cursor-pointer",
               selectedFilter === "all"
                 ? "border-primary ring-1 ring-primary/20 bg-primary/5"
                 : "border-border hover:bg-subtle/50"
             )}
           >
-            <span className="text-[11px] font-medium text-muted-foreground block">
+            <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground block truncate">
               Total Alerts
             </span>
-            <span className="text-2xl font-bold font-mono text-foreground mt-1.5 block tabular-nums">
+            <span className="text-xl sm:text-2xl font-bold font-mono text-foreground mt-1 sm:mt-1.5 block tabular-nums">
               {counts.total}
             </span>
           </button>
@@ -284,16 +284,16 @@ export function AlertsView({
               setSelectedFilter(selectedFilter === "schedule" ? "all" : "schedule")
             }
             className={cn(
-              "rounded-lg border bg-white p-4 text-left transition-all cursor-pointer",
+              "rounded-lg border bg-white p-3 sm:p-4 text-left transition-all cursor-pointer",
               selectedFilter === "schedule"
                 ? "border-primary ring-1 ring-primary/20 bg-primary/5"
                 : "border-border hover:bg-subtle/50"
             )}
           >
-            <span className="text-[11px] font-medium text-muted-foreground block">
+            <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground block truncate">
               Schedule Delays
             </span>
-            <span className="text-2xl font-bold font-mono text-foreground mt-1.5 block tabular-nums">
+            <span className="text-xl sm:text-2xl font-bold font-mono text-foreground mt-1 sm:mt-1.5 block tabular-nums">
               {counts.schedule}
             </span>
           </button>
@@ -305,16 +305,16 @@ export function AlertsView({
               setSelectedFilter(selectedFilter === "funding" ? "all" : "funding")
             }
             className={cn(
-              "rounded-lg border bg-white p-4 text-left transition-all cursor-pointer",
+              "rounded-lg border bg-white p-3 sm:p-4 text-left transition-all cursor-pointer",
               selectedFilter === "funding"
                 ? "border-primary ring-1 ring-primary/20 bg-primary/5"
                 : "border-border hover:bg-subtle/50"
             )}
           >
-            <span className="text-[11px] font-medium text-muted-foreground block">
+            <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground block truncate">
               Funding & Cash
             </span>
-            <span className="text-2xl font-bold font-mono text-foreground mt-1.5 block tabular-nums">
+            <span className="text-xl sm:text-2xl font-bold font-mono text-foreground mt-1 sm:mt-1.5 block tabular-nums">
               {counts.funding}
             </span>
           </button>
@@ -326,16 +326,16 @@ export function AlertsView({
               setSelectedFilter(selectedFilter === "budget" ? "all" : "budget")
             }
             className={cn(
-              "rounded-lg border bg-white p-4 text-left transition-all cursor-pointer",
+              "rounded-lg border bg-white p-3 sm:p-4 text-left transition-all cursor-pointer",
               selectedFilter === "budget"
                 ? "border-primary ring-1 ring-primary/20 bg-primary/5"
                 : "border-border hover:bg-subtle/50"
             )}
           >
-            <span className="text-[11px] font-medium text-muted-foreground block">
+            <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground block truncate">
               Budget & Cost
             </span>
-            <span className="text-2xl font-bold font-mono text-foreground mt-1.5 block tabular-nums">
+            <span className="text-xl sm:text-2xl font-bold font-mono text-foreground mt-1 sm:mt-1.5 block tabular-nums">
               {counts.budget}
             </span>
           </button>
@@ -349,25 +349,26 @@ export function AlertsView({
               )
             }
             className={cn(
-              "col-span-2 sm:col-span-1 rounded-lg border bg-white p-4 text-left transition-all cursor-pointer",
+              "col-span-2 sm:col-span-1 rounded-lg border bg-white p-3 sm:p-4 text-left transition-all cursor-pointer",
               selectedFilter === "documents"
                 ? "border-primary ring-1 ring-primary/20 bg-primary/5"
                 : "border-border hover:bg-subtle/50"
             )}
           >
-            <span className="text-[11px] font-medium text-muted-foreground block">
+            <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground block truncate">
               Missing Documents
             </span>
-            <span className="text-2xl font-bold font-mono text-foreground mt-1.5 block tabular-nums">
+            <span className="text-xl sm:text-2xl font-bold font-mono text-foreground mt-1 sm:mt-1.5 block tabular-nums">
               {counts.documents}
             </span>
           </button>
         </div>
 
-        {/* 3. Alerts Table */}
+        {/* 3. Alerts Table & Mobile Cards */}
         <div className="rounded-lg border border-border bg-white overflow-hidden shadow-2xs">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          {/* Desktop & Tablet Table View (sm and up) */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full text-left text-xs min-w-[700px]">
               <thead className="bg-subtle/50 border-b border-border text-muted-foreground font-medium text-[11px]">
                 <tr>
                   <th className="py-2.5 px-5">Issue</th>
@@ -475,6 +476,9 @@ export function AlertsView({
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
+                            const href = item.actionHref;
+                            const targetUrl = projectId ? `/projects/${projectId}${href}` : href;
+                            router.push(targetUrl);
                           }}
                           className="h-7 px-2.5 text-xs font-medium text-primary hover:text-primary gap-1"
                         >
@@ -487,6 +491,107 @@ export function AlertsView({
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Card List View (< sm) */}
+          <div className="sm:hidden">
+            {filteredAlerts.length === 0 ? (
+              <div className="py-10 px-4 text-center text-muted-foreground">
+                <CheckCircle2 className="h-8 w-8 text-emerald-500 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-foreground">
+                  No active alerts in this category
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  All issues in this view have been resolved.
+                </p>
+                {selectedFilter !== "all" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedFilter("all")}
+                    className="mt-3 text-xs"
+                  >
+                    Show All Alerts
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="divide-y divide-border/60">
+                {filteredAlerts.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => setSelectedAlert(item)}
+                    className="p-4 hover:bg-subtle/30 active:bg-subtle/50 transition-colors cursor-pointer space-y-3"
+                  >
+                    {/* Top Row: Category + Status */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-semibold text-muted-foreground bg-subtle px-2 py-0.5 rounded border border-border/60">
+                        {item.category}
+                      </span>
+                      <span
+                        className={cn(
+                          "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium border",
+                          item.status === "Open"
+                            ? "bg-slate-100 text-slate-700 border-slate-200"
+                            : item.status === "Resolved"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200/60"
+                            : "bg-amber-50 text-amber-700 border-amber-200/60"
+                        )}
+                      >
+                        {item.status}
+                      </span>
+                    </div>
+
+                    {/* Issue Title & Description */}
+                    <div>
+                      <div className="font-semibold text-foreground text-sm leading-snug">
+                        {item.title}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        {item.description}
+                      </div>
+                    </div>
+
+                    {/* Impact & Due Date Box */}
+                    <div className="rounded-md border border-border/60 bg-subtle/40 p-2.5 space-y-1.5 text-xs">
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="text-muted-foreground font-medium shrink-0">Impact:</span>
+                        <div className="text-right">
+                          <span className="font-semibold text-foreground">{item.impact}</span>
+                          {item.impactDetail && (
+                            <span className="block text-[11px] text-muted-foreground">{item.impactDetail}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40">
+                        <span className="text-muted-foreground font-medium">Due Date:</span>
+                        <span className="font-mono text-muted-foreground font-medium tabular-nums">{item.dueDate}</span>
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <div className="pt-0.5">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const href = item.actionHref;
+                          const targetUrl = projectId ? `/projects/${projectId}${href}` : href;
+                          router.push(targetUrl);
+                        }}
+                        className="w-full h-8 text-xs font-medium text-primary hover:text-primary justify-between px-3"
+                      >
+                        <span>{item.actionLabel}</span>
+                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
