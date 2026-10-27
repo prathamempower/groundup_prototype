@@ -30,7 +30,6 @@ import {
   ArrowUpDown,
   FolderSync,
   Download,
-  CheckCheck,
   AlertCircle,
   FileCheck,
   ChevronRight,
@@ -288,10 +287,6 @@ export default function DocumentsPage() {
               </span>
               <span className="text-xs font-medium text-slate-500">Files</span>
             </div>
-            <div className="mt-2.5 flex items-center gap-1.5 text-xs text-blue-700 font-medium">
-              <CheckCheck className="h-3.5 w-3.5" />
-              <span>Parsed & indexed in vault</span>
-            </div>
           </div>
 
           <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs hover:border-slate-300 transition-all">
@@ -306,12 +301,6 @@ export default function DocumentsPage() {
                 {needsReviewCount}
               </span>
               <span className="text-xs font-medium text-slate-500">Files</span>
-            </div>
-            <div className="mt-2.5 flex items-center gap-1.5 text-xs font-medium">
-              <span className={cn("h-1.5 w-1.5 rounded-full", needsReviewCount > 0 ? "bg-amber-500" : "bg-emerald-500")} />
-              <span className={needsReviewCount > 0 ? "text-amber-700" : "text-emerald-700"}>
-                {needsReviewCount > 0 ? "Pending line validation" : "All reviewed"}
-              </span>
             </div>
           </div>
 
@@ -328,12 +317,6 @@ export default function DocumentsPage() {
               </span>
               <span className="text-xs font-medium text-slate-500">Flagged</span>
             </div>
-            <div className="mt-2.5 flex items-center gap-1.5 text-xs font-medium">
-              <span className={cn("h-1.5 w-1.5 rounded-full", quarantinedCount > 0 ? "bg-rose-500" : "bg-slate-300")} />
-              <span className={quarantinedCount > 0 ? "text-rose-700" : "text-slate-500"}>
-                {quarantinedCount > 0 ? "Requires re-classification" : "Zero exceptions"}
-              </span>
-            </div>
           </div>
 
           <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs hover:border-slate-300 transition-all">
@@ -347,10 +330,6 @@ export default function DocumentsPage() {
               <span className="text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
                 {reviewedRate}%
               </span>
-            </div>
-            <div className="mt-2.5 flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              <span>Verified & baseline mapped</span>
             </div>
           </div>
         </div>
