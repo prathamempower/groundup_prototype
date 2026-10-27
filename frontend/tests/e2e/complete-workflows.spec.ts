@@ -181,14 +181,12 @@ test.describe("Role Boundaries & Access Protection", () => {
     await expect(page).toHaveURL(/\/inbox/, { timeout: 15000 });
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
-    // Attempt direct access to Settings
-    await page.goto("/settings");
-    await expect(page.getByText("Access Restricted")).toBeVisible();
-    await expect(page.getByRole("link", { name: /Return to workspace home/i })).toBeVisible();
+    // Attempt direct access to un-scoped routes returns 404
+    const settingsRes = await page.goto("/settings");
+    expect(settingsRes?.status()).toBe(404);
 
-    // Attempt direct access to Partners
-    await page.goto("/partners");
-    await expect(page.getByText("Access Restricted")).toBeVisible();
+    const partnersRes = await page.goto("/partners");
+    expect(partnersRes?.status()).toBe(404);
   });
 
   test("investor is directed to investor brief and blocked from budget editing", async ({ page }) => {
@@ -200,13 +198,13 @@ test.describe("Role Boundaries & Access Protection", () => {
       if (await proj.isVisible()) {
         await proj.click();
       } else {
-        await page.goto("/control-center");
+        await page.goto("/projects");
       }
     }
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
-    // Attempt direct access to Budget
-    await page.goto("/budget");
-    await expect(page.getByText("Access Restricted")).toBeVisible();
+    // Attempt direct access to un-scoped budget returns 404
+    const budgetRes = await page.goto("/budget");
+    expect(budgetRes?.status()).toBe(404);
   });
 });

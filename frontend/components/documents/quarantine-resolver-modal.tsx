@@ -23,6 +23,13 @@ import {
   Building,
 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 interface QuarantineResolverModalProps {
@@ -185,17 +192,18 @@ export function QuarantineResolverModal({
                 <label className="block text-caption font-semibold text-text-primary mb-1">
                   Target Project Workspace:
                 </label>
-                <select
-                  value={selectedProjectId}
-                  onChange={(e) => setSelectedProjectId(e.target.value)}
-                  className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary focus-visible:outline-primary"
-                >
-                  {projects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.project_entity})
-                    </option>
-                  ))}
-                </select>
+                <Select value={selectedProjectId} onValueChange={(val) => setSelectedProjectId(val)}>
+                  <SelectTrigger className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary">
+                    <SelectValue placeholder="Select target project workspace" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name} ({p.project_entity})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <p className="text-[11px] text-text-muted mt-1">
                   Reassigning will automatically clear the quarantine status and make the document available for OCR review.
                 </p>
@@ -223,16 +231,20 @@ export function QuarantineResolverModal({
                 <label className="block text-caption font-semibold text-text-primary mb-1">
                   Resolution Classification:
                 </label>
-                <select
+                <Select
                   value={markType}
-                  onChange={(e) => setMarkType(e.target.value as any)}
-                  className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary focus-visible:outline-primary"
+                  onValueChange={(val) => setMarkType(val as any)}
                 >
-                  <option value="DUPLICATE">Duplicate Version of Existing Document</option>
-                  <option value="MISFILED">Misfiled / Awaiting Relocation</option>
-                  <option value="IRRELEVANT">Irrelevant / Ineligible Evidence</option>
-                  <option value="NOT_APPLICABLE">Not Applicable (Exempt from Audit)</option>
-                </select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select classification" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DUPLICATE">Duplicate Version of Existing Document</SelectItem>
+                    <SelectItem value="MISFILED">Misfiled / Awaiting Relocation</SelectItem>
+                    <SelectItem value="IRRELEVANT">Irrelevant / Ineligible Evidence</SelectItem>
+                    <SelectItem value="NOT_APPLICABLE">Not Applicable (Exempt from Audit)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>

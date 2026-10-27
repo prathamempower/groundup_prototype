@@ -10,7 +10,13 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Banner } from "@/components/ui/banner";
 import { formatMoney } from "@/lib/format";
@@ -106,17 +112,18 @@ export function RemapCategoryModal({
             <label className="text-caption font-semibold text-text-secondary uppercase mb-1 block">
               New Budget Line
             </label>
-            <select
-              className="flex h-9 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary focus:border-primary focus:outline-hidden"
-              value={selectedLineId}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedLineId(e.target.value)}
-            >
-              {budgetLines.map((bl) => (
-                <option key={bl.id} value={bl.id}>
-                  {bl.code}: {bl.name} ({bl.category})
-                </option>
-              ))}
-            </select>
+            <Select value={selectedLineId} onValueChange={(val) => setSelectedLineId(val)}>
+              <SelectTrigger className="flex h-9 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-body text-text-primary">
+                <SelectValue placeholder="Select new budget line" />
+              </SelectTrigger>
+              <SelectContent>
+                {budgetLines.map((bl) => (
+                  <SelectItem key={bl.id} value={bl.id}>
+                    {bl.code}: {bl.name} ({bl.category})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>

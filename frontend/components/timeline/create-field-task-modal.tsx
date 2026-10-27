@@ -3,6 +3,13 @@
 import React, { useState } from "react";
 import { X, Plus, Calendar, Clock, User, Building2, AlertTriangle } from "lucide-react";
 import { ConstructionTask } from "@/lib/data/construction-calendar-data";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface CreateFieldTaskModalProps {
   open: boolean;
@@ -158,17 +165,18 @@ export function CreateFieldTaskModal({
               <label className="text-xs font-semibold text-slate-700 block mb-1">
                 Phase Milestone
               </label>
-              <select
-                value={phaseName}
-                onChange={(e) => setPhaseName(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-blue-600 focus:outline-none"
-              >
-                <option value="Site Excavation & Grading">Site Excavation & Grading</option>
-                <option value="Foundation & Concrete Pour">Foundation & Concrete Pour</option>
-                <option value="Superstructure Framing">Superstructure Framing</option>
-                <option value="MEP Rough-Ins & Utilities">MEP Rough-Ins & Utilities</option>
-                <option value="Critical Path & Delays">Critical Path & Delays</option>
-              </select>
+              <Select value={phaseName} onValueChange={(val) => setPhaseName(val)}>
+                <SelectTrigger className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900">
+                  <SelectValue placeholder="Select phase" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Site Excavation & Grading">Site Excavation & Grading</SelectItem>
+                  <SelectItem value="Foundation & Concrete Pour">Foundation & Concrete Pour</SelectItem>
+                  <SelectItem value="Superstructure Framing">Superstructure Framing</SelectItem>
+                  <SelectItem value="MEP Rough-Ins & Utilities">MEP Rough-Ins & Utilities</SelectItem>
+                  <SelectItem value="Critical Path & Delays">Critical Path & Delays</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-700 block mb-1">

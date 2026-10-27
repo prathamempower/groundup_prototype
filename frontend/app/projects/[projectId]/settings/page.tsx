@@ -10,6 +10,13 @@ import { ToastContainer, ToastMessage } from "@/components/Toast";
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   ArrowLeft,
   Building2,
   Calendar,
@@ -950,18 +957,22 @@ export default function ProjectSettingsPage() {
 
                       <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">Professional Role</label>
-                        <select
+                        <Select
                           value={inviteRoleTitle}
-                          onChange={(e) => setInviteRoleTitle(e.target.value)}
-                          className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white"
+                          onValueChange={(val) => setInviteRoleTitle(val)}
                         >
-                          <option value="Finance Partner">Finance Partner</option>
-                          <option value="General Contractor Lead">General Contractor Lead</option>
-                          <option value="Project Superintendent">Project Superintendent</option>
-                          <option value="Senior Loan Officer">Senior Loan Officer</option>
-                          <option value="Capital / Equity Partner">Capital / Equity Partner</option>
-                          <option value="Third-Party Draw Inspector">Third-Party Draw Inspector</option>
-                        </select>
+                          <SelectTrigger className="w-full h-8 text-xs">
+                            <SelectValue placeholder="Select Professional Role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Finance Partner">Finance Partner</SelectItem>
+                            <SelectItem value="General Contractor Lead">General Contractor Lead</SelectItem>
+                            <SelectItem value="Project Superintendent">Project Superintendent</SelectItem>
+                            <SelectItem value="Senior Loan Officer">Senior Loan Officer</SelectItem>
+                            <SelectItem value="Capital / Equity Partner">Capital / Equity Partner</SelectItem>
+                            <SelectItem value="Third-Party Draw Inspector">Third-Party Draw Inspector</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
 

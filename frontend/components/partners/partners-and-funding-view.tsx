@@ -36,6 +36,13 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { RecordPartnerContributionModal } from "@/components/partners/record-partner-contribution-modal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface PartnerItem {
   id: string;
@@ -602,15 +609,16 @@ export function PartnersAndFundingView({ projectId }: PartnersAndFundingViewProp
             </div>
 
             <div className="flex items-center gap-2">
-              <select
-                value={partnerFilter}
-                onChange={(e) => setPartnerFilter(e.target.value)}
-                className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 shadow-2xs hover:border-slate-300 focus:border-blue-600 focus:outline-none cursor-pointer"
-              >
-                <option value="ALL">All partners</option>
-                <option value="ON_TRACK">On Track</option>
-                <option value="NEEDS_TOPUP">Needs Top-up</option>
-              </select>
+              <Select value={partnerFilter} onValueChange={(val) => setPartnerFilter(val)}>
+                <SelectTrigger className="h-8 w-[140px] rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 shadow-2xs">
+                  <SelectValue placeholder="All partners" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All partners</SelectItem>
+                  <SelectItem value="ON_TRACK">On Track</SelectItem>
+                  <SelectItem value="NEEDS_TOPUP">Needs Top-up</SelectItem>
+                </SelectContent>
+              </Select>
 
               <button
                 onClick={() => {

@@ -125,7 +125,7 @@ export const WORKSPACE_ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   "alerts": ["OWNER"],
   "partners": ["OWNER"],
   "inbox": ["OWNER"],
-  "directs": ["OWNER"],
+  "investor-updates": ["OWNER"],
   "build-packet": ["OWNER"],
   "settings": ["OWNER"],
 };

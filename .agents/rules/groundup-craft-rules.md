@@ -54,3 +54,20 @@ When requirements contain any ambiguity or multiple design options:
 - Ask simple, direct, child-like clarifying questions one at a time.
 - Provide the recommended best-practice option with clear rationale.
 - Walk down each branch of the design tree until full alignment is reached.
+
+---
+
+## 6. Containerless Architecture & Unconstrained Layout Governance
+
+1. **Zero Unnecessary Containers & Pill Badges:** Never wrap raw text, mode switch links (*Already have an account? Log in*, *Don't have an account? Sign up*), or divider labels (*or continue with email*, *or register with work email*) inside artificial boxes, pill badges, background containers, borders, or shadow wrappers. Present them as pure, clean, high-contrast typography directly against the fluid background.
+2. **Whole Screen Fluid Fit:** Layouts must adaptively fit the viewport across any device height and width without awkward trapped whitespace or artificial microscopic column clamps. Forms should scale intelligently across tablet and desktop (`w-full max-w-xl md:max-w-2xl lg:max-w-3xl`) with balanced vertical rhythm that never forces unnecessary scrollbars.
+3. **Architectural Heading Text Effects:** Major headers (such as *Welcome back* and *Create your account*) must feature refined, sophisticated text effects: subtle dark slate-to-navy depth gradients, tight optical tracking (`tracking-tight`), and polished font smoothing that elevate the executive aesthetic.
+
+---
+
+## 7. Prohibition of AI Slop Styles & Mandatory Semantic SVGs
+
+1. **Strict Prohibition of `shadow-xs` & Generic Card Slop:** Do not sprinkle arbitrary `shadow-xs`, artificial blurry box shadows, or repetitive `bg-white/95` cards across inputs, buttons, and badges. Use crisp borders (`border border-slate-300`), clean flat surfaces, or high-definition elevation.
+2. **Mandatory SVGs Over Colored Dots:** Never use fake colored status dots (e.g. `<span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />`) or arbitrary colored pills (e.g. `text-emerald-700`) to represent organizations, companies, or metadata. Always render precise, professional SVG icons (e.g. Lucide `Building`, `Briefcase`, `Shield`, etc.) with semantic stroke colors and sizing.
+
+

@@ -7,7 +7,6 @@ import { authAdapter } from "@/lib/api/adapters/auth-adapter";
 import { Sidebar } from "./sidebar";
 import { TopBar } from "./top-bar";
 import {
-  NAV_ITEMS,
   ROUTE_ACCESS_MAP,
   WORKSPACE_ROUTE_PERMISSIONS,
   getDefaultRouteForRole,
@@ -20,20 +19,6 @@ import { Button } from "@/components/ui/button";
 interface AppShellProps {
   children: React.ReactNode;
 }
-
-const LEGACY_WORKSPACE_SECTIONS = [
-  "control-center",
-  "documents",
-  "budget",
-  "reconciliation",
-  "draws",
-  "timeline",
-  "alerts",
-  "partners",
-  "inbox",
-  "directs",
-  "settings",
-];
 
 export function AppShell({ children }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(false);
@@ -104,34 +89,7 @@ export function AppShell({ children }: AppShellProps) {
     }
   }, [rawProjectId]);
 
-  const lastProjectId = typeof window !== "undefined" ? window.localStorage.getItem("groundup_last_project_id") : null;
-  const sessionUser = session?.user as any;
-  const activeProjectId = rawProjectId || lastProjectId || sessionUser?.current_project_id || (memberships[0]?.project_id as string) || null;
 
-  // Legacy route redirect: if user navigates to standalone /budget, /draws, etc., redirect them into the project workspace
-  const standaloneMatch = pathname.match(/^\/([^\/]+)$/);
-  const standaloneSection = standaloneMatch ? standaloneMatch[1] : null;
-  React.useEffect(() => {
-    if (!session) return;
-    const resolvedProjectId =
-      rawProjectId ||
-      (typeof window !== "undefined" ? window.localStorage.getItem("groundup_last_project_id") : null) ||
-      sessionUser?.current_project_id ||
-      (memberships[0]?.project_id as string) ||
-      null;
-
-    if (!resolvedProjectId) return;
-
-    if (standaloneSection === "directs") {
-      router.replace(`/projects/${resolvedProjectId}/inbox`);
-    } else if (standaloneSection === "timeline" || pathname.includes("/timeline")) {
-      router.replace(`/projects/${resolvedProjectId}/control-center`);
-    } else if (standaloneSection && LEGACY_WORKSPACE_SECTIONS.includes(standaloneSection)) {
-      router.replace(`/projects/${resolvedProjectId}/${standaloneSection}`);
-    } else if (pathname === "/investor-update" || pathname.includes("/investor-updates")) {
-      router.replace(`/projects/${resolvedProjectId}/control-center`);
-    }
-  }, [pathname, session, rawProjectId, sessionUser, memberships, standaloneSection, router]);
 
   const workspaceProjectId = rawProjectId;
   const projectMembership = React.useMemo(() => {

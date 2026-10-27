@@ -16,6 +16,13 @@ import { Button } from "@/components/ui/button";
 import { MoneyInput } from "@/components/ui/money-input";
 import { PlusCircle, FileText, Layers, DollarSign, Building } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatMoney } from "@/lib/format";
 
 interface ChangeOrderModalProps {
@@ -133,17 +140,21 @@ export function ChangeOrderModal({
               <label className="block text-caption font-semibold text-text-primary mb-1">
                 Target CSI Budget Line:
               </label>
-              <select
+              <Select
                 value={targetLineId}
-                onChange={(e) => setTargetLineId(e.target.value)}
-                className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body text-text-primary focus-visible:outline-primary"
+                onValueChange={(val) => setTargetLineId(val)}
               >
-                {budgetLines.map((line) => (
-                  <option key={line.id} value={line.id}>
-                    {line.code} - {line.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select target CSI budget line" />
+                </SelectTrigger>
+                <SelectContent>
+                  {budgetLines.map((line) => (
+                    <SelectItem key={line.id} value={line.id}>
+                      {line.code}: {line.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {targetLine && (
                 <div className="text-[11px] text-text-muted mt-1">
                   Current Approved: {formatMoney(targetLine.current_approved_amount)}

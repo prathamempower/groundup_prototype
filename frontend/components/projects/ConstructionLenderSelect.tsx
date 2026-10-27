@@ -266,9 +266,9 @@ export function ConstructionLenderSelect({
 
           {/* Dropdown Menu */}
           {isOpen && (
-            <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+            <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white/98 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-[0_4px_20px_-2px_rgba(15,23,42,0.08),0_12px_36px_-4px_rgba(15,23,42,0.12)] overflow-hidden animate-in fade-in zoom-in-95 duration-150 ease-out p-1.5">
               {/* Search Header */}
-              <div className="p-2 border-b border-slate-100 bg-slate-50/70">
+              <div className="p-2 rounded-xl bg-slate-50/80 border border-slate-100 mb-1">
                 <div className="relative">
                   <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
                   <input
@@ -277,7 +277,7 @@ export function ConstructionLenderSelect({
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search all FDIC insured American banks..."
-                    className="w-full pl-8 pr-7 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 transition"
+                    className="w-full pl-8 pr-7 py-1.5 bg-white border border-slate-200/90 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10 transition"
                   />
                   {isLoading && (
                     <Loader2 className="w-3.5 h-3.5 text-slate-400 animate-spin absolute right-2.5 top-1/2 -translate-y-1/2" />
@@ -295,7 +295,7 @@ export function ConstructionLenderSelect({
               </div>
 
               {/* Bank List */}
-              <div className="max-h-56 overflow-y-auto divide-y divide-slate-100/60 p-1">
+              <div className="max-h-56 overflow-y-auto space-y-0.5 p-0.5">
                 {banks.length > 0 ? (
                   banks.map((b) => {
                     const isSelected = value?.toLowerCase() === b.name.toLowerCase();
@@ -304,30 +304,30 @@ export function ConstructionLenderSelect({
                         key={`${b.id}-${b.name}`}
                         type="button"
                         onClick={() => handleSelectBank(b.name)}
-                        className={`w-full flex items-center justify-between px-3 py-2 text-left rounded-lg transition cursor-pointer text-xs ${
+                        className={`w-full flex items-center justify-between px-2.5 py-2 text-left rounded-lg transition-colors cursor-pointer text-xs ${
                           isSelected
-                            ? "bg-slate-100 text-slate-900 font-bold border border-slate-900/20"
-                            : "hover:bg-slate-100 text-slate-800"
+                            ? "bg-blue-50/80 text-blue-900 font-semibold border border-blue-200/60"
+                            : "hover:bg-slate-100/80 text-slate-800"
                         }`}
                       >
                         <div className="truncate pr-2">
                           <span className="block truncate font-medium">{b.name}</span>
                           {(b.city || b.state) && (
                             <span
-                              className={`text-[10px] block truncate ${
-                                isSelected ? "text-slate-500" : "text-slate-400"
+                              className={`text-[10px] block truncate font-mono ${
+                                isSelected ? "text-blue-700/80" : "text-slate-400"
                               }`}
                             >
                               {[b.city, b.state].filter(Boolean).join(", ")}
                             </span>
                           )}
                         </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 shrink-0 text-slate-900 stroke-[2.5]" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 shrink-0 text-blue-600 stroke-[2.5]" />}
                       </button>
                     );
                   })
                 ) : (
-                  <div className="p-3 text-center text-xs text-slate-500">
+                  <div className="p-3 text-center text-xs text-slate-500 font-medium">
                     No matching banks found in FDIC directory.
                   </div>
                 )}

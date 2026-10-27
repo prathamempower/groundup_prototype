@@ -37,6 +37,13 @@ import { ToastContainer, ToastMessage } from '@/components/Toast';
 import { TextEffect } from '@/components/motion-primitives/text-effect';
 import { AmbientStructuralWireframes } from '@/components/ui/AmbientStructuralWireframes';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   OnboardingRole,
   OnboardingAnswers,
   OnboardingConfigurationResult,
@@ -1451,10 +1458,10 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
         </div>
       </header>
 
-      {/* ── Structured Onboarding Container (Pro UI/UX, Balanced White Space) ── */}
-      <main className={`flex-1 w-full mx-auto px-3 sm:px-6 py-4 sm:py-10 flex flex-col justify-center relative z-10 transition-all duration-200 ${currentStep === 3 ? 'max-w-2xl sm:max-w-3xl' : 'max-w-xl sm:max-w-2xl'
+      {/* ── Structured Onboarding Container (Unboxed Pro Minimalist Viewport) ── */}
+      <main className={`flex-1 w-full mx-auto px-4 sm:px-6 py-6 sm:py-12 flex flex-col justify-start relative z-10 transition-all duration-200 ${currentStep === 3 ? 'max-w-2xl sm:max-w-3xl' : 'max-w-xl sm:max-w-2xl'
         }`}>
-        <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-[0_10px_30px_-5px_rgba(15,23,42,0.04),0_1px_3px_rgba(0,0,0,0.02)] transition-all relative overflow-hidden">
+        <div className="w-full relative overflow-visible">
           {/* Back button for steps 2 to 5 */}
           {currentStep > 1 && currentStep < 6 && (
             <div className="mb-4">
@@ -1798,17 +1805,17 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         <label htmlFor="select-asset-archetype" className="block text-xs font-bold text-slate-800">
                           Development Type
                         </label>
-                        <select
-                          id="select-asset-archetype"
-                          value={assetType}
-                          onChange={(e) => setAssetType(e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition cursor-pointer"
-                        >
-                          <option value="SINGLE_FAMILY">Single Family</option>
-                          <option value="TWO_FAMILY">Two Family</option>
-                          <option value="MULTIFAMILY">Multi Family</option>
-                          <option value="MIXED_USE">Mixed Use</option>
-                        </select>
+                        <Select value={assetType} onValueChange={(val) => setAssetType(val)}>
+                          <SelectTrigger id="select-asset-archetype" className="w-full h-11 px-3.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900">
+                            <SelectValue placeholder="Select development type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="SINGLE_FAMILY">Single Family</SelectItem>
+                            <SelectItem value="TWO_FAMILY">Two Family</SelectItem>
+                            <SelectItem value="MULTIFAMILY">Multi Family</SelectItem>
+                            <SelectItem value="MIXED_USE">Mixed Use</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       {/* Target Acquisition Date */}
@@ -1888,17 +1895,17 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                         <label htmlFor="select-asset-archetype" className="block text-xs font-bold text-slate-800">
                           Development Type
                         </label>
-                        <select
-                          id="select-asset-archetype"
-                          value={assetType}
-                          onChange={(e) => setAssetType(e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition cursor-pointer"
-                        >
-                          <option value="SINGLE_FAMILY">Single Family</option>
-                          <option value="TWO_FAMILY">Two Family</option>
-                          <option value="MULTIFAMILY">Multi Family</option>
-                          <option value="MIXED_USE">Mixed Use</option>
-                        </select>
+                        <Select value={assetType} onValueChange={(val) => setAssetType(val)}>
+                          <SelectTrigger id="select-asset-archetype-active" className="w-full h-11 px-3.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900">
+                            <SelectValue placeholder="Select development type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="SINGLE_FAMILY">Single Family</SelectItem>
+                            <SelectItem value="TWO_FAMILY">Two Family</SelectItem>
+                            <SelectItem value="MULTIFAMILY">Multi Family</SelectItem>
+                            <SelectItem value="MIXED_USE">Mixed Use</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       {/* Timeline Schedule: Start and Completion Dates */}
@@ -2573,21 +2580,24 @@ export function NewUserIntakePage({ user, onCompleteIntake, onCancelOrSignOut }:
                   <label htmlFor="select-invite-role" className="block text-xs font-bold text-slate-800">
                     Project role &amp; access level
                   </label>
-                  <select
-                    id="select-invite-role"
+                  <Select
                     value={inviteRole}
-                    onChange={(e) => {
-                      setInviteRole(e.target.value);
+                    onValueChange={(val) => {
+                      setInviteRole(val);
                       if (inviteError) setInviteError(null);
                     }}
-                    className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 cursor-pointer"
                   >
-                    {ROLE_OPTIONS.map(r => (
-                      <option key={r.role} value={r.role}>
-                        {r.label}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger id="select-invite-role" className="w-full h-11 px-3.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900">
+                      <SelectValue placeholder="Select project role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ROLE_OPTIONS.map((r) => (
+                        <SelectItem key={r.role} value={r.role}>
+                          {r.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Custom role input field when "Other" is selected */}

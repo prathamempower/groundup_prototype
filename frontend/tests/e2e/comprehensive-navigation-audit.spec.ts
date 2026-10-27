@@ -81,27 +81,22 @@ test.describe("Full Navigation & Workspace Page Audit", () => {
       await expect(page.getByText("Access Restricted", { exact: true })).toHaveCount(0);
     }
 
-    // 5. Test standalone legacy redirect URLs - now should automatically redirect to /projects/[projectId]/<section>
-    const legacyRoutes = [
-      ["/control-center", `/projects/${projectId}/control-center`],
-      ["/documents", `/projects/${projectId}/documents`],
-      ["/budget", `/projects/${projectId}/budget`],
-      ["/reconciliation", `/projects/${projectId}/reconciliation`],
-      ["/draws", `/projects/${projectId}/draws`],
-      ["/timeline", `/projects/${projectId}/timeline`],
-      ["/partners", `/projects/${projectId}/partners`],
-      ["/alerts", `/projects/${projectId}/alerts`],
-      ["/investor-update", `/projects/${projectId}/control-center`],
-    ];
+    // 5. Test canonical server redirects & un-scoped route boundary
+    await page.goto("/login");
+    await expect(page).toHaveURL(/\/auth\/login/);
 
-    for (const [legacy, expectedTarget] of legacyRoutes) {
-      console.log(`Testing navigation to legacy/direct URL: ${legacy}`);
-      await page.goto(legacy);
-      await expect(page).toHaveURL(new RegExp(expectedTarget), { timeout: 10000 });
-      console.log(`Legacy ${legacy} redirected cleanly to:`, page.url());
-      // Sidebar should NOT disappear because it was redirected into active workspace!
-      await expect(sidebar).toBeVisible();
-    }
+    await page.goto(`/projects/${projectId}/economics`);
+    await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/budget`));
+
+    await page.goto(`/projects/${projectId}/directs`);
+    await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/inbox`));
+
+    await page.goto(`/projects/${projectId}/investor-update`);
+    await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/investor-updates`));
+
+    // Standalone un-scoped route should return 404
+    const response = await page.goto("/control-center");
+    expect(response?.status()).toBe(404);
 
     // 6. Test project switcher back to portfolio
     await sidebar.getByRole("link", { name: "Switch" }).click();
