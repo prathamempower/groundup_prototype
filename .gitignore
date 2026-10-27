@@ -60,6 +60,8 @@ tmp/
 **/temp/
 **/tmp/
 *.tmp
+temp_html_docs/
+**/temp_html_docs/
 
 # --- Testing, QA & Screenshots ---
 coverage/

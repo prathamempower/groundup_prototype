@@ -152,70 +152,7 @@ export default function ProjectSettingsPage() {
     },
   ]);
 
-  const DEFAULT_FALLBACK_TEAM = [
-    {
-      id: `fallback-1`,
-      project_id: projectId,
-      name: "Marcus Vance",
-      email: "m.vance@vancedev.com",
-      role: "OWNER" as const,
-      title: "Owner / Managing Principal",
-      company: "Vance Development LLC",
-      avatarInitials: "MV",
-      status: "ACTIVE" as const,
-      added_at: "2025-05-10T09:00:00Z",
-    },
-    {
-      id: `fallback-2`,
-      project_id: projectId,
-      name: "Sarah Lin",
-      email: "s.lin@vancedev.com",
-      role: "OWNER" as const,
-      title: "Co-Owner / Finance Partner",
-      company: "Vance Development LLC",
-      avatarInitials: "SL",
-      status: "ACTIVE" as const,
-      added_at: "2025-05-10T09:00:00Z",
-    },
-    {
-      id: `fallback-3`,
-      project_id: projectId,
-      name: "Frank Miller",
-      email: "frank@apexconstruction.com",
-      role: "OWNER" as const,
-      title: "General Contractor Lead",
-      company: "Apex Build Corp",
-      avatarInitials: "FM",
-      status: "ACTIVE" as const,
-      added_at: "2025-05-12T10:30:00Z",
-    },
-    {
-      id: `fallback-4`,
-      project_id: projectId,
-      name: "David Ross",
-      email: "d.ross@vancedev.com",
-      role: "OWNER" as const,
-      title: "Project Superintendent",
-      company: "Vance Development LLC",
-      avatarInitials: "DR",
-      status: "ACTIVE" as const,
-      added_at: "2025-05-15T14:00:00Z",
-    },
-    {
-      id: `fallback-5`,
-      project_id: projectId,
-      name: "Julian Thorne",
-      email: "j.thorne@pacwestbank.com",
-      role: "OWNER" as const,
-      title: "Senior Loan Officer",
-      company: "Pacific Western Bank",
-      avatarInitials: "JT",
-      status: "ACTIVE" as const,
-      added_at: "2025-06-01T11:00:00Z",
-    },
-  ];
-
-  const displayTeam = teamMembers && teamMembers.length > 0 ? teamMembers : DEFAULT_FALLBACK_TEAM;
+  const displayTeam = teamMembers;
 
   const handleSendInvite = async (e: React.FormEvent) => {
     e.preventDefault();
