@@ -210,8 +210,8 @@ export default function ControlCenterPage() {
           {/* Card 1: APPROVED BUDGET */}
           <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
-              <div className="flex items-center justify-between gap-1 min-h-[20px] sm:min-h-[22px]">
-                <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
+              <div className="flex items-start justify-between gap-1 min-h-[26px] sm:min-h-[22px]">
+                <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-tight sm:tracking-wider leading-tight">
                   Approved Budget
                 </span>
               </div>
@@ -232,8 +232,8 @@ export default function ControlCenterPage() {
           {/* Card 2: ACTUAL SPEND */}
           <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
-              <div className="flex items-center justify-between gap-1 min-h-[20px] sm:min-h-[22px]">
-                <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
+              <div className="flex items-start justify-between gap-1 min-h-[26px] sm:min-h-[22px]">
+                <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-tight sm:tracking-wider leading-tight">
                   Actual Spend
                 </span>
               </div>
@@ -254,8 +254,8 @@ export default function ControlCenterPage() {
           {/* Card 3: DRAW RECEIVED */}
           <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
-              <div className="flex items-center justify-between gap-1 min-h-[20px] sm:min-h-[22px]">
-                <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
+              <div className="flex items-start justify-between gap-1 min-h-[26px] sm:min-h-[22px]">
+                <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-tight sm:tracking-wider leading-tight">
                   Draw Received
                 </span>
               </div>
@@ -276,8 +276,8 @@ export default function ControlCenterPage() {
           {/* Card 4: CONSTRUCTION TIMELINE */}
           <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
-              <div className="flex items-center justify-between gap-1 min-h-[20px] sm:min-h-[22px]">
-                <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
+              <div className="flex items-start justify-between gap-1 min-h-[26px] sm:min-h-[22px]">
+                <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-tight sm:tracking-wider leading-tight">
                   Construction Timeline
                 </span>
               </div>
