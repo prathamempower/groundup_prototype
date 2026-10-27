@@ -273,12 +273,12 @@ export default function ControlCenterPage() {
             </div>
           </div>
 
-          {/* Card 4: TIMELINE */}
+          {/* Card 4: CONSTRUCTION TIMELINE */}
           <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-sm">
             <div>
               <div className="flex items-center justify-between gap-1 min-h-[20px] sm:min-h-[22px]">
                 <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
-                  Timeline
+                  Construction Timeline
                 </span>
               </div>
               <div className="mt-2 sm:mt-3">
@@ -286,7 +286,7 @@ export default function ControlCenterPage() {
                   <ClickableAmount
                     amountText="Dec 15, 2025"
                     originKey="completion_timeline"
-                    label="Project Master Timeline & Schedule"
+                    label="Construction Timeline & Schedule"
                     onClick={handleOpenAmountOrigin}
                   />
                 </div>

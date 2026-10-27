@@ -642,10 +642,10 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
     ],
   },
 
-  // 2b. Project Master Timeline & Schedule Origin
+  // 2b. Construction Timeline & Schedule Origin
   completion_timeline: {
     id: "completion_timeline",
-    title: "Project Master Timeline & Schedule",
+    title: "Construction Timeline & Schedule",
     subtitle: "Construction milestone activities, target dates, and draw alignment through completion",
     amountFormatted: "Dec 15, 2025",
     amountCents: 0,
