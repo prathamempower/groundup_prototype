@@ -10,9 +10,12 @@ import {
   DollarSign,
   Building2,
   ArrowLeft,
+  LayoutGrid,
+  Table as TableIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { cn } from "@/lib/utils";
 import type { DrawItem } from "@/lib/types";
 import {
   DRAW_REQUEST_FORM_ITEMS,
@@ -33,6 +36,7 @@ export default function DrawDetailPage() {
   const projectId = (params?.projectId as string) || "";
   const drawId = (params?.drawId as string) || "";
 
+  const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [isVerifyWorkOpen, setIsVerifyWorkOpen] = useState(false);
   const [isVerifyCostOpen, setIsVerifyCostOpen] = useState(false);
   const [isRecordDecisionOpen, setIsRecordDecisionOpen] = useState(false);
@@ -211,11 +215,11 @@ export default function DrawDetailPage() {
         </div>
       </div>
 
-      {/* DRAW REQUEST FORM - AUTHENTIC SOV TABLE */}
+      {/* DRAW REQUEST FORM - AUTHENTIC SOV TABLE & MOBILE CARDS */}
       <div className="rounded-xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
         {/* Section Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/70 px-5 py-3.5">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/70 px-4 sm:px-5 py-3 sm:py-3.5 gap-2 flex-wrap">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <h2 className="text-sm font-bold text-slate-900 tracking-tight">
               Draw Request Form
             </h2>
@@ -223,24 +227,168 @@ export default function DrawDetailPage() {
               {lines.length} Tasks Requested
             </span>
           </div>
+
+          {/* Mobile view toggle */}
+          <div className="sm:hidden flex items-center bg-slate-200/80 p-0.5 rounded-lg border border-slate-200 text-xs">
+            <button
+              type="button"
+              onClick={() => setViewMode("cards")}
+              className={cn(
+                "flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer",
+                viewMode === "cards"
+                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  : "text-slate-600 hover:text-slate-900"
+              )}
+            >
+              <LayoutGrid className="h-3 w-3" />
+              <span>Cards</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("table")}
+              className={cn(
+                "flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer",
+                viewMode === "table"
+                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  : "text-slate-600 hover:text-slate-900"
+              )}
+            >
+              <TableIcon className="h-3 w-3" />
+              <span>Table</span>
+            </button>
+          </div>
         </div>
 
-        {/* Authentic Draw Request Form Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+        {/* Mobile View: Task Cards (sm:hidden) */}
+        {viewMode === "cards" && (
+          <div className="sm:hidden p-3.5 space-y-3 bg-slate-50/40">
+            {lines.map((line, idx) => {
+              const budgetedVal = line.budgeted_amount
+                ? formatMoney(line.budgeted_amount)
+                : formatMoney(line.requested_amount);
+              const requestedVal = formatMoney(line.requested_amount);
+              const approvedVal = formatMoney(line.approved_amount);
+              const isZeroApproved = parseInt(line.approved_amount || "0", 10) === 0;
+
+              return (
+                <div
+                  key={line.id}
+                  className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs space-y-3"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="font-semibold text-slate-900 text-xs sm:text-[13px] leading-snug">
+                      {line.budget_line_name}
+                    </span>
+                    <span className="text-[10px] font-mono font-medium text-slate-400 shrink-0 bg-slate-100 px-1.5 py-0.5 rounded">
+                      #{idx + 1}
+                    </span>
+                  </div>
+
+                  {line.lender_notes && isZeroApproved && (
+                    <div className="text-[11px] text-amber-800 bg-amber-50/90 border border-amber-200 rounded-md p-2">
+                      <span className="font-semibold">Note:</span> {line.lender_notes}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-3 gap-2 pt-2.5 border-t border-slate-100 text-xs">
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">
+                        Budgeted
+                      </span>
+                      <span className="font-mono text-xs text-slate-700 block tabular-nums">
+                        {budgetedVal}
+                      </span>
+                    </div>
+
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">
+                        Requested
+                      </span>
+                      <span className="font-mono text-xs font-bold text-slate-900 block tabular-nums">
+                        {requestedVal}
+                      </span>
+                    </div>
+
+                    <div className="space-y-0.5 text-right">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">
+                        Approved
+                      </span>
+                      {isZeroApproved ? (
+                        <span className="font-mono text-xs font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block tabular-nums">
+                          {approvedVal}
+                        </span>
+                      ) : (
+                        <span className="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 inline-block tabular-nums">
+                          {approvedVal}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Mobile Totals Card */}
+            <div className="rounded-xl border-2 border-orange-200 bg-gradient-to-br from-orange-50/60 via-white to-orange-50/30 p-4 space-y-3 shadow-2xs">
+              <div className="flex items-center justify-between border-b border-orange-200/60 pb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#C85A17]">
+                  Totals Summary
+                </span>
+                <span className="text-[11px] font-bold text-slate-600 bg-orange-100 border border-orange-200/80 px-2 py-0.5 rounded-full">
+                  {lines.length} Tasks
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block">
+                    Total Requested
+                  </span>
+                  <span className="font-mono text-sm font-bold text-slate-900 tabular-nums block">
+                    {formatMoney(String(totalRequestedCents))}
+                  </span>
+                </div>
+
+                <div className="space-y-1 text-right">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-800 block">
+                    Total Approved
+                  </span>
+                  <span className="font-mono text-sm font-bold text-emerald-700 tabular-nums block">
+                    {formatMoney(String(totalApprovedCents))}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Table View (Desktop always sm:block, mobile when viewMode === "table") */}
+        <div
+          className={cn(
+            "overflow-x-auto custom-scrollbar",
+            viewMode === "table" ? "block" : "hidden sm:block"
+          )}
+        >
+          {/* Mobile Swipe Hint */}
+          <div className="sm:hidden px-4 py-2 bg-orange-50/90 border-b border-orange-200/60 text-[11px] text-[#C85A17] font-medium flex items-center justify-between">
+            <span>Scroll horizontally to view all columns</span>
+            <span className="text-xs font-bold">→</span>
+          </div>
+
+          <table className="w-full min-w-[620px] text-left text-xs border-collapse">
             {/* Terracotta / Burnt Orange Header matching user specification */}
             <thead>
               <tr className="bg-[#C85A17] text-white font-bold text-xs">
-                <th className="py-3.5 px-5 text-left font-bold tracking-wide border-r border-[#B34F14] w-[46%]">
+                <th className="py-3.5 px-4 sm:px-5 text-left font-bold tracking-wide border-r border-[#B34F14] w-[46%]">
                   Item Description
                 </th>
-                <th className="py-3.5 px-5 text-right font-bold tracking-wide border-r border-[#B34F14] w-[18%]">
+                <th className="py-3.5 px-4 sm:px-5 text-right font-bold tracking-wide border-r border-[#B34F14] w-[18%]">
                   Budgeted Amount
                 </th>
-                <th className="py-3.5 px-5 text-right font-bold tracking-wide border-r border-[#B34F14] w-[18%]">
+                <th className="py-3.5 px-4 sm:px-5 text-right font-bold tracking-wide border-r border-[#B34F14] w-[18%]">
                   Requested
                 </th>
-                <th className="py-3.5 px-5 text-right font-bold tracking-wide w-[18%]">
+                <th className="py-3.5 px-4 sm:px-5 text-right font-bold tracking-wide w-[18%]">
                   Approved Amount
                 </th>
               </tr>
@@ -260,7 +408,7 @@ export default function DrawDetailPage() {
                     className="hover:bg-slate-50/80 transition-colors"
                   >
                     {/* Item Description */}
-                    <td className="py-3.5 px-5 border-r border-slate-100">
+                    <td className="py-3.5 px-4 sm:px-5 border-r border-slate-100">
                       <div className="font-semibold text-slate-900 text-xs sm:text-[13px]">
                         {line.budget_line_name}
                       </div>
@@ -272,17 +420,17 @@ export default function DrawDetailPage() {
                     </td>
 
                     {/* Budgeted Amount */}
-                    <td className="py-3.5 px-5 text-right tabular-nums text-slate-700 font-medium text-xs sm:text-[13px] border-r border-slate-100">
+                    <td className="py-3.5 px-4 sm:px-5 text-right tabular-nums text-slate-700 font-medium text-xs sm:text-[13px] border-r border-slate-100">
                       {budgetedVal}
                     </td>
 
                     {/* Requested */}
-                    <td className="py-3.5 px-5 text-right tabular-nums text-slate-900 font-semibold text-xs sm:text-[13px] border-r border-slate-100">
+                    <td className="py-3.5 px-4 sm:px-5 text-right tabular-nums text-slate-900 font-semibold text-xs sm:text-[13px] border-r border-slate-100">
                       {requestedVal}
                     </td>
 
                     {/* Approved Amount */}
-                    <td className="py-3.5 px-5 text-right tabular-nums text-xs sm:text-[13px]">
+                    <td className="py-3.5 px-4 sm:px-5 text-right tabular-nums text-xs sm:text-[13px]">
                       {isZeroApproved ? (
                         <span className="font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                           {approvedVal}
@@ -301,16 +449,16 @@ export default function DrawDetailPage() {
             {/* Totals Row */}
             <tfoot>
               <tr className="border-t-2 border-slate-300 bg-slate-50/90 font-bold text-slate-900">
-                <td className="py-4 px-5 text-left font-bold text-xs sm:text-[13px] border-r border-slate-200">
+                <td className="py-4 px-4 sm:px-5 text-left font-bold text-xs sm:text-[13px] border-r border-slate-200">
                   Totals:
                 </td>
-                <td className="py-4 px-5 text-right border-r border-slate-200">
+                <td className="py-4 px-4 sm:px-5 text-right border-r border-slate-200">
                   {/* Intentionally blank to match authentic form image */}
                 </td>
-                <td className="py-4 px-5 text-right tabular-nums font-bold text-xs sm:text-[13px] text-slate-900 border-r border-slate-200">
+                <td className="py-4 px-4 sm:px-5 text-right tabular-nums font-bold text-xs sm:text-[13px] text-slate-900 border-r border-slate-200">
                   {formatMoney(String(totalRequestedCents))}
                 </td>
-                <td className="py-4 px-5 text-right tabular-nums font-bold text-xs sm:text-[13px] text-emerald-700">
+                <td className="py-4 px-4 sm:px-5 text-right tabular-nums font-bold text-xs sm:text-[13px] text-emerald-700">
                   {formatMoney(String(totalApprovedCents))}
                 </td>
               </tr>

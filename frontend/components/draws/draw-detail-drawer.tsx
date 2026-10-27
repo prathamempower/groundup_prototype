@@ -31,6 +31,7 @@ import {
   getDrawTasksByNumber,
 } from "@/lib/data/draw-request-form-items";
 import { AllocateDrawTasksModal } from "./allocate-draw-tasks-modal";
+import { cn } from "@/lib/utils";
 
 interface DrawDetailDrawerProps {
   open: boolean;
@@ -421,9 +422,110 @@ export function DrawDetailDrawer({
               </Button>
             </div>
 
-            {/* AUTHENTIC DRAW REQUEST FORM TABLE */}
-            <div className="rounded-lg border border-slate-200 overflow-x-auto custom-scrollbar bg-white shadow-xs">
-              <table className="w-full min-w-[560px] text-left text-xs border-collapse">
+            {/* MOBILE VIEW: TASK CARDS (sm:hidden) */}
+            <div className="sm:hidden space-y-3">
+              {lines.map((line, idx) => {
+                const budgetedVal = line.budgeted_amount
+                  ? formatMoney(line.budgeted_amount)
+                  : formatMoney(line.requested_amount);
+                const requestedVal = formatMoney(line.requested_amount);
+                const approvedVal = formatMoney(line.approved_amount);
+                const isZeroApproved = parseInt(line.approved_amount || "0", 10) === 0;
+
+                return (
+                  <div
+                    key={line.id}
+                    className="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-2xs space-y-2.5"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-semibold text-slate-900 text-xs leading-snug">
+                        {line.budget_line_name}
+                      </span>
+                      <span className="text-[10px] font-mono font-medium text-slate-400 shrink-0 bg-slate-100 px-1.5 py-0.5 rounded">
+                        #{idx + 1}
+                      </span>
+                    </div>
+
+                    {line.lender_notes && isZeroApproved && (
+                      <div className="text-[11px] text-amber-800 bg-amber-50/90 border border-amber-200 rounded-md p-2">
+                        <span className="font-semibold">Note:</span> {line.lender_notes}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-xs">
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">
+                          Budgeted
+                        </span>
+                        <span className="font-mono text-xs text-slate-700 block tabular-nums">
+                          {budgetedVal}
+                        </span>
+                      </div>
+
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">
+                          Requested
+                        </span>
+                        <span className="font-mono text-xs font-bold text-slate-900 block tabular-nums">
+                          {requestedVal}
+                        </span>
+                      </div>
+
+                      <div className="space-y-0.5 text-right">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">
+                          Approved
+                        </span>
+                        {isZeroApproved ? (
+                          <span className="font-mono text-xs font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block tabular-nums">
+                            {approvedVal}
+                          </span>
+                        ) : (
+                          <span className="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 inline-block tabular-nums">
+                            {approvedVal}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Mobile Totals Summary Card */}
+              <div className="rounded-xl border-2 border-orange-200 bg-gradient-to-br from-orange-50/60 via-white to-orange-50/30 p-3.5 space-y-2.5 shadow-2xs">
+                <div className="flex items-center justify-between border-b border-orange-200/60 pb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#C85A17]">
+                    Totals Summary
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-600 bg-orange-100 border border-orange-200/80 px-2 py-0.5 rounded-full">
+                    {lines.length} Tasks
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-0.5">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block">
+                      Total Requested
+                    </span>
+                    <span className="font-mono text-sm font-bold text-slate-900 tabular-nums block">
+                      {formatMoney(String(totalRequestedCents))}
+                    </span>
+                  </div>
+
+                  <div className="space-y-0.5 text-right">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-800 block">
+                      Total Approved
+                    </span>
+                    <span className="font-mono text-sm font-bold text-emerald-700 tabular-nums block">
+                      {formatMoney(String(totalApprovedCents))}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* DESKTOP TABLE VIEW (hidden sm:block) */}
+            <div className="hidden sm:block rounded-lg border border-slate-200 overflow-x-auto custom-scrollbar bg-white shadow-xs">
+              <table className="w-full min-w-[620px] text-left text-xs border-collapse">
                 {/* Terracotta / Burnt Orange Header matching user specification */}
                 <thead>
                   <tr className="bg-[#C85A17] text-white font-bold text-xs">
