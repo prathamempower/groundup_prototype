@@ -777,7 +777,7 @@ class MockStore {
         uploaded_by: "system",
         uploaded_at: new Date().toISOString(),
         pages_count: 7,
-        notes: "Itemized actual expenses register: construction, labor, accounting & legal, bank & municipal fees",
+        notes: "Itemized actual expenses register: construction expense, labour expense, accounts & legal fees, bank fees, municipal expense, miscellaneous expense",
       };
       this.state.documents.push(syntheticDoc);
       this.save();

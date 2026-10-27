@@ -37,7 +37,7 @@ export const PRE_EXISTING_DOCUMENTS: PreExistingDocDef[] = [
     category: "BUDGET_SOV",
     badge: "Actual Expenses (Excel)",
     sizeText: "18 KB",
-    description: "Itemized actual expenses register: construction, labor, accounting & legal, bank & municipal fees",
+    description: "Itemized actual expenses register: construction expense, labour expense, accounts & legal fees, bank fees, municipal expense, miscellaneous expense",
     recommendedProjectName: "73 Broadway",
   },
   {
@@ -47,7 +47,7 @@ export const PRE_EXISTING_DOCUMENTS: PreExistingDocDef[] = [
     category: "BUDGET_SOV",
     badge: "Actual Expenses (Excel)",
     sizeText: "18 KB",
-    description: "Itemized actual expenses register: construction, labor, accounting & legal, bank & municipal fees",
+    description: "Itemized actual expenses register: construction expense, labour expense, accounts & legal fees, bank fees, municipal expense, miscellaneous expense",
     recommendedProjectName: "73 Broadway",
   },
   {
