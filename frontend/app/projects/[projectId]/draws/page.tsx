@@ -456,9 +456,6 @@ export default function DrawsPage() {
             <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5">
               $1,066,920.00
             </div>
-            <span className="text-xs font-medium text-slate-700 mt-1 block">
-              98.2% paid to trades ($19,080 remaining)
-            </span>
           </div>
         </div>
 
