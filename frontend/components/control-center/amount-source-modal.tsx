@@ -49,8 +49,9 @@ export function AmountSourceModal({
   const locationText = origin.sourceDocument.sectionOrPage || origin.sourceDocument.section || "";
   const shortLocation = locationText.split("•")[0]?.trim() || locationText;
 
-  // Has target dates in standard table
+  // Has target dates or actual/funded dates in standard table
   const hasTargetDates = origin.components?.some((c) => Boolean(c.targetDate));
+  const hasActualDates = origin.components?.some((c) => Boolean(c.actualDate));
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
@@ -264,7 +265,7 @@ export function AmountSourceModal({
                       <td colSpan={3} className="py-2.5 px-3.5">
                         Total Activities: {origin.components.length} Tasks
                       </td>
-                      <td className="py-2.5 px-3.5 text-slate-700">Target: May – June 2027</td>
+                      <td className="py-2.5 px-3.5 text-slate-700 font-mono">Target: Dec 15, 2025</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -272,7 +273,7 @@ export function AmountSourceModal({
             </div>
           )}
 
-          {/* CASE C: STANDARD LINE ITEMS TABLE (e.g. Approved Project Budget) */}
+          {/* CASE C: STANDARD LINE ITEMS TABLE (e.g. Approved Project Budget, Draw Received) */}
           {!origin.isComparisonTable && !origin.isTimelineSchedule && origin.components && origin.components.length > 0 && (
             <div className="rounded-lg border border-slate-200 overflow-hidden">
               <div className="max-h-[340px] overflow-y-auto">
@@ -282,6 +283,9 @@ export function AmountSourceModal({
                       <th className="py-2.5 px-3.5 text-left">Item</th>
                       {hasTargetDates && (
                         <th className="py-2.5 px-3 text-left whitespace-nowrap">Target Date</th>
+                      )}
+                      {hasActualDates && (
+                        <th className="py-2.5 px-3 text-left whitespace-nowrap">Funded Date</th>
                       )}
                       <th className="py-2.5 px-3.5 text-right">Amount</th>
                     </tr>
@@ -302,6 +306,11 @@ export function AmountSourceModal({
                             {c.targetDate || "—"}
                           </td>
                         )}
+                        {hasActualDates && (
+                          <td className="py-2.5 px-3 text-slate-700 font-mono font-medium whitespace-nowrap text-[11px]">
+                            {c.actualDate || "—"}
+                          </td>
+                        )}
                         <td className="py-2.5 px-3.5 text-right font-mono font-semibold tabular-nums text-slate-900 whitespace-nowrap">
                           {c.amountFormatted}
                         </td>
@@ -310,7 +319,7 @@ export function AmountSourceModal({
                   </tbody>
                   <tfoot className="sticky bottom-0 z-10 bg-slate-50/95 backdrop-blur-xs">
                     <tr className="border-t border-slate-200 font-bold text-slate-900">
-                      <td colSpan={hasTargetDates ? 2 : 1} className="py-2.5 px-3.5">
+                      <td colSpan={1 + (hasTargetDates ? 1 : 0) + (hasActualDates ? 1 : 0)} className="py-2.5 px-3.5">
                         Total
                       </td>
                       <td className="py-2.5 px-3.5 text-right font-mono tabular-nums whitespace-nowrap">

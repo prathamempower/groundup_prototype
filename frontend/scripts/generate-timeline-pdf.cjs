@@ -243,7 +243,7 @@ const timelineHtml = `
     </div>
     <div class="target-badge-box">
       <div class="target-label">Certificate of Occupancy Target</div>
-      <div class="target-value">May – June 2027</div>
+      <div class="target-value">Dec 15, 2025</div>
     </div>
   </div>
 
@@ -253,7 +253,7 @@ const timelineHtml = `
         <th style="width: 48%;">Construction Activity</th>
         <th style="width: 14%; text-align: center;">Line Item</th>
         <th style="width: 18%; text-align: center;">Status</th>
-        <th style="width: 20%;">Target</th>
+        <th style="width: 20%;">Target Date</th>
       </tr>
     </thead>
     <tbody>
@@ -261,115 +261,115 @@ const timelineHtml = `
         <td class="activity-name">Permits & Approvals</td>
         <td style="text-align: center;" class="activity-code">01.03</td>
         <td style="text-align: center;"><span class="status-pill status-completed">Completed</span></td>
-        <td class="target-date">Completed</td>
+        <td class="target-date">Jun 20, 2025</td>
       </tr>
       <tr>
-        <td class="activity-name">Site Preparation</td>
+        <td class="activity-name">Site Preparation & Environmental</td>
         <td style="text-align: center;" class="activity-code">01.04</td>
         <td style="text-align: center;"><span class="status-pill status-completed">Completed</span></td>
-        <td class="target-date">Completed</td>
+        <td class="target-date">Jun 25, 2025</td>
       </tr>
       <tr>
-        <td class="activity-name">Excavation</td>
+        <td class="activity-name">Demolition & Excavation</td>
         <td style="text-align: center;" class="activity-code">02.01</td>
         <td style="text-align: center;"><span class="status-pill status-completed">Completed</span></td>
-        <td class="target-date">Completed</td>
+        <td class="target-date">Jul 10, 2025</td>
       </tr>
       <tr>
-        <td class="activity-name">Footings</td>
+        <td class="activity-name">Footings & Deep Foundation</td>
         <td style="text-align: center;" class="activity-code">02.02</td>
         <td style="text-align: center;"><span class="status-pill status-completed">Completed</span></td>
-        <td class="target-date">Completed</td>
+        <td class="target-date">Jul 25, 2025</td>
       </tr>
       <tr>
         <td class="activity-name">Foundation Walls</td>
         <td style="text-align: center;" class="activity-code">02.03</td>
-        <td style="text-align: center;"><span class="status-pill status-in-progress">In Progress</span></td>
-        <td class="target-date">July 2026</td>
+        <td style="text-align: center;"><span class="status-pill status-completed">Completed</span></td>
+        <td class="target-date">Aug 15, 2025</td>
       </tr>
       <tr>
         <td class="activity-name">Waterproofing / Foundation Drainage</td>
         <td style="text-align: center;" class="activity-code">02.04</td>
-        <td style="text-align: center;"><span class="status-pill status-upcoming">Upcoming</span></td>
-        <td class="target-date">Late July 2026</td>
+        <td style="text-align: center;"><span class="status-pill status-completed">Completed</span></td>
+        <td class="target-date">Aug 20, 2025</td>
       </tr>
       <tr>
-        <td class="activity-name">Backfill</td>
+        <td class="activity-name">Backfill & Soil Retention</td>
         <td style="text-align: center;" class="activity-code">02.05</td>
-        <td style="text-align: center;"><span class="status-pill status-upcoming">Upcoming</span></td>
-        <td class="target-date">Late July / Early August 2026</td>
+        <td style="text-align: center;"><span class="status-pill status-completed">Completed</span></td>
+        <td class="target-date">Aug 25, 2025</td>
       </tr>
       <tr>
         <td class="activity-name">Under Slab Plumbing</td>
         <td style="text-align: center;" class="activity-code">04.01a</td>
-        <td style="text-align: center;"><span class="status-pill status-upcoming">Upcoming</span></td>
-        <td class="target-date">Mid July 2026</td>
+        <td style="text-align: center;"><span class="status-pill status-completed">Completed</span></td>
+        <td class="target-date">Aug 22, 2025</td>
       </tr>
       <tr>
-        <td class="activity-name">Slab on Grade</td>
+        <td class="activity-name">Concrete Slab on Grade</td>
         <td style="text-align: center;" class="activity-code">03.01</td>
-        <td style="text-align: center;"><span class="status-pill status-upcoming">Upcoming</span></td>
-        <td class="target-date">Mid August 2026</td>
+        <td style="text-align: center;"><span class="status-pill status-completed">Completed</span></td>
+        <td class="target-date">Aug 25, 2025</td>
       </tr>
       <tr>
-        <td class="activity-name">Structural Framing</td>
+        <td class="activity-name">Structural Steel Framing & Columns</td>
         <td style="text-align: center;" class="activity-code">03.02</td>
-        <td style="text-align: center;"><span class="status-pill status-upcoming">Upcoming</span></td>
-        <td class="target-date">Aug – Oct 2026</td>
+        <td style="text-align: center;"><span class="status-pill status-completed">Completed</span></td>
+        <td class="target-date">Sep 01, 2025</td>
       </tr>
       <tr>
-        <td class="activity-name">Roofing</td>
+        <td class="activity-name">Light Gauge Steel Stud Framing</td>
+        <td style="text-align: center;" class="activity-code">03.03</td>
+        <td style="text-align: center;"><span class="status-pill status-completed">Completed</span></td>
+        <td class="target-date">Sep 20, 2025</td>
+      </tr>
+      <tr>
+        <td class="activity-name">Plumbing Waste, Vent & Water Rough-in</td>
+        <td style="text-align: center;" class="activity-code">04.01b</td>
+        <td style="text-align: center;"><span class="status-pill status-completed">Completed</span></td>
+        <td class="target-date">Oct 01, 2025</td>
+      </tr>
+      <tr>
+        <td class="activity-name">Electrical Service Main & Rough-ins</td>
+        <td style="text-align: center;" class="activity-code">04.02</td>
+        <td style="text-align: center;"><span class="status-pill status-completed">Completed</span></td>
+        <td class="target-date">Oct 15, 2025</td>
+      </tr>
+      <tr>
+        <td class="activity-name">HVAC Equipment & Duct Distribution</td>
+        <td style="text-align: center;" class="activity-code">04.03</td>
+        <td style="text-align: center;"><span class="status-pill status-in-progress">In Progress</span></td>
+        <td class="target-date">Oct 20, 2025</td>
+      </tr>
+      <tr>
+        <td class="activity-name">Roofing & Weather Barrier</td>
         <td style="text-align: center;" class="activity-code">03.04</td>
-        <td style="text-align: center;"><span class="status-pill status-upcoming">Upcoming</span></td>
-        <td class="target-date">October 2026</td>
+        <td style="text-align: center;"><span class="status-pill status-in-progress">In Progress</span></td>
+        <td class="target-date">Late Oct 2025</td>
       </tr>
       <tr>
-        <td class="activity-name">Windows & Exterior</td>
+        <td class="activity-name">Windows, Doors & Thermal Enclosure</td>
         <td style="text-align: center;" class="activity-code">06.01</td>
         <td style="text-align: center;"><span class="status-pill status-upcoming">Upcoming</span></td>
-        <td class="target-date">Oct – Nov 2026</td>
+        <td class="target-date">Nov 01 – Nov 15, 2025</td>
       </tr>
       <tr>
-        <td class="activity-name">MEP Rough-ins</td>
-        <td style="text-align: center;" class="activity-code">04.01b</td>
-        <td style="text-align: center;"><span class="status-pill status-upcoming">Upcoming</span></td>
-        <td class="target-date">Nov – Dec 2026</td>
-      </tr>
-      <tr>
-        <td class="activity-name">Insulation & Drywall</td>
+        <td class="activity-name">Insulation & Drywall Taping</td>
         <td style="text-align: center;" class="activity-code">05.01</td>
         <td style="text-align: center;"><span class="status-pill status-upcoming">Upcoming</span></td>
-        <td class="target-date">January 2027</td>
+        <td class="target-date">Nov 10 – Nov 25, 2025</td>
       </tr>
       <tr>
-        <td class="activity-name">Interior Finishes</td>
+        <td class="activity-name">Interior Finishes, Millwork & Fixtures</td>
         <td style="text-align: center;" class="activity-code">05.02</td>
         <td style="text-align: center;"><span class="status-pill status-upcoming">Upcoming</span></td>
-        <td class="target-date">Feb – Mar 2027</td>
+        <td class="target-date">Nov 25 – Dec 05, 2025</td>
       </tr>
       <tr>
-        <td class="activity-name">Cabinets / Trim / Paint / Flooring</td>
-        <td style="text-align: center;" class="activity-code">05.03</td>
-        <td style="text-align: center;"><span class="status-pill status-upcoming">Upcoming</span></td>
-        <td class="target-date">Mar – Apr 2027</td>
-      </tr>
-      <tr>
-        <td class="activity-name">Final Fixtures</td>
-        <td style="text-align: center;" class="activity-code">04.04</td>
-        <td style="text-align: center;"><span class="status-pill status-upcoming">Upcoming</span></td>
-        <td class="target-date">April 2027</td>
-      </tr>
-      <tr>
-        <td class="activity-name">Final Inspections & Punch List</td>
-        <td style="text-align: center;" class="activity-code">01.05</td>
-        <td style="text-align: center;"><span class="status-pill status-upcoming">Upcoming</span></td>
-        <td class="target-date">May 2027</td>
-      </tr>
-      <tr>
-        <td class="activity-name">Certificate of Occupancy</td>
+        <td class="activity-name">Final Inspections & Certificate of Occupancy</td>
         <td style="text-align: center;" class="activity-code">01.06</td>
         <td style="text-align: center;"><span class="status-pill status-target">Target</span></td>
-        <td class="target-date" style="font-weight: 800; color: #1e3a5f;">May – June 2027</td>
+        <td class="target-date" style="font-weight: 800; color: #1e3a5f;">Dec 15, 2025</td>
       </tr>
     </tbody>
   </table>

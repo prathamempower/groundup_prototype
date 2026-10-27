@@ -458,7 +458,7 @@ export default function ProjectTimelinePage() {
 
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
-                  <span>Final Target: <strong className="text-slate-800 font-bold">May – June 2027</strong></span>
+                  <span>Final Target: <strong className="text-slate-800 font-bold">Dec 15, 2025</strong></span>
                 </div>
                 <button
                   type="button"
@@ -550,7 +550,7 @@ export default function ProjectTimelinePage() {
                     <td colSpan={3} className="py-3 px-4">
                       Total: 19 Milestone Activities
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap">Target: May – June 2027</td>
+                    <td className="py-3 px-4 whitespace-nowrap font-mono">Target: Dec 15, 2025</td>
                     <td className="py-3 px-4 text-[11px] text-slate-500 font-normal">
                       All activities tracked against General Contractor master milestone schedule
                     </td>
