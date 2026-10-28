@@ -35,6 +35,8 @@ interface SpreadsheetViewerProps {
     | null;
   viewUrl?: string;
   downloadUrl?: string;
+  actions?: React.ReactNode;
+  trailingAction?: React.ReactNode;
 }
 
 interface CellMatch {
@@ -101,6 +103,8 @@ export function SpreadsheetViewer({
   selectedFieldCitation,
   viewUrl,
   downloadUrl,
+  actions,
+  trailingAction,
 }: SpreadsheetViewerProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -644,12 +648,14 @@ export function SpreadsheetViewer({
             )}
           </div>
 
+          {actions}
+
           {(viewUrl || url) && (
             <a
               href={viewUrl || url}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 h-8 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
               title="Open in new browser tab"
             >
               <ExternalLink className="h-3.5 w-3.5 text-slate-500" />
@@ -661,13 +667,15 @@ export function SpreadsheetViewer({
             <a
               href={downloadUrl || url}
               download={filename}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200/90 bg-slate-50 px-2.5 py-1.5 h-8 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
               title="Download backup copy"
             >
               <Download className="h-3.5 w-3.5 text-slate-500" />
               <span className="hidden sm:inline">Save</span>
             </a>
           )}
+
+          {trailingAction}
         </div>
       </header>
 

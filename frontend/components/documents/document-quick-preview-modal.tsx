@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription } from "@/components/ui/modal";
+import { Modal, ModalContent, ModalTitle, ModalDescription, ModalClose } from "@/components/ui/modal";
 import { DocumentItem } from "@/lib/types";
 import { DocumentViewer } from "./document-viewer";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, ArrowRight, SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, X } from "lucide-react";
 import Link from "next/link";
 
 interface DocumentQuickPreviewModalProps {
@@ -27,47 +27,45 @@ export function DocumentQuickPreviewModal({
   const viewerHref = targetProjectId
     ? `/projects/${targetProjectId}/documents/${document.id}`
     : `/documents/${document.id}`;
-  const reviewHref = `${viewerHref}/review`;
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent maxWidth="full" className="p-0 overflow-hidden flex flex-col h-[90vh] max-h-[92vh] rounded-xl bg-white border border-slate-200/90 shadow-overlay">
-        <ModalHeader className="border-b border-slate-200/80 bg-slate-50/80 px-6 py-3.5 flex-shrink-0">
-          <div className="flex items-center justify-between pr-8">
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <span className="rounded bg-blue-50 text-blue-700 border border-blue-200/70 font-mono px-2 py-0.5 text-[10px] font-bold tracking-tight">
-                  SOURCE DOCUMENT PREVIEW
-                </span>
-                <span className="text-xs text-slate-500 font-mono">
-                  {document.document_type.replace(/_/g, " ")}
-                </span>
-              </div>
-              <ModalTitle className="text-base font-bold text-slate-900 tracking-tight">
-                {document.original_filename}
-              </ModalTitle>
-              <ModalDescription className="text-xs text-slate-500">
-                Direct in-browser interactive inspection with full OCR citation overlay and zero forced download.
-              </ModalDescription>
-            </div>
+      <ModalContent
+        maxWidth="full"
+        showCloseButton={false}
+        className="p-0 overflow-hidden flex flex-col h-[90vh] max-h-[92vh] rounded-xl bg-white border border-slate-200/90 shadow-overlay"
+      >
+        <ModalTitle className="sr-only">
+          {document.original_filename}
+        </ModalTitle>
+        <ModalDescription className="sr-only">
+          {document.original_filename} preview
+        </ModalDescription>
 
-            <div className="flex items-center gap-2">
+        <div className="flex-1 p-2 overflow-hidden bg-slate-100/60 flex flex-col">
+          <DocumentViewer
+            document={document}
+            actions={
               <Link href={viewerHref}>
                 <Button
-                  variant="primary"
+                  variant="success"
                   size="sm"
-                  className="text-xs font-semibold h-8 gap-1.5 shadow-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                  className="h-8 px-3 gap-1.5 text-xs font-semibold shadow-xs"
                 >
                   <SlidersHorizontal className="h-3.5 w-3.5" />
                   <span>Open Review Workbench</span>
                 </Button>
               </Link>
-            </div>
-          </div>
-        </ModalHeader>
-
-        <div className="flex-1 p-3 overflow-hidden bg-slate-100/60 flex flex-col">
-          <DocumentViewer document={document} />
+            }
+            trailingAction={
+              <ModalClose
+                className="inline-flex shrink-0 items-center justify-center rounded-lg border border-slate-200/90 bg-white h-8 w-8 text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary shadow-2xs cursor-pointer transition-colors"
+                aria-label="Close preview"
+              >
+                <X className="h-4 w-4" />
+              </ModalClose>
+            }
+          />
         </div>
       </ModalContent>
     </Modal>

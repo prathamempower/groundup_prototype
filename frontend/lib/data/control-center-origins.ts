@@ -6,7 +6,7 @@ export interface AmountComponentItem {
   amountFormatted: string;
   amountCents: number;
   sharePct?: number;
-  status: "Verified" | "Paid" | "Disbursed" | "Committed" | "Approved" | "Reallocated";
+  status: "Verified" | "Paid" | "Disbursed" | "Committed" | "Approved" | "Reallocated" | "Delayed";
   notes?: string;
   targetDate?: string;
   actualDate?: string;
@@ -25,6 +25,25 @@ export interface AmountAuditEntry {
   actor: string;
   timestamp: string;
   details: string;
+}
+
+export interface TimelineDelayImpact {
+  atRiskMilestone: string;
+  leadTimeImpact: string;
+  scheduleSlipDays: number;
+  interestIncurredFormatted: string;
+  interestIncurredCents: number;
+  interestImpactShort: string;
+  targetCompletionDate: string;
+  forecastCompletionDate: string;
+  targetDateShort: string;
+  forecastDateShort: string;
+  milestoneBaseDate?: string;
+  milestoneDelayedDate?: string;
+  progressPct: number;
+  slipPct: number;
+  remainingPct: number;
+  loanDebtNote?: string;
 }
 
 export interface AmountSourceOrigin {
@@ -54,6 +73,7 @@ export interface AmountSourceOrigin {
   };
   isComparisonTable?: boolean;
   isTimelineSchedule?: boolean;
+  timelineDelayImpact?: TimelineDelayImpact;
   summaryStats?: {
     approvedTotal?: string;
     actualTotal?: string;
@@ -596,7 +616,7 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
         code: "04.03",
         name: "HVAC Equipment & Duct Distribution",
         targetDate: "Oct 20, 2025",
-        actualDate: "Oct 24, 2025",
+        actualDate: "Nov 24, 2025 (Slip +35d)",
         transactionRef: "FedWire #W-4403-D • Carrier Climate",
         approvedAmountFormatted: "$40,000.00",
         approvedAmountCents: 4000000,
@@ -608,8 +628,9 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
         amountFormatted: "$35,000.00",
         amountCents: 3500000,
         sharePct: 3.3,
-        status: "Paid",
-        notes: "Draw #3 active spending ($5,000 retainage held pending unit testing)",
+        status: "Delayed",
+        delayIncurred: "+35 Days (+ $28,500 Interest Carry)",
+        notes: "Currently delayed (+35d from Oct 20 to Nov 24): $35,000.00 spent to date; $5,000 retainage held pending unit delivery. 35-day critical delay incurs +$28,500 loan interest carry.",
       },
       {
         id: "as-16-01",
@@ -650,6 +671,24 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
     amountFormatted: "Dec 15, 2025",
     amountCents: 0,
     isTimelineSchedule: true,
+    timelineDelayImpact: {
+      atRiskMilestone: "HVAC Equipment & Duct Distribution",
+      leadTimeImpact: "Manufacturer heat pump & RTU equipment delivery extended by 5 weeks. Delays interior duct distribution, air balancing, and postpones bank loan debt payoff.",
+      scheduleSlipDays: 35,
+      interestIncurredFormatted: "+$28,500",
+      interestIncurredCents: 2850000,
+      interestImpactShort: "+$28.5k",
+      targetCompletionDate: "Nov 10, 2025",
+      forecastCompletionDate: "Dec 15, 2025",
+      targetDateShort: "Nov 10",
+      forecastDateShort: "Dec 15",
+      milestoneBaseDate: "Oct 20, 2025",
+      milestoneDelayedDate: "Nov 24, 2025",
+      progressPct: 62,
+      slipPct: 23,
+      remainingPct: 15,
+      loanDebtNote: "Additional interest incurred due to delay in loan debt service payoff ($650/day loan interest carry).",
+    },
     statusBadge: {
       label: "Active Critical Path",
       variant: "variance",
@@ -755,16 +794,6 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
         notes: "4000 PSI concrete slab pour and power trowel finish (Draw #2)",
       },
       {
-        id: "tl-10",
-        code: "03.02",
-        name: "Structural Steel Framing & Columns",
-        targetDate: "Sep 01, 2025",
-        status: "Approved",
-        amountFormatted: "Completed",
-        amountCents: 0,
-        notes: "Primary steel moment frame and column erection (Draw #2)",
-      },
-      {
         id: "tl-11",
         code: "03.03",
         name: "Light Gauge Steel Stud Framing",
@@ -798,17 +827,17 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
         id: "tl-14",
         code: "04.03",
         name: "HVAC Equipment & Duct Distribution",
-        targetDate: "Oct 20, 2025",
+        targetDate: "Nov 24, 2025",
         status: "Verified",
-        amountFormatted: "In Progress",
-        amountCents: 0,
-        notes: "Heat pump equipment set; retainage held pending final air balance (Draw #3)",
+        amountFormatted: "Delayed (+35d)",
+        amountCents: 2850000,
+        notes: "Commercial heat pump equipment delivery extended by 5 weeks; +$28,500 loan interest incurred (Target: Oct 20, Forecast: Nov 24)",
       },
       {
         id: "tl-15",
         code: "03.04",
         name: "Roofing & Weather Barrier",
-        targetDate: "Late Oct 2025",
+        targetDate: "Nov 28, 2025",
         status: "Committed",
         amountFormatted: "In Progress",
         amountCents: 0,
@@ -818,7 +847,7 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
         id: "tl-16",
         code: "06.01",
         name: "Windows, Doors & Thermal Enclosure",
-        targetDate: "Nov 01 – Nov 15, 2025",
+        targetDate: "Dec 03, 2025",
         status: "Committed",
         amountFormatted: "Upcoming",
         amountCents: 0,
@@ -828,7 +857,7 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
         id: "tl-17",
         code: "05.01",
         name: "Insulation & Drywall Taping",
-        targetDate: "Nov 10 – Nov 25, 2025",
+        targetDate: "Dec 08, 2025",
         status: "Committed",
         amountFormatted: "Upcoming",
         amountCents: 0,
@@ -838,7 +867,7 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
         id: "tl-18",
         code: "05.02",
         name: "Interior Finishes, Millwork & Fixtures",
-        targetDate: "Nov 25 – Dec 05, 2025",
+        targetDate: "Dec 12, 2025",
         status: "Committed",
         amountFormatted: "Upcoming",
         amountCents: 0,

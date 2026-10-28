@@ -60,7 +60,7 @@ const TIMELINE_STEPS: TimelineStepNode[] = [
     title: "Draw #1",
     scope: "Site Mobilization & Foundation Footings",
     amount: "$448,000.00",
-    disbursedText: "100% Disbursed",
+    disbursedText: "100% Spent",
     progressPct: 100,
     date: "Jan 12",
     status: "COMPLETED",
@@ -72,7 +72,7 @@ const TIMELINE_STEPS: TimelineStepNode[] = [
     title: "Draw #2",
     scope: "Concrete Core & Structural Steel",
     amount: "$320,000.00",
-    disbursedText: "100% Disbursed",
+    disbursedText: "100% Spent",
     progressPct: 100,
     date: "Mar 04",
     status: "COMPLETED",
@@ -84,7 +84,7 @@ const TIMELINE_STEPS: TimelineStepNode[] = [
     title: "Draw #3",
     scope: "Rough MEP & Utility Rough-Ins",
     amount: "$318,000.00",
-    disbursedText: "94% Disbursed",
+    disbursedText: "94% Spent",
     progressPct: 94,
     date: "May 19",
     status: "ACTIVE",
@@ -772,7 +772,7 @@ export default function DrawsPage() {
                         <span className="font-mono font-bold text-slate-900 text-sm">{step.amount}</span>
                       </div>
                       <div>
-                        <span className="text-[10px] uppercase font-semibold text-slate-400 block">Disbursed</span>
+                        <span className="text-[10px] uppercase font-semibold text-slate-400 block">Spent</span>
                         <span
                           className={cn(
                             "font-semibold text-xs mt-0.5 block",
@@ -1092,7 +1092,7 @@ export default function DrawsPage() {
                     </div>
                     <div>
                       <span className="text-[10px] uppercase font-semibold text-slate-400 block">
-                        Disbursed
+                        Spent
                       </span>
                       <span className="font-mono font-semibold text-slate-700 text-sm">
                         {row.disbursed}
@@ -1168,7 +1168,7 @@ export default function DrawsPage() {
                   <th className="py-3 px-4">Scope</th>
                   <th className="py-3 px-4">Date</th>
                   <th className="py-3 px-4 text-right">Requested</th>
-                  <th className="py-3 px-4 text-right">Disbursed</th>
+                  <th className="py-3 px-4 text-right">Spent</th>
                   <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
@@ -1219,7 +1219,7 @@ export default function DrawsPage() {
                       {row.requestedAmt}
                     </td>
 
-                    {/* Disbursed */}
+                    {/* Spent */}
                     <td className="py-3.5 px-4 font-mono text-right text-slate-600 font-medium">
                       {row.disbursed}
                     </td>

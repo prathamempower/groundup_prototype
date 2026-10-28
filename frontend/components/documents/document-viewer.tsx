@@ -7,15 +7,29 @@ import { api } from "@/lib/api";
 import { DocumentItem, ExtractionField } from "@/lib/types";
 import { SpreadsheetViewer } from "./spreadsheet-viewer";
 
+import { cn } from "@/lib/utils";
+
 interface DocumentViewerProps {
   document: DocumentItem;
   extractions?: ExtractionField[];
   selectedFieldId?: string | null;
   onSelectField?: (fieldId: string) => void;
   hideHeader?: boolean;
+  actions?: React.ReactNode;
+  trailingAction?: React.ReactNode;
+  headerClassName?: string;
 }
 
-export function DocumentViewer({ document, extractions, selectedFieldId, hideHeader = false }: DocumentViewerProps) {
+export function DocumentViewer({
+  document,
+  extractions,
+  selectedFieldId,
+  onSelectField,
+  hideHeader = false,
+  actions,
+  trailingAction,
+  headerClassName,
+}: DocumentViewerProps) {
   const download = useQuery({
     queryKey: ["document-download", document.id],
     queryFn: () => api.documents.getDownloadUrl(document.id),
@@ -59,7 +73,7 @@ export function DocumentViewer({ document, extractions, selectedFieldId, hideHea
   return (
     <section className="flex h-full min-h-[480px] flex-col overflow-hidden rounded-lg border border-border bg-surface">
       {!isSpreadsheet && !hideHeader && (
-        <header className="flex min-h-12 items-center justify-between gap-3 border-b border-border px-4 py-2 bg-white">
+        <header className={cn("flex min-h-12 items-center justify-between gap-3 border-b border-border px-4 py-2 bg-white", headerClassName)}>
           <div className="flex min-w-0 items-center gap-2 text-sm text-text-primary">
             <FileText className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
             <span className="truncate font-medium" title={document.original_filename}>
@@ -70,6 +84,7 @@ export function DocumentViewer({ document, extractions, selectedFieldId, hideHea
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {actions}
             {url && (
               <a
                 href={url}
@@ -85,13 +100,14 @@ export function DocumentViewer({ document, extractions, selectedFieldId, hideHea
               <a
                 href={downloadUrl}
                 download={document.original_filename}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200/90 bg-slate-50 px-2.5 py-1.5 h-8 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary shadow-2xs"
                 title="Download backup copy"
               >
                 <Download className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                 <span className="hidden sm:inline">Save</span>
               </a>
             )}
+            {trailingAction}
           </div>
         </header>
       )}
@@ -115,6 +131,8 @@ export function DocumentViewer({ document, extractions, selectedFieldId, hideHea
               selectedFieldCitation={selectedField?.citation}
               viewUrl={viewUrl}
               downloadUrl={downloadUrl}
+              actions={actions}
+              trailingAction={trailingAction}
             />
           </div>
         ) : url && isPdf ? (
