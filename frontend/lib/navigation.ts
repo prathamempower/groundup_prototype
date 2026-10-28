@@ -65,7 +65,6 @@ export const PROJECT_WORKSPACE_NAV: WorkspaceNavItem[] = [
     path: "reconciliation",
     icon: Scale,
     allowedRoles: ["OWNER"],
-    badgeKey: "reconciliation",
   },
   {
     id: "draws",
