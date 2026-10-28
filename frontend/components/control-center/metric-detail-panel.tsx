@@ -157,7 +157,7 @@ export function MetricDetailPanel({
     : origin.amountFormatted;
 
   // Has target dates or actual/funded dates in standard table
-  const hasTargetDates = displayComponents?.some((c) => Boolean(c.targetDate));
+  const hasTargetDates = origin.id !== "approved_budget" && displayComponents?.some((c) => Boolean(c.targetDate));
   const hasActualDates = displayComponents?.some((c) => Boolean(c.actualDate));
 
   return (

@@ -50,7 +50,7 @@ export function AmountSourceModal({
   const shortLocation = locationText.split("•")[0]?.trim() || locationText;
 
   // Has target dates or actual/funded dates in standard table
-  const hasTargetDates = origin.components?.some((c) => Boolean(c.targetDate));
+  const hasTargetDates = origin.id !== "approved_budget" && origin.components?.some((c) => Boolean(c.targetDate));
   const hasActualDates = origin.components?.some((c) => Boolean(c.actualDate));
 
   return (

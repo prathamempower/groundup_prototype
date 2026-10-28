@@ -56,4 +56,15 @@ describe("Timeline Delay Impact & Loan Interest Incurred Verification", () => {
     expect(hvacSpend?.actualDate).toContain("Slip +35d");
     expect(hvacSpend?.delayIncurred).toContain("+35 Days");
   });
+
+  it("ensures approved_budget components have zero targetDate entries", () => {
+    const approvedBudgetOrigin = getControlCenterAmountOrigin("approved_budget");
+    expect(approvedBudgetOrigin).toBeDefined();
+    expect(approvedBudgetOrigin?.components.length).toBeGreaterThan(0);
+
+    // Every line item in approved_budget should strictly have no targetDate
+    approvedBudgetOrigin?.components.forEach((component) => {
+      expect(component.targetDate).toBeUndefined();
+    });
+  });
 });
