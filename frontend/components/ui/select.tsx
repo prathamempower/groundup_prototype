@@ -72,9 +72,9 @@ const SelectContent = React.forwardRef<
       sideOffset={sideOffset}
       align={align}
       className={cn(
-        "relative z-50 max-h-80 overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-900 shadow-xl shadow-slate-900/10 p-1 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 duration-150 ease-out select-none",
+        "relative z-50 max-h-80 overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-900 shadow-xl shadow-slate-900/10 p-1.5 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 duration-150 ease-out select-none",
         position === "popper" &&
-          "w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] max-w-[var(--radix-select-trigger-width)]",
+          "min-w-[var(--radix-select-trigger-width)] w-auto max-w-xs",
         className
       )}
       {...props}
@@ -82,7 +82,7 @@ const SelectContent = React.forwardRef<
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport
         className={cn(
-          "p-0.5 space-y-0.5 w-full",
+          "p-0.5 space-y-1 w-full",
           position === "popper" && "w-full"
         )}
       >
@@ -116,7 +116,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2 pl-8 pr-3 text-xs sm:text-[13px] font-medium text-slate-800 outline-none transition-colors hover:bg-slate-100 hover:text-slate-900 focus:bg-slate-100 focus:text-slate-900 data-[state=checked]:bg-blue-50 data-[state=checked]:text-blue-900 data-[state=checked]:font-semibold data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
+      "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2 pl-8 pr-4 text-xs sm:text-[13px] font-medium text-slate-700 outline-none transition-colors whitespace-nowrap hover:bg-slate-100 hover:text-slate-900 focus:bg-slate-100 focus:text-slate-900 data-[state=checked]:bg-blue-50 data-[state=checked]:text-blue-900 data-[state=checked]:font-semibold data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
       className
     )}
     {...props}

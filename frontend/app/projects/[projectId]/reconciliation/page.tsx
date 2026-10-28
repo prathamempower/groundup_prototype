@@ -31,6 +31,8 @@ import {
   Layers,
   Link2,
   FileText,
+  FileQuestion,
+  Copy,
   AlertTriangle,
   CheckCircle2,
   Clock,
@@ -61,6 +63,7 @@ import {
   ReviewItemData,
   ResolutionActionType,
 } from "@/components/reconciliation/owner-resolution-modal";
+import { getIssueInfo } from "@/components/reconciliation/reconciliation-helpers";
 
 import {
   ReconciliationMatch,
@@ -74,21 +77,11 @@ export default function ReconciliationPage() {
   const queryClient = useQueryClient();
 
   // Active Tab matching Screenshot tabs:
-  // 1: Review queue (8)
-  // 2: Statement coverage (2)
-  // 3: Evidence and exceptions (2)
-  // 4: Transfers
-  // 5: Imports
-  const [activeTab, setActiveTab] = useState<
-    "queue" | "statement-coverage" | "exceptions"
-  >("queue");
-
   // Filters and search for Review Queue
   const [searchQuery, setSearchQuery] = useState("");
   const [accountFilter, setAccountFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [evidenceFilter, setEvidenceFilter] = useState("ALL");
-  const [sortOrder, setSortOrder] = useState<"NEWEST" | "OLDEST">("NEWEST");
   const [selectedMatchIds, setSelectedMatchIds] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
@@ -249,12 +242,19 @@ export default function ReconciliationPage() {
     {
       id: "rq-1",
       date: getRealDate(0),
-      account: "Operating · 4821",
+      account: "Columbia Bank · 4821",
       description: "Nilson Mocalos",
+      sourceFileName: "operating_statement_oct2026.pdf",
       type: "Bank transaction",
       direction: "out",
       amount: "-$155.00",
-      proposedLink: "Concrete & foundation st...",
+      matchedDocument: "Nilson Mocalos · Inv #INV-104",
+      matchedAmount: "$155.00",
+      variance: "$0.00",
+      auditIssue: "Missing Receipt",
+      auditDetail: "Card slip needed",
+      amountAtRisk: "$155.00 missing",
+      proposedLink: "Concrete & foundation",
       whyMatches: "Vendor alias and amount match",
       evidence: "Strong",
       status: "Pending review",
@@ -262,12 +262,19 @@ export default function ReconciliationPage() {
     {
       id: "rq-2",
       date: getRealDate(1),
-      account: "Operating · 4821",
+      account: "Columbia Bank · 4821",
       description: "Nilson Mocalos",
+      sourceFileName: "operating_statement_oct2026.pdf",
       type: "Bank transaction",
       direction: "out",
       amount: "-$1,280.00",
-      proposedLink: "Concrete & foundation st...",
+      matchedDocument: "",
+      matchedAmount: "$0.00",
+      variance: "-$1,280.00",
+      auditIssue: "Missing Invoice",
+      auditDetail: "No document on file",
+      amountAtRisk: "$1,280.00 missing",
+      proposedLink: "Concrete & foundation",
       whyMatches: "Vendor alias and amount match",
       evidence: "Missing",
       status: "Pending review",
@@ -275,11 +282,18 @@ export default function ReconciliationPage() {
     {
       id: "rq-3",
       date: getRealDate(2),
-      account: "Operating · 4821",
+      account: "Columbia Bank · 4821",
       description: "Jersey City Permit Office",
+      sourceFileName: "operating_statement_oct2026.pdf",
       type: "Bank transaction",
       direction: "out",
       amount: "-$640.00",
+      matchedDocument: "Permit Receipt #JC-4410",
+      matchedAmount: "$600.00",
+      variance: "$40.00",
+      auditIssue: "Amount Mismatch",
+      auditDetail: "Receipt is $600.00 (+$40 difference)",
+      amountAtRisk: "$40.00 difference",
       proposedLink: "Permits and fees",
       whyMatches: "Payee and memo match permit budget",
       evidence: "Strong",
@@ -288,11 +302,18 @@ export default function ReconciliationPage() {
     {
       id: "rq-4",
       date: getRealDate(3),
-      account: "Operating · 4821",
+      account: "Columbia Bank · 4821",
       description: "Architectural Studio LLC",
+      sourceFileName: "operating_statement_oct2026.pdf",
       type: "Bank transaction",
       direction: "out",
       amount: "-$2,450.00",
+      matchedDocument: "Arch Studio · Inv #AS-89",
+      matchedAmount: "$2,000.00",
+      variance: "$450.00",
+      auditIssue: "Amount Mismatch",
+      auditDetail: "Invoice is $2,000.00 (+$450 difference)",
+      amountAtRisk: "$450.00 difference",
       proposedLink: "Professional services",
       whyMatches: "Description resembles architect invoice",
       evidence: "Partial",
@@ -301,11 +322,18 @@ export default function ReconciliationPage() {
     {
       id: "rq-5",
       date: getRealDate(4),
-      account: "Operating · 4821",
+      account: "Columbia Bank · 4821",
       description: "Investor funding deposit",
+      sourceFileName: "wire_transfer_equity_w05.pdf",
       type: "Bank transaction",
       direction: "in",
       amount: "+$25,000.00",
+      matchedDocument: "Investor Equity Wire #W-05",
+      matchedAmount: "$25,000.00",
+      variance: "$0.00",
+      auditIssue: "Unlinked Deposit",
+      auditDetail: "Deposit needs loan draw link",
+      amountAtRisk: "$25,000.00 unlinked",
       proposedLink: "Unallocated funding",
       whyMatches: "Deposit cleared; no draw linked yet",
       evidence: "Strong",
@@ -314,11 +342,18 @@ export default function ReconciliationPage() {
     {
       id: "rq-6",
       date: getRealDate(5),
-      account: "Business card · 1108",
+      account: "Bank of America · 1108",
       description: "Credit card payment",
+      sourceFileName: "business_card_stmt_oct2026.pdf",
       type: "Bank transaction",
       direction: "out",
       amount: "-$1,850.00",
+      matchedDocument: "Card Statement Settlement",
+      matchedAmount: "$1,850.00",
+      variance: "$0.00",
+      auditIssue: "Card Payment",
+      auditDetail: "Card payoff (avoid double count)",
+      amountAtRisk: "$1,850.00 transfer",
       proposedLink: "Credit card payment",
       whyMatches: "Credit card payoff. Exclude to avoid counting card purchases twice.",
       evidence: "Partial",
@@ -327,11 +362,18 @@ export default function ReconciliationPage() {
     {
       id: "rq-7",
       date: getRealDate(7),
-      account: "Operating · 4821",
+      account: "Columbia Bank · 4821",
       description: "Jersey City Lumber Co.",
+      sourceFileName: "operating_statement_oct2026.pdf",
       type: "Bank transaction",
       direction: "out",
       amount: "-$5,000.00",
+      matchedDocument: "Lumber PO #LUM-332",
+      matchedAmount: "$5,000.00",
+      variance: "$0.00",
+      auditIssue: "Possible Duplicate",
+      auditDetail: "Same $5,000.00 charge found",
+      amountAtRisk: "$5,000.00 duplicate",
       proposedLink: "Rough carpentry framing",
       whyMatches: "Vendor and memo match framing lumber package",
       evidence: "Partial",
@@ -340,39 +382,22 @@ export default function ReconciliationPage() {
     {
       id: "rq-8",
       date: getRealDate(9),
-      account: "Operating · 4821",
+      account: "Columbia Bank · 4821",
       description: "Construction loan draw",
+      sourceFileName: "lender_draw_03_notice.pdf",
       type: "Bank transaction",
       direction: "in",
       amount: "+$40,000.00",
+      matchedDocument: "Lender Draw #03 Approval",
+      matchedAmount: "$40,000.00",
+      variance: "$0.00",
+      auditIssue: "Unlinked Deposit",
+      auditDetail: "Loan wire needs budget draw link",
+      amountAtRisk: "$40,000.00 unlinked",
       proposedLink: "Construction loan draw 03",
       whyMatches: "Deposit reference resembles lender draw notice",
       evidence: "Strong",
       status: "Pending review",
-    },
-  ];
-
-  // Evidence and Exceptions items (Screenshot 3)
-  const exceptionsList = [
-    {
-      id: "ex-1",
-      title: "Missing invoice or receipt",
-      subtitle: "Missing receipt or invoice",
-      relatedTxn: "Nilson Mocalos · $155.00",
-      severity: "High",
-      owner: "Owner",
-      age: "4 days",
-      status: "Open",
-    },
-    {
-      id: "ex-2",
-      title: "Possible duplicate",
-      subtitle: "Same vendor, date, and amount",
-      relatedTxn: "Nilson Mocalos · $1,280.00",
-      severity: "Medium",
-      owner: "Owner",
-      age: "2 days",
-      status: "Open",
     },
   ];
 
@@ -404,7 +429,11 @@ export default function ReconciliationPage() {
       const matchSearch =
         item.description.toLowerCase().includes(q) ||
         item.account.toLowerCase().includes(q) ||
-        item.proposedLink.toLowerCase().includes(q) ||
+        item.amount.toLowerCase().includes(q) ||
+        Boolean(item.sourceFileName && item.sourceFileName.toLowerCase().includes(q)) ||
+        Boolean(item.auditIssue && item.auditIssue.toLowerCase().includes(q)) ||
+        Boolean(item.auditDetail && item.auditDetail.toLowerCase().includes(q)) ||
+        Boolean(item.amountAtRisk && item.amountAtRisk.toLowerCase().includes(q)) ||
         Boolean(item.resolutionNote && item.resolutionNote.toLowerCase().includes(q));
       if (!matchSearch) return false;
     }
@@ -420,9 +449,11 @@ export default function ReconciliationPage() {
     }
 
     if (evidenceFilter !== "ALL") {
-      if (evidenceFilter === "STRONG" && item.evidence !== "Strong") return false;
-      if (evidenceFilter === "PARTIAL" && item.evidence !== "Partial") return false;
-      if (evidenceFilter === "MISSING" && item.evidence !== "Missing") return false;
+      if (evidenceFilter === "MISSING" && !item.auditIssue?.toLowerCase().includes("missing")) return false;
+      if (evidenceFilter === "VARIANCE" && !item.auditIssue?.toLowerCase().includes("variance") && !item.auditIssue?.toLowerCase().includes("mismatch")) return false;
+      if (evidenceFilter === "UNLINKED" && !item.auditIssue?.toLowerCase().includes("unlinked") && !item.auditIssue?.toLowerCase().includes("unallocated")) return false;
+      if (evidenceFilter === "CARD_PAYMENT" && !item.auditIssue?.toLowerCase().includes("card") && !item.auditIssue?.toLowerCase().includes("transfer")) return false;
+      if (evidenceFilter === "DUPLICATE" && !item.auditIssue?.toLowerCase().includes("duplicate")) return false;
     }
 
     return true;
@@ -442,10 +473,10 @@ export default function ReconciliationPage() {
       amount: numericAmount,
       counterparty: row.description,
       transaction_date: new Date().toISOString(),
-      proposed_budget_line_name: row.proposedLink,
+      proposed_budget_line_name: row.proposedLink || "Unassigned",
       proposed_budget_line_id: budgetLines[0]?.id || "bl-1",
       confidence: row.evidence === "Strong" ? 0.94 : 0.75,
-      confidence_reasons: [row.whyMatches],
+      confidence_reasons: [row.whyMatches || "Transaction match candidate"],
       evidence_strength: row.evidence === "Strong" ? "VERIFIED_INVOICE" : "BANK_TRANSACTION",
       status: row.status === "Resolved" ? "ACCEPTED" : "PENDING_REVIEW",
     };
@@ -454,7 +485,8 @@ export default function ReconciliationPage() {
   const handleResolveItem = (
     itemId: string,
     actionType: ResolutionActionType,
-    reason: string
+    reason: string,
+    uploadedFiles?: string[]
   ) => {
     const isLive = matches.some((m) => m.id === itemId);
     if (isLive) {
@@ -468,6 +500,7 @@ export default function ReconciliationPage() {
               status: "Resolved",
               resolutionType: actionType,
               resolutionNote: reason,
+              uploadedFiles: uploadedFiles || item.uploadedFiles,
             }
           : item
       )
@@ -476,7 +509,21 @@ export default function ReconciliationPage() {
     setActiveMoreMenuId(null);
   };
 
-  const getResolutionBadge = (type?: string) => {
+  const getResolutionBadge = (type?: string, uploadedFiles?: string[]) => {
+    const fileCount = uploadedFiles?.length || 0;
+    if (type === "UPLOAD_PROOF" || fileCount > 0) {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
+          <CheckCircle2 className="h-2.5 w-2.5" /> Resolved
+          {fileCount > 0 && (
+            <span className="text-emerald-600 font-normal">
+              ({fileCount} {fileCount === 1 ? "doc" : "docs"})
+            </span>
+          )}
+        </span>
+      );
+    }
+
     switch (type) {
       case "REQUEST_INVOICE":
         return (
@@ -568,109 +615,16 @@ export default function ReconciliationPage() {
         {/* Page Subtitle Breadcrumb & Title Header */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-              FINANCE / CONTROLS
-            </span>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Reconciliation
             </h1>
             <p className="text-xs text-slate-500 mt-1">
               Match bank transactions with budget lines and receipts.
             </p>
-
-          </div>
-
-
-        </div>
-
-        {/* 3 KPI Metric Cards Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          {/* Card 1: Unmatched transactions */}
-          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
-            <span className="text-[11px] font-semibold text-slate-500 block">
-              Unmatched transactions
-            </span>
-            <div className="mt-2 text-xl font-bold font-mono text-slate-900 tabular-nums">
-              ${totalUnresolvedDollars.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </div>
-            <p className="mt-1 text-[11px] text-slate-400">
-              <strong className="text-slate-700 font-semibold">{unresolvedCount} items</strong> awaiting review
-            </p>
-          </div>
-
-          {/* Card 2: Missing evidence */}
-          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
-            <span className="text-[11px] font-semibold text-slate-500 block">
-              Missing receipts or invoices
-            </span>
-            <div className="mt-2 text-xl font-bold font-mono text-slate-900 tabular-nums">
-              ${missingEvidenceDollars.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </div>
-            <p className="mt-1 text-[11px] text-slate-400">
-              <strong className="text-slate-700 font-semibold">{missingEvidenceCount} items</strong> need invoice or receipt
-            </p>
-          </div>
-
-          {/* Card 3: Unallocated funding */}
-          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
-            <span className="text-[11px] font-semibold text-slate-500 block">
-              Unallocated funding
-            </span>
-            <div className="mt-2 text-xl font-bold font-mono text-slate-900 tabular-nums">
-              $25,000.00
-            </div>
-            <p className="mt-1 text-[11px] text-slate-400">
-              Deposits received but not linked to a draw
-            </p>
           </div>
         </div>
-
-        {/* Segmented Underline Navigation Tabs */}
-        <div className="border-b border-slate-200">
-          <nav className="flex items-center gap-4 sm:gap-6 text-xs font-semibold overflow-x-auto scrollbar-none whitespace-nowrap">
-            <button
-              onClick={() => setActiveTab("queue")}
-              className={`flex items-center gap-1.5 pb-2.5 transition-colors border-b-2 -mb-px ${
-                activeTab === "queue"
-                  ? "border-slate-900 text-slate-900 font-bold"
-                  : "border-transparent text-slate-500 hover:text-slate-800"
-              }`}
-            >
-              <span>To review</span>
-              <span className="text-[10px] text-slate-400 font-mono">{unresolvedCount}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("statement-coverage")}
-              className={`flex items-center gap-1.5 pb-2.5 transition-colors border-b-2 -mb-px ${
-                activeTab === "statement-coverage"
-                  ? "border-slate-900 text-slate-900 font-bold"
-                  : "border-transparent text-slate-500 hover:text-slate-800"
-              }`}
-            >
-              <span>Monthly statements</span>
-              <span className="text-[10px] text-slate-400 font-mono">2</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("exceptions")}
-              className={`flex items-center gap-1.5 pb-2.5 transition-colors border-b-2 -mb-px ${
-                activeTab === "exceptions"
-                  ? "border-slate-900 text-slate-900 font-bold"
-                  : "border-transparent text-slate-500 hover:text-slate-800"
-              }`}
-            >
-              <span>Missing documents & alerts</span>
-              <span className="text-[10px] text-slate-400 font-mono">2</span>
-            </button>
-          </nav>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* TAB 1: REVIEW QUEUE (Screenshot 1)                                       */}
-        {/* ========================================================================= */}
-        {activeTab === "queue" && (
-          <div className="space-y-3.5">
+        {/* Review Queue */}
+        <div className="space-y-3.5">
             {/* Header description with responsive view toggle */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div>
@@ -732,13 +686,13 @@ export default function ReconciliationPage() {
                   value={accountFilter}
                   onValueChange={(val) => setAccountFilter(val)}
                 >
-                  <SelectTrigger className="w-full md:w-auto min-w-[130px] h-9 text-xs font-medium">
+                  <SelectTrigger className="w-full md:w-auto min-w-[150px] h-9 text-xs font-medium">
                     <SelectValue placeholder="All accounts" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ALL">All accounts</SelectItem>
-                    <SelectItem value="OPERATING">Operating · 4821</SelectItem>
-                    <SelectItem value="CARD">Business card · 1108</SelectItem>
+                    <SelectItem value="OPERATING">Columbia Bank · 4821</SelectItem>
+                    <SelectItem value="CARD">Bank of America · 1108</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -746,7 +700,7 @@ export default function ReconciliationPage() {
                   value={statusFilter}
                   onValueChange={(val) => setStatusFilter(val)}
                 >
-                  <SelectTrigger className="w-full md:w-auto min-w-[120px] h-9 text-xs font-medium">
+                  <SelectTrigger className="w-full md:w-auto min-w-[130px] h-9 text-xs font-medium">
                     <SelectValue placeholder="All statuses" />
                   </SelectTrigger>
                   <SelectContent>
@@ -760,27 +714,16 @@ export default function ReconciliationPage() {
                   value={evidenceFilter}
                   onValueChange={(val) => setEvidenceFilter(val)}
                 >
-                  <SelectTrigger className="w-full md:w-auto min-w-[115px] h-9 text-xs font-medium">
-                    <SelectValue placeholder="All evidence" />
+                  <SelectTrigger className="w-full md:w-auto min-w-[130px] h-9 text-xs font-medium">
+                    <SelectValue placeholder="All issues" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ALL">All evidence</SelectItem>
-                    <SelectItem value="STRONG">Strong</SelectItem>
-                    <SelectItem value="PARTIAL">Partial</SelectItem>
-                    <SelectItem value="MISSING">Missing</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={sortOrder}
-                  onValueChange={(val) => setSortOrder(val as any)}
-                >
-                  <SelectTrigger className="w-full md:w-auto min-w-[115px] h-9 text-xs font-medium">
-                    <SelectValue placeholder="Newest first" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="NEWEST">Newest first</SelectItem>
-                    <SelectItem value="OLDEST">Oldest first</SelectItem>
+                    <SelectItem value="ALL">All issues</SelectItem>
+                    <SelectItem value="MISSING">Missing documents</SelectItem>
+                    <SelectItem value="VARIANCE">Amount mismatch</SelectItem>
+                    <SelectItem value="UNLINKED">Unlinked deposits</SelectItem>
+                    <SelectItem value="CARD_PAYMENT">Card payments</SelectItem>
+                    <SelectItem value="DUPLICATE">Possible duplicates</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -790,18 +733,18 @@ export default function ReconciliationPage() {
             {viewMode === "table" ? (
               <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
                 {/* Mobile scroll hint */}
-                <div className="md:hidden flex items-center justify-between px-3.5 py-2 bg-slate-50/90 border-b border-slate-200/80 text-[11px] text-slate-500">
+                <div className="sm:hidden flex items-center justify-between px-3.5 py-2 bg-slate-50/90 border-b border-slate-200/80 text-[11px] text-slate-500">
                   <span className="flex items-center gap-1.5 font-medium">
                     <ArrowRightLeft className="h-3.5 w-3.5 text-slate-400" />
-                    Scroll horizontally to view all columns
+                    Swipe horizontally if needed
                   </span>
                   <span className="font-mono text-[10px] bg-slate-200/70 text-slate-700 px-1.5 py-0.5 rounded font-semibold">
-                    9 columns
+                    5 columns
                   </span>
                 </div>
 
                 <div className="overflow-x-auto touch-pan-x scrollbar-thin scrollbar-thumb-slate-300">
-                  <table className="w-full min-w-[980px] text-left text-xs border-collapse">
+                  <table className="w-full text-left text-xs border-collapse">
                     <thead>
                       <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                         <th className="px-3.5 py-2.5 w-10 text-center">
@@ -815,14 +758,11 @@ export default function ReconciliationPage() {
                             className="rounded border-slate-300 text-slate-900 focus:ring-0"
                           />
                         </th>
-                        <th className="px-3.5 py-2.5 w-[110px] min-w-[105px] whitespace-nowrap">Date</th>
-                        <th className="px-3.5 py-2.5 w-[155px] min-w-[145px] whitespace-nowrap">Account</th>
-                        <th className="px-3.5 py-2.5 w-[220px] min-w-[190px]">Description</th>
-                        <th className="px-3.5 py-2.5 w-[130px] min-w-[120px] whitespace-nowrap">Amount</th>
-                        <th className="px-3.5 py-2.5 w-[210px] min-w-[190px] whitespace-nowrap">Category</th>
-                        <th className="px-3.5 py-2.5 w-[95px] min-w-[90px] whitespace-nowrap">Evidence</th>
-                        <th className="px-3.5 py-2.5 w-[115px] min-w-[105px] whitespace-nowrap">Status</th>
-                        <th className="px-3.5 py-2.5 w-[95px] min-w-[85px] whitespace-nowrap text-right">Actions</th>
+                        <th className="px-3.5 py-2.5 whitespace-nowrap">Date</th>
+                        <th className="px-3.5 py-2.5 whitespace-nowrap">Transaction</th>
+                        <th className="px-3.5 py-2.5">Issue</th>
+                        <th className="px-3.5 py-2.5 whitespace-nowrap">Amount</th>
+                        <th className="px-3.5 py-2.5 whitespace-nowrap text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 font-medium">
@@ -833,28 +773,20 @@ export default function ReconciliationPage() {
                               <Skeleton className="h-4 w-4 rounded mx-auto" />
                             </td>
                             <td className="px-3.5 py-3">
-                              <Skeleton className="h-3.5 w-16" />
-                            </td>
-                            <td className="px-3.5 py-3">
                               <Skeleton className="h-3.5 w-24" />
+                              <Skeleton className="h-2.5 w-20 mt-1" />
                             </td>
                             <td className="px-3.5 py-3">
-                              <div className="space-y-1">
-                                <Skeleton className="h-3.5 w-40" />
-                                <Skeleton className="h-2.5 w-20" />
-                              </div>
+                              <Skeleton className="h-3.5 w-32" />
+                              <Skeleton className="h-2.5 w-24 mt-1" />
                             </td>
                             <td className="px-3.5 py-3">
-                              <Skeleton className="h-4 w-20" />
+                              <Skeleton className="h-3.5 w-40" />
+                              <Skeleton className="h-2.5 w-28 mt-1" />
                             </td>
                             <td className="px-3.5 py-3">
-                              <Skeleton className="h-5 w-24 rounded-full" />
-                            </td>
-                            <td className="px-3.5 py-3">
-                              <Skeleton className="h-5 w-16 rounded-full" />
-                            </td>
-                            <td className="px-3.5 py-3">
-                              <Skeleton className="h-5 w-20 rounded-full" />
+                              <Skeleton className="h-4 w-24" />
+                              <Skeleton className="h-2.5 w-16 mt-1" />
                             </td>
                             <td className="px-3.5 py-3 text-right">
                               <Skeleton className="h-7 w-18 ml-auto rounded-md" />
@@ -864,7 +796,7 @@ export default function ReconciliationPage() {
                       ) : filteredReviewItems.length === 0 ? (
                         <tr>
                           <td
-                            colSpan={9}
+                            colSpan={6}
                             className="py-10 text-center text-xs text-slate-400"
                           >
                             No transactions found.
@@ -874,6 +806,7 @@ export default function ReconciliationPage() {
                         filteredReviewItems.map((row) => {
                           const isSelected = selectedMatchIds.includes(row.id);
                           const isResolved = row.status === "Resolved";
+                          const issue = getIssueInfo(row);
 
                           return (
                             <tr
@@ -890,68 +823,69 @@ export default function ReconciliationPage() {
                                   className="rounded border-slate-300 text-slate-900 focus:ring-0"
                                 />
                               </td>
-                              <td className="px-3.5 py-3 whitespace-nowrap text-slate-600 font-mono text-[11px]">
-                                {row.date}
-                              </td>
-                              <td className="px-3.5 py-3 whitespace-nowrap text-slate-600">
-                                {row.account}
+                              <td className="px-3.5 py-3 whitespace-nowrap">
+                                <div className="font-mono text-xs font-semibold text-slate-900">
+                                  {row.date}
+                                </div>
+                                <div className="text-[11px] text-slate-500 font-normal mt-0.5">
+                                  {row.account}
+                                </div>
                               </td>
                               <td className="px-3.5 py-3">
-                                <div className="font-bold text-slate-900">{row.description}</div>
-                                <div className="text-[10px] text-slate-400 mt-0.5">{row.type}</div>
+                                <div className="font-semibold text-xs text-slate-900 leading-tight">
+                                  {row.description}
+                                </div>
+                              </td>
+                              <td className="px-3.5 py-3">
+                                <div className="flex items-center gap-1.5 font-semibold text-xs">
+                                  {issue.type === "missing" ? (
+                                    <FileQuestion className="h-3.5 w-3.5 text-rose-600 shrink-0" />
+                                  ) : issue.type === "variance" ? (
+                                    <Scale className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                                  ) : issue.type === "duplicate" ? (
+                                    <Copy className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                                  ) : issue.type === "transfer" ? (
+                                    <ArrowRightLeft className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                                  ) : (
+                                    <DollarSign className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                                  )}
+                                  <span
+                                    className={
+                                      issue.type === "missing"
+                                        ? "text-rose-600 font-semibold"
+                                        : "text-slate-900 font-semibold"
+                                    }
+                                  >
+                                    {issue.label}
+                                  </span>
+                                </div>
+                                <div className="text-[11px] text-slate-500 mt-0.5 font-normal">
+                                  {issue.detail}
+                                </div>
                               </td>
                               <td className="px-3.5 py-3 whitespace-nowrap">
-                                <span
-                                  className={`font-mono font-bold ${
-                                    row.direction === "in" ? "text-emerald-700" : "text-slate-900"
+                                <div
+                                  className={`font-mono text-xs font-semibold ${
+                                    issue.type === "missing"
+                                      ? "text-rose-600"
+                                      : "text-slate-900"
                                   }`}
                                 >
                                   {row.amount}
-                                </span>
-                                <span className="block text-[10px] text-slate-400 font-normal mt-0.5">
-                                  {row.direction === "in" ? "Money in" : "Money out"}
-                                </span>
-                              </td>
-                              <td className="px-3.5 py-3 whitespace-nowrap">
-                                <span className="inline-block rounded-md bg-slate-100/90 text-slate-700 px-2 py-0.5 text-[11px] border border-slate-200">
-                                  {row.proposedLink}
-                                </span>
-                              </td>
-                              <td className="px-3.5 py-3 whitespace-nowrap">
-                                {row.evidence === "Strong" && (
-                                  <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-bold border border-emerald-200">
-                                    Strong
-                                  </span>
-                                )}
-                                {row.evidence === "Partial" && (
-                                  <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-bold border border-amber-200">
-                                    Partial
-                                  </span>
-                                )}
-                                {row.evidence === "Missing" && (
-                                  <span className="rounded bg-rose-50 text-rose-800 px-2 py-0.5 text-[10px] font-bold border border-rose-200">
-                                    Missing
-                                  </span>
-                                )}
-                              </td>
-                              <td className="px-3.5 py-3 whitespace-nowrap">
-                                {isResolved ? (
-                                  getResolutionBadge(row.resolutionType)
-                                ) : (
-                                  <span className="rounded-full bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-semibold border border-amber-200">
-                                    Pending
-                                  </span>
-                                )}
+                                </div>
                               </td>
                               <td className="px-3.5 py-3 whitespace-nowrap text-right">
                                 {isResolved ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => setResolutionModalItem(row)}
-                                    className="rounded border border-slate-200 bg-white text-slate-700 px-2.5 py-1 text-xs font-medium hover:bg-slate-50 transition-colors shadow-2xs"
-                                  >
-                                    Edit
-                                  </button>
+                                  <div className="flex items-center justify-end gap-2">
+                                    {getResolutionBadge(row.resolutionType, row.uploadedFiles)}
+                                    <button
+                                      type="button"
+                                      onClick={() => setResolutionModalItem(row)}
+                                      className="rounded border border-slate-200 bg-white text-slate-700 px-2.5 py-1 text-xs font-medium hover:bg-slate-50 transition-colors shadow-2xs"
+                                    >
+                                      Edit
+                                    </button>
+                                  </div>
                                 ) : (
                                   <button
                                     type="button"
@@ -1032,6 +966,7 @@ export default function ReconciliationPage() {
                   filteredReviewItems.map((row) => {
                     const isSelected = selectedMatchIds.includes(row.id);
                     const isResolved = row.status === "Resolved";
+                    const issue = getIssueInfo(row);
 
                     return (
                       <div
@@ -1042,7 +977,7 @@ export default function ReconciliationPage() {
                             : "border-slate-200/90"
                         }`}
                       >
-                        {/* Top: Checkbox, Date, Account, Status */}
+                        {/* Top: Checkbox, Date & Account, Status */}
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 min-w-0">
                             <input
@@ -1051,17 +986,19 @@ export default function ReconciliationPage() {
                               onChange={() => handleToggleSelect(row.id)}
                               className="rounded border-slate-300 text-slate-900 focus:ring-0"
                             />
-                            <span className="text-xs font-semibold text-slate-700 font-mono">
-                              {row.date}
-                            </span>
-                            <span className="text-[11px] text-slate-300">•</span>
-                            <span className="text-xs text-slate-500 truncate">
-                              {row.account}
-                            </span>
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="text-xs font-semibold text-slate-800 font-mono">
+                                {row.date}
+                              </span>
+                              <span className="text-slate-300 text-[10px]">•</span>
+                              <span className="text-xs text-slate-500 truncate">
+                                {row.account}
+                              </span>
+                            </div>
                           </div>
                           <div className="shrink-0">
                             {isResolved ? (
-                              getResolutionBadge(row.resolutionType)
+                              getResolutionBadge(row.resolutionType, row.uploadedFiles)
                             ) : (
                               <span className="rounded-full bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-semibold border border-amber-200">
                                 Pending
@@ -1070,60 +1007,61 @@ export default function ReconciliationPage() {
                           </div>
                         </div>
 
-                        {/* Middle: Vendor Name & Amount */}
-                        <div className="flex items-start justify-between gap-3 pt-0.5">
-                          <div className="min-w-0">
-                            <h4 className="font-bold text-slate-900 text-sm leading-snug break-words">
-                              {row.description}
-                            </h4>
-                            <p className="text-[11px] text-slate-400 mt-0.5">{row.type}</p>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <div
-                              className={`font-mono text-sm font-bold ${
-                                row.direction === "in" ? "text-emerald-700" : "text-slate-900"
-                              }`}
-                            >
-                              {row.amount}
+                        {/* Middle: Transaction & Flagged Reason Container */}
+                        <div className="p-3 bg-slate-50/70 border border-slate-200/80 rounded-lg space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <h4 className="font-bold text-slate-900 text-xs">
+                                {row.description}
+                              </h4>
                             </div>
-                            <span className="text-[10px] text-slate-400 font-normal">
-                              {row.direction === "in" ? "Money in" : "Money out"}
+                            <div className="text-right shrink-0">
+                              <div
+                                className={`font-mono text-xs font-semibold ${
+                                  issue.type === "missing"
+                                    ? "text-rose-600"
+                                    : "text-slate-900"
+                                }`}
+                              >
+                                {row.amount}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="pt-2 border-t border-slate-200/60 flex items-center gap-1.5 text-xs font-medium">
+                            {issue.type === "missing" ? (
+                              <FileQuestion className="h-3.5 w-3.5 text-rose-600 shrink-0" />
+                            ) : issue.type === "variance" ? (
+                              <Scale className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                            ) : issue.type === "duplicate" ? (
+                              <Copy className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                            ) : issue.type === "transfer" ? (
+                              <ArrowRightLeft className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                            ) : (
+                              <DollarSign className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                            )}
+                            <span
+                              className={
+                                issue.type === "missing"
+                                  ? "text-rose-600 font-semibold"
+                                  : "text-slate-900 font-semibold"
+                              }
+                            >
+                              {issue.label}:
+                            </span>
+                            <span className="text-slate-600 text-[11px] truncate">
+                              {issue.detail}
                             </span>
                           </div>
                         </div>
 
-                        {/* Category & Evidence */}
-                        <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
-                          <span className="inline-block rounded-md bg-slate-100 text-slate-700 px-2 py-0.5 text-[11px] font-medium border border-slate-200 max-w-[220px] truncate">
-                            {row.proposedLink}
-                          </span>
-                          {row.evidence === "Strong" && (
-                            <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-bold border border-emerald-200">
-                              Strong evidence
-                            </span>
-                          )}
-                          {row.evidence === "Partial" && (
-                            <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-bold border border-amber-200">
-                              Partial evidence
-                            </span>
-                          )}
-                          {row.evidence === "Missing" && (
-                            <span className="rounded bg-rose-50 text-rose-800 px-2 py-0.5 text-[10px] font-bold border border-rose-200">
-                              Missing evidence
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Footer: Why matches & Action button */}
-                        <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-100/90">
-                          <p className="text-[11px] text-slate-400 truncate flex-1">
-                            {row.whyMatches}
-                          </p>
+                        {/* Footer: Action button */}
+                        <div className="flex items-center justify-end pt-1">
                           {isResolved ? (
                             <button
                               type="button"
                               onClick={() => setResolutionModalItem(row)}
-                              className="rounded border border-slate-200 bg-white text-slate-700 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 transition-colors shadow-2xs shrink-0"
+                              className="rounded border border-slate-200 bg-white text-slate-700 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 transition-colors shadow-2xs"
                             >
                               Edit resolution
                             </button>
@@ -1131,7 +1069,7 @@ export default function ReconciliationPage() {
                             <button
                               type="button"
                               onClick={() => setResolutionModalItem(row)}
-                              className="rounded bg-slate-900 text-white px-3.5 py-1.5 text-xs font-semibold hover:bg-slate-800 transition-colors shadow-2xs shrink-0"
+                              className="rounded bg-slate-900 text-white px-3.5 py-1.5 text-xs font-semibold hover:bg-slate-800 transition-colors shadow-2xs"
                             >
                               Resolve
                             </button>
@@ -1160,171 +1098,7 @@ export default function ReconciliationPage() {
               </div>
             )}
           </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 2: STATEMENT COVERAGE (Screenshot 2)                                  */}
-        {/* ========================================================================= */}
-        {activeTab === "statement-coverage" && (
-          <div className="space-y-3.5">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900">Statement coverage</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Reconcile opening and closing balances before signing off each period.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
-              <div className="overflow-x-auto touch-pan-x">
-                <table className="w-full min-w-[720px] text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    <th className="px-4 py-2.5">Account / Period</th>
-                    <th className="px-4 py-2.5">Opening Balance</th>
-                    <th className="px-4 py-2.5">Closing Balance</th>
-                    <th className="px-4 py-2.5">Calculated Closing</th>
-                    <th className="px-4 py-2.5">Difference</th>
-                    <th className="px-4 py-2.5">Coverage</th>
-                    <th className="px-4 py-2.5 text-right">Sign Off</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  <tr className="hover:bg-slate-50/60">
-                    <td className="px-4 py-3.5">
-                      <div className="font-bold text-slate-900">Operating · 4821</div>
-                      <div className="text-[10px] text-slate-400 mt-0.5">Sep 1–30, 2026</div>
-                    </td>
-                    <td className="px-4 py-3.5 font-mono text-slate-900 font-semibold">8,420.00</td>
-                    <td className="px-4 py-3.5 font-mono text-slate-900 font-semibold">4,155.00</td>
-                    <td className="px-4 py-3.5 font-mono text-slate-900 font-semibold">4,155.00</td>
-                    <td className="px-4 py-3.5 font-mono text-slate-600 font-medium">0.00</td>
-                    <td className="px-4 py-3.5">
-                      <span className="rounded bg-emerald-50 text-emerald-800 px-2 py-0.5 text-[10px] font-bold border border-emerald-200">
-                        Complete
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5 text-right">
-                      <button
-                        type="button"
-                        disabled
-                        className="rounded border border-slate-200 bg-slate-50 text-slate-400 px-2.5 py-1 text-[11px] font-medium cursor-not-allowed"
-                      >
-                        Sign off
-                      </button>
-                      <div className="text-[10px] text-slate-400 mt-1">3 items need review</div>
-                    </td>
-                  </tr>
-
-                  <tr className="hover:bg-slate-50/60">
-                    <td className="px-4 py-3.5">
-                      <div className="font-bold text-slate-900">Operating · 4821</div>
-                      <div className="text-[10px] text-slate-400 mt-0.5">Oct 1–31, 2026</div>
-                    </td>
-                    <td className="px-4 py-3.5 font-mono text-slate-900 font-semibold">4,155.00</td>
-                    <td className="px-4 py-3.5 text-slate-400">-</td>
-                    <td className="px-4 py-3.5 text-slate-400">-</td>
-                    <td className="px-4 py-3.5 text-slate-400">-</td>
-                    <td className="px-4 py-3.5">
-                      <span className="rounded bg-slate-100 text-slate-600 px-2 py-0.5 text-[10px] font-bold border border-slate-200">
-                        Missing!
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5 text-right">
-                      <button
-                        type="button"
-                        onClick={() => setIsImportOpen(true)}
-                        className="rounded border border-slate-200 bg-white text-slate-800 px-2.5 py-1 text-[11px] font-semibold hover:bg-slate-50 shadow-2xs"
-                      >
-                        Add statement
-                      </button>
-                      <div className="text-[10px] text-slate-400 mt-1">Statement not imported</div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 3: EVIDENCE AND EXCEPTIONS (Screenshot 3)                            */}
-        {/* ========================================================================= */}
-        {activeTab === "exceptions" && (
-          <div className="space-y-3.5">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">Evidence and exceptions</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Resolve missing support and data-quality issues before sign-off.
-                </p>
-              </div>
-              <span className="text-xs text-slate-500 font-medium">2 open exceptions</span>
-            </div>
-
-            <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
-              <div className="overflow-x-auto touch-pan-x">
-                <table className="w-full min-w-[720px] text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    <th className="px-4 py-2.5">Exception</th>
-                    <th className="px-4 py-2.5">Related Transaction</th>
-                    <th className="px-4 py-2.5">Severity</th>
-                    <th className="px-4 py-2.5">Owner</th>
-                    <th className="px-4 py-2.5">Age</th>
-                    <th className="px-4 py-2.5">Status</th>
-                    <th className="px-4 py-2.5 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {exceptionsList.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50/60">
-                      <td className="px-4 py-3.5">
-                        <div className="font-bold text-slate-900">{item.title}</div>
-                        <div className="text-[10px] text-slate-400 mt-0.5">{item.subtitle}</div>
-                      </td>
-                      <td className="px-4 py-3.5 font-medium text-slate-700">
-                        {item.relatedTxn}
-                      </td>
-                      <td className="px-4 py-3.5">
-                        {item.severity === "High" ? (
-                          <span className="rounded bg-rose-50 text-rose-700 px-2 py-0.5 text-[10px] font-bold border border-rose-200">
-                            High
-                          </span>
-                        ) : (
-                          <span className="rounded bg-amber-50 text-amber-700 px-2 py-0.5 text-[10px] font-bold border border-amber-200">
-                            Medium
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3.5 font-medium text-slate-700">{item.owner}</td>
-                      <td className="px-4 py-3.5 text-slate-500">{item.age}</td>
-                      <td className="px-4 py-3.5">
-                        <span className="rounded bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-semibold border border-amber-200">
-                          {item.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end">
-                          <button
-                            type="button"
-                            className="rounded border border-slate-200 bg-white text-slate-700 px-2.5 py-1 text-[11px] font-medium hover:bg-slate-50"
-                          >
-                            Resolve
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-
-      </div>
+        </div>
 
       {/* MODALS */}
       <ImportWizardModal
