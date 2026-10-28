@@ -943,40 +943,41 @@ export default function ReconciliationPage() {
                 </div>
 
                 {isQueueLoading ? (
-                  Array.from({ length: 4 }).map((_, idx) => (
-                    <div key={`card-skel-${idx}`} className="p-4 bg-white border border-slate-200 rounded-xl space-y-3 animate-pulse">
-                      <div className="flex justify-between items-center">
-                        <Skeleton className="h-4 w-28" />
-                        <Skeleton className="h-4 w-16 rounded-full" />
-                      </div>
-                      <div className="flex justify-between items-start">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {Array.from({ length: 6 }).map((_, idx) => (
+                      <div key={`card-skel-${idx}`} className="p-4 bg-white border border-slate-200 rounded-xl space-y-3 animate-pulse">
+                        <div className="flex justify-between items-center">
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-4 w-16 rounded-full" />
+                        </div>
                         <div className="space-y-1.5">
                           <Skeleton className="h-4 w-40" />
                           <Skeleton className="h-3 w-24" />
                         </div>
-                        <Skeleton className="h-5 w-20" />
+                        <Skeleton className="h-8 w-full rounded" />
                       </div>
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 ) : filteredReviewItems.length === 0 ? (
                   <div className="rounded-xl border border-slate-200/90 bg-white p-8 text-center text-xs text-slate-400">
                     No transactions found.
                   </div>
                 ) : (
-                  filteredReviewItems.map((row) => {
-                    const isSelected = selectedMatchIds.includes(row.id);
-                    const isResolved = row.status === "Resolved";
-                    const issue = getIssueInfo(row);
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredReviewItems.map((row) => {
+                      const isSelected = selectedMatchIds.includes(row.id);
+                      const isResolved = row.status === "Resolved";
+                      const issue = getIssueInfo(row);
 
-                    return (
-                      <div
-                        key={row.id}
-                        className={`p-3.5 sm:p-4 bg-white border rounded-xl space-y-3 shadow-2xs transition-colors ${
-                          isSelected
-                            ? "border-blue-400/80 bg-blue-50/20"
-                            : "border-slate-200/90"
-                        }`}
-                      >
+                      return (
+                        <div
+                          key={row.id}
+                          className={`flex flex-col justify-between p-4 bg-white border rounded-xl space-y-3 shadow-2xs transition-colors ${
+                            isSelected
+                              ? "border-blue-400/80 bg-blue-50/20"
+                              : "border-slate-200/90 hover:border-slate-300"
+                          }`}
+                        >
                         {/* Top: Checkbox, Date & Account, Status */}
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 min-w-0">
@@ -1077,8 +1078,9 @@ export default function ReconciliationPage() {
                         </div>
                       </div>
                     );
-                  })
-                )}
+                  })}
+                </div>
+              )}
 
                 {/* Card view pagination strip */}
                 <div className="flex items-center justify-between px-3.5 py-2.5 border border-slate-200/90 rounded-xl bg-white text-xs text-slate-500">
