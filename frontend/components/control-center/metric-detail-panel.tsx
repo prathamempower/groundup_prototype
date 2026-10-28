@@ -260,8 +260,8 @@ export function MetricDetailPanel({
                 <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
                   <tr className="text-slate-500 font-semibold text-[11px]">
                     <th className="py-2.5 px-3 text-left">Task / Line Item</th>
-                    <th className="py-2.5 px-3 text-left whitespace-nowrap">Target Date</th>
-                    <th className="py-2.5 px-3 text-left whitespace-nowrap">Actual Date</th>
+                    <th className="py-2.5 px-3 text-left whitespace-nowrap">Start Date</th>
+                    <th className="py-2.5 px-3 text-left whitespace-nowrap">Completion Date</th>
                     <th className="py-2.5 px-3 text-right whitespace-nowrap">Approved Budget</th>
                     <th className="py-2.5 px-3 text-right whitespace-nowrap">Actual Spend</th>
                     <th className="py-2.5 px-3 text-right whitespace-nowrap">Variance</th>
