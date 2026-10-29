@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { fontSans, fontMono, ibmPlexSans, ibmPlexMono } from "@/lib/fonts";
+import { fontSans, fontMono, plusJakartaSans } from "@/lib/fonts";
 import { AppProviders } from "@/components/providers/app-providers";
 import { AppShell } from "@/components/layout/app-shell";
 

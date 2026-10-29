@@ -33,7 +33,7 @@ export function getIssueInfo(row: ReviewItemData): AuditIssueInfo {
       return {
         type: "duplicate",
         label: row.auditIssue,
-        detail: row.auditDetail || "Same amount already recorded",
+        detail: row.auditDetail || "Matches another charge",
         badgeClass: "bg-slate-50 text-slate-700 border-slate-200",
         amountLabel: row.amount,
       };
@@ -42,7 +42,7 @@ export function getIssueInfo(row: ReviewItemData): AuditIssueInfo {
       return {
         type: "transfer",
         label: row.auditIssue,
-        detail: row.auditDetail || "Card payoff (avoid double count)",
+        detail: row.auditDetail || "Card payoff: exclude from project spend",
         badgeClass: "bg-slate-50 text-slate-700 border-slate-200",
         amountLabel: row.amount,
       };
@@ -51,7 +51,7 @@ export function getIssueInfo(row: ReviewItemData): AuditIssueInfo {
       return {
         type: "unallocated",
         label: row.auditIssue,
-        detail: row.auditDetail || "Deposit needs loan draw link",
+        detail: row.auditDetail || "Deposit needs allocation",
         badgeClass: "bg-slate-50 text-slate-700 border-slate-200",
         amountLabel: row.amount,
       };
@@ -63,7 +63,7 @@ export function getIssueInfo(row: ReviewItemData): AuditIssueInfo {
     return {
       type: "missing",
       label: "Missing Invoice",
-      detail: "No document on file",
+      detail: row.auditDetail || "No document on file",
       badgeClass: "bg-rose-50 text-rose-700 border-rose-200",
       amountLabel: row.amount,
     };
@@ -73,7 +73,7 @@ export function getIssueInfo(row: ReviewItemData): AuditIssueInfo {
     return {
       type: "duplicate",
       label: "Possible Duplicate",
-      detail: "Same $5,000.00 charge found",
+      detail: row.auditDetail || "Matches another $5,000 charge",
       badgeClass: "bg-slate-50 text-slate-700 border-slate-200",
       amountLabel: row.amount,
     };
@@ -88,7 +88,7 @@ export function getIssueInfo(row: ReviewItemData): AuditIssueInfo {
     return {
       type: "transfer",
       label: "Card Payment",
-      detail: "Card payoff (avoid double count)",
+      detail: row.auditDetail || "Card payoff: exclude from project spend",
       badgeClass: "bg-slate-50 text-slate-700 border-slate-200",
       amountLabel: row.amount,
     };
@@ -98,7 +98,7 @@ export function getIssueInfo(row: ReviewItemData): AuditIssueInfo {
     return {
       type: "unallocated",
       label: "Unlinked Deposit",
-      detail: row.id === "rq-8" ? "Loan wire needs budget draw link" : "Deposit needs loan draw link",
+      detail: row.auditDetail || (row.id === "rq-8" ? "Needs link to Draw 03" : "Needs allocation to equity"),
       badgeClass: "bg-slate-50 text-slate-700 border-slate-200",
       amountLabel: row.amount,
     };
@@ -108,7 +108,7 @@ export function getIssueInfo(row: ReviewItemData): AuditIssueInfo {
     return {
       type: "variance",
       label: "Amount Mismatch",
-      detail: row.id === "rq-3" ? "Receipt has $40 difference" : "Invoice has $450 difference",
+      detail: row.auditDetail || (row.id === "rq-3" ? "Receipt shows $600.00 ($40 variance)" : "Invoice shows $2,000.00 ($450 variance)"),
       badgeClass: "bg-slate-50 text-slate-700 border-slate-200",
       amountLabel: row.amount,
     };
@@ -117,7 +117,7 @@ export function getIssueInfo(row: ReviewItemData): AuditIssueInfo {
   return {
     type: "missing",
     label: "Missing Receipt",
-    detail: "Card slip needed",
+    detail: row.auditDetail || "Receipt needed",
     badgeClass: "bg-rose-50 text-rose-700 border-rose-200",
     amountLabel: row.amount,
   };

@@ -63,7 +63,7 @@ import {
   ReviewItemData,
   ResolutionActionType,
 } from "@/components/reconciliation/owner-resolution-modal";
-import { getIssueInfo } from "@/components/reconciliation/reconciliation-helpers";
+import { getIssueInfo, getSourceFileName } from "@/components/reconciliation/reconciliation-helpers";
 
 import {
   ReconciliationMatch,
@@ -248,15 +248,15 @@ export default function ReconciliationPage() {
       type: "Bank transaction",
       direction: "out",
       amount: "-$155.00",
-      matchedDocument: "Nilson Mocalos · Inv #INV-104",
-      matchedAmount: "$155.00",
-      variance: "$0.00",
+      matchedDocument: "",
+      matchedAmount: "$0.00",
+      variance: "-$155.00",
       auditIssue: "Missing Receipt",
-      auditDetail: "Card slip needed",
+      auditDetail: "Receipt needed",
       amountAtRisk: "$155.00 missing",
       proposedLink: "Concrete & foundation",
-      whyMatches: "Vendor alias and amount match",
-      evidence: "Strong",
+      whyMatches: "Bank statement charge; no receipt on file",
+      evidence: "Missing",
       status: "Pending review",
     },
     {
@@ -272,7 +272,7 @@ export default function ReconciliationPage() {
       matchedAmount: "$0.00",
       variance: "-$1,280.00",
       auditIssue: "Missing Invoice",
-      auditDetail: "No document on file",
+      auditDetail: "No invoice on file",
       amountAtRisk: "$1,280.00 missing",
       proposedLink: "Concrete & foundation",
       whyMatches: "Vendor alias and amount match",
@@ -292,7 +292,7 @@ export default function ReconciliationPage() {
       matchedAmount: "$600.00",
       variance: "$40.00",
       auditIssue: "Amount Mismatch",
-      auditDetail: "Receipt is $600.00 (+$40 difference)",
+      auditDetail: "Receipt shows $600.00 ($40 variance)",
       amountAtRisk: "$40.00 difference",
       proposedLink: "Permits and fees",
       whyMatches: "Payee and memo match permit budget",
@@ -312,7 +312,7 @@ export default function ReconciliationPage() {
       matchedAmount: "$2,000.00",
       variance: "$450.00",
       auditIssue: "Amount Mismatch",
-      auditDetail: "Invoice is $2,000.00 (+$450 difference)",
+      auditDetail: "Invoice shows $2,000.00 ($450 variance)",
       amountAtRisk: "$450.00 difference",
       proposedLink: "Professional services",
       whyMatches: "Description resembles architect invoice",
@@ -332,7 +332,7 @@ export default function ReconciliationPage() {
       matchedAmount: "$25,000.00",
       variance: "$0.00",
       auditIssue: "Unlinked Deposit",
-      auditDetail: "Deposit needs loan draw link",
+      auditDetail: "Needs allocation to equity",
       amountAtRisk: "$25,000.00 unlinked",
       proposedLink: "Unallocated funding",
       whyMatches: "Deposit cleared; no draw linked yet",
@@ -352,7 +352,7 @@ export default function ReconciliationPage() {
       matchedAmount: "$1,850.00",
       variance: "$0.00",
       auditIssue: "Card Payment",
-      auditDetail: "Card payoff (avoid double count)",
+      auditDetail: "Card payoff: exclude from project spend",
       amountAtRisk: "$1,850.00 transfer",
       proposedLink: "Credit card payment",
       whyMatches: "Credit card payoff. Exclude to avoid counting card purchases twice.",
@@ -372,7 +372,7 @@ export default function ReconciliationPage() {
       matchedAmount: "$5,000.00",
       variance: "$0.00",
       auditIssue: "Possible Duplicate",
-      auditDetail: "Same $5,000.00 charge found",
+      auditDetail: "Matches another $5,000 charge",
       amountAtRisk: "$5,000.00 duplicate",
       proposedLink: "Rough carpentry framing",
       whyMatches: "Vendor and memo match framing lumber package",
@@ -392,7 +392,7 @@ export default function ReconciliationPage() {
       matchedAmount: "$40,000.00",
       variance: "$0.00",
       auditIssue: "Unlinked Deposit",
-      auditDetail: "Loan wire needs budget draw link",
+      auditDetail: "Needs link to Draw 03",
       amountAtRisk: "$40,000.00 unlinked",
       proposedLink: "Construction loan draw 03",
       whyMatches: "Deposit reference resembles lender draw notice",
@@ -611,62 +611,54 @@ export default function ReconciliationPage() {
 
   return (
     <div className="space-y-6 pb-16">
-      <div className="px-4 sm:px-6 max-w-7xl mx-auto space-y-6 pt-2">
-        {/* Page Subtitle Breadcrumb & Title Header */}
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+      <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 pt-6 sm:pt-8">
+        {/* Unified Clean Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Reconciliation
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Match bank transactions with budget lines and receipts.
+              Match bank transactions with budget lines, invoices, and receipts.
             </p>
           </div>
-        </div>
-        {/* Review Queue */}
-        <div className="space-y-3.5">
-            {/* Header description with responsive view toggle */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">Review queue</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Specify owner resolution actions and audit reasons to clear transactions.
-                </p>
-              </div>
-              <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
-                <span className="text-xs text-slate-500 font-medium">
-                  {unresolvedCount} items need review
-                </span>
-                <div className="flex items-center rounded-lg border border-slate-200/90 bg-slate-100/80 p-0.5 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setViewMode("table")}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
-                      viewMode === "table"
-                        ? "bg-white text-slate-900 shadow-2xs"
-                        : "text-slate-500 hover:text-slate-900"
-                    }`}
-                    title="Table view"
-                  >
-                    <TableIcon className="h-3.5 w-3.5" />
-                    <span>Table</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setViewMode("cards")}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
-                      viewMode === "cards"
-                        ? "bg-white text-slate-900 shadow-2xs"
-                        : "text-slate-500 hover:text-slate-900"
-                    }`}
-                    title="Cards view"
-                  >
-                    <LayoutList className="h-3.5 w-3.5" />
-                    <span>Cards</span>
-                  </button>
-                </div>
-              </div>
+          <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+            <span className="text-xs text-slate-500 font-medium">
+              {unresolvedCount} items require review
+            </span>
+            <div className="flex items-center rounded-lg border border-slate-200/90 bg-slate-100/80 p-0.5 text-xs">
+              <button
+                type="button"
+                onClick={() => setViewMode("table")}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+                  viewMode === "table"
+                    ? "bg-white text-slate-900 shadow-2xs"
+                    : "text-slate-500 hover:text-slate-900"
+                }`}
+                title="Table view"
+              >
+                <TableIcon className="h-3.5 w-3.5" />
+                <span>Table</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("cards")}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+                  viewMode === "cards"
+                    ? "bg-white text-slate-900 shadow-2xs"
+                    : "text-slate-500 hover:text-slate-900"
+                }`}
+                title="Cards view"
+              >
+                <LayoutList className="h-3.5 w-3.5" />
+                <span>Cards</span>
+              </button>
             </div>
+          </div>
+        </div>
+
+        {/* Table & Filter Content */}
+        <div className="space-y-3.5">
 
             {/* Filter controls bar */}
             <div className="flex flex-col md:flex-row md:items-center gap-2.5">
@@ -747,30 +739,20 @@ export default function ReconciliationPage() {
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
                       <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                        <th className="px-3.5 py-2.5 w-10 text-center">
-                          <input
-                            type="checkbox"
-                            checked={
-                              selectedMatchIds.length === filteredReviewItems.length &&
-                              filteredReviewItems.length > 0
-                            }
-                            onChange={(e) => handleSelectAll(e.target.checked)}
-                            className="rounded border-slate-300 text-slate-900 focus:ring-0"
-                          />
-                        </th>
+                        <th className="px-3 py-2.5 w-12 text-center whitespace-nowrap">#</th>
                         <th className="px-3.5 py-2.5 whitespace-nowrap">Date</th>
-                        <th className="px-3.5 py-2.5 whitespace-nowrap">Transaction</th>
+                        <th className="px-3.5 py-2.5 whitespace-nowrap">Payee / Transaction</th>
                         <th className="px-3.5 py-2.5">Issue</th>
                         <th className="px-3.5 py-2.5 whitespace-nowrap">Amount</th>
-                        <th className="px-3.5 py-2.5 whitespace-nowrap text-right">Actions</th>
+                        <th className="px-3.5 py-2.5 whitespace-nowrap text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 font-medium">
                       {isQueueLoading ? (
                         Array.from({ length: 5 }).map((_, idx) => (
                           <tr key={`queue-skel-${idx}`} className="animate-pulse">
-                            <td className="px-3.5 py-3 text-center">
-                              <Skeleton className="h-4 w-4 rounded mx-auto" />
+                            <td className="px-3 py-3 text-center">
+                              <Skeleton className="h-3.5 w-4 mx-auto" />
                             </td>
                             <td className="px-3.5 py-3">
                               <Skeleton className="h-3.5 w-24" />
@@ -803,25 +785,17 @@ export default function ReconciliationPage() {
                           </td>
                         </tr>
                       ) : (
-                        filteredReviewItems.map((row) => {
-                          const isSelected = selectedMatchIds.includes(row.id);
+                        filteredReviewItems.map((row, index) => {
                           const isResolved = row.status === "Resolved";
                           const issue = getIssueInfo(row);
 
                           return (
                             <tr
                               key={row.id}
-                              className={`hover:bg-slate-50/60 transition-colors ${
-                                isSelected ? "bg-blue-50/20" : ""
-                              }`}
+                              className="hover:bg-slate-50/60 transition-colors"
                             >
-                              <td className="px-3.5 py-3 text-center">
-                                <input
-                                  type="checkbox"
-                                  checked={isSelected}
-                                  onChange={() => handleToggleSelect(row.id)}
-                                  className="rounded border-slate-300 text-slate-900 focus:ring-0"
-                                />
+                              <td className="px-3 py-3 text-center font-mono text-xs text-slate-400 tabular-nums select-none">
+                                {index + 1}
                               </td>
                               <td className="px-3.5 py-3 whitespace-nowrap">
                                 <div className="font-mono text-xs font-semibold text-slate-900">
@@ -923,25 +897,6 @@ export default function ReconciliationPage() {
             ) : (
               /* Mobile & Compact Card View */
               <div className="space-y-3">
-                {/* Select all header for card view */}
-                <div className="flex items-center justify-between px-3.5 py-2 bg-slate-50 border border-slate-200/90 rounded-lg text-xs">
-                  <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
-                    <input
-                      type="checkbox"
-                      checked={
-                        selectedMatchIds.length === filteredReviewItems.length &&
-                        filteredReviewItems.length > 0
-                      }
-                      onChange={(e) => handleSelectAll(e.target.checked)}
-                      className="rounded border-slate-300 text-slate-900 focus:ring-0"
-                    />
-                    <span>Select all ({filteredReviewItems.length})</span>
-                  </label>
-                  <span className="text-[11px] text-slate-400">
-                    {selectedMatchIds.length} selected
-                  </span>
-                </div>
-
                 {isQueueLoading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {Array.from({ length: 6 }).map((_, idx) => (
@@ -963,123 +918,119 @@ export default function ReconciliationPage() {
                     No transactions found.
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredReviewItems.map((row) => {
-                      const isSelected = selectedMatchIds.includes(row.id);
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                    {filteredReviewItems.map((row, index) => {
                       const isResolved = row.status === "Resolved";
                       const issue = getIssueInfo(row);
 
                       return (
                         <div
                           key={row.id}
-                          className={`flex flex-col justify-between p-4 bg-white border rounded-xl space-y-3 shadow-2xs transition-colors ${
-                            isSelected
-                              ? "border-blue-400/80 bg-blue-50/20"
-                              : "border-slate-200/90 hover:border-slate-300"
-                          }`}
+                          className="relative flex flex-col justify-between p-4 bg-white border border-slate-200/80 rounded-xl hover:border-slate-300 hover:shadow-2xs transition-all"
                         >
-                        {/* Top: Checkbox, Date & Account, Status */}
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => handleToggleSelect(row.id)}
-                              className="rounded border-slate-300 text-slate-900 focus:ring-0"
-                            />
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="text-xs font-semibold text-slate-800 font-mono">
-                                {row.date}
-                              </span>
-                              <span className="text-slate-300 text-[10px]">•</span>
-                              <span className="text-xs text-slate-500 truncate">
-                                {row.account}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="shrink-0">
-                            {isResolved ? (
-                              getResolutionBadge(row.resolutionType, row.uploadedFiles)
-                            ) : (
-                              <span className="rounded-full bg-amber-50 text-amber-800 px-2 py-0.5 text-[10px] font-semibold border border-amber-200">
-                                Pending
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                          <div className="space-y-3">
+                            {/* Card Header: Serial Number, Date & Account, Status */}
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="font-mono text-xs font-bold text-slate-700 bg-slate-100 border border-slate-300/80 rounded px-1.5 py-0.5 tabular-nums select-none shrink-0">
+                                  #{index + 1}
+                                </span>
+                                <span className="font-mono text-xs font-semibold text-slate-900 shrink-0">
+                                  {row.date}
+                                </span>
+                                <span className="text-slate-400 text-xs">•</span>
+                                <span className="text-xs font-medium text-slate-700 truncate">
+                                  {row.account}
+                                </span>
+                              </div>
 
-                        {/* Middle: Transaction & Flagged Reason Container */}
-                        <div className="p-3 bg-slate-50/70 border border-slate-200/80 rounded-lg space-y-2">
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <h4 className="font-bold text-slate-900 text-xs">
+                              {isResolved && (
+                                <div className="shrink-0">
+                                  {getResolutionBadge(row.resolutionType, row.uploadedFiles)}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Card Body: Payee & Amount */}
+                            <div className="flex items-baseline justify-between gap-3 pt-1">
+                              <h4 className="font-bold text-slate-900 text-sm tracking-tight truncate min-w-0">
                                 {row.description}
                               </h4>
-                            </div>
-                            <div className="text-right shrink-0">
                               <div
-                                className={`font-mono text-xs font-semibold ${
-                                  issue.type === "missing"
-                                    ? "text-rose-600"
+                                className={`font-mono text-sm font-bold tabular-nums shrink-0 ${
+                                  row.direction === "in" || row.amount.startsWith("+")
+                                    ? "text-emerald-700"
                                     : "text-slate-900"
                                 }`}
                               >
                                 {row.amount}
                               </div>
                             </div>
+
+                            {/* Audit Issue Presentation: Clean Containerless Typography */}
+                            <div className="pt-1 space-y-0.5">
+                              <div className="flex items-center gap-1.5">
+                                {issue.type === "missing" ? (
+                                  <FileQuestion className="h-3.5 w-3.5 text-rose-600 shrink-0" />
+                                ) : issue.type === "variance" ? (
+                                  <Scale className="h-3.5 w-3.5 text-slate-700 shrink-0" />
+                                ) : issue.type === "duplicate" ? (
+                                  <Copy className="h-3.5 w-3.5 text-slate-700 shrink-0" />
+                                ) : issue.type === "transfer" ? (
+                                  <ArrowRightLeft className="h-3.5 w-3.5 text-slate-700 shrink-0" />
+                                ) : (
+                                  <DollarSign className="h-3.5 w-3.5 text-slate-700 shrink-0" />
+                                )}
+                                <span
+                                  className={`text-xs font-semibold ${
+                                    issue.type === "missing"
+                                      ? "text-rose-700"
+                                      : "text-slate-900"
+                                  }`}
+                                >
+                                  {issue.label}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-600 font-normal pl-5">
+                                {issue.detail}
+                              </p>
+                            </div>
                           </div>
 
-                          <div className="pt-2 border-t border-slate-200/60 flex items-center gap-1.5 text-xs font-medium">
-                            {issue.type === "missing" ? (
-                              <FileQuestion className="h-3.5 w-3.5 text-rose-600 shrink-0" />
-                            ) : issue.type === "variance" ? (
-                              <Scale className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                            ) : issue.type === "duplicate" ? (
-                              <Copy className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                            ) : issue.type === "transfer" ? (
-                              <ArrowRightLeft className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                          {/* Card Footer: Source Info & Direct Action */}
+                          <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-200/90 text-xs">
+                            <div className="flex items-center gap-1.5 min-w-0 pr-2">
+                              <FileText className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                              <span
+                                className="font-mono text-xs text-slate-700 font-medium truncate"
+                                title={getSourceFileName(row)}
+                              >
+                                {getSourceFileName(row)}
+                              </span>
+                            </div>
+
+                            {isResolved ? (
+                              <button
+                                type="button"
+                                onClick={() => setResolutionModalItem(row)}
+                                className="rounded border border-slate-200 bg-white text-slate-700 px-3 py-1 text-xs font-medium hover:bg-slate-50 transition-colors shadow-2xs"
+                              >
+                                Edit
+                              </button>
                             ) : (
-                              <DollarSign className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                              <button
+                                type="button"
+                                onClick={() => setResolutionModalItem(row)}
+                                className="rounded bg-slate-900 text-white px-3 py-1 text-xs font-semibold hover:bg-slate-800 transition-colors shadow-2xs"
+                              >
+                                Resolve
+                              </button>
                             )}
-                            <span
-                              className={
-                                issue.type === "missing"
-                                  ? "text-rose-600 font-semibold"
-                                  : "text-slate-900 font-semibold"
-                              }
-                            >
-                              {issue.label}:
-                            </span>
-                            <span className="text-slate-600 text-[11px] truncate">
-                              {issue.detail}
-                            </span>
                           </div>
                         </div>
-
-                        {/* Footer: Action button */}
-                        <div className="flex items-center justify-end pt-1">
-                          {isResolved ? (
-                            <button
-                              type="button"
-                              onClick={() => setResolutionModalItem(row)}
-                              className="rounded border border-slate-200 bg-white text-slate-700 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 transition-colors shadow-2xs"
-                            >
-                              Edit resolution
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => setResolutionModalItem(row)}
-                              className="rounded bg-slate-900 text-white px-3.5 py-1.5 text-xs font-semibold hover:bg-slate-800 transition-colors shadow-2xs"
-                            >
-                              Resolve
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
               )}
 
                 {/* Card view pagination strip */}

@@ -1,10 +1,10 @@
-import { Inter, IBM_Plex_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, IBM_Plex_Mono } from "next/font/google";
 
-// Modern, high-clarity enterprise typography
-export const inter = Inter({
+// Modern, high-clarity enterprise typography: Plus Jakarta Sans
+export const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-inter",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-plus-jakarta-sans",
   display: "swap",
   fallback: [
     "-apple-system",
@@ -34,8 +34,9 @@ export const ibmPlexMono = IBM_Plex_Mono({
   ],
 });
 
-// Backward-compatibility and semantic aliases
-export const fontSans = inter;
+// Primary application typography and backward-compatibility aliases
+export const fontSans = plusJakartaSans;
+export const inter = plusJakartaSans;
+export const ibmPlexSans = plusJakartaSans;
 export const fontMono = ibmPlexMono;
 export const jetbrainsMono = ibmPlexMono;
-export const ibmPlexSans = inter;

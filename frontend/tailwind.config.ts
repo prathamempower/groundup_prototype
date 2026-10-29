@@ -74,6 +74,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
+          "var(--font-plus-jakarta-sans)",
           "var(--font-inter)",
           "system-ui",
           "-apple-system",
@@ -96,14 +97,22 @@ const config: Config = {
           "monospace",
         ],
       },
+      letterSpacing: {
+        tighter: "-0.035em",
+        tight: "-0.02em",
+        normal: "-0.011em",
+        wide: "0.025em",
+        wider: "0.05em",
+        widest: "0.08em",
+      },
       fontSize: {
-        caption: ["12px", { lineHeight: "16px" }],
-        label: ["13px", { lineHeight: "18px" }],
-        body: ["14px", { lineHeight: "22px" }],
-        subsection: ["15px", { lineHeight: "22px" }],
-        section: ["18px", { lineHeight: "26px" }],
-        title: ["24px", { lineHeight: "32px" }],
-        kpi: ["30px", { lineHeight: "38px" }],
+        caption: ["12px", { lineHeight: "16px", letterSpacing: "-0.005em" }],
+        label: ["13px", { lineHeight: "18px", letterSpacing: "-0.008em" }],
+        body: ["14px", { lineHeight: "22px", letterSpacing: "-0.011em" }],
+        subsection: ["15px", { lineHeight: "22px", letterSpacing: "-0.015em" }],
+        section: ["18px", { lineHeight: "26px", letterSpacing: "-0.02em" }],
+        title: ["24px", { lineHeight: "32px", letterSpacing: "-0.028em" }],
+        kpi: ["30px", { lineHeight: "38px", letterSpacing: "-0.032em" }],
       },
       boxShadow: {
         xs: "0 1px 2px 0 rgba(15, 23, 42, 0.05)",

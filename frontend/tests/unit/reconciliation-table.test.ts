@@ -245,5 +245,13 @@ describe("Resolve Transaction Modal Craft Governance", () => {
     expect(modalContent).toContain("Resolve Transaction");
     expect(modalContent).toContain("Cancel");
   });
+
+  it("displays document source origin and compared document context with view action", () => {
+    expect(modalContent).toContain("getSourceFileName(item)");
+    expect(modalContent).toContain("Source statement:");
+    expect(modalContent).toContain("Document on file:");
+    expect(modalContent).toContain("None on file");
+    expect(modalContent).toContain("ExternalLink");
+  });
 });
 

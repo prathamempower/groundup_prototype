@@ -38,6 +38,9 @@
   --verified: #059669;
   --attention: #2563EB;
   --destructive: #DC2626;
+
+  /* Typography variable aliases */
+  --font-inter: var(--font-plus-jakarta-sans);
 }
 
 /* Blueprint Grid Pattern */
@@ -249,25 +252,27 @@
     scroll-behavior: smooth;
     scroll-padding-top: 80px;
     color-scheme: light;
-    font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--font-plus-jakarta-sans), var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
   body {
     background-color: var(--bg-app);
     color: var(--text-primary);
-    font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--font-plus-jakarta-sans), var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     letter-spacing: -0.011em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  /* Stabilized global typography hierarchy */
+  /* Refined, consistent typography hierarchy */
   h1, .h1 {
     font-size: 1.25rem; /* 20px */
     line-height: 1.75rem; /* 28px */
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.028em;
     color: var(--text-primary);
   }
 
@@ -275,7 +280,7 @@
     font-size: 1.125rem; /* 18px */
     line-height: 1.625rem; /* 26px */
     font-weight: 700;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.022em;
     color: var(--text-primary);
   }
 
@@ -283,8 +288,38 @@
     font-size: 0.9375rem; /* 15px */
     line-height: 1.375rem; /* 22px */
     font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--text-primary);
+  }
+
+  h4, .h4 {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25rem; /* 20px */
+    font-weight: 600;
     letter-spacing: -0.01em;
     color: var(--text-primary);
+  }
+
+  /* Microcopy, Table Headers & Badges Optical Tracking */
+  .uppercase, [data-uppercase], th {
+    letter-spacing: 0.05em;
+  }
+
+  /* Form controls, inputs, buttons, and navigation typography inheritance */
+  input, button, select, textarea, optgroup {
+    font-family: inherit;
+    font-feature-settings: inherit;
+    letter-spacing: inherit;
+  }
+
+  input::placeholder, textarea::placeholder {
+    letter-spacing: -0.005em;
+  }
+
+  /* Numbers readability & scanability across tables, forms, metrics */
+  table, [role="table"], th, td, .tabular-nums {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1, "cv02", "cv03", "cv04", "cv11";
   }
 
   /* Accessible focus ring: 2px accent, 2px offset */

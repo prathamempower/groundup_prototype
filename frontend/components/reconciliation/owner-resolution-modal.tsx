@@ -19,7 +19,10 @@ import {
   Scale,
   Copy,
   DollarSign,
+  Check,
+  ExternalLink,
 } from "lucide-react";
+import { getSourceFileName } from "./reconciliation-helpers";
 
 export interface ReviewItemData {
   id: string;
@@ -174,89 +177,162 @@ export function OwnerResolutionModal({
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent maxWidth="md" className="p-5 sm:p-6">
-        {/* Header: Title and Amount */}
-        <ModalHeader className="pb-3 border-b border-slate-100 pr-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <ModalTitle className="text-base font-bold text-slate-900">
-                Resolve Transaction
-              </ModalTitle>
-              <span
-                className={`font-mono text-xs font-bold px-2.5 py-0.5 rounded-full border ${
-                  item.auditIssue?.toLowerCase().includes("missing")
-                    ? "bg-rose-50 text-rose-700 border-rose-200"
-                    : item.direction === "in"
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                    : "bg-slate-100 text-slate-800 border-slate-200"
-                }`}
-              >
-                {item.amount}
-              </span>
-            </div>
+        {/* Header: Title and Subtitle */}
+        <ModalHeader className="pb-3.5 border-b border-slate-100 pr-10">
+          <div>
+            <ModalTitle className="text-base font-bold text-slate-900">
+              Resolve Transaction
+            </ModalTitle>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Attach a receipt, invoice, or note to resolve this transaction.
+            </p>
           </div>
         </ModalHeader>
 
-        {/* Transaction Summary Strip */}
-        <div className="py-3 border-b border-slate-100 space-y-1.5">
-          <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="font-bold text-slate-900 truncate">
+        {/* Transaction Summary Card */}
+        <div className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/60 p-4 space-y-3">
+          {/* Top Row: Payee, Date, Amount, and Issue Flag */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h4 className="text-sm font-bold text-slate-900 tracking-tight truncate">
                 {item.description}
-              </span>
-              <span className="text-slate-300">•</span>
-              <span className="text-slate-500 truncate">{item.account}</span>
+              </h4>
+              <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
+                <span>{item.account}</span>
+                <span className="text-slate-300">•</span>
+                <span className="font-mono">{item.date}</span>
+              </div>
             </div>
-            <span className="text-slate-600 font-mono text-[11px] shrink-0 font-medium">
-              {item.date}
-            </span>
-          </div>
 
-          {item.auditIssue && (
-            <div className="flex items-center gap-1.5 text-[11px]">
-              {item.auditIssue.toLowerCase().includes("missing") ? (
-                <FileQuestion className="h-3.5 w-3.5 text-rose-600 shrink-0" />
-              ) : item.auditIssue.toLowerCase().includes("variance") ? (
-                <Scale className="h-3.5 w-3.5 text-slate-500 shrink-0" />
-              ) : item.auditIssue.toLowerCase().includes("duplicate") ? (
-                <Copy className="h-3.5 w-3.5 text-slate-500 shrink-0" />
-              ) : (
-                <DollarSign className="h-3.5 w-3.5 text-slate-500 shrink-0" />
-              )}
-              <span
-                className={`font-semibold ${
-                  item.auditIssue.toLowerCase().includes("missing")
-                    ? "text-rose-600"
-                    : "text-slate-700"
+            <div className="text-right shrink-0">
+              <div
+                className={`font-mono text-base font-bold tabular-nums tracking-tight ${
+                  item.direction === "in" || item.amount.startsWith("+")
+                    ? "text-emerald-700"
+                    : "text-slate-900"
                 }`}
               >
-                {item.auditIssue}
-              </span>
-              {item.auditDetail && (
-                <>
-                  <span className="text-slate-300">•</span>
-                  <span className="text-slate-500 truncate">{item.auditDetail}</span>
-                </>
+                {item.amount}
+              </div>
+              {item.auditIssue && (
+                <div className="mt-1 flex items-center justify-end gap-1.5">
+                  {item.auditIssue.toLowerCase().includes("missing") ? (
+                    <FileQuestion className="h-3.5 w-3.5 shrink-0 text-rose-600" />
+                  ) : item.auditIssue.toLowerCase().includes("variance") ||
+                    item.auditIssue.toLowerCase().includes("mismatch") ? (
+                    <Scale className="h-3.5 w-3.5 shrink-0 text-slate-600" />
+                  ) : item.auditIssue.toLowerCase().includes("duplicate") ? (
+                    <Copy className="h-3.5 w-3.5 shrink-0 text-slate-600" />
+                  ) : (
+                    <DollarSign className="h-3.5 w-3.5 shrink-0 text-slate-600" />
+                  )}
+                  <span
+                    className={`text-xs font-semibold ${
+                      item.auditIssue.toLowerCase().includes("missing")
+                        ? "text-rose-700"
+                        : "text-slate-800"
+                    }`}
+                  >
+                    {item.auditIssue}
+                  </span>
+                </div>
               )}
             </div>
-          )}
+          </div>
+
+          {/* Audit Trace: Source & Matched Records */}
+          <div className="pt-2.5 border-t border-slate-200/70 space-y-1.5 text-xs">
+            <div className="flex items-center justify-between gap-3 text-slate-600">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-xs font-medium text-slate-500 shrink-0">
+                  Source statement:
+                </span>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <FileText className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                  <span className="font-mono text-xs text-slate-700 truncate">
+                    {getSourceFileName(item)}
+                  </span>
+                </div>
+              </div>
+              <a
+                href={`#view-source-${item.id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  alert(`Opening statement preview for: ${getSourceFileName(item)}`);
+                }}
+                className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900 shrink-0 px-2 py-0.5 rounded border border-slate-200/80 bg-white hover:bg-slate-50 transition-colors shadow-2xs"
+                title="View origin document"
+              >
+                <span>View</span>
+                <ExternalLink className="h-3 w-3 text-slate-400" />
+              </a>
+            </div>
+
+            {item.matchedDocument ? (
+              <div className="flex items-center justify-between gap-3 text-slate-600">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xs font-medium text-slate-500 shrink-0">
+                    {item.auditIssue?.toLowerCase().includes("duplicate")
+                      ? "Conflicting charge:"
+                      : item.auditIssue?.toLowerCase().includes("variance") ||
+                        item.auditIssue?.toLowerCase().includes("mismatch")
+                      ? "Compared document:"
+                      : item.auditIssue?.toLowerCase().includes("draw") ||
+                        item.auditIssue?.toLowerCase().includes("deposit")
+                      ? "Deposit notice:"
+                      : item.auditIssue?.toLowerCase().includes("card")
+                      ? "Settlement record:"
+                      : "Document on file:"}
+                  </span>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    {item.auditIssue?.toLowerCase().includes("duplicate") ? (
+                      <Copy className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    ) : item.auditIssue?.toLowerCase().includes("draw") ||
+                      item.auditIssue?.toLowerCase().includes("deposit") ? (
+                      <DollarSign className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    ) : (
+                      <Scale className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    )}
+                    <span className="text-xs text-slate-700 font-medium truncate">
+                      {item.matchedDocument}
+                    </span>
+                  </div>
+                </div>
+                {item.matchedAmount && (
+                  <span className="font-mono text-xs font-semibold text-slate-800 shrink-0">
+                    {item.matchedAmount}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-3 text-slate-500">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xs font-medium text-slate-500 shrink-0">
+                    Supporting document:
+                  </span>
+                  <span className="text-xs text-slate-400 italic">
+                    None on file
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Main Section: 1 Clear Option to Upload Proof Document */}
-        <div className="space-y-4 pt-4">
+        {/* Upload & Notes */}
+        <div className="space-y-4 pt-3.5">
+          {/* Supporting Documents Upload */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-slate-900 block">
+              <label className="text-xs font-bold text-slate-900 block">
                 Proof &amp; Supporting Documents
               </label>
               {files.length > 0 && (
-                <span className="text-[11px] font-medium text-slate-500 font-mono">
-                  {files.length} {files.length === 1 ? "file" : "files"} attached
+                <span className="text-[11px] font-semibold text-slate-500 font-mono">
+                  {files.length} {files.length === 1 ? "file" : "files"}
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-slate-500 leading-normal">
-              Upload invoices, receipts, signed delivery slips, or payment confirmations.
-            </p>
 
             {/* Hidden native input supporting multiple files */}
             <input
@@ -275,42 +351,35 @@ export function OwnerResolutionModal({
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-colors ${
+                className={`border border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${
                   isDragging
-                    ? "border-slate-900 bg-slate-50"
-                    : "border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300"
+                    ? "border-slate-800 bg-slate-50"
+                    : "border-slate-200 bg-white hover:bg-slate-50/80 hover:border-slate-300"
                 }`}
               >
-                <UploadCloud className="h-7 w-7 text-slate-400 mx-auto mb-2" />
-                <div className="text-xs font-semibold text-slate-800">
-                  Click to upload proof{" "}
-                  <span className="font-normal text-slate-500">or drag &amp; drop</span>
+                <div className="flex flex-col items-center justify-center gap-1.5">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-100 text-slate-600">
+                    <UploadCloud className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="text-xs font-semibold text-slate-800">
+                    Drop file here, or{" "}
+                    <span className="text-slate-900 underline underline-offset-2">Choose Files</span>
+                  </div>
+                  <div className="text-[11px] text-slate-400">
+                    PDF, PNG, JPG, or spreadsheets
+                  </div>
                 </div>
-                <div className="text-[11px] text-slate-400 mt-1">
-                  PDF, PNG, JPG, or spreadsheets (multiple files supported)
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    fileInputRef.current?.click();
-                  }}
-                  className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 hover:bg-slate-100 transition-colors"
-                >
-                  <Plus className="h-3.5 w-3.5 text-slate-600" />
-                  Choose Files
-                </button>
               </div>
             ) : (
               <div className="space-y-2">
-                <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg bg-white overflow-hidden max-h-48 overflow-y-auto">
+                <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl bg-white overflow-hidden max-h-40 overflow-y-auto">
                   {files.map((file) => (
                     <div
                       key={file.id}
-                      className="flex items-center justify-between px-3 py-2 text-xs hover:bg-slate-50 transition-colors"
+                      className="flex items-center justify-between px-3.5 py-2 text-xs hover:bg-slate-50 transition-colors"
                     >
                       <div className="flex items-center gap-2 min-w-0 pr-2">
-                        <FileText className="h-4 w-4 text-slate-500 shrink-0" />
+                        <FileText className="h-4 w-4 text-slate-600 shrink-0" />
                         <span className="font-medium text-slate-800 truncate">
                           {file.name}
                         </span>
@@ -330,14 +399,14 @@ export function OwnerResolutionModal({
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between pt-1">
+                <div className="flex items-center justify-between pt-0.5">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 px-2.5 py-1 rounded-md border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 px-2.5 py-1 rounded-md border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-2xs"
                   >
                     <Plus className="h-3.5 w-3.5 text-slate-500" />
-                    Add more files
+                    Choose Files
                   </button>
                   <span className="text-[11px] text-slate-400">
                     PDF, PNG, JPG, or spreadsheets
@@ -347,26 +416,23 @@ export function OwnerResolutionModal({
             )}
           </div>
 
-          {/* Note Section */}
+          {/* Audit Note Section */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-slate-900 block">
-                Note{" "}
-                <span className="text-slate-400 font-normal">(optional)</span>
-              </label>
-            </div>
+            <label className="text-xs font-bold text-slate-900 block">
+              Note <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
             <Textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={2}
-              placeholder="Add context or explanation (e.g. Card slip verified with superintendent, paid in full)..."
-              className="text-xs font-normal text-slate-900 resize-none border-slate-200 focus:border-slate-400"
+              placeholder="Add an explanation or reason..."
+              className="text-xs font-normal text-slate-900 resize-none rounded-lg border-slate-200 focus:border-slate-400 placeholder:text-slate-400"
             />
           </div>
         </div>
 
         {/* Modal Footer */}
-        <ModalFooter className="border-t border-slate-100 pt-3 flex items-center justify-end gap-2 mt-5">
+        <ModalFooter className="border-t border-slate-100 pt-3 flex items-center justify-end gap-2 mt-4">
           <Button
             type="button"
             variant="ghost"
@@ -383,8 +449,9 @@ export function OwnerResolutionModal({
             size="sm"
             disabled={isSubmitting}
             onClick={handleSubmit}
-            className="text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 h-8 px-4"
+            className="text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 h-8 px-4 rounded-lg shadow-2xs transition-all flex items-center gap-1.5"
           >
+            <Check className="h-3.5 w-3.5" />
             {isSubmitting
               ? "Saving..."
               : isResolved

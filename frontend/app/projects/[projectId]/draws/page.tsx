@@ -16,7 +16,7 @@ import {
   ExternalLink,
   Check,
   Zap,
-  SlidersHorizontal,
+  CalendarRange,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -205,7 +205,24 @@ const SHOWCASE_ROWS = [
     actionLabel: "Request Draw #4",
     actionType: "PRIMARY",
     drawNumber: 4,
-    disbursed: "Pending",
+    disbursed: "$0.00",
+    reconciledPct: 0,
+  },
+  {
+    id: "drw-rev3",
+    badge: "R3",
+    badgeType: "REJECTED",
+    title: "Draw #3 Revision",
+    scopeName: "Fire Riser Hydraulic Calculation Submittal",
+    drawRefId: "DRW-2026-003-REV",
+    date: "May 25, 2026",
+    requestedAmt: "$19,080.00",
+    statusLabel: "Action Required",
+    statusType: "REJECTED",
+    actionLabel: "Resolve",
+    actionType: "DANGER_OUTLINE",
+    drawNumber: 3,
+    disbursed: "$0.00",
     reconciledPct: 0,
   },
   {
@@ -217,12 +234,12 @@ const SHOWCASE_ROWS = [
     drawRefId: "DRW-2026-003",
     date: "May 19, 2026",
     requestedAmt: "$318,000.00",
-    statusLabel: "Active (94%)",
+    statusLabel: "In Progress",
     statusType: "ACTIVE",
     actionLabel: "View Details",
     actionType: "OUTLINE",
     drawNumber: 3,
-    disbursed: "$318,000.00",
+    disbursed: "$298,920.00",
     reconciledPct: 94,
   },
   {
@@ -258,23 +275,6 @@ const SHOWCASE_ROWS = [
     drawNumber: 1,
     disbursed: "$448,000.00",
     reconciledPct: 100,
-  },
-  {
-    id: "drw-rev3",
-    badge: "R3",
-    badgeType: "REJECTED",
-    title: "Draw #3 Revision",
-    scopeName: "Fire Riser Hydraulic Calculation Submittal",
-    drawRefId: "DRW-2026-003-REV",
-    date: "May 25, 2026",
-    requestedAmt: "$19,080.00",
-    statusLabel: "Action Required",
-    statusType: "REJECTED",
-    actionLabel: "Resolve",
-    actionType: "DANGER_OUTLINE",
-    drawNumber: 3,
-    disbursed: "$0.00",
-    reconciledPct: 0,
   },
 ];
 
@@ -548,7 +548,7 @@ export default function DrawsPage() {
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">
               Loan Approved
             </span>
-            <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5">
+            <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5 tabular-nums">
               $1,471,120.00
             </div>
             <span className="text-xs text-slate-500 mt-1 block">
@@ -558,9 +558,9 @@ export default function DrawsPage() {
 
           <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">
-              Draw Received
+              Draws Received
             </span>
-            <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5">
+            <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5 tabular-nums">
               $1,086,000.00
             </div>
             <span className="text-xs font-medium text-emerald-700 mt-1 block">
@@ -572,7 +572,7 @@ export default function DrawsPage() {
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">
               Actual Spend
             </span>
-            <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5">
+            <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono mt-1.5 tabular-nums">
               $1,066,920.00
             </div>
           </div>
@@ -584,15 +584,15 @@ export default function DrawsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 sm:pb-5 border-b border-slate-100">
             <div className="flex items-center justify-between sm:justify-start gap-2.5 w-full sm:w-auto">
               <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-200/60 shadow-2xs">
-                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                <div className="h-8 w-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200/80 shadow-2xs">
+                  <CalendarRange className="h-4 w-4" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 tracking-tight">
                     Draw Timeline
                   </h3>
-                  <p className="text-[11px] text-slate-400 sm:hidden">
-                    Step {activeMobileStep} of {TIMELINE_STEPS.length} • {TIMELINE_STEPS[activeMobileStep - 1]?.title} ({TIMELINE_STEPS[activeMobileStep - 1]?.status === "ACTIVE" ? "Active" : TIMELINE_STEPS[activeMobileStep - 1]?.status === "READY" ? "Ready" : TIMELINE_STEPS[activeMobileStep - 1]?.status === "COMPLETED" ? "Funded" : "Upcoming"})
+                  <p className="text-[11px] text-slate-500 sm:hidden">
+                    Step {activeMobileStep} of {TIMELINE_STEPS.length} • {TIMELINE_STEPS[activeMobileStep - 1]?.title} ({TIMELINE_STEPS[activeMobileStep - 1]?.status === "ACTIVE" ? "Active" : TIMELINE_STEPS[activeMobileStep - 1]?.status === "READY" ? "Ready" : TIMELINE_STEPS[activeMobileStep - 1]?.status === "COMPLETED" ? "Funded" : "Scheduled"})
                   </p>
                 </div>
               </div>
@@ -623,20 +623,20 @@ export default function DrawsPage() {
             {/* Status Legend (Desktop) */}
             <div className="hidden sm:flex items-center flex-wrap gap-3 sm:gap-4 text-xs font-medium text-slate-600">
               <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                <span className="text-slate-700">Completed</span>
+                <span className="h-2 w-2 rounded-full bg-emerald-600" />
+                <span className="text-slate-700">Funded</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-teal-500" />
+                <span className="h-2 w-2 rounded-full bg-slate-900" />
                 <span className="text-slate-700">Active</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                <span className="h-2 w-2 rounded-full bg-amber-600" />
                 <span className="text-slate-700">Ready to Request</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-                <span className="text-slate-500">Upcoming</span>
+                <span className="h-2 w-2 rounded-full bg-slate-300" />
+                <span className="text-slate-500">Scheduled</span>
               </div>
             </div>
           </div>
@@ -649,7 +649,7 @@ export default function DrawsPage() {
               <div className="absolute top-[20px] left-[20px] right-[20px] h-[2px] bg-slate-200 z-0 pointer-events-none" />
               {/* Active Progress Line */}
               <div
-                className="absolute top-[20px] left-[20px] h-[2px] bg-emerald-500 z-0 pointer-events-none transition-all duration-300"
+                className="absolute top-[20px] left-[20px] h-[2px] bg-emerald-600 z-0 pointer-events-none transition-all duration-300"
                 style={{
                   width: `${((Math.min(activeMobileStep, 4) - 1) / (TIMELINE_STEPS.length - 1)) * 100}%`,
                 }}
@@ -673,27 +673,27 @@ export default function DrawsPage() {
                         className={cn(
                           "h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ring-2 ring-white shadow-2xs",
                           isCompleted
-                            ? "bg-emerald-500 text-white"
+                            ? "bg-emerald-600 text-white"
                             : isActive
-                            ? "bg-teal-500 text-white ring-teal-200 ring-offset-1"
+                            ? "bg-slate-900 text-white ring-slate-200"
                             : isReady
-                            ? "bg-amber-500 text-white"
-                            : "bg-slate-100 text-slate-400 border border-slate-200",
-                          isSelected && "scale-110 shadow-sm ring-blue-500 ring-offset-2"
+                            ? "bg-amber-600 text-white ring-amber-100"
+                            : "bg-white text-slate-400 border border-slate-300",
+                          isSelected && "scale-110 shadow-xs ring-slate-900 ring-offset-2"
                         )}
                       >
                         {isCompleted ? (
-                          <Check className="h-3.5 w-3.5 stroke-[3]" />
-                        ) : isActive ? (
-                          <Zap className="h-3.5 w-3.5 fill-white stroke-[1.5]" />
+                          <Check className="h-3.5 w-3.5 stroke-[2.5]" />
                         ) : (
-                          <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
+                          <span className="font-mono text-[11px] font-bold">
+                            0{step.num}
+                          </span>
                         )}
                       </div>
                       <span
                         className={cn(
                           "text-[10px] font-mono mt-1 font-semibold leading-none",
-                          isSelected ? "text-blue-600 font-bold" : "text-slate-500"
+                          isSelected ? "text-slate-900 font-bold" : "text-slate-500"
                         )}
                       >
                         {step.nodeId}
@@ -731,61 +731,61 @@ export default function DrawsPage() {
                     className={cn(
                       "w-[84vw] max-w-[310px] shrink-0 snap-center rounded-xl p-4 border transition-all cursor-pointer space-y-3 shadow-xs",
                       isSelected
-                        ? "border-blue-400/80 bg-blue-50/20 ring-1 ring-blue-300/50"
+                        ? "border-slate-900 bg-white ring-1 ring-slate-900/10"
                         : "border-slate-200/90 bg-white"
                     )}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2">
                           <span className="font-bold text-slate-900 text-sm">{step.title}</span>
                           {isCompleted && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/70">
-                              Completed
+                            <span className="text-[11px] font-semibold text-emerald-700 flex items-center gap-1">
+                              <Check className="h-3 w-3 stroke-[2.5]" /> Funded
                             </span>
                           )}
                           {isActive && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200/70">
-                              Active
+                            <span className="text-[11px] font-semibold text-slate-900 flex items-center gap-1">
+                              <span className="h-1.5 w-1.5 rounded-full bg-slate-900" /> Active
                             </span>
                           )}
                           {isReady && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200/70">
-                              Ready to Request
+                            <span className="text-[11px] font-semibold text-amber-800 flex items-center gap-1">
+                              <Clock className="h-3 w-3 text-amber-600" /> Ready
                             </span>
                           )}
                           {step.status === "UPCOMING" && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/70">
-                              Upcoming
+                            <span className="text-[11px] font-medium text-slate-500">
+                              Scheduled
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-slate-500 font-medium mt-0.5 line-clamp-1">{step.scope}</p>
+                        <p className="text-xs text-slate-600 font-medium mt-0.5 line-clamp-1">{step.scope}</p>
                       </div>
-                      <span className="text-xs font-semibold text-slate-400 shrink-0">{step.date}</span>
+                      <span className="text-xs font-semibold text-slate-500 shrink-0">{step.date}</span>
                     </div>
 
                     {/* Financial Metrics */}
                     <div className="grid grid-cols-2 gap-2 p-2.5 bg-slate-50 rounded-lg border border-slate-100 text-xs">
                       <div>
-                        <span className="text-[10px] uppercase font-semibold text-slate-400 block">Amount</span>
-                        <span className="font-mono font-bold text-slate-900 text-sm">{step.amount}</span>
+                        <span className="text-[10px] uppercase font-semibold text-slate-500 block">Amount</span>
+                        <span className="font-mono font-bold text-slate-900 text-sm tabular-nums">{step.amount}</span>
                       </div>
                       <div>
-                        <span className="text-[10px] uppercase font-semibold text-slate-400 block">Spent</span>
+                        <span className="text-[10px] uppercase font-semibold text-slate-500 block">Spent</span>
                         <span
                           className={cn(
-                            "font-semibold text-xs mt-0.5 block",
+                            "font-semibold text-xs mt-0.5 block tabular-nums",
                             isCompleted
                               ? "text-emerald-700"
                               : isActive
-                              ? "text-teal-700"
+                              ? "text-slate-900 font-bold"
                               : isReady
-                              ? "text-amber-700"
+                              ? "text-amber-800"
                               : "text-slate-500"
                           )}
                         >
-                          {step.disbursedText}
+                          {step.progressPct}% spent
                         </span>
                       </div>
                     </div>
@@ -796,7 +796,7 @@ export default function DrawsPage() {
                         <div
                           className={cn(
                             "h-full rounded-full transition-all duration-300",
-                            isCompleted ? "bg-emerald-500" : "bg-teal-500"
+                            isCompleted ? "bg-emerald-600" : "bg-slate-900"
                           )}
                           style={{ width: `${step.progressPct}%` }}
                         />
@@ -841,7 +841,7 @@ export default function DrawsPage() {
                   onClick={() => scrollToMobileStep(s.num)}
                   className={cn(
                     "h-1.5 rounded-full transition-all cursor-pointer",
-                    activeMobileStep === s.num ? "w-5 bg-blue-600" : "w-1.5 bg-slate-200 hover:bg-slate-300"
+                    activeMobileStep === s.num ? "w-5 bg-slate-900" : "w-1.5 bg-slate-200 hover:bg-slate-300"
                   )}
                   aria-label={`Go to Draw ${s.num}`}
                 />
@@ -854,9 +854,9 @@ export default function DrawsPage() {
             <div className="min-w-[640px] px-4 relative">
               <div className="grid grid-cols-5 relative">
                 {/* Continuous Background Track */}
-                <div className="absolute top-[20px] left-[10%] right-[10%] h-[3px] bg-slate-200 rounded-full z-0 pointer-events-none" />
-                {/* Active Progress Line (From D1 through D4) */}
-                <div className="absolute top-[20px] left-[10%] w-[60%] h-[3px] bg-emerald-500 rounded-full z-0 pointer-events-none shadow-[0_0_8px_rgba(16,185,129,0.25)]" />
+                <div className="absolute top-[18px] left-[10%] right-[10%] h-[2px] bg-slate-200 z-0 pointer-events-none" />
+                {/* Completed Progress Line (From D1 through D3) */}
+                <div className="absolute top-[18px] left-[10%] w-[50%] h-[2px] bg-emerald-600 z-0 pointer-events-none" />
 
                 {TIMELINE_STEPS.map((step) => {
                   const isCompleted = step.status === "COMPLETED";
@@ -873,90 +873,84 @@ export default function DrawsPage() {
                       <div className="relative z-10">
                         <div
                           className={cn(
-                            "h-10 w-10 rounded-full flex items-center justify-center shadow-xs ring-4 group-hover:scale-105 transition-transform duration-150",
+                            "h-9 w-9 rounded-full flex items-center justify-center transition-all duration-150 ring-4 ring-white shadow-xs",
                             isCompleted
-                              ? "bg-emerald-500 text-white ring-white"
+                              ? "bg-emerald-600 text-white"
                               : isActive
-                              ? "bg-teal-500 text-white ring-teal-300/80 ring-offset-2 ring-offset-teal-50 shadow-md"
+                              ? "bg-slate-900 text-white ring-slate-200"
                               : isReady
-                              ? "bg-amber-500 text-white ring-white"
-                              : "bg-slate-100 border border-slate-200/90 text-slate-500 ring-white shadow-2xs"
+                              ? "bg-amber-600 text-white ring-amber-100"
+                              : "bg-white border border-slate-300 text-slate-400"
                           )}
                         >
                           {isCompleted ? (
-                            <Check className="h-4 w-4 stroke-[3]" />
+                            <Check className="h-4 w-4 stroke-[2.5]" />
                           ) : isActive ? (
-                            <Zap className="h-4 w-4 fill-white stroke-[1.5]" />
+                            <span className="font-mono text-xs font-bold text-white">03</span>
+                          ) : isReady ? (
+                            <span className="font-mono text-xs font-bold text-white">04</span>
                           ) : (
-                            <Plus className={cn("h-4 w-4", isReady ? "stroke-[3]" : "stroke-[2]")} />
+                            <span className="font-mono text-xs font-medium text-slate-400">05</span>
                           )}
                         </div>
-                        <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-bold font-mono border-2 border-white shadow-2xs leading-none">
-                          {step.nodeId}
-                        </span>
                       </div>
 
-                      <div className="text-center mt-3 space-y-0.5 w-full max-w-[120px]">
-                        <div className="flex items-center justify-center gap-1.5">
+                      {/* Clean Single Typographic Hierarchy */}
+                      <div className="text-center mt-2.5 space-y-1 w-full max-w-[130px]">
+                        <div>
                           <span
                             className={cn(
-                              "text-xs font-bold transition-colors",
+                              "text-xs font-bold block tracking-tight transition-colors",
                               isActive
-                                ? "text-blue-600 group-hover:underline"
+                                ? "text-slate-900"
                                 : isUpcoming
-                                ? "text-slate-700"
-                                : "text-slate-900 group-hover:text-blue-600"
+                                ? "text-slate-600"
+                                : "text-slate-900 group-hover:text-slate-700"
                             )}
                           >
                             {step.title}
                           </span>
-                          {step.badgeLabel && (
-                            <span
-                              className={cn(
-                                "text-[10px] font-bold px-1.5 py-0.5 rounded leading-none border",
-                                isActive
-                                  ? "bg-teal-50 text-teal-700 border-teal-200/70"
-                                  : "bg-amber-50 text-amber-700 border-amber-200/70"
-                              )}
-                            >
-                              {step.badgeLabel}
-                            </span>
-                          )}
+                          <span className="text-[11px] font-mono text-slate-500 font-semibold tabular-nums block">
+                            {step.amount}
+                          </span>
                         </div>
 
-                        {isReady || isUpcoming ? (
-                          <div className="my-1">
-                            <span className="inline-block border border-amber-200/80 bg-amber-50/90 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md">
-                              {step.disbursedText}
-                            </span>
-                          </div>
-                        ) : (
-                          <>
-                            <div className="text-sm font-bold font-mono tracking-tight text-slate-900">
-                              {step.amount}
-                            </div>
-                            <div
-                              className={cn(
-                                "h-1 w-10 rounded-full mx-auto my-1.5",
-                                isCompleted ? "bg-emerald-500" : "bg-teal-500"
-                              )}
-                            />
-                            <div
-                              className={cn(
-                                "text-[11px] font-semibold",
-                                isCompleted ? "text-emerald-700" : "text-teal-700"
-                              )}
-                            >
-                              {step.disbursedText}
-                            </div>
-                          </>
-                        )}
-
-                        {step.date && (
-                          <div className="text-[11px] text-slate-400 font-medium pt-0.5">
-                            {step.date}
-                          </div>
-                        )}
+                        <div className="pt-0.5 space-y-0.5">
+                          <span
+                            className={cn(
+                              "text-[11px] font-semibold block tabular-nums",
+                              isCompleted
+                                ? "text-emerald-700"
+                                : isActive
+                                ? "text-slate-900 font-bold"
+                                : isReady
+                                ? "text-amber-800"
+                                : "text-slate-500"
+                            )}
+                          >
+                            {step.progressPct}% spent
+                          </span>
+                          <span
+                            className={cn(
+                              "text-[10px] font-medium block",
+                              isCompleted
+                                ? "text-slate-500"
+                                : isActive
+                                ? "text-slate-600"
+                                : isReady
+                                ? "text-slate-500"
+                                : "text-slate-400"
+                            )}
+                          >
+                            {isCompleted
+                              ? `Funded ${step.date}`
+                              : isActive
+                              ? `Active (${step.date})`
+                              : isReady
+                              ? `Ready to request`
+                              : `Target: Dec 2026`}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   );
@@ -1028,7 +1022,7 @@ export default function DrawsPage() {
                 No draws found matching the selected filter.
               </div>
             ) : (
-              filteredShowcaseRows.map((row) => (
+              filteredShowcaseRows.map((row, index) => (
                 <div
                   key={`mob-row-${row.id}`}
                   onClick={() => {
@@ -1040,33 +1034,40 @@ export default function DrawsPage() {
                   }}
                   className="p-4 hover:bg-slate-50/70 transition-colors cursor-pointer space-y-3"
                 >
-                  {/* Top row: Title + Status + Date */}
+                  {/* Top row: Sr + Title + Status + Date */}
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <div className="flex items-center gap-1.5 flex-wrap">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono text-xs text-slate-400 select-none">
+                          #{index + 1}
+                        </span>
                         <span className="font-bold text-slate-900 text-sm">{row.title}</span>
                         {row.statusType === "FUNDED" && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-800 border border-slate-200/80">
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
+                            <Check className="h-3 w-3 text-emerald-600 stroke-[2.5]" />
                             Funded
                           </span>
                         )}
                         {row.statusType === "ACTIVE" && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900">
+                            <span className="h-1.5 w-1.5 rounded-full bg-slate-900" />
                             Active ({row.reconciledPct}%)
                           </span>
                         )}
                         {row.statusType === "PENDING" && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200/60">
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-800">
+                            <Clock className="h-3 w-3 text-amber-600" />
                             Ready to Request
                           </span>
                         )}
                         {row.statusType === "REJECTED" && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200/60">
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-700">
+                            <AlertCircle className="h-3 w-3 text-rose-600" />
                             Action Required
                           </span>
                         )}
                       </div>
-                      <span className="text-[11px] font-mono text-slate-400 block mt-0.5">
+                      <span className="text-[11px] font-mono text-slate-500 block mt-0.5">
                         {row.drawRefId}
                       </span>
                     </div>
@@ -1083,19 +1084,22 @@ export default function DrawsPage() {
                   {/* Financials Summary */}
                   <div className="grid grid-cols-2 gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs">
                     <div>
-                      <span className="text-[10px] uppercase font-semibold text-slate-400 block">
+                      <span className="text-[10px] uppercase font-semibold text-slate-500 block">
                         Requested
                       </span>
-                      <span className="font-mono font-bold text-slate-900 text-sm">
+                      <span className="font-mono font-bold text-slate-900 text-sm tabular-nums">
                         {row.requestedAmt}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[10px] uppercase font-semibold text-slate-400 block">
+                      <span className="text-[10px] uppercase font-semibold text-slate-500 block">
                         Spent
                       </span>
-                      <span className="font-mono font-semibold text-slate-700 text-sm">
+                      <span className="font-mono font-semibold text-slate-700 text-sm tabular-nums">
                         {row.disbursed}
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-sans block mt-0.5">
+                        {row.reconciledPct > 0 ? `${row.reconciledPct}% spent` : "0% spent"}
                       </span>
                     </div>
                   </div>
@@ -1147,7 +1151,7 @@ export default function DrawsPage() {
                             buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
                           handleOpenDetail(matchingDraw);
                         }}
-                        className="w-full h-8 text-xs font-medium text-slate-700 border-slate-200 bg-white hover:bg-slate-50 rounded-lg shadow-2xs flex items-center justify-center gap-1.5"
+                        className="w-full h-8 text-xs font-medium text-slate-600 border-slate-200 bg-white hover:bg-slate-50 rounded-lg shadow-2xs flex items-center justify-center gap-1.5"
                       >
                         <span>View Details</span>
                         <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
@@ -1161,32 +1165,44 @@ export default function DrawsPage() {
 
           {/* Desktop Table (hidden sm:block) */}
           <div className="hidden sm:block overflow-x-auto custom-scrollbar">
-            <table className="w-full min-w-[760px] text-left text-xs">
+            <table className="w-full min-w-[780px] text-left text-xs">
+              <colgroup>
+                <col className="w-12" />
+                <col className="w-32" />
+                <col className="w-48" />
+                <col />
+                <col className="w-32" />
+                <col className="w-32" />
+                <col className="w-36" />
+                <col className="w-28" />
+              </colgroup>
               <thead className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-semibold text-[11px] uppercase tracking-wider">
                 <tr>
+                  <th className="py-3 px-3.5 text-center whitespace-nowrap">#</th>
+                  <th className="py-3 px-4">Date</th>
                   <th className="py-3 px-4">Draw</th>
                   <th className="py-3 px-4">Scope</th>
-                  <th className="py-3 px-4">Date</th>
                   <th className="py-3 px-4 text-right">Requested</th>
                   <th className="py-3 px-4 text-right">Spent</th>
                   <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-800">
                 {isDrawsLoading ? (
                   Array.from({ length: 4 }).map((_, idx) => (
                     <tr key={`skel-${idx}`} className="animate-pulse">
+                      <td className="py-3.5 px-3.5 text-center"><Skeleton className="h-4 w-4 mx-auto" /></td>
                       <td className="py-3.5 px-4"><Skeleton className="h-4 w-20" /></td>
-                      <td className="py-3.5 px-4"><Skeleton className="h-4 w-40" /></td>
                       <td className="py-3.5 px-4"><Skeleton className="h-4 w-24" /></td>
+                      <td className="py-3.5 px-4"><Skeleton className="h-4 w-40" /></td>
                       <td className="py-3.5 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
                       <td className="py-3.5 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
                       <td className="py-3.5 px-4"><Skeleton className="h-4 w-20" /></td>
                       <td className="py-3.5 px-4 text-right"><Skeleton className="h-6 w-16 ml-auto" /></td>
                     </tr>
                   ))
-                ) : filteredShowcaseRows.map((row) => (
+                ) : filteredShowcaseRows.map((row, index) => (
                   <tr
                     key={row.id}
                     onClick={() => {
@@ -1196,60 +1212,78 @@ export default function DrawsPage() {
                         buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
                       handleOpenDetail(matchingDraw);
                     }}
-                    className="hover:bg-slate-50/70 transition-colors cursor-pointer"
+                    className="group hover:bg-slate-50/70 transition-colors cursor-pointer"
                   >
-                    {/* Draw Ref */}
-                    <td className="py-3.5 px-4 font-mono font-medium text-xs">
-                      <div className="font-bold text-slate-900">{row.title}</div>
-                      <span className="text-[11px] text-slate-400">{row.drawRefId}</span>
-                    </td>
-
-                    {/* Scope */}
-                    <td className="py-3.5 px-4 text-slate-800 font-medium">
-                      {row.scopeName}
+                    {/* Index */}
+                    <td className="py-3.5 px-3.5 text-center font-mono text-xs text-slate-400 tabular-nums select-none">
+                      {index + 1}
                     </td>
 
                     {/* Date */}
-                    <td className="py-3.5 px-4 text-slate-500 font-medium">
+                    <td className="py-3.5 px-4 text-slate-600 font-medium whitespace-nowrap">
                       {row.date}
                     </td>
 
+                    {/* Draw Ref */}
+                    <td className="py-3.5 px-4 text-xs">
+                      <div className="font-bold text-slate-900 group-hover:text-slate-700 transition-colors">
+                        {row.title}
+                      </div>
+                      <span className="text-[11px] font-mono text-slate-500 block">
+                        {row.drawRefId}
+                      </span>
+                    </td>
+
+                    {/* Scope */}
+                    <td className="py-3.5 px-4 text-slate-700 font-medium">
+                      {row.scopeName}
+                    </td>
+
                     {/* Requested */}
-                    <td className="py-3.5 px-4 font-mono font-bold text-right text-slate-900">
+                    <td className="py-3.5 px-4 font-mono font-bold text-right text-slate-900 tabular-nums whitespace-nowrap">
                       {row.requestedAmt}
                     </td>
 
                     {/* Spent */}
-                    <td className="py-3.5 px-4 font-mono text-right text-slate-600 font-medium">
-                      {row.disbursed}
+                    <td className="py-3.5 px-4 font-mono text-right tabular-nums whitespace-nowrap">
+                      <span className="font-semibold text-slate-900 block">
+                        {row.disbursed}
+                      </span>
+                      <span className="text-[10px] text-slate-500 block font-sans">
+                        {row.reconciledPct > 0 ? `${row.reconciledPct}% spent` : "0% spent"}
+                      </span>
                     </td>
 
                     {/* Status badge */}
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-4 whitespace-nowrap">
                       {row.statusType === "FUNDED" && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-800 border border-slate-200/80">
-                          Funded
-                        </span>
+                        <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+                          <Check className="h-3.5 w-3.5 text-emerald-600 stroke-[2.5]" />
+                          <span>Funded</span>
+                        </div>
                       )}
                       {row.statusType === "ACTIVE" && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200/60">
-                          Active ({row.reconciledPct}%)
-                        </span>
+                        <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900">
+                          <span className="h-2 w-2 rounded-full bg-slate-900" />
+                          <span>In Progress</span>
+                        </div>
                       )}
                       {row.statusType === "PENDING" && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200/60">
-                          Ready to Request
-                        </span>
+                        <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800">
+                          <Clock className="h-3.5 w-3.5 text-amber-600" />
+                          <span>Ready to Request</span>
+                        </div>
                       )}
                       {row.statusType === "REJECTED" && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200/60">
-                          Action Required
-                        </span>
+                        <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700">
+                          <AlertCircle className="h-3.5 w-3.5 text-rose-600" />
+                          <span>Action Required</span>
+                        </div>
                       )}
                     </td>
 
                     {/* Action */}
-                    <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                       {row.actionType === "PRIMARY" ? (
                         <Button
                           variant="primary"
@@ -1279,13 +1313,13 @@ export default function DrawsPage() {
                             setSelectedDraw(matchingDraw);
                             setIsResubmitRevisionOpen(true);
                           }}
-                          className="h-7 text-xs font-semibold px-3 text-rose-700 border-rose-200 bg-rose-50/50 hover:bg-rose-100/50 rounded-lg shadow-2xs"
+                          className="h-7 text-xs font-semibold px-3 text-rose-700 border-rose-200 bg-rose-50 hover:bg-rose-100 rounded-lg shadow-2xs"
                         >
                           Resolve
                         </Button>
                       ) : (
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => {
                             setSelectedTimelineDrawNumber(row.drawNumber);
@@ -1294,9 +1328,10 @@ export default function DrawsPage() {
                               buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
                             handleOpenDetail(matchingDraw);
                           }}
-                          className="h-7 text-xs font-medium px-3 text-slate-700 border-slate-200 bg-white hover:bg-slate-50 rounded-lg shadow-2xs"
+                          className="h-7 text-xs font-medium px-2.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg inline-flex items-center gap-1 cursor-pointer"
                         >
-                          View Details
+                          <span>View</span>
+                          <ChevronRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-slate-600 transition-colors" />
                         </Button>
                       )}
                     </td>
