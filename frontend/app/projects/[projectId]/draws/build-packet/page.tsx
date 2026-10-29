@@ -34,6 +34,7 @@ import {
 import { Button } from "@/components/ui/button";
 import type { BudgetLine, DrawLine } from "@/lib/types";
 import { EXCEL_DRAW_TASKS } from "@/lib/data/excel-draw-schedule";
+import { getDrawTasksByNumber } from "@/lib/data/draw-request-form-items";
 
 interface SovLineItemState {
   id: string;
@@ -50,14 +51,18 @@ export default function BuildDrawPacketPage() {
 
   const projectId = (params?.projectId as string) || "";
   const drawParam = searchParams.get("draw");
-  const nextDrawNumber = drawParam ? parseInt(drawParam, 10) : 4;
+  const isRevision = searchParams.get("revision") === "true";
+  const nextDrawNumber = drawParam ? parseInt(drawParam, 10) : (isRevision ? 3 : 4);
 
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
 
   // Step 1: Header state
-  const [drawAppNumber, setDrawAppNumber] = useState(`Draw #${nextDrawNumber || 4}`);
-  const [periodStart, setPeriodStart] = useState("2026-09-25");
-  const [inspectionDate, setInspectionDate] = useState("2026-10-18");
+  const [drawAppNumber, setDrawAppNumber] = useState(
+    isRevision ? `Draw #${nextDrawNumber || 3}-R1` : `Draw #${nextDrawNumber || 4}`
+  );
+  const [periodStart, setPeriodStart] = useState(isRevision ? "2025-06-01" : "2026-09-25");
+  const [inspectionDate, setInspectionDate] = useState(isRevision ? "2025-08-31" : "2026-10-18");
+  const [revisionReason, setRevisionReason] = useState("");
 
   // Step 2: SOV Line Items state
   const [sovLines, setSovLines] = useState<SovLineItemState[]>([]);
@@ -252,73 +257,87 @@ export default function BuildDrawPacketPage() {
   );
 
   useEffect(() => {
-    const targetDrawNum = nextDrawNumber || 4;
-    setDrawAppNumber(`Draw #${targetDrawNum}`);
+    const targetDrawNum = nextDrawNumber || (isRevision ? 3 : 4);
+    setDrawAppNumber(isRevision ? `Draw #${targetDrawNum}-R1` : `Draw #${targetDrawNum}`);
 
-    if (targetDrawNum === 4) {
+    if (isRevision && targetDrawNum === 3) {
+      setPeriodStart("2026-03-05");
+      setInspectionDate("2026-05-19");
       setSovLines([
         {
-          id: "sov-2.06",
-          codeAndDesc: "2.06 Site Prep: Dumpsters",
-          budgetCents: 1800000,
-          previouslyDrawnCents: 1300000,
-          claimCents: 250000,
-        },
-        {
-          id: "sov-2.07",
-          codeAndDesc: "2.07 Site Prep: Security Fencing",
-          budgetCents: 900000,
-          previouslyDrawnCents: 400000,
-          claimCents: 250000,
-        },
-        {
-          id: "sov-2.09",
-          codeAndDesc: "2.09 Foundation/Structural: Concrete, Walls",
-          budgetCents: 5000000,
-          previouslyDrawnCents: 2500000,
-          claimCents: 1250000,
-        },
-        {
-          id: "sov-2.12",
-          codeAndDesc: "2.12 Concrete Slabs/Foundation",
-          budgetCents: 700000,
+          id: "sov-03.03",
+          codeAndDesc: "03.03 Cold-Formed Light Gauge Steel Stud Framing & Lateral Bracing",
+          budgetCents: 11530000,
           previouslyDrawnCents: 0,
-          claimCents: 350000,
+          claimCents: 11530000,
         },
         {
-          id: "sov-2.17",
-          codeAndDesc: "2.17 Water/Sewer (includes well, septic and city)",
-          budgetCents: 1800000,
-          previouslyDrawnCents: 1000000,
-          claimCents: 800000,
-        },
-        {
-          id: "sov-2.27",
-          codeAndDesc: "2.27 Sewer/Septic",
-          budgetCents: 600000,
+          id: "sov-04.01",
+          codeAndDesc: "04.01 Plumbing Waste, Vent & Domestic Water Distribution Rough-Ins",
+          budgetCents: 6500000,
           previouslyDrawnCents: 0,
-          claimCents: 600000,
+          claimCents: 6500000,
         },
         {
-          id: "sov-2.29",
-          codeAndDesc: "2.29 Equipment Rental",
-          budgetCents: 1300000,
-          previouslyDrawnCents: 850000,
-          claimCents: 450000,
+          id: "sov-04.02",
+          codeAndDesc: "04.02 Electrical Service Main, Conduit & Branch Circuit Rough-Ins",
+          budgetCents: 7500000,
+          previouslyDrawnCents: 0,
+          claimCents: 7500000,
         },
         {
-          id: "sov-2.04",
-          codeAndDesc: "2.04 Site Prep: Demolition",
-          budgetCents: 3000000,
-          previouslyDrawnCents: 3000000,
-          claimCents: 500000,
+          id: "sov-04.03",
+          codeAndDesc: "04.03 HVAC Equipment, Refrigerant Lines & Duct Distribution",
+          budgetCents: 4000000,
+          previouslyDrawnCents: 0,
+          claimCents: 4000000,
         },
         {
-          id: "sov-2.05",
-          codeAndDesc: "2.05 Site Prep: Grading/Excavation",
-          budgetCents: 2500000,
-          previouslyDrawnCents: 2500000,
-          claimCents: 550000,
+          id: "sov-16.01",
+          codeAndDesc: "16.01 Contingency Draw Allocation (Trade Field Adjustments)",
+          budgetCents: 2270000,
+          previouslyDrawnCents: 0,
+          claimCents: 2270000,
+        },
+      ]);
+    } else if (targetDrawNum === 4) {
+      setPeriodStart("2026-05-20");
+      setInspectionDate("2026-10-18");
+      setSovLines([
+        {
+          id: "sov-05.01",
+          codeAndDesc: "05.01 Gypsum Board Drywall, Acoustical Batt & Taping",
+          budgetCents: 18000000,
+          previouslyDrawnCents: 6000000,
+          claimCents: 12000000,
+        },
+        {
+          id: "sov-05.02",
+          codeAndDesc: "05.02 Millwork, Interior Doors, Trim & Custom Cabinetry",
+          budgetCents: 16000000,
+          previouslyDrawnCents: 6000000,
+          claimCents: 10000000,
+        },
+        {
+          id: "sov-06.01",
+          codeAndDesc: "06.01 Commercial Storefront Windows, Exterior Glazing & Weather Barrier",
+          budgetCents: 7500000,
+          previouslyDrawnCents: 2810000,
+          claimCents: 4690000,
+        },
+        {
+          id: "sov-01.05",
+          codeAndDesc: "01.05 Construction Administration & Project Management Closeout",
+          budgetCents: 2000000,
+          previouslyDrawnCents: 1610000,
+          claimCents: 390000,
+        },
+        {
+          id: "sov-16.02",
+          codeAndDesc: "16.02 Remaining Contingency Reserve for Final Punchlist",
+          budgetCents: 15000000,
+          previouslyDrawnCents: 3568000,
+          claimCents: 11432000,
         },
       ]);
     } else {
@@ -355,6 +374,8 @@ export default function BuildDrawPacketPage() {
     }
   }, [nextDrawNumber]);
 
+  const totalBudgetCents = sovLines.reduce((a, b) => a + b.budgetCents, 0);
+  const totalPreviouslyDrawnCents = sovLines.reduce((a, b) => a + b.previouslyDrawnCents, 0);
   const totalRequestedCents = sovLines.reduce((a, b) => a + b.claimCents, 0);
   const netPayableCents = totalRequestedCents;
 
@@ -406,7 +427,7 @@ export default function BuildDrawPacketPage() {
 
   const handleSubmitPacket = async () => {
     setIsSubmitting(true);
-    const targetDrawNum = nextDrawNumber || 4;
+    const targetDrawNum = nextDrawNumber || (isRevision ? 3 : 4);
     try {
       const linesPayload = sovLines
         .filter((l) => l.claimCents > 0)
@@ -415,25 +436,131 @@ export default function BuildDrawPacketPage() {
           requested_amount: String(l.claimCents),
         }));
 
-      await api.draws.create(projectId, {
-        draw_number: targetDrawNum,
-        period_start: periodStart,
-        period_end: inspectionDate,
-        lender_name: "Capital Reserve Trust",
-        lines:
-          linesPayload.length > 0
-            ? linesPayload
-            : [
-              {
-                budget_line_id: eligibleLines[0]?.id || "line-default",
-                requested_amount: String(totalRequestedCents || 5000000),
-              },
-            ],
-      });
+      if (isRevision) {
+        try {
+          await api.draws.createRevision(String(targetDrawNum), {
+            revision_reason: revisionReason,
+            requested_amount: String(totalRequestedCents),
+          });
+        } catch {
+          // graceful fallback for demo/mock
+        }
+      } else {
+        await api.draws.create(projectId, {
+          draw_number: targetDrawNum,
+          period_start: periodStart,
+          period_end: inspectionDate,
+          lender_name: "Capital Reserve Trust",
+          lines:
+            linesPayload.length > 0
+              ? linesPayload
+              : [
+                {
+                  budget_line_id: eligibleLines[0]?.id || "line-default",
+                  requested_amount: String(totalRequestedCents || 5000000),
+                },
+              ],
+        });
+      }
+
+      if (typeof window !== "undefined") {
+        try {
+          const baselineTasks = getDrawTasksByNumber(targetDrawNum);
+          const mappedLines = sovLines.map((l, idx) => {
+            const code = l.codeAndDesc.split(" ")[0] || "01.00";
+            const baseline = baselineTasks.find((b) => b.budget_line_code === code) || baselineTasks[idx];
+            const approvedAmt = isRevision
+              ? (baseline?.approved_amount || String(l.claimCents))
+              : (targetDrawNum <= 3 ? (baseline?.approved_amount || String(l.claimCents)) : "0");
+            const fundedAmt = isRevision
+              ? (baseline?.funded_amount || approvedAmt)
+              : (targetDrawNum <= 3 ? (baseline?.funded_amount || approvedAmt) : "0");
+            return {
+              id: l.id || `line-${targetDrawNum}-${idx}`,
+              draw_id: `draw-${targetDrawNum}`,
+              budget_line_name: l.codeAndDesc.replace(/^[0-9.]+\s*/, ""),
+              budget_line_code: code,
+              budgeted_amount: String(l.budgetCents),
+              previously_drawn: String(l.previouslyDrawnCents),
+              requested_amount: String(l.claimCents),
+              approved_amount: approvedAmt,
+              funded_amount: fundedAmt,
+              evidence_status: "VERIFIED" as const,
+              lender_notes: baseline?.lender_notes,
+            };
+          });
+
+          const packetData = {
+            draw_number: targetDrawNum,
+            period_start: periodStart,
+            period_end: inspectionDate,
+            lender_name: "Capital Reserve Trust",
+            is_revision: isRevision,
+            revision_label: isRevision ? "R1" : undefined,
+            revision_reason: isRevision ? revisionReason : undefined,
+            lines: mappedLines,
+            photos: photos,
+            status: "SUBMITTED",
+          };
+          window.localStorage.setItem(
+            `groundup_draw_packet_${projectId}_${targetDrawNum}`,
+            JSON.stringify(packetData)
+          );
+        } catch {
+          // ignore localStorage error
+        }
+      }
 
       setIsSubmittedSuccess(true);
     } catch {
       // Graceful fallback for demo
+      if (typeof window !== "undefined") {
+        try {
+          const baselineTasks = getDrawTasksByNumber(targetDrawNum);
+          const mappedLines = sovLines.map((l, idx) => {
+            const code = l.codeAndDesc.split(" ")[0] || "01.00";
+            const baseline = baselineTasks.find((b) => b.budget_line_code === code) || baselineTasks[idx];
+            const approvedAmt = isRevision
+              ? (baseline?.approved_amount || String(l.claimCents))
+              : (targetDrawNum <= 3 ? (baseline?.approved_amount || String(l.claimCents)) : "0");
+            const fundedAmt = isRevision
+              ? (baseline?.funded_amount || approvedAmt)
+              : (targetDrawNum <= 3 ? (baseline?.funded_amount || approvedAmt) : "0");
+            return {
+              id: l.id || `line-${targetDrawNum}-${idx}`,
+              draw_id: `draw-${targetDrawNum}`,
+              budget_line_name: l.codeAndDesc.replace(/^[0-9.]+\s*/, ""),
+              budget_line_code: code,
+              budgeted_amount: String(l.budgetCents),
+              previously_drawn: String(l.previouslyDrawnCents),
+              requested_amount: String(l.claimCents),
+              approved_amount: approvedAmt,
+              funded_amount: fundedAmt,
+              evidence_status: "VERIFIED" as const,
+              lender_notes: baseline?.lender_notes,
+            };
+          });
+
+          const packetData = {
+            draw_number: targetDrawNum,
+            period_start: periodStart,
+            period_end: inspectionDate,
+            lender_name: "Capital Reserve Trust",
+            is_revision: isRevision,
+            revision_label: isRevision ? "R1" : undefined,
+            revision_reason: isRevision ? revisionReason : undefined,
+            lines: mappedLines,
+            photos: photos,
+            status: "SUBMITTED",
+          };
+          window.localStorage.setItem(
+            `groundup_draw_packet_${projectId}_${targetDrawNum}`,
+            JSON.stringify(packetData)
+          );
+        } catch {
+          // ignore
+        }
+      }
       setIsSubmittedSuccess(true);
     } finally {
       setIsSubmitting(false);
@@ -453,10 +580,10 @@ export default function BuildDrawPacketPage() {
 
           <div className="space-y-1.5">
             <h1 className="text-xl font-bold tracking-tight text-slate-900">
-              Draw Packet Submitted
+              {isRevision ? "Draw Revision Submitted" : "Draw Packet Submitted"}
             </h1>
             <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-              {drawAppNumber} has been submitted to{" "}
+              {isRevision ? `${drawAppNumber}` : drawAppNumber} has been submitted to{" "}
               <span className="font-semibold text-slate-800">Capital Reserve Trust</span> for review and inspection approval.
             </p>
           </div>
@@ -465,8 +592,24 @@ export default function BuildDrawPacketPage() {
           <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-5 text-left text-xs space-y-3">
             <div className="flex items-center justify-between pb-2.5 border-b border-slate-200/70">
               <span className="text-slate-500 font-medium">Application</span>
-              <span className="font-semibold text-slate-900">{drawAppNumber}</span>
+              <span className="font-semibold text-slate-900">
+                {drawAppNumber}
+                {isRevision && (
+                  <span className="ml-1.5 text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded">
+                    R1
+                  </span>
+                )}
+              </span>
             </div>
+
+            {isRevision && revisionReason && (
+              <div className="flex items-start justify-between pb-2.5 border-b border-slate-200/70 gap-4">
+                <span className="text-slate-500 font-medium shrink-0">Reason for Revision</span>
+                <span className="font-medium text-slate-800 text-right text-xs leading-relaxed">
+                  {revisionReason}
+                </span>
+              </div>
+            )}
 
             <div className="flex items-center justify-between pb-2.5 border-b border-slate-200/70">
               <span className="text-slate-500 font-medium">Lender</span>
@@ -494,18 +637,18 @@ export default function BuildDrawPacketPage() {
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button
               type="button"
-              onClick={() => router.push(`/projects/${projectId}/draws`)}
+              onClick={() => router.push(`/projects/${projectId}/draws/${nextDrawNumber || (isRevision ? 3 : 4)}`)}
               className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-6 py-2.5 rounded-lg shadow-xs cursor-pointer"
             >
-              View in Draws Register
+              View Draw Application
             </Button>
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push(`/projects/${projectId}/control-center`)}
+              onClick={() => router.push(`/projects/${projectId}/draws`)}
               className="w-full sm:w-auto text-xs font-semibold px-5 py-2.5 rounded-lg border-slate-300 text-slate-700 hover:text-slate-900 cursor-pointer"
             >
-              Go to Control Center
+              Draws Register
             </Button>
           </div>
         </div>
@@ -533,12 +676,17 @@ export default function BuildDrawPacketPage() {
               <span>/</span>
               <span className="text-slate-700 font-semibold">{drawAppNumber}</span>
               <span>/</span>
-              <span className="text-slate-900 font-medium">Packet Builder</span>
+              <span className="text-slate-900 font-medium">{isRevision ? "Revise Packet" : "Packet Builder"}</span>
             </div>
             <div className="flex items-center gap-2.5 mt-0.5">
               <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                {drawAppNumber} Packet
+                {isRevision ? `Revise ${drawAppNumber}` : `${drawAppNumber} Packet`}
               </h1>
+              {isRevision && (
+                <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 border border-amber-200/80">
+                  Revision R1
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -837,26 +985,59 @@ export default function BuildDrawPacketPage() {
                       </tr>
                     ))}
                   </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-slate-300 bg-slate-50/90 font-bold text-slate-900">
+                      <td className="py-3.5 px-4 font-bold text-slate-900 text-xs">Totals</td>
+                      <td className="py-3.5 px-4 font-mono text-slate-900 tabular-nums text-xs">
+                        {formatMoney(totalBudgetCents)}
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-mono text-slate-700 tabular-nums text-xs">
+                        {formatMoney(totalPreviouslyDrawnCents)}
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-mono text-emerald-700 tabular-nums text-xs sm:text-[13px]">
+                        {formatMoney(totalRequestedCents)}
+                      </td>
+                      <td className="py-3.5 px-2"></td>
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
 
               {/* Summary Totals Bar */}
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 px-5 py-3.5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">
+                      Approved Budget
+                    </span>
+                    <span className="text-xs sm:text-sm font-mono font-bold text-slate-900 tabular-nums block">
+                      {formatMoney(totalBudgetCents)}
+                    </span>
+                  </div>
+
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">
+                      Previously Drawn
+                    </span>
+                    <span className="text-xs sm:text-sm font-mono font-bold text-slate-700 tabular-nums block">
+                      {formatMoney(totalPreviouslyDrawnCents)}
+                    </span>
+                  </div>
+
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">
                       Total Claim
                     </span>
-                    <span className="text-base font-mono font-bold text-slate-900 tabular-nums">
+                    <span className="text-xs sm:text-sm font-mono font-bold text-slate-900 tabular-nums block">
                       {formatMoney(totalRequestedCents)}
                     </span>
                   </div>
 
-                  <div className="text-right">
+                  <div className="space-y-0.5 text-right">
                     <span className="text-[10px] uppercase font-bold text-emerald-800 block tracking-wider">
                       Net Payable to Borrower
                     </span>
-                    <span className="text-xl font-mono font-bold text-emerald-600 tabular-nums">
+                    <span className="text-sm sm:text-base font-mono font-bold text-emerald-700 tabular-nums block">
                       {formatMoney(netPayableCents)}
                     </span>
                   </div>
@@ -1212,6 +1393,31 @@ export default function BuildDrawPacketPage() {
                   </div>
                 </div>
               </div>
+
+              {/* SECTION 4: Reason for Revision */}
+              {isRevision && (
+                <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-2xs">
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 bg-slate-50/70">
+                    <h3 className="text-xs font-bold text-slate-900">
+                      Reason for Revision
+                    </h3>
+                    <span className="text-[11px] font-medium text-slate-400">
+                      Required
+                    </span>
+                  </div>
+
+                  <div className="p-4 sm:p-5">
+                    <textarea
+                      id="revisionReasonInput"
+                      value={revisionReason}
+                      onChange={(e) => setRevisionReason(e.target.value)}
+                      rows={3}
+                      placeholder="Explain the adjustments or corrections made in this revision..."
+                      className="w-full rounded-lg border border-slate-200 bg-slate-50/40 p-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition-colors resize-y leading-relaxed"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1235,13 +1441,19 @@ export default function BuildDrawPacketPage() {
             <Button
               type="button"
               onClick={handleNext}
-              disabled={isSubmitting}
-              className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-5 py-2 rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer"
+              disabled={isSubmitting || (currentStep === 4 && isRevision && !revisionReason.trim())}
+              className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-5 py-2 rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               {currentStep === 4 ? (
                 <>
                   <ShieldCheck className="h-4 w-4" />
-                  <span>{isSubmitting ? "Transmitting..." : "Submit Packet to Lender"}</span>
+                  <span>
+                    {isSubmitting
+                      ? "Transmitting..."
+                      : isRevision
+                      ? "Resolve & Submit Revision"
+                      : "Submit Packet to Lender"}
+                  </span>
                 </>
               ) : (
                 "Next Step"

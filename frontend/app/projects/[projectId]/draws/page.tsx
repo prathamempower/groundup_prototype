@@ -33,7 +33,6 @@ import { VerifyWorkModal } from "@/components/draws/verify-work-modal";
 import { VerifyCostModal } from "@/components/draws/verify-cost-modal";
 import { RecordDecisionModal } from "@/components/draws/record-decision-modal";
 import { AllocateFundingModal } from "@/components/draws/allocate-funding-modal";
-import { ResubmitRevisionModal } from "@/components/draws/resubmit-revision-modal";
 import { DrawDetailDrawer } from "@/components/draws/draw-detail-drawer";
 
 type FilterTab = "ALL" | "ACTIVE" | "FUNDED" | "DISCREPANCY";
@@ -344,20 +343,15 @@ export default function DrawsPage() {
   };
 
   const handleStepClick = (step: TimelineStepNode) => {
+    if (step.status === "READY" || step.status === "UPCOMING" || step.isPrimaryAction) {
+      // Not requested / upcoming draw - clicking is disabled
+      return;
+    }
     setSelectedTimelineDrawNumber(step.num);
     setActiveMobileStep(step.num);
-    if (step.isPrimaryAction) {
-      if (currentProjectId) {
-        router.push(`/projects/${currentProjectId}/draws/build-packet?draw=${step.num}`);
-      } else {
-        setPacketDrawNumber(step.num);
-        setIsBuildDrawPacketOpen(true);
-      }
-    } else {
-      const fallback = buildDrawFallback(step.num, step.title, step.amount);
-      const matching = draws.find((d) => d.draw_number === step.num) || fallback;
-      handleOpenDetail(matching);
-    }
+    const fallback = buildDrawFallback(step.num, step.title, step.amount);
+    const matching = draws.find((d) => d.draw_number === step.num) || fallback;
+    handleOpenDetail(matching);
   };
 
   // Modal states
@@ -366,7 +360,6 @@ export default function DrawsPage() {
   const [isVerifyCostOpen, setIsVerifyCostOpen] = useState(false);
   const [isRecordDecisionOpen, setIsRecordDecisionOpen] = useState(false);
   const [isAllocateFundingOpen, setIsAllocateFundingOpen] = useState(false);
-  const [isResubmitRevisionOpen, setIsResubmitRevisionOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const refreshAll = () => {
@@ -723,13 +716,19 @@ export default function DrawsPage() {
                 const isCompleted = step.status === "COMPLETED";
                 const isActive = step.status === "ACTIVE";
                 const isReady = step.status === "READY";
+                const isUpcoming = step.status === "UPCOMING";
+                const isUnrequested = isReady || isUpcoming;
 
                 return (
                   <div
                     key={`carousel-card-${step.num}`}
-                    onClick={() => handleStepClick(step)}
+                    onClick={() => {
+                      if (isUnrequested) return;
+                      handleStepClick(step);
+                    }}
                     className={cn(
-                      "w-[84vw] max-w-[310px] shrink-0 snap-center rounded-xl p-4 border transition-all cursor-pointer space-y-3 shadow-xs",
+                      "w-[84vw] max-w-[310px] shrink-0 snap-center rounded-xl p-4 border transition-all space-y-3 shadow-xs",
+                      isUnrequested ? "cursor-default" : "cursor-pointer hover:border-slate-300",
                       isSelected
                         ? "border-slate-900 bg-white ring-1 ring-slate-900/10"
                         : "border-slate-200/90 bg-white"
@@ -863,12 +862,19 @@ export default function DrawsPage() {
                   const isActive = step.status === "ACTIVE";
                   const isReady = step.status === "READY";
                   const isUpcoming = step.status === "UPCOMING";
+                  const isUnrequested = isReady || isUpcoming;
 
                   return (
                     <div
                       key={`desk-step-${step.num}`}
-                      className="flex flex-col items-center cursor-pointer group px-2 select-none"
-                      onClick={() => handleStepClick(step)}
+                      className={cn(
+                        "flex flex-col items-center px-2 select-none",
+                        isUnrequested ? "cursor-default" : "cursor-pointer group"
+                      )}
+                      onClick={() => {
+                        if (isUnrequested) return;
+                        handleStepClick(step);
+                      }}
                     >
                       <div className="relative z-10">
                         <div
@@ -1022,18 +1028,24 @@ export default function DrawsPage() {
                 No draws found matching the selected filter.
               </div>
             ) : (
-              filteredShowcaseRows.map((row, index) => (
-                <div
-                  key={`mob-row-${row.id}`}
-                  onClick={() => {
-                    setSelectedTimelineDrawNumber(row.drawNumber);
-                    const matchingDraw =
-                      draws.find((d) => d.draw_number === row.drawNumber) ||
-                      buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
-                    handleOpenDetail(matchingDraw);
-                  }}
-                  className="p-4 hover:bg-slate-50/70 transition-colors cursor-pointer space-y-3"
-                >
+              filteredShowcaseRows.map((row, index) => {
+                const isUnrequested = row.actionType === "PRIMARY" || row.statusType === "PENDING";
+                return (
+                  <div
+                    key={`mob-row-${row.id}`}
+                    onClick={() => {
+                      if (isUnrequested) return;
+                      setSelectedTimelineDrawNumber(row.drawNumber);
+                      const matchingDraw =
+                        draws.find((d) => d.draw_number === row.drawNumber) ||
+                        buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
+                      handleOpenDetail(matchingDraw);
+                    }}
+                    className={cn(
+                      "p-4 transition-colors space-y-3",
+                      isUnrequested ? "cursor-default" : "hover:bg-slate-50/70 cursor-pointer"
+                    )}
+                  >
                   {/* Top row: Sr + Title + Status + Date */}
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -1130,13 +1142,11 @@ export default function DrawsPage() {
                         size="sm"
                         onClick={() => {
                           setSelectedTimelineDrawNumber(row.drawNumber);
-                          const matchingDraw =
-                            draws.find((d) => d.draw_number === row.drawNumber) ||
-                            buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
-                          setSelectedDraw(matchingDraw);
-                          setIsResubmitRevisionOpen(true);
+                          if (currentProjectId) {
+                            router.push(`/projects/${currentProjectId}/draws/build-packet?draw=${row.drawNumber}&revision=true`);
+                          }
                         }}
-                        className="w-full h-8 text-xs font-semibold text-rose-700 border-rose-200 bg-rose-50/50 hover:bg-rose-100/50 rounded-lg shadow-2xs"
+                        className="w-full h-8 text-xs font-semibold text-rose-700 border-rose-200 bg-rose-50/50 hover:bg-rose-100/50 rounded-lg shadow-2xs cursor-pointer"
                       >
                         Resolve
                       </Button>
@@ -1159,8 +1169,9 @@ export default function DrawsPage() {
                     )}
                   </div>
                 </div>
-              ))
-            )}
+              );
+            })
+          )}
           </div>
 
           {/* Desktop Table (hidden sm:block) */}
@@ -1202,18 +1213,24 @@ export default function DrawsPage() {
                       <td className="py-3.5 px-4 text-right"><Skeleton className="h-6 w-16 ml-auto" /></td>
                     </tr>
                   ))
-                ) : filteredShowcaseRows.map((row, index) => (
-                  <tr
-                    key={row.id}
-                    onClick={() => {
-                      setSelectedTimelineDrawNumber(row.drawNumber);
-                      const matchingDraw =
-                        draws.find((d) => d.draw_number === row.drawNumber) ||
-                        buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
-                      handleOpenDetail(matchingDraw);
-                    }}
-                    className="group hover:bg-slate-50/70 transition-colors cursor-pointer"
-                  >
+                ) : filteredShowcaseRows.map((row, index) => {
+                  const isUnrequested = row.actionType === "PRIMARY" || row.statusType === "PENDING";
+                  return (
+                    <tr
+                      key={row.id}
+                      onClick={() => {
+                        if (isUnrequested) return;
+                        setSelectedTimelineDrawNumber(row.drawNumber);
+                        const matchingDraw =
+                          draws.find((d) => d.draw_number === row.drawNumber) ||
+                          buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
+                        handleOpenDetail(matchingDraw);
+                      }}
+                      className={cn(
+                        "group transition-colors",
+                        isUnrequested ? "cursor-default" : "hover:bg-slate-50/70 cursor-pointer"
+                      )}
+                    >
                     {/* Index */}
                     <td className="py-3.5 px-3.5 text-center font-mono text-xs text-slate-400 tabular-nums select-none">
                       {index + 1}
@@ -1307,13 +1324,11 @@ export default function DrawsPage() {
                           size="sm"
                           onClick={() => {
                             setSelectedTimelineDrawNumber(row.drawNumber);
-                            const matchingDraw =
-                              draws.find((d) => d.draw_number === row.drawNumber) ||
-                              buildDrawFallback(row.drawNumber, row.title, row.requestedAmt);
-                            setSelectedDraw(matchingDraw);
-                            setIsResubmitRevisionOpen(true);
+                            if (currentProjectId) {
+                              router.push(`/projects/${currentProjectId}/draws/build-packet?draw=${row.drawNumber}&revision=true`);
+                            }
                           }}
-                          className="h-7 text-xs font-semibold px-3 text-rose-700 border-rose-200 bg-rose-50 hover:bg-rose-100 rounded-lg shadow-2xs"
+                          className="h-7 text-xs font-semibold px-3 text-rose-700 border-rose-200 bg-rose-50 hover:bg-rose-100 rounded-lg shadow-2xs cursor-pointer"
                         >
                           Resolve
                         </Button>
@@ -1336,7 +1351,8 @@ export default function DrawsPage() {
                       )}
                     </td>
                   </tr>
-                ))}
+                );
+              })}
               </tbody>
             </table>
           </div>
@@ -1381,13 +1397,6 @@ export default function DrawsPage() {
         onSuccess={refreshAll}
       />
 
-      <ResubmitRevisionModal
-        open={isResubmitRevisionOpen}
-        onOpenChange={setIsResubmitRevisionOpen}
-        draw={selectedDraw}
-        onSuccess={refreshAll}
-      />
-
       <DrawDetailDrawer
         open={isDrawerOpen}
         onOpenChange={setIsDrawerOpen}
@@ -1396,7 +1405,11 @@ export default function DrawsPage() {
         onVerifyCost={() => setIsVerifyCostOpen(true)}
         onRecordDecision={() => setIsRecordDecisionOpen(true)}
         onAllocateFunding={() => setIsAllocateFundingOpen(true)}
-        onResubmitRevision={() => setIsResubmitRevisionOpen(true)}
+        onResubmitRevision={() => {
+          if (currentProjectId && selectedDraw) {
+            router.push(`/projects/${currentProjectId}/draws/build-packet?draw=${selectedDraw.draw_number}&revision=true`);
+          }
+        }}
         onRefresh={refreshAll}
         onUpdateDraw={handleUpdateSelectedDraw}
       />

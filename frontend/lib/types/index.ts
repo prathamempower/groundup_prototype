@@ -613,6 +613,7 @@ export interface DrawLine {
   budget_line_name: string;
   budget_line_code: string;
   budgeted_amount?: string;
+  previously_drawn?: string;
   requested_amount: string; // cents
   recommended_amount: string;
   approved_amount: string;
@@ -652,6 +653,7 @@ export interface DrawItem {
   loan_id: string;
   draw_number: number;
   revision_label?: string;
+  revision_reason?: string;
   parent_draw_id?: string | null;
   status: "DRAFT" | "SUBMITTED" | "UNDER_REVIEW" | "PARTIALLY_APPROVED" | "APPROVED" | "REJECTED" | "FUNDED" | "CLOSED";
   period_start: string;
@@ -682,6 +684,7 @@ export interface DrawItem {
     costs_verified: boolean;
     prior_payments_verified: boolean;
   };
+  photos?: Array<{ id: string; title: string; url: string }>;
 }
 
 export interface MilestoneEvidence {
