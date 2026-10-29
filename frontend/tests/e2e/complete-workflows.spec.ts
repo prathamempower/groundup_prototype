@@ -12,7 +12,7 @@ test.describe("Full Navigation & Workspaces Verification", () => {
     // 2. Documents
     await page.getByRole("link", { name: "Documents" }).click();
     await expect(page).toHaveURL(/\/documents/);
-    await expect(page.getByRole("heading", { name: "Document Inbox & Evidence" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Documents & Evidence" })).toBeVisible();
 
     // 3. Budget / Project Economics
     await page.getByRole("link", { name: /Project Economics|Budget/i }).click();
@@ -92,7 +92,7 @@ test.describe("Full Navigation & Workspaces Verification", () => {
   test("documents filter tabs switch view smoothly", async ({ page }) => {
     await loginAsOwner(page);
     await page.goto("/documents");
-    await expect(page.getByRole("heading", { name: "Document Inbox & Evidence" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Documents & Evidence" })).toBeVisible();
 
     // Click filter tabs
     for (const tabName of ["Needs Review", "Reviewed", "Quarantined", "All Documents"]) {

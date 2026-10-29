@@ -251,8 +251,16 @@ export default function DrawDetailPage() {
         project_id: projectId || "df16b577-3585-4fb0-a13a-ffadaca73e0f",
         loan_id: "loan-col-73",
         draw_number: num,
-        revision_label: savedPacket?.revision_label,
-        revision_reason: savedPacket?.revision_reason,
+        revision_label: savedPacket?.revision_label || (num === 3 ? "R1" : undefined),
+        revision_reason:
+          savedPacket?.revision_reason &&
+          savedPacket.revision_reason !== "This is reason of revision" &&
+          !savedPacket.revision_reason.includes("hydraulic") &&
+          !savedPacket.revision_reason.includes("MEP utility")
+            ? savedPacket.revision_reason
+            : (num === 3
+              ? "Adjusted line item amounts and holdback per lender review."
+              : savedPacket?.revision_reason),
         status: savedPacket?.status || (num < 3 ? "FUNDED" : num === 3 ? "PARTIALLY_APPROVED" : "DRAFT"),
         period_start: savedPacket?.period_start || defaultPeriod.start,
         period_end: savedPacket?.period_end || defaultPeriod.end,
@@ -285,8 +293,17 @@ export default function DrawDetailPage() {
       period_start: savedPacket?.period_start || base.period_start || defaultPeriod.start,
       period_end: savedPacket?.period_end || base.period_end || defaultPeriod.end,
       lender_name: savedPacket?.lender_name || base.lender_name || "Capital Reserve Trust",
-      revision_label: savedPacket?.revision_label || base.revision_label,
-      revision_reason: savedPacket?.revision_reason || base.revision_reason,
+      revision_label: savedPacket?.revision_label || base.revision_label || (num === 3 ? "R1" : undefined),
+      revision_reason:
+        savedPacket?.revision_reason &&
+        savedPacket.revision_reason !== "This is reason of revision" &&
+        !savedPacket.revision_reason.includes("hydraulic") &&
+        !savedPacket.revision_reason.includes("MEP utility")
+          ? savedPacket.revision_reason
+          : base.revision_reason ||
+            (num === 3
+              ? "Adjusted line item amounts and holdback per lender review."
+              : savedPacket?.revision_reason),
       requested_amount: String(lineRequestedCents),
       approved_amount: String(lineApprovedCents),
       funded_amount: String(lineFundedCents),
@@ -515,21 +532,19 @@ export default function DrawDetailPage() {
 
         {/* Integrated Revision Reason Row */}
         {activeDraw.revision_reason && (
-          <div className="px-5 py-2.5 bg-slate-50/70 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2.5 text-xs">
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Revision Reason
+          <div className="px-5 py-3 bg-slate-50/80 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs">
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold shadow-2xs">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                Revision {activeDraw.revision_label || "R1"}
               </span>
-              {activeDraw.revision_label && (
-                <span className="font-mono text-[10px] font-bold text-slate-700 bg-white border border-slate-200 px-1.5 py-0.5 rounded">
-                  {activeDraw.revision_label}
-                </span>
-              )}
+              <span className="text-[11px] font-semibold text-slate-500">
+                Reason:
+              </span>
             </div>
-            <span className="text-slate-300 hidden sm:inline select-none">·</span>
-            <span className="font-medium text-slate-800">
+            <p className="text-xs font-medium text-slate-800 leading-relaxed">
               {activeDraw.revision_reason}
-            </span>
+            </p>
           </div>
         )}
       </div>

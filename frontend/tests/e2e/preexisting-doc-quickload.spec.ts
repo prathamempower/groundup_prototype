@@ -17,7 +17,7 @@ test.describe("Pre-existing Documents Quick Ingestion & Review", () => {
 
     // 2. Navigate to documents page
     await page.goto("/documents");
-    await expect(page.getByRole("heading", { name: "Document Inbox & Evidence" })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("heading", { name: "Documents & Evidence" })).toBeVisible({ timeout: 15000 });
 
     // 3. Click the pre-existing document quick ingest button on /documents
     const woodlawnQuickBtn = page.getByRole("button", { name: /161 Woodlawn Ave\.xlsx/i }).first();

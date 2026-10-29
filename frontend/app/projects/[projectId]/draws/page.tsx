@@ -1088,11 +1088,6 @@ export default function DrawsPage() {
                     </span>
                   </div>
 
-                  {/* Scope */}
-                  <div className="text-xs text-slate-700 font-medium">
-                    {row.scopeName}
-                  </div>
-
                   {/* Financials Summary */}
                   <div className="grid grid-cols-2 gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs">
                     <div>
@@ -1176,25 +1171,23 @@ export default function DrawsPage() {
 
           {/* Desktop Table (hidden sm:block) */}
           <div className="hidden sm:block overflow-x-auto custom-scrollbar">
-            <table className="w-full min-w-[780px] text-left text-xs">
+            <table className="w-full min-w-[720px] table-fixed text-left text-xs">
               <colgroup>
-                <col className="w-12" />
-                <col className="w-32" />
-                <col className="w-48" />
-                <col />
-                <col className="w-32" />
-                <col className="w-32" />
-                <col className="w-36" />
-                <col className="w-28" />
+                <col className="w-[4%]" />
+                <col className="w-[13%]" />
+                <col className="w-[23%]" />
+                <col className="w-[15%]" />
+                <col className="w-[15%]" />
+                <col className="w-[17%]" />
+                <col className="w-[13%]" />
               </colgroup>
               <thead className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-semibold text-[11px] uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-3.5 text-center whitespace-nowrap">#</th>
                   <th className="py-3 px-4">Date</th>
                   <th className="py-3 px-4">Draw</th>
-                  <th className="py-3 px-4">Scope</th>
-                  <th className="py-3 px-4 text-right">Requested</th>
-                  <th className="py-3 px-4 text-right">Spent</th>
+                  <th className="py-3 px-4">Requested</th>
+                  <th className="py-3 px-4">Spent</th>
                   <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4 text-right">Action</th>
                 </tr>
@@ -1205,10 +1198,9 @@ export default function DrawsPage() {
                     <tr key={`skel-${idx}`} className="animate-pulse">
                       <td className="py-3.5 px-3.5 text-center"><Skeleton className="h-4 w-4 mx-auto" /></td>
                       <td className="py-3.5 px-4"><Skeleton className="h-4 w-20" /></td>
-                      <td className="py-3.5 px-4"><Skeleton className="h-4 w-24" /></td>
-                      <td className="py-3.5 px-4"><Skeleton className="h-4 w-40" /></td>
-                      <td className="py-3.5 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
-                      <td className="py-3.5 px-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
+                      <td className="py-3.5 px-4"><Skeleton className="h-4 w-28" /></td>
+                      <td className="py-3.5 px-4"><Skeleton className="h-4 w-16" /></td>
+                      <td className="py-3.5 px-4"><Skeleton className="h-4 w-16" /></td>
                       <td className="py-3.5 px-4"><Skeleton className="h-4 w-20" /></td>
                       <td className="py-3.5 px-4 text-right"><Skeleton className="h-6 w-16 ml-auto" /></td>
                     </tr>
@@ -1251,18 +1243,13 @@ export default function DrawsPage() {
                       </span>
                     </td>
 
-                    {/* Scope */}
-                    <td className="py-3.5 px-4 text-slate-700 font-medium">
-                      {row.scopeName}
-                    </td>
-
                     {/* Requested */}
-                    <td className="py-3.5 px-4 font-mono font-bold text-right text-slate-900 tabular-nums whitespace-nowrap">
+                    <td className="py-3.5 px-4 font-mono font-bold text-slate-900 tabular-nums whitespace-nowrap">
                       {row.requestedAmt}
                     </td>
 
                     {/* Spent */}
-                    <td className="py-3.5 px-4 font-mono text-right tabular-nums whitespace-nowrap">
+                    <td className="py-3.5 px-4 font-mono tabular-nums whitespace-nowrap">
                       <span className="font-semibold text-slate-900 block">
                         {row.disbursed}
                       </span>

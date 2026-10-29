@@ -62,7 +62,9 @@ export default function BuildDrawPacketPage() {
   );
   const [periodStart, setPeriodStart] = useState(isRevision ? "2025-06-01" : "2026-09-25");
   const [inspectionDate, setInspectionDate] = useState(isRevision ? "2025-08-31" : "2026-10-18");
-  const [revisionReason, setRevisionReason] = useState("");
+  const [revisionReason, setRevisionReason] = useState(
+    isRevision ? "Adjusted line item amounts and holdback per lender review." : ""
+  );
 
   // Step 2: SOV Line Items state
   const [sovLines, setSovLines] = useState<SovLineItemState[]>([]);

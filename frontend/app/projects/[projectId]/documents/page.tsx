@@ -254,7 +254,7 @@ export default function DocumentsPage() {
     <div className="space-y-6 pb-16">
       <div className="px-4 sm:px-6 max-w-7xl mx-auto space-y-4 sm:space-y-6 pt-2 sm:pt-4">
         <PageHeader
-          title="Document Inbox & Evidence"
+          title="Documents & Evidence"
           statusBadge={{
             label: `${totalCount} Verified Files`,
             variant: "neutral",
@@ -276,7 +276,7 @@ export default function DocumentsPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
           <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs hover:border-slate-300 transition-all">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase text-slate-500">Total Tracked</span>
+              <span className="text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase text-slate-500">Total Documents</span>
               <span className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg bg-blue-50 text-blue-600 border border-blue-200/60 flex items-center justify-center">
                 <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </span>
