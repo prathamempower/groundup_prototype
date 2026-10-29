@@ -291,11 +291,11 @@ export function BuildDrawPacketModal({
           linesPayload.length > 0
             ? linesPayload
             : [
-                {
-                  budget_line_id: eligibleLines[0]?.id || "line-default",
-                  requested_amount: String(totalRequestedCents || 5000000),
-                },
-              ],
+              {
+                budget_line_id: eligibleLines[0]?.id || "line-default",
+                requested_amount: String(totalRequestedCents || 5000000),
+              },
+            ],
       });
 
       const createdLines: DrawLine[] = sovLines
@@ -382,22 +382,20 @@ export function BuildDrawPacketModal({
             <button
               type="button"
               onClick={() => setCurrentStep(1)}
-              className={`flex items-center gap-2 transition-colors ${
-                currentStep === 1
+              className={`flex items-center gap-2 transition-colors ${currentStep === 1
                   ? "text-blue-600 font-bold"
                   : currentStep > 1
-                  ? "text-emerald-700"
-                  : "text-slate-400"
-              }`}
+                    ? "text-emerald-700"
+                    : "text-slate-400"
+                }`}
             >
               <span
-                className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
-                  currentStep === 1
+                className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${currentStep === 1
                     ? "bg-blue-600 text-white"
                     : currentStep > 1
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-200 text-slate-600"
-                }`}
+                      ? "bg-emerald-600 text-white"
+                      : "bg-slate-200 text-slate-600"
+                  }`}
               >
                 {currentStep > 1 ? <Check className="h-3 w-3" /> : "1"}
               </span>
@@ -410,22 +408,20 @@ export function BuildDrawPacketModal({
             <button
               type="button"
               onClick={() => setCurrentStep(2)}
-              className={`flex items-center gap-2 transition-colors ${
-                currentStep === 2
+              className={`flex items-center gap-2 transition-colors ${currentStep === 2
                   ? "text-blue-600 font-bold"
                   : currentStep > 2
-                  ? "text-emerald-700"
-                  : "text-slate-400"
-              }`}
+                    ? "text-emerald-700"
+                    : "text-slate-400"
+                }`}
             >
               <span
-                className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
-                  currentStep === 2
+                className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${currentStep === 2
                     ? "bg-blue-600 text-white"
                     : currentStep > 2
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-200 text-slate-600"
-                }`}
+                      ? "bg-emerald-600 text-white"
+                      : "bg-slate-200 text-slate-600"
+                  }`}
               >
                 {currentStep > 2 ? <Check className="h-3 w-3" /> : "2"}
               </span>
@@ -438,22 +434,20 @@ export function BuildDrawPacketModal({
             <button
               type="button"
               onClick={() => setCurrentStep(3)}
-              className={`flex items-center gap-2 transition-colors ${
-                currentStep === 3
+              className={`flex items-center gap-2 transition-colors ${currentStep === 3
                   ? "text-blue-600 font-bold"
                   : currentStep > 3
-                  ? "text-emerald-700"
-                  : "text-slate-400"
-              }`}
+                    ? "text-emerald-700"
+                    : "text-slate-400"
+                }`}
             >
               <span
-                className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
-                  currentStep === 3
+                className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${currentStep === 3
                     ? "bg-blue-600 text-white"
                     : currentStep > 3
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-200 text-slate-600"
-                }`}
+                      ? "bg-emerald-600 text-white"
+                      : "bg-slate-200 text-slate-600"
+                  }`}
               >
                 {currentStep > 3 ? <Check className="h-3 w-3" /> : "3"}
               </span>
@@ -466,18 +460,16 @@ export function BuildDrawPacketModal({
             <button
               type="button"
               onClick={() => setCurrentStep(4)}
-              className={`flex items-center gap-2 transition-colors ${
-                currentStep === 4
+              className={`flex items-center gap-2 transition-colors ${currentStep === 4
                   ? "text-blue-600 font-bold"
                   : "text-slate-400"
-              }`}
+                }`}
             >
               <span
-                className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
-                  currentStep === 4
+                className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${currentStep === 4
                     ? "bg-blue-600 text-white"
                     : "bg-slate-200 text-slate-600"
-                }`}
+                  }`}
               >
                 4
               </span>

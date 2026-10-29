@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
@@ -10,6 +11,7 @@ import {
   FileText,
   Check,
   ChevronRight,
+  ChevronLeft,
   Building2,
   Calendar,
   Clock,
@@ -26,6 +28,8 @@ import {
   Maximize2,
   Link as LinkIcon,
   Image as ImageIcon,
+  Landmark,
+  Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { BudgetLine, DrawLine } from "@/lib/types";
@@ -52,8 +56,8 @@ export default function BuildDrawPacketPage() {
 
   // Step 1: Header state
   const [drawAppNumber, setDrawAppNumber] = useState(`Draw #${nextDrawNumber || 4}`);
+  const [periodStart, setPeriodStart] = useState("2026-09-25");
   const [inspectionDate, setInspectionDate] = useState("2026-10-18");
-  const [timeTakenDays, setTimeTakenDays] = useState("14");
 
   // Step 2: SOV Line Items state
   const [sovLines, setSovLines] = useState<SovLineItemState[]>([]);
@@ -62,49 +66,130 @@ export default function BuildDrawPacketPage() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [photos, setPhotos] = useState<Array<{ id: string; title: string; url: string }>>([
     {
+      id: "photo-0",
+      title: "Site Excavation",
+      url: "/inspection_images/0.jpg",
+    },
+    {
       id: "photo-1",
-      title: "Exterior Framing & Envelope",
-      url: "/projects/broadway-new.jpg",
+      title: "Trench Shoring",
+      url: "/inspection_images/1.jpg",
     },
     {
       id: "photo-2",
-      title: "TPO Roof Deck Seams",
-      url: "/projects/woodlawn-new.jpg",
+      title: "Subgrade Liner",
+      url: "/inspection_images/2.jpg",
     },
     {
       id: "photo-3",
-      title: "Weather Barrier Membrane",
-      url: "/projects/first-street-new.jpg",
+      title: "Marine Piling",
+      url: "/inspection_images/3.jpg",
     },
     {
       id: "photo-4",
-      title: "MEP Conduit & Rough-in",
-      url: "/projects/farnsworth.jpg",
+      title: "Foundation Drilling",
+      url: "/inspection_images/4.jpg",
+    },
+    {
+      id: "photo-5",
+      title: "Cofferdam Assembly",
+      url: "/inspection_images/5.jpg",
+    },
+    {
+      id: "photo-6",
+      title: "Sheet Pile Wall",
+      url: "/inspection_images/6.jpg",
+    },
+    {
+      id: "photo-7",
+      title: "Rebar & Concrete Pour",
+      url: "/inspection_images/7.jpg",
     },
   ]);
   const [isAddUrlOpen, setIsAddUrlOpen] = useState(false);
   const [urlTitleInput, setUrlTitleInput] = useState("");
   const [urlLinkInput, setUrlLinkInput] = useState("");
   const [previewPhoto, setPreviewPhoto] = useState<{ id: string; title: string; url: string } | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const [pendingUpload, setPendingUpload] = useState<{ url: string; defaultTitle: string } | null>(null);
+  const [uploadTitleInput, setUploadTitleInput] = useState("");
+
+  const currentPhotoIndex = previewPhoto ? photos.findIndex((p) => p.id === previewPhoto.id) : -1;
+
+  const handlePrevPhoto = () => {
+    if (photos.length <= 1 || currentPhotoIndex === -1) return;
+    const prevIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
+    setPreviewPhoto(photos[prevIndex]);
+  };
+
+  const handleNextPhoto = () => {
+    if (photos.length <= 1 || currentPhotoIndex === -1) return;
+    const nextIndex = (currentPhotoIndex + 1) % photos.length;
+    setPreviewPhoto(photos[nextIndex]);
+  };
+
+  useEffect(() => {
+    if (!previewPhoto) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setPreviewPhoto(null);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        if (photos.length > 1 && currentPhotoIndex !== -1) {
+          const prevIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
+          setPreviewPhoto(photos[prevIndex]);
+        }
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        if (photos.length > 1 && currentPhotoIndex !== -1) {
+          const nextIndex = (currentPhotoIndex + 1) % photos.length;
+          setPreviewPhoto(photos[nextIndex]);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [previewPhoto, currentPhotoIndex, photos]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const newPhotos = Array.from(files).map((file, idx) => {
-      const cleanName = file.name
-        .replace(/\.[^/.]+$/, "")
-        .replace(/[-_]/g, " ")
-        .trim();
-      return {
-        id: `upload-${Date.now()}-${idx}`,
-        title: cleanName ? cleanName.charAt(0).toUpperCase() + cleanName.slice(1) : `Site Photo #${photos.length + idx + 1}`,
-        url: URL.createObjectURL(file),
-      };
-    });
+    const file = files[0];
+    const cleanName = file.name
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[-_]/g, " ")
+      .trim();
 
-    setPhotos((prev) => [...prev, ...newPhotos]);
+    const titleCandidate = cleanName
+      ? cleanName.charAt(0).toUpperCase() + cleanName.slice(1)
+      : `Inspection Photo #${photos.length + 1}`;
+
+    const objectUrl = URL.createObjectURL(file);
+    setPendingUpload({ url: objectUrl, defaultTitle: titleCandidate });
+    setUploadTitleInput(titleCandidate);
     e.target.value = "";
+  };
+
+  const handleConfirmUpload = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pendingUpload) return;
+
+    setPhotos((prev) => [
+      ...prev,
+      {
+        id: `upload-${Date.now()}`,
+        title: uploadTitleInput.trim() || pendingUpload.defaultTitle,
+        url: pendingUpload.url,
+      },
+    ]);
+    setPendingUpload(null);
+    setUploadTitleInput("");
   };
 
   const handleAddUrlPhoto = (e: React.FormEvent) => {
@@ -127,16 +212,22 @@ export default function BuildDrawPacketPage() {
     if (e) {
       e.stopPropagation();
     }
-    setPhotos((prev) => prev.filter((p) => p.id !== id));
-    if (previewPhoto?.id === id) {
-      setPreviewPhoto(null);
-    }
+    setPhotos((prev) => {
+      const remaining = prev.filter((p) => p.id !== id);
+      if (previewPhoto?.id === id) {
+        if (remaining.length > 0) {
+          const removedIdx = prev.findIndex((p) => p.id === id);
+          const nextIdx = Math.min(removedIdx, remaining.length - 1);
+          setPreviewPhoto(remaining[nextIdx]);
+        } else {
+          setPreviewPhoto(null);
+        }
+      }
+      return remaining;
+    });
   };
 
-  // Step 4: Signature state
-  const [signerName, setSignerName] = useState("Marcus Vance");
-  const [signerRole, setSignerRole] = useState("Authorized Borrower Principal");
-  const [certificationAgreed, setCertificationAgreed] = useState(true);
+  // Step 4: Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmittedSuccess, setIsSubmittedSuccess] = useState(false);
 
@@ -265,8 +356,7 @@ export default function BuildDrawPacketPage() {
   }, [nextDrawNumber]);
 
   const totalRequestedCents = sovLines.reduce((a, b) => a + b.claimCents, 0);
-  const retainageCents = Math.round(totalRequestedCents * 0.1);
-  const netPayableCents = totalRequestedCents - retainageCents;
+  const netPayableCents = totalRequestedCents;
 
   const handleNext = () => {
     if (currentStep < 4) {
@@ -327,18 +417,18 @@ export default function BuildDrawPacketPage() {
 
       await api.draws.create(projectId, {
         draw_number: targetDrawNum,
-        period_start: "2026-09-25",
+        period_start: periodStart,
         period_end: inspectionDate,
         lender_name: "Capital Reserve Trust",
         lines:
           linesPayload.length > 0
             ? linesPayload
             : [
-                {
-                  budget_line_id: eligibleLines[0]?.id || "line-default",
-                  requested_amount: String(totalRequestedCents || 5000000),
-                },
-              ],
+              {
+                budget_line_id: eligibleLines[0]?.id || "line-default",
+                requested_amount: String(totalRequestedCents || 5000000),
+              },
+            ],
       });
 
       setIsSubmittedSuccess(true);
@@ -355,54 +445,65 @@ export default function BuildDrawPacketPage() {
 
   if (isSubmittedSuccess) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-8 text-center shadow-xs space-y-6">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200/60 shadow-xs">
+      <div className="mx-auto max-w-xl px-4 py-16 sm:px-6">
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-8 sm:p-10 text-center shadow-xs space-y-6">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
             <CheckCircle2 className="h-7 w-7" />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <h1 className="text-xl font-bold tracking-tight text-slate-900">
-              Draw Disbursement Packet Transmitted
+              Draw Packet Submitted
             </h1>
-            <p className="text-sm text-slate-500 max-w-md mx-auto">
-              {drawAppNumber} has been successfully submitted to{" "}
-              <strong className="text-slate-800">Capital Reserve Trust</strong>. AMHAR inspection and dual-statement spend reconciliation have been scheduled.
+            <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+              {drawAppNumber} has been submitted to{" "}
+              <span className="font-semibold text-slate-800">Capital Reserve Trust</span> for review and inspection approval.
             </p>
           </div>
 
-          <div className="mx-auto max-w-md rounded-xl border border-slate-200 bg-slate-50/60 p-4 text-left text-xs space-y-2">
-            <div className="flex justify-between pb-2 border-b border-slate-200">
-              <span className="text-slate-500">Facility Reference</span>
-              <span className="font-semibold text-slate-800">#23-03394</span>
+          {/* Clean Receipt Summary */}
+          <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-5 text-left text-xs space-y-3">
+            <div className="flex items-center justify-between pb-2.5 border-b border-slate-200/70">
+              <span className="text-slate-500 font-medium">Application</span>
+              <span className="font-semibold text-slate-900">{drawAppNumber}</span>
             </div>
-            <div className="flex justify-between pb-2 border-b border-slate-200">
-              <span className="text-slate-500">Gross Claim Amount</span>
-              <span className="font-semibold text-slate-800">{formatMoney(totalRequestedCents)}</span>
+
+            <div className="flex items-center justify-between pb-2.5 border-b border-slate-200/70">
+              <span className="text-slate-500 font-medium">Lender</span>
+              <span className="font-semibold text-slate-900">Capital Reserve Trust</span>
             </div>
-            <div className="flex justify-between pb-2 border-b border-slate-200">
-              <span className="text-slate-500">10% Retainage Withheld</span>
-              <span className="font-semibold text-slate-800">-{formatMoney(retainageCents)}</span>
+
+            <div className="flex items-center justify-between pb-2.5 border-b border-slate-200/70">
+              <span className="text-slate-500 font-medium">Target Inspection</span>
+              <span className="font-semibold text-slate-900">{inspectionDate}</span>
             </div>
-            <div className="flex justify-between pt-1">
-              <span className="font-bold text-slate-900">Net Eligible Wire</span>
-              <span className="font-bold text-emerald-600 text-sm">{formatMoney(netPayableCents)}</span>
+
+            <div className="flex items-center justify-between pb-2.5 border-b border-slate-200/70">
+              <span className="text-slate-500 font-medium">Inspection Proof</span>
+              <span className="font-semibold text-slate-900">{photos.length} photos attached</span>
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-slate-700 font-semibold">Total Claim Amount</span>
+              <span className="font-mono font-bold text-emerald-600 text-sm tabular-nums">
+                {formatMoney(totalRequestedCents)}
+              </span>
             </div>
           </div>
 
-          <div className="pt-2 flex items-center justify-center gap-3">
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button
               type="button"
               onClick={() => router.push(`/projects/${projectId}/draws`)}
-              className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-5 py-2.5 rounded-lg shadow-xs"
+              className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-6 py-2.5 rounded-lg shadow-xs cursor-pointer"
             >
-              Return to Draws Register
+              View in Draws Register
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={() => router.push(`/projects/${projectId}/control-center`)}
-              className="text-xs font-semibold px-5 py-2.5 rounded-lg border-slate-300"
+              className="w-full sm:w-auto text-xs font-semibold px-5 py-2.5 rounded-lg border-slate-300 text-slate-700 hover:text-slate-900 cursor-pointer"
             >
               Go to Control Center
             </Button>
@@ -414,161 +515,152 @@ export default function BuildDrawPacketPage() {
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5 sm:space-y-6 min-w-0">
-      {/* Top Breadcrumb & Action bar */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+      {/* Top Breadcrumb & Header bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
         <div className="flex items-center gap-3">
           <Link
             href={`/projects/${projectId}/draws`}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-2xs"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-2xs"
             title="Back to Draws Register"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
-            <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
               <Link href={`/projects/${projectId}/draws`} className="hover:text-slate-800 hover:underline">
-                Draws
+                Draws Register
               </Link>
               <span>/</span>
               <span className="text-slate-700 font-semibold">{drawAppNumber}</span>
               <span>/</span>
-              <span className="text-slate-900">Disbursement Packet Builder</span>
+              <span className="text-slate-900 font-medium">Packet Builder</span>
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 mt-0.5">
-              Build Draw Disbursement Packet
-            </h1>
+            <div className="flex items-center gap-2.5 mt-0.5">
+              <h1 className="text-xl font-bold tracking-tight text-slate-900">
+                {drawAppNumber} Packet
+              </h1>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Builder Card */}
       <div className="rounded-2xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden mb-12">
-        {/* Step Progression Bar - Fully Responsive */}
-        <div className="border-b border-slate-200 bg-slate-50/70 px-3 sm:px-6 py-3 sm:py-4">
-          {/* Responsive Stepper Row matching PC version exactly */}
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 max-w-3xl mx-auto overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 gap-2.5 sm:gap-4 py-1 px-1">
+        {/* Step Progression Bar - Fully Responsive, Clean Numbers */}
+        <div className="border-b border-slate-200 bg-slate-50/70 px-4 sm:px-6 py-3 sm:py-3.5">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 max-w-3xl mx-auto overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 gap-2 sm:gap-4 py-1 px-1">
             {/* Step 1 */}
             <button
               type="button"
               onClick={() => setCurrentStep(1)}
-              className={`flex items-center gap-1.5 sm:gap-2 transition-colors cursor-pointer shrink-0 ${
-                currentStep === 1
-                  ? "text-blue-600 font-bold"
-                  : currentStep > 1
+              className={`flex items-center gap-2 transition-colors cursor-pointer shrink-0 ${currentStep === 1
+                ? "text-slate-900 font-bold"
+                : currentStep > 1
                   ? "text-emerald-700 font-medium"
                   : "text-slate-400"
-              }`}
+                }`}
             >
               <span
-                className={`flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full text-[11px] sm:text-xs font-bold ${
-                  currentStep === 1
-                    ? "bg-blue-600 text-white shadow-2xs ring-2 ring-blue-100"
-                    : currentStep > 1
+                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-all ${currentStep === 1
+                  ? "bg-slate-900 text-white shadow-2xs"
+                  : currentStep > 1
                     ? "bg-emerald-600 text-white shadow-2xs"
                     : "bg-slate-200 text-slate-600"
-                }`}
+                  }`}
               >
-                {currentStep > 1 ? <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 stroke-[3]" /> : "1"}
+                {currentStep > 1 ? <Check className="h-3.5 w-3.5 stroke-[3]" /> : "01"}
               </span>
-              <span className="whitespace-nowrap text-[11px] sm:text-xs">1. Header & Timeline</span>
+              <span className="whitespace-nowrap text-xs">Header & Facility</span>
             </button>
 
-            <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-300 shrink-0" />
+            <ChevronRight className="h-3.5 w-3.5 text-slate-300 shrink-0" />
 
             {/* Step 2 */}
             <button
               type="button"
               onClick={() => setCurrentStep(2)}
-              className={`flex items-center gap-1.5 sm:gap-2 transition-colors cursor-pointer shrink-0 ${
-                currentStep === 2
-                  ? "text-blue-600 font-bold"
-                  : currentStep > 2
+              className={`flex items-center gap-2 transition-colors cursor-pointer shrink-0 ${currentStep === 2
+                ? "text-slate-900 font-bold"
+                : currentStep > 2
                   ? "text-emerald-700 font-medium"
                   : "text-slate-400"
-              }`}
+                }`}
             >
               <span
-                className={`flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full text-[11px] sm:text-xs font-bold ${
-                  currentStep === 2
-                    ? "bg-blue-600 text-white shadow-2xs ring-2 ring-blue-100"
-                    : currentStep > 2
+                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-all ${currentStep === 2
+                  ? "bg-slate-900 text-white shadow-2xs"
+                  : currentStep > 2
                     ? "bg-emerald-600 text-white shadow-2xs"
                     : "bg-slate-200 text-slate-600"
-                }`}
+                  }`}
               >
-                {currentStep > 2 ? <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 stroke-[3]" /> : "2"}
+                {currentStep > 2 ? <Check className="h-3.5 w-3.5 stroke-[3]" /> : "02"}
               </span>
-              <span className="whitespace-nowrap text-[11px] sm:text-xs">2. SOV Line Items</span>
+              <span className="whitespace-nowrap text-xs">Line Items (SOV)</span>
             </button>
 
-            <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-300 shrink-0" />
+            <ChevronRight className="h-3.5 w-3.5 text-slate-300 shrink-0" />
 
             {/* Step 3 */}
             <button
               type="button"
               onClick={() => setCurrentStep(3)}
-              className={`flex items-center gap-1.5 sm:gap-2 transition-colors cursor-pointer shrink-0 ${
-                currentStep === 3
-                  ? "text-blue-600 font-bold"
-                  : currentStep > 3
+              className={`flex items-center gap-2 transition-colors cursor-pointer shrink-0 ${currentStep === 3
+                ? "text-slate-900 font-bold"
+                : currentStep > 3
                   ? "text-emerald-700 font-medium"
                   : "text-slate-400"
-              }`}
+                }`}
             >
               <span
-                className={`flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full text-[11px] sm:text-xs font-bold ${
-                  currentStep === 3
-                    ? "bg-blue-600 text-white shadow-2xs ring-2 ring-blue-100"
-                    : currentStep > 3
+                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-all ${currentStep === 3
+                  ? "bg-slate-900 text-white shadow-2xs"
+                  : currentStep > 3
                     ? "bg-emerald-600 text-white shadow-2xs"
                     : "bg-slate-200 text-slate-600"
-                }`}
+                  }`}
               >
-                {currentStep > 3 ? <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 stroke-[3]" /> : "3"}
+                {currentStep > 3 ? <Check className="h-3.5 w-3.5 stroke-[3]" /> : "03"}
               </span>
-              <span className="whitespace-nowrap text-[11px] sm:text-xs">3. Visual Proof</span>
+              <span className="whitespace-nowrap text-xs">Inspection Proof</span>
             </button>
 
-            <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-300 shrink-0" />
+            <ChevronRight className="h-3.5 w-3.5 text-slate-300 shrink-0" />
 
             {/* Step 4 */}
             <button
               type="button"
               onClick={() => setCurrentStep(4)}
-              className={`flex items-center gap-1.5 sm:gap-2 transition-colors cursor-pointer shrink-0 ${
-                currentStep === 4
-                  ? "text-blue-600 font-bold"
-                  : "text-slate-400"
-              }`}
+              className={`flex items-center gap-2 transition-colors cursor-pointer shrink-0 ${currentStep === 4
+                ? "text-slate-900 font-bold"
+                : "text-slate-400"
+                }`}
             >
               <span
-                className={`flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full text-[11px] sm:text-xs font-bold ${
-                  currentStep === 4
-                    ? "bg-blue-600 text-white shadow-2xs ring-2 ring-blue-100"
-                    : "bg-slate-200 text-slate-600"
-                }`}
+                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-all ${currentStep === 4
+                  ? "bg-slate-900 text-white shadow-2xs"
+                  : "bg-slate-200 text-slate-600"
+                  }`}
               >
-                4
+                04
               </span>
-              <span className="whitespace-nowrap text-[11px] sm:text-xs">4. Signatures</span>
+              <span className="whitespace-nowrap text-xs">Review & Submit</span>
             </button>
           </div>
         </div>
 
         {/* Step Body */}
         <div className="p-4 sm:p-6 md:p-8">
-          {/* STEP 1: HEADER & INSPECTION */}
+          {/* STEP 1: HEADER & FACILITY SPECIFICATION */}
           {currentStep === 1 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">
-                  Draw Header & Inspection Time Frame
+                  Draw Details & Facility Terms
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Establish the disbursement period, target lender inspection date, and time elapsed.
-                </p>
               </div>
 
+              {/* Primary Form Parameters (3 Columns) */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1.5">
@@ -578,48 +670,34 @@ export default function BuildDrawPacketPage() {
                     type="text"
                     value={drawAppNumber}
                     onChange={(e) => setDrawAppNumber(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-900 shadow-2xs focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-900 shadow-2xs focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                     placeholder="e.g. Draw #4"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Inspection Target Date
+                    Draw Cycle Start
                   </label>
                   <input
                     type="date"
-                    value={inspectionDate}
-                    onChange={(e) => setInspectionDate(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-900 shadow-2xs focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
+                    value={periodStart}
+                    onChange={(e) => setPeriodStart(e.target.value)}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-900 shadow-2xs focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Project Cycle Days Elapsed
+                    Target Lender Inspection
                   </label>
                   <input
-                    type="number"
-                    value={timeTakenDays}
-                    onChange={(e) => setTimeTakenDays(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-900 shadow-2xs focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
-                    placeholder="14"
+                    type="date"
+                    value={inspectionDate}
+                    onChange={(e) => setInspectionDate(e.target.value)}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-900 shadow-2xs focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                   />
                 </div>
-              </div>
-
-              {/* Project Reference Card */}
-              <div className="rounded-xl border border-blue-200/90 bg-blue-50/50 p-4 space-y-1 text-xs">
-                <div className="font-bold text-blue-950 flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-blue-600 shrink-0" />
-                  <span>Project Reference: {projectTitle}</span>
-                </div>
-                {projectAddress && (
-                  <div className="text-slate-600 text-xs pl-6">
-                    {projectAddress}
-                  </div>
-                )}
               </div>
             </div>
           )}
@@ -630,18 +708,15 @@ export default function BuildDrawPacketPage() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">
-                    Schedule of Values (SOV) Line Items Claim
+                    Schedule of Values (SOV) Claims
                   </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Allocate and claim completed work against approved budget line items for {drawAppNumber}.
-                  </p>
                 </div>
 
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleAddCustomLine}
-                  className="text-xs font-semibold gap-1.5 border-slate-300 bg-white shadow-2xs hover:bg-slate-50 shrink-0 self-start sm:self-auto"
+                  className="text-xs font-semibold gap-1.5 border-slate-300 bg-white shadow-2xs hover:bg-slate-50 hover:text-slate-900 shrink-0 self-start sm:self-auto cursor-pointer"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Add Line Item</span>
@@ -663,7 +738,7 @@ export default function BuildDrawPacketPage() {
                         <button
                           type="button"
                           onClick={() => handleRemoveLine(line.id)}
-                          className="text-slate-400 hover:text-rose-600 p-1"
+                          className="text-slate-400 hover:text-rose-600 p-1 cursor-pointer"
                           title="Remove item"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -673,18 +748,18 @@ export default function BuildDrawPacketPage() {
 
                     <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-100">
                       <div>
-                        <span className="text-[10px] uppercase font-bold text-slate-500 block">
+                        <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">
                           Approved Budget
                         </span>
-                        <span className="font-semibold text-slate-700">
+                        <span className="font-mono font-semibold text-slate-700 tabular-nums">
                           {formatMoney(line.budgetCents)}
                         </span>
                       </div>
                       <div>
-                        <span className="text-[10px] uppercase font-bold text-slate-500 block">
+                        <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">
                           Previously Drawn
                         </span>
-                        <span className="font-semibold text-slate-500">
+                        <span className="font-mono font-semibold text-slate-500 tabular-nums">
                           {formatMoney(line.previouslyDrawnCents)}
                         </span>
                       </div>
@@ -692,7 +767,7 @@ export default function BuildDrawPacketPage() {
 
                     <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
                       <span className="text-xs font-bold text-slate-700">
-                        This Period Claim ($):
+                        Claim Amount ($):
                       </span>
                       <div className="flex items-center gap-1.5">
                         <span className="text-slate-400 font-semibold text-xs">$</span>
@@ -702,7 +777,7 @@ export default function BuildDrawPacketPage() {
                           onChange={(e) =>
                             handleUpdateLineClaim(line.id, Number(e.target.value) || 0)
                           }
-                          className="w-32 text-right rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
+                          className="w-32 text-right rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-mono font-bold text-slate-900 tabular-nums focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                         />
                       </div>
                     </div>
@@ -713,12 +788,12 @@ export default function BuildDrawPacketPage() {
               {/* Desktop Table View (>= md) */}
               <div className="hidden md:block rounded-xl border border-slate-200 overflow-x-auto shadow-2xs">
                 <table className="w-full text-left text-xs min-w-[580px]">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
+                  <thead className="bg-slate-50/90 border-b border-slate-200 text-slate-600 font-semibold">
                     <tr>
-                      <th className="py-3 px-4">SOV Code & Description</th>
-                      <th className="py-3 px-4">Approved Budget</th>
-                      <th className="py-3 px-4 text-right">Previously Drawn</th>
-                      <th className="py-3 px-4 text-right">This Period Claim ($)</th>
+                      <th className="py-3 px-4 font-bold text-[11px] uppercase tracking-wider text-slate-500">Line Item</th>
+                      <th className="py-3 px-4 font-bold text-[11px] uppercase tracking-wider text-slate-500">Approved Budget</th>
+                      <th className="py-3 px-4 text-right font-bold text-[11px] uppercase tracking-wider text-slate-500">Previously Drawn</th>
+                      <th className="py-3 px-4 text-right font-bold text-[11px] uppercase tracking-wider text-slate-500">Claim Amount ($)</th>
                       <th className="py-3 px-2 w-8"></th>
                     </tr>
                   </thead>
@@ -728,10 +803,10 @@ export default function BuildDrawPacketPage() {
                         <td className="py-3 px-4 font-semibold text-slate-900">
                           {line.codeAndDesc}
                         </td>
-                        <td className="py-3 px-4 tabular-nums text-slate-600">
+                        <td className="py-3 px-4 font-mono tabular-nums text-slate-600">
                           {formatMoney(line.budgetCents)}
                         </td>
-                        <td className="py-3 px-4 text-right tabular-nums text-slate-500">
+                        <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-500">
                           {formatMoney(line.previouslyDrawnCents)}
                         </td>
                         <td className="py-3 px-4 text-right">
@@ -743,7 +818,7 @@ export default function BuildDrawPacketPage() {
                               onChange={(e) =>
                                 handleUpdateLineClaim(line.id, Number(e.target.value) || 0)
                               }
-                              className="w-28 text-right rounded-md border border-slate-300 px-2.5 py-1 text-xs font-bold text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
+                              className="w-28 text-right rounded-md border border-slate-300 px-2.5 py-1 text-xs font-mono font-bold text-slate-900 tabular-nums focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                             />
                           </div>
                         </td>
@@ -752,7 +827,7 @@ export default function BuildDrawPacketPage() {
                             <button
                               type="button"
                               onClick={() => handleRemoveLine(line.id)}
-                              className="text-slate-300 hover:text-rose-600 transition-colors p-1"
+                              className="text-slate-300 hover:text-rose-600 transition-colors p-1 cursor-pointer"
                               title="Remove item"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -765,27 +840,26 @@ export default function BuildDrawPacketPage() {
                 </table>
               </div>
 
-              {/* Calculations Box */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4">
-                  <span className="text-xs font-semibold text-slate-500 block">Gross Claimed Total</span>
-                  <span className="text-base sm:text-lg font-bold text-slate-900 mt-1 block">
-                    {formatMoney(totalRequestedCents)}
-                  </span>
-                </div>
+              {/* Summary Totals Bar */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 px-5 py-3.5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                      Total Claim
+                    </span>
+                    <span className="text-base font-mono font-bold text-slate-900 tabular-nums">
+                      {formatMoney(totalRequestedCents)}
+                    </span>
+                  </div>
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4">
-                  <span className="text-xs font-semibold text-slate-500 block">Standard Retainage (10%)</span>
-                  <span className="text-base sm:text-lg font-bold text-amber-700 mt-1 block">
-                    -{formatMoney(retainageCents)}
-                  </span>
-                </div>
-
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3.5 sm:p-4">
-                  <span className="text-xs font-semibold text-emerald-800 block">Net Eligible Wire Disbursement</span>
-                  <span className="text-base sm:text-lg font-bold text-emerald-700 mt-1 block">
-                    {formatMoney(netPayableCents)}
-                  </span>
+                  <div className="text-right">
+                    <span className="text-[10px] uppercase font-bold text-emerald-800 block tracking-wider">
+                      Net Payable to Borrower
+                    </span>
+                    <span className="text-xl font-mono font-bold text-emerald-600 tabular-nums">
+                      {formatMoney(netPayableCents)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -793,20 +867,15 @@ export default function BuildDrawPacketPage() {
 
           {/* STEP 3: VISUAL PROOF PHOTOS */}
           {currentStep === 3 && (
-            <div className="space-y-6">
+            <div className="space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-200">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                      Visual Inspection Proof Photos
-                    </h2>
-                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 border border-slate-200">
-                      {photos.length} {photos.length === 1 ? "photo" : "photos"}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    High-resolution photo evidence attached for lender inspector verification.
-                  </p>
+                <div className="flex items-center gap-2.5">
+                  <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                    Visual Inspection Proof
+                  </h2>
+                  <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 border border-slate-200">
+                    {photos.length} {photos.length === 1 ? "photo" : "photos"}
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
@@ -832,23 +901,23 @@ export default function BuildDrawPacketPage() {
                     type="button"
                     size="sm"
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-8 gap-1.5 shadow-2xs cursor-pointer font-semibold"
+                    className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-8 gap-1.5 shadow-2xs cursor-pointer font-semibold"
                   >
                     <Plus className="h-3.5 w-3.5" />
-                    <span>Add Images</span>
+                    <span>Upload Photos</span>
                   </Button>
                 </div>
               </div>
 
               {photos.length === 0 ? (
                 <div className="rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center space-y-3">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
                     <ImageIcon className="h-6 w-6" />
                   </div>
                   <div className="space-y-1">
                     <h3 className="text-sm font-semibold text-slate-900">No photos attached yet</h3>
                     <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                      Attach visual inspection photos from the job site to support claimed SOV line items.
+                      Attach site inspection photos from the job site to support line item claims.
                     </p>
                   </div>
                   <div className="pt-2 flex items-center justify-center gap-2">
@@ -856,7 +925,7 @@ export default function BuildDrawPacketPage() {
                       type="button"
                       size="sm"
                       onClick={() => fileInputRef.current?.click()}
-                      className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-8 gap-1.5 cursor-pointer"
+                      className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-8 gap-1.5 cursor-pointer font-semibold shadow-2xs"
                     >
                       <Upload className="h-3.5 w-3.5" />
                       <span>Upload Photos</span>
@@ -873,51 +942,51 @@ export default function BuildDrawPacketPage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                   {photos.map((photo) => (
                     <div
                       key={photo.id}
                       onClick={() => setPreviewPhoto(photo)}
-                      className="group relative aspect-4/3 rounded-xl border border-slate-200 overflow-hidden bg-slate-900/5 shadow-2xs hover:shadow-md transition-all cursor-pointer"
+                      className="group rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={photo.url}
-                        alt={photo.title}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
+                      {/* Image Preview Container */}
+                      <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={photo.url}
+                          alt={photo.title}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
 
-                      {/* Clean bottom gradient for label legibility */}
-                      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent pointer-events-none" />
-
-                      {/* Photo Title */}
-                      <div className="absolute bottom-2.5 left-2.5 right-2.5">
-                        <span className="inline-block truncate max-w-full rounded-md bg-slate-900/80 backdrop-blur-xs px-2 py-0.5 text-[11px] font-semibold text-white shadow-xs">
-                          {photo.title}
-                        </span>
+                        {/* Top Action buttons */}
+                        <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewPhoto(photo);
+                            }}
+                            className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-900/80 hover:bg-slate-900 text-white transition-colors shadow-sm cursor-pointer"
+                            title="Preview full size"
+                          >
+                            <Maximize2 className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => handleRemovePhoto(photo.id, e)}
+                            className="flex h-7 w-7 items-center justify-center rounded-md bg-rose-600/90 hover:bg-rose-600 text-white transition-colors shadow-sm cursor-pointer"
+                            title="Remove photo"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
 
-                      {/* Action buttons (Top Right) */}
-                      <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPreviewPhoto(photo);
-                          }}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900/80 hover:bg-slate-900 text-white transition-colors shadow-sm cursor-pointer"
-                          title="Preview full size"
-                        >
-                          <Maximize2 className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => handleRemovePhoto(photo.id, e)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-600/90 hover:bg-rose-600 text-white transition-colors shadow-sm cursor-pointer"
-                          title="Remove photo"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
+                      {/* Photo Caption */}
+                      <div className="px-3.5 py-2.5 border-t border-slate-100 flex items-center bg-white min-h-[42px]">
+                        <span className="text-xs font-semibold text-slate-800 leading-snug truncate" title={photo.title}>
+                          {photo.title}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -926,16 +995,16 @@ export default function BuildDrawPacketPage() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="group relative aspect-4/3 rounded-xl border-2 border-dashed border-slate-300 hover:border-blue-500 bg-slate-50/50 hover:bg-blue-50/40 transition-all flex flex-col items-center justify-center p-4 text-center cursor-pointer shadow-2xs"
+                    className="group rounded-xl border-2 border-dashed border-slate-200 hover:border-slate-800 bg-slate-50/50 hover:bg-slate-100/60 transition-all flex flex-col items-center justify-center p-6 text-center cursor-pointer min-h-[160px]"
                   >
-                    <div className="h-9 w-9 rounded-full bg-white group-hover:bg-blue-600 text-slate-600 group-hover:text-white border border-slate-200 group-hover:border-blue-600 flex items-center justify-center transition-all mb-2 shadow-2xs">
+                    <div className="h-9 w-9 rounded-full bg-white group-hover:bg-slate-900 text-slate-600 group-hover:text-white border border-slate-200 group-hover:border-slate-900 flex items-center justify-center transition-all mb-2 shadow-2xs">
                       <Plus className="h-4 w-4" />
                     </div>
-                    <span className="text-xs font-semibold text-slate-800 group-hover:text-blue-700">
-                      Add Image
+                    <span className="text-xs font-semibold text-slate-800 group-hover:text-slate-900">
+                      Add Site Photo
                     </span>
                     <span className="text-[10px] text-slate-400 mt-0.5">
-                      Upload from computer
+                      JPG, PNG up to 15MB
                     </span>
                   </button>
                 </div>
@@ -943,78 +1012,204 @@ export default function BuildDrawPacketPage() {
             </div>
           )}
 
-          {/* STEP 4: SIGNATURES & TRANSMISSION */}
+          {/* STEP 4: PACKET REVIEW & TRANSMISSION */}
           {currentStep === 4 && (
             <div className="space-y-6">
-              <div>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">
-                  Certification & Digital Signature
+              {/* Header */}
+              <div className="pb-2 border-b border-slate-200/80">
+                <h2 className="text-base font-bold text-slate-900">
+                  Review Draw Packet
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Confirm accuracy of requested quantities and transmit to AMHAR inspection & lender.
-                </p>
               </div>
 
-              {/* Review Card */}
-              <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-5 space-y-3 text-xs">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                  <span className="font-semibold text-slate-600">Packet Reference</span>
-                  <span className="font-bold text-slate-900">{drawAppNumber} (DRW-2026-004)</span>
+              {/* Financial Key Figures Strip */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
+                  <div className="text-xs font-medium text-slate-500">
+                    Total Claim
+                  </div>
+                  <div className="text-xl font-bold font-mono text-slate-900 mt-1 tabular-nums">
+                    {formatMoney(totalRequestedCents)}
+                  </div>
                 </div>
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                  <span className="font-semibold text-slate-600">Target Inspection Date</span>
-                  <span className="font-bold text-slate-900">{inspectionDate}</span>
+
+                <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
+                  <div className="text-xs font-medium text-slate-500">
+                    Net Payable to Borrower
+                  </div>
+                  <div className="text-xl font-bold font-mono text-emerald-600 mt-1 tabular-nums">
+                    {formatMoney(netPayableCents)}
+                  </div>
                 </div>
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                  <span className="font-semibold text-slate-600">Net Eligible Amount</span>
-                  <span className="font-bold text-emerald-600 text-sm">{formatMoney(netPayableCents)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-slate-600">Verified Evidence Photos</span>
-                  <span className="font-bold text-blue-600">{photos.length} Attached & Reconciled</span>
+
+                <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
+                  <div className="text-xs font-medium text-slate-500">
+                    Site Photos
+                  </div>
+                  <div className="text-xl font-bold font-mono text-slate-900 mt-1 tabular-nums">
+                    {photos.length}
+                  </div>
                 </div>
               </div>
 
-              {/* Certification Checkbox */}
-              <label className="flex items-start gap-3 rounded-xl border border-blue-200/90 bg-blue-50/50 p-4 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={certificationAgreed}
-                  onChange={(e) => setCertificationAgreed(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div className="text-xs text-slate-700 leading-relaxed">
-                  <span className="font-bold text-slate-900 block mb-0.5">
-                    Borrower / Principal Certification of Work Complete
-                  </span>
-                  I hereby certify under penalty of contract default that all represented line item materials have been physically incorporated into the improvements at {projectAddress}, and all trade lien waivers have been collected.
-                </div>
-              </label>
-
-              {/* Signature Inputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Signer Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={signerName}
-                    onChange={(e) => setSignerName(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 shadow-2xs"
-                  />
+              {/* SECTION 1: Header & Facility */}
+              <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-2xs">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 bg-slate-50/70">
+                  <h3 className="text-xs font-bold text-slate-900">
+                    Header & Facility
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(1)}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                  >
+                    <Pencil className="h-3 w-3" />
+                    <span>Edit</span>
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Signer Authority / Role
-                  </label>
-                  <input
-                    type="text"
-                    value={signerRole}
-                    onChange={(e) => setSignerRole(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 shadow-2xs"
-                  />
+                <div className="p-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                  <div className="space-y-1">
+                    <div className="text-slate-500 text-[11px]">Draw Application</div>
+                    <div className="font-semibold text-slate-900">{drawAppNumber}</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-slate-500 text-[11px]">Billing Cycle Start</div>
+                    <div className="font-semibold text-slate-900">{periodStart}</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-slate-500 text-[11px]">Target Lender Inspection</div>
+                    <div className="font-semibold text-slate-900">{inspectionDate}</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-slate-500 text-[11px]">Lending Facility</div>
+                    <div className="font-semibold text-slate-900">Capital Reserve Trust</div>
+                  </div>
+                  <div className="sm:col-span-2 md:col-span-4 pt-3 border-t border-slate-100 space-y-1">
+                    <div className="text-slate-500 text-[11px]">Project Location</div>
+                    <div className="font-medium text-slate-800">{projectAddress}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 2: Line Items (SOV) */}
+              <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-2xs">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 bg-slate-50/70">
+                  <h3 className="text-xs font-bold text-slate-900">
+                    Line Items (SOV)
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(2)}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                  >
+                    <Pencil className="h-3 w-3" />
+                    <span>Edit</span>
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 bg-slate-50/70 text-xs font-semibold text-slate-600">
+                        <th className="py-2.5 px-4 font-semibold">SOV Code & Description</th>
+                        <th className="py-2.5 px-4 font-semibold text-right">Total Budget</th>
+                        <th className="py-2.5 px-4 font-semibold text-right">Previously Drawn</th>
+                        <th className="py-2.5 px-4 font-semibold text-right">This Period Claim</th>
+                        <th className="py-2.5 px-4 font-semibold text-right">Remaining Balance</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {sovLines.map((line) => {
+                        const remaining = Math.max(0, line.budgetCents - line.previouslyDrawnCents - line.claimCents);
+                        return (
+                          <tr key={line.id} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="py-3 px-4 font-semibold text-slate-900">
+                              {line.codeAndDesc}
+                            </td>
+                            <td className="py-3 px-4 font-mono text-slate-600 text-right tabular-nums">
+                              {formatMoney(line.budgetCents)}
+                            </td>
+                            <td className="py-3 px-4 font-mono text-slate-600 text-right tabular-nums">
+                              {formatMoney(line.previouslyDrawnCents)}
+                            </td>
+                            <td className="py-3 px-4 font-mono font-bold text-slate-900 text-right tabular-nums">
+                              {formatMoney(line.claimCents)}
+                            </td>
+                            <td className="py-3 px-4 font-mono text-slate-600 text-right tabular-nums">
+                              {formatMoney(remaining)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t-2 border-slate-200 bg-slate-50/80 font-bold text-slate-900">
+                        <td className="py-3 px-4">Total</td>
+                        <td className="py-3 px-4 font-mono text-right tabular-nums">
+                          {formatMoney(sovLines.reduce((acc, l) => acc + l.budgetCents, 0))}
+                        </td>
+                        <td className="py-3 px-4 font-mono text-right tabular-nums">
+                          {formatMoney(sovLines.reduce((acc, l) => acc + l.previouslyDrawnCents, 0))}
+                        </td>
+                        <td className="py-3 px-4 font-mono text-right text-emerald-700 text-sm tabular-nums">
+                          {formatMoney(totalRequestedCents)}
+                        </td>
+                        <td className="py-3 px-4 font-mono text-right tabular-nums">
+                          {formatMoney(
+                            sovLines.reduce(
+                              (acc, l) =>
+                                acc + Math.max(0, l.budgetCents - l.previouslyDrawnCents - l.claimCents),
+                              0
+                            )
+                          )}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+
+              {/* SECTION 3: Inspection Proof */}
+              <div className="rounded-xl border border-slate-200/90 bg-white overflow-hidden shadow-2xs">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 bg-slate-50/70">
+                  <h3 className="text-xs font-bold text-slate-900">
+                    Inspection Proof
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(3)}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                  >
+                    <Pencil className="h-3 w-3" />
+                    <span>Edit</span>
+                  </button>
+                </div>
+
+                <div className="p-5">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 gap-3">
+                    {photos.map((photo) => (
+                      <div
+                        key={photo.id}
+                        onClick={() => setPreviewPhoto(photo)}
+                        className="group rounded-lg border border-slate-200/80 bg-slate-50 overflow-hidden hover:border-slate-400 transition-all cursor-pointer flex flex-col"
+                      >
+                        <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={photo.url}
+                            alt={photo.title}
+                            className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                          />
+                        </div>
+                        <div className="px-2.5 py-1.5 bg-white border-t border-slate-100 truncate">
+                          <span className="text-[11px] font-semibold text-slate-700 truncate block" title={photo.title}>
+                            {photo.title}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1028,7 +1223,7 @@ export default function BuildDrawPacketPage() {
             variant="ghost"
             disabled={currentStep === 1 || isSubmitting}
             onClick={handlePrevious}
-            className="text-xs font-semibold text-slate-700 hover:text-slate-900 border border-slate-200 bg-white px-4 py-2 rounded-lg disabled:opacity-40"
+            className="text-xs font-semibold text-slate-700 hover:text-slate-900 border border-slate-200 bg-white px-4 py-2 rounded-lg disabled:opacity-40 cursor-pointer"
           >
             Previous
           </Button>
@@ -1040,11 +1235,14 @@ export default function BuildDrawPacketPage() {
             <Button
               type="button"
               onClick={handleNext}
-              disabled={isSubmitting || (currentStep === 4 && !certificationAgreed)}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-5 py-2 rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer"
+              disabled={isSubmitting}
+              className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-5 py-2 rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer"
             >
               {currentStep === 4 ? (
-                isSubmitting ? "Transmitting..." : "Submit to Lender"
+                <>
+                  <ShieldCheck className="h-4 w-4" />
+                  <span>{isSubmitting ? "Transmitting..." : "Submit Packet to Lender"}</span>
+                </>
               ) : (
                 "Next Step"
               )}
@@ -1054,59 +1252,106 @@ export default function BuildDrawPacketPage() {
       </div>
 
       {/* Lightbox Preview Modal */}
-      {previewPhoto && (
+      {isMounted && previewPhoto && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-xs p-4 sm:p-6 animate-in fade-in-0 duration-150"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 sm:p-6 overflow-hidden animate-in fade-in-0 duration-150"
           onClick={() => setPreviewPhoto(null)}
+          role="dialog"
+          aria-modal="true"
         >
           <div
-            className="relative max-w-4xl w-full bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-800"
+            className="relative max-w-5xl w-full max-h-[90vh] flex flex-col bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950">
-              <span className="text-sm font-semibold text-white truncate pr-4">
-                {previewPhoto.title}
-              </span>
-              <div className="flex items-center gap-2">
-                <Button
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-3.5 border-b border-slate-100 bg-white shrink-0">
+              <div className="flex items-center gap-3 min-w-0 pr-4">
+                <span className="text-sm font-bold text-slate-900 truncate">
+                  {previewPhoto.title}
+                </span>
+                {photos.length > 0 && currentPhotoIndex !== -1 && (
+                  <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full font-mono shrink-0">
+                    {currentPhotoIndex + 1} of {photos.length}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
                   type="button"
-                  variant="outline"
-                  size="sm"
                   onClick={() => handleRemovePhoto(previewPhoto.id)}
-                  className="h-7 text-xs bg-slate-800 border-slate-700 text-rose-400 hover:bg-rose-950 hover:text-rose-300 gap-1 cursor-pointer"
+                  className="h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                  title="Remove photo"
+                  aria-label="Remove photo"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  <span>Remove Photo</span>
-                </Button>
+                  <Trash2 className="h-4 w-4" />
+                </button>
                 <button
                   type="button"
                   onClick={() => setPreviewPhoto(null)}
-                  className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+                  className="h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                  aria-label="Close preview"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
             </div>
-            <div className="max-h-[75vh] flex items-center justify-center p-2 bg-black">
+
+            {/* Modal Image Area */}
+            <div className="relative flex-1 min-h-0 flex items-center justify-center p-6 bg-slate-50/70 select-none overflow-hidden">
+              {/* Previous Photo Button */}
+              {photos.length > 1 && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePrevPhoto();
+                  }}
+                  className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 hover:bg-white text-slate-700 hover:text-slate-900 shadow-md border border-slate-200 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  aria-label="Previous photo"
+                  title="Previous photo (Left arrow)"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+              )}
+
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewPhoto.url}
                 alt={previewPhoto.title}
-                className="max-h-[70vh] w-auto max-w-full object-contain rounded-lg"
+                className="max-h-[calc(90vh-90px)] max-w-full w-auto h-auto object-contain rounded-xl shadow-md border border-slate-200/80 bg-white"
               />
+
+              {/* Next Photo Button */}
+              {photos.length > 1 && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNextPhoto();
+                  }}
+                  className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 hover:bg-white text-slate-700 hover:text-slate-900 shadow-md border border-slate-200 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  aria-label="Next photo"
+                  title="Next photo (Right arrow)"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Add from URL Modal */}
-      {isAddUrlOpen && (
+      {isMounted && isAddUrlOpen && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 backdrop-blur-xs p-4 animate-in fade-in-0 duration-150"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 overflow-hidden animate-in fade-in-0 duration-150"
           onClick={() => setIsAddUrlOpen(false)}
+          role="dialog"
+          aria-modal="true"
         >
           <div
-            className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4"
+            className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-2xl p-6 shadow-2xl border border-slate-200 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -1115,6 +1360,7 @@ export default function BuildDrawPacketPage() {
                 type="button"
                 onClick={() => setIsAddUrlOpen(false)}
                 className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                aria-label="Close"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1130,7 +1376,7 @@ export default function BuildDrawPacketPage() {
                   value={urlTitleInput}
                   onChange={(e) => setUrlTitleInput(e.target.value)}
                   placeholder="e.g. Foundation Concrete Pour"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
                 />
               </div>
 
@@ -1144,7 +1390,7 @@ export default function BuildDrawPacketPage() {
                   value={urlLinkInput}
                   onChange={(e) => setUrlLinkInput(e.target.value)}
                   placeholder="https://..."
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
                 />
               </div>
 
@@ -1161,14 +1407,92 @@ export default function BuildDrawPacketPage() {
                 <Button
                   type="submit"
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs cursor-pointer"
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs cursor-pointer font-semibold"
                 >
                   Add Photo
                 </Button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Upload Photo Confirmation & Title Modal */}
+      {isMounted && pendingUpload && createPortal(
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 overflow-hidden animate-in fade-in-0 duration-150"
+          onClick={() => setPendingUpload(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-2xl p-6 shadow-2xl border border-slate-200 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-bold text-slate-900">Add Site Photo Details</h3>
+              <button
+                type="button"
+                onClick={() => setPendingUpload(null)}
+                className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Thumbnail Preview */}
+            <div className="relative aspect-16/10 w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={pendingUpload.url}
+                alt="Upload preview"
+                className="h-full w-full object-cover"
+              />
+            </div>
+
+            <form onSubmit={handleConfirmUpload} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Photo Title / Description
+                </label>
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  value={uploadTitleInput}
+                  onChange={(e) => setUploadTitleInput(e.target.value)}
+                  placeholder="e.g. Foundation Concrete Pour"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-900 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 shadow-2xs"
+                />
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Specify a clear label for inspector and lender verification.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPendingUpload(null)}
+                  className="text-xs cursor-pointer"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs cursor-pointer font-semibold shadow-xs"
+                >
+                  Attach to Draw
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

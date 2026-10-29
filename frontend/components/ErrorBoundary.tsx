@@ -53,10 +53,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
       return (
         <div className="min-h-screen bg-[#fafaf9] dark:bg-slate-950 flex flex-col items-center justify-center p-6 text-slate-900 dark:text-slate-100">
-          <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl p-8 text-center animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-center mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                <AlertTriangle className="w-7 h-7" />
+          <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs p-6 sm:p-8 text-center animate-in fade-in duration-150">
+            <div className="flex justify-center mb-5">
+              <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-200">
+                <AlertTriangle className="w-6 h-6 stroke-[1.75]" />
               </div>
             </div>
 
