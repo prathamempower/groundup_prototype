@@ -193,6 +193,7 @@ export default function ControlCenterPage() {
   const project = d?.project || currentProject;
 
   const isApprovedBudgetActive = selectedOriginKey === "approved_budget";
+  const isSelfFundActive = selectedOriginKey === "self_fund";
   const isActualSpendActive = selectedOriginKey === "actual_spend";
   const isDrawReceivedActive = selectedOriginKey === "draw_received";
   const isTimelineActive = selectedOriginKey === "completion_timeline";
@@ -237,49 +238,101 @@ export default function ControlCenterPage() {
         {/* ========================================================================= */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 w-full min-w-0">
 
-          {/* Card 1: APPROVED BUDGET */}
+          {/* Card 1: APPROVED BUDGET & SELF FUND */}
           <div
-            role="button"
-            tabIndex={0}
-            aria-expanded={isApprovedBudgetActive}
-            onClick={() => handleSelectMetric("approved_budget")}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleSelectMetric("approved_budget");
-              }
-            }}
-            title="Click to view Approved Budget breakdown below"
             className={cn(
-              "relative rounded-xl border p-3 sm:p-4 lg:p-5 flex flex-col justify-between transition-all cursor-pointer text-left focus:outline-hidden focus:ring-2 focus:ring-blue-500/40 select-none min-w-0 h-full",
-              isApprovedBudgetActive
+              "relative rounded-xl border p-3 sm:p-4 lg:p-5 flex flex-col justify-between transition-all select-none min-w-0 h-full",
+              isApprovedBudgetActive || isSelfFundActive
                 ? "border-blue-600 bg-blue-50/20 ring-2 ring-blue-600/20 shadow-xs"
                 : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-xs"
             )}
           >
             <div className="w-full min-w-0">
-              <div className="flex items-start justify-between gap-1 min-h-[26px] sm:min-h-[22px]">
-                <span
-                  className={cn(
-                    "text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight transition-colors line-clamp-2",
-                    isApprovedBudgetActive ? "text-blue-700 font-bold" : "text-slate-500"
-                  )}
-                >
-                  Approved Budget
-                </span>
+              {/* Approved Budget Main Section */}
+              <div
+                role="button"
+                tabIndex={0}
+                aria-expanded={isApprovedBudgetActive}
+                onClick={() => handleSelectMetric("approved_budget")}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleSelectMetric("approved_budget");
+                  }
+                }}
+                title="Click to view Approved Budget breakdown below"
+                className="cursor-pointer group rounded-md p-1 -m-1 transition-colors hover:bg-slate-50/60"
+              >
+                <div className="flex items-start justify-between gap-1 min-h-[26px] sm:min-h-[22px]">
+                  <span
+                    className={cn(
+                      "text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight transition-colors line-clamp-2",
+                      isApprovedBudgetActive ? "text-blue-700 font-bold" : "text-slate-500 group-hover:text-slate-700"
+                    )}
+                  >
+                    Approved Budget
+                  </span>
+                </div>
+                <div className="mt-1 sm:mt-2 lg:mt-3">
+                  <div
+                    className={cn(
+                      "text-sm xs:text-base sm:text-xl lg:text-[22px] xl:text-2xl font-bold tracking-tight font-mono tabular-nums leading-none transition-colors truncate",
+                      isApprovedBudgetActive ? "text-blue-900" : "text-slate-900 group-hover:text-blue-950"
+                    )}
+                  >
+                    $1,471,120.00
+                  </div>
+                </div>
               </div>
-              <div className="mt-1 sm:mt-2 lg:mt-3">
-                <div
-                  className={cn(
-                    "text-sm xs:text-base sm:text-xl lg:text-[22px] xl:text-2xl font-bold tracking-tight font-mono tabular-nums leading-none transition-colors truncate",
-                    isApprovedBudgetActive ? "text-blue-900" : "text-slate-900"
-                  )}
-                >
-                  $1,471,120.00
+
+              {/* Sub header: Self Fund / Additional Cost */}
+              <div
+                role="button"
+                tabIndex={0}
+                aria-expanded={isSelfFundActive}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelectMetric("self_fund");
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSelectMetric("self_fund");
+                  }
+                }}
+                title="Click to view Self Fund vs Additional Cost comparison table"
+                className={cn(
+                  "mt-3 pt-2.5 border-t transition-all rounded-md px-2 py-1.5 cursor-pointer -mx-1",
+                  isSelfFundActive
+                    ? "bg-blue-100/70 border-blue-300 ring-1 ring-blue-500/40"
+                    : "border-slate-100 hover:bg-slate-100/70 hover:border-slate-200"
+                )}
+              >
+                <div className="flex items-center justify-between gap-1 mb-1">
+                  <span
+                    className={cn(
+                      "text-[10px] font-semibold uppercase tracking-wider truncate",
+                      isSelfFundActive ? "text-blue-700 font-bold" : "text-slate-500"
+                    )}
+                  >
+                    Self Fund / Additional Cost
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-500 shrink-0">
+                    Left: <strong className="text-slate-900 font-bold">$40,000</strong>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between font-mono text-[11px] sm:text-xs">
+                  <span className="text-black font-bold tabular-nums" title="Self Fund Amount">
+                    $50,000
+                  </span>
+                  <span className="text-red-600 font-bold tabular-nums" title="Additional Cost Incurred">
+                    -$10,000
+                  </span>
                 </div>
               </div>
             </div>
-            {isApprovedBudgetActive && (
+            {(isApprovedBudgetActive || isSelfFundActive) && (
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-white border-b border-r border-blue-600 rotate-45 z-10 hidden lg:block" />
             )}
           </div>

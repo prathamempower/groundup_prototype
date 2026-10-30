@@ -36,7 +36,7 @@ export function AmountSourceModal({
     origin.sourceDocument.fileType === "xlsx" ||
     origin.sourceDocument.fileName.toLowerCase().endsWith(".xlsx");
 
-  const isWide = Boolean(origin.isComparisonTable || origin.isTimelineSchedule);
+  const isWide = Boolean(origin.isComparisonTable || origin.isTimelineSchedule || origin.isSelfFundComparison);
 
   // Clean, short title
   const cleanTitle = origin.title
@@ -274,7 +274,7 @@ export function AmountSourceModal({
           )}
 
           {/* CASE C: STANDARD LINE ITEMS TABLE (e.g. Approved Project Budget, Draw Received) */}
-          {!origin.isComparisonTable && !origin.isTimelineSchedule && origin.components && origin.components.length > 0 && (
+          {!origin.isComparisonTable && !origin.isTimelineSchedule && !origin.isSelfFundComparison && origin.components && origin.components.length > 0 && (
             <div className="rounded-lg border border-slate-200 overflow-hidden">
               <div className="max-h-[340px] overflow-y-auto">
                 <table className="w-full text-xs">
@@ -328,6 +328,126 @@ export function AmountSourceModal({
                     </tr>
                   </tfoot>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {/* CASE D: SELF FUND VS ADDITIONAL COST COMPARISON TABLE */}
+          {origin.isSelfFundComparison && origin.components && origin.components.length > 0 && (
+            <div className="rounded-lg border border-slate-200 overflow-hidden shadow-2xs flex flex-col bg-white">
+              <div className="max-h-[340px] overflow-y-auto overflow-x-auto touch-pan-x touch-pan-y">
+                <table className="w-full text-xs min-w-[620px]">
+                  <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
+                    <tr className="text-slate-500 font-semibold text-[11px]">
+                      <th className="py-2.5 px-3 text-left">Expense / Item Description</th>
+                      <th className="py-2.5 px-3 text-left whitespace-nowrap">Vendor / Reference</th>
+                      <th className="py-2.5 px-3 text-left whitespace-nowrap">Date</th>
+                      <th className="py-2.5 px-3 text-right whitespace-nowrap text-black font-bold">
+                        Self Fund
+                      </th>
+                      <th className="py-2.5 px-3 text-right whitespace-nowrap text-red-600 font-bold">
+                        Additional Cost
+                      </th>
+                      <th className="py-2.5 px-3 text-right whitespace-nowrap font-bold text-slate-800">
+                        Self Fund Left
+                      </th>
+                      <th className="py-2.5 px-3 text-center whitespace-nowrap">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-800">
+                    {origin.components.map((c) => {
+                      const isIncurred = c.isAdditionalCost || c.status === "Incurred";
+
+                      return (
+                        <tr
+                          key={c.id}
+                          className={cn(
+                            "transition-colors",
+                            isIncurred
+                              ? "bg-rose-50/40 hover:bg-rose-50/70 border-l-2 border-l-red-500"
+                              : "hover:bg-slate-50/80"
+                          )}
+                        >
+                          <td className="py-2.5 px-3 font-medium text-slate-900">
+                            <div className="flex items-center gap-1.5">
+                              {c.code && (
+                                <span className="font-mono text-[11px] font-semibold text-slate-500 bg-slate-100 px-1 py-0.5 rounded border border-slate-200/60 shrink-0">
+                                  {c.code}
+                                </span>
+                              )}
+                              <span className="truncate max-w-[240px] sm:max-w-none">{c.name}</span>
+                            </div>
+                            {c.notes && (
+                              <p className="text-[10px] text-slate-400 mt-0.5 truncate max-w-xs sm:max-w-md">
+                                {c.notes}
+                              </p>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3 text-slate-600 text-[11px] whitespace-nowrap">
+                            <div>{c.vendor || "-"}</div>
+                            {c.transactionRef && (
+                              <span className="text-[10px] text-slate-400 font-mono block">
+                                {c.transactionRef}
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3 text-slate-600 font-mono whitespace-nowrap text-[11px]">
+                            {c.actualDate || "-"}
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-mono font-bold text-black tabular-nums whitespace-nowrap">
+                            {c.selfFundFormatted || (c.isAdditionalCost ? "-" : c.amountFormatted)}
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-mono font-bold tabular-nums whitespace-nowrap">
+                            {c.isAdditionalCost || (c.additionalCostFormatted && c.additionalCostFormatted !== "-") ? (
+                              <span className="text-red-600">
+                                {c.additionalCostFormatted || c.amountFormatted}
+                              </span>
+                            ) : (
+                              <span className="text-slate-300">-</span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900 tabular-nums whitespace-nowrap">
+                            {c.differenceFormatted || "-"}
+                          </td>
+                          <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                            <span
+                              className={cn(
+                                "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                                isIncurred
+                                ? "bg-red-100 text-red-800 border border-red-200"
+                                : "bg-slate-100 text-slate-800 border border-slate-200"
+                              )}
+                            >
+                              {c.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Docked Total Bar */}
+              <div className="bg-slate-50/95 border-t border-slate-200 px-3.5 py-2.5 shrink-0">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-bold text-slate-900">
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-700">Self Fund & Cost Comparison</span>
+                    <span className="text-slate-300 hidden sm:inline">·</span>
+                    <span className="text-slate-500 font-normal">Difference Reconciliation</span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-4 font-mono">
+                    <span className="text-black font-bold">
+                      Self Fund: {origin.selfFundSummary?.totalSelfFundFormatted || "$50,000.00"}
+                    </span>
+                    <span className="text-red-600 font-bold">
+                      Additional Cost: -{origin.selfFundSummary?.totalAdditionalCostFormatted || "$10,000.00"}
+                    </span>
+                    <span className="text-slate-900 font-bold bg-white px-2 py-0.5 rounded border border-slate-200">
+                      Self Fund Left: {origin.selfFundSummary?.currentSelfFundLeftFormatted || "$40,000.00"}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           )}

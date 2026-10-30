@@ -6,7 +6,7 @@ export interface AmountComponentItem {
   amountFormatted: string;
   amountCents: number;
   sharePct?: number;
-  status: "Verified" | "Paid" | "Disbursed" | "Committed" | "Approved" | "Reallocated" | "Delayed";
+  status: "Verified" | "Paid" | "Disbursed" | "Committed" | "Approved" | "Reallocated" | "Delayed" | "Incurred" | "Allocated";
   notes?: string;
   targetDate?: string;
   actualDate?: string;
@@ -18,6 +18,13 @@ export interface AmountComponentItem {
   varianceCents?: number;
   delayIncurred?: string;
   transactionRef?: string;
+  selfFundFormatted?: string;
+  selfFundCents?: number;
+  additionalCostFormatted?: string;
+  additionalCostCents?: number;
+  differenceFormatted?: string;
+  differenceCents?: number;
+  isAdditionalCost?: boolean;
 }
 
 export interface AmountAuditEntry {
@@ -73,6 +80,12 @@ export interface AmountSourceOrigin {
   };
   isComparisonTable?: boolean;
   isTimelineSchedule?: boolean;
+  isSelfFundComparison?: boolean;
+  selfFundSummary?: {
+    totalSelfFundFormatted: string;
+    totalAdditionalCostFormatted: string;
+    currentSelfFundLeftFormatted: string;
+  };
   timelineDelayImpact?: TimelineDelayImpact;
   summaryStats?: {
     approvedTotal?: string;
@@ -222,6 +235,91 @@ export const CONTROL_CENTER_AMOUNT_ORIGINS: Record<string, AmountSourceOrigin> =
         actor: "Developer & Hudson Peak GC",
         timestamp: "Aug 14, 2025, 02:15 PM",
         details: "Approved structural steel tie-in reinforcement adding $16,120 to contract sum.",
+      },
+    ],
+  },
+
+  // 1-SF. Self Fund vs Additional Cost Comparison ($40,000 Left)
+  self_fund: {
+    id: "self_fund",
+    title: "Self Fund vs Additional Cost Comparison",
+    subtitle: "Comparison of developer self fund amount used against additional project costs incurred",
+    amountFormatted: "$40,000.00",
+    amountCents: 4000000,
+    isSelfFundComparison: true,
+    statusBadge: {
+      label: "Active Self Fund",
+      variant: "approved",
+    },
+    sourceDocument: {
+      fileName: "73 Broadway - Expense Tracker.xlsx",
+      fileType: "xlsx",
+      fileTypeName: "Owner Equity & Out-of-Pocket Register",
+      section: "Tab 'Self Fund Ledger' • Direct Owner Disbursements",
+      extractionMethod: "Bank & Ledger Ingestion",
+      extractionDate: "Oct 25, 2025",
+      confidenceScore: "100% Reconciled",
+    },
+    formula: {
+      expression: "Self Fund ($50,000.00) − Additional Cost ($10,000.00) = Current Self Fund Left ($40,000.00)",
+      explanation: "Self fund capital committed by owner less additional out-of-pocket project costs.",
+    },
+    selfFundSummary: {
+      totalSelfFundFormatted: "$50,000.00",
+      totalAdditionalCostFormatted: "$10,000.00",
+      currentSelfFundLeftFormatted: "$40,000.00",
+    },
+    components: [
+      {
+        id: "sf-01",
+        code: "SF-01",
+        name: "Initial Self Fund Allocation (Developer Equity)",
+        vendor: "Developer Operating Account",
+        actualDate: "Apr 01, 2025",
+        selfFundFormatted: "$50,000.00",
+        selfFundCents: 5000000,
+        additionalCostFormatted: "-",
+        additionalCostCents: 0,
+        differenceFormatted: "$50,000.00",
+        differenceCents: 5000000,
+        isAdditionalCost: false,
+        amountFormatted: "$50,000.00",
+        amountCents: 5000000,
+        status: "Allocated",
+        notes: "Developer equity commitment for non-loan contingencies",
+      },
+      {
+        id: "sf-02",
+        code: "AC-01",
+        name: "Legal Fees (Zoning Appeal & Municipal Legal Counsel)",
+        vendor: "Sills Cummis & Gross P.C.",
+        actualDate: "Jul 18, 2025",
+        transactionRef: "Check #1042 • Cleared Jul 22, 2025",
+        selfFundFormatted: "-",
+        selfFundCents: 0,
+        additionalCostFormatted: "$10,000.00",
+        additionalCostCents: 1000000,
+        differenceFormatted: "$40,000.00",
+        differenceCents: 4000000,
+        isAdditionalCost: true,
+        amountFormatted: "$10,000.00",
+        amountCents: 1000000,
+        status: "Incurred",
+        notes: "Municipal zoning board representation and appeal filings",
+      },
+    ],
+    auditTrail: [
+      {
+        event: "Self Fund Commitment Registered",
+        actor: "Managing Sponsor",
+        timestamp: "Apr 01, 2025",
+        details: "$50,000 self fund allocated from sponsor equity.",
+      },
+      {
+        event: "Additional Cost Incurred & Cleared",
+        actor: "Legal Counsel Billing",
+        timestamp: "Jul 18, 2025",
+        details: "$10,000 legal fees paid, current self fund left is $40,000.",
       },
     ],
   },
