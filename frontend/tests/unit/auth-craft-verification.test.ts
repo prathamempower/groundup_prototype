@@ -156,11 +156,10 @@ describe("Auth System & UI Craft Verification", () => {
       expect(cardContent).toContain('key="signup"');
     });
 
-    it("verifies top-bar uses semantic Building SVG icon and no fake emerald dot for company", () => {
+    it("verifies top-bar does not use fake colored status dots or artificial pills for company/status", () => {
       const topBarPath = path.resolve(__dirname, "../../components/layout/top-bar.tsx");
       const topBarContent = fs.readFileSync(topBarPath, "utf-8");
 
-      expect(topBarContent).toContain("<Building");
       expect(topBarContent).not.toContain("rounded-full bg-emerald-500");
     });
   });

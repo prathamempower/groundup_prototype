@@ -254,12 +254,7 @@ export default function DocumentsPage() {
     <div className="space-y-6 pb-16">
       <div className="px-4 sm:px-6 max-w-7xl mx-auto space-y-4 sm:space-y-6 pt-2 sm:pt-4">
         <PageHeader
-          title="Documents & Evidence"
-          statusBadge={{
-            label: `${totalCount} Verified Files`,
-            variant: "neutral",
-            icon: <FileText className="h-3.5 w-3.5" />,
-          }}
+          title="Documents"
           primaryAction={
             <Button
               variant="primary"
@@ -272,67 +267,7 @@ export default function DocumentsPage() {
           }
         />
 
-        {/* Modern Enterprise KPI Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-          <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs hover:border-slate-300 transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase text-slate-500">Total Documents</span>
-              <span className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg bg-blue-50 text-blue-600 border border-blue-200/60 flex items-center justify-center">
-                <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </span>
-            </div>
-            <div className="mt-2.5 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
-              <span className="text-xl sm:text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
-                {totalCount}
-              </span>
-              <span className="text-[11px] sm:text-xs font-medium text-slate-500">Files</span>
-            </div>
-          </div>
 
-          <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs hover:border-slate-300 transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase text-slate-500">Needs Review</span>
-              <span className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center justify-center">
-                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </span>
-            </div>
-            <div className="mt-2.5 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
-              <span className="text-xl sm:text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
-                {needsReviewCount}
-              </span>
-              <span className="text-[11px] sm:text-xs font-medium text-slate-500">Files</span>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs hover:border-slate-300 transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase text-slate-500">Exceptions</span>
-              <span className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg bg-rose-50 text-rose-700 border border-rose-200/60 flex items-center justify-center">
-                <ShieldAlert className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </span>
-            </div>
-            <div className="mt-2.5 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
-              <span className="text-xl sm:text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
-                {quarantinedCount}
-              </span>
-              <span className="text-[11px] sm:text-xs font-medium text-slate-500">Flagged</span>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs hover:border-slate-300 transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase text-slate-500">Verified Rate</span>
-              <span className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center">
-                <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </span>
-            </div>
-            <div className="mt-2.5 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
-              <span className="text-xl sm:text-2xl lg:text-[28px] font-bold tracking-tight text-slate-900 font-mono tabular-nums leading-none">
-                {reviewedRate}%
-              </span>
-            </div>
-          </div>
-        </div>
 
         {/* Quarantined documents alert banner */}
         {misfiledQuarantinedDoc && (
@@ -375,6 +310,7 @@ export default function DocumentsPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("ALL")}
+                aria-label="All Documents"
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
                   activeTab === "ALL"
@@ -382,7 +318,7 @@ export default function DocumentsPage() {
                     : "text-slate-600 hover:text-slate-900"
                 )}
               >
-                <span>All Documents</span>
+                <span>All</span>
                 <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold font-mono", activeTab === "ALL" ? "bg-blue-100 text-blue-800" : "bg-slate-200/80 text-slate-700")}>
                   {totalCount}
                 </span>
@@ -407,6 +343,7 @@ export default function DocumentsPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("REVIEWED")}
+                aria-label="Verified (Reviewed)"
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2",
                   activeTab === "REVIEWED"
@@ -414,7 +351,7 @@ export default function DocumentsPage() {
                     : "text-slate-600 hover:text-slate-900"
                 )}
               >
-                <span>Reviewed & Published</span>
+                <span>Verified</span>
                 <span className={cn("px-1.5 py-0.2 rounded-full text-[10px] font-bold font-mono", activeTab === "REVIEWED" ? "bg-emerald-100 text-emerald-900" : "bg-emerald-100/60 text-emerald-800")}>
                   {reviewedCount}
                 </span>
@@ -515,11 +452,11 @@ export default function DocumentsPage() {
                 <table className="w-full text-left border-collapse min-w-[720px]">
                   <thead>
                     <tr className="border-b border-slate-200/80 bg-slate-50/75 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                      <th className="py-3 px-5 min-w-[320px]">Document & Classification</th>
-                      <th className="py-3 px-5 min-w-[170px]">Verification Status</th>
+                      <th className="py-3 px-5 min-w-[320px]">Document</th>
+                      <th className="py-3 px-5 min-w-[170px]">Status</th>
                       <th className="py-3 px-5 min-w-[160px]">Uploaded By</th>
                       <th className="py-3 px-5 text-right whitespace-nowrap min-w-[110px]">Date</th>
-                      <th className="py-3 px-5 text-right min-w-[110px]">Actions</th>
+                      <th className="py-3 px-5 text-right min-w-[110px]"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-xs">
@@ -542,8 +479,8 @@ export default function DocumentsPage() {
                               <div className={cn(
                                 "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 border mt-0.5",
                                 isSheet 
-                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200/60" 
-                                  : "bg-blue-50 text-blue-700 border-blue-200/60"
+                                   ? "bg-emerald-50 text-emerald-700 border-emerald-200/60" 
+                                   : "bg-blue-50 text-blue-700 border-blue-200/60"
                               )}>
                                 {isSheet ? (
                                   <FileSpreadsheet className="h-4.5 w-4.5" />
@@ -576,11 +513,6 @@ export default function DocumentsPage() {
                                   <span className="inline-flex items-center rounded bg-slate-100 border border-slate-200/80 px-2 py-0.5 text-[10px] font-semibold text-slate-700 uppercase tracking-tight font-mono">
                                     {doc.document_type.replace(/_/g, " ")}
                                   </span>
-                                  {doc.notes && (
-                                    <span className="text-[11px] text-slate-400 truncate max-w-[220px]" title={doc.notes}>
-                                      · {doc.notes}
-                                    </span>
-                                  )}
                                 </div>
                               </div>
                             </div>
@@ -670,7 +602,7 @@ export default function DocumentsPage() {
                                     }
                                   }}
                                   className="h-7 px-2.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 hover:bg-emerald-100 shadow-2xs gap-1"
-                                  title="Inspect interactive spreadsheet with color-coded confidence and inline editing"
+                                  title="Review document"
                                 >
                                   <SlidersHorizontal className="h-3 w-3 text-emerald-600" />
                                   <span>Review</span>
@@ -757,11 +689,6 @@ export default function DocumentsPage() {
                             <span className="inline-flex items-center rounded bg-slate-100 border border-slate-200/80 px-2 py-0.5 text-[10px] font-semibold text-slate-700 uppercase tracking-tight font-mono">
                               {doc.document_type.replace(/_/g, " ")}
                             </span>
-                            {doc.notes && (
-                              <span className="text-[11px] text-slate-400 truncate max-w-[190px]" title={doc.notes}>
-                                · {doc.notes}
-                              </span>
-                            )}
                           </div>
                         </div>
                       </div>

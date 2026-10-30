@@ -17,7 +17,7 @@ test.describe("Pre-existing Documents Quick Ingestion & Review", () => {
 
     // 2. Navigate to documents page
     await page.goto("/documents");
-    await expect(page.getByRole("heading", { name: "Documents & Evidence" })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("heading", { name: "Documents" })).toBeVisible({ timeout: 15000 });
 
     // 3. Click the pre-existing document quick ingest button on /documents
     const woodlawnQuickBtn = page.getByRole("button", { name: /161 Woodlawn Ave\.xlsx/i }).first();
@@ -29,8 +29,8 @@ test.describe("Pre-existing Documents Quick Ingestion & Review", () => {
     console.log("Navigated to Document Review Workbench:", page.url());
 
     // 8. Verify Review Workbench header & components
-    await expect(page.getByText("OCR REVIEW WORKBENCH")).toBeVisible();
-    await expect(page.getByText(/Extraction Queue/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: "Complete Review" })).toBeVisible();
+    await expect(page.getByText(/Extracted Fields/i)).toBeVisible();
 
     // Wait for spreadsheet viewer to load
     await expect(page.getByPlaceholder("Search in sheet...")).toBeVisible({ timeout: 10000 });

@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Project, OnboardingTask } from "@/lib/types";
+import { Project, OnboardingTask, AlertItem } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import {
   Bell,
   ChevronDown,
-  Building,
-  Building2,
   Check,
   AlertTriangle,
   Info,
@@ -19,12 +18,10 @@ import {
   LogOut,
   CheckSquare,
   ArrowRight,
-  Search,
-  Moon,
   X,
-  MessageSquare,
-  Inbox,
   ArrowLeft,
+  FileText,
+  CheckCircle2,
 } from "lucide-react";
 import { authAdapter } from "@/lib/api/adapters/auth-adapter";
 import {
@@ -38,6 +35,49 @@ import {
 } from "@/components/ui/drawer";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { useSignOut } from "@/lib/hooks/use-sign-out";
+
+const DEFAULT_WORKSPACE_ALERTS: AlertItem[] = [
+  {
+    id: "alt-work-01",
+    project_id: "default",
+    title: "Framing completion delayed",
+    description: "Inspection report indicates framing milestone is 12 days behind schedule.",
+    severity: "DANGER",
+    owner: "David Ross",
+    status: "OPEN",
+    created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+  },
+  {
+    id: "alt-work-02",
+    project_id: "default",
+    title: "Upcoming cash shortfall ($325,000)",
+    description: "Available cash is insufficient for upcoming contractor payment obligations.",
+    severity: "DANGER",
+    owner: "Sarah Lin",
+    status: "OPEN",
+    created_at: new Date(Date.now() - 86400000 * 4).toISOString(),
+  },
+  {
+    id: "alt-work-03",
+    project_id: "default",
+    title: "Construction costs exceeding budget (18%)",
+    description: "Actual costs on electrical and plumbing line items exceed approved budget.",
+    severity: "WARNING",
+    owner: "Sarah Lin",
+    status: "OPEN",
+    created_at: new Date(Date.now() - 86400000 * 6).toISOString(),
+  },
+  {
+    id: "alt-work-04",
+    project_id: "default",
+    title: "3 construction invoices missing lien waivers",
+    description: "Recent draw disbursements require missing subcontractor unconditional lien waivers.",
+    severity: "INFO",
+    owner: "Marcus Vance",
+    status: "OPEN",
+    created_at: new Date(Date.now() - 86400000 * 9).toISOString(),
+  },
+];
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -56,8 +96,34 @@ export function TopBar({
 
   const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isAlertsOpen, setIsAlertsOpen] = useState(false);
+  const [alertsFilter, setAlertsFilter] = useState<"ALL" | "OPEN" | "RESOLVED">("ALL");
+  const [localResolvedAlertIds, setLocalResolvedAlertIds] = useState<string[]>([]);
   const [isTasksOpen, setIsTasksOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isUserDropdownOpen) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserDropdownOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsUserDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isUserDropdownOpen]);
 
   const { data: meData } = useQuery({
     queryKey: ["me"],
@@ -110,39 +176,41 @@ export function TopBar({
     },
   });
 
-  const { data: notificationsData } = useQuery({
-    queryKey: ["notifications", currentProjectId],
-    queryFn: () => api.notifications.list(currentProjectId || undefined),
+  const { data: alertsData } = useQuery({
+    queryKey: ["alerts", currentProjectId],
+    queryFn: () =>
+      currentProjectId
+        ? api.alerts.list(currentProjectId)
+        : Promise.resolve({ data: [] as AlertItem[] }),
+    enabled: Boolean(currentProjectId),
   });
 
-  const notifications = notificationsData?.data || [];
-  const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
+  const rawAlerts: AlertItem[] =
+    alertsData?.data && alertsData.data.length > 0
+      ? alertsData.data
+      : currentProjectId
+      ? DEFAULT_WORKSPACE_ALERTS
+      : [];
 
-  const criticalPathAlert =
-    notifications.find(
-      (n) =>
-        !n.read &&
-        (n.title.toLowerCase().includes("structural steel") ||
-          n.title.toLowerCase().includes("critical path") ||
-          n.type === "MILESTONE")
-    ) ||
-    notifications.find(
-      (n) =>
-        n.title.toLowerCase().includes("structural steel") ||
-        n.title.toLowerCase().includes("critical path")
-    );
+  const alerts: AlertItem[] = rawAlerts.map((a) =>
+    localResolvedAlertIds.includes(a.id) ? { ...a, status: "RESOLVED" } : a
+  );
 
-  const markReadMutation = useMutation({
-    mutationFn: (id: string) => api.notifications.markRead(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    },
+  const openAlertsCount = alerts.filter((a) => a.status === "OPEN").length;
+  const resolvedAlertsCount = alerts.filter((a) => a.status === "RESOLVED").length;
+
+  const filteredAlerts = alerts.filter((a) => {
+    if (alertsFilter === "OPEN") return a.status === "OPEN";
+    if (alertsFilter === "RESOLVED") return a.status === "RESOLVED";
+    return true;
   });
 
-  const markAllReadMutation = useMutation({
-    mutationFn: () => api.notifications.markAllRead(currentProjectId || undefined),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+  const resolveAlertMutation = useMutation({
+    mutationFn: (alertId: string) =>
+      api.alerts.resolveAlert(alertId, "Resolved via alerts drawer"),
+    onSuccess: (_, alertId) => {
+      setLocalResolvedAlertIds((prev) => [...prev, alertId]);
+      queryClient.invalidateQueries({ queryKey: ["alerts"] });
     },
   });
 
@@ -192,6 +260,16 @@ export function TopBar({
       : defaultTasks;
 
   const pendingTasksCount = tasks.filter((t) => t.status !== "RESOLVED").length;
+
+  const { data: documentsData } = useQuery({
+    queryKey: ["documents", currentProjectId],
+    queryFn: () => api.documents.list(currentProjectId!),
+    enabled: Boolean(currentProjectId),
+  });
+
+  const projectDocuments = documentsData?.data || [];
+  const documentsCount = projectDocuments.length;
+  const isDocumentsActive = pathname.includes("/documents");
 
   return (
     <div className="sticky top-0 z-30 w-full flex flex-col">
@@ -268,13 +346,55 @@ export function TopBar({
           )}
         </div>
 
-        {/* Right: Tasks, Inbox, Notifications & User Menu */}
+        {/* Right: Documents, Tasks, Notifications & User Menu */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Documents Workspace Navigation */}
+          {currentProjectId ? (
+            <Link
+              href={`/projects/${currentProjectId}/documents`}
+              className={`relative flex h-8 items-center gap-1.5 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                isDocumentsActive
+                  ? "bg-blue-50 text-blue-700 border border-blue-200/80 shadow-2xs"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent hover:border-slate-200/80"
+              }`}
+              aria-current={isDocumentsActive ? "page" : undefined}
+              title="Documents"
+            >
+              <FileText className={`h-3.5 w-3.5 ${isDocumentsActive ? "text-blue-600" : "text-slate-400"}`} />
+              <span className="hidden sm:inline">Documents</span>
+              {documentsCount > 0 && (
+                <span
+                  className={`flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums ${
+                    isDocumentsActive
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-slate-100 text-slate-700 border border-slate-200/70"
+                  }`}
+                >
+                  {documentsCount}
+                </span>
+              )}
+            </Link>
+          ) : (
+            <Link
+              href="/documents"
+              className={`relative flex h-8 items-center gap-1.5 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                isDocumentsActive
+                  ? "bg-blue-50 text-blue-700 border border-blue-200/80 shadow-2xs"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent hover:border-slate-200/80"
+              }`}
+              aria-current={isDocumentsActive ? "page" : undefined}
+              title="Documents"
+            >
+              <FileText className={`h-3.5 w-3.5 ${isDocumentsActive ? "text-blue-600" : "text-slate-400"}`} />
+              <span className="hidden sm:inline">Documents</span>
+            </Link>
+          )}
+
           {/* Tasks Trigger */}
           <button
             onClick={() => {
               setIsTasksOpen(true);
-              setIsNotificationsOpen(false);
+              setIsAlertsOpen(false);
               setIsUserDropdownOpen(false);
             }}
             className="relative flex h-8 items-center gap-1.5 px-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent hover:border-slate-200/80 transition-all cursor-pointer"
@@ -407,167 +527,203 @@ export function TopBar({
             </DrawerContent>
           </Drawer>
 
-          {/* Notifications / Alerts Trigger */}
+          {/* Alerts Trigger (formerly Notifications) */}
           <button
             onClick={() => {
-              setIsNotificationsOpen(true);
+              setIsAlertsOpen(true);
               setIsUserDropdownOpen(false);
               setIsProjectDropdownOpen(false);
               setIsTasksOpen(false);
             }}
             className="relative flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 border border-transparent hover:border-slate-200/80 transition-all cursor-pointer"
-            aria-label="View notifications and alerts"
+            aria-label="View project alerts"
+            title="Project Alerts"
           >
             <Bell className="h-4 w-4 text-slate-500" />
-            {unreadNotificationsCount > 0 && (
+            {openAlertsCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-2xs">
-                {unreadNotificationsCount}
+                {openAlertsCount}
               </span>
             )}
           </button>
 
-          {/* Notifications Slide-out Drawer */}
-          <Drawer open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
-            <DrawerContent width="default" className="flex flex-col h-full bg-surface">
+          {/* Alerts Slide-out Drawer */}
+          <Drawer open={isAlertsOpen} onOpenChange={setIsAlertsOpen}>
+            <DrawerContent width="default" className="flex flex-col h-full bg-surface tracking-normal">
               <DrawerHeader className="border-b border-border bg-surface px-5 py-4 flex-shrink-0">
                 <div className="flex items-center justify-between pr-8">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                      <Bell className="h-4 w-4" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                      <AlertTriangle className="h-4 w-4" />
                     </div>
                     <div className="flex items-center gap-2">
                       <DrawerTitle className="text-sm font-bold text-slate-900">
-                        Notifications
+                        Alerts
                       </DrawerTitle>
-                      {unreadNotificationsCount > 0 ? (
-                        <span className="rounded-full bg-rose-50 border border-rose-200 px-2 py-0.5 text-[11px] font-semibold text-rose-700">
-                          {unreadNotificationsCount} unread
+                      {openAlertsCount > 0 ? (
+                        <span className="rounded-full bg-rose-50 border border-rose-200/80 px-2 py-0.5 text-[11px] font-semibold text-rose-700">
+                          {openAlertsCount} open
                         </span>
                       ) : (
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-                          {notifications.length} total
+                        <span className="rounded-full bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                          All resolved
                         </span>
                       )}
                     </div>
                   </div>
-
-                  {unreadNotificationsCount > 0 && (
-                    <button
-                      onClick={() => markAllReadMutation.mutate()}
-                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
-                    >
-                      Mark all read
-                    </button>
+                  {currentProject?.name && (
+                    <span className="text-xs font-medium text-slate-500 truncate max-w-[140px]">
+                      {currentProject.name}
+                    </span>
                   )}
                 </div>
                 <DrawerDescription className="sr-only">
-                  System and project notifications
+                  Project alerts, risks, and discrepancies
                 </DrawerDescription>
+
+                {/* Filter Tabs */}
+                <div className="flex items-center gap-1.5 mt-3 pt-2 border-t border-slate-100">
+                  <button
+                    onClick={() => setAlertsFilter("ALL")}
+                    className={cn(
+                      "px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer",
+                      alertsFilter === "ALL"
+                        ? "bg-slate-900 text-white shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                    )}
+                  >
+                    All ({alerts.length})
+                  </button>
+                  <button
+                    onClick={() => setAlertsFilter("OPEN")}
+                    className={cn(
+                      "px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer",
+                      alertsFilter === "OPEN"
+                        ? "bg-slate-900 text-white shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                    )}
+                  >
+                    Open ({openAlertsCount})
+                  </button>
+                  <button
+                    onClick={() => setAlertsFilter("RESOLVED")}
+                    className={cn(
+                      "px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer",
+                      alertsFilter === "RESOLVED"
+                        ? "bg-slate-900 text-white shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                    )}
+                  >
+                    Resolved ({resolvedAlertsCount})
+                  </button>
+                </div>
               </DrawerHeader>
 
               <DrawerBody className="p-4 space-y-2.5">
-                {notifications.length === 0 ? (
+                {filteredAlerts.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 mb-2">
-                      <Bell className="h-5 w-5" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 mb-2">
+                      <CheckCircle2 className="h-5 w-5" />
                     </div>
-                    <p className="text-xs font-semibold text-slate-900">No notifications yet</p>
+                    <p className="text-xs font-semibold text-slate-900">
+                      {alertsFilter === "OPEN"
+                        ? "No open alerts"
+                        : alertsFilter === "RESOLVED"
+                        ? "No resolved alerts yet"
+                        : "No alerts"}
+                    </p>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      You will be notified about project milestones, draws, and alerts here.
+                      {alertsFilter === "OPEN"
+                        ? "All project risks and discrepancies are currently addressed."
+                        : "Project alerts will appear here as they are generated."}
                     </p>
                   </div>
                 ) : (
-                  notifications.map((notif) => {
-                    const isUnread = !notif.read;
+                  filteredAlerts.map((alert) => {
+                    const isOpen = alert.status === "OPEN";
+                    const isDanger = alert.severity === "DANGER";
+                    const isWarning = alert.severity === "WARNING";
 
                     return (
                       <div
-                        key={notif.id}
-                        onClick={() => {
-                          if (isUnread) markReadMutation.mutate(notif.id);
-                          if (notif.link_url && !notif.link_url.includes("timeline")) {
-                            setIsNotificationsOpen(false);
-                            router.push(notif.link_url);
-                          }
-                        }}
-                        className={`group relative flex items-start gap-3 rounded-xl border p-3.5 transition-all cursor-pointer shadow-2xs ${
-                          isUnread
-                            ? "border-blue-200 bg-blue-50/40 hover:bg-blue-50/70"
-                            : "border-slate-200/80 bg-white hover:bg-slate-50/60"
-                        }`}
+                        key={alert.id}
+                        className={cn(
+                          "group relative flex flex-col gap-2 rounded-xl border p-3.5 transition-all shadow-2xs",
+                          isOpen
+                            ? isDanger
+                              ? "border-rose-200/90 bg-rose-50/20 hover:border-rose-300"
+                              : "border-amber-200/80 bg-amber-50/15 hover:border-amber-300"
+                            : "border-slate-200/80 bg-white hover:border-slate-300 opacity-80"
+                        )}
                       >
-                        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
-                          {notif.severity === "CRITICAL" ? (
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-100 text-red-600">
-                              <AlertCircle className="h-4 w-4" />
-                            </div>
-                          ) : notif.severity === "WARNING" ? (
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
-                              <AlertTriangle className="h-4 w-4" />
-                            </div>
-                          ) : notif.severity === "SUCCESS" ? (
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
-                              <Check className="h-4 w-4" />
-                            </div>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase",
+                                isDanger
+                                  ? "bg-rose-100 text-rose-700 border border-rose-200/60"
+                                  : isWarning
+                                  ? "bg-amber-100 text-amber-700 border border-amber-200/60"
+                                  : "bg-blue-100 text-blue-700 border border-blue-200/60"
+                              )}
+                            >
+                              {alert.severity}
+                            </span>
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold",
+                                isOpen
+                                  ? "bg-slate-100 text-slate-700"
+                                  : "bg-emerald-100 text-emerald-800"
+                              )}
+                            >
+                              {isOpen ? "Open" : "Resolved"}
+                            </span>
+                          </div>
+
+                          {isOpen ? (
+                            <button
+                              onClick={() => resolveAlertMutation.mutate(alert.id)}
+                              disabled={resolveAlertMutation.isPending}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100 transition-colors shadow-2xs cursor-pointer disabled:opacity-50"
+                              title="Mark this alert as resolved"
+                            >
+                              <Check className="h-3 w-3 text-emerald-600" />
+                              <span>Resolve</span>
+                            </button>
                           ) : (
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
-                              <Info className="h-4 w-4" />
-                            </div>
+                            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700">
+                              <CheckCircle2 className="h-3 w-3" />
+                              <span>Resolved</span>
+                            </span>
                           )}
                         </div>
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <h5
-                              className={`text-xs font-semibold leading-tight ${
-                                isUnread ? "text-slate-900 font-bold" : "text-slate-700"
-                              }`}
-                            >
-                              {notif.title}
-                            </h5>
-                            {isUnread && (
-                              <span className="h-2 w-2 rounded-full bg-blue-600 shrink-0" />
-                            )}
-                          </div>
-
-                          <p className="text-[12px] text-slate-500 mt-1 leading-relaxed line-clamp-2">
-                            {notif.message}
+                        <div>
+                          <h5 className="text-xs font-semibold text-slate-900 leading-snug tracking-normal">
+                            {alert.title}
+                          </h5>
+                          <p className="text-[12px] text-slate-600 leading-relaxed mt-1 tracking-normal">
+                            {alert.description}
                           </p>
+                        </div>
 
-                          {(notif.title.toLowerCase().includes("structural steel") ||
-                            notif.title.toLowerCase().includes("critical path") ||
-                            notif.type === "MILESTONE") && (
-                            <div className="mt-2.5 rounded-lg border border-amber-200 bg-amber-50/80 p-2.5 text-[11px] space-y-1.5">
-                              <div className="flex items-center justify-between text-amber-900 font-semibold">
-                                <span>Schedule Slip: <strong className="font-mono text-amber-700">+35 Days</strong></span>
-                                <span>Carry Impact: <strong className="font-mono text-amber-700">+$28,500</strong></span>
-                              </div>
-                              <span className="text-amber-800/80 font-bold flex items-center gap-1 text-[10px] mt-0.5 select-none">
-                                View Milestone Schedule
-                              </span>
-                            </div>
-                          )}
-
-
-
-                          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400">
-                            <span className="font-medium text-slate-500 uppercase text-[10px] tracking-wider">
-                              {notif.type}
+                        <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1.5 border-t border-slate-100">
+                          <span className="inline-flex items-center gap-1">
+                            <span>Owner:</span>
+                            <strong className="text-slate-600 font-medium">
+                              {alert.owner || "Team"}
+                            </strong>
+                          </span>
+                          {alert.created_at && (
+                            <span>
+                              {new Date(alert.created_at).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                              })}
                             </span>
-                            {notif.created_at && (
-                              <>
-                                <span>•</span>
-                                <span>
-                                  {new Date(notif.created_at).toLocaleDateString(undefined, {
-                                    month: "short",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </span>
-                              </>
-                            )}
-                          </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -578,7 +734,7 @@ export function TopBar({
               <DrawerFooter className="border-t border-border p-4 bg-surface">
                 <button
                   onClick={() => {
-                    setIsNotificationsOpen(false);
+                    setIsAlertsOpen(false);
                     if (currentProjectId) {
                       router.push(`/projects/${currentProjectId}/alerts`);
                     } else {
@@ -587,7 +743,7 @@ export function TopBar({
                   }}
                   className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 active:bg-slate-950 transition-colors cursor-pointer"
                 >
-                  <span>View All Alerts</span>
+                  <span>Open Full Alerts Workspace</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </DrawerFooter>
@@ -595,12 +751,12 @@ export function TopBar({
           </Drawer>
 
           {/* User menu */}
-          <div className="relative ml-1 shrink-0">
+          <div ref={userMenuRef} className="relative ml-1 shrink-0">
             <button
               onClick={() => {
                 setIsUserDropdownOpen(!isUserDropdownOpen);
                 setIsProjectDropdownOpen(false);
-                setIsNotificationsOpen(false);
+                setIsAlertsOpen(false);
               }}
               className="flex items-center gap-2.5 rounded-lg py-1 px-1.5 hover:bg-slate-100/80 border border-transparent hover:border-slate-200/80 transition-all shrink-0 cursor-pointer group"
               aria-expanded={isUserDropdownOpen}
@@ -610,48 +766,52 @@ export function TopBar({
                 {currentUser?.avatarInitials || "MV"}
               </div>
               <div className="hidden sm:flex flex-col text-left shrink-0">
-                <span className="text-xs font-bold leading-tight text-slate-900 whitespace-nowrap">
+                <span className="text-xs font-semibold leading-tight text-slate-900 whitespace-nowrap">
                   {currentUser?.name || "Marcus Vance"}
                 </span>
-                <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider whitespace-nowrap leading-tight mt-0.5">
+                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-normal whitespace-nowrap leading-tight mt-0.5">
                   {currentUser?.role || "OWNER"}
                 </span>
               </div>
               <ChevronDown className={`h-3 w-3 text-slate-400 hidden sm:block transition-transform duration-150 ${isUserDropdownOpen ? "rotate-180 text-slate-700" : ""}`} />
             </button>
 
-            {/* User Dropdown */}
+            {/* Professional Enterprise User Popover */}
             {isUserDropdownOpen && (
-              <div className="absolute right-0 mt-1.5 w-68 rounded-2xl border border-slate-200/90 bg-white/98 backdrop-blur-xl p-1.5 text-slate-900 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.08),0_12px_36px_-4px_rgba(15,23,42,0.12)] z-50 animate-in fade-in zoom-in-95 duration-150 ease-out select-none">
-                {/* Architectural Account Header with Blueprint Accent */}
-                <div className="rounded-xl bg-slate-50/80 border border-slate-100 p-3 mb-1 text-left">
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="text-xs font-bold text-slate-900 truncate">
-                      {currentUser?.name || "Marcus Vance"}
-                    </span>
-                    <span className="rounded-md bg-blue-50 border border-blue-200/60 px-1.5 py-0.5 text-[9px] font-mono font-bold text-blue-700 uppercase tracking-wider">
-                      {currentUser?.role || "OWNER"}
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-slate-500 font-medium truncate">{currentUser?.email || "marcus@vancedevelopment.com"}</div>
-                  {currentUser?.company && (
-                    <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
-                      <Building className="size-3.5 text-slate-400 shrink-0" aria-hidden="true" />
-                      <span className="truncate">{currentUser.company}</span>
+              <div className="absolute right-0 mt-2 w-64 rounded-xl border border-slate-200 bg-white text-slate-900 shadow-xl shadow-slate-900/5 z-50 overflow-hidden divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-100 ease-out select-none">
+                {/* 1. Identity Header: User & Role */}
+                <div className="p-3 bg-slate-50/60">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white tracking-normal shrink-0 ring-2 ring-white shadow-2xs">
+                      {currentUser?.avatarInitials || "MV"}
                     </div>
-                  )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <span className="text-xs font-semibold text-slate-900 tracking-tight truncate">
+                          {currentUser?.name || "Marcus Vance"}
+                        </span>
+                        <span className="rounded px-1.5 py-0.5 text-[9px] font-semibold text-slate-600 bg-white border border-slate-200/80 uppercase tracking-tight shrink-0 shadow-2xs">
+                          {currentUser?.role || "OWNER"}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 font-normal truncate mt-0.5">
+                        {currentUser?.email || "m.vance@vancedev.com"}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="h-px bg-slate-100 my-1" />
-
-                <button
-                  onClick={() => signOut()}
-                  disabled={isSigningOut}
-                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-semibold text-rose-600 hover:bg-rose-50/80 transition-colors disabled:opacity-50 cursor-pointer"
-                >
-                  <LogOut className="h-3.5 w-3.5 text-rose-500" />
-                  <span>{isSigningOut ? "Signing out…" : "Sign out"}</span>
-                </button>
+                {/* 2. Session Actions */}
+                <div className="p-1">
+                  <button
+                    onClick={() => signOut()}
+                    disabled={isSigningOut}
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-rose-600 hover:bg-rose-50/80 transition-colors disabled:opacity-50 cursor-pointer group"
+                  >
+                    <LogOut className="h-4 w-4 text-rose-500 group-hover:text-rose-600 transition-colors shrink-0" />
+                    <span>{isSigningOut ? "Signing out…" : "Sign out"}</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>

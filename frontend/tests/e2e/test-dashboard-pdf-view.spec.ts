@@ -47,7 +47,7 @@ test.describe("Dashboard PDF Show / Inline Preview", () => {
 
     // 6. Test on /documents page too
     await page.goto("/documents");
-    await expect(page.getByRole("heading", { name: "Documents & Evidence" })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("heading", { name: "Documents" })).toBeVisible({ timeout: 15000 });
 
     // Find a row with .pdf document
     const pdfRow = page.locator("tr", { hasText: ".pdf" }).first();

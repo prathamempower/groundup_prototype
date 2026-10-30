@@ -177,11 +177,8 @@ export default function DocumentReviewPage() {
 
           <div className="h-4 w-px bg-slate-200 shrink-0" />
 
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="hidden md:inline-block rounded bg-blue-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-700 border border-blue-200/70 shrink-0">
-              OCR REVIEW WORKBENCH
-            </span>
-            <span className="text-xs sm:text-sm font-semibold text-slate-900 truncate max-w-[130px] sm:max-w-[200px] md:max-w-[300px]">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-xs sm:text-sm font-semibold text-slate-900 truncate max-w-[200px] sm:max-w-[320px] md:max-w-[480px]">
               {document.original_filename}
             </span>
             <StatusBadge
@@ -237,7 +234,7 @@ export default function DocumentReviewPage() {
             className="h-8 px-2.5 sm:px-3.5 text-xs font-semibold rounded-lg shadow-xs bg-emerald-600 hover:bg-emerald-700 text-white"
           >
             <FileCheck className="h-3.5 w-3.5 sm:mr-1.5" />
-            <span className="hidden sm:inline">Complete & </span>Done
+            <span>Complete Review</span>
           </Button>
         </div>
       </header>
@@ -251,6 +248,7 @@ export default function DocumentReviewPage() {
             extractions={extractions}
             selectedFieldId={selectedFieldId}
             onSelectField={(id) => setSelectedFieldId(id)}
+            hideDocumentTitle={true}
           />
         </div>
 
@@ -258,24 +256,14 @@ export default function DocumentReviewPage() {
         {showSideReview && (
           <div className="w-full md:w-[460px] h-full flex flex-col bg-white overflow-hidden shrink-0 border-l border-slate-200/80">
             {/* Header Bar */}
-            <div className="p-4 border-b border-slate-200/80 bg-slate-50/50 space-y-2 shrink-0">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-900 flex items-center gap-1.5">
-                  <ScanText className="h-3.5 w-3.5 text-blue-600" />
-                  Extraction Queue ({extractions.length} fields)
-                </span>
-                <span className="text-[11px] font-mono text-slate-500 font-medium">
-                  {acceptedCount} of {totalFields} verified
-                </span>
-              </div>
-              <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                <div
-                  className="bg-blue-600 h-full transition-all duration-300 rounded-full"
-                  style={{
-                    width: `${totalFields > 0 ? (acceptedCount / totalFields) * 100 : 0}%`,
-                  }}
-                />
-              </div>
+            <div className="px-4 py-3 border-b border-slate-200/80 bg-slate-50/50 flex items-center justify-between shrink-0">
+              <span className="font-semibold text-xs text-slate-900 flex items-center gap-1.5">
+                <ScanText className="h-3.5 w-3.5 text-blue-600" />
+                Extracted Fields ({extractions.length})
+              </span>
+              <span className="text-[11px] font-mono text-slate-500 font-medium">
+                {acceptedCount} of {totalFields} reviewed
+              </span>
             </div>
 
             {/* List of Fields */}
@@ -291,9 +279,6 @@ export default function DocumentReviewPage() {
                   const isSelected = selectedFieldId === field.id;
                   const isEditing = editingFieldId === field.id;
                   const isRejecting = rejectingFieldId === field.id;
-
-                  const score = field.confidence > 1 ? field.confidence : field.confidence * 100;
-                  const level = score >= 85 ? "high" : score >= 70 ? "medium" : "low";
 
                   let citationLabel = "Page 1";
                   if (typeof field.citation === "string") {
@@ -318,24 +303,12 @@ export default function DocumentReviewPage() {
                       {/* Field Header */}
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <span className="text-xs font-bold text-slate-900 block capitalize">
+                          <span className="text-xs font-semibold text-slate-900 block capitalize">
                             {field.field_name.replace(/_/g, " ")}
                           </span>
                           <div className="flex items-center gap-2 mt-1">
-                            <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-mono text-slate-600 font-semibold">
+                            <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-mono text-slate-600 font-medium">
                               {citationLabel}
-                            </span>
-                            <span
-                              className={cn(
-                                "px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shrink-0 border",
-                                level === "high"
-                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                  : level === "medium"
-                                  ? "bg-amber-50 text-amber-700 border-amber-200"
-                                  : "bg-rose-50 text-rose-700 border-rose-200"
-                              )}
-                            >
-                              {Math.round(score)}% {level === "high" ? "Verified" : level === "medium" ? "Review" : "Attention"}
                             </span>
                           </div>
                         </div>
@@ -373,12 +346,9 @@ export default function DocumentReviewPage() {
                           setEditedValue(field.normalized_value || field.raw_value);
                         }}
                         title="Double-click to edit value"
-                        className="mt-2.5 p-2 rounded-lg bg-slate-50 border border-slate-200/80 font-mono text-xs font-semibold text-slate-800 cursor-pointer hover:bg-slate-100/70 hover:border-slate-300 transition-colors flex items-center justify-between group"
+                        className="mt-2.5 p-2 rounded-lg bg-slate-50 border border-slate-200/80 font-mono text-xs font-semibold text-slate-800 cursor-pointer hover:bg-slate-100/70 hover:border-slate-300 transition-colors"
                       >
-                        <span className="truncate">{field.normalized_value || field.raw_value}</span>
-                        <span className="text-[10px] font-sans font-normal text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                          Double-click to edit
-                        </span>
+                        <span className="truncate block">{field.normalized_value || field.raw_value}</span>
                       </div>
 
                       {/* Review Actions */}

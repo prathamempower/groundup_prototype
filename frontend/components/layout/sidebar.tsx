@@ -145,8 +145,8 @@ export function Sidebar({
     ? getProjectNavItems(workspaceProjectId, effectiveRole)
     : [];
 
-  // Operational workspace items: Control Center, Reconciliation, Draws, Documents, Alerts
-  const mainWorkspaceItemIds = ["control-center", "reconciliation", "draws", "documents", "alerts"];
+  // Operational workspace items: Control Center, Reconciliation, Draws
+  const mainWorkspaceItemIds = ["control-center", "reconciliation", "draws"];
 
   const mainNavItems = mainWorkspaceItemIds
     .map((id) => visibleNavItems.find((i) => i.id === id))

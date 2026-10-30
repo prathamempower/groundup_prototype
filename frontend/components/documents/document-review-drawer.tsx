@@ -559,7 +559,7 @@ export function DocumentReviewDrawer({
               className="rounded-lg h-8.5 px-3.5 text-xs font-semibold shadow-xs"
             >
               <FileCheck className="h-3.5 w-3.5 mr-1.5" />
-              Complete & Done
+              Complete Review
             </Button>
           </div>
         </ModalFooter>

@@ -15,6 +15,7 @@ interface DocumentViewerProps {
   selectedFieldId?: string | null;
   onSelectField?: (fieldId: string) => void;
   hideHeader?: boolean;
+  hideDocumentTitle?: boolean;
   actions?: React.ReactNode;
   trailingAction?: React.ReactNode;
   headerClassName?: string;
@@ -26,6 +27,7 @@ export function DocumentViewer({
   selectedFieldId,
   onSelectField,
   hideHeader = false,
+  hideDocumentTitle = false,
   actions,
   trailingAction,
   headerClassName,
@@ -73,15 +75,18 @@ export function DocumentViewer({
   return (
     <section className="flex h-full min-h-[480px] flex-col overflow-hidden rounded-lg border border-border bg-surface">
       {!isSpreadsheet && !hideHeader && (
-        <header className={cn("flex min-h-12 items-center justify-between gap-3 border-b border-border px-4 py-2 bg-white", headerClassName)}>
-          <div className="flex min-w-0 items-center gap-2 text-sm text-text-primary">
-            <FileText className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-            <span className="truncate font-medium" title={document.original_filename}>
-              {document.original_filename}
-            </span>
-            <span className="text-xs text-slate-400 font-mono">
-              ({document.document_type})
-            </span>
+        <header className={cn("flex min-h-10 items-center justify-between gap-3 border-b border-border px-3.5 py-1.5 bg-white", headerClassName)}>
+          <div className="flex min-w-0 items-center gap-2 text-xs text-text-primary">
+            {!hideDocumentTitle ? (
+              <>
+                <FileText className="h-3.5 w-3.5 shrink-0 text-slate-500" aria-hidden="true" />
+                <span className="truncate font-medium text-slate-800" title={document.original_filename}>
+                  {document.original_filename}
+                </span>
+              </>
+            ) : (
+              <span className="text-xs font-medium text-slate-500">Preview</span>
+            )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {actions}
@@ -90,9 +95,9 @@ export function DocumentViewer({
                 href={url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary shadow-2xs"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary shadow-2xs transition-colors"
               >
-                <ExternalLink className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
+                <ExternalLink className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                 <span>Open in tab</span>
               </a>
             )}
@@ -100,11 +105,11 @@ export function DocumentViewer({
               <a
                 href={downloadUrl}
                 download={document.original_filename}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200/90 bg-slate-50 px-2.5 py-1.5 h-8 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary shadow-2xs"
-                title="Download backup copy"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200/90 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary shadow-2xs transition-colors"
+                title="Download file"
               >
                 <Download className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-                <span className="hidden sm:inline">Save</span>
+                <span className="hidden sm:inline">Download</span>
               </a>
             )}
             {trailingAction}
